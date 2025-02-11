@@ -1,0 +1,415 @@
+/* 전역 스타일 */
+:root {
+    --primary-color: #004C3F;
+    --secondary-color: #465B63;
+    --background-color: #fff;
+    --text-color: #333;
+    --accent-color: #00684A;
+    --header-height: 60px;
+    --modal-max-width: 1200px;
+    --modal-max-height: 80vh;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* 헤더 스타일 */
+.header {
+    background-color: var(--background-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: var(--header-height);
+}
+
+.header .nav {
+    width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.logo {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.nav-links {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-links a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: var(--primary-color);
+}
+
+/* 메인 컨텐츠 */
+.main-content {
+    margin-top: calc(var(--header-height) + 40px);
+    width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+}
+
+/* 히어로 섹션 */
+.hero {
+    width: 1200px;
+    margin: 0 auto 40px auto;
+    height: 400px;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    color: var(--primary-color);
+}
+
+/* 작품 그리드 */
+.artwork-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.artwork-card {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.artwork-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.artwork-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.artwork-info {
+    padding: 15px;
+}
+
+.artwork-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+}
+
+.artwork-artist {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-bottom: 3px;
+}
+
+.artwork-department {
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+    opacity: 0.8;
+}
+
+/* 모달 스타일 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1100;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal-content {
+    position: relative;
+    background-color: white;
+    margin: 40px auto;
+    width: 95%;
+    max-width: var(--modal-max-width);
+    height: var(--modal-max-height);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--secondary-color);
+    cursor: pointer;
+    z-index: 2;
+    transition: all 0.3s ease;
+    background-color: #f5f5f5;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.close:hover {
+    color: var(--primary-color);
+    transform: rotate(90deg);
+    background-color: #eee;
+}
+
+.modal-body {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 20px;
+    height: 100%;
+    background-color: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.modal-image-container {
+    width: 100%;
+    height: calc(100% - 0px);
+    overflow: hidden;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.modal-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.modal-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    background-color: #f9f9f9;
+    position: relative;
+    height: calc(100% - 0px);
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.modal-info-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.modal-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    line-height: 1.3;
+}
+
+.modal-artist {
+    font-size: 1.3rem;
+    color: var(--text-color);
+    margin-bottom: 12px;
+}
+
+.modal-department {
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-exhibition {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.detail-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 24px;
+    background-color: var(--accent-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    width: calc(100% - 0px);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-top: auto;
+    box-sizing: border-box;
+}
+
+.detail-button:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 76, 63, 0.2);
+}
+
+/* 푸터 */
+footer {
+    width: 1200px;
+    margin: 60px auto 0 auto;
+    padding: 20px 0;
+    background-color: #f5f5f5;
+    text-align: center;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1240px) {
+    .header .nav,
+    .main-content,
+    .hero,
+    footer {
+        width: 95%;
+        max-width: 1200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav {
+        padding: 0 15px;
+    }
+
+    .nav-links {
+        gap: 15px;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .modal {
+        padding: 10px;
+    }
+
+    .modal-content {
+        margin: 20px auto;
+        width: 95%;
+        height: 90vh;
+        max-height: none;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .close {
+        right: 15px;
+        top: 15px;
+        width: 32px;
+        height: 32px;
+        font-size: 24px;
+    }
+
+    .modal-body {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        height: auto;
+        padding: 20px;
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+
+    .modal-image-container {
+        width: 100%;
+        height: 40vh;
+        min-height: 250px;
+        padding: 10px;
+    }
+
+    .modal-info {
+        padding: 15px;
+        height: auto;
+        min-height: auto;
+    }
+
+    .modal-info-content {
+        margin: 0;
+        height: auto;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    .modal-artist {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+    .modal-department {
+        font-size: 1rem;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+    }
+
+    .modal-exhibition {
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+
+    .detail-button {
+        padding: 14px 20px;
+        font-size: 1rem;
+        position: sticky;
+        bottom: 0;
+        margin-top: 20px;
+    }
+} 

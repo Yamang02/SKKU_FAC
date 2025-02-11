@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">SKKU FINE ARTCLUB</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/exhibitions">Exhibitions</a>
+                <a href="/notices">Notices</a>
+                <a href="/about">About</a>
+                <a href="/login">Login</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>현대 미술 특별전</h1>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <h2>Featured Artworks</h2>
+        <div class="artwork-grid">
+            <div class="artwork-card" data-artwork-id="1">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/800px-Meisje_met_de_parel.jpg" alt="진주 귀걸이를 한 소녀" class="artwork-image">
+                <div class="artwork-info">
+                    <div class="artwork-title">진주 귀걸이를 한 소녀</div>
+                    <div class="artwork-artist">요하네스 베르메르</div>
+                    <div class="artwork-department">서양화과 18학번</div>
+                </div>
+            </div>
+            <div class="artwork-card" data-artwork-id="2">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1200px-Tsunami_by_hokusai_19th_century.jpg" alt="가나가와 해변의 높은 파도 아래" class="artwork-image">
+                <div class="artwork-info">
+                    <div class="artwork-title">가나가와 해변의 높은 파도 아래</div>
+                    <div class="artwork-artist">가쓰시카 호쿠사이</div>
+                    <div class="artwork-department">동양화과 20학번</div>
+                </div>
+            </div>
+            <div class="artwork-card" data-artwork-id="3">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg/800px-Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg" alt="자화상" class="artwork-image">
+                <div class="artwork-info">
+                    <div class="artwork-title">자화상</div>
+                    <div class="artwork-artist">빈센트 반 고흐</div>
+                    <div class="artwork-department">한문교육과 19학번</div>
+                </div>
+            </div>
+            <div class="artwork-card" data-artwork-id="4">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg/1200px-The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg" alt="세속적 쾌락의 정원" class="artwork-image">
+                <div class="artwork-info">
+                    <div class="artwork-title">세속적 쾌락의 정원</div>
+                    <div class="artwork-artist">히에로니무스 보스</div>
+                    <div class="artwork-department">국어국문학과 21학번</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 작품 상세 모달 -->
+    <div id="artwork-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <img src="" alt="" class="modal-image">
+                </div>
+                <div class="modal-info">
+                    <div class="modal-info-content">
+                        <div class="modal-title"></div>
+                        <div class="modal-artist"></div>
+                        <div class="modal-department"></div>
+                        <div class="modal-exhibition"></div>
+                        <a href="#" class="detail-button">작품 상세보기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 SKKU Faculty Art Gallery. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // 작품 데이터
+        const artworkData = {
+            1: {
+                title: '진주 귀걸이를 한 소녀',
+                artist: '요하네스 베르메르',
+                department: '서양화과 18학번',
+                exhibition: '2024 봄 기획전: 서양미술의 걸작',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/800px-Meisje_met_de_parel.jpg',
+                dimensions: {
+                    width: 800,
+                    height: 952
+                }
+            },
+            2: {
+                title: '가나가와 해변의 높은 파도 아래',
+                artist: '가쓰시카 호쿠사이',
+                department: '동양화과 20학번',
+                exhibition: '2024 봄 기획전: 동아시아의 풍경',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1200px-Tsunami_by_hokusai_19th_century.jpg',
+                dimensions: {
+                    width: 1200,
+                    height: 815
+                }
+            },
+            3: {
+                title: '자화상',
+                artist: '빈센트 반 고흐',
+                department: '한문교육과 19학번',
+                exhibition: '2024 봄 기획전: 자아와 표현',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg/800px-Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg',
+                dimensions: {
+                    width: 800,
+                    height: 971
+                }
+            },
+            4: {
+                title: '세속적 쾌락의 정원',
+                artist: '히에로니무스 보스',
+                department: '국어국문학과 21학번',
+                exhibition: '2024 봄 기획전: 중세의 상상력',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg/1200px-The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg',
+                dimensions: {
+                    width: 1200,
+                    height: 677
+                }
+            }
+        };
+
+        // 모달 관련 JavaScript
+        const modal = document.getElementById('artwork-modal');
+        const artworkCards = document.querySelectorAll('.artwork-card');
+        const closeBtn = document.querySelector('.close');
+        const modalContent = modal.querySelector('.modal-content');
+
+        artworkCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const artworkId = card.dataset.artworkId;
+                const artwork = artworkData[artworkId];
+                
+                // 모달 내용 업데이트
+                modal.querySelector('.modal-image').src = artwork.image;
+                modal.querySelector('.modal-title').textContent = artwork.title;
+                modal.querySelector('.modal-artist').textContent = artwork.artist;
+                modal.querySelector('.modal-department').textContent = artwork.department;
+                modal.querySelector('.modal-exhibition').textContent = artwork.exhibition;
+                modal.querySelector('.detail-button').href = `/artworks/${artworkId}`;
+                
+                modal.style.display = 'block';
+            });
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> 
