@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKKU FINE ARTCLUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .h-screen-minus-16 {
+            height: calc(100vh - 64px);
+        }
+        .grid-cols-auto-fill-250 {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-900 m-0 p-0">
+    <header id="header"></header>
+
+    <section class="h-screen-minus-16 bg-cover bg-center flex items-center justify-center" style="background-image: url('https://images.unsplash.com/photo-1531685250784-7569952593d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&h=600&q=80');">
+        <div class="text-center text-white bg-black bg-opacity-50 p-8">
+            <h1>현대 미술 특별전</h1>
+        </div>
+    </section>
+
+    <main class="max-w-4xl mx-auto my-8 px-4">
+        <h2 class="text-2xl font-bold mb-4">Featured Artworks</h2>
+        <div class="grid grid-cols-auto-fill-250 gap-8">
+            <div class="bg-white rounded-lg overflow-hidden shadow-md">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/300px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg" alt="별이 빛나는 밤" class="w-full h-52 object-cover">
+                <div class="p-4">
+                    <div class="font-bold mb-2">별이 빛나는 밤</div>
+                    <div class="text-gray-600">빈센트 반 고흐</div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg overflow-hidden shadow-md">
+                <img src="https://uploads6.wikiart.org/images/salvador-dali/the-persistence-of-memory-1931.jpg!Large.jpg" alt="기억의 지속" class="w-full h-52 object-cover">
+                <div class="p-4">
+                    <div class="font-bold mb-2">기억의 지속</div>
+                    <div class="text-gray-600">살바도르 달리</div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg overflow-hidden shadow-md">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg/300px-Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg" alt="절규" class="w-full h-52 object-cover">
+                <div class="p-4">
+                    <div class="font-bold mb-2">절규</div>
+                    <div class="text-gray-600">에드바르트 뭉크</div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg overflow-hidden shadow-md">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/300px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg" alt="비너스의 탄생" class="w-full h-52 object-cover">
+                <div class="p-4">
+                    <div class="font-bold mb-2">비너스의 탄생</div>
+                    <div class="text-gray-600">산드로 보티첼리</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer id="footer"></footer>
+
+    <script src="/js/common.js"></script>
+</body>
+</html>
