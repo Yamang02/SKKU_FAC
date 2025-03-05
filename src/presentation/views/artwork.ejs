@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= artwork.title %> - SKKU Faculty Art Gallery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <main class="artwork-detail-page">
+        <div class="artwork-detail-container">
+            <!-- 작품 이미지 섹션 -->
+            <section class="artwork-image-section">
+                <div class="artwork-image-wrapper">
+                    <img src="<%= artwork.image %>" alt="<%= artwork.title %>" class="artwork-main-image">
+                </div>
+            </section>
+
+            <!-- 작품 정보 섹션 -->
+            <section class="artwork-info-section">
+                <div class="artwork-detail-header">
+                    <h1 class="artwork-detail-title"><%= artwork.title %></h1>
+                    <p class="artwork-detail-artist"><%= artwork.artist %></p>
+                    <p class="artwork-detail-department"><%= artwork.department %></p>
+                </div>
+
+                <div class="artwork-details">
+                    <div class="detail-group">
+                        <h2>작품 정보</h2>
+                        <div class="detail-item">
+                            <span class="label">제작 연도</span>
+                            <span class="value"><%= artwork.year %></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">매체</span>
+                            <span class="value"><%= artwork.medium %></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">크기</span>
+                            <span class="value"><%= artwork.size %></span>
+                        </div>
+                    </div>
+
+                    <div class="detail-group">
+                        <h2>작품 설명</h2>
+                        <p class="artwork-description"><%= artwork.description %></p>
+                    </div>
+
+                    <div class="detail-group">
+                        <h2>전시 정보</h2>
+                        <p class="exhibition-info"><%= artwork.exhibition %></p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 댓글 섹션 -->
+        <div class="comments-section">
+            <div class="comments-header">
+                <h2 class="comments-title">댓글</h2>
+                <span class="comment-count">총 5개의 댓글</span>
+            </div>
+            
+            <form class="comment-form">
+                <div class="comment-input-wrapper">
+                    <textarea class="comment-input" placeholder="댓글을 작성해주세요..."></textarea>
+                    <div class="comment-actions-wrapper">
+                        <button type="button" class="clear-comment" aria-label="댓글 내용 초기화">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <button type="submit" class="submit-comment" aria-label="댓글 작성">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="comments-list">
+                <!-- 예시 댓글 1 -->
+                <div class="comment-item">
+                    <div class="comment-actions">
+                        <button class="comment-action-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="comment-action-btn delete-btn">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                    <div class="comment-author">김방문</div>
+                    <div class="comment-date">2024.02.11</div>
+                    <div class="comment-content">정말 멋진 작품이네요. 작가님의 예술 세계가 돋보입니다.</div>
+                </div>
+                <!-- 예시 댓글 2 -->
+                <div class="comment-item">
+                    <div class="comment-actions">
+                        <button class="comment-action-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="comment-action-btn delete-btn">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                    <div class="comment-author">이관람</div>
+                    <div class="comment-date">2024.02.10</div>
+                    <div class="comment-content">색감이 매우 인상적입니다. 다음 전시회도 기대됩니다.</div>
+                </div>
+            </div>
+
+            <div class="comments-pagination">
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">4</button>
+                <button class="page-btn">5</button>
+            </div>
+        </div>
+
+        <!-- 관련 작품 섹션 -->
+        <div class="related-artworks">
+            <div class="related-artworks-container">
+                <div class="related-artworks-header">
+                    <h2 class="related-artworks-title">다른 작품</h2>
+                </div>
+                <div class="related-artworks-list">
+                    <!-- 로딩 상태 -->
+                    <div class="loading-state" style="display: none;">
+                        <div class="loading-spinner"></div>
+                        <p>작품을 불러오는 중입니다...</p>
+                    </div>
+                    <!-- 에러 상태 -->
+                    <div class="error-state" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>작품을 불러오는데 실패했습니다.</p>
+                    </div>
+                    <!-- 데이터 없음 상태 -->
+                    <div class="empty-state" style="display: none;">
+                        <i class="fas fa-image"></i>
+                        <p>관련된 다른 작품이 없습니다.</p>
+                    </div>
+                    <!-- 예시 카드 1 -->
+                    <div class="related-artwork-card">
+                        <div class="artwork-image-placeholder">
+                            <img src="<%= artwork.image || '/images/default-artwork.svg' %>" 
+                                alt="<%= artwork.title || '작품 이미지' %>" 
+                                class="related-artwork-image"
+                                onerror="this.src='/images/default-artwork.svg'">
+                        </div>
+                        <div class="related-artwork-info">
+                            <h3 class="related-artwork-title"><%= artwork.title || '제목 없음' %></h3>
+                            <p class="related-artwork-artist"><%= artwork.artist || '작가미상' %></p>
+                        </div>
+                    </div>
+                    <!-- 예시 카드 2 -->
+                    <div class="related-artwork-card">
+                        <img src="/images/artwork2.jpg" alt="작품 이미지" class="related-artwork-image">
+                        <div class="related-artwork-info">
+                            <h3 class="related-artwork-title">여름 햇살</h3>
+                            <p class="related-artwork-artist">이창작</p>
+                        </div>
+                    </div>
+                    <!-- 예시 카드 3 -->
+                    <div class="related-artwork-card">
+                        <img src="/images/artwork3.jpg" alt="작품 이미지" class="related-artwork-image">
+                        <div class="related-artwork-info">
+                            <h3 class="related-artwork-title">가을 단풍</h3>
+                            <p class="related-artwork-artist">박미술</p>
+                        </div>
+                    </div>
+                    <!-- 예시 카드 4 -->
+                    <div class="related-artwork-card">
+                        <img src="/images/artwork4.jpg" alt="작품 이미지" class="related-artwork-image">
+                        <div class="related-artwork-info">
+                            <h3 class="related-artwork-title">겨울 설경</h3>
+                            <p class="related-artwork-artist">정작가</p>
+                        </div>
+                    </div>
+                    <!-- 예시 카드 5 -->
+                    <div class="related-artwork-card">
+                        <img src="/images/artwork5.jpg" alt="작품 이미지" class="related-artwork-image">
+                        <div class="related-artwork-info">
+                            <h3 class="related-artwork-title">도시의 밤</h3>
+                            <p class="related-artwork-artist">한예술</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-action">
+                    <div class="action-group">
+                        <button class="scroll-btn prev-btn" aria-label="이전 작품">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <a href="/artworks" class="back-to-list">
+                            <i class="fas fa-th-large"></i>
+                            <span>작품 목록</span>
+                        </a>
+                        <button class="scroll-btn next-btn" aria-label="다음 작품">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        // 스크롤 버튼 기능
+        const scrollContainer = document.querySelector('.related-artworks-list');
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+
+        prevBtn.addEventListener('click', () => {
+            scrollContainer.scrollBy({ left: -340, behavior: 'smooth' });
+        });
+
+        nextBtn.addEventListener('click', () => {
+            scrollContainer.scrollBy({ left: 340, behavior: 'smooth' });
+        });
+
+        // 댓글 제출 처리
+        document.querySelector('.comment-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // 여기에 댓글 제출 로직 구현
+        });
+
+        // Sticky 기능 보완
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageSection = document.querySelector('.artwork-image-section');
+            const headerHeight = document.querySelector('header').offsetHeight;
+            
+            function updateStickyPosition() {
+                const windowHeight = window.innerHeight;
+                const imageSectionHeight = imageSection.offsetHeight;
+                
+                // 이미지 섹션이 화면보다 크면 sticky 기능을 비활성화
+                if (imageSectionHeight > windowHeight - headerHeight - 40) {
+                    imageSection.style.position = 'relative';
+                } else {
+                    imageSection.style.position = 'sticky';
+                    imageSection.style.top = `${headerHeight + 20}px`;
+                }
+            }
+            
+            // 초기 로드 및 리사이즈 시 실행
+            updateStickyPosition();
+            window.addEventListener('resize', updateStickyPosition);
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 배경 -->
+    <rect width="800" height="600" fill="#F8F9FA"/>
+    
+    <!-- 이미지 아이콘 -->
+    <g transform="translate(350,250)">
+        <!-- 액자 프레임 -->
+        <rect x="-50" y="-50" width="200" height="160" rx="8" fill="#E9ECEF" stroke="#DEE2E6" stroke-width="2"/>
+        
+        <!-- 산 모양 -->
+        <path d="M-20 80 L40 20 L80 50 L130 -20 L130 80 L-20 80 Z" fill="#CED4DA"/>
+        
+        <!-- 태양 -->
+        <circle cx="100" cy="-5" r="15" fill="#ADB5BD"/>
+    </g>
+    
+    <!-- 텍스트 -->
+    <text x="400" y="450" font-family="Arial, sans-serif" font-size="24" fill="#6C757D" text-anchor="middle">
+        이미지를 불러올 수 없습니다
+    </text>
+    <text x="400" y="480" font-family="Arial, sans-serif" font-size="16" fill="#ADB5BD" text-anchor="middle">
+        Image not available
+    </text>
+</svg> 

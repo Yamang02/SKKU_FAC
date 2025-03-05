@@ -1,0 +1,71 @@
+/* 컨테이너 레이아웃 */
+.container {
+  width: var(--container-width);
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+}
+
+/* 컨테이너 변형 */
+.container-sm {
+  max-width: 640px;
+}
+
+.container-md {
+  max-width: 768px;
+}
+
+.container-lg {
+  max-width: 1024px;
+}
+
+.container-xl {
+  max-width: 1200px;
+}
+
+/* 컨테이너 패딩 */
+.container-fluid {
+  width: 100%;
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+}
+
+/* 컨테이너 정렬 */
+.container-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 섹션 컨테이너 */
+.section {
+  padding-top: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+}
+
+.section-sm {
+  padding-top: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+}
+
+.section-lg {
+  padding-top: calc(var(--spacing-xl) * 2);
+  padding-bottom: calc(var(--spacing-xl) * 2);
+}
+
+/* 컨텐츠 영역 */
+.content-area {
+  margin-top: calc(var(--header-height) + var(--spacing-lg));
+}
+
+/* 메인 컨텐츠 */
+.main-content {
+  margin-top: calc(var(--header-height) + var(--spacing-lg));
+  width: var(--container-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0;
+} 

@@ -1,0 +1,16 @@
+/* 메인 컨텐츠 레이아웃 */
+.main-content {
+    margin-top: calc(var(--header-height) + 40px);
+    width: var(--container-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1240px) {
+    .main-content {
+        width: 95%;
+        max-width: var(--container-width);
+    }
+} 

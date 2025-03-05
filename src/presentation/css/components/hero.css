@@ -1,0 +1,31 @@
+/* 히어로 섹션 */
+.hero {
+    width: var(--container-width);
+    margin: 0 auto 40px auto;
+    height: 400px;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    color: var(--primary-color);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1240px) {
+    .hero {
+        width: 95%;
+        max-width: var(--container-width);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
+} 
