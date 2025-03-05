@@ -17,6 +17,32 @@ const artworks = [
     }
 ];
 
+// 작품 목록 페이지 라우트
+router.get('/list', async (req, res) => {
+    try {
+        // 검색 파라미터 가져오기
+        const { keyword, exhibition, year, department, page = 1 } = req.query;
+        
+        // 실제 구현에서는 DB에서 검색 조건에 맞는 작품 목록을 가져옵니다.
+        // 여기서는 더미 데이터로 대체합니다.
+        
+        // 페이지 렌더링
+        res.render('artwork-list', { 
+            title: '작품 검색 - SKKU Faculty Art Gallery',
+            keyword,
+            exhibition,
+            year,
+            department,
+            page
+        });
+    } catch (error) {
+        console.error('작품 목록 조회 오류:', error);
+        res.status(500).render('error', { 
+            message: '작품 목록을 불러오는 중 오류가 발생했습니다.' 
+        });
+    }
+});
+
 // 작품 상세 페이지 라우트
 router.get('/:id', (req, res) => {
     const artwork = artworks.find(art => art.id === parseInt(req.params.id));

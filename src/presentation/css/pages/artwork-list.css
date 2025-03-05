@@ -1,0 +1,153 @@
+/* 작품 목록 페이지 스타일 */
+.search-container {
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: var(--border-radius);
+    margin-bottom: 40px;
+    box-shadow: var(--shadow-sm);
+}
+
+.search-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.search-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 10px;
+}
+
+.view-toggle button {
+    padding: 8px 12px;
+    background-color: #eee;
+    border-radius: var(--border-radius);
+    color: var(--text-color);
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+}
+
+.view-toggle button.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* 테이블 뷰 스타일 */
+.table-view {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table-view th, .table-view td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.table-view th {
+    background-color: #f5f5f5;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.table-view tr {
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.table-view tr:hover {
+    background-color: #f9f9f9;
+}
+
+.table-view .artwork-thumbnail {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: var(--border-radius-sm);
+}
+
+/* 결과 정보 스타일 */
+.results-info {
+    margin: 20px 0;
+    color: var(--text-color);
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-color);
+    background-color: #f9f9f9;
+    border-radius: var(--border-radius);
+    margin-top: 20px;
+}
+
+/* 페이지네이션 스타일 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+    gap: 10px;
+}
+
+.pagination button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f5f5f5;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+}
+
+.pagination button.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.pagination button:hover:not(.active) {
+    background-color: #e0e0e0;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .search-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .view-toggle {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .table-view th:nth-child(4),
+    .table-view td:nth-child(4),
+    .table-view th:nth-child(5),
+    .table-view td:nth-child(5) {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-view th:nth-child(6),
+    .table-view td:nth-child(6) {
+        display: none;
+    }
+} 
