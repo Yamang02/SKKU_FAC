@@ -207,48 +207,7 @@
 
     <%- include('partials/footer') %>
 
-    <script>
-        // 스크롤 버튼 기능
-        const scrollContainer = document.querySelector('.related-artworks-list');
-        const prevBtn = document.querySelector('.prev-btn');
-        const nextBtn = document.querySelector('.next-btn');
-
-        prevBtn.addEventListener('click', () => {
-            scrollContainer.scrollBy({ left: -340, behavior: 'smooth' });
-        });
-
-        nextBtn.addEventListener('click', () => {
-            scrollContainer.scrollBy({ left: 340, behavior: 'smooth' });
-        });
-
-        // 댓글 제출 처리
-        document.querySelector('.comment-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // 여기에 댓글 제출 로직 구현
-        });
-
-        // Sticky 기능 보완
-        document.addEventListener('DOMContentLoaded', function() {
-            const imageSection = document.querySelector('.artwork-image-section');
-            const headerHeight = document.querySelector('header').offsetHeight;
-            
-            function updateStickyPosition() {
-                const windowHeight = window.innerHeight;
-                const imageSectionHeight = imageSection.offsetHeight;
-                
-                // 이미지 섹션이 화면보다 크면 sticky 기능을 비활성화
-                if (imageSectionHeight > windowHeight - headerHeight - 40) {
-                    imageSection.style.position = 'relative';
-                } else {
-                    imageSection.style.position = 'sticky';
-                    imageSection.style.top = `${headerHeight + 20}px`;
-                }
-            }
-            
-            // 초기 로드 및 리사이즈 시 실행
-            updateStickyPosition();
-            window.addEventListener('resize', updateStickyPosition);
-        });
-    </script>
+    <!-- 외부 스크립트 파일 로드 -->
+    <script src="/js/artwork-detail.js"></script>
 </body>
 </html> 

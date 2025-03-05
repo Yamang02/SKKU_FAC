@@ -27,7 +27,7 @@ router.get('/:id', (req, res) => {
         });
     }
 
-    res.render('artwork', { artwork });
+    res.render('artwork-detail', { artwork });
 });
 
 module.exports = router; 
