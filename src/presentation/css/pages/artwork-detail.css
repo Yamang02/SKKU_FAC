@@ -406,10 +406,16 @@
 .related-artworks-container {
     position: relative;
     width: 100%;
+    overflow: hidden;
 }
 
 .related-artworks-header {
     margin-bottom: 30px;
+    position: relative;
+    z-index: 3;
+    background-color: #fff;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
 }
 
 .related-artworks-list {
@@ -423,6 +429,39 @@
     margin: -10px -5px;
     width: 100%;
     min-height: 360px;
+    border-left: 5px solid #fff;
+    border-right: 5px solid #fff;
+    position: relative;
+}
+
+.related-artworks-list::-webkit-scrollbar {
+    display: none;
+}
+
+.related-artworks-container::before,
+.related-artworks-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 120px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.related-artworks-container::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+.related-artworks-container::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+.related-artworks-list::before,
+.related-artworks-list::after {
+    display: none;
 }
 
 .related-artwork-card {
@@ -527,6 +566,9 @@
     margin-top: 30px;
     padding-top: 20px;
     border-top: 1px solid #eee;
+    position: relative;
+    z-index: 3;
+    background-color: #fff;
 }
 
 .action-group {

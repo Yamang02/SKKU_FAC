@@ -15,59 +15,151 @@
         <div class="container">
             <h1 class="text-center" style="margin: 60px 0 40px 0;">작품 검색</h1>
 
-            <!-- 검색 필터 섹션 -->
-            <section class="search-container">
-                <form class="search-form" id="searchForm">
-                    <div class="form-group">
-                        <label for="keyword" class="form-label">키워드</label>
-                        <input type="text" id="keyword" name="keyword" class="form-control" placeholder="작품명, 작가명 검색">
+            <!-- 전시회 캐러셀 섹션 -->
+            <section class="exhibition-carousel">
+                <h2 class="section-title">전시회별 작품</h2>
+                <div class="carousel-container">
+                    <button class="carousel-arrow carousel-prev">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    
+                    <div class="carousel-track">
+                        <!-- 전시회 아이템 -->
+                        <div class="exhibition-item active" data-exhibition="all">
+                            <div class="exhibition-image">
+                                <img src="/images/default-artwork.svg" alt="모든 전시회">
+                            </div>
+                            <div class="exhibition-info">
+                                <h3 class="exhibition-title">모든 작품</h3>
+                            </div>
+                        </div>
+                        
+                        <div class="exhibition-item" data-exhibition="2024-spring">
+                            <div class="exhibition-image">
+                                <img src="/images/default-artwork.svg" alt="2024 봄 기획전">
+                            </div>
+                            <div class="exhibition-info">
+                                <h3 class="exhibition-title">2024 봄 기획전</h3>
+                                <p class="exhibition-subtitle">동아시아의 풍경</p>
+                            </div>
+                        </div>
+                        
+                        <div class="exhibition-item" data-exhibition="2023-winter">
+                            <div class="exhibition-image">
+                                <img src="/images/default-artwork.svg" alt="2023 겨울 기획전">
+                            </div>
+                            <div class="exhibition-info">
+                                <h3 class="exhibition-title">2023 겨울 기획전</h3>
+                                <p class="exhibition-subtitle">현대미술의 흐름</p>
+                            </div>
+                        </div>
+                        
+                        <div class="exhibition-item" data-exhibition="2023-fall">
+                            <div class="exhibition-image">
+                                <img src="/images/default-artwork.svg" alt="2023 가을 기획전">
+                            </div>
+                            <div class="exhibition-info">
+                                <h3 class="exhibition-title">2023 가을 기획전</h3>
+                                <p class="exhibition-subtitle">색채의 향연</p>
+                            </div>
+                        </div>
+                        
+                        <div class="exhibition-item" data-exhibition="2023-summer">
+                            <div class="exhibition-image">
+                                <img src="/images/default-artwork.svg" alt="2023 여름 기획전">
+                            </div>
+                            <div class="exhibition-info">
+                                <h3 class="exhibition-title">2023 여름 기획전</h3>
+                                <p class="exhibition-subtitle">자연과 인간</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="exhibition" class="form-label">전시회</label>
-                        <select id="exhibition" name="exhibition" class="form-control">
-                            <option value="">모든 전시회</option>
-                            <option value="2024-spring">2024 봄 기획전: 동아시아의 풍경</option>
-                            <option value="2023-winter">2023 겨울 기획전: 현대미술의 흐름</option>
-                            <option value="2023-fall">2023 가을 기획전: 색채의 향연</option>
-                            <option value="2023-summer">2023 여름 기획전: 자연과 인간</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="year" class="form-label">출품년도</label>
-                        <select id="year" name="year" class="form-control">
-                            <option value="">모든 년도</option>
-                            <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                            <option value="2022">2022</option>
-                            <option value="2021">2021</option>
-                            <option value="2020">2020</option>
-                            <option value="older">2020년 이전</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="department" class="form-label">학과</label>
-                        <select id="department" name="department" class="form-control">
-                            <option value="">모든 학과</option>
-                            <option value="painting">서양화과</option>
-                            <option value="oriental">동양화과</option>
-                            <option value="sculpture">조소과</option>
-                            <option value="design">디자인학과</option>
-                            <option value="media">미디어아트학과</option>
-                        </select>
-                    </div>
-                </form>
-                <div class="search-actions">
-                    <button type="submit" form="searchForm" class="btn btn-primary">검색</button>
-                    <div class="view-toggle">
-                        <button id="cardViewBtn" class="active"><i class="fas fa-th"></i> 카드 보기</button>
-                        <button id="tableViewBtn"><i class="fas fa-list"></i> 테이블 보기</button>
-                    </div>
+                    
+                    <button class="carousel-arrow carousel-next">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
             </section>
 
-            <!-- 검색 결과 정보 -->
-            <div class="results-info">
-                <p>총 <strong>12</strong>개의 작품이 검색되었습니다.</p>
+            <!-- 상세 검색 토글 버튼 -->
+            <div class="search-toggle-container">
+                <button id="advancedSearchToggle" class="search-toggle-btn">
+                    <i class="fas fa-sliders-h"></i> 상세 검색 필터
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </button>
+            </div>
+
+            <!-- 상세 검색 패널 (기본적으로 숨겨짐) -->
+            <section id="advancedSearchPanel" class="advanced-search-panel">
+                <div class="panel-content">
+                    <form class="search-form" id="searchForm" method="get" action="">
+                        <!-- 키워드 검색 (전체 너비 차지) -->
+                        <div class="search-row keyword-row">
+                            <div class="form-group full-width">
+                                <label for="keyword" class="form-label">작품 검색</label>
+                                <div class="search-input-wrapper">
+                                    <input type="text" id="keyword" name="keyword" class="form-control" placeholder="작품명, 작가명, 학과 등으로 검색">
+                                    <i class="fas fa-search search-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 전시회, 출품년도 선택 -->
+                        <div class="search-row">
+                            <div class="form-group">
+                                <label for="exhibition" class="form-label">전시회 선택</label>
+                                <select id="exhibition" name="exhibition" class="form-control">
+                                    <option value="">모든 전시회</option>
+                                    <option value="2024-spring">2024 봄 기획전: 동아시아의 풍경</option>
+                                    <option value="2023-winter">2023 겨울 기획전: 현대미술의 흐름</option>
+                                    <option value="2023-fall">2023 가을 기획전: 색채의 향연</option>
+                                    <option value="2023-summer">2023 여름 기획전: 자연과 인간</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="year" class="form-label">출품년도</label>
+                                <select id="year" name="year" class="form-control">
+                                    <option value="">모든 년도</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                    <option value="2020">2020</option>
+                                    <option value="older">2020년 이전</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="search-row">
+                            <div class="form-group search-buttons-container">
+                                <div class="search-actions">
+                                    <button type="reset" class="btn btn-outline">
+                                        <i class="fas fa-undo"></i> 초기화
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i> 검색하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 결과 컨트롤 섹션 -->
+            <div class="results-control">
+                <div class="results-info">
+                    <p>총 <strong id="resultCount">12</strong>개의 작품이 검색되었습니다.</p>
+                </div>
+                <div class="view-toggle">
+                    <button id="cardViewBtn" class="view-toggle-btn active" aria-label="카드 보기">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button id="tableViewBtn" class="view-toggle-btn" aria-label="테이블 보기">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- 카드 뷰 (기본) -->

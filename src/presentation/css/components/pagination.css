@@ -1,0 +1,43 @@
+/* 페이지네이션 스타일 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 30px 0;
+}
+
+.pagination button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: var(--text-color);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.pagination button:hover {
+  background-color: #f5f5f5;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.pagination button.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* 반응형 스타일 */
+@media (max-width: 576px) {
+  .pagination button {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+} 

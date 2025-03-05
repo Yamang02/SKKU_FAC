@@ -42,7 +42,7 @@
 }
 
 .close:hover {
-    color: var(--primary-color);
+    color: #e74c3c;
     transform: rotate(90deg);
     background-color: #eee;
 }
@@ -142,6 +142,7 @@
 
 .detail-button:hover {
     background-color: var(--accent-color);
+    color: white;
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
 }
