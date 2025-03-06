@@ -62,7 +62,7 @@
         <div class="comments-section">
             <div class="comments-header">
                 <h2 class="comments-title">댓글</h2>
-                <span class="comment-count">총 5개의 댓글</span>
+                <span class="comment-count">총 <%= commentPagination.totalComments %>개의 댓글</span>
             </div>
             
             <form class="comment-form">
@@ -80,43 +80,38 @@
             </form>
 
             <div class="comments-list">
-                <!-- 예시 댓글 1 -->
-                <div class="comment-item">
-                    <div class="comment-actions">
-                        <button class="comment-action-btn edit-btn">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="comment-action-btn delete-btn">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                <% if (comments && comments.length > 0) { %>
+                    <% comments.forEach(comment => { %>
+                        <div class="comment-item">
+                            <% if (comment.isEditable) { %>
+                                <div class="comment-actions">
+                                    <button class="comment-action-btn edit-btn">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="comment-action-btn delete-btn">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            <% } %>
+                            <div class="comment-author"><%= comment.author %></div>
+                            <div class="comment-date"><%= comment.formattedDate %></div>
+                            <div class="comment-content"><%= comment.content %></div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="no-comments">
+                        <p>아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>
                     </div>
-                    <div class="comment-author">김방문</div>
-                    <div class="comment-date">2024.02.11</div>
-                    <div class="comment-content">정말 멋진 작품이네요. 작가님의 예술 세계가 돋보입니다.</div>
-                </div>
-                <!-- 예시 댓글 2 -->
-                <div class="comment-item">
-                    <div class="comment-actions">
-                        <button class="comment-action-btn edit-btn">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="comment-action-btn delete-btn">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                    <div class="comment-author">이관람</div>
-                    <div class="comment-date">2024.02.10</div>
-                    <div class="comment-content">색감이 매우 인상적입니다. 다음 전시회도 기대됩니다.</div>
-                </div>
+                <% } %>
             </div>
 
-            <div class="comments-pagination">
-                <button class="page-btn active">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">3</button>
-                <button class="page-btn">4</button>
-                <button class="page-btn">5</button>
-            </div>
+            <% if (commentPagination.totalPages > 1) { %>
+                <div class="comments-pagination">
+                    <% for (let i = 1; i <= commentPagination.totalPages; i++) { %>
+                        <a href="?commentPage=<%= i %>" class="page-btn <%= i === commentPagination.currentPage ? 'active' : '' %>"><%= i %></a>
+                    <% } %>
+                </div>
+            <% } %>
         </div>
 
         <!-- 관련 작품 섹션 -->
@@ -126,66 +121,29 @@
                     <h2 class="related-artworks-title">다른 작품</h2>
                 </div>
                 <div class="related-artworks-list">
-                    <!-- 로딩 상태 -->
-                    <div class="loading-state" style="display: none;">
-                        <div class="loading-spinner"></div>
-                        <p>작품을 불러오는 중입니다...</p>
-                    </div>
-                    <!-- 에러 상태 -->
-                    <div class="error-state" style="display: none;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>작품을 불러오는데 실패했습니다.</p>
-                    </div>
-                    <!-- 데이터 없음 상태 -->
-                    <div class="empty-state" style="display: none;">
-                        <i class="fas fa-image"></i>
-                        <p>관련된 다른 작품이 없습니다.</p>
-                    </div>
-                    <!-- 예시 카드 1 -->
-                    <div class="related-artwork-card">
-                        <div class="artwork-image-placeholder">
-                            <img src="<%= artwork.image || '/images/default-artwork.svg' %>" 
-                                alt="<%= artwork.title || '작품 이미지' %>" 
-                                class="related-artwork-image"
-                                onerror="this.src='/images/default-artwork.svg'">
+                    <% if (relatedArtworks && relatedArtworks.length > 0) { %>
+                        <% relatedArtworks.forEach(relatedArtwork => { %>
+                            <div class="related-artwork-card">
+                                <a href="/artwork/<%= relatedArtwork.id %>">
+                                    <div class="artwork-image-placeholder">
+                                        <img src="<%= relatedArtwork.image || '/images/default-artwork.svg' %>" 
+                                            alt="<%= relatedArtwork.title || '작품 이미지' %>" 
+                                            class="related-artwork-image"
+                                            onerror="this.src='/images/default-artwork.svg'">
+                                    </div>
+                                    <div class="related-artwork-info">
+                                        <h3 class="related-artwork-title"><%= relatedArtwork.title || '제목 없음' %></h3>
+                                        <p class="related-artwork-artist"><%= relatedArtwork.artist || '작가미상' %></p>
+                                    </div>
+                                </a>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="empty-state">
+                            <i class="fas fa-image"></i>
+                            <p>관련된 다른 작품이 없습니다.</p>
                         </div>
-                        <div class="related-artwork-info">
-                            <h3 class="related-artwork-title"><%= artwork.title || '제목 없음' %></h3>
-                            <p class="related-artwork-artist"><%= artwork.artist || '작가미상' %></p>
-                        </div>
-                    </div>
-                    <!-- 예시 카드 2 -->
-                    <div class="related-artwork-card">
-                        <img src="/images/artwork2.jpg" alt="작품 이미지" class="related-artwork-image">
-                        <div class="related-artwork-info">
-                            <h3 class="related-artwork-title">여름 햇살</h3>
-                            <p class="related-artwork-artist">이창작</p>
-                        </div>
-                    </div>
-                    <!-- 예시 카드 3 -->
-                    <div class="related-artwork-card">
-                        <img src="/images/artwork3.jpg" alt="작품 이미지" class="related-artwork-image">
-                        <div class="related-artwork-info">
-                            <h3 class="related-artwork-title">가을 단풍</h3>
-                            <p class="related-artwork-artist">박미술</p>
-                        </div>
-                    </div>
-                    <!-- 예시 카드 4 -->
-                    <div class="related-artwork-card">
-                        <img src="/images/artwork4.jpg" alt="작품 이미지" class="related-artwork-image">
-                        <div class="related-artwork-info">
-                            <h3 class="related-artwork-title">겨울 설경</h3>
-                            <p class="related-artwork-artist">정작가</p>
-                        </div>
-                    </div>
-                    <!-- 예시 카드 5 -->
-                    <div class="related-artwork-card">
-                        <img src="/images/artwork5.jpg" alt="작품 이미지" class="related-artwork-image">
-                        <div class="related-artwork-info">
-                            <h3 class="related-artwork-title">도시의 밤</h3>
-                            <p class="related-artwork-artist">한예술</p>
-                        </div>
-                    </div>
+                    <% } %>
                 </div>
                 <div class="list-action">
                     <div class="action-group">

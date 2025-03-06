@@ -25,54 +25,19 @@
                     
                     <div class="carousel-track">
                         <!-- 전시회 아이템 -->
-                        <div class="exhibition-item active" data-exhibition="all">
+                        <% exhibitions.forEach(exhibition => { %>
+                        <div class="exhibition-item <%= exhibition.code === (exhibition || 'all') ? 'active' : '' %>" data-exhibition="<%= exhibition.code %>">
                             <div class="exhibition-image">
-                                <img src="/images/default-artwork.svg" alt="모든 전시회">
+                                <img src="<%= exhibition.image %>" alt="<%= exhibition.title %>">
                             </div>
                             <div class="exhibition-info">
-                                <h3 class="exhibition-title">모든 작품</h3>
+                                <h3 class="exhibition-title"><%= exhibition.title %></h3>
+                                <% if (exhibition.subtitle) { %>
+                                <p class="exhibition-subtitle"><%= exhibition.subtitle %></p>
+                                <% } %>
                             </div>
                         </div>
-                        
-                        <div class="exhibition-item" data-exhibition="2024-spring">
-                            <div class="exhibition-image">
-                                <img src="/images/default-artwork.svg" alt="2024 봄 기획전">
-                            </div>
-                            <div class="exhibition-info">
-                                <h3 class="exhibition-title">2024 봄 기획전</h3>
-                                <p class="exhibition-subtitle">동아시아의 풍경</p>
-                            </div>
-                        </div>
-                        
-                        <div class="exhibition-item" data-exhibition="2023-winter">
-                            <div class="exhibition-image">
-                                <img src="/images/default-artwork.svg" alt="2023 겨울 기획전">
-                            </div>
-                            <div class="exhibition-info">
-                                <h3 class="exhibition-title">2023 겨울 기획전</h3>
-                                <p class="exhibition-subtitle">현대미술의 흐름</p>
-                            </div>
-                        </div>
-                        
-                        <div class="exhibition-item" data-exhibition="2023-fall">
-                            <div class="exhibition-image">
-                                <img src="/images/default-artwork.svg" alt="2023 가을 기획전">
-                            </div>
-                            <div class="exhibition-info">
-                                <h3 class="exhibition-title">2023 가을 기획전</h3>
-                                <p class="exhibition-subtitle">색채의 향연</p>
-                            </div>
-                        </div>
-                        
-                        <div class="exhibition-item" data-exhibition="2023-summer">
-                            <div class="exhibition-image">
-                                <img src="/images/default-artwork.svg" alt="2023 여름 기획전">
-                            </div>
-                            <div class="exhibition-info">
-                                <h3 class="exhibition-title">2023 여름 기획전</h3>
-                                <p class="exhibition-subtitle">자연과 인간</p>
-                            </div>
-                        </div>
+                        <% }); %>
                     </div>
                     
                     <button class="carousel-arrow carousel-next">
@@ -93,54 +58,37 @@
             <section id="advancedSearchPanel" class="advanced-search-panel">
                 <div class="panel-content">
                     <form class="search-form" id="searchForm" method="get" action="">
-                        <!-- 키워드 검색 (전체 너비 차지) -->
-                        <div class="search-row keyword-row">
-                            <div class="form-group full-width">
+                        <div class="search-simple-layout">
+                            <div class="search-column keyword-column">
                                 <label for="keyword" class="form-label">작품 검색</label>
                                 <div class="search-input-wrapper">
-                                    <input type="text" id="keyword" name="keyword" class="form-control" placeholder="작품명, 작가명, 학과 등으로 검색">
-                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" id="keyword" name="keyword" class="search-input" placeholder="작품명, 작가명, 키워드 등을 입력하세요" value="<%= keyword || '' %>">
+                                    <button type="submit" class="search-button">
+                                        <i class="fas fa-search"></i>
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- 전시회, 출품년도 선택 -->
-                        <div class="search-row">
-                            <div class="form-group">
-                                <label for="exhibition" class="form-label">전시회 선택</label>
-                                <select id="exhibition" name="exhibition" class="form-control">
+                            
+                            <div class="search-column">
+                                <label for="exhibition" class="form-label">전시회</label>
+                                <select id="exhibition" name="exhibition" class="form-select">
                                     <option value="">모든 전시회</option>
-                                    <option value="2024-spring">2024 봄 기획전: 동아시아의 풍경</option>
-                                    <option value="2023-winter">2023 겨울 기획전: 현대미술의 흐름</option>
-                                    <option value="2023-fall">2023 가을 기획전: 색채의 향연</option>
-                                    <option value="2023-summer">2023 여름 기획전: 자연과 인간</option>
+                                    <% exhibitions.forEach(ex => { %>
+                                    <% if (ex.code !== 'all') { %>
+                                    <option value="<%= ex.code %>" <%= exhibition === ex.code ? 'selected' : '' %>><%= ex.title %></option>
+                                    <% } %>
+                                    <% }); %>
                                 </select>
                             </div>
                             
-                            <div class="form-group">
-                                <label for="year" class="form-label">출품년도</label>
-                                <select id="year" name="year" class="form-control">
-                                    <option value="">모든 년도</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2022">2022</option>
-                                    <option value="2021">2021</option>
-                                    <option value="2020">2020</option>
-                                    <option value="older">2020년 이전</option>
-                                </select>
+                            <div class="search-column">
+                                <label for="year" class="form-label">제작 연도</label>
+                                <input type="text" id="year" name="year" class="form-input" placeholder="예: 2023" value="<%= year || '' %>">
                             </div>
-                        </div>
-                        
-                        <div class="search-row">
-                            <div class="form-group search-buttons-container">
-                                <div class="search-actions">
-                                    <button type="reset" class="btn btn-outline">
-                                        <i class="fas fa-undo"></i> 초기화
-                                    </button>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-search"></i> 검색하기
-                                    </button>
-                                </div>
+                            
+                            <div class="search-column search-buttons">
+                                <button type="submit" class="btn btn-primary">검색</button>
+                                <button type="reset" class="btn btn-secondary">초기화</button>
                             </div>
                         </div>
                     </form>
@@ -148,187 +96,82 @@
             </section>
 
             <!-- 결과 컨트롤 섹션 -->
-            <div class="results-control">
+            <section class="results-control">
+                <!-- 결과 수 표시 -->
                 <div class="results-info">
-                    <p>총 <strong id="resultCount">12</strong>개의 작품이 검색되었습니다.</p>
+                    <p id="resultCount">총 <strong><%= artworks ? artworks.length : 0 %></strong>개의 작품이 검색되었습니다.</p>
                 </div>
+                
+                <!-- 뷰 전환 버튼 -->
                 <div class="view-toggle">
-                    <button id="cardViewBtn" class="view-toggle-btn active" aria-label="카드 보기">
+                    <button id="cardViewBtn" class="view-toggle-btn active" title="카드 뷰">
                         <i class="fas fa-th"></i>
                     </button>
-                    <button id="tableViewBtn" class="view-toggle-btn" aria-label="테이블 보기">
+                    <button id="tableViewBtn" class="view-toggle-btn" title="테이블 뷰">
                         <i class="fas fa-list"></i>
                     </button>
                 </div>
-            </div>
-
-            <!-- 카드 뷰 (기본) -->
-            <section class="artwork-grid" id="cardView">
-                <!-- 작품 카드 1 -->
-                <div class="artwork-card" onclick="location.href='/artwork/1'">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/800px-Tsunami_by_hokusai_19th_century.jpg" alt="가나가와 해변의 높은 파도 아래" class="artwork-image">
-                    <div class="artwork-info">
-                        <div class="artwork-title">가나가와 해변의 높은 파도 아래</div>
-                        <div class="artwork-artist">가쓰시카 호쿠사이</div>
-                        <div class="artwork-department">동양화과 20학번</div>
-                    </div>
-                </div>
-                
-                <!-- 작품 카드 2 -->
-                <div class="artwork-card" onclick="location.href='/artwork/2'">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/800px-Meisje_met_de_parel.jpg" alt="진주 귀걸이를 한 소녀" class="artwork-image">
-                    <div class="artwork-info">
-                        <div class="artwork-title">진주 귀걸이를 한 소녀</div>
-                        <div class="artwork-artist">요하네스 베르메르</div>
-                        <div class="artwork-department">서양화과 19학번</div>
-                    </div>
-                </div>
-                
-                <!-- 작품 카드 3 -->
-                <div class="artwork-card" onclick="location.href='/artwork/3'">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/VanGogh_1887_Selbstbildnis.jpg/800px-VanGogh_1887_Selbstbildnis.jpg" alt="자화상" class="artwork-image">
-                    <div class="artwork-info">
-                        <div class="artwork-title">자화상</div>
-                        <div class="artwork-artist">빈센트 반 고흐</div>
-                        <div class="artwork-department">서양화과 18학번</div>
-                    </div>
-                </div>
-                
-                <!-- 작품 카드 4 -->
-                <div class="artwork-card" onclick="location.href='/artwork/4'">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg/800px-The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg" alt="세속적 쾌락의 정원" class="artwork-image">
-                    <div class="artwork-info">
-                        <div class="artwork-title">세속적 쾌락의 정원</div>
-                        <div class="artwork-artist">히에로니무스 보스</div>
-                        <div class="artwork-department">서양화과 21학번</div>
-                    </div>
-                </div>
-                
-                <!-- 추가 작품 카드들 -->
-                <div class="artwork-card" onclick="location.href='/artwork/5'">
-                    <img src="/images/default-artwork.svg" alt="모나리자" class="artwork-image">
-                    <div class="artwork-info">
-                        <div class="artwork-title">모나리자</div>
-                        <div class="artwork-artist">레오나르도 다 빈치</div>
-                        <div class="artwork-department">서양화과 17학번</div>
-                    </div>
-                </div>
-                
-                <div class="artwork-card" onclick="location.href='/artwork/6'">
-                    <img src="/images/default-artwork.svg" alt="별이 빛나는 밤" class="artwork-image">
-                    <div class="artwork-info">
-                        <div class="artwork-title">별이 빛나는 밤</div>
-                        <div class="artwork-artist">빈센트 반 고흐</div>
-                        <div class="artwork-department">서양화과 18학번</div>
-                    </div>
-                </div>
-                
-                <div class="artwork-card" onclick="location.href='/artwork/7'">
-                    <img src="/images/default-artwork.svg" alt="그랑드자트 섬의 일요일 오후" class="artwork-image">
-                    <div class="artwork-info">
-                        <div class="artwork-title">그랑드자트 섬의 일요일 오후</div>
-                        <div class="artwork-artist">조르주 쇠라</div>
-                        <div class="artwork-department">서양화과 22학번</div>
-                    </div>
-                </div>
-                
-                <div class="artwork-card" onclick="location.href='/artwork/8'">
-                    <img src="/images/default-artwork.svg" alt="메모리" class="artwork-image">
-                    <div class="artwork-info">
-                        <div class="artwork-title">메모리</div>
-                        <div class="artwork-artist">르네 마그리트</div>
-                        <div class="artwork-department">서양화과 20학번</div>
-                    </div>
-                </div>
             </section>
 
-            <!-- 테이블 뷰 -->
-            <table class="table-view" id="tableView" style="display: none;">
-                <thead>
-                    <tr>
-                        <th>이미지</th>
-                        <th>작품명</th>
-                        <th>작가</th>
-                        <th>학과</th>
-                        <th>전시회</th>
-                        <th>출품년도</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr onclick="location.href='/artwork/1'">
-                        <td><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/800px-Tsunami_by_hokusai_19th_century.jpg" alt="가나가와 해변의 높은 파도 아래" class="artwork-thumbnail"></td>
-                        <td>가나가와 해변의 높은 파도 아래</td>
-                        <td>가쓰시카 호쿠사이</td>
-                        <td>동양화과 20학번</td>
-                        <td>2024 봄 기획전: 동아시아의 풍경</td>
-                        <td>1831</td>
-                    </tr>
-                    <tr onclick="location.href='/artwork/2'">
-                        <td><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/800px-Meisje_met_de_parel.jpg" alt="진주 귀걸이를 한 소녀" class="artwork-thumbnail"></td>
-                        <td>진주 귀걸이를 한 소녀</td>
-                        <td>요하네스 베르메르</td>
-                        <td>서양화과 19학번</td>
-                        <td>2023 겨울 기획전: 현대미술의 흐름</td>
-                        <td>1665</td>
-                    </tr>
-                    <tr onclick="location.href='/artwork/3'">
-                        <td><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/VanGogh_1887_Selbstbildnis.jpg/800px-VanGogh_1887_Selbstbildnis.jpg" alt="자화상" class="artwork-thumbnail"></td>
-                        <td>자화상</td>
-                        <td>빈센트 반 고흐</td>
-                        <td>서양화과 18학번</td>
-                        <td>2023 가을 기획전: 색채의 향연</td>
-                        <td>1889</td>
-                    </tr>
-                    <tr onclick="location.href='/artwork/4'">
-                        <td><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg/800px-The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg" alt="세속적 쾌락의 정원" class="artwork-thumbnail"></td>
-                        <td>세속적 쾌락의 정원</td>
-                        <td>히에로니무스 보스</td>
-                        <td>서양화과 21학번</td>
-                        <td>2023 여름 기획전: 자연과 인간</td>
-                        <td>1490</td>
-                    </tr>
-                    <tr onclick="location.href='/artwork/5'">
-                        <td><img src="/images/default-artwork.svg" alt="모나리자" class="artwork-thumbnail"></td>
-                        <td>모나리자</td>
-                        <td>레오나르도 다 빈치</td>
-                        <td>서양화과 17학번</td>
-                        <td>2023 겨울 기획전: 현대미술의 흐름</td>
-                        <td>1503</td>
-                    </tr>
-                    <tr onclick="location.href='/artwork/6'">
-                        <td><img src="/images/default-artwork.svg" alt="별이 빛나는 밤" class="artwork-thumbnail"></td>
-                        <td>별이 빛나는 밤</td>
-                        <td>빈센트 반 고흐</td>
-                        <td>서양화과 18학번</td>
-                        <td>2023 가을 기획전: 색채의 향연</td>
-                        <td>1889</td>
-                    </tr>
-                    <tr onclick="location.href='/artwork/7'">
-                        <td><img src="/images/default-artwork.svg" alt="그랑드자트 섬의 일요일 오후" class="artwork-thumbnail"></td>
-                        <td>그랑드자트 섬의 일요일 오후</td>
-                        <td>조르주 쇠라</td>
-                        <td>서양화과 22학번</td>
-                        <td>2024 봄 기획전: 동아시아의 풍경</td>
-                        <td>1884</td>
-                    </tr>
-                    <tr onclick="location.href='/artwork/8'">
-                        <td><img src="/images/default-artwork.svg" alt="메모리" class="artwork-thumbnail"></td>
-                        <td>메모리</td>
-                        <td>르네 마그리트</td>
-                        <td>서양화과 20학번</td>
-                        <td>2023 여름 기획전: 자연과 인간</td>
-                        <td>1948</td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- 작품 목록 섹션 (카드 뷰) -->
+            <section class="artwork-list-section">
+                <div id="cardView" class="artwork-grid">
+                    <% if (artworks && artworks.length > 0) { %>
+                        <% artworks.forEach(artwork => { %>
+                            <div class="artwork-card">
+                                <a href="/artwork/<%= artwork.id %>" class="artwork-link">
+                                    <div class="artwork-image-container">
+                                        <img src="<%= artwork.image %>" alt="<%= artwork.title %>" class="artwork-image">
+                                    </div>
+                                    <div class="artwork-info">
+                                        <h3 class="artwork-title"><%= artwork.title %></h3>
+                                        <p class="artwork-artist"><%= artwork.artist %></p>
+                                        <p class="artwork-department"><%= artwork.department %></p>
+                                    </div>
+                                </a>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="no-results">
+                            <p>검색 결과가 없습니다.</p>
+                        </div>
+                    <% } %>
+                </div>
 
-            <!-- 페이지네이션 -->
-            <div class="pagination">
-                <button class="active">1</button>
-                <button>2</button>
-                <button>3</button>
-                <button><i class="fas fa-chevron-right"></i></button>
-            </div>
+                <!-- 테이블 뷰 (기본적으로 숨겨짐) -->
+                <table id="tableView" class="table-view" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>이미지</th>
+                            <th>작품명</th>
+                            <th>작가</th>
+                            <th>학과</th>
+                            <th>전시회</th>
+                            <th>제작 연도</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (artworks && artworks.length > 0) { %>
+                            <% artworks.forEach(artwork => { %>
+                                <tr data-id="<%= artwork.id %>" onclick="window.location.href='/artwork/<%= artwork.id %>'">
+                                    <td>
+                                        <img src="<%= artwork.image %>" alt="<%= artwork.title %>" class="artwork-thumbnail">
+                                    </td>
+                                    <td><%= artwork.title %></td>
+                                    <td><%= artwork.artist %></td>
+                                    <td><%= artwork.department %></td>
+                                    <td><%= artwork.exhibition %></td>
+                                    <td><%= artwork.year %></td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="no-results">검색 결과가 없습니다.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </section>
         </div>
     </main>
 

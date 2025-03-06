@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const homeService = require('./src/domain/home/service/HomeService');
 
 const app = express();
 
@@ -25,10 +26,10 @@ app.use(session({
 }));
 
 // 라우터 설정
-const exhibitionRouter = require('./src/interfaces/routes/exhibition');
-const noticeRouter = require('./src/interfaces/routes/notice');
-const userRouter = require('./src/interfaces/routes/user');
-const artworkRouter = require('./src/interfaces/routes/artwork');
+const exhibitionRouter = require('./src/interface/routes/exhibition');
+const noticeRouter = require('./src/interface/routes/notice');
+const userRouter = require('./src/interface/routes/user');
+const artworkRouter = require('./src/interface/routes/artwork');
 
 app.use('/exhibition', exhibitionRouter);
 app.use('/notice', noticeRouter);
@@ -37,8 +38,10 @@ app.use('/artwork', artworkRouter);
 
 // 메인 페이지 라우트
 app.get('/', (req, res) => {
+    const featuredArtworks = homeService.getFeaturedArtworks();
     res.render('index', {
-        title: 'SKKU Faculty Art Gallery'
+        title: 'SKKU Faculty Art Gallery',
+        featuredArtworks
     });
 });
 

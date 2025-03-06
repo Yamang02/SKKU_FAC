@@ -19,38 +19,16 @@
     <main class="main-content">
         <h2>Featured Artworks</h2>
         <div class="artwork-grid">
-            <div class="artwork-card" data-artwork-id="1">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/800px-Meisje_met_de_parel.jpg" alt="진주 귀걸이를 한 소녀" class="artwork-image">
+            <% featuredArtworks.forEach(artwork => { %>
+            <div class="artwork-card" data-artwork-id="<%= artwork.id %>">
+                <img src="<%= artwork.image %>" alt="<%= artwork.title %>" class="artwork-image">
                 <div class="artwork-info">
-                    <div class="artwork-title">진주 귀걸이를 한 소녀</div>
-                    <div class="artwork-artist">요하네스 베르메르</div>
-                    <div class="artwork-department">서양화과 18학번</div>
+                    <div class="artwork-title"><%= artwork.title %></div>
+                    <div class="artwork-artist"><%= artwork.artist %></div>
+                    <div class="artwork-department"><%= artwork.department %></div>
                 </div>
             </div>
-            <div class="artwork-card" data-artwork-id="2">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1200px-Tsunami_by_hokusai_19th_century.jpg" alt="가나가와 해변의 높은 파도 아래" class="artwork-image">
-                <div class="artwork-info">
-                    <div class="artwork-title">가나가와 해변의 높은 파도 아래</div>
-                    <div class="artwork-artist">가쓰시카 호쿠사이</div>
-                    <div class="artwork-department">동양화과 20학번</div>
-                </div>
-            </div>
-            <div class="artwork-card" data-artwork-id="3">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg/800px-Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg" alt="자화상" class="artwork-image">
-                <div class="artwork-info">
-                    <div class="artwork-title">자화상</div>
-                    <div class="artwork-artist">빈센트 반 고흐</div>
-                    <div class="artwork-department">한문교육과 19학번</div>
-                </div>
-            </div>
-            <div class="artwork-card" data-artwork-id="4">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg/1200px-The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg" alt="세속적 쾌락의 정원" class="artwork-image">
-                <div class="artwork-info">
-                    <div class="artwork-title">세속적 쾌락의 정원</div>
-                    <div class="artwork-artist">히에로니무스 보스</div>
-                    <div class="artwork-department">국어국문학과 21학번</div>
-                </div>
-            </div>
+            <% }); %>
         </div>
     </main>
 
@@ -77,7 +55,6 @@
 
     <%- include('partials/footer') %>
 
-    <!-- 외부 스크립트 파일 로드 -->
     <script src="/js/index.js"></script>
 </body>
 </html> 
