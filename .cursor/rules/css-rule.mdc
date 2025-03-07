@@ -3,20 +3,138 @@ description:
 globs: 
 alwaysApply: false
 ---
+---
+description: 
+globs: 
+alwaysApply: false
+---
+네이밍 룰
+1. 기본 네이밍 규칙
+
+이름은 영문 소문자, 숫자, 언더스코어(_) 조합 사용
+
+이름은 반드시 영문 소문자로 시작
+
+약속어를 준수하여 레이아웃, 객체, 이미지, 폴더, 파일 명명
+
+공통 요소 약속어(.u_)는 공통 업무 담당자만 사용 가능
+
+예시:
+
+잘못된 예: Btn, 2btn, btn, btn
+
+올바른 예: btn, btn2, section_list
+
+2. ID 및 CLASS 네이밍 규칙
+
+A. ID 사용 규칙
+
+ID는 문서 전체에서 유일한 고유 식별자로 사용.
+
+ID는 레이아웃을 제외하고 스타일을 지정하지 않음.
+
+레이아웃 예약 ID
+
+#wrap : 페이지 전체 영역
+
+#header : 머리글 영역
+
+#container : 본문 영역
+
+#content : 주요 콘텐츠 영역
+
+#footer : 바닥글 영역
+
+B. CLASS 사용 규칙
+
+CLASS는 문서에서 여러 번 사용할 수 있음.
+
+개발과 연동되는 동적 객체는 ID 대신 CLASS를 사용.
+
+팝업, iframe에서도 동일한 규칙 적용.
+
+C. CLASS 네이밍 확장
+
+종속 확장 CLASS
+
+.mykin_list a { font-size: 12px; line-height: 14px; font-weight: bold; }
+.mykin_list_v1 a { color: #f00; }
+.mykin_list_v2 a { color: #03f; }
+
+<div class="mykin_list"><a href="#">바로가기</a></div>
+<div class="mykin_list mykin_list_v1"><a href="#">바로가기</a></div>
+<div class="mykin_list mykin_list_v2"><a href="#">바로가기</a></div>
+
+독립 확장 CLASS
+
+<ul class="mykin_list2">
+  <li>리스트1</li>
+</ul>
+<ul class="mykin_list3">
+  <li>리스트1</li>
+</ul>
+
+3. 이미지 네이밍 규칙
+
+이미지 이름은 형태_의미_상태 순서로 조합
+
+같은 분류의 이미지가 두 개 이상이면 파일명 마지막에 숫자 추가.
+
+임시 이미지는 tmp_를 접두사로 사용.
+
+예시:
+
+잘못된 예: on_recommend_tab1.gif, bnm.gif, btn_Search.gif, 1btn_search.gif
+
+올바른 예: tab1_recomm_on.gif, btn_naver_mail.gif, btn_srch.gif
+
+4. 파일 및 폴더 네이밍 규칙
+
+A. HTML 파일
+
+서비스이름.html 형태 사용 (예: news.html)
+
+팝업 파일: pop_*.html (예: pop_notice.html)
+
+iframe 파일: ifr_*.html (예: ifr_login.html)
+
+Include 파일: inc_*.html (예: inc_footer.html)
+
+임시 파일: tmp_*.html (예: tmp_test.html)
+
+B. CSS 파일
+
+서비스이름.css 사용 (예: news.css)
+
+모바일 예외 대응: 서비스이름_e.css (예: news_e.css)
+
+C. 폴더 구조
+
+신규 프로젝트 작업: p_yymmdd_프로젝트이름
+
+유지보수 작업: s_yymmdd_서스테이닝이름
+
+공통 폴더: img, css, js
+
+HTML 파일의 폴더 분류가 필요한 경우: p_yymmdd_프로젝트명\메뉴명
+
+임시 폴더: tmp_
+
+
 # SKKU Faculty Gallery - CSS 스타일 가이드
 
 이 문서는 SKKU Faculty Gallery 프로젝트의 CSS 코딩 스타일과 구조에 대한 가이드라인을 제공합니다.
 
 ## 목차
 
-1. [디렉토리 구조](#디렉토리-구조)
-2. [네이밍 컨벤션](#네이밍-컨벤션)
-3. [코드 포맷팅](#코드-포맷팅)
-4. [CSS 모듈화](#css-모듈화)
-5. [변수 사용](#변수-사용)
-6. [미디어 쿼리](#미디어-쿼리)
-7. [유틸리티 클래스](#유틸리티-클래스)
-8. [주석 작성](#주석-작성)
+1. [디렉토리 구조](mdc:SKKU_FAC_GALLERY/#디렉토리-구조)
+2. [네이밍 컨벤션](mdc:SKKU_FAC_GALLERY/#네이밍-컨벤션)
+3. [코드 포맷팅](mdc:SKKU_FAC_GALLERY/#코드-포맷팅)
+4. [CSS 모듈화](mdc:SKKU_FAC_GALLERY/#css-모듈화)
+5. [변수 사용](mdc:SKKU_FAC_GALLERY/#변수-사용)
+6. [미디어 쿼리](mdc:SKKU_FAC_GALLERY/#미디어-쿼리)
+7. [유틸리티 클래스](mdc:SKKU_FAC_GALLERY/#유틸리티-클래스)
+8. [주석 작성](mdc:SKKU_FAC_GALLERY/#주석-작성)
 
 ## 디렉토리 구조
 
