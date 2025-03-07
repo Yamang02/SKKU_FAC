@@ -9,7 +9,7 @@
 
 .artwork-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 15px rgb(0 0 0 / 10%);
 }
 
 .artwork-image {
@@ -48,7 +48,7 @@
     margin-top: var(--spacing-lg);
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .artwork-title {
         font-size: 0.9rem;
     }

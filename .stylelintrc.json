@@ -1,0 +1,11 @@
+{
+    "extends": "stylelint-config-standard",
+    "rules": {
+      "no-duplicate-selectors": true,
+      "selector-class-pattern": null,
+      "declaration-block-no-duplicate-properties": true,
+      "declaration-block-no-redundant-longhand-properties": true,
+      "shorthand-property-no-redundant-values": true,
+      "comment-no-empty": true
+    }
+}

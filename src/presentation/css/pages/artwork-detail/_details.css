@@ -11,16 +11,12 @@
 }
 
 .detail-group h2 {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    margin-bottom: 15px;
-    color: var(--primary-color);
+    margin-bottom: 20px;
+    color: var(--color-text-dark);
     display: flex;
     align-items: center;
-}
-
-.detail-group h2 i {
-    margin-right: 8px;
 }
 
 .detail-item {
@@ -71,14 +67,14 @@
     text-decoration: none;
     transition: all 0.3s ease;
     margin-top: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
 }
 
 .back-to-list:hover {
     background-color: var(--primary-color);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
 }
 
 .back-to-list i {
@@ -149,4 +145,12 @@
     margin: 0;
     color: #777;
     font-size: 0.85rem;
+}
+
+i.icon-margin {
+    margin-right: 8px;
+}
+
+.detail-group h2 i {
+    color: var(--color-primary);
 } 

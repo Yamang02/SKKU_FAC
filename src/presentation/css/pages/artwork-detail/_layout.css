@@ -41,7 +41,7 @@
     background: white;
     padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
 }
 
 .artwork-main-image {
@@ -85,17 +85,17 @@
     background: white;
     border-radius: 12px;
     padding: 30px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
 }
 
 /* 반응형 레이아웃 */
-@media (max-width: 1600px) {
+@media (width <= 1600px) {
     .related-artworks {
         padding: 0 20px;
     }
 }
 
-@media (max-width: 1400px) {
+@media (width <= 1400px) {
     .artwork-detail-container,
     .comments-container,
     .related-artworks-wrapper {
@@ -103,7 +103,7 @@
     }
 }
 
-@media (max-width: 1200px) {
+@media (width <= 1200px) {
     .footer-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -114,7 +114,7 @@
     }
 }
 
-@media (max-width: 1023px) {
+@media (width <= 1023px) {
     .artwork-detail-container {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -126,7 +126,7 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .back-to-list {
         padding: 8px 15px;
     }

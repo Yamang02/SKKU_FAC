@@ -29,4 +29,4 @@ class CommentDTO {
     }
 }
 
-module.exports = CommentDTO; 
+export default CommentDTO; 

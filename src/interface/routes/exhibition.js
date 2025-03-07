@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import * as ExhibitionController from '../../domain/exhibition/controller/ExhibitionController.js';
+
 const router = express.Router();
-const ExhibitionController = require('../../domain/exhibition/controller/ExhibitionController');
 
 // 전시회 목록
 router.get('/', ExhibitionController.getExhibitionList);
@@ -11,4 +12,4 @@ router.get('/category/:category', ExhibitionController.getCategoryExhibition);
 // 작품 상세 페이지
 router.get('/:id', ExhibitionController.getExhibitionDetail);
 
-module.exports = router; 
+export default router; 

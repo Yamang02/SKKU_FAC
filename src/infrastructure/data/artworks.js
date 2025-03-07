@@ -56,4 +56,4 @@ const artworks = [
     }
 ];
 
-module.exports = artworks; 
+export default artworks; 

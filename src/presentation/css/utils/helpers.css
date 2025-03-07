@@ -70,13 +70,13 @@
 .shadow-lg { box-shadow: var(--shadow-lg); }
 
 /* 반응형 유틸리티 */
-@media (max-width: 1240px) {
+@media (width <= 1240px) {
     .container {
         width: 95%;
     }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .hide-mobile {
         display: none;
     }

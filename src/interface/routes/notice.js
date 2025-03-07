@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import * as NoticeController from '../../domain/notice/controller/NoticeController.js';
+
 const router = express.Router();
-const NoticeController = require('../../domain/notice/controller/NoticeController');
 
 // 공지사항 목록
 router.get('/', NoticeController.getNoticeList);
 
-module.exports = router; 
+export default router; 

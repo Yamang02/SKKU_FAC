@@ -14,4 +14,4 @@ class Exhibition {
     }
 }
 
-module.exports = Exhibition; 
+export default Exhibition; 

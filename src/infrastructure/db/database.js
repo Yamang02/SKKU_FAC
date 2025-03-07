@@ -1,4 +1,4 @@
-const mysql = require('mysql2/promise');
+import mysql from 'mysql2/promise';
 require('dotenv').config();
 
 const pool = mysql.createPool({
@@ -11,4 +11,4 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-module.exports = pool; 
+export default pool; 

@@ -1,8 +1,13 @@
-const express = require('express');
-const path = require('path');
-const bodyParser = require('body-parser');
-const session = require('express-session');
-const homeService = require('./src/domain/home/service/HomeService');
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import bodyParser from 'body-parser';
+import session from 'express-session';
+import { getFeaturedArtworks } from './src/domain/home/service/HomeService.js';
+
+// ES 모듈에서 __dirname 대체
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -26,10 +31,10 @@ app.use(session({
 }));
 
 // 라우터 설정
-const exhibitionRouter = require('./src/interface/routes/exhibition');
-const noticeRouter = require('./src/interface/routes/notice');
-const userRouter = require('./src/interface/routes/user');
-const artworkRouter = require('./src/interface/routes/artwork');
+import exhibitionRouter from './src/interface/routes/exhibition.js';
+import noticeRouter from './src/interface/routes/notice.js';
+import userRouter from './src/interface/routes/user.js';
+import artworkRouter from './src/interface/routes/artwork.js';
 
 app.use('/exhibition', exhibitionRouter);
 app.use('/notice', noticeRouter);
@@ -38,7 +43,7 @@ app.use('/artwork', artworkRouter);
 
 // 메인 페이지 라우트
 app.get('/', (req, res) => {
-    const featuredArtworks = homeService.getFeaturedArtworks();
+    const featuredArtworks = getFeaturedArtworks();
     res.render('index', {
         title: 'SKKU Faculty Art Gallery',
         featuredArtworks
@@ -48,5 +53,5 @@ app.get('/', (req, res) => {
 // 서버 시작
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
+    // console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
 }); 

@@ -32,4 +32,4 @@ const featuredArtworks = [
     }
 ];
 
-module.exports = featuredArtworks; 
+export default featuredArtworks; 

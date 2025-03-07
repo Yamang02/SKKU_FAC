@@ -6,53 +6,47 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // 작품 데이터
+
     const artworkData = {
         1: {
             title: '진주 귀걸이를 한 소녀',
             artist: '요하네스 베르메르',
             department: '서양화과 18학번',
             exhibition: '2024 봄 기획전: 서양미술의 걸작',
-            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/800px-Meisje_met_de_parel.jpg',
-            dimensions: {
-                width: 800,
-                height: 952
-            }
+            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/800px-Meisje_met_de_parel.jpg'
         },
         2: {
             title: '가나가와 해변의 높은 파도 아래',
             artist: '가쓰시카 호쿠사이',
             department: '동양화과 20학번',
             exhibition: '2024 봄 기획전: 동아시아의 풍경',
-            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1200px-Tsunami_by_hokusai_19th_century.jpg',
-            dimensions: {
-                width: 1200,
-                height: 815
-            }
+            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1200px-Tsunami_by_hokusai_19th_century.jpg'
         },
         3: {
             title: '자화상',
             artist: '빈센트 반 고흐',
             department: '한문교육과 19학번',
             exhibition: '2024 봄 기획전: 자아와 표현',
-            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg/800px-Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg',
-            dimensions: {
-                width: 800,
-                height: 971
-            }
+            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg/800px-Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg'
         },
         4: {
             title: '세속적 쾌락의 정원',
             artist: '히에로니무스 보스',
             department: '국어국문학과 21학번',
             exhibition: '2024 봄 기획전: 중세의 상상력',
-            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg/1200px-The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg',
-            dimensions: {
-                width: 1200,
-                height: 677
-            }
+            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg/1200px-The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg'
         }
     };
+
+    // TODO: 서버에서 데이터 가져오기 (향후 구현)
+    // fetch('/api/artworks/featured')
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         initArtworkModal(data);
+    //     })
+    //     .catch(error => {
+    //         console.error('데이터 로딩 중 오류:', error);
+    //     });
 
     initArtworkModal(artworkData);
 });
@@ -114,6 +108,16 @@ function updateModalContent(modal, artwork, artworkId) {
     modal.querySelector('.modal-title').textContent = artwork.title;
     modal.querySelector('.modal-artist').textContent = artwork.artist;
     modal.querySelector('.modal-department').textContent = artwork.department;
-    modal.querySelector('.modal-exhibition').textContent = artwork.exhibition;
-    modal.querySelector('.detail-button').href = `/artwork/${artworkId}`;
+    
+    // 전시회 정보가 있으면 표시
+    const exhibitionElement = modal.querySelector('.modal-exhibition');
+    if (exhibitionElement) {
+        exhibitionElement.textContent = artwork.exhibition || '';
+    }
+    
+    // 상세 페이지 링크 설정
+    const detailLink = modal.querySelector('#detail-link');
+    if (detailLink) {
+        detailLink.href = `/artwork/${artworkId}`;
+    }
 }

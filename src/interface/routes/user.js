@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import * as UserController from '../../domain/user/controller/UserController.js';
+
 const router = express.Router();
-const UserController = require('../../domain/user/controller/UserController');
 
 // 로그인 페이지
 router.get('/login', UserController.getLoginPage);
@@ -17,4 +18,4 @@ router.get('/register', UserController.getRegisterPage);
 // 회원가입 처리
 router.post('/register', UserController.register);
 
-module.exports = router; 
+export default router; 

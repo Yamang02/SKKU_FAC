@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const cardView = document.getElementById('cardView');
     const tableView = document.getElementById('tableView');
     const searchForm = document.getElementById('searchForm');
-    const resultCount = document.getElementById('resultCount');
 
     // 전시회 캐러셀 초기화
     initCarousel();
@@ -287,8 +286,6 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {string} exhibitionId - 전시회 ID
      */
     function filterArtworksByExhibition(exhibitionId) {
-        console.log(`전시회 필터링: ${exhibitionId}`);
-        
         // 로딩 상태 표시
         showLoading(true);
         
@@ -326,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!searchForm) return;
 
         // 폼 제출 이벤트
-        searchForm.addEventListener('submit', function(event) {
+        searchForm.addEventListener('submit', function() {
             // 로딩 상태 표시
             showLoading(true);
             
@@ -341,8 +338,6 @@ document.addEventListener('DOMContentLoaded', function() {
             for (const [key, value] of formData.entries()) {
                 searchParams[key] = value;
             }
-            
-            console.log('검색 파라미터:', searchParams);
         });
         
         // 초기화 버튼 이벤트 - 폼 초기화만 수행하고 자동 검색은 하지 않음
@@ -364,8 +359,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 초기화 버튼 클릭 애니메이션
                 animateButtonClick(resetButton);
-                
-                console.log('폼이 초기화되었습니다. 검색하려면 검색 버튼을 클릭하세요.');
             });
         }
     }

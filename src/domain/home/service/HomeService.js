@@ -1,5 +1,5 @@
-const FeaturedArtworkDTO = require('../dto/FeaturedArtworkDTO');
-const featuredArtworksData = require('../../../infrastructure/data/featuredArtworks');
+import FeaturedArtworkDTO from '../dto/FeaturedArtworkDTO.js';
+import featuredArtworksData from '../../../infrastructure/data/featuredArtworks.js';
 
 /**
  * 메인 페이지 관련 도메인 서비스
@@ -14,4 +14,5 @@ class HomeService {
     }
 }
 
-module.exports = new HomeService(); 
+const homeService = new HomeService();
+export const getFeaturedArtworks = () => homeService.getFeaturedArtworks(); 

@@ -41,14 +41,14 @@
     color: var(--primary-color);
 }
 
-@media (max-width: 1240px) {
+@media (width <= 1240px) {
     .header .nav {
         width: 95%;
         padding: 0 20px;
     }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .nav {
         padding: 0 15px;
     }

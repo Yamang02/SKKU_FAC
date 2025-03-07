@@ -10,26 +10,35 @@
 <body>
     <%- include('partials/header') %>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1>현대 미술 특별전</h1>
-        </div>
-    </section>
-
-    <main class="main-content">
-        <h2>Featured Artworks</h2>
-        <div class="artwork-grid">
-            <% featuredArtworks.forEach(artwork => { %>
-            <div class="artwork-card" data-artwork-id="<%= artwork.id %>">
-                <img src="<%= artwork.image %>" alt="<%= artwork.title %>" class="artwork-image">
-                <div class="artwork-info">
-                    <div class="artwork-title"><%= artwork.title %></div>
-                    <div class="artwork-artist"><%= artwork.artist %></div>
-                    <div class="artwork-department"><%= artwork.department %></div>
+    <main>
+        <section class="idx-hero-section">
+            <div class="container idx-hero">
+                <div class="idx-hero__content">
+                    <h1>현대 미술 특별전</h1>
                 </div>
             </div>
-            <% }); %>
-        </div>
+        </section>
+
+        <section class="idx-featured-section">
+            <div class="container idx-content">
+                <header class="idx-featured__header">
+                    <h2 class="idx-featured__title">Featured Artworks</h2>
+                    <a href="/artwork/list" class="idx-featured__link">모든 작품 보기</a>
+                </header>
+                <div class="artwork-grid">
+                    <% featuredArtworks.forEach(artwork => { %>
+                    <div class="artwork-card" data-artwork-id="<%= artwork.id %>">
+                        <img src="<%= artwork.image %>" alt="<%= artwork.title %>" class="artwork-image">
+                        <div class="artwork-info">
+                            <div class="artwork-title"><%= artwork.title %></div>
+                            <div class="artwork-artist"><%= artwork.artist %></div>
+                            <div class="artwork-department"><%= artwork.department %></div>
+                        </div>
+                    </div>
+                    <% }); %>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- 작품 상세 모달 -->
@@ -46,7 +55,7 @@
                         <div class="modal-artist" id="modal-artist"></div>
                         <div class="modal-department"></div>
                         <div class="modal-exhibition"></div>
-                        <a href="#" class="detail-button">작품 상세보기</a>
+                        <a href="#" class="detail-button" id="detail-link">작품 상세보기</a>
                     </div>
                 </div>
             </div>

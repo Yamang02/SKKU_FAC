@@ -1,58 +1,101 @@
 /* 페이드 인 애니메이션 */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+@keyframes fade-in {
+    from { 
+        opacity: 0; 
+    }
+
+    to { 
+        opacity: 1; 
+    }
 }
 
 .fade-in {
-    animation: fadeIn var(--transition-normal) ease;
+    animation: fade-in var(--transition-normal) ease;
 }
 
 /* 슬라이드 인 애니메이션 */
-@keyframes slideInFromLeft {
-    from { transform: translateX(-30px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+@keyframes slide-in-from-left {
+    from { 
+        transform: translateX(-30px); 
+        opacity: 0; 
+    }
+
+    to { 
+        transform: translateX(0); 
+        opacity: 1; 
+    }
 }
 
 .slide-in-left {
-    animation: slideInFromLeft var(--transition-normal) ease;
+    animation: slide-in-from-left var(--transition-normal) ease;
 }
 
-@keyframes slideInFromRight {
-    from { transform: translateX(30px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+/* 오른쪽에서 슬라이드 인 */
+@keyframes slide-in-from-right {
+    from { 
+        transform: translateX(30px); 
+        opacity: 0; 
+    }
+
+    to { 
+        transform: translateX(0); 
+        opacity: 1; 
+    }
 }
 
 .slide-in-right {
-    animation: slideInFromRight var(--transition-normal) ease;
+    animation: slide-in-from-right var(--transition-normal) ease;
 }
 
-@keyframes slideInFromTop {
-    from { transform: translateY(-30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+/* 위에서 슬라이드 인 */
+@keyframes slide-in-from-top {
+    from { 
+        transform: translateY(-30px); 
+        opacity: 0; 
+    }
+
+    to { 
+        transform: translateY(0); 
+        opacity: 1; 
+    }
 }
 
 .slide-in-top {
-    animation: slideInFromTop var(--transition-normal) ease;
+    animation: slide-in-from-top var(--transition-normal) ease;
 }
 
-@keyframes slideInFromBottom {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+/* 아래에서 슬라이드 인 */
+@keyframes slide-in-from-bottom {
+    from { 
+        transform: translateY(30px); 
+        opacity: 0; 
+    }
+
+    to { 
+        transform: translateY(0); 
+        opacity: 1; 
+    }
 }
 
 .slide-in-bottom {
-    animation: slideInFromBottom var(--transition-normal) ease;
+    animation: slide-in-from-bottom var(--transition-normal) ease;
 }
 
-/* 확대/축소 애니메이션 */
-@keyframes zoomIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+/* 줌 인 애니메이션 */
+@keyframes zoom-in {
+    from { 
+        transform: scale(0.95); 
+        opacity: 0; 
+    }
+
+    to { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
 }
 
 .zoom-in {
-    animation: zoomIn var(--transition-normal) ease;
+    animation: zoom-in var(--transition-normal) ease;
 }
 
 /* 회전 애니메이션 */
@@ -62,166 +105,137 @@
 }
 
 .rotate {
-    animation: rotate 2s linear infinite;
+    animation: rotate 1s linear infinite;
 }
 
-/* 호버 트랜지션 */
+/* 호버 효과 - 확대 */
 .hover-grow {
-    transition: transform var(--transition-fast);
+    transition: transform var(--transition-fast) ease;
 }
 
 .hover-grow:hover {
     transform: scale(1.05);
 }
 
+/* 호버 효과 - 페이드 */
 .hover-fade {
-    transition: opacity var(--transition-fast);
+    transition: opacity var(--transition-fast) ease;
 }
 
 .hover-fade:hover {
     opacity: 0.8;
 }
 
-/* 애니메이션 유틸리티 */
-
 /* 버튼 클릭 애니메이션 */
 .btn-clicked {
-  transform: scale(0.95) !important;
-  opacity: 0.8;
-  transition: transform 0.2s ease, opacity 0.2s ease !important;
+    animation: zoom-in 0.2s ease;
 }
 
+/* 아이템 클릭 애니메이션 */
 .item-clicked {
-  transform: scale(0.98) !important;
-  opacity: 0.9;
-  transition: transform 0.2s ease, opacity 0.2s ease !important;
+    animation: zoom-in 0.3s ease;
 }
 
-/* 로딩 상태 */
+/* 로딩 애니메이션 */
 body.loading {
-  position: relative;
-  overflow: hidden;
+    position: relative;
+    overflow: hidden;
 }
 
 body.loading::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.7);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(255 255 255 / 70%);
+    z-index: 9998;
 }
 
 body.loading::before {
-  content: '';
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50px;
-  height: 50px;
-  border: 3px solid var(--primary-color);
-  border-top-color: transparent;
-  border-radius: 50%;
-  z-index: 10000;
-  animation: spin 1s linear infinite;
+    content: "";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin-top: -25px;
+    margin-left: -25px;
+    border: 5px solid var(--color-primary-light);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    z-index: 9999;
+    animation: spin 1s linear infinite;
 }
 
+/* 스핀 애니메이션 */
 @keyframes spin {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-/* 페이드 인/아웃 애니메이션 */
-.fade-in {
-  animation: fadeIn 0.3s ease forwards;
-}
-
+/* 페이드 아웃 애니메이션 */
 .fade-out {
-  animation: fadeOut 0.3s ease forwards;
+    animation: fade-out var(--transition-normal) ease;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+@keyframes fade-out {
+    from { 
+        opacity: 1; 
+    }
+
+    to { 
+        opacity: 0; 
+    }
 }
 
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
-/* 슬라이드 애니메이션 */
-.slide-in-right {
-  animation: slideInRight 0.3s ease forwards;
-}
-
+/* 오른쪽으로 슬라이드 아웃 */
 .slide-out-right {
-  animation: slideOutRight 0.3s ease forwards;
+    animation: slide-out-right var(--transition-normal) ease;
 }
 
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+@keyframes slide-out-right {
+    from { 
+        transform: translateX(0); 
+        opacity: 1; 
+    }
+
+    to { 
+        transform: translateX(30px); 
+        opacity: 0; 
+    }
 }
 
-@keyframes slideOutRight {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
-}
-
-/* 확대/축소 애니메이션 */
+/* 스케일 애니메이션 */
 .scale-in {
-  animation: scaleIn 0.3s ease forwards;
+    animation: scale-in var(--transition-normal) ease;
 }
 
 .scale-out {
-  animation: scaleOut 0.3s ease forwards;
+    animation: scale-out var(--transition-normal) ease;
 }
 
-@keyframes scaleIn {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+@keyframes scale-in {
+    from { 
+        transform: scale(0); 
+        opacity: 0; 
+    }
+
+    to { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
 }
 
-@keyframes scaleOut {
-  from {
-    transform: scale(1);
-    opacity: 1;
-  }
-  to {
-    transform: scale(0.8);
-    opacity: 0;
-  }
+@keyframes scale-out {
+    from { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
+
+    to { 
+        transform: scale(0); 
+        opacity: 0; 
+    }
 } 

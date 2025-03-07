@@ -30,14 +30,14 @@
     background: white;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
     transition: transform 0.3s, box-shadow 0.3s;
     cursor: pointer;
 }
 
 .artwork-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
 }
 
 .artwork-image {
@@ -71,7 +71,7 @@
 }
 
 /* 반응형 디자인 */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .hero h1 {
         font-size: 2rem;
     }

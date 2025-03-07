@@ -10,7 +10,7 @@
     border-radius: 12px;
     padding: 30px;
     margin-top: 30px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
 }
 
 .comments-header,
@@ -100,7 +100,7 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
     padding: 0;
     box-sizing: border-box; /* 박스 사이징 추가 */
 }
@@ -120,7 +120,7 @@
 .submit-comment:hover {
     background-color: var(--accent-color);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
     border-color: var(--accent-color);
 }
 
@@ -128,7 +128,7 @@
     background-color: #ff4757;
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(255, 71, 87, 0.3);
+    box-shadow: 0 4px 8px rgb(255 71 87 / 30%);
     border-color: #ff4757;
 }
 
@@ -186,12 +186,12 @@
 
 .comment-action-btn.edit-btn:hover {
     color: var(--primary-color);
-    background-color: rgba(0,0,0,0.05);
+    background-color: rgb(0 0 0 / 5%);
 }
 
 .comment-action-btn.delete-btn:hover {
     color: #ff4757; /* 붉은색으로 변경 */
-    background-color: rgba(255,71,87,0.1); /* 배경색도 약간 붉은색으로 */
+    background-color: rgb(255 71 87 / 10%); /* 배경색도 약간 붉은색으로 */
 }
 
 .comment-action-btn i {
@@ -229,7 +229,7 @@
 }
 
 /* 반응형 스타일 */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .comment-input-wrapper {
         flex-direction: column;
         gap: 10px;
@@ -246,6 +246,7 @@
     .clear-comment {
         width: 40px;
         height: 40px;
+
         /* 크기 유지 */
     }
     
@@ -253,6 +254,7 @@
     .comment-actions {
         top: 10px;
         right: 10px;
+
         /* display 속성은 그대로 유지 */
     }
     

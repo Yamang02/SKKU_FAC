@@ -12,4 +12,4 @@ class FeaturedArtworkDTO {
     }
 }
 
-module.exports = FeaturedArtworkDTO; 
+export default FeaturedArtworkDTO; 

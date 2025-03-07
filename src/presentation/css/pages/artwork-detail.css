@@ -6,13 +6,13 @@
  */
 
 /* 기본 레이아웃 */
-@import 'artwork-detail/_layout.css';
+@import url('artwork-detail/_layout.css');
 
 /* 상세 정보 섹션 */
-@import 'artwork-detail/_details.css';
+@import url('artwork-detail/_details.css');
 
 /* 댓글 섹션 */
-@import 'artwork-detail/_comments.css';
+@import url('artwork-detail/_comments.css');
 
 /* 관련 작품 섹션 */
-@import 'artwork-detail/_related.css'; 
+@import url('artwork-detail/_related.css'); 

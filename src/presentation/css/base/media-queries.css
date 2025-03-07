@@ -1,4 +1,5 @@
 /* 미디어 쿼리 브레이크포인트 */
+
 /* 
   - 모바일: 0-767px
   - 태블릿: 768px-1023px
@@ -7,10 +8,11 @@
 */
 
 /* 모바일 (기본) */
+
 /* 모바일에서는 기본 스타일이 적용됩니다. */
 
 /* 태블릿 */
-@media (min-width: 768px) {
+@media (width >= 768px) {
   /* 컨테이너 */
   .container {
     width: 90%;
@@ -24,7 +26,7 @@
 }
 
 /* 데스크탑 */
-@media (min-width: 1024px) {
+@media (width >= 1024px) {
   /* 컨테이너 */
   .container {
     width: 90%;
@@ -48,7 +50,7 @@
 }
 
 /* 와이드 데스크탑 */
-@media (min-width: 1240px) {
+@media (width >= 1240px) {
   /* 컨테이너 */
   .container {
     width: var(--container-width);
@@ -69,7 +71,7 @@
 /* 특정 컴포넌트 미디어 쿼리 */
 
 /* 헤더 반응형 */
-@media (max-width: 1023px) {
+@media (width <= 1023px) {
   .header .nav {
     width: 95%;
     padding: 0 20px;
@@ -80,7 +82,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .header .nav {
     padding: 0 15px;
   }
@@ -99,7 +101,7 @@
 }
 
 /* 모달 반응형 */
-@media (max-width: 1023px) {
+@media (width <= 1023px) {
   .modal-body {
     grid-template-columns: 1fr;
     overflow-y: auto;
@@ -110,7 +112,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .modal-content {
     margin: 20px auto;
     height: 90vh;

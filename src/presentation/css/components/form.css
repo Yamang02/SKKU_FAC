@@ -28,7 +28,7 @@
   background-color: #fff;
   border-color: var(--primary-color);
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 76, 63, 0.25);
+  box-shadow: 0 0 0 0.2rem rgb(0 76 63 / 25%);
 }
 
 /* 폼 크기 */
@@ -91,7 +91,7 @@
 
 .is-valid:focus {
   border-color: #28a745;
-  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+  box-shadow: 0 0 0 0.2rem rgb(40 167 69 / 25%);
 }
 
 .is-invalid {
@@ -100,7 +100,7 @@
 
 .is-invalid:focus {
   border-color: #dc3545;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+  box-shadow: 0 0 0 0.2rem rgb(220 53 69 / 25%);
 }
 
 .invalid-feedback {
@@ -111,8 +111,8 @@
   color: #dc3545;
 }
 
-.was-validated .form-control:invalid ~ .invalid-feedback,
-.form-control.is-invalid ~ .invalid-feedback {
+.form-control.is-invalid ~ .invalid-feedback,
+.was-validated .form-control:invalid ~ .invalid-feedback {
   display: block;
 }
 

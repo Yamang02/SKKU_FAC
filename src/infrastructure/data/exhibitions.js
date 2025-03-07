@@ -54,4 +54,4 @@ const exhibitions = [
     }
 ];
 
-module.exports = exhibitions; 
+export default exhibitions; 

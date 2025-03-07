@@ -31,12 +31,7 @@
 
 .search-actions .btn-primary {
     background-color: var(--primary-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.search-actions .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
 }
 
 .search-actions .btn-outline {
@@ -100,11 +95,11 @@
     top: 25%;
     height: 50%;
     width: 1px;
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgb(255 255 255 / 30%);
 }
 
 .table-view td:not(:last-child) {
-    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    border-right: 1px solid rgb(0 0 0 / 5%);
 }
 
 .table-view tr {
@@ -139,39 +134,8 @@
     margin-top: 20px;
 }
 
-/* 페이지네이션 스타일 */
-.pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 40px;
-    gap: 10px;
-}
-
-.pagination button {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #f5f5f5;
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-    border: none;
-    cursor: pointer;
-}
-
-.pagination button.active {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.pagination button:hover:not(.active) {
-    background-color: #e0e0e0;
-}
-
 /* 반응형 스타일 */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .search-form {
         grid-template-columns: 1fr;
     }
@@ -194,7 +158,7 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
     .table-view th:nth-child(6),
     .table-view td:nth-child(6) {
         display: none;
@@ -268,12 +232,12 @@
 
 .carousel-container::before {
   left: 70px; /* 왼쪽 화살표 버튼 뒤에 위치 */
-  background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+  background: linear-gradient(to right, rgb(255 255 255 / 100%), rgb(255 255 255 / 0%));
 }
 
 .carousel-container::after {
   right: 70px; /* 오른쪽 화살표 버튼 앞에 위치 */
-  background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+  background: linear-gradient(to left, rgb(255 255 255 / 100%), rgb(255 255 255 / 0%));
 }
 
 /* 기존 트랙 페이드 효과 제거 */
@@ -295,7 +259,7 @@
   cursor: pointer;
   z-index: 3;
   transition: all 0.3s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
 }
 
 .carousel-arrow:hover {
@@ -303,7 +267,7 @@
   border-color: var(--primary-color);
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
 }
 
 .carousel-prev {
@@ -478,7 +442,7 @@
 }
 
 .search-toggle-btn:hover {
-  background-color: rgba(0, 76, 63, 0.05);
+  background-color: rgb(0 76 63 / 5%);
 }
 
 .search-toggle-btn .toggle-icon {
@@ -490,7 +454,7 @@
 }
 
 /* 반응형 스타일 */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .search-simple-layout {
     flex-direction: column;
   }
@@ -540,7 +504,7 @@
 }
 
 /* 반응형 스타일 추가 */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .search-row {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -586,7 +550,7 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .search-toggle-btn {
     font-size: 14px;
     padding: 10px 16px;
@@ -625,4 +589,11 @@
   .keyword-row {
     margin-bottom: 20px;
   }
+}
+
+/* 여기에 다시 추가 */
+.search-actions .btn-primary:hover {
+  background-color: var(--primary-color-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
 } 

@@ -16,4 +16,4 @@ class ExhibitionDTO {
     }
 }
 
-module.exports = ExhibitionDTO; 
+export default ExhibitionDTO; 

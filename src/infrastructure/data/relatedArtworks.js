@@ -139,4 +139,4 @@ const relatedArtworks = {
     ]
 };
 
-module.exports = relatedArtworks; 
+export default relatedArtworks; 

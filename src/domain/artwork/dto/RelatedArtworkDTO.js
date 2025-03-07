@@ -11,4 +11,4 @@ class RelatedArtworkDTO {
     }
 }
 
-module.exports = RelatedArtworkDTO; 
+export default RelatedArtworkDTO; 

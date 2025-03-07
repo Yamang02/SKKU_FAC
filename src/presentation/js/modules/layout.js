@@ -17,7 +17,7 @@ export class LayoutModule {
             const data = await response.text();
             this.header.innerHTML = data;
         } catch (error) {
-            console.error('헤더 로딩 실패:', error);
+            // console.error('헤더 로딩 실패:', error);
         }
     }
     
@@ -27,7 +27,7 @@ export class LayoutModule {
             const data = await response.text();
             this.footer.innerHTML = data;
         } catch (error) {
-            console.error('푸터 로딩 실패:', error);
+            // console.error('푸터 로딩 실패:', error);
         }
     }
 } 

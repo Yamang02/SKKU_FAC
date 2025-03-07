@@ -16,4 +16,4 @@ class Artwork {
     }
 }
 
-module.exports = Artwork; 
+export default Artwork; 
