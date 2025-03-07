@@ -1,0 +1,248 @@
+/* 
+ * 작품 상세 페이지 - 레이아웃
+ * 
+ * 이 파일은 작품 상세 페이지의 기본 레이아웃 구조를 정의합니다.
+ */
+
+.artwork-detail-page {
+    padding: 40px 20px;
+    min-height: 100vh;
+    background-color: #f9f9f9;
+    overflow: visible;
+}
+
+.artwork-detail-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    align-items: start;
+}
+
+/* 댓글 및 관련 작품 컨테이너 */
+.comments-container,
+.related-artworks-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 이미지 섹션 */
+.artwork-image-section {
+    position: sticky;
+    top: calc(var(--header-height) + 20px);
+    height: fit-content;
+    align-self: flex-start;
+}
+
+.artwork-image-wrapper {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.artwork-main-image {
+    width: 100%;
+    height: auto;
+    min-height: 400px;
+    min-width: 400px;
+    border-radius: 4px;
+    object-fit: contain;
+}
+
+/* 정보 섹션 */
+.artwork-info-section {
+    padding: 20px 0;
+}
+
+.artwork-detail-header {
+    margin-bottom: 30px;
+    padding-left: 20px;
+}
+
+.artwork-detail-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.artwork-detail-artist {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+    margin-bottom: 5px;
+}
+
+.artwork-detail-department {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.artwork-details {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* 반응형 레이아웃 */
+@media (max-width: 1600px) {
+    .related-artworks {
+        padding: 0 20px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .artwork-detail-container,
+    .comments-container,
+    .related-artworks-wrapper {
+        padding: 0 20px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .comments-section,
+    .artwork-details {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 1023px) {
+    .artwork-detail-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .artwork-image-section {
+        position: relative;
+        top: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .back-to-list {
+        padding: 8px 15px;
+    }
+    
+    .back-to-list i {
+        margin-right: 5px;
+    }
+    
+    .artwork-image-section {
+        margin-bottom: 20px;
+    }
+    
+    .artwork-image-wrapper {
+        padding: 15px;
+    }
+    
+    .comments-section,
+    .artwork-details {
+        padding: 15px;
+        border-radius: 8px;
+    }
+    
+    .artwork-detail-container,
+    .related-artworks {
+        padding: 10px;
+    }
+    
+    .artwork-detail-title {
+        font-size: 1.8rem;
+    }
+    
+    .artwork-detail-artist {
+        font-size: 1rem;
+    }
+    
+    .detail-group,
+    .comment-item {
+        margin-bottom: 15px;
+    }
+    
+    .comment-input-wrapper {
+        padding: 10px;
+    }
+    
+    .submit-comment,
+    .clear-comment {
+        padding: 8px 12px;
+    }
+    
+    .submit-comment i,
+    .clear-comment i {
+        margin-right: 5px;
+    }
+    
+    .comments-title,
+    .related-artworks-title {
+        font-size: 1.5rem;
+    }
+    
+    .related-artworks-title {
+        margin-bottom: 15px;
+    }
+    
+    .related-artwork-card {
+        min-width: 200px;
+    }
+    
+    .related-artwork-image {
+        height: 150px;
+    }
+    
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .footer-container {
+        padding: 30px 20px;
+    }
+    
+    .footer-bottom {
+        padding: 15px 20px;
+    }
+    
+    .header-actions {
+        display: none;
+    }
+    
+    .scroll-btn,
+    .back-to-list {
+        font-size: 0.9rem;
+    }
+    
+    .comment-count {
+        font-size: 0.9rem;
+    }
+    
+    .list-action {
+        margin-top: 20px;
+    }
+    
+    .back-to-list:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .back-to-list span {
+        display: none;
+    }
+    
+    .artwork-main-image {
+        min-height: 300px;
+        min-width: 300px;
+    }
+    
+    .artwork-image-placeholder {
+        height: 300px;
+    }
+} 

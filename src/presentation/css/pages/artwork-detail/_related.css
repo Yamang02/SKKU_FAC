@@ -1,0 +1,286 @@
+/* 
+ * 작품 상세 페이지 - 관련 작품 섹션
+ * 
+ * 이 파일은 작품 상세 페이지의 관련 작품 섹션 스타일을 정의합니다.
+ */
+
+.related-artworks-container {
+    position: relative;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.related-artworks-header {
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2; /* 헤더를 fade 효과 위에 배치 */
+}
+
+.related-artworks-list {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 10px 0;
+    padding-left: 20px; /* 왼쪽 여백 추가 */
+    padding-right: 20px; /* 오른쪽 여백 추가 */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: relative;
+}
+
+.related-artworks-list::-webkit-scrollbar {
+    display: none;
+}
+
+/* fade-out 효과 - 컨테이너에 적용 */
+.related-artworks-container::before,
+.related-artworks-container::after {
+    content: "";
+    position: absolute;
+    top: 50px; /* 헤더 아래부터 시작 */
+    bottom: 0;
+    width: 100px; /* 더 넓은 fade 영역 */
+    z-index: 3; /* 카드보다 위에 표시 */
+    pointer-events: none; /* 클릭 이벤트 통과 */
+}
+
+.related-artworks-container::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 40%, transparent 100%);
+}
+
+.related-artworks-container::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 40%, transparent 100%);
+}
+
+/* 리스트 내 첫 번째 아이템 앞에 약간의 여백 추가 */
+.related-artworks-list::before {
+    content: "";
+    flex: 0 0 10px;
+}
+
+.related-artwork-card {
+    flex: 0 0 auto;
+    width: 250px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    position: relative;
+    z-index: 2; /* fade 효과보다 낮은 z-index */
+}
+
+.related-artwork-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.related-artwork-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
+}
+
+.related-artwork-info {
+    padding: 15px;
+}
+
+.related-artwork-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.related-artwork-artist {
+    font-size: 0.85rem;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.loading-state,
+.error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 0;
+    color: #888;
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.error-state i,
+.loading-state i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.artwork-image-placeholder {
+    width: 100%;
+    height: 400px;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-size: 1.2rem;
+    border-radius: 4px;
+}
+
+.artwork-image-placeholder::before {
+    content: "\f03e";
+    font-family: "Font Awesome 5 Free";
+    font-size: 3rem;
+    opacity: 0.3;
+}
+
+.list-action {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 15px;
+}
+
+.action-group {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    align-items: center;
+}
+
+/* 버튼 순서를 고려한 마진 조정 */
+.action-group .prev-btn {
+    margin-right: 0;
+}
+
+.action-group .back-to-list {
+    margin-right: 0;
+}
+
+.action-group .next-btn {
+    margin-left: 0;
+}
+
+.scroll-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: white;
+    color: var(--secondary-color);
+    border: 1px solid #eee;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 0;
+}
+
+.scroll-btn:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.back-to-list {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    color: var(--secondary-color);
+    border: 1px solid #eee;
+    border-radius: 30px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    padding: 8px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-top: 0;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+.back-to-list i {
+    margin-right: 8px;
+    font-size: 0.9rem;
+}
+
+.back-to-list span {
+    margin-left: 0;
+}
+
+.back-to-list:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.back-to-list:hover span {
+    color: white;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .action-group {
+        gap: 10px;
+    }
+    
+    .back-to-list {
+        padding: 8px 12px;
+    }
+    
+    .back-to-list span {
+        display: none;
+    }
+    
+    /* 모바일에서 fade 효과 조정 */
+    .related-artworks-container::before,
+    .related-artworks-container::after {
+        width: 60px;
+        top: 40px;
+    }
+}
+
+/* 반응형 레이아웃 */
+@media (max-width: 1600px) {
+    .related-artworks-wrapper {
+        padding: 0 20px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .related-artworks-list {
+        gap: 15px;
+    }
+} 

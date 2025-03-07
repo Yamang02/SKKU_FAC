@@ -1,0 +1,152 @@
+/* 
+ * 작품 상세 페이지 - 상세 정보
+ * 
+ * 이 파일은 작품 상세 정보 섹션의 스타일을 정의합니다.
+ */
+
+.detail-group {
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
+.detail-group h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+}
+
+.detail-group h2 i {
+    margin-right: 8px;
+}
+
+.detail-item {
+    display: flex;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.detail-item:last-child {
+    margin-bottom: 0;
+}
+
+.label {
+    font-weight: 600;
+    width: 120px;
+    color: #555;
+    flex-shrink: 0;
+}
+
+.value {
+    color: #333;
+    flex-grow: 1;
+}
+
+.artwork-description {
+    line-height: 1.7;
+    color: #444;
+    margin-bottom: 30px;
+}
+
+.exhibition-info {
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.back-to-list {
+    display: inline-flex;
+    align-items: center;
+    background-color: white;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.back-to-list:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.back-to-list i {
+    margin-right: 8px;
+}
+
+.action-group .back-to-list {
+    margin-right: 10px;
+}
+
+.artwork-detail-footer {
+    background-color: #f8f8f8;
+    margin-top: 60px;
+    border-top: 1px solid #eee;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 50px 20px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+}
+
+.footer-section {
+    margin-bottom: 20px;
+}
+
+.footer-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-section li {
+    margin-bottom: 10px;
+}
+
+.footer-section a {
+    color: #555;
+    text-decoration: none;
+    transition: color 0.2s;
+    font-size: 0.9rem;
+}
+
+.footer-section a:hover {
+    color: var(--primary-color);
+}
+
+.footer-bottom {
+    background-color: #f1f1f1;
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid #e5e5e5;
+}
+
+.footer-bottom p {
+    margin: 0;
+    color: #777;
+    font-size: 0.85rem;
+} 

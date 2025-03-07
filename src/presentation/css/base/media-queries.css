@@ -52,7 +52,7 @@
   /* 컨테이너 */
   .container {
     width: var(--container-width);
-    max-width: 1200px;
+    max-width: 1400px;
   }
   
   /* 그리드 */

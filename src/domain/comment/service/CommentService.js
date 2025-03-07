@@ -13,7 +13,7 @@ class CommentService {
      * @param {number} pageSize 페이지당 댓글 수
      * @returns {Object} 댓글 목록과 페이지네이션 정보
      */
-    getCommentsByArtworkId(artworkId, page = 1, pageSize = 5) {
+    getCommentsByArtworkId(artworkId, page = 1, pageSize = 6) {
         // 작품 ID에 해당하는 댓글 필터링
         const filteredComments = commentsData.filter(comment => 
             comment.artworkId === parseInt(artworkId)
@@ -37,6 +37,11 @@ class CommentService {
         const commentEntities = paginatedComments.map(comment => new Comment(comment));
         const commentDTOs = commentEntities.map(comment => new CommentDTO(comment));
         
+        // 페이지네이션 계산
+        const startPage = Math.max(1, validPage - 1);
+        const endPage = Math.min(totalPages, startPage + 2);
+        
+        // 페이지네이션 정보 생성
         return {
             comments: commentDTOs,
             pagination: {
@@ -44,7 +49,15 @@ class CommentService {
                 totalPages,
                 totalComments,
                 hasNextPage: validPage < totalPages,
-                hasPrevPage: validPage > 1
+                hasPrevPage: validPage > 1,
+                // 페이지네이션 UI를 위한 추가 정보
+                startPage,
+                endPage,
+                showFirstPage: startPage > 1,
+                showLastPage: endPage < totalPages,
+                showFirstEllipsis: startPage > 2,
+                showLastEllipsis: endPage < totalPages - 1,
+                pages: Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
             }
         };
     }
