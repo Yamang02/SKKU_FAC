@@ -6,8 +6,17 @@
  */
 
 document.addEventListener('DOMContentLoaded', function () {
+    // 서버에서 데이터를 가져오는 대신 현재는 프론트엔드에서 데이터를 관리
+    // 실제 구현 시에는 서버에서 데이터를 가져오는 방식으로 변경 필요
+    initArtworkModal();
+});
 
-    const artworkData = {
+/**
+ * 작품 모달 기능 초기화
+ */
+function initArtworkModal() {
+    // 임시 데이터 (API가 구현되지 않은 경우 사용)
+    const tempArtworkData = {
         1: {
             title: '진주 귀걸이를 한 소녀',
             artist: '요하네스 베르메르',
@@ -38,24 +47,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // TODO: 서버에서 데이터 가져오기 (향후 구현)
-    // fetch('/api/artworks/featured')
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         initArtworkModal(data);
-    //     })
-    //     .catch(error => {
-    //         console.error('데이터 로딩 중 오류:', error);
-    //     });
-
-    initArtworkModal(artworkData);
-});
-
-/**
- * 작품 모달 기능 초기화
- * @param {Object} artworkData - 작품 데이터 객체
- */
-function initArtworkModal(artworkData) {
     const modal = document.getElementById('artwork-modal');
     const artworkCards = document.querySelectorAll('.card.card--home');
     const closeBtn = document.querySelector('.close');
@@ -67,34 +58,77 @@ function initArtworkModal(artworkData) {
 
     // 작품 카드 클릭 이벤트
     artworkCards.forEach(card => {
-        card.addEventListener('click', () => {
-            const artworkId = card.dataset.artworkId;
-            const artwork = artworkData[artworkId];
+        card.addEventListener('click', function () {
+            const artworkId = this.dataset.artworkId;
 
-            if (!artwork) {
-                console.error(`ID ${artworkId}에 해당하는 작품 데이터가 없습니다.`);
+            // 작품 ID가 없으면 처리하지 않음
+            if (!artworkId) {
+                console.error('작품 ID를 찾을 수 없습니다.');
                 return;
             }
 
-            // 모달 내용 업데이트
-            updateModalContent(modal, artwork, artworkId);
+            // 서버에서 작품 데이터 가져오기
+            fetch(`/api/artworks/${artworkId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('작품 데이터를 가져오는데 실패했습니다.');
+                    }
+                    return response.json();
+                })
+                .then(artwork => {
+                    // 모달 내용 업데이트
+                    updateModalContent(modal, artwork, artworkId);
 
-            // 모달 표시
-            modal.style.display = 'block';
+                    // 모달 표시
+                    modal.style.display = 'block';
+
+                    // 모달이 표시될 때 body 스크롤 방지
+                    document.body.style.overflow = 'hidden';
+                })
+                .catch(error => {
+                    console.error('작품 데이터 로딩 중 오류:', error);
+
+                    // API 오류 시 임시 데이터 사용
+                    if (tempArtworkData[artworkId]) {
+                        console.log('임시 데이터를 사용합니다.');
+                        updateModalContent(modal, tempArtworkData[artworkId], artworkId);
+                        modal.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        // 임시 데이터도 없는 경우 작품 상세 페이지로 이동
+                        window.location.href = `/artwork/${artworkId}`;
+                    }
+                });
         });
     });
 
     // 닫기 버튼 이벤트
     closeBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
+        closeModal(modal);
     });
 
     // 모달 외부 클릭 시 닫기
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
-            modal.style.display = 'none';
+            closeModal(modal);
         }
     });
+
+    // ESC 키 누를 때 모달 닫기
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
+            closeModal(modal);
+        }
+    });
+}
+
+/**
+ * 모달 닫기 함수
+ * @param {HTMLElement} modal - 모달 요소
+ */
+function closeModal(modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = ''; // body 스크롤 복원
 }
 
 /**
@@ -104,12 +138,32 @@ function initArtworkModal(artworkData) {
  * @param {string} artworkId - 작품 ID
  */
 function updateModalContent(modal, artwork, artworkId) {
-    modal.querySelector('.modal-image').src = artwork.image;
-    modal.querySelector('.modal-title').textContent = artwork.title;
-    modal.querySelector('.modal-artist').textContent = artwork.artist;
-    modal.querySelector('.modal-department').textContent = artwork.department;
+    // 이미지 업데이트
+    const modalImage = modal.querySelector('.modal-image');
+    if (modalImage) {
+        modalImage.src = artwork.image || '';
+        modalImage.alt = artwork.title || '작품 이미지';
+    }
 
-    // 전시회 정보가 있으면 표시
+    // 제목 업데이트
+    const modalTitle = modal.querySelector('.modal-title');
+    if (modalTitle) {
+        modalTitle.textContent = artwork.title || '제목 없음';
+    }
+
+    // 작가 업데이트
+    const modalArtist = modal.querySelector('.modal-artist');
+    if (modalArtist) {
+        modalArtist.textContent = artwork.artist || '작가 미상';
+    }
+
+    // 학과 정보 업데이트
+    const modalDepartment = modal.querySelector('.modal-department');
+    if (modalDepartment) {
+        modalDepartment.textContent = artwork.department || '';
+    }
+
+    // 전시회 정보 업데이트
     const exhibitionElement = modal.querySelector('.modal-exhibition');
     if (exhibitionElement) {
         exhibitionElement.textContent = artwork.exhibition || '';

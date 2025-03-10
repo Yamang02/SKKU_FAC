@@ -2,14 +2,8 @@
 <html lang="ko">
 
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>
-            <%= title %>
-        </title>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"
-            rel="stylesheet">
-        <link rel="stylesheet" href="/css/style.css">
+        <% const pageTitle=title; const additionalStyles=[]; %>
+            <%- include('../common/head', { pageTitle, additionalStyles }) %>
     </head>
 
     <body>
@@ -33,16 +27,21 @@
                         <div class="artwork-grid">
                             <% featuredArtworks.forEach(artwork=> { %>
                                 <div class="card card--home" data-artwork-id="<%= artwork.id %>">
-                                    <img src="<%= artwork.image %>" alt="<%= artwork.title %>" class="card__image">
-                                    <div class="card__info">
-                                        <h3 class="card__title">
-                                            <%= artwork.title %>
-                                        </h3>
-                                        <p class="card__subtitle">
-                                            <%= artwork.artist %>
-                                        </p>
-                                        <div class="card__meta">
-                                            <%= artwork.department %>
+                                    <div class="card__link">
+                                        <div class="card__image-container">
+                                            <img src="<%= artwork.image %>" alt="<%= artwork.title %>"
+                                                class="card__image">
+                                        </div>
+                                        <div class="card__info">
+                                            <h3 class="card__title">
+                                                <%= artwork.title %>
+                                            </h3>
+                                            <p class="card__subtitle">
+                                                <%= artwork.artist %>
+                                            </p>
+                                            <div class="card__meta">
+                                                <%= artwork.department %>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

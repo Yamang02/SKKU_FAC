@@ -53,7 +53,15 @@ export async function getArtworkList(req, res) {
             filters: { keyword, exhibition, year, department },
             pagination: {
                 currentPage: parseInt(page),
-                totalPages: Math.ceil(artworksResult.total / limit)
+                totalPages: Math.ceil(artworksResult.total / limit),
+                totalItems: artworksResult.total,
+                hasPrevPage: parseInt(page) > 1,
+                hasNextPage: parseInt(page) < Math.ceil(artworksResult.total / limit),
+                pages: generatePageNumbers(parseInt(page), Math.ceil(artworksResult.total / limit)),
+                showFirstPage: parseInt(page) > 3,
+                showLastPage: parseInt(page) < Math.ceil(artworksResult.total / limit) - 2,
+                showFirstEllipsis: parseInt(page) > 4,
+                showLastEllipsis: parseInt(page) < Math.ceil(artworksResult.total / limit) - 3
             }
         });
     } catch (error) {
@@ -103,4 +111,28 @@ export function getArtworkDetail(req, res) {
             message: '작품 정보를 불러오는 중 오류가 발생했습니다.'
         });
     }
+}
+
+/**
+ * 페이지 번호 배열을 생성합니다.
+ * @param {number} currentPage - 현재 페이지 번호
+ * @param {number} totalPages - 전체 페이지 수
+ * @returns {Array} 페이지 번호 배열
+ */
+function generatePageNumbers(currentPage, totalPages) {
+    const pages = [];
+    const maxPagesToShow = 5;
+
+    let startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow && startPage > 1) {
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+    }
+
+    return pages;
 }

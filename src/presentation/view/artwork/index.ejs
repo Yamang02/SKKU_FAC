@@ -2,13 +2,8 @@
 <html lang="ko">
 
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>작품 검색 - SKKU Faculty Art Gallery</title>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"
-            rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-        <link rel="stylesheet" href="/css/style.css">
+        <% const pageTitle='작품 검색 - SKKU 순수미술동아리 갤러리' ; const additionalStyles=[]; %>
+            <%- include('../common/head', { pageTitle, additionalStyles }) %>
     </head>
 
     <body>
@@ -56,7 +51,7 @@
 
                     <!-- 상세 검색 토글 버튼 -->
                     <div class="search-toggle-container">
-                        <button id="advancedSearchToggle" class="search-toggle-btn">
+                        <button id="advancedSearchToggle" class="btn btn--toggle">
                             <i class="fas fa-sliders-h"></i> 상세 검색 필터
                             <i class="fas fa-chevron-down toggle-icon"></i>
                         </button>
@@ -72,7 +67,7 @@
                                         <div class="search-input-wrapper">
                                             <input type="text" id="keyword" name="keyword" class="search-input"
                                                 placeholder="작품명, 작가명, 키워드 등을 입력하세요" value="<%= keyword || '' %>">
-                                            <button type="submit" class="search-button">
+                                            <button type="submit" class="btn btn--search">
                                                 <i class="fas fa-search"></i>
                                             </button>
                                         </div>
@@ -99,8 +94,8 @@
                                     </div>
 
                                     <div class="search-column search-buttons">
-                                        <button type="submit" class="btn btn-primary">검색</button>
-                                        <button type="reset" class="btn btn-secondary">초기화</button>
+                                        <button type="submit" class="btn btn--primary">검색</button>
+                                        <button type="reset" class="btn btn--secondary">초기화</button>
                                     </div>
                                 </div>
                             </form>
@@ -118,10 +113,10 @@
 
                         <!-- 뷰 전환 버튼 -->
                         <div class="view-toggle">
-                            <button id="cardViewBtn" class="view-toggle-btn active" title="카드 뷰">
+                            <button id="cardViewBtn" class="btn btn--toggle active" title="카드 뷰">
                                 <i class="fas fa-th"></i>
                             </button>
-                            <button id="tableViewBtn" class="view-toggle-btn" title="테이블 뷰">
+                            <button id="tableViewBtn" class="btn btn--toggle" title="테이블 뷰">
                                 <i class="fas fa-list"></i>
                             </button>
                         </div>
@@ -145,6 +140,9 @@
                                                 <p class="card__subtitle">
                                                     <%= artwork.artist %>
                                                 </p>
+                                                <div class="card__meta">
+                                                    <%= artwork.department %>
+                                                </div>
                                             </div>
                                         </a>
                                     </div>
@@ -202,6 +200,13 @@
                             </tbody>
                         </table>
                     </section>
+
+                    <!-- 페이지네이션 -->
+                    <div class="artwork-pagination">
+                        <%- include('../common/pagination', { pagination: pagination, baseUrl: '?keyword=' + (keyword
+                            || '' ) + '&exhibition=' + (exhibition || '' ) + '&year=' + (year || '' ) + '&department=' +
+                            (department || '' ) + '&page=' }) %>
+                    </div>
                 </div>
             </main>
 

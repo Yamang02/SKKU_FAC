@@ -2,15 +2,8 @@
 <html lang="ko">
 
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>
-            <%= artwork.title %> - SKKU Faculty Art Gallery
-        </title>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"
-            rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-        <link rel="stylesheet" href="/css/style.css">
+        <% const pageTitle=`${artwork.title} - SKKU 순수미술동아리 갤러리`; const additionalStyles=[]; %>
+            <%- include('../common/head', { pageTitle, additionalStyles }) %>
     </head>
 
     <body>
@@ -81,60 +74,64 @@
 
                 <!-- 댓글 섹션 -->
                 <div class="comments-container">
-                    <div class="comments-section">
-                        <div class="comments-header">
-                            <h2 class="comments-title">댓글</h2>
-                            <span class="comment-count">총 <%= commentPagination.totalComments %>개의 댓글</span>
+                    <div class="comments">
+                        <div class="comments__header">
+                            <h2 class="comments__title">댓글</h2>
+                            <span class="comments__count">총 <%= commentPagination.totalComments %>개의 댓글</span>
                         </div>
 
                         <form class="comment-form">
-                            <div class="comment-input-wrapper">
-                                <textarea class="comment-input" placeholder="댓글을 작성해주세요..."></textarea>
-                                <div class="comment-actions-wrapper">
-                                    <button type="button" class="clear-comment" aria-label="댓글 내용 초기화">
+                            <div class="comment-form__input-wrapper">
+                                <textarea class="comment-form__input" placeholder="댓글을 작성해주세요..."></textarea>
+                                <div class="comment-form__actions">
+                                    <button type="button" class="btn btn--comment btn--comment-clear btn--delete"
+                                        aria-label="댓글 내용 초기화">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-                                    <button type="submit" class="submit-comment" aria-label="댓글 작성">
+                                    <button type="submit" class="btn btn--comment btn--comment-submit"
+                                        aria-label="댓글 작성">
                                         <i class="fas fa-paper-plane"></i>
                                     </button>
                                 </div>
                             </div>
                         </form>
 
-                        <div class="comments-list">
+                        <div class="comments__list">
                             <% if (comments && comments.length> 0) { %>
                                 <% comments.forEach(comment=> { %>
-                                    <div class="comment-item">
-                                        <div class="comment-actions">
-                                            <button class="comment-action-btn edit-btn"
-                                                data-comment-id="<%= comment.id %>" title="댓글 수정">
+                                    <div class="comment">
+                                        <div class="comment__actions">
+                                            <button class="btn btn--action" data-comment-id="<%= comment.id %>"
+                                                title="댓글 수정">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <button class="comment-action-btn delete-btn"
+                                            <button class="btn btn--action btn--delete"
                                                 data-comment-id="<%= comment.id %>" title="댓글 삭제">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </div>
-                                        <div class="comment-author">
+                                        <div class="comment__author">
                                             <%= comment.author %>
                                         </div>
-                                        <div class="comment-date">
+                                        <div class="comment__date">
                                             <%= comment.formattedDate %>
                                         </div>
-                                        <div class="comment-content">
+                                        <div class="comment__content">
                                             <%= comment.content %>
                                         </div>
                                     </div>
                                     <% }); %>
                                         <% } else { %>
-                                            <div class="no-comments">
+                                            <div class="comments__empty">
                                                 <p>아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>
                                             </div>
                                             <% } %>
                         </div>
 
-                        <%- include('../common/pagination', { pagination: commentPagination, baseUrl: '?commentPage=' })
-                            %>
+                        <div class="comments__pagination">
+                            <%- include('../common/pagination', { pagination: commentPagination,
+                                baseUrl: '?commentPage=' }) %>
+                        </div>
                     </div>
                 </div>
 
@@ -149,7 +146,7 @@
                                 <% if (relatedArtworks && relatedArtworks.length> 0) { %>
                                     <% relatedArtworks.forEach(relatedArtwork=> { %>
                                         <div class="card card--related">
-                                            <a href="/artwork/<%= relatedArtwork.id %>">
+                                            <a href="/artwork/<%= relatedArtwork.id %>" class="card__link">
                                                 <% if (relatedArtwork.image) { %>
                                                     <div class="card__image-container">
                                                         <img src="<%= relatedArtwork.image %>"
@@ -171,6 +168,9 @@
                                                                 <p class="card__subtitle">
                                                                     <%= relatedArtwork.artist || '작가 미상' %>
                                                                 </p>
+                                                                <div class="card__meta">
+                                                                    <%= relatedArtwork.department || '' %>
+                                                                </div>
                                                             </div>
                                             </a>
                                         </div>
@@ -184,14 +184,14 @@
                             </div>
                             <div class="list-action">
                                 <div class="action-group">
-                                    <button class="scroll-btn prev-btn" aria-label="이전 작품">
+                                    <button class="btn btn--round btn--scroll" aria-label="이전 작품">
                                         <i class="fas fa-chevron-left"></i>
                                     </button>
-                                    <a href="/artwork/list" class="back-to-list">
-                                        <i class="fas fa-th-large icon-margin"></i>
+                                    <a href="/artwork/list" class="btn btn--round btn--list">
+                                        <i class="fas fa-th-large"></i>
                                         <span>작품 목록</span>
                                     </a>
-                                    <button class="scroll-btn next-btn" aria-label="다음 작품">
+                                    <button class="btn btn--round btn--scroll" aria-label="다음 작품">
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
                                 </div>

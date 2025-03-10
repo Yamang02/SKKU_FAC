@@ -2,46 +2,49 @@
 
     <div class="pagination">
         <% if (pagination.hasPrevPage) { %>
-            <a href="<%= baseUrl %><%= pagination.currentPage - 1 %>" class="page-btn prev" aria-label="이전 페이지">
+            <a href="<%= baseUrl %><%= pagination.currentPage - 1 %>" class="pagination__btn pagination__btn--prev"
+                aria-label="이전 페이지">
                 <i class="fas fa-chevron-left"></i>
             </a>
             <% } else { %>
-                <span class="page-btn prev disabled" aria-label="이전 페이지">
+                <span class="pagination__btn pagination__btn--prev pagination__btn--disabled" aria-label="이전 페이지">
                     <i class="fas fa-chevron-left"></i>
                 </span>
                 <% } %>
 
                     <% if (pagination.showFirstPage) { %>
-                        <a href="<%= baseUrl %>1" class="page-btn">1</a>
+                        <a href="<%= baseUrl %>1" class="pagination__btn">1</a>
                         <% if (pagination.showFirstEllipsis) { %>
-                            <span class="page-dots">...</span>
+                            <span class="pagination__dots">...</span>
                             <% } %>
                                 <% } %>
 
                                     <% pagination.pages.forEach(pageNum=> { %>
                                         <a href="<%= baseUrl %><%= pageNum %>"
-                                            class="page-btn <%= pageNum === pagination.currentPage ? 'active' : '' %>">
+                                            class="pagination__btn <%= pageNum === pagination.currentPage ? 'pagination__btn--active' : '' %>">
                                             <%= pageNum %>
                                         </a>
                                         <% }); %>
 
                                             <% if (pagination.showLastPage) { %>
                                                 <% if (pagination.showLastEllipsis) { %>
-                                                    <span class="page-dots">...</span>
+                                                    <span class="pagination__dots">...</span>
                                                     <% } %>
                                                         <a href="<%= baseUrl %><%= pagination.totalPages %>"
-                                                            class="page-btn">
+                                                            class="pagination__btn">
                                                             <%= pagination.totalPages %>
                                                         </a>
                                                         <% } %>
 
                                                             <% if (pagination.hasNextPage) { %>
                                                                 <a href="<%= baseUrl %><%= pagination.currentPage + 1 %>"
-                                                                    class="page-btn next" aria-label="다음 페이지">
+                                                                    class="pagination__btn pagination__btn--next"
+                                                                    aria-label="다음 페이지">
                                                                     <i class="fas fa-chevron-right"></i>
                                                                 </a>
                                                                 <% } else { %>
-                                                                    <span class="page-btn next disabled"
+                                                                    <span
+                                                                        class="pagination__btn pagination__btn--next pagination__btn--disabled"
                                                                         aria-label="다음 페이지">
                                                                         <i class="fas fa-chevron-right"></i>
                                                                     </span>

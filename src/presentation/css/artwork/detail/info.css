@@ -142,8 +142,7 @@
     height: 40px;
 }
 
-.scroll-btn,
-.back-to-list {
+.btn--round {
     width: 40px;
     height: 40px;
     display: flex;
@@ -157,12 +156,25 @@
     color: var(--secondary-color);
 }
 
-.back-to-list span {
+.btn--round i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.btn--list {
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.btn--list span {
     display: none;
     margin-left: 8px;
 }
 
-.back-to-list:hover {
+.btn--list:hover {
     width: auto;
     padding: 0 20px;
     border-radius: 6px;
@@ -171,11 +183,11 @@
     color: white;
 }
 
-.back-to-list:hover span {
+.btn--list:hover span {
     display: inline-block;
 }
 
-.scroll-btn:hover {
+.btn--scroll:hover {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
     color: white;

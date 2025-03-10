@@ -2,15 +2,9 @@
 <html lang="ko">
 
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>
-            <%= exhibition.title %> | <%= title %>
-        </title>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"
-            rel="stylesheet">
-        <link rel="stylesheet" href="/css/style.css">
-        <link rel="stylesheet" href="/css/pages/exhibition-detail.css">
+        <% const pageTitle=`${exhibition.title} | ${title}`; const additionalStyles=[ '/css/pages/exhibition-detail.css'
+            ]; %>
+            <%- include('../common/head', { pageTitle, additionalStyles }) %>
     </head>
 
     <body>
