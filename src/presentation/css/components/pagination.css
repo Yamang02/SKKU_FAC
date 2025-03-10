@@ -1,51 +1,37 @@
 /* 페이지네이션 스타일 */
-
 .pagination {
     display: flex;
-    gap: 5px;
     justify-content: center;
-    margin-top: 20px;
-    padding: 10px 0;
+    margin-top: 2rem;
 }
 
-.page-btn {
+.pagination-item {
+    margin: 0 0.25rem;
+}
+
+.pagination-link {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid #eee;
-    border-radius: 50%; /* 동그란 모양 */
-    background-color: white;
-    color: #666;
-    font-size: 0.9rem;
-    font-weight: 500;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     text-decoration: none;
-    transition: all 0.2s;
-    cursor: pointer;
+    color: #333;
+    transition: background-color 0.3s ease;
 }
 
-.page-btn.active {
-    background-color: var(--primary-color);
-    color: white;
-    box-shadow: none;
-    border-color: var(--primary-color);
-}
-
-.page-btn.disabled {
-    background-color: #f9f9f9;
-    color: #aaa;
-    cursor: not-allowed;
-    border-color: #eee;
-    opacity: 0.4;
-    pointer-events: none;
-}
-
-.page-btn:hover:not(.active, .disabled) {
+.pagination-link:hover {
     background-color: #f5f5f5;
-    border-color: #ddd;
-    box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
-    transform: translateY(-2px);
+}
+
+.pagination-link.active {
+    background-color: #1a73e8;
+    color: #fff;
+}
+
+.pagination-prev, .pagination-next {
+    font-size: 1.2rem;
 }
 
 /* 페이지네이션 화살표 버튼 */
@@ -76,17 +62,17 @@
         margin-top: 15px;
         padding: 8px 0;
     }
-    
+
     .page-btn {
         width: 28px;
         height: 28px;
         border-radius: 50%; /* 동그란 모양 유지 */
         font-size: 0.8rem;
     }
-    
+
     .page-dots {
         width: 16px;
         height: 28px;
         font-size: 0.8rem;
     }
-} 
+}

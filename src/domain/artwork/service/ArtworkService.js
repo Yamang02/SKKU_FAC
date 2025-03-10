@@ -11,16 +11,16 @@ import * as exhibitionService from '../../exhibition/service/ExhibitionService.j
 export function getArtworkById(id) {
     const artwork = artworksData.find(art => art.id === parseInt(id));
     if (!artwork) return null;
-    
+
     const artworkEntity = new Artwork(artwork);
     const exhibition = exhibitionService.getExhibitionByCode(artwork.exhibitionId);
-    
+
     // DTO 변환 시 전시회 정보 추가
-    const dto = _convertToDTO([artworkEntity])[0];
+    const dto = convertToDTO([artworkEntity])[0];
     if (exhibition) {
         dto.exhibition = exhibition.title;
     }
-    
+
     return dto;
 }
 
@@ -40,48 +40,48 @@ export function getArtworks(filters = {}) {
  */
 export function searchArtworks(filters = {}) {
     const { keyword, exhibition, year, department, limit = 12, offset = 0 } = filters;
-    
+
     // 필터링 로직
     let filteredArtworks = [...artworksData];
-    
+
     if (keyword) {
         const searchTerm = keyword.toLowerCase();
-        filteredArtworks = filteredArtworks.filter(art => 
-            art.title.toLowerCase().includes(searchTerm) || 
+        filteredArtworks = filteredArtworks.filter(art =>
+            art.title.toLowerCase().includes(searchTerm) ||
             art.artist.toLowerCase().includes(searchTerm) ||
             art.description.toLowerCase().includes(searchTerm)
         );
     }
-    
+
     if (exhibition) {
-        filteredArtworks = filteredArtworks.filter(art => 
+        filteredArtworks = filteredArtworks.filter(art =>
             art.exhibitionId === exhibition
         );
     }
-    
+
     if (year) {
-        filteredArtworks = filteredArtworks.filter(art => 
+        filteredArtworks = filteredArtworks.filter(art =>
             art.year === parseInt(year)
         );
     }
-    
+
     if (department) {
-        filteredArtworks = filteredArtworks.filter(art => 
+        filteredArtworks = filteredArtworks.filter(art =>
             art.department === department
         );
     }
-    
+
     // 총 개수
     const total = filteredArtworks.length;
-    
+
     // 페이지네이션
     const paginatedArtworks = filteredArtworks.slice(offset, offset + limit);
-    
+
     // 엔티티 변환
     const artworkEntities = paginatedArtworks.map(art => new Artwork(art));
-    
+
     return {
-        items: _convertToDTO(artworkEntities),
+        items: convertToDTO(artworkEntities),
         total
     };
 }
@@ -105,11 +105,11 @@ export function getYears() {
 }
 
 /**
- * 엔티티를 DTO로 변환합니다.
+ * 작품 엔티티 목록을 DTO로 변환합니다.
  * @param {Array<Artwork>} artworks 작품 엔티티 목록
  * @returns {Array<ArtworkDTO>} 작품 DTO 목록
  */
-function _convertToDTO(artworks) {
+function convertToDTO(artworks) {
     return artworks.map(artwork => {
         const exhibition = exhibitionService.getExhibitionByCode(artwork.exhibitionId);
         return new ArtworkDTO(artwork, exhibition);

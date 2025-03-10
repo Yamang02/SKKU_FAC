@@ -7,7 +7,7 @@
  * - 이미지 섹션 Sticky 기능
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // 스크롤 버튼 기능
     initRelatedArtworksScroll();
     
@@ -46,7 +46,7 @@ function initCommentForm() {
     const commentInput = document.querySelector('.comment_input');
     
     if (commentForm) {
-        commentForm.addEventListener('submit', function(e) {
+        commentForm.addEventListener('submit', function (e) {
             e.preventDefault();
             // 여기에 댓글 제출 로직 구현
             
@@ -56,7 +56,7 @@ function initCommentForm() {
     }
     
     if (clearBtn && commentInput) {
-        clearBtn.addEventListener('click', function() {
+        clearBtn.addEventListener('click', function () {
             commentInput.value = '';
             commentInput.focus();
         });

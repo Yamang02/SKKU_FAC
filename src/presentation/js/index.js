@@ -5,7 +5,7 @@
  * - 작품 모달 기능
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
     const artworkData = {
         1: {

@@ -19,5 +19,36 @@
         "css"
     ],
     "html.format.wrapLineLength": 120,
-    "html.format.indentInnerHtml": true
-} 
+    "html.format.indentInnerHtml": true,
+    "files.associations": {
+        "*.ejs": "html"
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true
+    },
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#1f6fd0",
+        "activityBar.background": "#1f6fd0",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799"
+    },
+    "projectStructure": {
+        "domains": [
+            "artwork",
+            "exhibition",
+            "notice",
+            "user",
+            "comment",
+            "image",
+            "home"
+        ],
+        "layers": [
+            "domain",
+            "application",
+            "infrastructure",
+            "interface",
+            "presentation"
+        ]
+    }
+}

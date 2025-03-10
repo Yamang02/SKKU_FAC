@@ -2,7 +2,7 @@
  * 작품 목록 페이지 스크립트
  * 카드 뷰와 테이블 뷰 전환, 검색 기능 등을 처리합니다.
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // 요소 참조
     const carouselTrack = document.querySelector('.carousel-track');
     const prevButton = document.querySelector('.carousel-prev');
@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!searchForm) return;
 
         // 폼 제출 이벤트
-        searchForm.addEventListener('submit', function() {
+        searchForm.addEventListener('submit', function () {
             // 로딩 상태 표시
             showLoading(true);
             
@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const resetButton = searchForm.querySelector('button[type="reset"]');
         if (resetButton) {
             // 기본 reset 이벤트를 방지하고 커스텀 동작 구현
-            resetButton.addEventListener('click', function(event) {
+            resetButton.addEventListener('click', function (event) {
                 event.preventDefault(); // 기본 reset 동작 방지
                 
                 // 폼 필드 수동 초기화
@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const buttons = pagination.querySelectorAll('button');
         
         buttons.forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 // 이미 활성화된 버튼이거나 화살표 버튼이면 무시
                 if (this.classList.contains('active') || this.querySelector('i')) return;
                 
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 다음 페이지 버튼
         const nextPageBtn = pagination.querySelector('button:last-child');
         if (nextPageBtn) {
-            nextPageBtn.addEventListener('click', function() {
+            nextPageBtn.addEventListener('click', function () {
                 // 버튼 클릭 애니메이션
                 animateButtonClick(this);
                 
@@ -509,7 +509,7 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function debounce(func, wait) {
         let timeout;
-        return function() {
+        return function () {
             const context = this;
             const args = arguments;
             clearTimeout(timeout);

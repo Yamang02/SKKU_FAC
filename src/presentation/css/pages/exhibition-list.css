@@ -2,23 +2,26 @@
 .exhibitions-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 2rem 1rem;
 }
 
 .exhibitions-header {
-    margin-bottom: 2rem;
     text-align: center;
+    margin-bottom: 3rem;
 }
 
 .exhibitions-title {
     font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-primary);
 }
 
 .exhibitions-subtitle {
     font-size: 1.2rem;
-    color: #666;
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .exhibitions-grid {
@@ -30,15 +33,15 @@
 .exhibition-card {
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
-    background-color: #fff;
+    background-color: var(--color-background);
 }
 
 .exhibition-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .exhibition-image {
@@ -52,24 +55,47 @@
 }
 
 .exhibition-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
 }
 
 .exhibition-subtitle {
-    font-size: 1rem;
-    color: #666;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
     margin-bottom: 1rem;
 }
 
 .exhibition-date {
-    font-size: 0.9rem;
-    color: #888;
     display: flex;
     align-items: center;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
 }
 
 .exhibition-date svg {
     margin-right: 0.5rem;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .exhibitions-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .exhibitions-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .exhibitions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .exhibitions-container {
+        padding: 1.5rem 1rem;
+    }
 }

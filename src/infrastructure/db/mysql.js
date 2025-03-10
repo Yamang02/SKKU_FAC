@@ -1,5 +1,8 @@
 import mysql from 'mysql2';
-require('dotenv').config();
+import * as dotenv from 'dotenv';
+
+// 환경 변수 로드
+dotenv.config();
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
