@@ -14,12 +14,14 @@
 /* 태블릿 */
 @media (width >= 768px) {
   /* 컨테이너 */
+
   .container {
     width: 90%;
     max-width: 720px;
   }
   
   /* 그리드 */
+
   .grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -28,22 +30,26 @@
 /* 데스크탑 */
 @media (width >= 1024px) {
   /* 컨테이너 */
+
   .container {
     width: 90%;
     max-width: 960px;
   }
   
   /* 그리드 */
+
   .grid {
     grid-template-columns: repeat(3, 1fr);
   }
   
   /* 헤더 */
+
   .header .nav {
     padding: 0;
   }
   
   /* 모달 */
+
   .modal-content {
     width: 90%;
   }
@@ -52,17 +58,20 @@
 /* 와이드 데스크탑 */
 @media (width >= 1240px) {
   /* 컨테이너 */
+
   .container {
     width: var(--container-width);
     max-width: 1400px;
   }
   
   /* 그리드 */
+
   .grid {
     grid-template-columns: repeat(4, 1fr);
   }
   
   /* 모달 */
+
   .modal-content {
     width: 85%;
   }
@@ -114,8 +123,8 @@
 
 @media (width <= 767px) {
   .modal-content {
-    margin: 20px auto;
     height: 90vh;
+    margin: 20px auto;
   }
   
   .modal-body {

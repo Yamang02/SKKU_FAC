@@ -36,6 +36,21 @@ npm run lint:css:fix
 2. Stylelint를 사용하여 중복된 CSS 규칙 확인
 3. 브라우저 개발자 도구의 Coverage 탭을 사용하여 실행 시 사용되지 않는 코드 확인
 
+## 코드 컨벤션
+
+이 프로젝트는 일관된 코드 스타일을 유지하기 위해 코드 컨벤션을 준수합니다.
+자세한 내용은 [CODING_CONVENTION.md](CODING_CONVENTION.md) 파일을 참조하세요.
+
+코드 작성 전에 다음 명령어로 개발 환경을 설정하세요:
+
+```bash
+# 의존성 설치
+npm install
+
+# 코드 컨벤션 검사
+npm run analyze
+```
+
 ## 설치 및 실행
 
 ```bash
@@ -47,4 +62,4 @@ npm run dev
 
 # 프로덕션 서버 실행
 npm start
-``` 
+```

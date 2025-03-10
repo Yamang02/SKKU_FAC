@@ -22,9 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
  * 관련 작품 스크롤 기능 초기화
  */
 function initRelatedArtworksScroll() {
-    const scrollContainer = document.querySelector('.related-artworks-list');
-    const prevBtn = document.querySelector('.prev-btn');
-    const nextBtn = document.querySelector('.next-btn');
+    const scrollContainer = document.querySelector('.related_artworks_list');
+    const prevBtn = document.querySelector('.prev_btn');
+    const nextBtn = document.querySelector('.next_btn');
 
     if (scrollContainer && prevBtn && nextBtn) {
         prevBtn.addEventListener('click', () => {
@@ -41,9 +41,9 @@ function initRelatedArtworksScroll() {
  * 댓글 폼 기능 초기화
  */
 function initCommentForm() {
-    const commentForm = document.querySelector('.comment-form');
-    const clearBtn = document.querySelector('.clear-comment');
-    const commentInput = document.querySelector('.comment-input');
+    const commentForm = document.querySelector('.comment_form');
+    const clearBtn = document.querySelector('.clear_comment');
+    const commentInput = document.querySelector('.comment_input');
     
     if (commentForm) {
         commentForm.addEventListener('submit', function(e) {
@@ -67,7 +67,7 @@ function initCommentForm() {
  * 이미지 섹션 Sticky 기능 초기화
  */
 function initStickyImageSection() {
-    const imageSection = document.querySelector('.artwork-image-section');
+    const imageSection = document.querySelector('.artwork_image_section');
     const headerHeight = document.querySelector('header')?.offsetHeight || 0;
     
     if (imageSection) {

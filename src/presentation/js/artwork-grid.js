@@ -2,7 +2,7 @@ const artworks = [
     { id: 1, title: 'Artwork 1', artist: 'John Doe', affiliation: 'Studio A', image: '/placeholder.svg?height=400&width=400' },
     { id: 2, title: 'Artwork 2', artist: 'Jane Smith', affiliation: 'Gallery B', image: '/placeholder.svg?height=400&width=400' },
     { id: 3, title: 'Artwork 3', artist: 'Alex Johnson', affiliation: 'Independent', image: '/placeholder.svg?height=400&width=400' },
-    { id: 4, title: 'Artwork 4', artist: 'Emily Brown', affiliation: 'Art Collective C', image: '/placeholder.svg?height=400&width=400' },
+    { id: 4, title: 'Artwork 4', artist: 'Emily Brown', affiliation: 'Art Collective C', image: '/placeholder.svg?height=400&width=400' }
 ];
 
 const artworkGrid = document.getElementById('artwork-grid');

@@ -100,7 +100,7 @@ export function updateComment(commentId, commentData) {
     // 댓글 수정
     commentsData[commentIndex] = {
         ...commentsData[commentIndex],
-        content: commentData.content,
+        content: commentData.content
         // 수정 시간 업데이트는 실제 구현에서 필요할 수 있습니다.
     };
     

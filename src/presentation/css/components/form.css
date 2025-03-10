@@ -1,4 +1,5 @@
 /* 기본 폼 스타일 */
+
 .form-group {
   margin-bottom: 1rem;
 }
@@ -13,40 +14,42 @@
   display: block;
   width: 100%;
   padding: 0.5rem 0.75rem;
-  font-size: 1rem;
-  line-height: 1.5;
-  color: var(--text-color);
-  background-color: #fff;
-  background-clip: padding-box;
   border: 1px solid #ced4da;
   border-radius: var(--border-radius);
+  background-color: #fff;
+  color: var(--text-color);
+  font-size: 1rem;
+  line-height: 1.5;
   transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+  background-clip: padding-box;
 }
 
 .form-control:focus {
-  color: var(--text-color);
   background-color: #fff;
+  color: var(--text-color);
+  box-shadow: 0 0 0 0.2rem rgb(0 76 63 / 25%);
   border-color: var(--primary-color);
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgb(0 76 63 / 25%);
 }
 
 /* 폼 크기 */
+
 .form-control-sm {
   padding: 0.25rem 0.5rem;
+  border-radius: calc(var(--border-radius) * 0.75);
   font-size: 0.875rem;
   line-height: 1.5;
-  border-radius: calc(var(--border-radius) * 0.75);
 }
 
 .form-control-lg {
   padding: 0.75rem 1rem;
+  border-radius: calc(var(--border-radius) * 1.25);
   font-size: 1.125rem;
   line-height: 1.5;
-  border-radius: calc(var(--border-radius) * 1.25);
 }
 
 /* 인라인 폼 */
+
 .form-inline {
   display: flex;
   flex-flow: row wrap;
@@ -68,6 +71,7 @@
 }
 
 /* 체크박스와 라디오 버튼 */
+
 .form-check {
   position: relative;
   display: block;
@@ -85,6 +89,7 @@
 }
 
 /* 유효성 검사 스타일 */
+
 .is-valid {
   border-color: #28a745;
 }
@@ -107,8 +112,8 @@
   display: none;
   width: 100%;
   margin-top: 0.25rem;
-  font-size: 0.875em;
   color: #dc3545;
+  font-size: 0.875em;
 }
 
 .form-control.is-invalid ~ .invalid-feedback,
@@ -117,44 +122,46 @@
 }
 
 /* 텍스트 영역 */
+
 textarea.form-control {
   height: auto;
   resize: vertical;
 }
 
 /* 댓글 폼 */
+
 .comment-form textarea {
   width: 100%;
   height: 120px;
+  margin-bottom: 16px;
   padding: 16px;
   border: 1px solid #eee;
   border-radius: var(--border-radius);
-  resize: vertical;
-  font-size: 1rem;
   font-family: inherit;
-  margin-bottom: 16px;
+  font-size: 1rem;
   transition: border-color var(--transition-normal);
+  resize: vertical;
 }
 
 .comment-form textarea:focus {
-  outline: none;
   border-color: var(--primary-color);
+  outline: none;
 }
 
 .submit-comment {
-  background-color: var(--primary-color);
-  color: white;
   padding: 12px 24px;
   border: none;
   border-radius: var(--border-radius);
+  background-color: var(--primary-color);
+  color: white;
   font-size: 1rem;
   font-weight: 500;
-  cursor: pointer;
   transition: all var(--transition-normal);
+  cursor: pointer;
 }
 
 .submit-comment:hover {
   background-color: var(--accent-color);
-  transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
 } 

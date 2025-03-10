@@ -1,4 +1,5 @@
 /* 작품 그리드 레이아웃 */
+
 .artwork-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

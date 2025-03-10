@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 showLoading(true);
                 
                 const urlParams = new URLSearchParams(window.location.search);
-                let currentPage = parseInt(urlParams.get('page') || '1');
+                const currentPage = parseInt(urlParams.get('page') || '1');
                 urlParams.set('page', (currentPage + 1).toString());
                 
                 const newUrl = `${window.location.pathname}?${urlParams.toString()}`;

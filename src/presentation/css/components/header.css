@@ -1,28 +1,28 @@
 .header {
-    background-color: var(--background-color);
-    box-shadow: var(--box-shadow);
     position: fixed;
     top: 0;
-    left: 0;
     right: 0;
+    left: 0;
     z-index: 1000;
     height: var(--header-height);
+    background-color: var(--background-color);
+    box-shadow: var(--box-shadow);
 }
 
 .header .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     width: var(--container-width);
+    height: 100%;
     margin: 0 auto;
     padding: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 100%;
 }
 
 .logo {
-    font-size: 1.2rem;
-    font-weight: bold;
     color: var(--primary-color);
+    font-size: 1.2rem;
+    font-weight: 700;
 }
 
 .nav-links {

@@ -4,6 +4,10 @@ import { fileURLToPath } from 'url';
 import bodyParser from 'body-parser';
 import session from 'express-session';
 import { getFeaturedArtworks } from './src/domain/home/service/HomeService.js';
+import * as dotenv from 'dotenv';
+
+// 환경 변수 로드
+dotenv.config();
 
 // ES 모듈에서 __dirname 대체
 const __filename = fileURLToPath(import.meta.url);
@@ -53,5 +57,5 @@ app.get('/', (req, res) => {
 // 서버 시작
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    // console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
-}); 
+    console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
+});

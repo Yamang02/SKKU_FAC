@@ -1,84 +1,87 @@
 /* 페이지네이션 스타일 */
+
 .pagination {
     display: flex;
+    gap: 5px;
     justify-content: center;
     margin-top: 20px;
-    gap: 5px;
     padding: 10px 0;
 }
 
 .page-btn {
-    width: 32px;
-    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #eee;
     border-radius: 50%; /* 동그란 모양 */
     background-color: white;
-    border: 1px solid #eee;
     color: #666;
+    font-size: 0.9rem;
     font-weight: 500;
+    text-decoration: none;
     transition: all 0.2s;
     cursor: pointer;
-    text-decoration: none;
-    font-size: 0.9rem;
 }
 
 .page-btn.active {
     background-color: var(--primary-color);
     color: white;
-    border-color: var(--primary-color);
     box-shadow: none;
+    border-color: var(--primary-color);
 }
 
 .page-btn.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
     background-color: #f9f9f9;
     color: #aaa;
+    cursor: not-allowed;
     border-color: #eee;
+    opacity: 0.4;
     pointer-events: none;
 }
 
 .page-btn:hover:not(.active, .disabled) {
     background-color: #f5f5f5;
     border-color: #ddd;
-    transform: translateY(-2px);
     box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+    transform: translateY(-2px);
 }
 
 /* 페이지네이션 화살표 버튼 */
+
 .page-btn.prev,
 .page-btn.next {
     font-size: 0.8rem;
 }
 
 /* 페이지 점(...)의 스타일 */
+
 .page-dots {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 20px;
     height: 32px;
+    margin: 0 -2px; /* 간격 조정 */
     color: #999;
     font-size: 0.9rem;
     letter-spacing: 1px;
-    margin: 0 -2px; /* 간격 조정 */
 }
 
 /* 반응형 스타일 */
 @media (width <= 768px) {
     .pagination {
         gap: 3px;
-        padding: 8px 0;
         margin-top: 15px;
+        padding: 8px 0;
     }
     
     .page-btn {
         width: 28px;
         height: 28px;
-        font-size: 0.8rem;
         border-radius: 50%; /* 동그란 모양 유지 */
+        font-size: 0.8rem;
     }
     
     .page-dots {

@@ -1,15 +1,15 @@
 .artwork-card {
-    background: white;
     border: 1px solid #eee;
     border-radius: var(--border-radius);
-    overflow: hidden;
-    cursor: pointer;
+    background: white;
     transition: var(--transition);
+    cursor: pointer;
+    overflow: hidden;
 }
 
 .artwork-card:hover {
-    transform: translateY(-5px);
     box-shadow: 0 5px 15px rgb(0 0 0 / 10%);
+    transform: translateY(-5px);
 }
 
 .artwork-image {
@@ -23,21 +23,21 @@
 }
 
 .artwork-title {
-    font-size: 1rem;
-    font-weight: 500;
     margin-bottom: 5px;
     color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 .artwork-artist {
-    font-size: 0.9rem;
-    color: var(--secondary-color);
     margin-bottom: 3px;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
 }
 
 .artwork-department {
-    font-size: 0.8rem;
     color: var(--secondary-color);
+    font-size: 0.8rem;
     opacity: 0.8;
 }
 
