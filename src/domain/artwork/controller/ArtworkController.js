@@ -16,11 +16,11 @@ export async function getArtworkList(req, res) {
     try {
         // 검색 파라미터 가져오기
         const { keyword, exhibition, year, department, page = 1 } = req.query;
-        
+
         // 페이지네이션 설정
         const limit = 12;
         const offset = (page - 1) * limit;
-        
+
         // 작품 목록 조회
         const artworksResult = artworkService.searchArtworks({
             keyword,
@@ -30,17 +30,17 @@ export async function getArtworkList(req, res) {
             limit,
             offset
         });
-        
+
         // 전시회 목록 조회 (필터용)
         const exhibitions = exhibitionService.getAllExhibitions();
-        
+
         // 학과 목록 조회 (필터용)
         const departments = artworkService.getDepartments();
-        
+
         // 연도 목록 조회 (필터용)
         const years = artworkService.getYears();
-        
-        res.render('artwork-list', {
+
+        res.render('artwork/index', {
             title: '작품 목록',
             artworks: artworksResult.items,
             exhibitions,
@@ -57,9 +57,8 @@ export async function getArtworkList(req, res) {
             }
         });
     } catch (error) {
-        // console.error 대신 다른 로깅 방식 사용
-        // console.error('작품 목록 조회 중 오류 발생:', error);
-        res.status(500).render('error', {
+        // console.error('작품 목록 조회 오류:', error);
+        res.status(500).render('common/error', {
             message: '작품 목록을 불러오는 중 오류가 발생했습니다.'
         });
     }
@@ -74,23 +73,23 @@ export function getArtworkDetail(req, res) {
     try {
         const { id } = req.params;
         const commentPage = parseInt(req.query.commentPage) || 1;
-        
+
         // 작품 정보 조회
         const artwork = artworkService.getArtworkById(id);
-        
+
         if (!artwork) {
-            return res.status(404).render('error', {
-                message: '요청하신 작품을 찾을 수 없습니다.'
+            return res.status(404).render('common/error', {
+                message: '해당 작품을 찾을 수 없습니다.'
             });
         }
-        
+
         // 관련 작품 조회
         const relatedArtworks = relatedArtworkService.getRelatedArtworks(id);
-        
+
         // 댓글 조회
         const commentData = commentService.getCommentsByArtworkId(id, commentPage);
-        
-        res.render('artwork-detail', {
+
+        res.render('artwork/detail', {
             title: artwork.title,
             artwork,
             relatedArtworks,
@@ -99,10 +98,9 @@ export function getArtworkDetail(req, res) {
             user: req.session.user || null
         });
     } catch (error) {
-        // console.error 대신 다른 로깅 방식 사용
-        // console.error('작품 상세 조회 중 오류 발생:', error);
-        res.status(500).render('error', {
+        // console.error('작품 상세 조회 오류:', error);
+        res.status(500).render('common/error', {
             message: '작품 정보를 불러오는 중 오류가 발생했습니다.'
         });
     }
-} 
+}

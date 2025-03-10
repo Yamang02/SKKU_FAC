@@ -13,14 +13,14 @@ import * as artworkService from '../../artwork/service/ArtworkService.js';
 export function getExhibitionList(req, res) {
     try {
         const exhibitions = exhibitionService.getAllExhibitions();
-        
-        res.render('exhibitions/index', {
+
+        res.render('exhibition/index', {
             title: '작품 아카이브',
             exhibitions
         });
     } catch (error) {
-        // console.error('전시회 목록 조회 중 오류 발생:', error);
-        res.status(500).render('error', {
+        // console.error('전시회 목록 조회 오류:', error);
+        res.status(500).render('common/error', {
             message: '전시회 목록을 불러오는 중 오류가 발생했습니다.'
         });
     }
@@ -35,16 +35,16 @@ export function getCategoryExhibition(req, res) {
     try {
         const { category } = req.params;
         const exhibitions = exhibitionService.getExhibitionsByCategory(category);
-        
-        res.render('exhibitions/category', {
+
+        res.render('exhibition/category', {
             title: `${category} 전시회`,
             category,
             exhibitions
         });
     } catch (error) {
-        // console.error('카테고리별 전시회 조회 중 오류 발생:', error);
-        res.status(500).render('error', {
-            message: '전시회 정보를 불러오는 중 오류가 발생했습니다.'
+        // console.error('카테고리별 전시회 조회 오류:', error);
+        res.status(500).render('common/error', {
+            message: '전시회 목록을 불러오는 중 오류가 발생했습니다.'
         });
     }
 }
@@ -59,16 +59,16 @@ export function getExhibitionDetail(req, res) {
         const { id } = req.params;
         const exhibition = exhibitionService.getExhibitionById(id);
         const artworks = artworkService.getArtworksByExhibitionId(id);
-        
-        res.render('exhibitions/detail', {
+
+        res.render('exhibition/detail', {
             title: exhibition.title,
             exhibition,
             artworks
         });
     } catch (error) {
-        // console.error('전시회 상세 조회 중 오류 발생:', error);
-        res.status(500).render('error', {
+        // console.error('전시회 상세 조회 오류:', error);
+        res.status(500).render('common/error', {
             message: '전시회 정보를 불러오는 중 오류가 발생했습니다.'
         });
     }
-} 
+}

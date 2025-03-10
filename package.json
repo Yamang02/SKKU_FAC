@@ -4,13 +4,21 @@
     "description": "SKKU Faculty Art Gallery Website",
     "main": "app.js",
     "type": "module",
+    "_moduleAliases": {
+        "@root": ".",
+        "@src": "src",
+        "@domain": "src/domain",
+        "@interface": "src/interface",
+        "@infrastructure": "src/infrastructure",
+        "@presentation": "src/presentation"
+    },
     "scripts": {
         "start": "node app.js",
         "dev": "nodemon app.js",
-        "lint": "npx eslint src/",
-        "lint:fix": "npx eslint src/ --fix",
-        "lint:css": "npx stylelint \"src/presentation/css/**/*.css\" --quiet",
-        "lint:css:fix": "npx stylelint \"src/presentation/css/**/*.css\" --fix --quiet",
+        "lint": "npx eslint --config ./config/.eslintrc.json src/",
+        "lint:fix": "npx eslint --config ./config/.eslintrc.json src/ --fix",
+        "lint:css": "npx stylelint --config ./config/.stylelintrc.json \"src/presentation/css/**/*.css\" --quiet",
+        "lint:css:fix": "npx stylelint --config ./config/.stylelintrc.json \"src/presentation/css/**/*.css\" --fix --quiet",
         "analyze": "npm run lint && npm run lint:css && echo '코드 분석이 완료되었습니다.'"
     },
     "dependencies": {
@@ -19,11 +27,14 @@
         "ejs": "^3.1.9",
         "express": "^4.18.2",
         "express-session": "^1.17.3",
+        "module-alias": "^2.2.3",
         "mysql2": "^3.6.0"
     },
     "devDependencies": {
         "@eslint/js": "^9.21.0",
         "eslint": "^8.57.1",
+        "eslint-plugin-filenames": "^1.3.2",
+        "eslint-plugin-folders": "^1.0.4",
         "eslint-plugin-html": "^8.1.2",
         "globals": "^16.0.0",
         "nodemon": "^3.0.1",

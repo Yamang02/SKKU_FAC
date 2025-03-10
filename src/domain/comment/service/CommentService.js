@@ -1,6 +1,6 @@
 import Comment from '../entity/Comment.js';
 import CommentDTO from '../dto/CommentDTO.js';
-import commentsData from '../../../infrastructure/data/comments.js';
+import { comments as commentsData } from '../../../infrastructure/data/comment.js';
 
 /**
  * 작품 ID에 해당하는 댓글 목록을 가져옵니다.
@@ -11,32 +11,32 @@ import commentsData from '../../../infrastructure/data/comments.js';
  */
 export function getCommentsByArtworkId(artworkId, page = 1, pageSize = 6) {
     // 작품 ID에 해당하는 댓글 필터링
-    const filteredComments = commentsData.filter(comment => 
+    const filteredComments = commentsData.filter(comment =>
         comment.artworkId === parseInt(artworkId)
     );
-    
+
     // 전체 댓글 수
     const totalComments = filteredComments.length;
-    
+
     // 전체 페이지 수 계산
     const totalPages = Math.ceil(totalComments / pageSize);
-    
+
     // 페이지 번호 유효성 검사
     const validPage = Math.max(1, Math.min(page, totalPages || 1));
-    
+
     // 페이지에 해당하는 댓글 추출
     const startIndex = (validPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const paginatedComments = filteredComments.slice(startIndex, endIndex);
-    
+
     // 댓글 엔티티 생성 및 DTO 변환
     const commentEntities = paginatedComments.map(comment => new Comment(comment));
     const commentDTOs = commentEntities.map(comment => new CommentDTO(comment));
-    
+
     // 페이지네이션 계산
     const startPage = Math.max(1, validPage - 1);
     const endPage = Math.min(totalPages, startPage + 2);
-    
+
     // 페이지네이션 정보 생성
     return {
         comments: commentDTOs,
@@ -74,9 +74,9 @@ export function addComment(commentData) {
         date: new Date().toISOString().split('T')[0],
         isEditable: true
     };
-    
+
     commentsData.push(newComment);
-    
+
     const commentEntity = new Comment(newComment);
     return new CommentDTO(commentEntity);
 }
@@ -89,21 +89,21 @@ export function addComment(commentData) {
  */
 export function updateComment(commentId, commentData) {
     // 댓글 찾기
-    const commentIndex = commentsData.findIndex(comment => 
+    const commentIndex = commentsData.findIndex(comment =>
         comment.id === parseInt(commentId)
     );
-    
+
     if (commentIndex === -1) {
         return null;
     }
-    
+
     // 댓글 수정
     commentsData[commentIndex] = {
         ...commentsData[commentIndex],
         content: commentData.content
         // 수정 시간 업데이트는 실제 구현에서 필요할 수 있습니다.
     };
-    
+
     const commentEntity = new Comment(commentsData[commentIndex]);
     return new CommentDTO(commentEntity);
 }
@@ -115,16 +115,16 @@ export function updateComment(commentId, commentData) {
  */
 export function deleteComment(commentId) {
     // 댓글 찾기
-    const commentIndex = commentsData.findIndex(comment => 
+    const commentIndex = commentsData.findIndex(comment =>
         comment.id === parseInt(commentId)
     );
-    
+
     if (commentIndex === -1) {
         return false;
     }
-    
+
     // 댓글 삭제
     commentsData.splice(commentIndex, 1);
-    
+
     return true;
 }

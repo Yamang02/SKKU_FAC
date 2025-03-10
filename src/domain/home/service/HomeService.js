@@ -1,5 +1,5 @@
 import FeaturedArtworkDTO from '../dto/FeaturedArtworkDTO.js';
-import featuredArtworksData from '../../../infrastructure/data/featuredArtworks.js';
+import { getFeaturedArtworks as getArtworksData } from '../../../infrastructure/data/featuredArtwork.js';
 
 /**
  * 메인 페이지 관련 도메인 서비스
@@ -10,9 +10,9 @@ class HomeService {
      * @returns {Array<FeaturedArtworkDTO>} 추천 작품 DTO 목록
      */
     getFeaturedArtworks() {
-        return featuredArtworksData.map(artwork => new FeaturedArtworkDTO(artwork));
+        return getArtworksData().map(artwork => new FeaturedArtworkDTO(artwork));
     }
 }
 
 const homeService = new HomeService();
-export const getFeaturedArtworks = () => homeService.getFeaturedArtworks(); 
+export const getFeaturedArtworks = () => homeService.getFeaturedArtworks();

@@ -1,59 +1,66 @@
 /*
  * SKKU Faculty Gallery - Main Stylesheet
- * 
- * �� ������ ��� ��Ÿ���� ����Ʈ�ϴ� ���� �������Դϴ�.
- * �� ������ ���� ��Ÿ���� ���������� �׷�ȭ�մϴ�.
+ *
+ * 이 파일은 모든 스타일을 임포트하는 메인 스타일시트입니다.
+ * 이 파일을 통해 스타일을 체계적으로 그룹화합니다.
  */
-
-/* 
- * 1. Base Styles
- * �⺻ ����, ����, Ÿ�����׷��� �� �̵�� ������ �����մϴ�. */
-
-@import url('base/variables.css');
-@import url('base/reset.css');
-@import url('base/typography.css');
-@import url('base/media-queries.css');
-
-/* 
- * 2. Utils
- * ��ƿ��Ƽ Ŭ���� �� ���� �Լ��� �����մϴ�.
- */
-@import url('utils/helpers.css');
-@import url('utils/animations.css');
-
-/* 
- * 3. Components
- * ���� ������ UI ������Ʈ�� �����մϴ�.
- */
-@import url('components/header.css');
-@import url('components/footer.css');
-@import url('components/artwork-card.css');
-@import url('components/modal.css');
-@import url('components/hero.css');
-@import url('components/button.css');
-@import url('components/form.css');
-@import url('components/pagination.css');
-
-/* 
- * 4. Layouts
- * ������ ���̾ƿ� �� ������ �����մϴ�.
- */
-@import url('layouts/main.css');
-@import url('layouts/grid.css');
-@import url('layouts/container.css');
-
-/* 
- * 5. Pages
- * Ư�� �������� ���� ��Ÿ���� �����մϴ�.
- */
-@import url('pages/home.css');
-@import url('pages/artwork-detail.css');
-@import url('pages/artwork-list.css');
-@import url('pages/error.css');
 
 /*
- * 6. ���� ��ƿ��Ƽ Ŭ����
- * ���������� ���Ǵ� ��ƿ��Ƽ Ŭ������ �����մϴ�.
- * �� ������ �������� ����Ʈ�Ͽ� �ʿ��� ��� �ٸ� ��Ÿ���� �������� �� �ֽ��ϴ�.
+ * 1. Base Styles
+ * 기본 색상, 폰트, 타이포그래피 등 기본적인 스타일을 정의합니다. */
+
+@import url('common/base/variables.css');
+@import url('common/base/reset.css');
+@import url('common/base/typography.css');
+@import url('common/base/media-queries.css');
+
+/*
+ * 2. Utils
+ * 유틸리티 클래스 및 믹스인 함수를 정의합니다.
  */
-@import url('utils/common.css');
+@import url('common/util/helpers.css');
+@import url('common/util/animations.css');
+@import url('common/util/common.css');
+
+/*
+ * 3. Components
+ * 재사용 가능한 UI 컴포넌트를 정의합니다.
+ */
+@import url('common/components/header.css');
+@import url('common/components/modal.css');
+@import url('common/components/nav.css');
+@import url('common/components/card.css');
+/*
+@import url('common/components/footer.css');
+@import url('common/components/hero.css');
+@import url('common/components/button.css');
+@import url('common/components/form.css');
+@import url('common/components/pagination.css');
+*/
+
+/*
+ * 4. Layouts
+ * 페이지 레이아웃 및 그리드를 정의합니다.
+ */
+@import url('common/layout/main.css');
+@import url('common/layout/grid.css');
+@import url('common/layout/container.css');
+
+/*
+ * 5. Pages
+ * 특정 페이지에 대한 스타일을 정의합니다.
+ */
+@import url('home/index.css');
+@import url('artwork/detail.css');
+@import url('artwork/index.css');
+@import url('exhibition/index.css');
+@import url('exhibition/detail.css');
+@import url('notice/index.css');
+@import url('common/error.css');
+
+/*
+ * 6. 기타 유틸리티 클래스
+ * 전역적으로 사용되는 유틸리티 클래스를 정의합니다.
+ * 이 섹션은 마지막에 임포트하여 필요한 경우 다른 스타일을 오버라이드 할 수 있습니다.
+ */
+/* @import url('common/util/common.css'); */

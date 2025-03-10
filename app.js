@@ -1,3 +1,6 @@
+// module-alias 등록 (가장 먼저 로드되어야 함)
+// import 'module-alias/register.js';
+
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -5,9 +8,10 @@ import bodyParser from 'body-parser';
 import session from 'express-session';
 import { getFeaturedArtworks } from './src/domain/home/service/HomeService.js';
 import * as dotenv from 'dotenv';
+import apiRouter from './src/interface/router/index.js';
 
 // 환경 변수 로드
-dotenv.config();
+dotenv.config({ path: './config/.env' });
 
 // ES 모듈에서 __dirname 대체
 const __filename = fileURLToPath(import.meta.url);
@@ -17,14 +21,14 @@ const app = express();
 
 // 뷰 엔진 설정
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'src/presentation/views'));
+app.set('views', path.join(__dirname, 'src/presentation/view'));
 
 // 미들웨어 설정
 // 정적 파일 경로 설정
 app.use(express.static(path.join(__dirname, 'src/presentation')));
 app.use('/css', express.static(path.join(__dirname, 'src/presentation/css')));
 app.use('/js', express.static(path.join(__dirname, 'src/presentation/js')));
-app.use('/images', express.static(path.join(__dirname, 'src/presentation/assets/images')));
+app.use('/images', express.static(path.join(__dirname, 'src/presentation/asset/image')));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -34,22 +38,14 @@ app.use(session({
     saveUninitialized: true
 }));
 
-// 라우터 설정
-import exhibitionRouter from './src/interface/routes/exhibition.js';
-import noticeRouter from './src/interface/routes/notice.js';
-import userRouter from './src/interface/routes/user.js';
-import artworkRouter from './src/interface/routes/artwork.js';
-
-app.use('/exhibition', exhibitionRouter);
-app.use('/notice', noticeRouter);
-app.use('/user', userRouter);
-app.use('/artwork', artworkRouter);
+// API 라우터 설정
+app.use('/', apiRouter);
 
 // 메인 페이지 라우트
 app.get('/', (req, res) => {
     const featuredArtworks = getFeaturedArtworks();
-    res.render('index', {
-        title: 'SKKU Faculty Art Gallery',
+    res.render('home/index', {
+        title: 'SKKU Fine Art Gallery',
         featuredArtworks
     });
 });

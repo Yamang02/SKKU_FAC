@@ -1,0 +1,18 @@
+/*
+ * 작품 상세 페이지 스타일
+ *
+ * 이 파일은 작품 상세 페이지의 모든 스타일을 임포트하는 진입점입니다.
+ * 각 모듈은 특정 기능 영역에 대한 스타일을 담당합니다.
+ */
+
+/* 기본 레이아웃 */
+@import url('layout.css');
+
+/* 상세 정보 섹션 */
+@import url('info.css');
+
+/* 댓글 섹션 */
+@import url('comments.css');
+
+/* 관련 작품 섹션 */
+@import url('related.css');

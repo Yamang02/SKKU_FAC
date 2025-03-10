@@ -14,15 +14,15 @@ export function getNoticeList(req, res) {
     try {
         // 공지사항 목록을 가져오는 로직 추가 필요
         // const notices = noticeService.getAllNotices();
-        
+
         res.render('notices/index', {
             title: '공지사항'
             // notices
         });
     } catch (error) {
         // console.error('공지사항 목록 조회 오류:', error);
-        res.status(500).render('error', { 
-            message: '공지사항 목록을 불러오는 중 오류가 발생했습니다.' 
+        res.status(500).render('common/error', {
+            message: '공지사항을 불러오는 중 오류가 발생했습니다.'
         });
     }
 }
@@ -35,24 +35,24 @@ export function getNoticeList(req, res) {
 export function getNoticeDetail(req, res) {
     try {
         // const noticeId = req.params.id; // 현재 사용되지 않음
-        
+
         // 공지사항 정보를 가져오는 로직 추가 필요
         // const notice = noticeService.getNoticeById(noticeId);
-        
+
         // if (!notice) {
-        //     return res.status(404).render('error', {
-        //         message: '공지사항을 찾을 수 없습니다.'
+        //     return res.status(404).render('common/error', {
+        //         message: '해당 공지사항을 찾을 수 없습니다.'
         //     });
         // }
-        
+
         res.render('notices/detail', {
             title: '공지사항 상세'
             // notice
         });
     } catch (error) {
         // console.error('공지사항 상세 조회 오류:', error);
-        res.status(500).render('error', { 
-            message: '공지사항을 불러오는 중 오류가 발생했습니다.' 
+        res.status(500).render('common/error', {
+            message: '공지사항을 불러오는 중 오류가 발생했습니다.'
         });
     }
-} 
+}

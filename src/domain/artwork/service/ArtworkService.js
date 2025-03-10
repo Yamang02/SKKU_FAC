@@ -1,6 +1,6 @@
 import Artwork from '../entity/Artwork.js';
 import ArtworkDTO from '../dto/ArtworkDTO.js';
-import artworksData from '../../../infrastructure/data/artworks.js';
+import artworksData from '../../../infrastructure/data/artwork.js';
 import * as exhibitionService from '../../exhibition/service/ExhibitionService.js';
 
 /**

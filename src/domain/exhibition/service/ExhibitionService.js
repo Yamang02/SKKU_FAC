@@ -1,6 +1,6 @@
 import Exhibition from '../entity/Exhibition.js';
 import ExhibitionDTO from '../dto/ExhibitionDTO.js';
-import exhibitionsData from '../../../infrastructure/data/exhibitions.js';
+import exhibitionsData from '../../../infrastructure/data/exhibition.js';
 
 /**
  * 모든 전시회 목록을 가져옵니다.
@@ -60,6 +60,6 @@ export function getExhibitionsByCategory(category) {
     const exhibitions = exhibitionsData
         .filter(ex => ex.category === category)
         .map(ex => new Exhibition(ex));
-    
+
     return exhibitions.map(exhibition => new ExhibitionDTO(exhibition));
 }

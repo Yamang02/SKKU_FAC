@@ -24,10 +24,10 @@ export function getLoginPage(req, res) {
 export function login(req, res) {
     try {
         const { email } = req.body;
-        
+
         // 로그인 로직 추가 필요
         // const user = userService.authenticateUser(email, password);
-        
+
         // 임시 로그인 처리 (실제 구현에서는 데이터베이스 인증 필요)
         req.session.user = {
             id: 1,
@@ -35,12 +35,12 @@ export function login(req, res) {
             name: '사용자',
             role: 'user'
         };
-        
+
         res.redirect('/');
     } catch (error) {
         // console.error('로그인 처리 오류:', error);
-        res.status(500).render('error', { 
-            message: '로그인 처리 중 오류가 발생했습니다.' 
+        res.status(500).render('common/error', {
+            message: '로그인 처리 중 오류가 발생했습니다.'
         });
     }
 }
@@ -78,7 +78,7 @@ export function getRegisterPage(req, res) {
 export function register(req, res) {
     try {
         const { name, email, password, confirmPassword } = req.body;
-        
+
         // 비밀번호 확인
         if (password !== confirmPassword) {
             return res.render('users/register', {
@@ -87,15 +87,15 @@ export function register(req, res) {
                 user: { name, email }
             });
         }
-        
+
         // 회원가입 로직 추가 필요
         // const user = userService.registerUser(name, email, password);
-        
+
         res.redirect('/user/login');
     } catch (error) {
         // console.error('회원가입 처리 오류:', error);
-        res.status(500).render('error', { 
-            message: '회원가입 처리 중 오류가 발생했습니다.' 
+        res.status(500).render('common/error', {
+            message: '회원가입 처리 중 오류가 발생했습니다.'
         });
     }
-} 
+}

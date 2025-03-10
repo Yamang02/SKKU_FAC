@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            <%= title %>
+        </title>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"
+            rel="stylesheet">
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+
+    <body>
+        <%- include('../common/header') %>
+
+            <main>
+                <section class="idx-hero-section">
+                    <div class="container idx-hero">
+                        <div class="idx-hero__content">
+                            <h1>현대 미술 특별전</h1>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="idx-featured-section">
+                    <div class="container idx-content">
+                        <header class="idx-featured__header">
+                            <h2 class="idx-featured__title">Featured Artworks</h2>
+                            <a href="/artwork/list" class="idx-featured__link">모든 작품 보기</a>
+                        </header>
+                        <div class="artwork-grid">
+                            <% featuredArtworks.forEach(artwork=> { %>
+                                <div class="card card--home" data-artwork-id="<%= artwork.id %>">
+                                    <img src="<%= artwork.image %>" alt="<%= artwork.title %>" class="card__image">
+                                    <div class="card__info">
+                                        <h3 class="card__title">
+                                            <%= artwork.title %>
+                                        </h3>
+                                        <p class="card__subtitle">
+                                            <%= artwork.artist %>
+                                        </p>
+                                        <div class="card__meta">
+                                            <%= artwork.department %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }); %>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- 작품 상세 모달 -->
+            <div id="artwork-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close" id="close-modal">&times;</span>
+                    <div class="modal-body">
+                        <div class="modal-image-container">
+                            <img src="" alt="" class="modal-image" id="modal-image">
+                        </div>
+                        <div class="modal-info">
+                            <div class="modal-info-content">
+                                <div class="modal-title" id="modal-title"></div>
+                                <div class="modal-artist" id="modal-artist"></div>
+                                <div class="modal-department"></div>
+                                <div class="modal-exhibition"></div>
+                                <a href="#" class="detail-button" id="detail-link">작품 상세보기</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <%- include('../common/footer') %>
+
+                <script src="/js/home/index.js"></script>
+    </body>
+
+</html>
