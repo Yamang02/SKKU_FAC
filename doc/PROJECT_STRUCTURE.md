@@ -9,17 +9,26 @@ SKKU_FAC_GALLERY/
 │   ├── .env                # 환경 변수
 │   ├── .eslintrc.json      # ESLint 설정
 │   └── .stylelintrc.json   # Stylelint 설정
-├── docs/                   # 문서
+├── doc/                    # 문서
+├── node_modules/           # 노드 모듈
+├── .vscode/                # VS Code 설정
+├── .git/                   # Git 저장소
+├── .gitignore              # Git 무시 파일 목록
+├── LICENSE                 # 라이센스 파일
+├── package.json            # 패키지 정보
+├── package-lock.json       # 패키지 의존성 잠금 파일
+├── README.md               # 프로젝트 설명서
 └── src/                    # 소스 코드
+    ├── application/        # 애플리케이션 레이어
     ├── domain/             # 도메인 레이어
-    │   ├── [도메인]/       # 각 도메인 디렉토리
-    │   │   ├── controller/ # 도메인 컨트롤러
-    │   │   ├── dto/        # 데이터 전송 객체
-    │   │   ├── entity/     # 도메인 엔티티
-    │   │   └── service/    # 도메인 서비스
+    │   └── [도메인]/       # 각 도메인 디렉토리
+    │       ├── controller/ # 도메인 컨트롤러
+    │       ├── dto/        # 데이터 전송 객체
+    │       ├── entity/     # 도메인 엔티티
+    │       └── service/    # 도메인 서비스
     ├── infrastructure/     # 인프라 레이어
     │   ├── db/             # 데이터베이스 연결
-    │   ├── data/           # 정적 데이터
+    │   └── data/           # 정적 데이터
     ├── interface/          # 인터페이스 레이어
     │   └── router/         # 라우터
     │       ├── index.js    # 통합 라우터
@@ -28,9 +37,11 @@ SKKU_FAC_GALLERY/
         ├── asset/          # 정적 자산
         │   └── image/      # 이미지 파일
         ├── css/            # CSS 파일
+        │   ├── style.css   # 메인 스타일 파일
         │   ├── common/     # 공통 스타일
         │   └── [도메인]/   # 도메인별 스타일
         ├── js/             # 클라이언트 JavaScript
+        │   ├── index.js    # 메인 JavaScript 파일
         │   ├── common/     # 공통 JavaScript
         │   └── [도메인]/   # 도메인별 JavaScript
         └── view/           # EJS 템플릿
@@ -48,6 +59,7 @@ SKKU_FAC_GALLERY/
 src/presentation/view/common/
 ├── error.ejs              # 에러 페이지 템플릿
 ├── footer.ejs             # 푸터 템플릿
+├── head.ejs               # 헤드 템플릿
 ├── header.ejs             # 헤더 템플릿
 └── pagination.ejs         # 페이지네이션 템플릿
 ```
@@ -89,7 +101,7 @@ src/presentation/js/common/
 │   ├── artwork.js         # 작품 관련 컴포넌트
 │   ├── artworkGrid.js     # 작품 그리드 컴포넌트
 │   └── layout.js          # 레이아웃 컴포넌트
-└── util/                  # 유틸리티 함수
+├── util/                  # 유틸리티 함수
     ├── index.js           # 유틸리티 모듈 진입점
     ├── animation.js       # 애니메이션 관련 유틸리티
     ├── dom.js             # DOM 조작 유틸리티
@@ -97,102 +109,53 @@ src/presentation/js/common/
     └── notification.js    # 알림 관련 유틸리티
 ```
 
-## 4. 도메인별 JavaScript 구조
+## 3. 도메인별 JavaScript 구조
 
 각 도메인별 JavaScript 파일은 다음과 같은 구조로 관리됩니다:
 
 ```
 src/presentation/js/[도메인]/
-├── list/                   # 목록 페이지 관련 모듈
-│   ├── index.js            # 진입점
-│   ├── filter.js           # 필터 기능
-│   ├── gallery.js          # 갤러리 표시 기능
-│   ├── search.js           # 검색 기능
-│   └── pagination.js       # 페이지네이션 기능
-├── detail/                 # 상세 페이지 관련 모듈
-│   ├── index.js            # 진입점
-│   ├── viewer.js           # 작품 뷰어 기능
-│   ├── comment.js          # 댓글 기능
-│   └── related.js          # 관련 작품 기능
-├── main/                   # 메인 페이지 관련 모듈 (홈 도메인)
-│   ├── index.js            # 진입점
-│   ├── hero.js             # 히어로 섹션 기능
-│   ├── featured.js         # 추천 작품 기능
-│   └── modal.js            # 모달 기능
-└── common/                 # 도메인 공통 모듈
-    ├── api.js              # API 호출 함수
-    ├── util.js             # 유틸리티 함수
-    ├── animation.js        # 애니메이션 함수
-    └── modal.js            # 모달 관련 함수
+├── [페이지]/              # 페이지별 모듈
+│   ├── index.js           # 진입점
+│   └── [모듈].js          # 기능별 모듈
+└── common/                # 도메인 공통 모듈
+    ├── api.js             # API 호출 함수
+    └── util.js            # 유틸리티 함수
 ```
 
-예를 들어, artwork 도메인의 경우:
-
-```
-src/presentation/js/artwork/
-├── list/                   # 작품 목록 페이지 관련 모듈
-│   ├── index.js            # 진입점
-│   ├── filter.js           # 필터 기능
-│   ├── gallery.js          # 갤러리 표시 기능
-│   ├── search.js           # 검색 기능
-│   └── pagination.js       # 페이지네이션 기능
-├── detail/                 # 작품 상세 페이지 관련 모듈
-│   ├── index.js            # 진입점
-│   ├── viewer.js           # 작품 뷰어 기능
-│   ├── related.js          # 관련 작품 기능
-│   └── comment.js          # 댓글 기능
-└── common/                 # 작품 도메인 공통 모듈
-    ├── api.js              # API 호출 함수
-    ├── util.js             # 유틸리티 함수
-    ├── animation.js        # 애니메이션 함수
-    └── modal.js            # 모달 관련 함수
-```
-
-그리고 home 도메인의 경우:
-
-```
-src/presentation/js/home/
-├── main/                   # 홈 메인 페이지 관련 모듈
-│   ├── index.js            # 진입점
-│   ├── hero.js             # 히어로 섹션 기능
-│   ├── featured.js         # 추천 작품 기능
-│   └── modal.js            # 모달 기능
-└── common/                 # 홈 도메인 공통 모듈
-    ├── api.js              # API 호출 함수
-    └── util.js             # 유틸리티 함수
-```
-
-그리고 exhibition 도메인의 경우:
-
-```
-src/presentation/js/exhibition/
-├── list/                   # 전시 목록 페이지 관련 모듈
-│   ├── index.js            # 진입점
-│   ├── grid.js             # 그리드 기능
-│   └── modal.js            # 모달 기능
-├── detail/                 # 전시 상세 페이지 관련 모듈
-│   ├── index.js            # 진입점
-│   ├── image.js            # 이미지 로더 기능
-│   └── filter.js           # 필터 기능
-└── common/                 # 전시 도메인 공통 모듈
-    ├── api.js              # API 호출 함수
-    └── util.js             # 유틸리티 함수
-```
-
-## 5. 도메인별 CSS 구조
+## 4. 도메인별 CSS 구조
 
 각 도메인별 CSS 파일은 다음과 같은 구조로 관리됩니다:
 
 ```
 src/presentation/css/[도메인]/
-├── index.css              # 도메인 목록 페이지 스타일
-└── detail.css             # 도메인 상세 페이지 스타일
+├── [페이지].css           # 페이지별 스타일 (간단한 경우)
+└── [페이지]/              # 페이지별 스타일 디렉토리 (복잡한 경우)
+    ├── index.css          # 페이지 스타일 진입점
+    ├── layout.css         # 페이지 레이아웃 스타일
+    ├── components.css     # 페이지 컴포넌트 스타일
+    └── [모듈].css         # 특정 모듈 스타일
 ```
 
-예를 들어, artwork 도메인의 경우:
+일반적으로는 `[페이지].css` 파일만 있지만, CSS 내용이 많아지면 `[페이지].css`는 진입점으로 사용되고 `[페이지]` 디렉토리 아래에 세부 스타일 파일들이 생성됩니다.
+
+## 5. 도메인 구조
+
+각 도메인은 다음과 같은 구조로 관리됩니다:
 
 ```
-src/presentation/css/artwork/
-├── index.css              # 작품 목록 페이지 스타일
-└── detail.css             # 작품 상세 페이지 스타일
+src/domain/[도메인]/
+├── controller/            # 도메인 컨트롤러
+├── dto/                   # 데이터 전송 객체
+├── entity/                # 도메인 엔티티
+└── service/               # 도메인 서비스
 ```
+
+현재 프로젝트에는 다음과 같은 도메인이 있습니다:
+- artwork: 작품 관련 도메인
+- comment: 댓글 관련 도메인
+- exhibition: 전시 관련 도메인
+- home: 홈 관련 도메인
+- image: 이미지 관련 도메인
+- notice: 공지사항 관련 도메인
+- user: 사용자 관련 도메인
