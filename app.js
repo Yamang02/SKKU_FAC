@@ -44,7 +44,7 @@ app.use('/', apiRouter);
 // 메인 페이지 라우트
 app.get('/', (req, res) => {
     const featuredArtworks = getFeaturedArtworks();
-    res.render('home/index', {
+    res.render('home/main', {
         title: 'SKKU Fine Art Gallery',
         featuredArtworks
     });

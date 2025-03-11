@@ -49,10 +49,10 @@
  * 5. Pages
  * 특정 페이지에 대한 스타일을 정의합니다.
  */
-@import url('home/index.css');
+@import url('home/main.css');
 @import url('artwork/detail.css');
-@import url('artwork/index.css');
-@import url('exhibition/index.css');
+@import url('artwork/list.css');
+@import url('exhibition/list.css');
 @import url('exhibition/detail.css');
 @import url('notice/index.css');
 @import url('common/error.css');

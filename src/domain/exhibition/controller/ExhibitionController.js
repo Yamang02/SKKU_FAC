@@ -14,7 +14,7 @@ export function getExhibitionList(req, res) {
     try {
         const exhibitions = exhibitionService.getAllExhibitions();
 
-        res.render('exhibition/index', {
+        res.render('exhibition/list', {
             title: '작품 아카이브',
             exhibitions
         });
