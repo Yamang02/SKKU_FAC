@@ -2,7 +2,7 @@
 <html lang="ko">
 
     <head>
-        <% const pageTitle=title; const additionalStyles=[]; %>
+        <% const pageTitle=title; const additionalStyles=['/css/home/main.css']; %>
             <%- include('../common/head', { pageTitle, additionalStyles }) %>
     </head>
 
@@ -74,7 +74,7 @@
 
             <%- include('../common/footer') %>
 
-                <script src="/js/home/index.js"></script>
+                <script type="module" src="/js/home/main.js"></script>
     </body>
 
 </html>

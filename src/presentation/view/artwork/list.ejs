@@ -2,7 +2,7 @@
 <html lang="ko">
 
     <head>
-        <% const pageTitle='작품 검색 - SKKU 순수미술동아리 갤러리' ; const additionalStyles=[]; %>
+        <% const pageTitle='작품 검색 - SKKU 순수미술동아리 갤러리' ; const additionalStyles=['/css/artwork/list.css']; %>
             <%- include('../common/head', { pageTitle, additionalStyles }) %>
     </head>
 
@@ -212,7 +212,7 @@
 
             <%- include('../common/footer') %>
 
-                <script src="/js/artwork/index.js"></script>
+                <script type="module" src="/js/artwork/list/index.js"></script>
     </body>
 
 </html>

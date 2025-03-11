@@ -90,33 +90,11 @@ src/presentation/js/common/
 │   ├── artworkGrid.js     # 작품 그리드 컴포넌트
 │   └── layout.js          # 레이아웃 컴포넌트
 └── util/                  # 유틸리티 함수
-    └── dom.js             # DOM 조작 유틸리티
-```
-
-## 3. 라우팅 구조
-
-라우팅은 중앙 집중식으로 관리됩니다:
-
-```javascript
-// app.js
-import apiRouter from './src/interface/router/index.js';
-app.use('/', apiRouter);
-
-// src/interface/router/index.js
-import express from 'express';
-import exhibitionRouter from './exhibition/router.js';
-import noticeRouter from './notice/router.js';
-import userRouter from './user/router.js';
-import artworkRouter from './artwork/router.js';
-
-const router = express.Router();
-
-router.use('/exhibition', exhibitionRouter);
-router.use('/notice', noticeRouter);
-router.use('/user', userRouter);
-router.use('/artwork', artworkRouter);
-
-export default router;
+    ├── index.js           # 유틸리티 모듈 진입점
+    ├── animation.js       # 애니메이션 관련 유틸리티
+    ├── dom.js             # DOM 조작 유틸리티
+    ├── modal.js           # 모달 관련 유틸리티
+    └── notification.js    # 알림 관련 유틸리티
 ```
 
 ## 4. 도메인별 JavaScript 구조
@@ -125,16 +103,80 @@ export default router;
 
 ```
 src/presentation/js/[도메인]/
-├── index.js               # 도메인 목록 페이지 스크립트
-└── detail.js              # 도메인 상세 페이지 스크립트
+├── list/                   # 목록 페이지 관련 모듈
+│   ├── index.js            # 진입점
+│   ├── filter.js           # 필터 기능
+│   ├── gallery.js          # 갤러리 표시 기능
+│   ├── search.js           # 검색 기능
+│   └── pagination.js       # 페이지네이션 기능
+├── detail/                 # 상세 페이지 관련 모듈
+│   ├── index.js            # 진입점
+│   ├── viewer.js           # 작품 뷰어 기능
+│   ├── comment.js          # 댓글 기능
+│   └── related.js          # 관련 작품 기능
+├── main/                   # 메인 페이지 관련 모듈 (홈 도메인)
+│   ├── index.js            # 진입점
+│   ├── hero.js             # 히어로 섹션 기능
+│   ├── featured.js         # 추천 작품 기능
+│   └── modal.js            # 모달 기능
+└── common/                 # 도메인 공통 모듈
+    ├── api.js              # API 호출 함수
+    ├── util.js             # 유틸리티 함수
+    ├── animation.js        # 애니메이션 함수
+    └── modal.js            # 모달 관련 함수
 ```
 
 예를 들어, artwork 도메인의 경우:
 
 ```
 src/presentation/js/artwork/
-├── index.js               # 작품 목록 페이지 스크립트
-└── detail.js              # 작품 상세 페이지 스크립트
+├── list/                   # 작품 목록 페이지 관련 모듈
+│   ├── index.js            # 진입점
+│   ├── filter.js           # 필터 기능
+│   ├── gallery.js          # 갤러리 표시 기능
+│   ├── search.js           # 검색 기능
+│   └── pagination.js       # 페이지네이션 기능
+├── detail/                 # 작품 상세 페이지 관련 모듈
+│   ├── index.js            # 진입점
+│   ├── viewer.js           # 작품 뷰어 기능
+│   ├── related.js          # 관련 작품 기능
+│   └── comment.js          # 댓글 기능
+└── common/                 # 작품 도메인 공통 모듈
+    ├── api.js              # API 호출 함수
+    ├── util.js             # 유틸리티 함수
+    ├── animation.js        # 애니메이션 함수
+    └── modal.js            # 모달 관련 함수
+```
+
+그리고 home 도메인의 경우:
+
+```
+src/presentation/js/home/
+├── main/                   # 홈 메인 페이지 관련 모듈
+│   ├── index.js            # 진입점
+│   ├── hero.js             # 히어로 섹션 기능
+│   ├── featured.js         # 추천 작품 기능
+│   └── modal.js            # 모달 기능
+└── common/                 # 홈 도메인 공통 모듈
+    ├── api.js              # API 호출 함수
+    └── util.js             # 유틸리티 함수
+```
+
+그리고 exhibition 도메인의 경우:
+
+```
+src/presentation/js/exhibition/
+├── list/                   # 전시 목록 페이지 관련 모듈
+│   ├── index.js            # 진입점
+│   ├── grid.js             # 그리드 기능
+│   └── modal.js            # 모달 기능
+├── detail/                 # 전시 상세 페이지 관련 모듈
+│   ├── index.js            # 진입점
+│   ├── image.js            # 이미지 로더 기능
+│   └── filter.js           # 필터 기능
+└── common/                 # 전시 도메인 공통 모듈
+    ├── api.js              # API 호출 함수
+    └── util.js             # 유틸리티 함수
 ```
 
 ## 5. 도메인별 CSS 구조
