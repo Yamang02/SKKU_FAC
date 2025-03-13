@@ -61,7 +61,12 @@ function addComment(commentText) {
 
     // 현재 시간 포맷팅
     const now = new Date();
-    const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
 
     // 새 댓글 요소 생성
     const newComment = document.createElement('div');
@@ -136,7 +141,9 @@ function updateCommentCount(change) {
  */
 function saveComment(commentText) {
     // TODO: 서버에 댓글 저장 로직 구현
-    console.log('댓글 저장:', commentText);
+    // eslint-disable-next-line no-unused-vars
+    const payload = { content: commentText, timestamp: new Date().toISOString() };
+    // 실제 구현에서는 이 payload를 서버로 전송
 }
 
 /**
@@ -145,5 +152,7 @@ function saveComment(commentText) {
  */
 function deleteCommentFromServer(commentId) {
     // TODO: 서버에서 댓글 삭제 로직 구현
-    console.log('댓글 삭제:', commentId);
+    // eslint-disable-next-line no-unused-vars
+    const deleteRequest = { id: commentId, deleted: true };
+    // 실제 구현에서는 이 deleteRequest를 서버로 전송
 }

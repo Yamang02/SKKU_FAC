@@ -11,7 +11,8 @@ const exhibition = [
         startDate: '',
         endDate: '',
         image: 'https://via.placeholder.com/800x400?text=All+Artworks',
-        artists: []
+        artists: [],
+        exhibitionType: 'regular'
     },
     {
         id: 2,
@@ -22,7 +23,8 @@ const exhibition = [
         startDate: '2024-03-01',
         endDate: '2024-03-31',
         image: 'https://via.placeholder.com/800x400?text=East+Asian+Landscapes',
-        artists: ['가쓰시카 호쿠사이', '김홍도', '장승업']
+        artists: ['가쓰시카 호쿠사이', '김홍도', '장승업'],
+        exhibitionType: 'regular'
     },
     {
         id: 3,
@@ -33,7 +35,8 @@ const exhibition = [
         startDate: '2024-04-01',
         endDate: '2024-04-30',
         image: 'https://via.placeholder.com/800x400?text=Modern+Art+Trends',
-        artists: ['요하네스 베르메르', '파블로 피카소', '앤디 워홀']
+        artists: ['요하네스 베르메르', '파블로 피카소', '앤디 워홀'],
+        exhibitionType: 'special'
     },
     {
         id: 4,
@@ -44,7 +47,8 @@ const exhibition = [
         startDate: '2024-05-01',
         endDate: '2024-05-31',
         image: 'https://via.placeholder.com/800x400?text=Festival+of+Colors',
-        artists: ['빈센트 반 고흐', '클로드 모네', '마크 로스코']
+        artists: ['빈센트 반 고흐', '클로드 모네', '마크 로스코'],
+        exhibitionType: 'regular'
     },
     {
         id: 5,
@@ -55,11 +59,21 @@ const exhibition = [
         startDate: '2024-06-01',
         endDate: '2024-06-30',
         image: 'https://via.placeholder.com/800x400?text=Nature+and+Humans',
-        artists: ['레오나르도 다빈치', '존 컨스터블', '앤셀 아담스']
+        artists: ['레오나르도 다빈치', '존 컨스터블', '앤셀 아담스'],
+        exhibitionType: 'special'
     }
 ];
 
 export default exhibition;
 export function getExhibitionById(id) {
     return exhibition.find(exhibition => exhibition.id === parseInt(id));
+}
+
+/**
+ * 전시회 유형에 따라 텍스트 반환
+ * @param {string} type - 전시회 유형 ('regular' 또는 'special')
+ * @returns {string} 전시회 유형 텍스트
+ */
+export function getExhibitionTypeText(type) {
+    return type === 'regular' ? '정기' : '특별';
 }

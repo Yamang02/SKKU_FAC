@@ -11,7 +11,8 @@ class Exhibition {
         this.startDate = data.startDate;
         this.endDate = data.endDate;
         this.image = data.image;
+        this.exhibitionType = data.exhibitionType || 'regular'; // 기본값은 정기 전시회
     }
 }
 
-export default Exhibition; 
+export default Exhibition;

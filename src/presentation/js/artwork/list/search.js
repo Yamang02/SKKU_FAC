@@ -9,22 +9,11 @@ import { debounce } from '/js/common/util/index.js';
  * 검색 기능 초기화
  */
 export function initSearch() {
-    console.log('initSearch 함수 호출됨');
-
     // HTML에 맞게 ID 수정
     const searchInput = document.getElementById('keyword');
     const searchButton = document.querySelector('.search-buttons .btn--primary');
 
-    console.log('검색 요소 선택 결과:', {
-        searchInput: searchInput,
-        searchButton: searchButton
-    });
-
     if (!searchInput || !searchButton) {
-        console.log('검색 요소를 찾을 수 없음:', {
-            inputExists: !!searchInput,
-            buttonExists: !!searchButton
-        });
         return;
     }
 
@@ -58,8 +47,6 @@ export function initSearch() {
         searchInput.value = keywordParam;
         performSearch(keywordParam.toLowerCase());
     }
-
-    console.log('검색 모듈 초기화 완료');
 }
 
 /**

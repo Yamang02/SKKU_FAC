@@ -49,8 +49,11 @@ const artwork = [
         year: '1503',
         medium: '나무 패널에 유화',
         size: '77cm x 53cm',
-        description: '레오나르도 다빈치의 가장 유명한 초상화로, 신비로운 미소를 짓고 있는 여인의 모습을 담고 있습니다. 스푸마토 기법을 사용하여 부드러운 명암 효과를 표현했습니다.',
-        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
+        description: '레오나르도 다빈치의 가장 유명한 초상화로, 신비로운 미소를 짓고 있는 여인의 모습을 담고 있습니다. ' +
+            '스푸마토 기법을 사용하여 부드러운 명암 효과를 표현했습니다.',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/' +
+            'Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/' +
+            '800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
         exhibition: '자연과 인간',
         exhibitionId: 5
     }

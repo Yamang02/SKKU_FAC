@@ -20,7 +20,8 @@ const relatedArtworks = {
             id: 4,
             title: '모나리자',
             artist: '레오나르도 다빈치',
-            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg'
+            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/' +
+                'Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg'
         }
     ],
 
@@ -42,7 +43,8 @@ const relatedArtworks = {
             id: 4,
             title: '모나리자',
             artist: '레오나르도 다빈치',
-            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg'
+            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/' +
+                'Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg'
         }
     ],
 
@@ -64,7 +66,8 @@ const relatedArtworks = {
             id: 4,
             title: '모나리자',
             artist: '레오나르도 다빈치',
-            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg'
+            image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/' +
+                'Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg'
         }
     ],
 

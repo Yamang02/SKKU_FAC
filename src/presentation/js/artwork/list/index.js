@@ -12,8 +12,6 @@ import { fadeIn } from '/js/common/util/index.js';
 import { animateButtonClick } from '/js/artwork/common/animation.js';
 
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOMContentLoaded 이벤트 발생');
-
     // 모듈 초기화
     initCarousel();
     initFilter();
@@ -33,8 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const advancedSearchPanel = document.getElementById('advancedSearchPanel');
 
     if (advancedSearchToggle && advancedSearchPanel) {
-        console.log('상세 검색 토글 버튼 직접 초기화');
-
         // 초기 상태 설정
         advancedSearchPanel.style.display = 'none';
         let isOpen = false;
@@ -42,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
         // 클릭 이벤트 리스너 추가
         advancedSearchToggle.addEventListener('click', function (e) {
             e.preventDefault();
-            console.log('상세 검색 토글 버튼 클릭됨 (index.js)');
 
             isOpen = !isOpen;
 

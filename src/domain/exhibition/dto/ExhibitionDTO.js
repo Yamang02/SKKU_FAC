@@ -12,8 +12,9 @@ class ExhibitionDTO {
         this.startDate = exhibition.startDate;
         this.endDate = exhibition.endDate;
         this.image = exhibition.image;
+        this.exhibitionType = exhibition.exhibitionType || 'regular'; // 기본값은 정기 전시회
         this.fullTitle = exhibition.title + (exhibition.subtitle ? ': ' + exhibition.subtitle : '');
     }
 }
 
-export default ExhibitionDTO; 
+export default ExhibitionDTO;
