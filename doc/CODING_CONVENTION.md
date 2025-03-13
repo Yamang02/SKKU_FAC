@@ -57,7 +57,22 @@
 - **색상 이름**: 직접 사용 금지 (예: `white` 대신 `#fff` 사용)
 - **최대 중첩 깊이**: 3
 
-### 2.2. 파일 네이밍 규칙
+### 2.2. CSS 변수 네이밍 규칙
+- **색상 변수**: `--color-` 접두사 사용
+  - 예: `--color-primary`, `--color-secondary`, `--color-background`
+  - 색상 변형: `-light`, `-dark` 접미사 사용 (예: `--color-primary-light`)
+- **간격 변수**: `--spacing-` 접두사 사용
+  - 예: `--spacing-xs`, `--spacing-sm`, `--spacing-md`
+- **테두리 반경 변수**: `--border-radius-` 접두사 사용
+  - 예: `--border-radius-sm`, `--border-radius-md`
+- **그림자 변수**: `--shadow-` 접두사 사용
+  - 예: `--shadow-sm`, `--shadow-md`
+- **전환 변수**: `--transition-` 접두사 사용
+  - 예: `--transition-fast`, `--transition-normal`
+- **z-index 변수**: `--z-index-` 접두사 사용
+  - 예: `--z-index-modal`, `--z-index-dropdown`
+
+### 2.3. 파일 네이밍 규칙
 - **메인 CSS 파일**: 페이지 또는 컴포넌트 이름 사용 (예: `detail.css`, `header.css`)
 - **언더스코어 사용 금지**: 파일명에 언더스코어(`_`) 사용 금지
 - **파일명 패턴**:
@@ -72,7 +87,7 @@
   - 레이아웃 스타일: `css/common/layout/`
   - 유틸리티 스타일: `css/common/util/`
 
-### 2.3. 속성 선언 순서
+### 2.4. 속성 선언 순서
 1. 위치 (position, top, right, bottom, left, z-index)
 2. 표시 (display, visibility, overflow)
 3. 박스 모델 (width, height, margin, padding, border)

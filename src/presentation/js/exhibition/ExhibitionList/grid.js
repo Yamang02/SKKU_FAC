@@ -8,7 +8,7 @@ import { fadeIn } from '../common/util.js';
  * 그리드 초기화
  */
 export function initGrid() {
-    const exhibitionGrid = document.querySelector('.exhibitions-grid');
+    const exhibitionGrid = document.querySelector('.exhibition-grid');
     const exhibitionCards = document.querySelectorAll('.exhibition-card');
 
     if (!exhibitionGrid || !exhibitionCards.length) return;

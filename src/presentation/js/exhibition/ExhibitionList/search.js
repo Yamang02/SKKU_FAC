@@ -31,7 +31,10 @@ export function initSearch() {
     // 필터 변경 이벤트
     const filterType = document.getElementById('filter-type');
     const filterYear = document.getElementById('filter-year');
+    const filterCategory = document.getElementById('filter-category');
+    const sortOption = document.getElementById('sort-option');
 
+    // 필터 이벤트 리스너
     if (filterType) {
         filterType.addEventListener('change', () => {
             updateSearchState();
@@ -41,6 +44,20 @@ export function initSearch() {
 
     if (filterYear) {
         filterYear.addEventListener('change', () => {
+            updateSearchState();
+            performSearch();
+        });
+    }
+
+    if (filterCategory) {
+        filterCategory.addEventListener('change', () => {
+            updateSearchState();
+            performSearch();
+        });
+    }
+
+    if (sortOption) {
+        sortOption.addEventListener('change', () => {
             updateSearchState();
             performSearch();
         });
@@ -96,8 +113,24 @@ function initSearchFromUrl() {
         if (yearSelect) yearSelect.value = year;
     }
 
+    // 카테고리
+    const category = urlParams.get('category');
+    if (category) {
+        searchState.category = category;
+        const categorySelect = document.getElementById('filter-category');
+        if (categorySelect) categorySelect.value = category;
+    }
+
+    // 정렬
+    const sort = urlParams.get('sort');
+    if (sort) {
+        searchState.sort = sort;
+        const sortSelect = document.getElementById('sort-option');
+        if (sortSelect) sortSelect.value = sort;
+    }
+
     // 검색 실행
-    if (keyword || type !== 'all' || year !== 'all') {
+    if (keyword || type !== 'all' || year !== 'all' || category !== 'all' || sort !== 'date-desc') {
         performSearch();
     }
 }
@@ -123,44 +156,66 @@ function updateSearchState() {
     if (yearSelect) {
         searchState.year = yearSelect.value;
     }
+
+    // 카테고리
+    const categorySelect = document.getElementById('filter-category');
+    if (categorySelect) {
+        searchState.category = categorySelect.value;
+    }
+
+    // 정렬
+    const sortSelect = document.getElementById('sort-option');
+    if (sortSelect) {
+        searchState.sort = sortSelect.value;
+    }
 }
 
 /**
  * 검색 실행
  */
 function performSearch() {
-    const exhibitions = document.querySelectorAll('.exhibition-card');
-    let visibleCount = 0;
+    // 로딩 표시
+    const loadingIndicator = document.getElementById('loading-indicator');
+    if (loadingIndicator) loadingIndicator.style.display = 'flex';
+
+    // 검색 결과 없음 메시지 숨기기
+    const noResultElement = document.getElementById('no-results');
+    if (noResultElement) noResultElement.style.display = 'none';
 
     // 활성 필터 태그 업데이트
     updateActiveFilterTags();
-
-    exhibitions.forEach(exhibition => {
-        const isVisible = isExhibitionMatchingSearch(exhibition);
-
-        // 검색 결과에 따라 표시/숨김 처리
-        if (isVisible) {
-            exhibition.style.display = '';
-            visibleCount++;
-        } else {
-            exhibition.style.display = 'none';
-        }
-    });
-
-    // 결과 없음 메시지 표시/숨김
-    const noResults = document.getElementById('no-results');
-    if (noResults) {
-        noResults.style.display = visibleCount === 0 ? 'flex' : 'none';
-    }
-
-    // 전시회 수 업데이트
-    updateExhibitionCount(visibleCount);
 
     // URL 업데이트
     updateSearchUrl();
 
     // 페이지네이션 초기화
     resetPagination();
+
+    // 검색 실행 (약간의 지연으로 UI 업데이트 시간 확보)
+    setTimeout(() => {
+        // 모든 전시회 요소
+        const exhibitionContainer = document.getElementById('exhibitions-container');
+        const exhibitions = Array.from(exhibitionContainer.querySelectorAll('.exhibition-card'));
+
+        // 검색 조건에 맞는 전시회만 표시
+        let visibleCount = 0;
+        exhibitions.forEach(exhibition => {
+            const isMatch = isExhibitionMatchingSearch(exhibition);
+            exhibition.style.display = isMatch ? '' : 'none';
+            if (isMatch) visibleCount++;
+        });
+
+        // 검색 결과 카운트 업데이트
+        updateExhibitionCount(visibleCount);
+
+        // 검색 결과가 없는 경우
+        if (visibleCount === 0 && noResultElement) {
+            noResultElement.style.display = 'flex';
+        }
+
+        // 로딩 표시 숨기기
+        if (loadingIndicator) loadingIndicator.style.display = 'none';
+    }, 300);
 }
 
 /**
@@ -183,72 +238,125 @@ function isExhibitionMatchingSearch(exhibition) {
         if (!date || !date.includes(searchState.year)) return false;
     }
 
+    // 카테고리 검색
+    if (searchState.category !== 'all') {
+        const category = exhibition.dataset.category;
+        if (!category || category !== searchState.category) return false;
+    }
+
+    // 정렬 적용 (정렬은 여기서 처리하지 않고 별도 함수로 처리하는 것이 좋지만,
+    // 현재 구현에서는 간단히 처리)
+    if (searchState.sort !== 'date-desc') {
+        // 정렬 로직은 실제 구현 시 추가
+    }
+
     return true;
 }
 
 /**
- * 활성 필터 태그 업데이트
+ * 활성화된 필터 태그 업데이트
  */
 function updateActiveFilterTags() {
-    const activeFilters = document.getElementById('active-filters');
-    if (!activeFilters) return;
+    // 필터 태그 컨테이너
+    const filterContainer = document.querySelector('.filter-list');
+    if (!filterContainer) return;
 
-    // 기존 태그 제거
-    activeFilters.innerHTML = '';
+    // 기존 태그 모두 제거
+    filterContainer.innerHTML = '';
 
-    // 키워드 태그
+    // 검색어 태그
     if (searchState.query) {
-        addFilterTag(activeFilters, '키워드', searchState.query, () => {
-            const keywordInput = document.getElementById('keyword');
-            if (keywordInput) keywordInput.value = '';
-            searchState.query = '';
-            performSearch();
-        });
+        addFilterTag(
+            filterContainer,
+            `검색어: ${searchState.query}`,
+            'query',
+            () => {
+                const keywordInput = document.getElementById('keyword');
+                if (keywordInput) keywordInput.value = '';
+                searchState.query = '';
+                performSearch();
+            }
+        );
     }
 
     // 전시 유형 태그
     if (searchState.type !== 'all') {
-        const typeSelect = document.getElementById('filter-type');
-        const typeText = typeSelect?.options[typeSelect.selectedIndex].text ||
-            (searchState.type === 'regular' ? '정기' : '특별');
-
-        addFilterTag(activeFilters, '전시 유형', typeText, () => {
-            if (typeSelect) typeSelect.value = 'all';
-            searchState.type = 'all';
-            performSearch();
-        });
+        const typeLabel = searchState.type === 'regular' ? '정기 전시회' : '특별 전시회';
+        addFilterTag(
+            filterContainer,
+            `유형: ${typeLabel}`,
+            'type',
+            () => {
+                const typeSelect = document.getElementById('filter-type');
+                if (typeSelect) typeSelect.value = 'all';
+                searchState.type = 'all';
+                performSearch();
+            }
+        );
     }
 
     // 연도 태그
     if (searchState.year !== 'all') {
-        addFilterTag(activeFilters, '개최 연도', searchState.year, () => {
-            const yearSelect = document.getElementById('filter-year');
-            if (yearSelect) yearSelect.value = 'all';
-            searchState.year = 'all';
-            performSearch();
-        });
+        addFilterTag(
+            filterContainer,
+            `연도: ${searchState.year}`,
+            'year',
+            () => {
+                const yearSelect = document.getElementById('filter-year');
+                if (yearSelect) yearSelect.value = 'all';
+                searchState.year = 'all';
+                performSearch();
+            }
+        );
+    }
+
+    // 카테고리 태그
+    if (searchState.category !== 'all') {
+        const categoryLabels = {
+            'painting': '회화',
+            'sculpture': '조각',
+            'photography': '사진',
+            'digital': '디지털 아트'
+        };
+        const categoryLabel = categoryLabels[searchState.category] || searchState.category;
+
+        addFilterTag(
+            filterContainer,
+            `카테고리: ${categoryLabel}`,
+            'category',
+            () => {
+                const categorySelect = document.getElementById('filter-category');
+                if (categorySelect) categorySelect.value = 'all';
+                searchState.category = 'all';
+                performSearch();
+            }
+        );
     }
 }
 
 /**
  * 필터 태그 추가
- * @param {HTMLElement} container - 태그 컨테이너
- * @param {string} label - 태그 레이블
- * @param {string} value - 태그 값
- * @param {Function} removeCallback - 제거 콜백
+ * @param {HTMLElement} container 태그를 추가할 컨테이너
+ * @param {string} label 태그 레이블
+ * @param {string} value 태그 값
+ * @param {Function} removeCallback 태그 제거 시 콜백
  */
 function addFilterTag(container, label, value, removeCallback) {
     const tag = document.createElement('div');
     tag.className = 'filter-tag';
+    tag.dataset.value = value;
+
     tag.innerHTML = `
-        <span>${label}: ${value}</span>
-        <span class="filter-tag-remove">×</span>
+        ${label}
+        <span class="filter-tag-remove">&times;</span>
     `;
 
-    // 제거 버튼 이벤트
     const removeButton = tag.querySelector('.filter-tag-remove');
-    if (removeButton && removeCallback) {
-        removeButton.addEventListener('click', removeCallback);
+    if (removeButton) {
+        removeButton.addEventListener('click', () => {
+            container.removeChild(tag);
+            if (removeCallback) removeCallback();
+        });
     }
 
     container.appendChild(tag);
@@ -272,6 +380,14 @@ function updateSearchUrl() {
         urlParams.set('year', searchState.year);
     }
 
+    if (searchState.category !== 'all') {
+        urlParams.set('category', searchState.category);
+    }
+
+    if (searchState.sort !== 'date-desc') {
+        urlParams.set('sort', searchState.sort);
+    }
+
     const newUrl = `${window.location.pathname}${urlParams.toString() ? '?' + urlParams.toString() : ''}`;
     window.history.replaceState({}, '', newUrl);
 }
@@ -290,6 +406,15 @@ function resetSearch() {
     searchState.query = '';
     searchState.type = 'all';
     searchState.year = 'all';
+    searchState.category = 'all';
+    searchState.sort = 'date-desc';
+
+    // 필터 초기화
+    const categorySelect = document.getElementById('filter-category');
+    if (categorySelect) categorySelect.value = 'all';
+
+    const sortSelect = document.getElementById('sort-option');
+    if (sortSelect) sortSelect.value = 'date-desc';
 
     // 검색 실행
     performSearch();

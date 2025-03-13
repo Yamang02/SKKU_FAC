@@ -28,7 +28,7 @@
 
 /* 기본 형태 버튼 */
 .btn--primary {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
     padding: 10px 16px;
     border-radius: 6px;
@@ -36,14 +36,14 @@
 }
 
 .btn--primary:hover {
-    background-color: var(--accent-color);
+    background-color: var(--color-primary-light);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .btn--secondary {
     background-color: white;
-    color: var(--text-color);
+    color: var(--color-text-primary);
     padding: 10px 16px;
     border-radius: 6px;
     border: 1px solid #ddd;
@@ -64,12 +64,12 @@
 }
 
 .btn--comment-submit {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
 }
 
 .btn--comment-submit:hover {
-    background-color: var(--accent-color);
+    background-color: var(--color-primary-light);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -96,8 +96,8 @@
 }
 
 .btn--action:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
     color: white;
 }
 
@@ -112,7 +112,7 @@
     border-radius: 50%;
     background-color: white;
     border: 1px solid #eee;
-    color: var(--secondary-color);
+    color: var(--color-secondary);
 }
 
 .btn--round i {
@@ -120,8 +120,8 @@
 }
 
 .btn--round:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
     color: white;
 }
 
@@ -152,7 +152,7 @@
     padding: 8px 16px;
     border-radius: 6px;
     background-color: #f8f9fa;
-    color: var(--text-color);
+    color: var(--color-text-primary);
     font-weight: 500;
     border: 1px solid #eee;
     display: flex;
@@ -164,9 +164,9 @@
 }
 
 .btn--toggle.active {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 /* 뷰 토글 버튼의 아이콘 (테이블/그리드) */
@@ -198,12 +198,12 @@
     width: 40px;
     height: 40px;
     border-radius: 0 6px 6px 0;
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
 }
 
 .btn--search:hover {
-    background-color: var(--accent-color);
+    background-color: var(--color-primary-light);
 }
 
 /* 버튼 클릭 애니메이션 */

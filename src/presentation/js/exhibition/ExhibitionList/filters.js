@@ -98,50 +98,56 @@ function initFilterStateFromUrl() {
 
 /**
  * 활성화된 필터 태그 업데이트
- * @param {string} type - 필터 유형
- * @param {string} label - 표시할 레이블
+ * @param {string} type 필터 유형
+ * @param {string} label 표시할 레이블
  */
 function updateActiveFilterTags(type, label) {
-    const activeFiltersContainer = document.getElementById('active-filters');
-    if (!activeFiltersContainer) return;
-
     // 기존 같은 유형의 태그 제거
     const existingTag = document.querySelector(`.filter-tag[data-type="${type}"]`);
     if (existingTag) {
-        activeFiltersContainer.removeChild(existingTag);
+        existingTag.remove();
         activeTags.delete(type);
     }
 
     // 'all'이 아닌 경우에만 태그 추가
-    if (filterState[type] !== 'all') {
+    if (label && label !== '전체' && label !== 'All') {
+        activeTags.add(type);
+
+        // 태그 컨테이너
+        const filterContainer = document.querySelector('.filter-list');
+        if (!filterContainer) return;
+
+        // 태그 생성
         const tagElement = document.createElement('div');
         tagElement.className = 'filter-tag';
         tagElement.dataset.type = type;
         tagElement.innerHTML = `
             ${label}
-            <span class="filter-tag-remove" data-type="${type}">×</span>
+            <span class="filter-tag-remove" data-type="${type}">&times;</span>
         `;
 
         // 태그 제거 이벤트
         const removeButton = tagElement.querySelector('.filter-tag-remove');
-        removeButton.addEventListener('click', () => {
-            // 필터 초기화
-            const filterElement = document.getElementById(`filter-${type}`);
-            if (filterElement) {
-                filterElement.value = 'all';
+        if (removeButton) {
+            removeButton.addEventListener('click', () => {
+                // 필터 상태 초기화
                 filterState[type] = 'all';
-            }
 
-            // 태그 제거
-            activeFiltersContainer.removeChild(tagElement);
-            activeTags.delete(type);
+                // 필터 UI 업데이트
+                const filterElement = document.getElementById(`filter-${type}`);
+                if (filterElement) filterElement.value = 'all';
 
-            // 필터 적용
-            applyFilters();
-        });
+                // 태그 제거
+                tagElement.remove();
+                activeTags.delete(type);
 
-        activeFiltersContainer.appendChild(tagElement);
-        activeTags.add(type);
+                // 필터 적용
+                applyFilters();
+            });
+        }
+
+        // 태그 추가
+        filterContainer.appendChild(tagElement);
     }
 }
 

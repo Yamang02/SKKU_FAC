@@ -27,12 +27,12 @@
 .footer-info h3 {
     font-size: 1.2rem;
     font-weight: 600;
-    color: var(--primary-color);
+    color: var(--color-primary);
     margin-bottom: 15px;
 }
 
 .footer-info p {
-    color: var(--secondary-color);
+    color: var(--color-secondary);
     font-size: 0.9rem;
     margin: 5px 0;
     line-height: 1.5;
@@ -51,14 +51,14 @@
     height: 36px;
     border-radius: 50%;
     background-color: #fff;
-    color: var(--primary-color);
+    color: var(--color-primary);
     font-size: 1.2rem;
     transition: all 0.3s ease;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .footer-social a:hover {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
     transform: translateY(-3px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

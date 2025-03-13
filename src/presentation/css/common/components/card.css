@@ -10,14 +10,34 @@
     border-radius: 8px;
     background-color: white;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     position: relative;
+    will-change: transform, box-shadow;
+    transform: translateY(0);
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding-bottom: 12px;
+    margin-bottom: -12px;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 76, 63, 0.25);
+    animation: floating 4s ease-in-out infinite;
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes floating {
+    0% {
+        transform: translateY(-8px);
+    }
+    50% {
+        transform: translateY(-12px);
+    }
+    100% {
+        transform: translateY(-8px);
+    }
 }
 
 /* 카드 링크 스타일 */
@@ -71,7 +91,7 @@
 .card__title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--primary-color);
+    color: var(--color-primary);
     margin-bottom: 8px;
     line-height: 1.4;
     overflow: hidden;
@@ -84,7 +104,7 @@
 /* 카드 부제목 (작가명 등) */
 .card__subtitle {
     font-size: 0.9rem;
-    color: var(--secondary-color);
+    color: var(--color-secondary);
     margin-bottom: 5px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -129,7 +149,7 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    background-color: var(--accent-color);
+    background-color: var(--color-primary-light);
     color: white;
     padding: 4px 8px;
     border-radius: 4px;
@@ -140,6 +160,12 @@
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
+    .artwork-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+        padding: 8px;
+        margin: -8px;
+    }
 
     .card__image-container,
     .card__image-placeholder {
@@ -178,4 +204,13 @@
         font-size: 0.95rem;
         -webkit-line-clamp: 1;
     }
+}
+
+/* 작품 그리드 */
+.artwork-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 12px;
+    margin: -12px -12px 20px -12px;
 }

@@ -10,13 +10,13 @@
 .artwork-detail-title {
     font-size: 2.2rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--color-primary);
     margin-bottom: 15px;
 }
 
 .artwork-detail-artist {
     font-size: 1.2rem;
-    color: var(--secondary-color);
+    color: var(--color-secondary);
     margin-bottom: 10px;
 }
 
@@ -41,7 +41,7 @@
 .detail-group h2 {
     font-size: 1.4rem;
     font-weight: 600;
-    color: var(--primary-color);
+    color: var(--color-primary);
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
@@ -69,17 +69,17 @@
 
 .value {
     font-size: 1rem;
-    color: var(--text-color);
+    color: var(--color-text-primary);
 }
 
 .artwork-description {
     line-height: 1.8;
-    color: var(--text-color);
+    color: var(--color-text-primary);
 }
 
 .exhibition-info {
     line-height: 1.8;
-    color: var(--text-color);
+    color: var(--color-text-primary);
 }
 
 /* 작품 목록 버튼 */
@@ -91,7 +91,7 @@
     background-color: white;
     border: 1px solid #eee;
     border-radius: 8px;
-    color: var(--secondary-color);
+    color: var(--color-secondary);
     text-decoration: none;
     font-size: 0.95rem;
     margin-bottom: 30px;
@@ -99,8 +99,8 @@
 }
 
 .back-to-list:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -117,7 +117,7 @@
     padding: 0;
     background-color: white;
     border: 1px solid #eee;
-    color: var(--secondary-color);
+    color: var(--color-secondary);
     font-size: 0.95rem;
     overflow: hidden;
     position: relative;
@@ -153,7 +153,7 @@
     cursor: pointer;
     background-color: white;
     border: 1px solid #eee;
-    color: var(--secondary-color);
+    color: var(--color-secondary);
 }
 
 .btn--round i {
@@ -178,8 +178,8 @@
     width: auto;
     padding: 0 20px;
     border-radius: 6px;
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
     color: white;
 }
 
@@ -188,8 +188,8 @@
 }
 
 .btn--scroll:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
     color: white;
 }
 

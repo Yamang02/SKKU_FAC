@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 배경 -->
+    <rect width="800" height="600" fill="#F5F5F5"/>
+
+    <!-- 갤러리 프레임 -->
+    <rect x="200" y="150" width="400" height="300" rx="8" stroke="#CCCCCC" stroke-width="4" fill="white"/>
+
+    <!-- 그림 아이콘 -->
+    <path d="M300 250 h200 v150 h-200 v-150 M300 350 l50 -50 l50 50 l100 -100" stroke="#CCCCCC" stroke-width="4" fill="none"/>
+
+    <!-- 텍스트 -->
+    <text x="400" y="500" font-family="Arial" font-size="24" fill="#666666" text-anchor="middle">전시 이미지</text>
+</svg>

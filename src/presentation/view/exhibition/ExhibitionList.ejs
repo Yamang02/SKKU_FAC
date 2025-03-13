@@ -11,31 +11,31 @@
         <%- include('../common/header') %>
 
             <main>
-                <section class="exhibitions-container">
-                    <header class="exhibitions-header">
-                        <h1 class="exhibitions-title">전시회 목록</h1>
+                <section class="exhibition-container">
+                    <header class="exhibition-header">
+                        <h1 class="exhibition-title">전시회 목록</h1>
                     </header>
 
-                    <!-- 검색 및 필터링 섹션 -->
-                    <section class="search-section">
-                        <div class="search-form-container">
-                            <form class="search-form" id="searchForm" method="get" action="">
-                                <div class="search-simple-layout">
-                                    <div class="search-column keyword-column">
-                                        <label for="keyword" class="form-label">작품 검색</label>
-                                        <div class="search-input-wrapper">
-                                            <input type="text" id="keyword" name="keyword" class="search-input"
-                                                placeholder="작품명, 작가명, 키워드 등을 입력하세요">
-                                            <button type="submit" class="search-button">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                    fill="currentColor" viewBox="0 0 16 16">
-                                                    <path
-                                                        d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
-                                                </svg>
-                                            </button>
-                                        </div>
+                    <!-- 검색 섹션 -->
+                    <section class="search-container">
+                        <form class="search-form" id="searchForm" method="get" action="">
+                            <div class="search-layout">
+                                <div class="search-column keyword-column">
+                                    <label for="keyword" class="form-label">전시회 검색</label>
+                                    <div class="search-input-wrapper">
+                                        <input type="text" id="keyword" name="keyword" class="search-input"
+                                            placeholder="전시회명, 작가명, 키워드 등을 입력하세요">
+                                        <button type="submit" class="search-button">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                                            </svg>
+                                        </button>
                                     </div>
+                                </div>
 
+                                <div class="search-filters">
                                     <div class="search-column">
                                         <label for="filter-type" class="form-label">전시회 유형</label>
                                         <select id="filter-type" name="type" class="form-select">
@@ -49,35 +49,58 @@
                                         <label for="filter-year" class="form-label">개최 연도</label>
                                         <select id="filter-year" name="year" class="form-select">
                                             <option value="all">전체</option>
-                                            <option value="2023">예: 2023</option>
+                                            <option value="2023">2023</option>
+                                            <option value="2022">2022</option>
+                                            <option value="2021">2021</option>
                                         </select>
                                     </div>
 
                                     <div class="search-column">
-                                        <button type="submit" class="search-button">검색</button>
-                                        <button type="reset" class="reset-button">초기화</button>
+                                        <label for="filter-category" class="form-label">카테고리</label>
+                                        <select id="filter-category" name="category" class="form-select">
+                                            <option value="all">모든 카테고리</option>
+                                            <option value="painting">회화</option>
+                                            <option value="sculpture">조각</option>
+                                            <option value="photography">사진</option>
+                                            <option value="digital">디지털 아트</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="search-column">
+                                        <label for="sort-option" class="form-label">정렬 기준</label>
+                                        <select id="sort-option" name="sort" class="form-select">
+                                            <option value="date-desc">최신순</option>
+                                            <option value="date-asc">오래된순</option>
+                                            <option value="title-asc">제목 오름차순</option>
+                                            <option value="title-desc">제목 내림차순</option>
+                                        </select>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
+
+                                <div class="search-buttons">
+                                    <button type="submit" class="btn-search">검색</button>
+                                    <button type="reset" class="btn-reset">초기화</button>
+                                </div>
+                            </div>
+                        </form>
                     </section>
 
                     <!-- 필터 태그 표시 영역 -->
-                    <div id="active-filters" class="active-filters">
+                    <div id="active-filters" class="filter-list">
                         <!-- 활성화된 필터가 여기에 표시됩니다 -->
                     </div>
 
                     <!-- 결과 카운트 -->
-                    <div class="results-header">
-                        <div class="results-count">
-                            <span id="exhibition-count">
-                                <%= exhibitions.length %>
-                            </span>개의 전시회
+                    <div class="result-header">
+                        <div class="result-count">
+                            <p id="exhibition-count">총 <strong>
+                                    <%= exhibitions.length %>
+                                </strong>개의 전시회가 검색되었습니다.</p>
                         </div>
                     </div>
 
                     <!-- 전시회 그리드 -->
-                    <div class="exhibitions-grid" id="exhibitions-container">
+                    <div class="exhibition-grid" id="exhibitions-container">
                         <% exhibitions.forEach(exhibition=> { %>
                             <div class="exhibition-card" data-exhibition-id="<%= exhibition.id %>"
                                 data-title="<%= exhibition.title %>" data-date="<%= exhibition.startDate %>"
@@ -85,8 +108,9 @@
                                 data-exhibition-type="<%= exhibition.exhibitionType || 'regular' %>">
 
                                 <div class="card-image-container">
-                                    <img src="<%= exhibition.image || '/asset/image/exhibition/default-exhibition.jpg' %>"
-                                        alt="<%= exhibition.title %>" class="exhibition-image">
+                                    <img src="<%= exhibition.image || '/image/exhibition/placeholder-exhibition.svg' %>"
+                                        alt="<%= exhibition.title %>" class="exhibition-image"
+                                        onerror="this.src='/image/exhibition/placeholder-exhibition.svg'">
                                     <!-- 전시 유형 표시 (정기/특별) -->
                                     <span class="exhibition-type <%= exhibition.exhibitionType || 'regular' %>">
                                         <%= exhibition.exhibitionType==='special' ? '특별' : '정기' %>
@@ -131,7 +155,7 @@
                     </div>
 
                     <!-- 결과 없음 메시지 -->
-                    <div id="no-results" class="no-results" style="display: none;">
+                    <div id="no-results" class="no-result" style="display: none;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor"
                             viewBox="0 0 16 16">
                             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />

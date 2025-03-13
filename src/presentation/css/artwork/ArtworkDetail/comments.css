@@ -22,12 +22,12 @@
 .comments__title {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--primary-color);
+    color: var(--color-primary);
     padding-left: 20px;
 }
 
 .comments__count {
-    color: var(--secondary-color);
+    color: var(--color-secondary);
     font-size: 0.95rem;
     background-color: #f8f9fa;
     padding: 6px 12px;
@@ -87,7 +87,7 @@
 }
 
 .btn--comment-submit {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
 }
 
@@ -97,7 +97,7 @@
 }
 
 .btn--comment-submit:hover {
-    background-color: var(--accent-color);
+    background-color: var(--color-primary-light);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -157,8 +157,8 @@
 }
 
 .btn--action:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
     color: white;
 }
 
@@ -186,7 +186,7 @@
 
 .comment__content {
     line-height: 1.6;
-    color: var(--text-color);
+    color: var(--color-text-primary);
 }
 
 .comments__empty {
@@ -220,7 +220,7 @@
     cursor: pointer;
     transition: all 0.3s;
     background-color: white;
-    color: var(--text-color);
+    color: var(--color-text-primary);
     text-decoration: none;
 }
 
@@ -236,18 +236,18 @@
     align-items: center;
     justify-content: center;
     width: 24px;
-    color: var(--text-color);
+    color: var(--color-text-primary);
 }
 
 .pagination__btn--active {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 .pagination__btn:hover:not(.pagination__btn--active):not(.pagination__btn--disabled) {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }
 
 .pagination__btn--disabled {

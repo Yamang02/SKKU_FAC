@@ -1,19 +1,15 @@
 :root {
     /* Colors */
-    --primary-color: #004C3F;
-    --secondary-color: #465B63;
-    --background-color: #fff;
-    --text-color: #333;
-    --accent-color: #00684A;
-
-    /* 새로운 색상 변수 */
+    /* 통일된 색상 변수 */
     --color-primary: #004C3F;
     --color-primary-dark: #003D32;
+    --color-primary-light: #00684A;
     --color-secondary: #465B63;
+    --color-background: #fff;
+    --color-background-light: #f8f9fa;
     --color-text-primary: #333;
     --color-text-secondary: #555;
     --color-text-tertiary: #666;
-    --color-background-light: #f8f9fa;
     --color-border: #e0e0e0;
     --color-white: #fff;
 
@@ -38,7 +34,6 @@
     --border-radius-el: 24px;
 
     /* Shadows */
-    --box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
     --shadow-sm: 0 2px 4px rgb(0 0 0 / 10%);
     --shadow-md: 0 4px 8px rgb(0 0 0 / 10%);
     --shadow-lg: 0 8px 16px rgb(0 0 0 / 10%);

@@ -28,7 +28,7 @@ app.set('views', path.join(__dirname, 'src/presentation/view'));
 app.use(express.static(path.join(__dirname, 'src/presentation')));
 app.use('/css', express.static(path.join(__dirname, 'src/presentation/css')));
 app.use('/js', express.static(path.join(__dirname, 'src/presentation/js')));
-app.use('/images', express.static(path.join(__dirname, 'src/presentation/asset/image')));
+app.use('/image', express.static(path.join(__dirname, 'src/presentation/asset/image')));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());

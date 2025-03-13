@@ -10,7 +10,7 @@
 export function updateExhibitionCount(count) {
     const countElement = document.getElementById('exhibition-count');
     if (countElement) {
-        countElement.textContent = count;
+        countElement.innerHTML = `총 <strong>${count}</strong>개의 전시회가 검색되었습니다.`;
     }
 }
 

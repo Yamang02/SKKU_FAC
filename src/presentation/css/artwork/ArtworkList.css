@@ -33,18 +33,18 @@
 }
 
 .search-actions .btn-primary {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
 }
 
 .search-actions .btn-outline {
     background-color: transparent;
-    border: 1px solid var(--primary-color);
-    color: var(--primary-color);
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
 }
 
 .search-actions .btn-outline:hover {
-    background-color: var(--primary-color-light);
+    background-color: var(--color-primary-light);
 }
 
 .view-toggle {
@@ -78,9 +78,9 @@
 }
 
 .view-toggle button.active {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 /* 테이블 뷰 스타일 */
@@ -102,7 +102,7 @@
 }
 
 .table-view th {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     font-weight: 600;
     color: white;
     position: relative;
@@ -214,7 +214,7 @@
     transform: translateY(-50%);
     width: 5px;
     height: 20px;
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     border-radius: 2px;
 }
 
@@ -289,8 +289,8 @@
 }
 
 .carousel-arrow:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
     color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
@@ -316,7 +316,7 @@
 
 .exhibition-item:hover {
     transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 8px 16px rgba(0, 76, 63, 0.15);
 }
 
 .exhibition-info {
@@ -412,7 +412,7 @@
 
 .search-column input:focus,
 .search-column select:focus {
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
     outline: none;
     box-shadow: 0 0 0 2px rgba(0, 76, 63, 0.1);
 }
@@ -447,7 +447,7 @@
 }
 
 .search-column .btn-primary {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
     border: none;
 }
@@ -482,9 +482,9 @@
 
 /* 상세 검색 패널이 열려 있을 때 버튼 스타일 */
 #advancedSearchToggle.active {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 #advancedSearchToggle i {
@@ -494,7 +494,7 @@
 
 /* 검색 버튼 스타일 개선 */
 .btn-search {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
     border: none;
     padding: 12px 20px;
@@ -582,9 +582,9 @@
 }
 
 .view-toggle-btn.active {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 /* 모바일 반응형 */
@@ -673,7 +673,7 @@
 }
 
 .search-actions .btn-primary:hover {
-    background-color: var(--primary-color-dark);
+    background-color: var(--color-primary-dark);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 

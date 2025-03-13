@@ -19,7 +19,7 @@
 
 .error-container h1 {
     margin-bottom: 1rem;
-    color: var(--primary-color);
+    color: var(--color-primary);
     font-size: 2rem;
 }
 
@@ -32,12 +32,12 @@
     display: inline-block;
     padding: 0.75rem 1.5rem;
     border-radius: 4px;
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
     text-decoration: none;
     transition: background-color 0.3s;
 }
 
 .back-button:hover {
-    background-color: var(--accent-color);
-} 
+    background-color: var(--color-primary-light);
+}

@@ -28,7 +28,7 @@
     cursor: pointer;
     transition: all 0.3s;
     background-color: white;
-    color: var(--text-color);
+    color: var(--color-text-primary);
     text-decoration: none;
 }
 
@@ -45,20 +45,20 @@
     align-items: center;
     justify-content: center;
     width: 24px;
-    color: var(--text-color);
+    color: var(--color-text-primary);
 }
 
 /* 활성화된 페이지 버튼 */
 .pagination__btn--active {
-    background-color: var(--primary-color);
+    background-color: var(--color-primary);
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 /* 버튼 호버 효과 */
 .pagination__btn:hover:not(.pagination__btn--active):not(.pagination__btn--disabled) {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }
 
 /* 비활성화된 버튼 */
