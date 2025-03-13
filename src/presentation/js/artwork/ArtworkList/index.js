@@ -46,6 +46,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
             isOpen = !isOpen;
 
+            // 버튼 active 클래스 토글
+            if (isOpen) {
+                advancedSearchToggle.classList.add('active');
+            } else {
+                advancedSearchToggle.classList.remove('active');
+            }
+
             // 아이콘 회전
             const icon = advancedSearchToggle.querySelector('.toggle-icon');
             if (icon) {
@@ -55,25 +62,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // 패널 표시/숨김
             if (isOpen) {
+                // 패널 표시
                 advancedSearchPanel.style.display = 'block';
-                advancedSearchPanel.style.opacity = '1';
-                advancedSearchPanel.style.visibility = 'visible';
-                advancedSearchPanel.style.maxHeight = '1000px';
-                advancedSearchPanel.style.padding = '20px';
-                advancedSearchPanel.style.marginTop = '10px';
-                advancedSearchPanel.style.marginBottom = '30px';
+
+                // 약간의 지연 후 애니메이션 적용 (브라우저 렌더링 시간 확보)
+                setTimeout(() => {
+                    advancedSearchPanel.classList.add('active');
+                    advancedSearchPanel.style.opacity = '1';
+                    advancedSearchPanel.style.transform = 'translateY(0)';
+                    advancedSearchPanel.style.visibility = 'visible';
+                    advancedSearchPanel.style.maxHeight = '1000px';
+                    advancedSearchPanel.style.marginTop = '20px';
+                    advancedSearchPanel.style.marginBottom = '30px';
+                }, 10);
             } else {
+                // 패널 숨김 애니메이션
+                advancedSearchPanel.classList.remove('active');
                 advancedSearchPanel.style.opacity = '0';
+                advancedSearchPanel.style.transform = 'translateY(-10px)';
                 advancedSearchPanel.style.visibility = 'hidden';
                 advancedSearchPanel.style.maxHeight = '0';
-                advancedSearchPanel.style.padding = '0';
+                advancedSearchPanel.style.marginTop = '0';
+                advancedSearchPanel.style.marginBottom = '0';
 
                 // 트랜지션 완료 후 display 속성 변경
                 setTimeout(() => {
                     if (!isOpen) {
                         advancedSearchPanel.style.display = 'none';
                     }
-                }, 300);
+                }, 600);
             }
 
             // 버튼 클릭 애니메이션
