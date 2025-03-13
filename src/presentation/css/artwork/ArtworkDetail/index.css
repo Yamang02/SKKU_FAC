@@ -6,13 +6,13 @@
  */
 
 /* 기본 레이아웃 */
-@import url('layout.css');
+@import url('./layout.css');
 
 /* 상세 정보 섹션 */
-@import url('info.css');
+@import url('./info.css');
 
 /* 댓글 섹션 */
-@import url('comments.css');
+@import url('./comments.css');
 
 /* 관련 작품 섹션 */
-@import url('related.css');
+@import url('./related.css');

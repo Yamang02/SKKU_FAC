@@ -2,7 +2,7 @@
 <html lang="ko">
 
     <head>
-        <% const pageTitle=title; const additionalStyles=['/css/home/main.css']; %>
+        <% const pageTitle=title; const additionalStyles=['/css/home/HomePage.css']; %>
             <%- include('../common/head', { pageTitle, additionalStyles }) %>
     </head>
 
@@ -22,7 +22,7 @@
                     <div class="container idx-content">
                         <header class="idx-featured__header">
                             <h2 class="idx-featured__title">Featured Artworks</h2>
-                            <a href="/artwork/list" class="idx-featured__link">모든 작품 보기</a>
+                            <a href="/artwork" class="idx-featured__link">모든 작품 보기</a>
                         </header>
                         <div class="artwork-grid">
                             <% featuredArtworks.forEach(artwork=> { %>
@@ -74,7 +74,7 @@
 
             <%- include('../common/footer') %>
 
-                <script type="module" src="/js/home/main.js"></script>
+                <script type="module" src="/js/home/HomePage.js"></script>
     </body>
 
 </html>

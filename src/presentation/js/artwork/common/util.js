@@ -4,7 +4,7 @@
  */
 
 // 공통 유틸리티 함수 가져오기
-import { fadeIn, fadeOut, debounce, showErrorMessage } from '../../../common/util/index.js';
+import { fadeIn, fadeOut, debounce, showErrorMessage } from '/js/common/util/index.js';
 
 // 재내보내기
 export { fadeIn, fadeOut, debounce, showErrorMessage };

@@ -6,13 +6,5 @@
  */
 
 /* 기본 레이아웃 */
-@import url('detail/layout.css');
+@import url('./ArtworkDetail/index.css');
 
-/* 상세 정보 섹션 */
-@import url('detail/info.css');
-
-/* 댓글 섹션 */
-@import url('detail/comments.css');
-
-/* 관련 작품 섹션 */
-@import url('detail/related.css');

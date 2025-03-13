@@ -40,7 +40,7 @@ export async function getArtworkList(req, res) {
         // 연도 목록 조회 (필터용)
         const years = artworkService.getYears();
 
-        res.render('artwork/list', {
+        res.render('artwork/ArtworkList', {
             title: '작품 목록',
             artworks: artworksResult.items,
             exhibitions,
@@ -97,7 +97,7 @@ export function getArtworkDetail(req, res) {
         // 댓글 조회
         const commentData = commentService.getCommentsByArtworkId(id, commentPage);
 
-        res.render('artwork/detail', {
+        res.render('artwork/ArtworkDetail', {
             title: artwork.title,
             artwork,
             relatedArtworks,

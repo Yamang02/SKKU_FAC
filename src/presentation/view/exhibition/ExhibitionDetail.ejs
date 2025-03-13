@@ -2,8 +2,8 @@
 <html lang="ko">
 
     <head>
-        <% const pageTitle=`${exhibition.title} | ${title}`; const additionalStyles=[ '/css/pages/exhibition-detail.css'
-            ]; %>
+        <% const pageTitle=`${exhibition.title} | ${title}`; const
+            additionalStyles=[ '/css/exhibition/ExhibitionDetail.css' ]; %>
             <%- include('../common/head', { pageTitle, additionalStyles }) %>
     </head>
 
@@ -78,7 +78,8 @@
 
             <%- include(' ../common/footer') %>
 
-                                            <script type="module" src="/js/exhibition/detail/index.js"></script>
+                                            <script type="module"
+                                                src="/js/exhibition/ExhibitionDetail/index.js"></script>
     </body>
 
 </html>

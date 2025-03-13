@@ -2,7 +2,8 @@
 <html lang="ko">
 
     <head>
-        <% const pageTitle=`${artwork.title} - SKKU 순수미술동아리 갤러리`; const additionalStyles=[]; %>
+        <% const pageTitle=`${artwork.title} - SKKU 순수미술동아리 갤러리`; const
+            additionalStyles=['/css/artwork/ArtworkDetail.css']; %>
             <%- include('../common/head', { pageTitle, additionalStyles }) %>
     </head>
 
@@ -187,7 +188,7 @@
                                     <button class="btn btn--round btn--scroll" aria-label="이전 작품">
                                         <i class="fas fa-chevron-left"></i>
                                     </button>
-                                    <a href="/artwork/list" class="btn btn--round btn--list">
+                                    <a href="/artwork" class="btn btn--round btn--list">
                                         <i class="fas fa-th-large"></i>
                                         <span>작품 목록</span>
                                     </a>
@@ -204,7 +205,7 @@
             <%- include('../common/footer') %>
 
                 <!-- 외부 스크립트 파일 로드 -->
-                <script type="module" src="/js/artwork/detail/index.js"></script>
+                <script type="module" src="/js/artwork/ArtworkDetail/index.js"></script>
     </body>
 
 </html>
