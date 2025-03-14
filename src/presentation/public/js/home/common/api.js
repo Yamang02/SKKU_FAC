@@ -12,7 +12,7 @@ import { showErrorMessage } from './util.js';
 export async function fetchFeaturedArtworks(limit = 6) {
     try {
         // API 요청
-        const response = await fetch(`/api/artworks/featured?limit=${limit}`);
+        const response = await fetch(`/api/artworks?featured=true&limit=${limit}`);
 
         if (!response.ok) {
             throw new Error(`API 오류: ${response.status}`);

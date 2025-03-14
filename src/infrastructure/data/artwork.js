@@ -13,7 +13,8 @@ const artwork = [
         description: '가쓰시카 호쿠사이의 대표작 중 하나로, 일본 에도 시대의 목판화입니다. 거대한 파도가 후지산을 배경으로 어부들의 배를 위협하는 모습을 담고 있습니다.',
         image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1024px-Tsunami_by_hokusai_19th_century.jpg',
         exhibition: '동아시아 풍경화전',
-        exhibitionId: 2
+        exhibitionId: 2,
+        isFeatured: true
     },
     {
         id: 2,
@@ -26,7 +27,8 @@ const artwork = [
         description: '네덜란드 황금시대의 화가 요하네스 베르메르의 대표작으로, 진주 귀걸이를 한 소녀의 초상화입니다. 빛과 그림자의 대비, 소녀의 신비로운 표정이 특징적입니다.',
         image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/800px-Meisje_met_de_parel.jpg',
         exhibition: '현대미술의 흐름',
-        exhibitionId: 3
+        exhibitionId: 3,
+        isFeatured: true
     },
     {
         id: 3,
@@ -39,7 +41,8 @@ const artwork = [
         description: '빈센트 반 고흐의 대표작으로, 프랑스 생레미의 정신병원에서 머무를 때 그린 작품입니다. 소용돌이치는 하늘과 밝게 빛나는 별들이 특징적입니다.',
         image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1024px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
         exhibition: '색채의 향연',
-        exhibitionId: 4
+        exhibitionId: 4,
+        isFeatured: true
     },
     {
         id: 4,
@@ -55,11 +58,17 @@ const artwork = [
             'Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/' +
             '800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
         exhibition: '자연과 인간',
-        exhibitionId: 5
+        exhibitionId: 5,
+        isFeatured: true
     }
 ];
 
 export default artwork;
+
 export function getArtworkById(id) {
     return artwork.find(artwork => artwork.id === parseInt(id));
+}
+
+export function getFeaturedArtworks(limit = 6) {
+    return artwork.filter(art => art.isFeatured).slice(0, limit);
 }

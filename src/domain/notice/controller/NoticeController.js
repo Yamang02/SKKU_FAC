@@ -1,3 +1,5 @@
+import viewResolver from '../../../presentation/view/ViewResolver.js';
+
 /**
  * 공지사항 컨트롤러
  * HTTP 요청을 처리하고 서비스 레이어와 연결합니다.
@@ -15,13 +17,13 @@ export function getNoticeList(req, res) {
         // 공지사항 목록을 가져오는 로직 추가 필요
         // const notices = noticeService.getAllNotices();
 
-        res.render('notices/index', {
+        res.render(viewResolver.resolve('notices/index'), {
             title: '공지사항'
             // notices
         });
     } catch (error) {
         // console.error('공지사항 목록 조회 오류:', error);
-        res.status(500).render('common/error', {
+        res.status(500).render(viewResolver.resolve('common/error'), {
             message: '공지사항을 불러오는 중 오류가 발생했습니다.'
         });
     }
@@ -40,18 +42,18 @@ export function getNoticeDetail(req, res) {
         // const notice = noticeService.getNoticeById(noticeId);
 
         // if (!notice) {
-        //     return res.status(404).render('common/error', {
+        //     return res.status(404).render(viewResolver.resolve('common/error'), {
         //         message: '해당 공지사항을 찾을 수 없습니다.'
         //     });
         // }
 
-        res.render('notices/detail', {
+        res.render(viewResolver.resolve('notices/detail'), {
             title: '공지사항 상세'
             // notice
         });
     } catch (error) {
         // console.error('공지사항 상세 조회 오류:', error);
-        res.status(500).render('common/error', {
+        res.status(500).render(viewResolver.resolve('common/error'), {
             message: '공지사항을 불러오는 중 오류가 발생했습니다.'
         });
     }

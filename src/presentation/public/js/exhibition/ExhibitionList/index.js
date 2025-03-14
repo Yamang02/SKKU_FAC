@@ -2,7 +2,7 @@
  * 전시회 목록 페이지 - 메인 스크립트
  * 전시회 목록 페이지의 기능을 초기화합니다.
  */
-import { openExhibitionDetailModal } from '../components/ExhibitionDetailModal.js';
+import { showExhibitionModal } from './modal.js';
 import { initGrid } from './grid.js';
 import { initFilters } from './filters.js';
 import { initSearch } from './search.js';
@@ -55,7 +55,7 @@ function initExhibitionCardEvents() {
                 viewingHours: card.dataset.viewingHours || '10:00 - 18:00',
                 admission: card.dataset.admission || '무료'
             };
-            openExhibitionDetailModal(exhibitionData);
+            showExhibitionModal(exhibitionData);
         });
     });
 }

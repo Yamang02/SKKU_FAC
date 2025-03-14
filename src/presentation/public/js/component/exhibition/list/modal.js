@@ -2,8 +2,8 @@
  * 전시 목록 페이지 - 모달 모듈
  * 전시회 모달 관련 기능을 처리합니다.
  */
-import { fadeIn, fadeOut, showErrorMessage } from '../common/util.js';
-import { fetchExhibitionDetail } from '../common/api.js';
+import { fadeIn, fadeOut, showErrorMessage } from '../../../utils/index.js';
+import { fetchExhibitionDetail } from '../../../api/exhibition.js';
 
 // 모달 상태
 const modalState = {

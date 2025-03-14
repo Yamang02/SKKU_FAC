@@ -17,8 +17,8 @@
         "dev": "nodemon app.js",
         "lint": "npx eslint --config ./config/.eslintrc.json src/",
         "lint:fix": "npx eslint --config ./config/.eslintrc.json src/ --fix",
-        "lint:css": "npx stylelint --config ./config/.stylelintrc.json \"src/presentation/css/**/*.css\" --quiet",
-        "lint:css:fix": "npx stylelint --config ./config/.stylelintrc.json \"src/presentation/css/**/*.css\" --fix --quiet",
+        "lint:css": "npx stylelint --config ./config/.stylelintrc.json \"src/presentation/public/css/**/*.css\" --quiet",
+        "lint:css:fix": "npx stylelint --config ./config/.stylelintrc.json \"src/presentation/public/css/**/*.css\" --fix --quiet",
         "analyze": "npm run lint && npm run lint:css && echo '코드 분석이 완료되었습니다.'"
     },
     "dependencies": {

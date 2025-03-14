@@ -2,6 +2,7 @@
  * 전시회 컨트롤러
  * HTTP 요청을 처리하고 서비스 레이어와 연결합니다.
  */
+import viewResolver from '../../../presentation/view/ViewResolver.js';
 import * as exhibitionService from '../service/ExhibitionService.js';
 import * as artworkService from '../../artwork/service/ArtworkService.js';
 
@@ -14,13 +15,13 @@ export function getExhibitionList(req, res) {
     try {
         const exhibitions = exhibitionService.getAllExhibitions();
 
-        res.render('exhibition/ExhibitionList', {
+        res.render(viewResolver.resolve('exhibition/ExhibitionList'), {
             title: '작품 아카이브',
             exhibitions
         });
     } catch (error) {
         // console.error('전시회 목록 조회 오류:', error);
-        res.status(500).render('common/error', {
+        res.status(500).render(viewResolver.resolve('common/error'), {
             message: '전시회 목록을 불러오는 중 오류가 발생했습니다.'
         });
     }
@@ -36,14 +37,14 @@ export function getCategoryExhibition(req, res) {
         const { category } = req.params;
         const exhibitions = exhibitionService.getExhibitionsByCategory(category);
 
-        res.render('exhibition/category', {
+        res.render(viewResolver.resolve('exhibition/category'), {
             title: `${category} 전시회`,
             category,
             exhibitions
         });
     } catch (error) {
         // console.error('카테고리별 전시회 조회 오류:', error);
-        res.status(500).render('common/error', {
+        res.status(500).render(viewResolver.resolve('common/error'), {
             message: '전시회 목록을 불러오는 중 오류가 발생했습니다.'
         });
     }
@@ -60,14 +61,14 @@ export function getExhibitionDetail(req, res) {
         const exhibition = exhibitionService.getExhibitionById(id);
         const artworks = artworkService.getArtworksByExhibitionId(id);
 
-        res.render('exhibition/detail', {
+        res.render(viewResolver.resolve('exhibition/detail'), {
             title: exhibition.title,
             exhibition,
             artworks
         });
     } catch (error) {
         // console.error('전시회 상세 조회 오류:', error);
-        res.status(500).render('common/error', {
+        res.status(500).render(viewResolver.resolve('common/error'), {
             message: '전시회 정보를 불러오는 중 오류가 발생했습니다.'
         });
     }

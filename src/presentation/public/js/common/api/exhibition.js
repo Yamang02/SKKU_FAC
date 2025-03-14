@@ -2,7 +2,7 @@
  * 전시 도메인 - API 모듈
  * 서버 API 통신 관련 함수들을 제공합니다.
  */
-import { showErrorMessage } from './util.js';
+import { showErrorMessage } from '/js/common/util/index.js';
 
 /**
  * 전시회 상세 정보 가져오기

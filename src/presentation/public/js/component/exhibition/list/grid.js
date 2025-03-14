@@ -2,8 +2,8 @@
  * 전시 목록 페이지 - 그리드 모듈
  * 전시회 그리드 관련 기능을 처리합니다.
  */
-import { fadeIn } from '../../common/util/index.js';
-import { openExhibitionDetailModal } from '../components/ExhibitionDetailModal.js';
+import { fadeIn } from '../../../utils/index.js';
+import { showExhibitionModal } from './modal.js';
 
 /**
  * 그리드 초기화
@@ -153,7 +153,7 @@ function initCardClickEvents(cards) {
                         name: card.dataset.location
                     }]
             };
-            openExhibitionDetailModal(exhibitionData);
+            showExhibitionModal(exhibitionData);
         });
     });
 }

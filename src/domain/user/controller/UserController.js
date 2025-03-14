@@ -1,3 +1,5 @@
+import viewResolver from '../../../presentation/view/ViewResolver.js';
+
 /**
  * 사용자 컨트롤러
  * HTTP 요청을 처리하고 서비스 레이어와 연결합니다.
@@ -11,7 +13,7 @@
  * @param {Object} res - Express 응답 객체
  */
 export function getLoginPage(req, res) {
-    res.render('users/login', {
+    res.render(viewResolver.resolve('users/login'), {
         title: '로그인'
     });
 }
@@ -39,7 +41,7 @@ export function login(req, res) {
         res.redirect('/');
     } catch (error) {
         // console.error('로그인 처리 오류:', error);
-        res.status(500).render('common/error', {
+        res.status(500).render(viewResolver.resolve('common/error'), {
             message: '로그인 처리 중 오류가 발생했습니다.'
         });
     }
@@ -65,7 +67,7 @@ export function logout(req, res) {
  * @param {Object} res - Express 응답 객체
  */
 export function getRegisterPage(req, res) {
-    res.render('users/register', {
+    res.render(viewResolver.resolve('users/register'), {
         title: '회원가입'
     });
 }
@@ -81,7 +83,7 @@ export function register(req, res) {
 
         // 비밀번호 확인
         if (password !== confirmPassword) {
-            return res.render('users/register', {
+            return res.render(viewResolver.resolve('users/register'), {
                 title: '회원가입',
                 error: '비밀번호가 일치하지 않습니다.',
                 user: { name, email }
@@ -94,7 +96,7 @@ export function register(req, res) {
         res.redirect('/user/login');
     } catch (error) {
         // console.error('회원가입 처리 오류:', error);
-        res.status(500).render('common/error', {
+        res.status(500).render(viewResolver.resolve('common/error'), {
             message: '회원가입 처리 중 오류가 발생했습니다.'
         });
     }

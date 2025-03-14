@@ -2,8 +2,7 @@
 <html lang="ko">
 
     <head>
-        <% const pageTitle=title; const additionalStyles=[ '/css/exhibition/ExhibitionList.css'
-            , '/css/components/exhibition-modal.css' ]; %>
+        <% const pageTitle=title; const additionalStyles=[ '/css/exhibition/ExhibitionList.css' ]; %>
             <%- include('../common/head', { pageTitle, additionalStyles }) %>
     </head>
 
@@ -113,9 +112,9 @@
                                 data-exhibition-type="<%= exhibition.exhibitionType || 'regular' %>">
 
                                 <div class="card-image-container">
-                                    <img src="<%= exhibition.image || '/image/exhibition/placeholder-exhibition.svg' %>"
+                                    <img src="<%= exhibition.image || '/assets/image/exhibition/placeholder-exhibition.svg' %>"
                                         alt="<%= exhibition.title %>" class="exhibition-image"
-                                        onerror="this.src='/image/exhibition/placeholder-exhibition.svg'">
+                                        onerror="this.src='/assets/image/exhibition/placeholder-exhibition.svg'">
                                     <!-- 전시 유형 표시 (정기/특별) -->
                                     <span class="exhibition-type <%= exhibition.exhibitionType || 'regular' %>">
                                         <%= exhibition.exhibitionType==='special' ? '특별' : '정기' %>
@@ -177,8 +176,7 @@
                 <%- include('./components/ExhibitionDetailModal.ejs') %>
 
                     <!-- 스크립트 -->
-                    <script src="/js/exhibition/ExhibitionList/index.js" type="module"></script>
-                    <script src="/js/exhibition/components/ExhibitionDetailModal.js" type="module"></script>
+                    <script src="/js/pages/exhibition/ExhibitionList.js" type="module"></script>
     </body>
 
 </html>

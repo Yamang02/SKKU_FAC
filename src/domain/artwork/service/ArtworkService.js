@@ -39,7 +39,7 @@ export function getArtworks(filters = {}) {
  * @returns {Object} 작품 목록과 총 개수
  */
 export function searchArtworks(filters = {}) {
-    const { keyword, exhibition, year, department, limit = 12, offset = 0 } = filters;
+    const { keyword, exhibition, year, department, featured, limit = 12, offset = 0 } = filters;
 
     // 필터링 로직
     let filteredArtworks = [...artworksData];
@@ -69,6 +69,10 @@ export function searchArtworks(filters = {}) {
         filteredArtworks = filteredArtworks.filter(art =>
             art.department === department
         );
+    }
+
+    if (featured) {
+        filteredArtworks = filteredArtworks.filter(art => art.isFeatured);
     }
 
     // 총 개수

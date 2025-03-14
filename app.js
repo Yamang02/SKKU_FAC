@@ -9,6 +9,7 @@ import session from 'express-session';
 import { getFeaturedArtworks } from './src/domain/home/service/HomeService.js';
 import * as dotenv from 'dotenv';
 import apiRouter from './src/interface/router/index.js';
+import viewResolver from './src/presentation/view/ViewResolver.js';
 
 // 환경 변수 로드
 dotenv.config({ path: './config/.env' });
@@ -25,10 +26,22 @@ app.set('views', path.join(__dirname, 'src/presentation/view'));
 
 // 미들웨어 설정
 // 정적 파일 경로 설정
-app.use(express.static(path.join(__dirname, 'src/presentation')));
-app.use('/css', express.static(path.join(__dirname, 'src/presentation/css')));
-app.use('/js', express.static(path.join(__dirname, 'src/presentation/js')));
-app.use('/image', express.static(path.join(__dirname, 'src/presentation/asset/image')));
+app.use(express.static(path.join(__dirname, 'src/presentation/public'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        }
+    }
+}));
+app.use('/css', express.static(path.join(__dirname, 'src/presentation/public/css'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        }
+    }
+}));
+app.use('/js', express.static(path.join(__dirname, 'src/presentation/public/js')));
+app.use('/image', express.static(path.join(__dirname, 'src/presentation/public/assets/image')));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -44,7 +57,7 @@ app.use('/', apiRouter);
 // 메인 페이지 라우트
 app.get('/', (req, res) => {
     const featuredArtworks = getFeaturedArtworks();
-    res.render('home/HomePage', {
+    res.render(viewResolver.resolve('home/HomePage'), {
         title: 'SKKU Fine Art Gallery',
         featuredArtworks
     });

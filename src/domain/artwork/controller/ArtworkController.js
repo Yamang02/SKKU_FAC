@@ -2,6 +2,7 @@
  * 작품 컨트롤러
  * HTTP 요청을 처리하고 서비스 레이어와 연결합니다.
  */
+import viewResolver from '../../../presentation/view/ViewResolver.js';
 import * as artworkService from '../service/ArtworkService.js';
 import * as relatedArtworkService from '../service/RelatedArtworkService.js';
 import * as exhibitionService from '../../exhibition/service/ExhibitionService.js';
@@ -15,7 +16,26 @@ import * as commentService from '../../comment/service/CommentService.js';
 export async function getArtworkList(req, res) {
     try {
         // 검색 파라미터 가져오기
-        const { keyword, exhibition, year, department, page = 1 } = req.query;
+        const { keyword, exhibition, year, department, page = 1, featured } = req.query;
+
+        // API 요청인 경우 JSON 응답
+        if (req.xhr || req.headers.accept.includes('application/json')) {
+            const limit = parseInt(req.query.limit) || 12;
+            const offset = (page - 1) * limit;
+
+            // 작품 목록 조회
+            const artworksResult = artworkService.searchArtworks({
+                keyword,
+                exhibition,
+                year,
+                department,
+                featured: featured === 'true',
+                limit,
+                offset
+            });
+
+            return res.json(artworksResult);
+        }
 
         // 페이지네이션 설정
         const limit = 12;
@@ -40,7 +60,7 @@ export async function getArtworkList(req, res) {
         // 연도 목록 조회 (필터용)
         const years = artworkService.getYears();
 
-        res.render('artwork/ArtworkList', {
+        res.render(viewResolver.resolve('artwork/ArtworkList'), {
             title: '작품 목록',
             artworks: artworksResult.items,
             exhibitions,
@@ -66,7 +86,7 @@ export async function getArtworkList(req, res) {
         });
     } catch (error) {
         // console.error('작품 목록 조회 오류:', error);
-        res.status(500).render('common/error', {
+        res.status(500).render(viewResolver.resolve('common/error'), {
             message: '작품 목록을 불러오는 중 오류가 발생했습니다.'
         });
     }
@@ -86,7 +106,7 @@ export function getArtworkDetail(req, res) {
         const artwork = artworkService.getArtworkById(id);
 
         if (!artwork) {
-            return res.status(404).render('common/error', {
+            return res.status(404).render(viewResolver.resolve('common/error'), {
                 message: '해당 작품을 찾을 수 없습니다.'
             });
         }
@@ -97,7 +117,7 @@ export function getArtworkDetail(req, res) {
         // 댓글 조회
         const commentData = commentService.getCommentsByArtworkId(id, commentPage);
 
-        res.render('artwork/ArtworkDetail', {
+        res.render(viewResolver.resolve('artwork/ArtworkDetail'), {
             title: artwork.title,
             artwork,
             relatedArtworks,
@@ -107,7 +127,7 @@ export function getArtworkDetail(req, res) {
         });
     } catch (error) {
         // console.error('작품 상세 조회 오류:', error);
-        res.status(500).render('common/error', {
+        res.status(500).render(viewResolver.resolve('common/error'), {
             message: '작품 정보를 불러오는 중 오류가 발생했습니다.'
         });
     }

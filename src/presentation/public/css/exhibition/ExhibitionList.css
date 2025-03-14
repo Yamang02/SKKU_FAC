@@ -33,6 +33,7 @@
 
 /* 검색 컨테이너 */
 .search-container {
+    width: 100%;
     background-color: white;
     border-radius: var(--border-radius-lg);
     padding: 30px;
@@ -44,6 +45,7 @@
 /* 검색 폼 */
 .search-form {
     width: 100%;
+    display: block;
 }
 
 /* 검색 레이아웃 */
