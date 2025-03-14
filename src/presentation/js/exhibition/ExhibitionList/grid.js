@@ -2,7 +2,8 @@
  * 전시 목록 페이지 - 그리드 모듈
  * 전시회 그리드 관련 기능을 처리합니다.
  */
-import { fadeIn } from '../common/util.js';
+import { fadeIn } from '../../common/util/index.js';
+import { openExhibitionDetailModal } from '../components/ExhibitionDetailModal.js';
 
 /**
  * 그리드 초기화
@@ -18,6 +19,9 @@ export function initGrid() {
 
     // 카드 호버 효과
     initCardHoverEffects(exhibitionCards);
+
+    // 카드 클릭 이벤트
+    initCardClickEvents(exhibitionCards);
 
     // 필터링 기능 (있는 경우)
     initFiltering();
@@ -120,6 +124,36 @@ function initFiltering() {
                     }
                 });
             }
+        });
+    });
+}
+
+/**
+ * 카드 클릭 이벤트 초기화
+ * @param {NodeList} cards - 카드 요소 목록
+ */
+function initCardClickEvents(cards) {
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            const exhibitionData = {
+                id: card.dataset.exhibitionId,
+                imageUrl: card.querySelector('.exhibition-image').src,
+                title: card.querySelector('.exhibition-title').textContent,
+                startDate: card.dataset.startDate,
+                endDate: card.dataset.endDate,
+                description: card.dataset.description,
+                type: card.querySelector('.exhibition-type')?.textContent || '일반 전시',
+                viewingHours: card.dataset.viewingHours || '10:00 - 18:00',
+                // 기간별 전시장소 데이터 구성
+                locations: card.dataset.locations ?
+                    JSON.parse(card.dataset.locations) :
+                    [{
+                        startDate: card.dataset.startDate,
+                        endDate: card.dataset.endDate,
+                        name: card.dataset.location
+                    }]
+            };
+            openExhibitionDetailModal(exhibitionData);
         });
     });
 }

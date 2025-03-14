@@ -225,8 +225,9 @@ function performSearch() {
  */
 function isExhibitionMatchingSearch(exhibition) {
     // 제목 검색
-    const title = exhibition.dataset.title.toLowerCase();
-    if (searchState.query && !title.includes(searchState.query)) return false;
+    const titleElement = exhibition.querySelector('.exhibition-title');
+    const title = titleElement ? titleElement.textContent.trim().toLowerCase() : '';
+    if (searchState.query && !title.includes(searchState.query.toLowerCase())) return false;
 
     // 전시 유형 검색
     const exhibitionType = exhibition.dataset.exhibitionType;

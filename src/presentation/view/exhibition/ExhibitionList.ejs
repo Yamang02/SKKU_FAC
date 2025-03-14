@@ -103,7 +103,12 @@
                     <div class="exhibition-grid" id="exhibitions-container">
                         <% exhibitions.forEach(exhibition=> { %>
                             <div class="exhibition-card" data-exhibition-id="<%= exhibition.id %>"
-                                data-title="<%= exhibition.title %>" data-date="<%= exhibition.startDate %>"
+                                data-start-date="<%= exhibition.startDate %>" data-end-date="<%= exhibition.endDate %>"
+                                data-location="<%= exhibition.location %>"
+                                data-description="<%= exhibition.description %>"
+                                data-artists="<%= exhibition.artists ? exhibition.artists.join(',') : '' %>"
+                                data-viewing-hours="<%= exhibition.viewingHours || '10:00 - 18:00' %>"
+                                data-admission="<%= exhibition.admission || '무료' %>"
                                 data-category="<%= exhibition.category || 'uncategorized' %>"
                                 data-exhibition-type="<%= exhibition.exhibitionType || 'regular' %>">
 
@@ -169,17 +174,11 @@
             </main>
 
             <%- include('../common/footer') %>
+                <%- include('./components/ExhibitionDetailModal.ejs') %>
 
-                <!-- 전시회 모달 -->
-                <div id="exhibition-modal" class="modal">
-                    <div class="modal-content">
-                        <span class="close-modal">&times;</span>
-                        <div id="modal-content-container"></div>
-                    </div>
-                </div>
-
-                <!-- 스크립트 -->
-                <script src="/js/exhibition/ExhibitionList/index.js" type="module"></script>
+                    <!-- 스크립트 -->
+                    <script src="/js/exhibition/ExhibitionList/index.js" type="module"></script>
+                    <script src="/js/exhibition/components/ExhibitionDetailModal.js" type="module"></script>
     </body>
 
 </html>

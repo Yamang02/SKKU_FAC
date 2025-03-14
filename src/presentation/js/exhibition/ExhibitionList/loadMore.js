@@ -1,42 +1,46 @@
 /**
- * 전시 목록 페이지 - 더보기 모듈
- * 더보기 버튼을 통한 추가 전시회 로드 기능을 처리합니다.
+ * 전시 목록 페이지 - 무한 스크롤 모듈
  */
 
-// 페이지네이션 상태
-const paginationState = {
-    currentPage: 1,
-    itemsPerPage: 6,
-    totalItems: 30, // 데모용 총 아이템 수
-    hasMore: true,
-    isLoading: false
-};
+let currentPage = 1;
+const maxPages = 3; // 최대 3페이지까지만 로드 (초기 + 2번의 추가 로드)
+let isLoading = false; // 로딩 상태
+let scrollTimeout = null; // 디바운싱을 위한 타임아웃
 
 /**
- * 더보기 기능 초기화
+ * 무한 스크롤 초기화
  */
 export function initLoadMore() {
-    // 스크롤 이벤트 리스너 등록
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', debounceScroll);
+}
 
-    // 초기 상태 설정
-    updateLoadingIndicator();
+/**
+ * 스크롤 이벤트 디바운싱
+ */
+function debounceScroll() {
+    if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+    }
+    scrollTimeout = setTimeout(handleScroll, 100);
 }
 
 /**
  * 스크롤 이벤트 핸들러
  */
 function handleScroll() {
-    // 이미 로딩 중이거나 더 불러올 항목이 없으면 중단
-    if (paginationState.isLoading || !paginationState.hasMore) return;
+    if (currentPage >= maxPages || isLoading) {
+        // 최대 페이지에 도달했거나 로딩 중이면 중단
+        if (currentPage >= maxPages) {
+            window.removeEventListener('scroll', debounceScroll);
+        }
+        return;
+    }
 
-    // 페이지 하단에 도달했는지 확인
     const scrollHeight = document.documentElement.scrollHeight;
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const clientHeight = window.innerHeight || document.documentElement.clientHeight;
+    const clientHeight = document.documentElement.clientHeight;
 
-    // 하단에서 200px 이내로 스크롤되면 추가 로드
-    if (scrollTop + clientHeight >= scrollHeight - 200) {
+    if (scrollTop + clientHeight >= scrollHeight - 100) {
         loadMoreExhibitions();
     }
 }
@@ -45,99 +49,46 @@ function handleScroll() {
  * 추가 전시회 로드
  */
 function loadMoreExhibitions() {
-    // 로딩 상태 설정
-    paginationState.isLoading = true;
-    updateLoadingIndicator();
+    if (isLoading) return; // 이미 로딩 중이면 중단
 
-    // 페이지 증가
-    paginationState.currentPage++;
-
-    // 서버에서 데이터를 가져오는 대신 지연 시뮬레이션
-    setTimeout(() => {
-        // 기존 전시회 복제하여 추가 (데모용)
-        const exhibitionsContainer = document.getElementById('exhibitions-container');
-        const existingCards = document.querySelectorAll('.exhibition-card');
-
-        if (exhibitionsContainer && existingCards.length > 0) {
-            // 기존 카드 복제하여 추가 (실제로는 서버에서 새 데이터 받아옴)
-            const cardsToAdd = Math.min(paginationState.itemsPerPage, existingCards.length);
-
-            for (let i = 0; i < cardsToAdd; i++) {
-                const randomIndex = Math.floor(Math.random() * existingCards.length);
-                const clonedCard = existingCards[randomIndex].cloneNode(true);
-
-                // 고유 ID 부여 (실제로는 서버에서 받은 데이터의 ID 사용)
-                const newId = `exhibition-${Date.now()}-${i}`;
-                clonedCard.setAttribute('data-exhibition-id', newId);
-
-                // 전시회 유형 랜덤 설정 (데모용)
-                const exhibitionTypes = ['regular', 'special'];
-                const randomType = exhibitionTypes[Math.floor(Math.random() * exhibitionTypes.length)];
-                clonedCard.setAttribute('data-exhibition-type', randomType);
-
-                // 전시회 유형 뱃지 업데이트
-                const typeElement = clonedCard.querySelector('.exhibition-type');
-                if (typeElement) {
-                    typeElement.className = `exhibition-type ${randomType}`;
-                    typeElement.textContent = randomType === 'regular' ? '정기' : '특별';
-                }
-
-                // 약간의 변형 추가 (데모용)
-                const titleElement = clonedCard.querySelector('.exhibition-title');
-                if (titleElement) {
-                    titleElement.textContent = `${titleElement.textContent} (추가)`;
-                }
-
-                // 애니메이션 효과를 위한 초기 스타일
-                clonedCard.style.opacity = '0';
-                clonedCard.style.transform = 'translateY(20px)';
-
-                // 컨테이너에 추가
-                exhibitionsContainer.appendChild(clonedCard);
-
-                // 애니메이션 효과
-                setTimeout(() => {
-                    clonedCard.style.opacity = '1';
-                    clonedCard.style.transform = 'translateY(0)';
-                }, 100 * i);
-
-                // 클릭 이벤트 다시 바인딩 (모달 등)
-                clonedCard.addEventListener('click', function () {
-                    const event = new CustomEvent('exhibition:selected', {
-                        detail: { id: newId }
-                    });
-                    document.dispatchEvent(event);
-                });
-            }
-
-            // 더 불러올 항목이 있는지 확인
-            const totalLoaded = paginationState.currentPage * paginationState.itemsPerPage;
-            paginationState.hasMore = totalLoaded < paginationState.totalItems;
-        }
-
-        // 로딩 상태 해제
-        paginationState.isLoading = false;
-        updateLoadingIndicator();
-
-    }, 800); // 로딩 시뮬레이션을 위한 지연
-}
-
-/**
- * 로딩 인디케이터 업데이트
- */
-function updateLoadingIndicator() {
+    isLoading = true; // 로딩 시작
     const loadingIndicator = document.getElementById('loading-indicator');
-    if (loadingIndicator) {
-        loadingIndicator.style.display = paginationState.isLoading ? 'flex' : 'none';
-    }
+    if (loadingIndicator) loadingIndicator.style.display = 'flex';
+
+    // 현재 표시된 전시회들을 복제하여 추가
+    setTimeout(() => {
+        const container = document.getElementById('exhibitions-container');
+        const exhibitions = container.querySelectorAll('.exhibition-card');
+
+        // 현재 보이는 전시회만 복제
+        const visibleExhibitions = Array.from(exhibitions).filter(
+            exhibition => exhibition.style.display !== 'none'
+        );
+
+        visibleExhibitions.forEach(exhibition => {
+            const clone = exhibition.cloneNode(true);
+            container.appendChild(clone);
+        });
+
+        currentPage++;
+        isLoading = false; // 로딩 완료
+
+        if (loadingIndicator) loadingIndicator.style.display = 'none';
+
+        // 최대 페이지에 도달하면 스크롤 이벤트 제거
+        if (currentPage >= maxPages) {
+            window.removeEventListener('scroll', debounceScroll);
+        }
+    }, 1000);
 }
 
 /**
- * 페이지네이션 상태 초기화
+ * 페이지네이션 초기화
  */
 export function resetPagination() {
-    paginationState.currentPage = 1;
-    paginationState.hasMore = true;
-    paginationState.isLoading = false;
-    updateLoadingIndicator();
+    currentPage = 1;
+    isLoading = false;
+    // 스크롤 이벤트 다시 등록
+    window.removeEventListener('scroll', debounceScroll);
+    window.addEventListener('scroll', debounceScroll);
 }

@@ -430,3 +430,195 @@
 .reset-button:hover {
     background-color: var(--exhibition-primary-dark);
 }
+
+/* 전시회 모달 스타일 */
+.exhibition-modal .modal-content {
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+}
+
+.exhibition-modal .modal-body {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 30px;
+    padding: 0;
+    height: 100%;
+}
+
+.exhibition-modal .modal-image-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    position: relative;
+}
+
+.exhibition-modal .modal-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.exhibition-modal .modal-info {
+    padding: 40px 40px 40px 10px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.exhibition-modal .modal-info-header {
+    margin-bottom: 30px;
+}
+
+.exhibition-modal .modal-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--exhibition-primary);
+    margin-bottom: 15px;
+}
+
+.exhibition-modal .modal-period {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 10px;
+}
+
+.exhibition-modal .modal-location {
+    font-size: 1rem;
+    color: var(--color-text-tertiary);
+    margin-bottom: 20px;
+}
+
+.exhibition-modal .modal-description {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--color-text-primary);
+    margin-bottom: 30px;
+}
+
+.exhibition-modal .modal-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.exhibition-modal .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.exhibition-modal .info-label {
+    min-width: 100px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.exhibition-modal .info-value {
+    color: var(--color-text-primary);
+    flex: 1;
+}
+
+.exhibition-modal .modal-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 15px;
+}
+
+.exhibition-modal .action-button {
+    flex: 1;
+    padding: 14px 24px;
+    border-radius: var(--border-radius-md);
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.exhibition-modal .primary-action {
+    background-color: var(--exhibition-primary);
+    color: white;
+    border: none;
+}
+
+.exhibition-modal .primary-action:hover {
+    background-color: var(--exhibition-primary-dark);
+    transform: translateY(-2px);
+}
+
+.exhibition-modal .secondary-action {
+    background-color: var(--exhibition-primary-light);
+    color: var(--exhibition-primary);
+    border: 1px solid var(--exhibition-primary);
+}
+
+.exhibition-modal .secondary-action:hover {
+    background-color: var(--exhibition-primary-light);
+    transform: translateY(-2px);
+}
+
+.exhibition-modal .close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    border: none;
+}
+
+.exhibition-modal .close:hover {
+    transform: rotate(90deg);
+    background-color: var(--exhibition-primary-light);
+}
+
+@media (max-width: 992px) {
+    .exhibition-modal .modal-body {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .exhibition-modal .modal-image-container {
+        height: 300px;
+    }
+
+    .exhibition-modal .modal-info {
+        padding: 30px;
+    }
+
+    .exhibition-modal .modal-title {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .exhibition-modal .modal-info {
+        padding: 20px;
+    }
+
+    .exhibition-modal .modal-title {
+        font-size: 1.5rem;
+    }
+
+    .exhibition-modal .modal-actions {
+        flex-direction: column;
+    }
+
+    .exhibition-modal .close {
+        right: 10px;
+        top: 10px;
+        width: 32px;
+        height: 32px;
+    }
+}
