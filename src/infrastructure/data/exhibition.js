@@ -2,18 +2,7 @@
  * 전시회 데이터
  */
 const exhibition = [
-    {
-        id: 1,
-        code: 'all',
-        title: '모든 작품',
-        subtitle: '',
-        description: '모든 작품을 보여줍니다.',
-        startDate: '',
-        endDate: '',
-        image: 'https://via.placeholder.com/800x400?text=All+Artworks',
-        artists: [],
-        exhibitionType: 'regular'
-    },
+
     {
         id: 2,
         code: 'east-asia',

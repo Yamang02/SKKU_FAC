@@ -22,6 +22,17 @@
                             </button>
                             <div class="carousel-track-container">
                                 <div class="carousel-track">
+                                    <!-- 모든 작품 카드 -->
+                                    <div class="carousel-slide" data-exhibition="all">
+                                        <div class="card card--carousel card--all">
+                                            <i class="card__icon fas fa-images"></i>
+                                            <h3 class="card__title">모든 작품</h3>
+                                            <p class="card__subtitle">전체 작품 컬렉션</p>
+                                            <div class="card__meta">총 <strong>
+                                                    <%= artworks ? artworks.length : 0 %>
+                                                </strong>개의 작품</div>
+                                        </div>
+                                    </div>
                                     <% exhibitions.forEach((exhibition, index)=> { %>
                                         <div class="carousel-slide" data-exhibition="<%= exhibition.code %>">
                                             <div class="card card--carousel">
