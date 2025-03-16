@@ -7,6 +7,14 @@
 
 // 모듈 스코프에서 실행
 document.addEventListener('DOMContentLoaded', function () {
+    // 모달 초기화
+    initModal();
+});
+
+/**
+ * 모달 초기화
+ */
+function initModal() {
     // 카드 요소 선택
     const cards = document.querySelectorAll('.card.card--home');
 
@@ -78,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
             closeModal(modal);
         }
     });
-});
+}
 
 /**
  * 모달 표시 함수
