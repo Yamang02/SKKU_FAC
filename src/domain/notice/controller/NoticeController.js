@@ -16,14 +16,31 @@ import * as noticeData from '../../../infrastructure/data/notice.js';
 export function getNoticeList(req, res) {
     const searchType = req.query.searchType || 'all';
     const keyword = req.query.keyword || '';
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = 10;  // 페이지당 항목 수
 
     const notices = noticeData.findBySearchType(searchType, keyword);
+    const totalCount = notices.length;
+    const totalPages = Math.ceil(totalCount / limit);
 
-    return viewResolver.render(res, 'notice/NoticeList', {
-        notices,
+    // 페이지네이션을 위한 데이터 계산
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedNotices = notices.slice(startIndex, endIndex);
+
+    const pagination = {
+        currentPage: page,
+        totalPages: totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+    };
+
+    return res.render(viewResolver.resolve('notice/NoticeList'), {
+        notices: paginatedNotices,
         searchType,
         keyword,
-        totalCount: notices.length
+        totalCount,
+        pagination
     });
 }
 
@@ -35,15 +52,39 @@ export function getNoticeList(req, res) {
 export function getNoticeDetail(req, res) {
     const noticeId = parseInt(req.params.id, 10);
     const notice = noticeData.findById(noticeId);
+    const commentPage = parseInt(req.query.commentPage, 10) || 1;
+    const commentsPerPage = 10;
 
     if (!notice) {
         return res.status(404).send('공지사항을 찾을 수 없습니다.');
     }
 
+    // 이전/다음 공지 ID 찾기
+    const notices = noticeData.findBySearchType('all', '');
+    const currentIndex = notices.findIndex(n => n.id === noticeId);
+
+    notice.prevId = currentIndex > 0 ? notices[currentIndex - 1].id : null;
+    notice.nextId = currentIndex < notices.length - 1 ? notices[currentIndex + 1].id : null;
+
     // 조회수 증가
     noticeData.incrementViews(noticeId);
 
-    return viewResolver.render(res, 'notice/NoticeDetail', {
-        notice
+    // 임시 댓글 데이터
+    const comments = [];
+    const totalComments = 0;
+    const totalPages = Math.ceil(totalComments / commentsPerPage);
+
+    const commentPagination = {
+        currentPage: commentPage,
+        totalPages: totalPages,
+        totalComments: totalComments,
+        hasNext: commentPage < totalPages,
+        hasPrev: commentPage > 1
+    };
+
+    return res.render(viewResolver.resolve('notice/NoticeDetail'), {
+        notice,
+        comments,
+        commentPagination
     });
 }
