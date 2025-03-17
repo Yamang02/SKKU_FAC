@@ -1,52 +1,28 @@
-<% /** * 페이지네이션 부분 템플릿 * * 필요한 파라미터: * - pagination: 페이지네이션 정보 객체 * - baseUrl: 페이지 URL (예: "?commentPage=" ) */ %>
+<%- /** * 페이지네이션 부분 템플릿 * 필요한 파라미터: * - pagination: 페이지네이션 정보 객체 * - baseUrl: 페이지 URL (예: "?commentPage=" ) */ %>
 
     <div class="pagination">
-        <% if (pagination.hasPrevPage) { %>
-            <a href="<%= baseUrl %><%= pagination.currentPage - 1 %>" class="pagination__btn pagination__btn--prev"
-                aria-label="이전 페이지">
+        <% if (pagination.hasPrev) { %>
+            <a href="<%= baseUrl %><%= pagination.currentPage - 1 %>" class="pagination__btn pagination__btn--prev">
                 <i class="fas fa-chevron-left"></i>
             </a>
-            <% } else { %>
-                <span class="pagination__btn pagination__btn--prev pagination__btn--disabled" aria-label="이전 페이지">
-                    <i class="fas fa-chevron-left"></i>
-                </span>
-                <% } %>
+            <% } %>
 
-                    <% if (pagination.showFirstPage) { %>
-                        <a href="<%= baseUrl %>1" class="pagination__btn">1</a>
-                        <% if (pagination.showFirstEllipsis) { %>
-                            <span class="pagination__dots">...</span>
+                <% for(let i=1; i <=pagination.totalPages; i++) { %>
+                    <% if (i===pagination.currentPage) { %>
+                        <a href="<%= baseUrl %><%= i %>" class="pagination__btn pagination__btn--active">
+                            <%= i %>
+                        </a>
+                        <% } else { %>
+                            <a href="<%= baseUrl %><%= i %>" class="pagination__btn">
+                                <%= i %>
+                            </a>
                             <% } %>
                                 <% } %>
 
-                                    <% pagination.pages.forEach(pageNum=> { %>
-                                        <a href="<%= baseUrl %><%= pageNum %>"
-                                            class="pagination__btn <%= pageNum === pagination.currentPage ? 'pagination__btn--active' : '' %>">
-                                            <%= pageNum %>
+                                    <% if (pagination.hasNext) { %>
+                                        <a href="<%= baseUrl %><%= pagination.currentPage + 1 %>"
+                                            class="pagination__btn pagination__btn--next">
+                                            <i class="fas fa-chevron-right"></i>
                                         </a>
-                                        <% }); %>
-
-                                            <% if (pagination.showLastPage) { %>
-                                                <% if (pagination.showLastEllipsis) { %>
-                                                    <span class="pagination__dots">...</span>
-                                                    <% } %>
-                                                        <a href="<%= baseUrl %><%= pagination.totalPages %>"
-                                                            class="pagination__btn">
-                                                            <%= pagination.totalPages %>
-                                                        </a>
-                                                        <% } %>
-
-                                                            <% if (pagination.hasNextPage) { %>
-                                                                <a href="<%= baseUrl %><%= pagination.currentPage + 1 %>"
-                                                                    class="pagination__btn pagination__btn--next"
-                                                                    aria-label="다음 페이지">
-                                                                    <i class="fas fa-chevron-right"></i>
-                                                                </a>
-                                                                <% } else { %>
-                                                                    <span
-                                                                        class="pagination__btn pagination__btn--next pagination__btn--disabled"
-                                                                        aria-label="다음 페이지">
-                                                                        <i class="fas fa-chevron-right"></i>
-                                                                    </span>
-                                                                    <% } %>
+                                        <% } %>
     </div>

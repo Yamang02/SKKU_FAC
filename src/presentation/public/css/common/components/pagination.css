@@ -56,7 +56,7 @@
 }
 
 /* 버튼 호버 효과 */
-.pagination__btn:hover:not(.pagination__btn--active):not(.pagination__btn--disabled) {
+.pagination__btn:hover:not(.pagination__btn--active) {
     border-color: var(--color-primary);
     color: var(--color-primary);
 }

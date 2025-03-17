@@ -1,4 +1,5 @@
 import viewResolver from '../../../presentation/view/ViewResolver.js';
+import * as noticeData from '../../../infrastructure/data/notice.js';
 
 /**
  * 공지사항 컨트롤러
@@ -13,20 +14,17 @@ import viewResolver from '../../../presentation/view/ViewResolver.js';
  * @param {Object} res - Express 응답 객체
  */
 export function getNoticeList(req, res) {
-    try {
-        // 공지사항 목록을 가져오는 로직 추가 필요
-        // const notices = noticeService.getAllNotices();
+    const searchType = req.query.searchType || 'all';
+    const keyword = req.query.keyword || '';
 
-        res.render(viewResolver.resolve('notices/index'), {
-            title: '공지사항'
-            // notices
-        });
-    } catch (error) {
-        // console.error('공지사항 목록 조회 오류:', error);
-        res.status(500).render(viewResolver.resolve('common/error'), {
-            message: '공지사항을 불러오는 중 오류가 발생했습니다.'
-        });
-    }
+    const notices = noticeData.findBySearchType(searchType, keyword);
+
+    return viewResolver.render(res, 'notice/NoticeList', {
+        notices,
+        searchType,
+        keyword,
+        totalCount: notices.length
+    });
 }
 
 /**
@@ -35,26 +33,17 @@ export function getNoticeList(req, res) {
  * @param {Object} res - Express 응답 객체
  */
 export function getNoticeDetail(req, res) {
-    try {
-        // const noticeId = req.params.id; // 현재 사용되지 않음
+    const noticeId = parseInt(req.params.id, 10);
+    const notice = noticeData.findById(noticeId);
 
-        // 공지사항 정보를 가져오는 로직 추가 필요
-        // const notice = noticeService.getNoticeById(noticeId);
-
-        // if (!notice) {
-        //     return res.status(404).render(viewResolver.resolve('common/error'), {
-        //         message: '해당 공지사항을 찾을 수 없습니다.'
-        //     });
-        // }
-
-        res.render(viewResolver.resolve('notices/detail'), {
-            title: '공지사항 상세'
-            // notice
-        });
-    } catch (error) {
-        // console.error('공지사항 상세 조회 오류:', error);
-        res.status(500).render(viewResolver.resolve('common/error'), {
-            message: '공지사항을 불러오는 중 오류가 발생했습니다.'
-        });
+    if (!notice) {
+        return res.status(404).send('공지사항을 찾을 수 없습니다.');
     }
+
+    // 조회수 증가
+    noticeData.incrementViews(noticeId);
+
+    return viewResolver.render(res, 'notice/NoticeDetail', {
+        notice
+    });
 }
