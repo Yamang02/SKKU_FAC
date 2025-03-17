@@ -248,37 +248,20 @@ function appendExhibitions(exhibitions) {
 function createExhibitionCard(exhibition) {
     const card = document.createElement('div');
     card.className = 'exhibition-card';
-    card.dataset.exhibitionId = exhibition.id;
-    card.dataset.startDate = exhibition.startDate;
-    card.dataset.endDate = exhibition.endDate;
-    card.dataset.location = exhibition.location;
-    card.dataset.description = exhibition.description;
-    card.dataset.artists = exhibition.artists.join(',');
-    card.dataset.viewingHours = exhibition.viewingHours;
-    card.dataset.admission = exhibition.admission;
-    card.dataset.category = exhibition.category;
-    card.dataset.exhibitionType = exhibition.exhibitionType;
+
+    const imageUrl = exhibition.image || '/images/default-exhibition.svg';
+    const title = exhibition.title || '제목 없음';
+    const description = exhibition.description || '설명 없음';
 
     card.innerHTML = `
-        <div class="card-image-container">
-            <img src="${exhibition.image || '/assets/image/exhibition/placeholder-exhibition.svg'}"
-                alt="${exhibition.title}"
-                class="exhibition-image"
-                onerror="this.src='/assets/image/exhibition/placeholder-exhibition.svg'">
-            <span class="exhibition-type ${exhibition.exhibitionType || 'regular'}">
-                ${exhibition.exhibitionType === 'special' ? '특별' : '정기'}
-            </span>
+        <div class="exhibition-card__image">
+            <img src="${imageUrl}"
+                 alt="${title}"
+                 onerror="this.onerror=null; this.src='/images/default-exhibition.svg'">
         </div>
-        <div class="exhibition-info">
-            <h2 class="exhibition-title">${exhibition.title}</h2>
-            ${exhibition.subtitle ? `<p class="exhibition-subtitle">${exhibition.subtitle}</p>` : ''}
-            <p class="exhibition-date">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
-                </svg>
-                ${exhibition.startDate} ~ ${exhibition.endDate}
-            </p>
-            ${exhibition.category ? `<span class="exhibition-category">${exhibition.category}</span>` : ''}
+        <div class="exhibition-card__content">
+            <h3 class="exhibition-card__title">${title}</h3>
+            <p class="exhibition-card__description">${description}</p>
         </div>
     `;
 

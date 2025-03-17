@@ -136,7 +136,7 @@
                         <div id="cardView" class="artwork-grid">
                             <% if (artworks && artworks.length> 0) { %>
                                 <% artworks.forEach(artwork=> { %>
-                                    <div class="card card--list">
+                                    <div class="card card--list" data-exhibition="<%= artwork.exhibition_code %>">
                                         <a href="/artwork/<%= artwork.id %>" class="card__link">
                                             <div class="card__image-container">
                                                 <img src="<%= artwork.image %>" alt="<%= artwork.title %>"
@@ -220,8 +220,7 @@
             </main>
 
             <%- include('../common/footer') %>
-
-                <script type="module" src="/js/artwork/ArtworkList/index.js"></script>
+                <script src="/js/page/artwork/ArtworkList.js"></script>
     </body>
 
 </html>

@@ -425,7 +425,7 @@
 .advanced-search-panel {
     max-height: 0;
     overflow: hidden;
-    transition: all 0.6s cubic-bezier(0.215, 0.61, 0.355, 1);
+    transition: all 0.3s ease-in-out;
     opacity: 0;
     margin-top: 0;
     margin-bottom: 0;
@@ -434,16 +434,40 @@
     box-shadow: var(--shadow-sm);
     transform: translateY(-10px);
     border: 0px solid transparent;
+    visibility: hidden;
+    pointer-events: none;
 }
 
-.advanced-search-panel.active {
-    max-height: 500px;
+.advanced-search-panel.panel-open {
     opacity: 1;
-    margin-top: 20px;
+    visibility: visible;
+    pointer-events: auto;
+    max-height: 1000px;
+    padding: 20px;
+    margin-top: 10px;
     margin-bottom: 30px;
+    transform: translateY(0);
     border: 2px solid #e0e0e0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transform: translateY(0);
+}
+
+.advanced-search-panel.panel-closing {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    max-height: 0;
+    padding: 0;
+    margin: 0;
+    transform: translateY(-10px);
+}
+
+/* 토글 아이콘 회전 */
+.toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.toggle-icon.rotate {
+    transform: rotate(180deg);
 }
 
 /* 패널 내용 */
@@ -824,4 +848,10 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 25px;
     margin-top: 20px;
+}
+
+/* 버튼 클릭 애니메이션 */
+.clicked {
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
 }

@@ -1,19 +1,10 @@
 /**
  * 공통 유틸리티 모듈 진입점
- * 모든 공통 유틸리티 함수들을 내보냅니다.
+ * 자주 사용되는 유틸리티 함수들을 내보냅니다.
  */
-
-// DOM 유틸리티
-export { domUtils } from './dom.js';
-
-// 애니메이션 유틸리티
-export { fadeIn, fadeOut } from './animation.js';
 
 // 알림 유틸리티
 export { showErrorMessage, showSuccessMessage } from './notification.js';
-
-// 모달 유틸리티
-export { initModal, showModal, closeModal } from './modal.js';
 
 /**
  * 디바운스 함수
