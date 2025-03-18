@@ -60,7 +60,7 @@ export async function getArtworkList(req, res) {
         // 연도 목록 조회 (필터용)
         const years = artworkService.getYears();
 
-        res.render(viewResolver.resolve('artwork/ArtworkList'), {
+        viewResolver.render(res, 'artwork/ArtworkList', {
             title: '작품 목록',
             artworks: artworksResult.items,
             exhibitions,
@@ -85,8 +85,9 @@ export async function getArtworkList(req, res) {
             }
         });
     } catch (error) {
-        // console.error('작품 목록 조회 오류:', error);
-        res.status(500).render(viewResolver.resolve('common/error'), {
+        console.error('Error in getArtworkList:', error);
+        viewResolver.render(res, 'common/error', {
+            title: '오류',
             message: '작품 목록을 불러오는 중 오류가 발생했습니다.'
         });
     }
@@ -106,8 +107,9 @@ export function getArtworkDetail(req, res) {
         const artwork = artworkService.getArtworkById(id);
 
         if (!artwork) {
-            return res.status(404).render(viewResolver.resolve('common/error'), {
-                message: '해당 작품을 찾을 수 없습니다.'
+            return viewResolver.render(res, 'common/error', {
+                title: '오류',
+                message: '작품을 찾을 수 없습니다.'
             });
         }
 
@@ -117,7 +119,7 @@ export function getArtworkDetail(req, res) {
         // 댓글 조회
         const commentData = commentService.getCommentsByArtworkId(id, commentPage);
 
-        res.render(viewResolver.resolve('artwork/ArtworkDetail'), {
+        viewResolver.render(res, 'artwork/ArtworkDetail', {
             title: artwork.title,
             artwork,
             relatedArtworks,
@@ -126,9 +128,10 @@ export function getArtworkDetail(req, res) {
             user: req.session.user || null
         });
     } catch (error) {
-        // console.error('작품 상세 조회 오류:', error);
-        res.status(500).render(viewResolver.resolve('common/error'), {
-            message: '작품 정보를 불러오는 중 오류가 발생했습니다.'
+        console.error('Error in getArtworkDetail:', error);
+        viewResolver.render(res, 'common/error', {
+            title: '오류',
+            message: '작품 상세 정보를 불러오는 중 오류가 발생했습니다.'
         });
     }
 }

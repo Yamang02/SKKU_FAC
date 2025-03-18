@@ -15,13 +15,14 @@ export function getExhibitionList(req, res) {
     try {
         const exhibitions = exhibitionService.getAllExhibitions();
 
-        res.render(viewResolver.resolve('exhibition/ExhibitionList'), {
-            title: '작품 아카이브',
-            exhibitions
+        viewResolver.render(res, 'exhibition/ExhibitionList', {
+            title: '전시회',
+            exhibitions: exhibitions
         });
     } catch (error) {
-        // console.error('전시회 목록 조회 오류:', error);
-        res.status(500).render(viewResolver.resolve('common/error'), {
+        console.error('Error in getExhibitionList:', error);
+        viewResolver.render(res, 'common/error', {
+            title: '오류',
             message: '전시회 목록을 불러오는 중 오류가 발생했습니다.'
         });
     }
@@ -37,15 +38,16 @@ export function getCategoryExhibition(req, res) {
         const { category } = req.params;
         const exhibitions = exhibitionService.getExhibitionsByCategory(category);
 
-        res.render(viewResolver.resolve('exhibition/category'), {
+        viewResolver.render(res, 'exhibition/category', {
             title: `${category} 전시회`,
             category,
-            exhibitions
+            exhibitions: exhibitions
         });
     } catch (error) {
-        // console.error('카테고리별 전시회 조회 오류:', error);
-        res.status(500).render(viewResolver.resolve('common/error'), {
-            message: '전시회 목록을 불러오는 중 오류가 발생했습니다.'
+        console.error('Error in getExhibitionsByCategory:', error);
+        viewResolver.render(res, 'common/error', {
+            title: '오류',
+            message: '카테고리별 전시회를 불러오는 중 오류가 발생했습니다.'
         });
     }
 }
@@ -61,15 +63,16 @@ export function getExhibitionDetail(req, res) {
         const exhibition = exhibitionService.getExhibitionById(id);
         const artworks = artworkService.getArtworksByExhibitionId(id);
 
-        res.render(viewResolver.resolve('exhibition/detail'), {
+        viewResolver.render(res, 'exhibition/detail', {
             title: exhibition.title,
             exhibition,
             artworks
         });
     } catch (error) {
-        // console.error('전시회 상세 조회 오류:', error);
-        res.status(500).render(viewResolver.resolve('common/error'), {
-            message: '전시회 정보를 불러오는 중 오류가 발생했습니다.'
+        console.error('Error in getExhibitionDetail:', error);
+        viewResolver.render(res, 'common/error', {
+            title: '오류',
+            message: '전시회 상세 정보를 불러오는 중 오류가 발생했습니다.'
         });
     }
 }

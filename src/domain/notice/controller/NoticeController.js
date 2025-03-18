@@ -35,7 +35,8 @@ export function getNoticeList(req, res) {
         hasPrev: page > 1
     };
 
-    return res.render(viewResolver.resolve('notice/NoticeList'), {
+    viewResolver.render(res, 'notice/NoticeList', {
+        title: '공지사항',
         notices: paginatedNotices,
         searchType,
         keyword,
@@ -82,8 +83,9 @@ export function getNoticeDetail(req, res) {
         hasPrev: commentPage > 1
     };
 
-    return res.render(viewResolver.resolve('notice/NoticeDetail'), {
-        notice,
+    viewResolver.render(res, 'notice/NoticeDetail', {
+        title: notice.title,
+        notice: notice,
         comments,
         commentPagination
     });
