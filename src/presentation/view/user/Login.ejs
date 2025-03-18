@@ -4,6 +4,7 @@
     <head>
         <% const pageTitle='로그인' ; const additionalStyles=['/css/user/Login.css']; %>
             <%- include('../common/head', { pageTitle, additionalStyles }) %>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     </head>
 
     <body>
@@ -35,9 +36,14 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="form-group form-check">
-                                        <input type="checkbox" id="remember" name="remember" class="form-check-input">
-                                        <label class="form-check-label" for="remember">로그인 상태 유지</label>
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <div class="form-check-wrapper">
+                                                <input type="checkbox" id="remember" name="remember"
+                                                    class="form-check-input">
+                                                <label class="form-check-label" for="remember">로그인 상태 유지</label>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-primary btn-block">로그인</button>
@@ -58,175 +64,3 @@
     </body>
 
 </html>
-
-<style>
-    .login-container {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #f8f9fa;
-        padding: 20px;
-    }
-
-    .login-box {
-        background: white;
-        padding: 40px;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 400px;
-    }
-
-    .login-title {
-        text-align: center;
-        margin-bottom: 30px;
-        color: #333;
-        font-size: 24px;
-    }
-
-    .login-form .form-group {
-        margin-bottom: 20px;
-    }
-
-    .login-form label {
-        display: block;
-        margin-bottom: 8px;
-        color: #555;
-        font-weight: 500;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 16px;
-        transition: border-color 0.2s;
-    }
-
-    .form-control:focus {
-        border-color: #007bff;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-    }
-
-    .password-input-group {
-        position: relative;
-    }
-
-    .toggle-password {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: #666;
-        cursor: pointer;
-        padding: 0;
-    }
-
-    .toggle-password:hover {
-        color: #333;
-    }
-
-    .form-check {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .form-check-input {
-        margin: 0;
-    }
-
-    .btn {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background-color: #0056b3;
-    }
-
-    .login-footer {
-        margin-top: 20px;
-        text-align: center;
-        color: #666;
-    }
-
-    .register-link,
-    .forgot-password-link {
-        color: #007bff;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .register-link:hover,
-    .forgot-password-link:hover {
-        text-decoration: underline;
-    }
-
-    .login-options {
-        margin-top: 10px;
-    }
-
-    .alert {
-        padding: 12px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-    }
-
-    .alert-danger {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
-    }
-
-    @media (max-width: 480px) {
-        .login-box {
-            padding: 20px;
-        }
-
-        .login-title {
-            font-size: 20px;
-        }
-
-        .form-control {
-            padding: 10px;
-            font-size: 14px;
-        }
-
-        .btn {
-            padding: 10px;
-            font-size: 14px;
-        }
-    }
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const togglePassword = document.querySelector('.toggle-password');
-        const passwordInput = document.querySelector('#password');
-
-        togglePassword.addEventListener('click', function () {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-
-            const icon = this.querySelector('i');
-            icon.classList.toggle('fa-eye');
-            icon.classList.toggle('fa-eye-slash');
-        });
-    });
-</script>

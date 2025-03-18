@@ -1,17 +1,18 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // 비밀번호 표시/숨김 토글 기능
+document.addEventListener('DOMContentLoaded', function () {
     const togglePassword = document.querySelector('.toggle-password');
-    const passwordInput = document.querySelector('#password');
+    const passwordInput = document.getElementById('password');
 
     if (togglePassword && passwordInput) {
-        togglePassword.addEventListener('click', () => {
+        togglePassword.addEventListener('click', function (e) {
+            e.preventDefault();
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
 
-            // 아이콘 변경
-            const icon = togglePassword.querySelector('i');
-            icon.classList.toggle('fa-eye');
-            icon.classList.toggle('fa-eye-slash');
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            }
         });
     }
 
