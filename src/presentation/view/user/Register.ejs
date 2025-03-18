@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+    <head>
+        <% const pageTitle='회원가입' ; const additionalStyles=['/css/user/Register.css']; %>
+            <%- include('../common/head', { pageTitle, additionalStyles }) %>
+    </head>
+
+    <body>
+        <%- include('../common/header') %>
+
+            <main class="register-page">
+                <div class="container">
+                    <div class="register-card">
+                        <h1 class="register-title">회원가입</h1>
+                        <% if (locals.error) { %>
+                            <div class="alert alert-danger">
+                                <%= error %>
+                            </div>
+                            <% } %>
+
+                                <form class="register-form" action="/user/register" method="POST">
+                                    <div class="form-group">
+                                        <label for="username">아이디 *</label>
+                                        <input type="text" id="username" name="username" class="form-control"
+                                            value="<%= locals.formData?.username || '' %>" required
+                                            pattern="^[a-zA-Z0-9_]{4,20}$" title="4~20자의 영문, 숫자, 언더스코어만 사용 가능합니다"
+                                            placeholder="아이디를 입력하세요">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="password">비밀번호 *</label>
+                                        <div class="password-input-group">
+                                            <input type="password" id="password" name="password" class="form-control"
+                                                required
+                                                pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
+                                                title="최소 8자, 영문, 숫자, 특수문자를 포함해야 합니다" placeholder="비밀번호를 입력하세요">
+                                            <button type="button" class="toggle-password" aria-label="비밀번호 표시">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="confirmPassword">비밀번호 확인 *</label>
+                                        <div class="password-input-group">
+                                            <input type="password" id="confirmPassword" name="confirmPassword"
+                                                class="form-control" required placeholder="비밀번호를 다시 입력하세요">
+                                            <button type="button" class="toggle-password" aria-label="비밀번호 표시">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="name">이름 *</label>
+                                        <input type="text" id="name" name="name" class="form-control"
+                                            value="<%= locals.formData?.name || '' %>" required placeholder="이름을 입력하세요">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="email">이메일 *</label>
+                                        <input type="email" id="email" name="email" class="form-control"
+                                            value="<%= locals.formData?.email || '' %>" required
+                                            placeholder="이메일을 입력하세요">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="role">가입 유형 *</label>
+                                        <select id="role" name="role" class="form-control" required>
+                                            <option value="">가입 유형을 선택하세요</option>
+                                            <% roles.forEach(function(role) { %>
+                                                <option value="<%= role.value %>" <%=locals.formData?.role===role.value
+                                                    ? 'selected' : '' %>
+                                                    >
+                                                    <%= role.label %>
+                                                </option>
+                                                <% }); %>
+                                        </select>
+                                    </div>
+
+                                    <!-- 동아리 회원 전용 필드 -->
+                                    <div class="form-group club-member-field" style="display: none;">
+                                        <label for="studentId">학번</label>
+                                        <input type="text" id="studentId" name="studentId" class="form-control"
+                                            value="<%= locals.formData?.studentId || '' %>" pattern="[0-9]{10}"
+                                            title="10자리 학번을 입력해주세요" placeholder="학번을 입력하세요">
+                                    </div>
+
+                                    <!-- 작가 전용 필드 -->
+                                    <div class="form-group artist-field" style="display: none;">
+                                        <label for="artistBio">작가 소개</label>
+                                        <textarea id="artistBio" name="artistInfo[biography]" class="form-control"
+                                            rows="3"
+                                            placeholder="작가 소개를 입력하세요"><%= locals.formData?.artistInfo?.biography || '' %></textarea>
+
+                                        <label for="artistWebsite">웹사이트</label>
+                                        <input type="url" id="artistWebsite" name="artistInfo[website]"
+                                            class="form-control"
+                                            value="<%= locals.formData?.artistInfo?.website || '' %>"
+                                            placeholder="웹사이트 주소를 입력하세요">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary btn-block">회원가입</button>
+                                    </div>
+
+                                    <div class="register-footer">
+                                        <p>
+                                            이미 계정이 있으신가요?
+                                            <a href="/user/login" class="login-link">로그인</a>
+                                        </p>
+                                    </div>
+                                </form>
+                    </div>
+                </div>
+            </main>
+
+            <%- include('../common/footer') %>
+                <script src="/js/page/user/Register.js"></script>
+    </body>
+
+</html>
+
+<style>
+    .register-page {
+        background-color: #f8f9fa;
+        padding: 40px 0;
+        min-height: calc(100vh - 60px);
+    }
+
+    .register-card {
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .register-title {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+        font-size: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .password-input-group {
+        position: relative;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .toggle-password:hover {
+        color: #333;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .register-footer {
+        margin-top: 20px;
+        text-align: center;
+        color: #666;
+    }
+
+    .login-link {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .login-link:hover {
+        text-decoration: underline;
+    }
+
+    .alert {
+        padding: 12px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+
+    @media (max-width: 768px) {
+        .register-card {
+            padding: 20px;
+            margin: 0 20px;
+        }
+
+        .register-title {
+            font-size: 20px;
+        }
+
+        .form-control {
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px;
+            font-size: 14px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const roleSelect = document.getElementById('role');
+        const clubMemberField = document.querySelector('.club-member-field');
+        const artistField = document.querySelector('.artist-field');
+        const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+
+        // 가입 유형에 따른 필드 표시/숨김
+        function updateFields() {
+            const selectedRole = roleSelect.value;
+            clubMemberField.style.display = selectedRole === 'MEMBER' ? 'block' : 'none';
+            artistField.style.display = selectedRole === 'ARTIST' ? 'block' : 'none';
+
+            // 필수 필드 설정 업데이트
+            const studentIdInput = document.getElementById('studentId');
+            const artistBioInput = document.getElementById('artistBio');
+            const artistWebsiteInput = document.getElementById('artistWebsite');
+
+            studentIdInput.required = selectedRole === 'MEMBER';
+            artistBioInput.required = selectedRole === 'ARTIST';
+            artistWebsiteInput.required = false; // 웹사이트는 선택사항
+        }
+
+        roleSelect.addEventListener('change', updateFields);
+
+        // 비밀번호 표시/숨김 토글
+        togglePasswordButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const input = this.previousElementSibling;
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+        });
+
+        // 비밀번호 일치 확인
+        function validatePassword() {
+            if (password.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity('비밀번호가 일치하지 않습니다.');
+            } else {
+                confirmPassword.setCustomValidity('');
+            }
+        }
+
+        password.addEventListener('change', validatePassword);
+        confirmPassword.addEventListener('keyup', validatePassword);
+
+        // 초기 필드 상태 설정
+        updateFields();
+    });
+</script>
