@@ -1,12 +1,18 @@
 <header class="header">
     <nav class="nav">
-        <div class="logo">SKKU FINE ARTCLUB</div>
+        <div class="logo"><a href="/">SKKU FAC Gallery</a></div>
         <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/exhibition">Exhibitions</a>
-            <a href="/notice">Notices</a>
-            <a href="/about">About</a>
-            <a href="/user/login">Login</a>
+            <a href="/artwork">작품목록</a>
+            <a href="/exhibition">전시회</a>
+            <a href="/notice">공지사항</a>
+            <a href="/about">소개</a>
+            <% if (locals.user) { %>
+                <a href="/user/profile" class="user-profile">
+                    <%= user.name %> (<%= user.username %>)
+                </a>
+                <% } else { %>
+                    <a href="/user/login">로그인</a>
+                    <% } %>
         </div>
     </nav>
 </header>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+    <head>
+        <% const pageTitle='프로필 - SKKU FAC Gallery' ; const additionalStyles=['/css/user/Profile.css']; %>
+            <%- include('../common/head', { pageTitle, additionalStyles }) %>
+    </head>
+
+    <body>
+        <%- include('../common/header') %>
+
+            <main class="profile-page">
+                <div class="container">
+                    <div class="profile-card">
+                        <h2 class="profile-title">프로필 정보</h2>
+                        <% if (locals.error) { %>
+                            <div class="alert alert-danger">
+                                <%= error %>
+                            </div>
+                            <% } %>
+                                <% if (locals.success) { %>
+                                    <div class="alert alert-success">
+                                        <%= success %>
+                                    </div>
+                                    <% } %>
+
+                                        <form class="profile-form" action="/user/profile" method="POST">
+                                            <div class="form-group">
+                                                <label for="username">아이디</label>
+                                                <input type="text" id="username" class="form-control"
+                                                    value="<%= user.username %>" readonly>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="name">이름</label>
+                                                <input type="text" id="name" name="name" class="form-control"
+                                                    value="<%= user.name %>" required>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="email">이메일</label>
+                                                <input type="email" id="email" name="email" class="form-control"
+                                                    value="<%= user.email %>" required>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="currentPassword">현재 비밀번호</label>
+                                                <div class="password-input-group">
+                                                    <input type="password" id="currentPassword" name="currentPassword"
+                                                        class="form-control" placeholder="현재 비밀번호를 입력하세요">
+                                                    <button type="button" class="toggle-password" aria-label="비밀번호 표시">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="newPassword">새 비밀번호 (변경시에만 입력)</label>
+                                                <div class="password-input-group">
+                                                    <input type="password" id="newPassword" name="newPassword"
+                                                        class="form-control"
+                                                        pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
+                                                        placeholder="새 비밀번호">
+                                                    <button type="button" class="toggle-password" aria-label="비밀번호 표시">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="confirmNewPassword">새 비밀번호 확인</label>
+                                                <div class="password-input-group">
+                                                    <input type="password" id="confirmNewPassword"
+                                                        name="confirmNewPassword" class="form-control"
+                                                        placeholder="새 비밀번호 확인">
+                                                    <button type="button" class="toggle-password" aria-label="비밀번호 표시">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <% if (user.role==='MEMBER' ) { %>
+                                                <div class="form-group">
+                                                    <label for="studentId">학번</label>
+                                                    <input type="text" id="studentId" name="studentId"
+                                                        class="form-control" value="<%= user.studentId %>"
+                                                        pattern="[0-9]{10}" readonly>
+                                                </div>
+                                                <% } %>
+
+                                                    <% if (user.role==='ARTIST' ) { %>
+                                                        <div class="form-group">
+                                                            <label for="artistBio">작가 소개</label>
+                                                            <textarea id="artistBio" name="artistInfo[biography]"
+                                                                class="form-control"
+                                                                required><%= user.artistInfo?.biography %></textarea>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="artistWebsite">웹사이트</label>
+                                                            <input type="url" id="artistWebsite"
+                                                                name="artistInfo[website]" class="form-control"
+                                                                value="<%= user.artistInfo?.website %>">
+                                                        </div>
+                                                        <% } %>
+
+                                                            <div class="button-group">
+                                                                <button type="submit" class="btn btn-primary">정보
+                                                                    수정</button>
+                                                                <button type="button" class="btn btn-outline"
+                                                                    onclick="history.back()">취소</button>
+                                                            </div>
+                                        </form>
+                    </div>
+                </div>
+            </main>
+
+            <%- include('../common/footer') %>
+                <script src="/js/page/user/Profile.js"></script>
+    </body>
+
+</html>
