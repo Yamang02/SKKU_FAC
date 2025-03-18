@@ -54,14 +54,7 @@ app.use(session({
 // API 라우터 설정
 app.use('/', apiRouter);
 
-// 메인 페이지 라우트
-app.get('/', (req, res) => {
-    const featuredArtworks = getFeaturedArtworks();
-    res.render(viewResolver.resolve('home/HomePage'), {
-        title: 'SKKU Fine Art Gallery',
-        featuredArtworks
-    });
-});
+// 메인 페이지 라우트는 apiRouter에서 처리하도록 제거
 
 // 서버 시작
 const PORT = process.env.PORT || 3000;
