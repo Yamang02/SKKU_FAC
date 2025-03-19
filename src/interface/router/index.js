@@ -12,8 +12,8 @@ router.use('/', homeRouter);
 
 // 각 도메인별 라우터 등록
 router.use('/exhibition', exhibitionRouter);
-router.use('/notice', noticeRouter);
 router.use('/user', userRouter);
 router.use('/artwork', artworkRouter);
+router.use('/notice', noticeRouter);
 
 export default router;

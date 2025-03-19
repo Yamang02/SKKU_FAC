@@ -1,5 +1,6 @@
 import express from 'express';
-import UserController from '../../../domain/user/controller/UserController.js';
+import UserController from '../../../application/user/controller/UserController.js';
+import { UserRole } from '../../../infrastructure/data/user.js';
 
 const router = express.Router();
 const userController = new UserController();
@@ -19,5 +20,12 @@ router.post('/register', userController.register);
 router.get('/profile', userController.isAuthenticated, userController.getProfilePage);
 router.get('/profile/edit', userController.isAuthenticated, userController.getProfileEditPage);
 router.post('/profile/edit', userController.isAuthenticated, userController.updateProfile);
+
+// 사용자 관리 (관리자 전용)
+router.get('/management', userController.isAuthenticated, userController.hasRole(UserRole.ADMIN), userController.getUserList);
+router.get('/management/stats', userController.isAuthenticated, userController.hasRole(UserRole.ADMIN), userController.getDashboardStats);
+router.get('/management/:id', userController.isAuthenticated, userController.hasRole(UserRole.ADMIN), userController.getUserDetail);
+router.delete('/management/:id', userController.isAuthenticated, userController.hasRole(UserRole.ADMIN), userController.deleteUser);
+router.put('/management/:id/role', userController.isAuthenticated, userController.hasRole(UserRole.ADMIN), userController.updateUserRole);
 
 export default router;
