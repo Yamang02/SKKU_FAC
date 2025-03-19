@@ -45,33 +45,7 @@
     gap: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
-}
-
-.btn {
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    text-decoration: none;
-    text-align: center;
-    transition: background-color 0.2s ease;
-}
-
-.btn-primary {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-dark);
-}
-
-.btn-danger {
-    background-color: var(--danger-color);
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: var(--danger-dark);
+    justify-content: center;
 }
 
 .form-group {
@@ -137,19 +111,9 @@ textarea.form-control {
 
 .button-group {
     display: flex;
-    gap: 10px;
+    gap: 1rem;
     margin-top: 30px;
-}
-
-.btn-outline {
-    background-color: transparent;
-    border: 1px solid var(--color-border);
-    color: var(--color-text);
-}
-
-.btn-outline:hover {
-    background-color: var(--color-background);
-    border-color: var(--color-text);
+    justify-content: center;
 }
 
 .alert {
@@ -185,13 +149,15 @@ textarea.form-control {
         margin-bottom: 20px;
     }
 
-    .button-group {
+    .button-group,
+    .profile-actions {
         flex-direction: column;
+        align-items: center;
     }
 
-    .btn {
+    .profile-actions .btn,
+    .button-group .btn {
         width: 100%;
-        padding: 10px;
-        font-size: 14px;
+        max-width: 300px;
     }
 }

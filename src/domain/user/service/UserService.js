@@ -96,6 +96,41 @@ class UserService {
     }
 
     /**
+     * 사용자 프로필을 수정합니다.
+     * @param {number} userId - 사용자 ID
+     * @param {Object} updateData - 수정할 프로필 데이터
+     * @returns {Promise<Object>} 수정된 사용자 프로필 정보
+     * @throws {Error} 수정 실패 시 에러
+     */
+    async updateProfile(userId, updateData) {
+        const user = await this.userRepository.findById(userId);
+        if (!user) {
+            throw new Error('사용자를 찾을 수 없습니다.');
+        }
+
+        // 비밀번호 변경 처리
+        if (updateData.newPassword) {
+            if (updateData.newPassword !== updateData.confirmNewPassword) {
+                throw new Error('새 비밀번호가 일치하지 않습니다.');
+            }
+            updateData.password = await bcrypt.hash(updateData.newPassword, 10);
+        }
+
+        // 수정 가능한 필드만 업데이트
+        const updatableFields = ['name', 'email', 'password', 'studentId', 'artistInfo'];
+        const updateFields = {};
+
+        for (const field of updatableFields) {
+            if (updateData[field] !== undefined) {
+                updateFields[field] = updateData[field];
+            }
+        }
+
+        await this.userRepository.update(userId, updateFields);
+        return this.getProfile(userId);
+    }
+
+    /**
      * 새로운 사용자를 생성합니다.
      * @param {Object} userData - 생성할 사용자 데이터
      * @returns {Promise<Object>} 생성된 사용자 객체

@@ -17,5 +17,7 @@ router.post('/register', userController.register);
 
 // 프로필 (인증 필요)
 router.get('/profile', userController.isAuthenticated, userController.getProfilePage);
+router.get('/profile/edit', userController.isAuthenticated, userController.getProfileEditPage);
+router.post('/profile/edit', userController.isAuthenticated, userController.updateProfile);
 
 export default router;

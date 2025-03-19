@@ -22,6 +22,8 @@ class UserController {
         this.getRegisterPage = this.getRegisterPage.bind(this);
         this.register = this.register.bind(this);
         this.getProfilePage = this.getProfilePage.bind(this);
+        this.getProfileEditPage = this.getProfileEditPage.bind(this);
+        this.updateProfile = this.updateProfile.bind(this);
     }
 
     /**
@@ -128,6 +130,45 @@ class UserController {
             return viewResolver.render(res, 'common/error', {
                 title: '에러',
                 message: error.message
+            });
+        }
+    };
+
+    /**
+     * 프로필 수정 페이지를 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
+    getProfileEditPage = async (req, res) => {
+        try {
+            const profileUser = await this.userService.getProfile(req.session.user.id);
+            return viewResolver.render(res, 'user/ProfileEdit', {
+                title: '프로필 수정',
+                profileUser
+            });
+        } catch (error) {
+            return viewResolver.render(res, 'common/error', {
+                title: '에러',
+                message: error.message
+            });
+        }
+    };
+
+    /**
+     * 프로필 수정 요청을 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
+    updateProfile = async (req, res) => {
+        try {
+            await this.userService.updateProfile(req.session.user.id, req.body);
+            res.redirect('/user/profile');
+        } catch (error) {
+            const profileUser = await this.userService.getProfile(req.session.user.id);
+            return viewResolver.render(res, 'user/ProfileEdit', {
+                title: '프로필 수정',
+                profileUser,
+                error: error.message
             });
         }
     };

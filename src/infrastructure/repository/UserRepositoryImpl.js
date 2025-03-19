@@ -2,11 +2,29 @@ import UserRepository from '../../domain/user/repository/UserRepository.js';
 import user, { UserRole } from '../data/user.js';
 
 class UserRepositoryImpl extends UserRepository {
+    async findById(id) {
+        try {
+            return user.find(u => u.id === id) || null;
+        } catch (error) {
+            console.error('Error in findById:', error);
+            throw error;
+        }
+    }
+
     async findByUsername(username) {
         try {
             return user.find(u => u.username === username) || null;
         } catch (error) {
             console.error('Error in findByUsername:', error);
+            throw error;
+        }
+    }
+
+    async findByEmail(email) {
+        try {
+            return user.find(u => u.email === email) || null;
+        } catch (error) {
+            console.error('Error in findByEmail:', error);
             throw error;
         }
     }
@@ -38,6 +56,11 @@ class UserRepositoryImpl extends UserRepository {
                 throw new Error('이미 사용 중인 아이디입니다.');
             }
 
+            // 이메일 중복 체크
+            if (await this.findByEmail(userData.email)) {
+                throw new Error('이미 사용 중인 이메일입니다.');
+            }
+
             // 학번이 있는 경우 중복 체크
             if (userData.studentId && await this.findByStudentId(userData.studentId)) {
                 throw new Error('이미 등록된 학번입니다.');
@@ -51,17 +74,26 @@ class UserRepositoryImpl extends UserRepository {
                 updatedAt: new Date()
             };
             user.push(newUser);
-            return newId;
+            return newUser;
         } catch (error) {
             console.error('Error in save:', error);
             throw error;
         }
     }
 
-    async update(userData) {
+    async update(id, userData) {
         try {
-            const index = user.findIndex(u => u.username === userData.username);
-            if (index === -1) return false;
+            const index = user.findIndex(u => u.id === id);
+            if (index === -1) {
+                throw new Error('사용자를 찾을 수 없습니다.');
+            }
+
+            // 이메일 변경 시 중복 체크
+            if (userData.email &&
+                userData.email !== user[index].email &&
+                await this.findByEmail(userData.email)) {
+                throw new Error('이미 사용 중인 이메일입니다.');
+            }
 
             // 학번 변경 시 중복 체크
             if (userData.studentId &&
@@ -75,16 +107,16 @@ class UserRepositoryImpl extends UserRepository {
                 ...userData,
                 updatedAt: new Date()
             };
-            return true;
+            return user[index];
         } catch (error) {
             console.error('Error in update:', error);
             throw error;
         }
     }
 
-    async delete(username) {
+    async delete(id) {
         try {
-            const index = user.findIndex(u => u.username === username);
+            const index = user.findIndex(u => u.id === id);
             if (index === -1) return false;
 
             user.splice(index, 1);
