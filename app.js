@@ -48,7 +48,12 @@ app.use(bodyParser.json());
 app.use(session({
     secret: 'skku-gallery-secret',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: false, // HTTPS를 사용하는 경우 true로 설정
+        maxAge: 1000 * 60 * 60 * 24 // 24시간
+    }
 }));
 
 // API 라우터 설정

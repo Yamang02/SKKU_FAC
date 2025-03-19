@@ -17,10 +17,14 @@ class ViewResolver {
         // 뷰 경로 생성
         const viewPath = this.resolveViewPath(view);
 
+        // req 객체에서 세션 정보 가져오기
+        const user = res.req?.session?.user || null;
+
         // 데이터 준비
         const renderData = {
             ...useCommonData ? this.commonData : {},
-            ...data
+            ...data,
+            user // 세션의 user 정보를 모든 뷰에 전달
         };
 
         // 뷰 렌더링

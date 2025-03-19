@@ -61,6 +61,33 @@
     background-color: var(--color-primary);
 }
 
+/* 프로필 링크 스타일 */
+.user-profile {
+    padding: 6px 16px;
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: 20px;
+    transition: background-color 0.2s ease;
+}
+
+.user-profile:hover {
+    background-color: var(--hover-bg);
+}
+
+/* 로그인 버튼 스타일 */
+.login-button {
+    padding: 6px 16px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.login-button:hover {
+    background-color: var(--primary-dark);
+}
+
 /* 모바일 반응형 */
 @media (max-width: 768px) {
     .header .nav {

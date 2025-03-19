@@ -33,7 +33,8 @@ class HomeController {
         return viewResolver.render(res, 'home/HomePage', {
             title: '홈',
             recentNotices: recentNotices || [],
-            featuredArtworks: featuredArtworks || []
+            featuredArtworks: featuredArtworks || [],
+            user: req.session.user || null
         });
     }
 }

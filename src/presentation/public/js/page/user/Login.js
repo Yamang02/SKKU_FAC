@@ -17,21 +17,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 폼 제출 전 유효성 검사
-    const loginForm = document.querySelector('.login-form');
+    const loginForm = document.querySelector('form');
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
-            const studentId = document.querySelector('#studentId').value;
+            const username = document.querySelector('#username').value;
             const password = passwordInput.value;
 
-            if (!studentId || !password) {
+            if (!username || !password) {
                 e.preventDefault();
-                showError('모든 필드를 입력해주세요.');
-                return;
-            }
-
-            if (!/^\d{10}$/.test(studentId)) {
-                e.preventDefault();
-                showError('올바른 학번 형식이 아닙니다.');
+                showError('아이디와 비밀번호를 모두 입력해주세요.');
                 return;
             }
         });
@@ -40,12 +34,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // 에러 메시지 표시 함수
 function showError(message) {
-    let alert = document.querySelector('.alert-error');
+    let alert = document.querySelector('.alert');
 
     if (!alert) {
         alert = document.createElement('div');
         alert.classList.add('alert', 'alert-error');
-        const form = document.querySelector('.login-form');
+        const form = document.querySelector('form');
         form.insertBefore(alert, form.firstChild);
     }
 

@@ -1,31 +1,77 @@
 .profile-page {
-    min-height: calc(100vh - 60px);
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    background-color: var(--color-background);
-    padding: 40px 20px;
+    padding: 2rem 0;
 }
 
-.container {
-    width: 100%;
+.profile-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
     max-width: 600px;
     margin: 0 auto;
 }
 
-.profile-card {
-    background: var(--color-white);
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 30px;
+.profile-title {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.profile-title {
+.profile-info {
+    margin-bottom: 2rem;
+}
+
+.info-group {
+    margin-bottom: 1rem;
+}
+
+.info-group label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.info-group p {
+    font-size: 1rem;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-decoration: none;
     text-align: center;
-    margin-bottom: 30px;
-    color: var(--color-text);
-    font-size: 24px;
-    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: var(--danger-dark);
 }
 
 .form-group {
@@ -93,28 +139,6 @@ textarea.form-control {
     display: flex;
     gap: 10px;
     margin-top: 30px;
-}
-
-.btn {
-    flex: 1;
-    padding: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    text-align: center;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-primary {
-    background-color: var(--color-primary);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: var(--color-primary-dark);
-    transform: translateY(-1px);
 }
 
 .btn-outline {

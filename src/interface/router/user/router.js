@@ -4,19 +4,18 @@ import UserController from '../../../domain/user/controller/UserController.js';
 const router = express.Router();
 const userController = new UserController();
 
-// 로그인 페이지
+// 로그인
 router.get('/login', userController.getLoginPage);
-
-// 로그인 처리
 router.post('/login', userController.login);
 
 // 로그아웃
 router.get('/logout', userController.logout);
 
-// 회원가입 페이지
+// 회원가입
 router.get('/register', userController.getRegisterPage);
-
-// 회원가입 처리
 router.post('/register', userController.register);
+
+// 프로필 (인증 필요)
+router.get('/profile', userController.isAuthenticated, userController.getProfilePage);
 
 export default router;

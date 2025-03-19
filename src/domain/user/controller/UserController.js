@@ -1,8 +1,7 @@
 import viewResolver from '../../../presentation/view/ViewResolver.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import UserRepositoryImpl from '../../../infrastructure/repository/UserRepositoryImpl.js';
 import { UserRole } from '../../../infrastructure/data/user.js';
+import UserService from '../service/UserService.js';
 
 /**
  * 사용자 컨트롤러
@@ -13,7 +12,8 @@ import { UserRole } from '../../../infrastructure/data/user.js';
 
 class UserController {
     constructor() {
-        this.userRepository = new UserRepositoryImpl();
+        const userRepository = new UserRepositoryImpl();
+        this.userService = new UserService(userRepository);
 
         // 메서드 바인딩
         this.getLoginPage = this.getLoginPage.bind(this);
@@ -21,6 +21,7 @@ class UserController {
         this.logout = this.logout.bind(this);
         this.getRegisterPage = this.getRegisterPage.bind(this);
         this.register = this.register.bind(this);
+        this.getProfilePage = this.getProfilePage.bind(this);
     }
 
     /**
@@ -41,60 +42,25 @@ class UserController {
      */
     login = async (req, res) => {
         try {
-            const { username, password, remember } = req.body;
-
-            const user = await this.userRepository.findByUsername(username);
-
-            if (!user) {
-                return viewResolver.render(res, 'user/Login', {
-                    error: '존재하지 않는 아이디입니다.',
-                    username
-                });
-            }
-
-            // 비밀번호 검증
-            const isValidPassword = await bcrypt.compare(password, user.password);
-            if (!isValidPassword) {
-                return viewResolver.render(res, 'user/Login', {
-                    error: '비밀번호가 일치하지 않습니다.',
-                    username
-                });
-            }
-
-            // JWT 토큰 생성
-            const token = jwt.sign(
-                {
-                    id: user.id,
-                    username: user.username,
-                    role: user.role,
-                    name: user.name
-                },
-                process.env.JWT_SECRET,
-                { expiresIn: remember ? '7d' : '1d' }
-            );
+            const { username, password } = req.body;
+            const user = await this.userService.login(username, password);
 
             // 세션에 사용자 정보 저장
-            req.session.user = {
-                id: user.id,
-                username: user.username,
-                name: user.name,
-                role: user.role,
-                email: user.email
-            };
+            req.session.user = user;
 
-            // 쿠키에 토큰 저장
-            res.cookie('auth_token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                maxAge: remember ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000
+            // 세션 저장이 완료되었는지 확인
+            await new Promise((resolve, reject) => {
+                req.session.save((err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
             });
 
-            // 홈페이지로 리다이렉트
             res.redirect('/');
         } catch (error) {
-            console.error('Login error:', error);
             return viewResolver.render(res, 'user/Login', {
-                error: '로그인 처리 중 오류가 발생했습니다.'
+                error: error.message,
+                username: req.body.username
             });
         }
     };
@@ -105,9 +71,12 @@ class UserController {
      * @param {Object} res - Express 응답 객체
      */
     logout = (req, res) => {
-        req.session.destroy();
-        res.clearCookie('auth_token');
-        res.redirect('/');
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Logout error:', err);
+            }
+            res.redirect('/');
+        });
     };
 
     /**
@@ -133,52 +102,62 @@ class UserController {
      */
     register = async (req, res) => {
         try {
-            const {
-                username,
-                password,
-                confirmPassword,
-                name,
-                email,
-                role,
-                studentId,
-                artistInfo
-            } = req.body;
-
-            // 비밀번호 확인
-            if (password !== confirmPassword) {
-                return viewResolver.render(res, 'user/Register', {
-                    error: '비밀번호가 일치하지 않습니다.',
-                    formData: { username, name, email, role, studentId }
-                });
-            }
-
-            // 비밀번호 해시화
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            // 사용자 데이터 준비
-            const userData = {
-                username,
-                password: hashedPassword,
-                name,
-                email,
-                role: role || UserRole.GUEST,
-                studentId: role === UserRole.CLUB_MEMBER ? studentId : null,
-                artistInfo: role === UserRole.ARTIST ? JSON.parse(artistInfo) : null
-            };
-
-            // 사용자 저장
-            await this.userRepository.save(userData);
-
-            // 로그인 페이지로 리다이렉트
+            await this.userService.register(req.body);
             res.redirect('/user/login');
         } catch (error) {
-            console.error('Register error:', error);
             return viewResolver.render(res, 'user/Register', {
-                error: error.message || '회원가입 처리 중 오류가 발생했습니다.',
+                error: error.message,
                 formData: req.body
             });
         }
     };
+
+    /**
+     * 프로필 페이지를 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
+    getProfilePage = async (req, res) => {
+        try {
+            const profileUser = await this.userService.getProfile(req.session.user.id);
+            return viewResolver.render(res, 'user/Profile', {
+                title: '프로필',
+                profileUser
+            });
+        } catch (error) {
+            return viewResolver.render(res, 'common/error', {
+                title: '에러',
+                message: error.message
+            });
+        }
+    };
+
+    // 인증 미들웨어
+    isAuthenticated(req, res, next) {
+        if (req.session.user) {
+            next();
+        } else {
+            req.session.returnTo = req.originalUrl;
+            return viewResolver.render(res, 'user/Login', {
+                error: '로그인이 필요한 서비스입니다.',
+                returnTo: req.originalUrl
+            });
+        }
+    }
+
+    // 특정 역할 확인 미들웨어
+    hasRole(role) {
+        return (req, res, next) => {
+            if (req.session.user && req.session.user.role === role) {
+                next();
+            } else {
+                return viewResolver.render(res, 'common/error', {
+                    title: '접근 제한',
+                    message: '접근 권한이 없습니다.'
+                });
+            }
+        };
+    }
 }
 
 export default UserController;

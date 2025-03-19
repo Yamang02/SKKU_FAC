@@ -8,10 +8,10 @@
             <a href="/about">소개</a>
             <% if (locals.user) { %>
                 <a href="/user/profile" class="user-profile">
-                    <%= user.name %> (<%= user.username %>)
+                    <%= user.username %>
                 </a>
                 <% } else { %>
-                    <a href="/user/login">로그인</a>
+                    <a href="/user/login" class="login-button">로그인</a>
                     <% } %>
         </div>
     </nav>
