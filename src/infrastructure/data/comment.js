@@ -1,75 +1,65 @@
 /**
- * 댓글 데이터
+ * 임시 댓글 데이터
+ * @type {Array<Object>}
  */
-const comments = [
+const comment = [
     {
         id: 1,
-        artworkId: 1,
-        author: '김방문',
-        content: '정말 멋진 작품이네요. 작가님의 예술 세계가 돋보입니다.',
-        date: '2024-02-11',
-        formattedDate: '2024년 2월 11일'
+        content: '정말 멋진 작품이네요!',
+        artwork_id: 1,
+        user_id: 1,
+        username: '김예술',
+        created_at: '2024-03-15T09:00:00.000Z',
+        updated_at: '2024-03-15T09:00:00.000Z'
     },
     {
         id: 2,
-        artworkId: 1,
-        author: '이감상',
-        content: '파도의 역동성이 정말 잘 표현되어 있습니다. 일본 목판화의 정수를 보는 것 같아요.',
-        date: '2024-02-12',
-        formattedDate: '2024년 2월 12일'
+        content: '색감이 너무 아름답습니다.',
+        artwork_id: 1,
+        user_id: 2,
+        username: '이감상',
+        created_at: '2024-03-15T10:30:00.000Z',
+        updated_at: '2024-03-15T10:30:00.000Z'
     },
     {
         id: 3,
-        artworkId: 2,
-        author: '박미술',
-        content: '소녀의 표정이 너무 인상적입니다. 베르메르의 빛 표현 기법이 돋보이는 작품이에요.',
-        date: '2024-02-13',
-        formattedDate: '2024년 2월 13일'
+        content: '작가님의 생각이 궁금해요.',
+        artwork_id: 2,
+        user_id: 3,
+        username: '박미술',
+        created_at: '2024-03-16T11:00:00.000Z',
+        updated_at: '2024-03-16T11:00:00.000Z'
     },
     {
         id: 4,
-        artworkId: 2,
-        author: '최관람',
-        content: '진주 귀걸이의 반짝임이 정말 사실적으로 표현되어 있어요. 어떻게 이런 효과를 낼 수 있는지 궁금합니다.',
-        date: '2024-02-14',
-        formattedDate: '2024년 2월 14일'
+        content: '전시회 일정이 궁금합니다.',
+        notice_id: 1,
+        user_id: 1,
+        username: '김예술',
+        created_at: '2024-03-17T09:00:00.000Z',
+        updated_at: '2024-03-17T09:00:00.000Z'
     },
     {
         id: 5,
-        artworkId: 3,
-        author: '정예술',
-        content: '반 고흐의 소용돌이치는 별이 정말 아름답습니다. 그의 내면 세계가 느껴지는 작품이에요.',
-        date: '2024-02-15',
-        formattedDate: '2024년 2월 15일'
+        content: '참여 신청은 어디서 하나요?',
+        notice_id: 1,
+        user_id: 2,
+        username: '이감상',
+        created_at: '2024-03-17T10:30:00.000Z',
+        updated_at: '2024-03-17T10:30:00.000Z'
     },
     {
         id: 6,
-        artworkId: 3,
-        author: '강감성',
-        content: '색채의 대비가 정말 인상적입니다. 반 고흐의 독특한 붓 터치가 잘 드러나는 작품이에요.',
-        date: '2024-02-16',
-        formattedDate: '2024년 2월 16일'
-    },
-    {
-        id: 7,
-        artworkId: 4,
-        author: '윤명화',
-        content: '모나리자의 미소는 정말 신비롭습니다. 다빈치의 천재성이 돋보이는 작품이에요.',
-        date: '2024-02-17',
-        formattedDate: '2024년 2월 17일'
-    },
-    {
-        id: 8,
-        artworkId: 4,
-        author: '한갤러리',
-        content: '배경의 풍경과 인물의 조화가 정말 아름답습니다. 르네상스 미술의 정수를 보는 것 같아요.',
-        date: '2024-02-18',
-        formattedDate: '2024년 2월 18일'
+        content: '공모전 접수 기간이 연장되나요?',
+        notice_id: 2,
+        user_id: 3,
+        username: '박미술',
+        created_at: '2024-03-18T11:00:00.000Z',
+        updated_at: '2024-03-18T11:00:00.000Z'
     }
 ];
 
-// comments 배열 내보내기
-export { comments };
+export default comment;
 
 /**
  * 작품 ID로 댓글 목록을 가져옵니다.
@@ -79,7 +69,7 @@ export { comments };
  * @returns {Object} 댓글 목록과 페이지네이션 정보
  */
 export function getCommentsByArtworkId(artworkId, page = 1, limit = 5) {
-    const artworkComments = comments.filter(comment => comment.artworkId === parseInt(artworkId));
+    const artworkComments = comment.filter(c => c.artwork_id === parseInt(artworkId));
     const totalComments = artworkComments.length;
     const totalPages = Math.ceil(totalComments / limit);
 

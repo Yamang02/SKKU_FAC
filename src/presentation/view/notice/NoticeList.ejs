@@ -21,7 +21,7 @@
                     <section class="results-control">
                         <div class="results-info">
                             <p>총 <strong>
-                                    <%= notices ? notices.length : 0 %>
+                                    <%= pagination.totalCount %>
                                 </strong>개의 공지사항이 있습니다.</p>
                         </div>
                         <form class="search-form" method="get" action="">
@@ -56,8 +56,8 @@
                                     <article class="notice-item">
                                         <a href="/notice/<%= notice.id %>" class="notice-link">
                                             <div class="notice-thumbnail">
-                                                <% if (notice.image_url) { %>
-                                                    <img src="<%= notice.image_url %>" alt="<%= notice.title %> 이미지">
+                                                <% if (notice.images && notice.images.length> 0) { %>
+                                                    <img src="<%= notice.images[0] %>" alt="<%= notice.title %> 이미지">
                                                     <% } else { %>
                                                         <div class="notice-thumbnail-placeholder">
                                                             <i class="fas fa-newspaper"></i>
@@ -96,8 +96,8 @@
 
                         <!-- 페이지네이션 -->
                         <div class="notice-pagination">
-                            <%- include('../common/pagination', { pagination: pagination, baseUrl: '?keyword=' +
-                                (keyword || '' ) + '&page=' }) %>
+                            <%- include('../common/pagination', { pagination: pagination, baseUrl: '/notice?searchType='
+                                + searchType + '&keyword=' + (keyword || '' ) + '&page=' }) %>
                         </div>
                     </section>
                 </div>

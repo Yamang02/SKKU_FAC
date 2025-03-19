@@ -1,21 +1,21 @@
 /**
- * 작품 데이터 전송 객체 (DTO)
- * 프레젠테이션 레이어로 전달되는 데이터 구조
+ * 작품 DTO 클래스
+ * 작품 데이터를 전송하기 위한 객체입니다.
  */
-class ArtworkDTO {
-    constructor(artwork, exhibition = null) {
+class ArtworkDto {
+    constructor(artwork) {
         this.id = artwork.id;
         this.title = artwork.title;
+        this.description = artwork.description;
         this.artist = artwork.artist;
         this.department = artwork.department;
         this.year = artwork.year;
-        this.medium = artwork.medium;
-        this.size = artwork.size;
-        this.description = artwork.description;
-        this.exhibition = exhibition ? exhibition.title + (exhibition.subtitle ? ': ' + exhibition.subtitle : '') : '';
-        this.exhibitionId = artwork.exhibitionId;
-        this.image = artwork.image;
+        this.featured = artwork.featured;
+        this.exhibition_id = artwork.exhibition_id;
+        this.images = artwork.images;
+        this.created_at = artwork.created_at;
+        this.updated_at = artwork.updated_at;
     }
 }
 
-export default ArtworkDTO; 
+export default ArtworkDto;
