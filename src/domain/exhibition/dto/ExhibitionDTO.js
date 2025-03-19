@@ -1,20 +1,20 @@
 /**
- * 전시회 데이터 전송 객체 (DTO)
- * 프레젠테이션 레이어로 전달되는 데이터 구조
+ * 전시회 DTO 클래스
+ * 전시회 데이터를 전송하기 위한 객체입니다.
  */
-class ExhibitionDTO {
+class ExhibitionDto {
     constructor(exhibition) {
         this.id = exhibition.id;
-        this.code = exhibition.code;
         this.title = exhibition.title;
         this.subtitle = exhibition.subtitle;
         this.description = exhibition.description;
-        this.startDate = exhibition.startDate;
-        this.endDate = exhibition.endDate;
-        this.image = exhibition.image;
-        this.exhibitionType = exhibition.exhibitionType || 'regular'; // 기본값은 정기 전시회
-        this.fullTitle = exhibition.title + (exhibition.subtitle ? ': ' + exhibition.subtitle : '');
+        this.start_date = exhibition.start_date;
+        this.end_date = exhibition.end_date;
+        this.thumbnail = exhibition.thumbnail;
+        this.code = exhibition.code;
+        this.created_at = exhibition.created_at;
+        this.updated_at = exhibition.updated_at;
     }
 }
 
-export default ExhibitionDTO;
+export default ExhibitionDto;
