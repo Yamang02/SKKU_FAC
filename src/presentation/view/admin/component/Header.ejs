@@ -1,0 +1,26 @@
+<div class="admin-header">
+    <div class="header-content">
+        <h1 class="admin-title">
+            <%= title %>
+        </h1>
+        <div class="admin-breadcrumb">
+            <a href="/admin/dashboard">관리자</a>
+            <% if (breadcrumb) { %>
+                <span class="breadcrumb-separator">/</span>
+                <span class="current-page">
+                    <%= breadcrumb %>
+                </span>
+                <% } %>
+        </div>
+    </div>
+    <div class="header-actions">
+        <div class="search-box">
+            <input type="text" placeholder="검색..." />
+            <i class="fas fa-search"></i>
+        </div>
+        <button class="btn btn--primary">
+            <i class="fas fa-plus"></i>
+            새로 만들기
+        </button>
+    </div>
+</div>

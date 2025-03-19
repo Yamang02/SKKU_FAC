@@ -4,6 +4,7 @@ import noticeRouter from './notice/router.js';
 import userRouter from './user/router.js';
 import artworkRouter from './artwork/router.js';
 import homeRouter from './home/router.js';
+import adminRouter from './admin/router.js';
 
 const router = express.Router();
 
@@ -12,8 +13,9 @@ router.use('/', homeRouter);
 
 // 각 도메인별 라우터 등록
 router.use('/exhibition', exhibitionRouter);
-router.use('/notice', noticeRouter);
 router.use('/user', userRouter);
 router.use('/artwork', artworkRouter);
+router.use('/notice', noticeRouter);
+router.use('/admin', adminRouter);
 
 export default router;

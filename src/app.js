@@ -14,7 +14,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 정적 파일 제공
-app.use(express.static(path.join(__dirname, 'presentation/public')));
+app.use(express.static(path.join(__dirname, 'presentation/public'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        }
+    }
+}));
 
 // 뷰 엔진 설정
 app.set('views', path.join(__dirname, 'presentation/view'));

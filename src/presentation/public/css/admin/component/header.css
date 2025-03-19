@@ -1,0 +1,109 @@
+.admin-header {
+    background-color: var(--admin-color-white);
+    border-bottom: 1px solid var(--admin-color-border);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.admin-title {
+    font-size: 1.5rem;
+    color: var(--admin-color-text-primary);
+    margin: 0;
+}
+
+.admin-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--admin-color-text-secondary);
+    font-size: 0.875rem;
+}
+
+.admin-breadcrumb a {
+    color: var(--admin-color-primary);
+    text-decoration: none;
+}
+
+.admin-breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.admin-breadcrumb i {
+    font-size: 0.75rem;
+    color: var(--admin-color-text-muted);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.search-input {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--admin-color-border);
+    border-radius: var(--admin-border-radius-md);
+    font-size: 0.875rem;
+    color: var(--admin-color-text-primary);
+    width: 300px;
+    transition: all 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--admin-color-primary);
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+.create-button {
+    padding: 0.5rem 1rem;
+    background-color: var(--admin-color-primary);
+    color: var(--admin-color-white);
+    border: none;
+    border-radius: var(--admin-border-radius-md);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.create-button:hover {
+    background-color: var(--admin-color-primary-dark);
+}
+
+.create-button i {
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .search-input {
+        width: 100%;
+    }
+
+    .create-button {
+        width: 100%;
+        justify-content: center;
+    }
+}

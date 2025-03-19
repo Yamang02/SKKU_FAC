@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            <%= title %> - 관리자
+        </title>
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <!-- 관리자 페이지 스타일 -->
+        <link rel="stylesheet" href="/css/admin/common/reset.css">
+        <link rel="stylesheet" href="/css/admin/common/style.css">
+        <link rel="stylesheet" href="/css/admin/component/sidebar.css">
+        <link rel="stylesheet" href="/css/admin/component/header.css">
+        <link rel="stylesheet" href="/css/admin/dashboard.css">
+    </head>
+
+    <body>
+        <div class="admin-container">
+            <%- include('../component/Sidebar.ejs', { currentPage }) %>
+                <main class="admin-main">
+                    <%- include('../component/Header.ejs', { title, breadcrumb }) %>
+                        <%- content %>
+                </main>
+        </div>
+    </body>
+
+</html>
