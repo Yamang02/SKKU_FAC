@@ -9,7 +9,7 @@ router.get('/', homeController.getHome);
 
 // About 페이지 라우트
 router.get('/about', (req, res) => {
-    viewResolver.render(res, 'about/AboutPage', {
+    viewResolver.render(res, 'common/AboutPage', {
         title: '소개'
     });
 });
