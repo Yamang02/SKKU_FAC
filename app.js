@@ -33,15 +33,9 @@ app.use(express.static(path.join(__dirname, 'src/presentation/public'), {
         }
     }
 }));
-app.use('/css', express.static(path.join(__dirname, 'src/presentation/public/css'), {
-    setHeaders: (res, path) => {
-        if (path.endsWith('.css')) {
-            res.setHeader('Content-Type', 'text/css');
-        }
-    }
-}));
+app.use('/css', express.static(path.join(__dirname, 'src/presentation/public/css')));
 app.use('/js', express.static(path.join(__dirname, 'src/presentation/public/js')));
-app.use('/image', express.static(path.join(__dirname, 'src/presentation/public/assets/image')));
+app.use('/image', express.static(path.join(__dirname, 'src/presentation/public/asset/image')));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
