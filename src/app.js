@@ -2,7 +2,7 @@ import express from 'express';
 import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import userRouter from './interface/router/user/router.js';
+import router from './interface/router/RouterIndex.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -56,21 +56,7 @@ app.use((req, res, next) => {
 });
 
 // 라우터 설정
-app.use('/user', userRouter);
-
-// 홈페이지 라우트
-app.get('/', (req, res) => {
-    console.log('\n[홈] ---- 홈페이지 접속 ----');
-    console.log('[홈] 세션 ID:', req.sessionID);
-    console.log('[홈] 전체 세션 정보:', req.session);
-    console.log('[홈] 세션의 user 정보:', req.session.user);
-    console.log('[홈] locals 정보:', res.locals.user);
-    console.log('[홈] 쿠키 정보:', req.session.cookie);
-    console.log('[홈] ---- 렌더링 시작 ----\n');
-    res.render('home/Home', {
-        user: req.session.user
-    });
-});
+app.use(router);
 
 // 서버 시작
 const PORT = process.env.PORT || 3000;

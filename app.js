@@ -6,10 +6,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import bodyParser from 'body-parser';
 import session from 'express-session';
-import { getFeaturedArtworks } from './src/domain/home/service/HomeService.js';
 import * as dotenv from 'dotenv';
-import apiRouter from './src/interface/router/index.js';
-import viewResolver from './src/presentation/view/ViewResolver.js';
+import apiRouter from './src/interface/router/RouterIndex.js';
+
 
 // 환경 변수 로드
 dotenv.config({ path: './config/.env' });
@@ -52,8 +51,6 @@ app.use(session({
 
 // API 라우터 설정
 app.use('/', apiRouter);
-
-// 메인 페이지 라우트는 apiRouter에서 처리하도록 제거
 
 // 서버 시작
 const PORT = process.env.PORT || 3000;
