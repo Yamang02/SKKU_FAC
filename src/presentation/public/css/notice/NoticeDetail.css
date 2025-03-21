@@ -255,82 +255,214 @@
 }
 
 /* 댓글 섹션 스타일 */
-.comments-container {
+.comments {
+    width: 100%;
+    margin: 40px auto;
+    padding: 40px;
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
 }
 
 .comments__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
 }
 
 .comments__title {
     font-size: 1.5rem;
-    font-weight: 700;
-    color: #333;
+    font-weight: 600;
+    color: var(--color-primary);
+    padding-left: 20px;
 }
 
 .comments__count {
-    color: #666;
+    color: var(--color-secondary);
     font-size: 0.95rem;
+    background-color: #f8f9fa;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin-right: 20px;
+}
+
+.comment-form {
+    position: relative;
+    margin-bottom: 40px;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.comment-form__input-wrapper {
+    display: flex;
+    gap: 15px;
+}
+
+.comment-form__input {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    resize: none;
+    height: 100px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.comment-form__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-self: center;
+}
+
+.btn--comment {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn--comment-submit {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn--comment-clear {
+    background-color: #f1f3f5;
+    color: #868e96;
+}
+
+.btn--comment-submit:hover {
+    background-color: var(--color-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn--comment-clear:hover {
+    background-color: #ff4757;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.25);
+}
+
+.comments__list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.comment {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.comment:hover {
+    background-color: #f9f9f9;
+}
+
+.comment__actions {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    display: none;
+    gap: 10px;
+}
+
+.comment:hover .comment__actions {
+    display: flex;
+}
+
+.btn--action {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: white;
+    border: 1px solid #eee;
+}
+
+.btn--action:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.btn--delete:hover {
+    background-color: #ff4757;
+    border-color: #ff4757;
+    color: white;
+}
+
+.comment__author {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.comment__date {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+.comment__content {
+    line-height: 1.6;
+    color: var(--color-text-primary);
+}
+
+.comments__empty {
+    text-align: center;
+    padding: 40px 0;
+    color: #666;
+}
+
+.comments__pagination {
+    margin-top: 40px;
 }
 
 /* 반응형 스타일 */
 @media (width <= 768px) {
-    .notice-detail-page {
-        padding: 1rem;
+    .comments {
+        padding: 20px;
     }
 
-    .notice-detail-container,
-    .comments-container {
-        padding: 1.5rem;
+    .comment-form {
+        padding: 15px;
     }
 
-    .notice-detail-title {
-        font-size: 1.5rem;
-    }
-
-    .notice-meta {
+    .comment-form__input-wrapper {
         flex-direction: column;
-        gap: 0.5rem;
     }
 
-    .notice-images {
-        grid-template-columns: 1fr;
-        padding: 1rem;
-    }
-
-    .notice-content {
-        padding: 1.5rem;
+    .comment-form__actions {
+        flex-direction: row;
+        justify-content: flex-end;
     }
 }
 
 @media (width <= 480px) {
-    .notice-detail-container,
-    .comments-container {
-        padding: 1rem;
+    .comments__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
     }
 
-    .notice-detail-title {
-        font-size: 1.25rem;
-    }
-
-    .notice-content {
-        padding: 1rem;
-    }
-
-    .btn--list {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .btn--list:hover {
-        width: 100%;
+    .comments__count {
+        margin-right: 0;
+        margin-left: 20px;
     }
 }
 

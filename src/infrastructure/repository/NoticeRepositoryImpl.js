@@ -62,6 +62,14 @@ class NoticeRepositoryImpl extends NoticeRepository {
             nextId: currentIndex < notices.length - 1 ? notices[currentIndex + 1].id : null
         };
     }
+
+    /**
+     * 모든 공지사항을 조회합니다.
+     * @returns {Promise<Array>} 공지사항 목록
+     */
+    async findAll() {
+        return noticeData.findAll();
+    }
 }
 
 export default NoticeRepositoryImpl;
