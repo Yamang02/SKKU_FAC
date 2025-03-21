@@ -17,15 +17,18 @@ class CommentRepositoryImpl extends CommentRepository {
      * @param {Comment} comment - 생성할 댓글 엔티티
      * @returns {Promise<Comment>} 생성된 댓글
      */
-    async create(data) {
-        const newId = Math.max(...comment.map(c => c.id)) + 1;
+    async create(commentData) {
+        const newId = Math.max(...comment.map(c => c.id), 0) + 1;
         const now = new Date().toISOString();
         const newComment = {
             id: newId,
-            content: data.content,
-            artwork_id: parseInt(data.artwork_id),
-            user_id: parseInt(data.user_id),
-            username: data.username,
+            content: commentData.content,
+            user_id: commentData.user_id,
+            username: commentData.username,
+            department: commentData.department,
+            student_id: commentData.student_id,
+            artwork_id: commentData.artwork_id,
+            notice_id: commentData.notice_id,
             created_at: now,
             updated_at: now
         };
@@ -72,7 +75,15 @@ class CommentRepositoryImpl extends CommentRepository {
      * @returns {Promise<Comment>} 조회된 댓글
      */
     async findById(id) {
-        return this.comments.find(comment => comment.id === id);
+        const foundComment = comment.find(c => c.id === parseInt(id));
+        if (!foundComment) return null;
+        return {
+            ...foundComment,
+            user_id: foundComment.user_id,
+            username: foundComment.username,
+            department: foundComment.department,
+            student_id: foundComment.student_id
+        };
     }
 
     /**
@@ -117,18 +128,26 @@ class CommentRepositoryImpl extends CommentRepository {
     /**
      * @inheritdoc
      */
-    async findByArtworkId(artworkId, { limit = 10, offset = 0 }) {
-        return comment
-            .filter(comment => comment.artwork_id === parseInt(artworkId))
+    async findByArtworkId(artworkId, { offset = 0, limit = 10 }) {
+        const comments = comment
+            .filter(c => c.artwork_id === parseInt(artworkId))
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .slice(offset, offset + limit);
+            .slice(offset, offset + limit)
+            .map(c => ({
+                ...c,
+                user_id: c.user_id,
+                username: c.username,
+                department: c.department,
+                student_id: c.student_id
+            }));
+        return comments;
     }
 
     /**
      * @inheritdoc
      */
     async countByArtworkId(artworkId) {
-        return comment.filter(comment => comment.artwork_id === parseInt(artworkId)).length;
+        return comment.filter(c => c.artwork_id === parseInt(artworkId)).length;
     }
 
     /**
@@ -139,8 +158,18 @@ class CommentRepositoryImpl extends CommentRepository {
      * @returns {Promise<Array>} 댓글 목록
      */
     async findByNoticeId(noticeId, offset = 0, limit = 10) {
-        const comments = comment.filter(c => c.notice_id === parseInt(noticeId));
-        return comments.slice(offset, offset + limit);
+        const comments = comment
+            .filter(c => c.notice_id === parseInt(noticeId))
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(offset, offset + limit)
+            .map(c => ({
+                ...c,
+                user_id: c.user_id,
+                username: c.username,
+                department: c.department,
+                student_id: c.student_id
+            }));
+        return comments;
     }
 
     /**

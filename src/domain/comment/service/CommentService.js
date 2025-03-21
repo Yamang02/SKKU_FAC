@@ -1,6 +1,5 @@
 import Comment from '../entity/Comment.js';
 import CommentDTO from '../dto/CommentDTO.js';
-import { comment } from '../../../infrastructure/data/comment.js';
 import CommentRepositoryImpl from '../../../infrastructure/repository/CommentRepositoryImpl.js';
 
 /**
@@ -12,18 +11,100 @@ class CommentService {
         this.commentRepository = new CommentRepositoryImpl();
     }
 
+    /**
+     * 댓글 내용의 유효성을 검사합니다.
+     * @param {string} content - 댓글 내용
+     * @returns {boolean} 유효성 검사 결과
+     */
+    validateContent(content) {
+        if (!content || typeof content !== 'string') {
+            return false;
+        }
+
+        const trimmedContent = content.trim();
+        return trimmedContent.length >= 1 && trimmedContent.length <= 1000;
+    }
+
+    /**
+     * 타겟 타입의 유효성을 검사합니다.
+     * @param {string} targetType - 타겟 타입
+     * @returns {boolean} 유효성 검사 결과
+     */
+    validateTargetType(targetType) {
+        const validTypes = ['notice', 'artwork'];
+        return validTypes.includes(targetType);
+    }
+
+    /**
+     * 페이지네이션 파라미터의 유효성을 검사합니다.
+     * @param {number} page - 페이지 번호
+     * @param {number} limit - 페이지당 항목 수
+     * @returns {boolean} 유효성 검사 결과
+     */
+    validatePagination(page, limit) {
+        return (
+            Number.isInteger(page) &&
+            Number.isInteger(limit) &&
+            page > 0 &&
+            limit > 0 &&
+            limit <= 100
+        );
+    }
+
+    /**
+     * 댓글 작성자의 유효성을 검사합니다.
+     * @param {string} author - 작성자
+     * @returns {boolean} 유효성 검사 결과
+     */
+    validateAuthor(author) {
+        return author && typeof author === 'string' && author.length > 0;
+    }
+
+    /**
+     * 대댓글 작성 가능 여부를 검사합니다.
+     * @param {Comment} parentComment - 부모 댓글
+     * @returns {boolean} 작성 가능 여부
+     */
+    canCreateReply(parentComment) {
+        return parentComment && !parentComment.is_deleted && !parentComment.isReply();
+    }
+
+    /**
+     * 댓글 수정/삭제 권한을 확인합니다.
+     * @param {Comment} comment - 댓글
+     * @param {string} userId - 사용자 ID
+     * @returns {boolean} 권한 여부
+     */
+    hasPermission(comment, userId) {
+        return comment && !comment.is_deleted && comment.isOwnedBy(userId);
+    }
+
     async getCommentsByNoticeId(noticeId, page = 1, limit = 10) {
         const offset = (page - 1) * limit;
         const comments = await this.commentRepository.findByNoticeId(noticeId, offset, limit);
         const totalCount = await this.commentRepository.countByNoticeId(noticeId);
 
+        const totalPages = Math.ceil(totalCount / limit);
+        const validPage = Math.max(1, Math.min(page, totalPages || 1));
+
+        const startPage = Math.max(1, validPage - 1);
+        const endPage = Math.min(totalPages, startPage + 2);
+
         return {
-            comments,
-            commentPagination: {
-                currentPage: page,
-                totalPages: Math.ceil(totalCount / limit),
-                totalItems: totalCount,
-                itemsPerPage: limit
+            comments: comments.map(c => new CommentDTO(new Comment(c))),
+            pagination: {
+                currentPage: validPage,
+                totalPages,
+                totalComments: totalCount,
+                hasNextPage: validPage < totalPages,
+                hasPrevPage: validPage > 1,
+                startPage,
+                endPage,
+                showFirstPage: startPage > 1,
+                showLastPage: endPage < totalPages,
+                showFirstEllipsis: startPage > 2,
+                showLastEllipsis: endPage < totalPages - 1,
+                pages: Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
             }
         };
     }
@@ -40,43 +121,24 @@ class CommentService {
      * @returns {Object} 댓글 목록과 페이지네이션 정보
      */
     async getCommentsByArtworkId(artworkId, page = 1, pageSize = 6) {
-        // 작품 ID에 해당하는 댓글 필터링
-        const filteredComments = comment.filter(c =>
-            c.artworkId === parseInt(artworkId)
-        );
+        const offset = (page - 1) * pageSize;
+        const comments = await this.commentRepository.findByArtworkId(artworkId, { offset, limit: pageSize });
+        const totalCount = await this.commentRepository.countByArtworkId(artworkId);
 
-        // 전체 댓글 수
-        const totalComments = filteredComments.length;
-
-        // 전체 페이지 수 계산
-        const totalPages = Math.ceil(totalComments / pageSize);
-
-        // 페이지 번호 유효성 검사
+        const totalPages = Math.ceil(totalCount / pageSize);
         const validPage = Math.max(1, Math.min(page, totalPages || 1));
 
-        // 페이지에 해당하는 댓글 추출
-        const startIndex = (validPage - 1) * pageSize;
-        const endIndex = startIndex + pageSize;
-        const paginatedComments = filteredComments.slice(startIndex, endIndex);
-
-        // 댓글 엔티티 생성 및 DTO 변환
-        const commentEntities = paginatedComments.map(c => new Comment(c));
-        const commentDTOs = commentEntities.map(c => new CommentDTO(c));
-
-        // 페이지네이션 계산
         const startPage = Math.max(1, validPage - 1);
         const endPage = Math.min(totalPages, startPage + 2);
 
-        // 페이지네이션 정보 생성
         return {
-            comments: commentDTOs,
+            comments: comments.map(c => new CommentDTO(new Comment(c))),
             pagination: {
                 currentPage: validPage,
                 totalPages,
-                totalComments,
+                totalComments: totalCount,
                 hasNextPage: validPage < totalPages,
                 hasPrevPage: validPage > 1,
-                // 페이지네이션 UI를 위한 추가 정보
                 startPage,
                 endPage,
                 showFirstPage: startPage > 1,
@@ -94,19 +156,26 @@ class CommentService {
      * @returns {CommentDTO} 추가된 댓글 DTO
      */
     async addComment(commentData) {
-        const newComment = {
-            id: comment.length + 1,
-            artworkId: parseInt(commentData.artworkId),
-            author: commentData.author,
+        if (!this.validateContent(commentData.content)) {
+            throw new Error('Invalid comment content');
+        }
+
+        if (!this.validateAuthor(commentData.author)) {
+            throw new Error('Invalid author');
+        }
+
+        const newCommentData = {
             content: commentData.content,
-            date: new Date().toISOString().split('T')[0],
-            isEditable: true
+            user_id: commentData.user_id,
+            username: commentData.author,
+            department: commentData.department,
+            student_id: commentData.student_id,
+            artwork_id: commentData.artwork_id,
+            notice_id: commentData.notice_id
         };
 
-        comment.push(newComment);
-
-        const commentEntity = new Comment(newComment);
-        return new CommentDTO(commentEntity);
+        const newComment = await this.commentRepository.create(newCommentData);
+        return new CommentDTO(new Comment(newComment));
     }
 
     /**
@@ -115,22 +184,18 @@ class CommentService {
      * @param {Object} commentData 수정할 댓글 데이터
      * @returns {CommentDTO|null} 수정된 댓글 DTO 또는 null
      */
-    async updateComment(commentId, commentData) {
-        const commentIndex = comment.findIndex(c =>
-            c.id === parseInt(commentId)
-        );
-
-        if (commentIndex === -1) {
-            return null;
+    async updateComment(commentId, commentData, userId) {
+        if (!this.validateContent(commentData.content)) {
+            throw new Error('Invalid comment content');
         }
 
-        comment[commentIndex] = {
-            ...comment[commentIndex],
-            content: commentData.content
-        };
+        const existingComment = await this.commentRepository.findById(commentId);
+        if (!this.hasPermission(existingComment, userId)) {
+            throw new Error('Permission denied');
+        }
 
-        const commentEntity = new Comment(comment[commentIndex]);
-        return new CommentDTO(commentEntity);
+        const updatedComment = await this.commentRepository.update(commentId, commentData);
+        return new CommentDTO(new Comment(updatedComment));
     }
 
     /**
@@ -138,17 +203,13 @@ class CommentService {
      * @param {number} commentId 댓글 ID
      * @returns {boolean} 삭제 성공 여부
      */
-    async deleteComment(commentId) {
-        const commentIndex = comment.findIndex(c =>
-            c.id === parseInt(commentId)
-        );
-
-        if (commentIndex === -1) {
-            return false;
+    async deleteComment(commentId, userId) {
+        const existingComment = await this.commentRepository.findById(commentId);
+        if (!this.hasPermission(existingComment, userId)) {
+            throw new Error('Permission denied');
         }
 
-        comment.splice(commentIndex, 1);
-        return true;
+        return this.commentRepository.delete(commentId);
     }
 }
 

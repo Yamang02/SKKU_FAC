@@ -93,6 +93,18 @@ class NoticeService {
             limit <= 100
         );
     }
+
+    async getNoticeById(id) {
+        try {
+            const notice = await this.noticeRepository.findById(id);
+            if (!notice) {
+                throw new Error('공지사항을 찾을 수 없습니다.');
+            }
+            return notice;
+        } catch (error) {
+            throw new Error(`공지사항 조회 중 오류가 발생했습니다: ${error.message}`);
+        }
+    }
 }
 
 export default NoticeService;

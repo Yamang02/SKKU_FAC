@@ -81,58 +81,70 @@
                             <span class="comments__count">총 <%= commentPagination.totalComments %>개의 댓글</span>
                         </div>
 
-                        <form class="comment-form">
-                            <div class="comment-form__input-wrapper">
-                                <textarea class="comment-form__input" placeholder="댓글을 작성해주세요..."></textarea>
-                                <div class="comment-form__actions">
-                                    <button type="button" class="btn btn--comment btn--comment-clear btn--delete"
-                                        aria-label="댓글 내용 초기화">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                    <button type="submit" class="btn btn--comment btn--comment-submit"
-                                        aria-label="댓글 작성">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-
-                        <div class="comments__list">
-                            <% if (comments && comments.length> 0) { %>
-                                <% comments.forEach(comment=> { %>
-                                    <div class="comment">
-                                        <div class="comment__actions">
-                                            <button class="btn btn--action" data-comment-id="<%= comment.id %>"
-                                                title="댓글 수정">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn--action btn--delete"
-                                                data-comment-id="<%= comment.id %>" title="댓글 삭제">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </div>
-                                        <div class="comment__author">
-                                            <%= comment.author %>
-                                        </div>
-                                        <div class="comment__date">
-                                            <%= comment.formattedDate %>
-                                        </div>
-                                        <div class="comment__content">
-                                            <%= comment.content %>
-                                        </div>
+                        <% if (user) { %>
+                            <form class="comment-form">
+                                <div class="comment-form__input-wrapper">
+                                    <textarea class="comment-form__input" placeholder="댓글을 작성해주세요..."></textarea>
+                                    <div class="comment-form__actions">
+                                        <button type="button" class="btn btn--comment btn--comment-clear btn--delete"
+                                            aria-label="댓글 내용 초기화">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                        <button type="submit" class="btn btn--comment btn--comment-submit"
+                                            aria-label="댓글 작성">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
                                     </div>
-                                    <% }); %>
-                                        <% } else { %>
-                                            <div class="comments__empty">
-                                                <p>아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>
-                                            </div>
-                                            <% } %>
-                        </div>
+                                </div>
+                            </form>
+                            <% } else { %>
+                                <div class="comments__login-message">
+                                    <p>댓글을 작성하려면 <a href="/user/login">로그인</a>이 필요합니다.</p>
+                                </div>
+                                <% } %>
 
-                        <div class="comments__pagination">
-                            <%- include('../common/pagination', { pagination: commentPagination,
-                                baseUrl: '?commentPage=' }) %>
-                        </div>
+                                    <div class="comments__list">
+                                        <% if (comments && comments.length> 0) { %>
+                                            <% comments.forEach(comment=> { %>
+                                                <div class="comment">
+                                                    <div class="comment__header">
+                                                        <div class="comment__info">
+                                                            <span class="comment__author">
+                                                                <%= comment.author %>
+                                                            </span>
+                                                            <span class="comment__date">
+                                                                <%= comment.formattedDate %>
+                                                            </span>
+                                                        </div>
+                                                        <% if (user && user.id===comment.user.id) { %>
+                                                            <div class="comment__actions">
+                                                                <button class="btn btn--action"
+                                                                    data-comment-id="<%= comment.id %>" title="댓글 수정">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </button>
+                                                                <button class="btn btn--action btn--delete"
+                                                                    data-comment-id="<%= comment.id %>" title="댓글 삭제">
+                                                                    <i class="fas fa-trash-alt"></i>
+                                                                </button>
+                                                            </div>
+                                                            <% } %>
+                                                    </div>
+                                                    <div class="comment__content">
+                                                        <%= comment.content %>
+                                                    </div>
+                                                </div>
+                                                <% }); %>
+                                                    <% } else { %>
+                                                        <div class="comments__empty">
+                                                            <p>아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>
+                                                        </div>
+                                                        <% } %>
+                                    </div>
+
+                                    <div class="comments__pagination">
+                                        <%- include('../common/pagination', { pagination: commentPagination,
+                                            baseUrl: '?commentPage=' }) %>
+                                    </div>
                     </div>
                 </div>
 

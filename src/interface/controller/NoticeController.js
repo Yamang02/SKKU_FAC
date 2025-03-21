@@ -4,10 +4,9 @@ import CommentService from '../../domain/comment/service/CommentService.js';
 
 class NoticeController {
     constructor() {
-        const noticeService = new NoticeService();
-        const commentService = new CommentService();
-
-        this.noticeUseCase = new NoticeUseCase(noticeService, commentService);
+        this.noticeService = new NoticeService();
+        this.commentService = new CommentService();
+        this.noticeUseCase = new NoticeUseCase(this.noticeService, this.commentService);
 
         // 메서드 바인딩
         this.getNoticeList = this.getNoticeList.bind(this);
@@ -60,29 +59,56 @@ class NoticeController {
     async getNoticeDetail(req, res) {
         try {
             const noticeId = parseInt(req.params.id, 10);
-            const commentPage = parseInt(req.query.commentPage, 10) || 1;
+            const notice = await this.noticeService.findById(noticeId);
+            const comments = await this.commentService.getCommentsByNoticeId(noticeId);
 
-            const result = await this.noticeUseCase.getNoticeDetail(noticeId, commentPage);
+            // comments를 배열로 변환
+            const commentsArray = Array.isArray(comments) ? comments : [];
 
-            if (req.xhr || req.headers.accept.includes('application/json')) {
-                return res.json(result);
-            }
+            // 조회수 증가
+            await this.noticeService.incrementViews(noticeId);
+
+            const currentPage = parseInt(req.query.commentPage, 10) || 1;
+            const itemsPerPage = 10;
+            const totalItems = commentsArray.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+            // 페이지 배열 생성 (예: [1, 2, 3, 4, 5])
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, startPage + 4);
+            const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+
+            const pagination = {
+                totalItems,
+                currentPage,
+                totalPages,
+                itemsPerPage,
+                pages,
+                hasPrev: currentPage > 1,
+                hasNext: currentPage < totalPages,
+                showFirstPage: startPage > 1,
+                showLastPage: endPage < totalPages,
+                showFirstEllipsis: startPage > 2,
+                showLastEllipsis: endPage < totalPages - 1
+            };
+
+            // 현재 페이지에 해당하는 댓글만 필터링
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentPageComments = commentsArray.slice(startIndex, endIndex);
 
             res.render('notice/NoticeDetail', {
-                title: result.notice.title,
-                ...result,
-                searchType: req.query.searchType || 'all',
-                keyword: req.query.keyword || '',
+                title: notice.title,
+                notice,
+                comments: currentPageComments,
+                pagination,
                 user: req.session.user || null
             });
         } catch (error) {
-            if (req.xhr || req.headers.accept.includes('application/json')) {
-                return res.status(404).json({ error: error.message });
-            }
-
+            console.error('Error in getNoticeDetail:', error);
             res.render('common/error', {
-                title: '에러',
-                message: error.message
+                title: '오류가 발생했습니다',
+                message: error.message || '공지사항을 찾을 수 없습니다.'
             });
         }
     }

@@ -6,11 +6,40 @@ class CommentDto {
     constructor(comment) {
         this.id = comment.id;
         this.content = comment.content;
+        this.author = comment.username || (comment.user && comment.user.username) || '알 수 없는 사용자';
         this.artwork_id = comment.artwork_id;
-        this.user_id = comment.user_id;
-        this.username = comment.username;
-        this.created_at = comment.created_at;
-        this.updated_at = comment.updated_at;
+        this.notice_id = comment.notice_id;
+        this.created_at = this.formatDate(comment.created_at);
+        this.updated_at = comment.updated_at ? this.formatDate(comment.updated_at) : null;
+
+        // 사용자 정보
+        this.user = {
+            id: comment.user_id || (comment.user && comment.user.id),
+            username: comment.username || (comment.user && comment.user.username),
+            department: comment.department || (comment.user && comment.user.department),
+            student_id: comment.student_id || (comment.user && comment.user.student_id)
+        };
+    }
+
+    formatDate(date) {
+        if (!date) return '';
+
+        const dateObj = new Date(date);
+        const now = new Date();
+        const diff = Math.floor((now - dateObj) / 1000); // 초 단위 차이
+
+        if (diff < 60) return '방금 전';
+        if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`;
+
+        return dateObj.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     }
 
     static fromEntity(comment) {
@@ -22,10 +51,13 @@ class CommentDto {
             id: dto.id,
             content: dto.content,
             artwork_id: dto.artwork_id,
-            user_id: dto.user_id,
-            username: dto.username,
+            notice_id: dto.notice_id,
             created_at: dto.created_at,
-            updated_at: dto.updated_at
+            updated_at: dto.updated_at,
+            user_id: dto.user.id,
+            username: dto.user.username,
+            department: dto.user.department,
+            student_id: dto.user.student_id
         };
     }
 
