@@ -1,5 +1,5 @@
-import CommentApplicationService from '../service/CommentApplicationService.js';
-import CommentRepositoryImpl from '../../../infrastructure/repository/CommentRepositoryImpl.js';
+import CommentApplicationService from '../../application/comment/service/CommentApplicationService.js';
+import CommentRepositoryImpl from '../../infrastructure/repository/CommentRepositoryImpl.js';
 
 /**
  * Comment 컨트롤러

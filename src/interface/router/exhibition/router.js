@@ -1,5 +1,5 @@
 import express from 'express';
-import ExhibitionController from '../../../application/exhibition/controller/ExhibitionController.js';
+import ExhibitionController from '../../controller/ExhibitionController.js';
 import ExhibitionApplicationService from '../../../application/exhibition/service/ExhibitionApplicationService.js';
 import ExhibitionRepositoryImpl from '../../../infrastructure/repository/ExhibitionRepositoryImpl.js';
 import ArtworkApplicationService from '../../../application/artwork/service/ArtworkApplicationService.js';

@@ -1,7 +1,7 @@
-import NoticeApplicationService from '../service/NoticeApplicationService.js';
-import NoticeRepositoryImpl from '../../../infrastructure/repository/NoticeRepositoryImpl.js';
-import CommentApplicationService from '../../comment/service/CommentApplicationService.js';
-import CommentRepositoryImpl from '../../../infrastructure/repository/CommentRepositoryImpl.js';
+import NoticeApplicationService from '../../application/notice/service/NoticeApplicationService.js';
+import NoticeRepositoryImpl from '../../infrastructure/repository/NoticeRepositoryImpl.js';
+import CommentApplicationService from '../../application/comment/service/CommentApplicationService.js';
+import CommentRepositoryImpl from '../../infrastructure/repository/CommentRepositoryImpl.js';
 
 class NoticeController {
     constructor() {

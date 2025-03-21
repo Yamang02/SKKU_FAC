@@ -1,5 +1,5 @@
 import express from 'express';
-import ArtworkController from '../../../application/artwork/controller/ArtworkController.js';
+import ArtworkController from '../../controller/ArtworkController.js';
 import ArtworkApplicationService from '../../../application/artwork/service/ArtworkApplicationService.js';
 import CommentApplicationService from '../../../application/comment/service/CommentApplicationService.js';
 import ExhibitionApplicationService from '../../../application/exhibition/service/ExhibitionApplicationService.js';

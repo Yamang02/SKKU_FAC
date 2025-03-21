@@ -1,4 +1,4 @@
-import viewResolver from '../../../presentation/view/ViewResolver.js';
+import viewResolver from '../../presentation/view/ViewResolver.js';
 
 /**
  * 전시회 컨트롤러

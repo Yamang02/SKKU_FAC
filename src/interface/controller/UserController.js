@@ -1,6 +1,6 @@
-import UserApplicationService from '../service/UserApplicationService.js';
-import UserRepositoryImpl from '../../../infrastructure/repository/UserRepositoryImpl.js';
-import { UserRole } from '../../../infrastructure/data/user.js';
+import UserApplicationService from '../../application/user/service/UserApplicationService.js';
+import UserRepositoryImpl from '../../infrastructure/repository/UserRepositoryImpl.js';
+import { UserRole } from '../../infrastructure/data/user.js';
 
 class UserController {
     constructor() {
@@ -129,7 +129,6 @@ class UserController {
         }
     }
 
-    // 관리 기능 추가
     async getUserList(req, res) {
         try {
             const page = parseInt(req.query.page) || 1;
@@ -248,32 +247,6 @@ class UserController {
                 message: error.message
             });
         }
-    }
-
-    // 미들웨어
-    isAuthenticated(req, res, next) {
-        if (req.session.user) {
-            next();
-        } else {
-            req.session.returnTo = req.originalUrl;
-            res.render('user/Login', {
-                error: '로그인이 필요한 서비스입니다.',
-                returnTo: req.originalUrl
-            });
-        }
-    }
-
-    hasRole(role) {
-        return (req, res, next) => {
-            if (req.session.user && req.session.user.role === role) {
-                next();
-            } else {
-                res.render('common/error', {
-                    title: '접근 제한',
-                    message: '접근 권한이 없습니다.'
-                });
-            }
-        };
     }
 }
 

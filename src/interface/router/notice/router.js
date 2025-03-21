@@ -1,5 +1,5 @@
 import express from 'express';
-import NoticeController from '../../../application/notice/controller/NoticeController.js';
+import NoticeController from '../../controller/NoticeController.js';
 import NoticeApplicationService from '../../../application/notice/service/NoticeApplicationService.js';
 import NoticeRepositoryImpl from '../../../infrastructure/repository/NoticeRepositoryImpl.js';
 import CommentApplicationService from '../../../application/comment/service/CommentApplicationService.js';

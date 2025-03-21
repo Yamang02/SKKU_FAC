@@ -1,6 +1,6 @@
-import viewResolver from '../../../presentation/view/ViewResolver.js';
-import * as noticeData from '../../../infrastructure/data/notice.js';
-import { getFeaturedArtworks } from '../service/HomeService.js';
+import viewResolver from '../../presentation/view/ViewResolver.js';
+import * as noticeData from '../../infrastructure/data/notice.js';
+import { getFeaturedArtworks } from '../../domain/home/service/HomeService.js';
 
 class HomeController {
     constructor() {
