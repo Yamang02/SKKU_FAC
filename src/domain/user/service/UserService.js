@@ -4,89 +4,92 @@ import { UserRole } from '../../../infrastructure/data/user.js';
 import UserDto from '../dto/UserDTO.js';
 
 class UserService {
-    constructor() {
-        this.userRepository = new UserRepositoryImpl();
+    constructor(userRepository = new UserRepositoryImpl()) {
+        this.userRepository = userRepository;
     }
 
-    /**
-     * 사용자명으로 사용자를 찾습니다.
-     * @param {string} username - 찾을 사용자의 아이디
-     * @returns {Promise<Object|null>} 찾은 사용자 객체 또는 null
-     */
+    // 검증 메서드들
+    validatePassword(password) {
+        if (password.length < 8) {
+            throw new Error('비밀번호는 최소 8자 이상이어야 합니다.');
+        }
+        if (!/[A-Z]/.test(password)) {
+            throw new Error('비밀번호는 최소 1개의 대문자를 포함해야 합니다.');
+        }
+        if (!/[0-9]/.test(password)) {
+            throw new Error('비밀번호는 최소 1개의 숫자를 포함해야 합니다.');
+        }
+        if (!/[!@#$%^&*]/.test(password)) {
+            throw new Error('비밀번호는 최소 1개의 특수문자(!@#$%^&*)를 포함해야 합니다.');
+        }
+    }
+
+    validateStudentId(studentId) {
+        if (!studentId) return false;
+        return /^\d{9}$/.test(studentId);
+    }
+
+    validateEmail(email) {
+        if (!email) return false;
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    validateArtistInfo(artistInfo) {
+        if (!artistInfo) return false;
+        if (!artistInfo.biography || typeof artistInfo.biography !== 'string') return false;
+        if (!artistInfo.specialty || typeof artistInfo.specialty !== 'string') return false;
+        return true;
+    }
+
+    validateUserRole(user, requiredRole) {
+        if (!user || user.role !== requiredRole) {
+            throw new Error('접근 권한이 없습니다.');
+        }
+    }
+
+    validateUserStatus(user) {
+        if (!user) {
+            throw new Error('사용자를 찾을 수 없습니다.');
+        }
+        if (user.status === 'INACTIVE') {
+            throw new Error('비활성화된 계정입니다.');
+        }
+        if (user.status === 'BLOCKED') {
+            throw new Error('차단된 계정입니다.');
+        }
+    }
+
+    // 중복 검사 메서드들
+    async checkDuplicateUsername(username) {
+        const existingUser = await this.userRepository.findByUsername(username);
+        if (existingUser) {
+            throw new Error('이미 사용 중인 사용자명입니다.');
+        }
+    }
+
+    async checkDuplicateEmail(email) {
+        const existingUser = await this.userRepository.findByEmail(email);
+        if (existingUser) {
+            throw new Error('이미 사용 중인 이메일입니다.');
+        }
+    }
+
+    // 조회 메서드들
+    async getUserList(page, limit, filters) {
+        const users = await this.userRepository.findAll(page, limit, filters);
+        return users.map(user => UserDto.fromEntity(user));
+    }
+
     async findByUsername(username) {
         const user = await this.userRepository.findByUsername(username);
         return user ? UserDto.fromEntity(user) : null;
     }
 
-    /**
-     * 이메일로 사용자를 찾습니다.
-     * @param {string} email - 찾을 사용자의 이메일
-     * @returns {Promise<Object|null>} 찾은 사용자 객체 또는 null
-     */
     async findByEmail(email) {
         const user = await this.userRepository.findByEmail(email);
         return user ? UserDto.fromEntity(user) : null;
     }
 
-    /**
-     * 사용자 로그인을 처리합니다.
-     * @param {string} username - 사용자명
-     * @param {string} password - 비밀번호
-     * @returns {Promise<Object>} 로그인된 사용자 정보
-     * @throws {Error} 로그인 실패 시 에러
-     */
-    async login(username, password) {
-        const user = await this.userRepository.findByUsername(username);
-
-        if (!user) {
-            throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
-        }
-
-        const isValidPassword = await bcrypt.compare(password, user.password);
-
-        if (!isValidPassword) {
-            throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
-        }
-
-        return UserDto.fromEntity(user);
-    }
-
-    /**
-     * 새로운 사용자를 등록합니다.
-     * @param {Object} userData - 사용자 데이터
-     * @returns {Promise<Object>} 등록된 사용자 정보
-     * @throws {Error} 등록 실패 시 에러
-     */
-    async register(userData) {
-        const { password, confirmPassword, ...otherData } = userData;
-
-        if (password !== confirmPassword) {
-            throw new Error('비밀번호가 일치하지 않습니다.');
-        }
-
-        // 비밀번호 해시화
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // 사용자 데이터 준비
-        const userToSave = {
-            ...otherData,
-            password: hashedPassword,
-            role: otherData.role || UserRole.GUEST,
-            studentId: otherData.role === UserRole.CLUB_MEMBER ? otherData.studentId : null,
-            artistInfo: otherData.role === UserRole.ARTIST ? JSON.parse(otherData.artistInfo) : null
-        };
-
-        // 사용자 저장
-        const savedUser = await this.userRepository.save(userToSave);
-        return UserDto.fromEntity(savedUser);
-    }
-
-    /**
-     * 사용자 프로필을 조회합니다.
-     * @param {number} userId - 사용자 ID
-     * @returns {Promise<Object>} 사용자 프로필 정보
-     * @throws {Error} 조회 실패 시 에러
-     */
     async getProfile(userId) {
         const user = await this.userRepository.findById(userId);
         if (!user) {
@@ -95,30 +98,89 @@ class UserService {
         return UserDto.fromEntity(user);
     }
 
-    /**
-     * 사용자 프로필을 수정합니다.
-     * @param {number} userId - 사용자 ID
-     * @param {Object} updateData - 수정할 프로필 데이터
-     * @returns {Promise<Object>} 수정된 사용자 프로필 정보
-     * @throws {Error} 수정 실패 시 에러
-     */
+    async getUserStats() {
+        const totalUsers = await this.userRepository.count();
+        const roleStats = await this.userRepository.countByRole();
+        const activeUsers = await this.userRepository.countByStatus('ACTIVE');
+
+        return {
+            totalUsers,
+            roleStats,
+            activeUsers
+        };
+    }
+
+    // 인증 관련 메서드들
+    async login(username, password) {
+        const user = await this.userRepository.findByUsername(username);
+
+        if (!user) {
+            throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
+        }
+
+        this.validateUserStatus(user);
+
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
+        }
+
+        return UserDto.fromEntity(user);
+    }
+
+    // 사용자 관리 메서드들
+    async register(userData) {
+        const { password, confirmPassword, ...otherData } = userData;
+
+        if (password !== confirmPassword) {
+            throw new Error('비밀번호가 일치하지 않습니다.');
+        }
+
+        await this.checkDuplicateUsername(otherData.username);
+        await this.checkDuplicateEmail(otherData.email);
+        this.validatePassword(password);
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const userToSave = {
+            ...otherData,
+            password: hashedPassword,
+            role: otherData.role || UserRole.GUEST,
+            studentId: otherData.role === UserRole.CLUB_MEMBER ? otherData.studentId : null,
+            artistInfo: otherData.role === UserRole.ARTIST ? JSON.parse(otherData.artistInfo) : null,
+            status: 'ACTIVE',
+            created_at: new Date(),
+            updated_at: new Date()
+        };
+
+        const savedUser = await this.userRepository.save(userToSave);
+        return UserDto.fromEntity(savedUser);
+    }
+
     async updateProfile(userId, updateData) {
         const user = await this.userRepository.findById(userId);
         if (!user) {
             throw new Error('사용자를 찾을 수 없습니다.');
         }
 
-        // 비밀번호 변경 처리
+        this.validateUserStatus(user);
+
+        if (updateData.email && updateData.email !== user.email) {
+            await this.checkDuplicateEmail(updateData.email);
+        }
+
         if (updateData.newPassword) {
             if (updateData.newPassword !== updateData.confirmNewPassword) {
                 throw new Error('새 비밀번호가 일치하지 않습니다.');
             }
+            this.validatePassword(updateData.newPassword);
             updateData.password = await bcrypt.hash(updateData.newPassword, 10);
         }
 
-        // 수정 가능한 필드만 업데이트
         const updatableFields = ['name', 'email', 'password', 'studentId', 'artistInfo'];
-        const updateFields = {};
+        const updateFields = {
+            updated_at: new Date()
+        };
 
         for (const field of updatableFields) {
             if (updateData[field] !== undefined) {
@@ -130,56 +192,6 @@ class UserService {
         return this.getProfile(userId);
     }
 
-    /**
-     * 새로운 사용자를 생성합니다.
-     * @param {Object} userData - 생성할 사용자 데이터
-     * @returns {Promise<Object>} 생성된 사용자 객체
-     */
-    async createUser(userData) {
-        // 중복 검사
-        const existingUser = await this.userRepository.findByUsername(userData.username);
-        if (existingUser) {
-            throw new Error('이미 사용 중인 아이디입니다.');
-        }
-
-        const existingEmail = await this.userRepository.findByEmail(userData.email);
-        if (existingEmail) {
-            throw new Error('이미 사용 중인 이메일입니다.');
-        }
-
-        const savedUser = await this.userRepository.save(userData);
-        return UserDto.fromEntity(savedUser);
-    }
-
-    /**
-     * 사용자 정보를 업데이트합니다.
-     * @param {string} userId - 업데이트할 사용자의 ID
-     * @param {Object} updateData - 업데이트할 데이터
-     * @returns {Promise<Object>} 업데이트된 사용자 객체
-     */
-    async updateUser(userId, updateData) {
-        const user = await this.userRepository.findById(userId);
-        if (!user) {
-            throw new Error('사용자를 찾을 수 없습니다.');
-        }
-
-        // 이메일 변경 시 중복 검사
-        if (updateData.email && updateData.email !== user.email) {
-            const existingEmail = await this.userRepository.findByEmail(updateData.email);
-            if (existingEmail) {
-                throw new Error('이미 사용 중인 이메일입니다.');
-            }
-        }
-
-        const updatedUser = await this.userRepository.update(userId, updateData);
-        return UserDto.fromEntity(updatedUser);
-    }
-
-    /**
-     * 사용자를 삭제합니다.
-     * @param {string} userId - 삭제할 사용자의 ID
-     * @returns {Promise<void>}
-     */
     async deleteUser(userId) {
         const user = await this.userRepository.findById(userId);
         if (!user) {
@@ -187,6 +199,18 @@ class UserService {
         }
 
         await this.userRepository.delete(userId);
+    }
+
+    async updateUserRole(userId, newRole) {
+        const user = await this.userRepository.findById(userId);
+        this.validateUserStatus(user);
+
+        const updatedUser = await this.userRepository.update(userId, {
+            role: newRole,
+            updated_at: new Date()
+        });
+
+        return UserDto.fromEntity(updatedUser);
     }
 }
 

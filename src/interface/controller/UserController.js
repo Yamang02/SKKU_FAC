@@ -1,11 +1,11 @@
-import UserApplicationService from '../../application/user/service/UserApplicationService.js';
-import UserRepositoryImpl from '../../infrastructure/repository/UserRepositoryImpl.js';
-import { UserRole } from '../../infrastructure/data/user.js';
+import UserUseCase from '../../application/user/UserUseCase.js';
+import UserService from '../../domain/user/service/UserService.js';
+import SessionUtil from '../util/SessionUtil.js';
 
 class UserController {
     constructor() {
-        const userRepository = new UserRepositoryImpl();
-        this.userApplicationService = new UserApplicationService(userRepository);
+        const userService = new UserService();
+        this.userUseCase = new UserUseCase(userService);
 
         // 메서드 바인딩
         this.getLoginPage = this.getLoginPage.bind(this);
@@ -34,16 +34,8 @@ class UserController {
     async login(req, res) {
         try {
             const { username, password } = req.body;
-            const user = await this.userApplicationService.login(username, password);
-
-            req.session.user = user;
-            await new Promise((resolve, reject) => {
-                req.session.save((err) => {
-                    if (err) reject(err);
-                    else resolve();
-                });
-            });
-
+            const user = await this.userUseCase.login(username, password);
+            await SessionUtil.saveUserToSession(req, user);
             res.redirect('/');
         } catch (error) {
             res.render('user/Login', {
@@ -53,29 +45,25 @@ class UserController {
         }
     }
 
-    logout(req, res) {
-        req.session.destroy((err) => {
-            if (err) {
-                console.error('Logout error:', err);
-            }
-            res.redirect('/');
-        });
+    async logout(req, res) {
+        await SessionUtil.destroySession(req);
+        res.redirect('/');
     }
 
     getRegisterPage(req, res) {
         res.render('user/Register', {
             title: '회원가입',
             roles: [
-                { value: UserRole.CLUB_MEMBER, label: '동아리 회원' },
-                { value: UserRole.ARTIST, label: '외부 작가' },
-                { value: UserRole.GUEST, label: '일반 사용자' }
+                { value: 'CLUB_MEMBER', label: '동아리 회원' },
+                { value: 'ARTIST', label: '외부 작가' },
+                { value: 'GUEST', label: '일반 사용자' }
             ]
         });
     }
 
     async register(req, res) {
         try {
-            await this.userApplicationService.register(req.body);
+            await this.userUseCase.register(req.body);
             res.redirect('/user/login');
         } catch (error) {
             res.render('user/Register', {
@@ -87,7 +75,7 @@ class UserController {
 
     async getProfilePage(req, res) {
         try {
-            const profileUser = await this.userApplicationService.getProfile(req.session.user.id);
+            const profileUser = await this.userUseCase.getProfile(req.session.user.id);
             res.render('user/Profile', {
                 title: '프로필',
                 profileUser
@@ -102,7 +90,7 @@ class UserController {
 
     async getProfileEditPage(req, res) {
         try {
-            const profileUser = await this.userApplicationService.getProfile(req.session.user.id);
+            const profileUser = await this.userUseCase.getProfile(req.session.user.id);
             res.render('user/ProfileEdit', {
                 title: '프로필 수정',
                 profileUser
@@ -117,10 +105,10 @@ class UserController {
 
     async updateProfile(req, res) {
         try {
-            await this.userApplicationService.updateProfile(req.session.user.id, req.body);
+            await this.userUseCase.updateProfile(req.session.user.id, req.body);
             res.redirect('/user/profile');
         } catch (error) {
-            const profileUser = await this.userApplicationService.getProfile(req.session.user.id);
+            const profileUser = await this.userUseCase.getProfile(req.session.user.id);
             res.render('user/ProfileEdit', {
                 title: '프로필 수정',
                 profileUser,
@@ -138,7 +126,7 @@ class UserController {
                 search: req.query.search
             };
 
-            const result = await this.userApplicationService.getUserList(page, limit, filters);
+            const result = await this.userUseCase.getUserList(page, limit, filters);
 
             if (req.xhr || req.headers.accept.includes('application/json')) {
                 return res.json(result);
@@ -160,7 +148,7 @@ class UserController {
     async getUserDetail(req, res) {
         try {
             const userId = req.params.id;
-            const user = await this.userApplicationService.getProfile(userId);
+            const user = await this.userUseCase.getProfile(userId);
 
             if (req.xhr || req.headers.accept.includes('application/json')) {
                 return res.json(user);
@@ -182,7 +170,7 @@ class UserController {
     async deleteUser(req, res) {
         try {
             const userId = req.params.id;
-            await this.userApplicationService.deleteUser(userId);
+            await this.userUseCase.deleteUser(userId);
 
             if (req.xhr || req.headers.accept.includes('application/json')) {
                 return res.json({ success: true });
@@ -205,7 +193,7 @@ class UserController {
         try {
             const userId = req.params.id;
             const { role } = req.body;
-            const user = await this.userApplicationService.updateUserRole(userId, role);
+            const user = await this.userUseCase.updateUserRole(userId, role);
 
             if (req.xhr || req.headers.accept.includes('application/json')) {
                 return res.json(user);
@@ -226,7 +214,7 @@ class UserController {
 
     async getDashboardStats(req, res) {
         try {
-            const stats = await this.userApplicationService.getUserStats();
+            const stats = await this.userUseCase.getUserStats();
 
             if (req.xhr || req.headers.accept.includes('application/json')) {
                 return res.json(stats);
