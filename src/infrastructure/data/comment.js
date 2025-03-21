@@ -2,7 +2,7 @@
  * 임시 댓글 데이터
  * @type {Array<Object>}
  */
-const comment = [
+export const comment = [
     {
         id: 1,
         content: '정말 멋진 작품이네요!',
@@ -58,8 +58,6 @@ const comment = [
         updated_at: '2024-03-18T11:00:00.000Z'
     }
 ];
-
-export default comment;
 
 /**
  * 작품 ID로 댓글 목록을 가져옵니다.

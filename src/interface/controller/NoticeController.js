@@ -1,18 +1,13 @@
 import NoticeUseCase from '../../application/notice/NoticeUseCase.js';
-import NoticeDomainService from '../../domain/notice/service/NoticeDomainService.js';
-import NoticeRepositoryImpl from '../../infrastructure/repository/NoticeRepositoryImpl.js';
-import CommentDomainService from '../../domain/comment/service/CommentDomainService.js';
-import CommentRepositoryImpl from '../../infrastructure/repository/CommentRepositoryImpl.js';
+import NoticeService from '../../domain/notice/service/NoticeService.js';
+import CommentService from '../../domain/comment/service/CommentService.js';
 
 class NoticeController {
     constructor() {
-        const noticeRepository = new NoticeRepositoryImpl();
-        const commentRepository = new CommentRepositoryImpl();
+        const noticeService = new NoticeService();
+        const commentService = new CommentService();
 
-        const noticeDomainService = new NoticeDomainService(noticeRepository);
-        const commentDomainService = new CommentDomainService(commentRepository);
-
-        this.noticeUseCase = new NoticeUseCase(noticeDomainService, commentDomainService);
+        this.noticeUseCase = new NoticeUseCase(noticeService, commentService);
 
         // 메서드 바인딩
         this.getNoticeList = this.getNoticeList.bind(this);
@@ -29,16 +24,11 @@ class NoticeController {
      */
     async getNoticeList(req, res) {
         try {
-            const searchType = req.query.searchType || 'all';
-            const keyword = req.query.keyword || '';
-            const page = parseInt(req.query.page, 10) || 1;
-            const limit = 10;
-
             const result = await this.noticeUseCase.getNoticeList({
-                searchType,
-                keyword,
-                page,
-                limit
+                searchType: req.query.searchType || 'all',
+                keyword: req.query.keyword || '',
+                page: parseInt(req.query.page, 10) || 1,
+                limit: parseInt(req.query.limit, 10) || 10
             });
 
             if (req.xhr || req.headers.accept.includes('application/json')) {
@@ -47,8 +37,8 @@ class NoticeController {
 
             res.render('notice/NoticeList', {
                 title: '공지사항',
-                searchType,
-                keyword,
+                searchType: req.query.searchType || 'all',
+                keyword: req.query.keyword || '',
                 ...result
             });
         } catch (error) {
@@ -70,19 +60,17 @@ class NoticeController {
     async getNoticeDetail(req, res) {
         try {
             const noticeId = parseInt(req.params.id, 10);
-            const commentPage = parseInt(req.query.commentPage) || 1;
+            const commentPage = parseInt(req.query.commentPage, 10) || 1;
 
-            const { notice, comments, commentPagination } = await this.noticeUseCase.getNoticeDetail(noticeId, commentPage);
+            const result = await this.noticeUseCase.getNoticeDetail(noticeId, commentPage);
 
             if (req.xhr || req.headers.accept.includes('application/json')) {
-                return res.json({ notice, comments });
+                return res.json(result);
             }
 
             res.render('notice/NoticeDetail', {
-                title: notice.title,
-                notice,
-                comments,
-                commentPagination,
+                title: result.notice.title,
+                ...result,
                 searchType: req.query.searchType || 'all',
                 keyword: req.query.keyword || '',
                 user: req.session.user || null
@@ -99,6 +87,11 @@ class NoticeController {
         }
     }
 
+    /**
+     * 공지사항 작성을 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
     async createNotice(req, res) {
         try {
             const notice = await this.noticeUseCase.createNotice(req.body, req.session.user.id);
@@ -121,6 +114,11 @@ class NoticeController {
         }
     }
 
+    /**
+     * 공지사항 수정을 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
     async updateNotice(req, res) {
         try {
             const noticeId = parseInt(req.params.id, 10);
@@ -144,6 +142,11 @@ class NoticeController {
         }
     }
 
+    /**
+     * 공지사항 삭제를 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
     async deleteNotice(req, res) {
         try {
             const noticeId = parseInt(req.params.id, 10);

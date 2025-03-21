@@ -1,5 +1,5 @@
 import CommentRepository from '../../domain/comment/repository/CommentRepository.js';
-import commentsData from '../data/comment.js';
+import { comment } from '../data/comment.js';
 
 /**
  * Comment 리포지토리 구현체
@@ -18,7 +18,7 @@ class CommentRepositoryImpl extends CommentRepository {
      * @returns {Promise<Comment>} 생성된 댓글
      */
     async create(data) {
-        const newId = Math.max(...commentsData.map(comment => comment.id)) + 1;
+        const newId = Math.max(...comment.map(c => c.id)) + 1;
         const now = new Date().toISOString();
         const newComment = {
             id: newId,
@@ -30,7 +30,7 @@ class CommentRepositoryImpl extends CommentRepository {
             updated_at: now
         };
 
-        commentsData.push(newComment);
+        comment.push(newComment);
         return newComment;
     }
 
@@ -41,16 +41,16 @@ class CommentRepositoryImpl extends CommentRepository {
      * @returns {Promise<Comment>} 수정된 댓글
      */
     async update(id, data) {
-        const index = commentsData.findIndex(comment => comment.id === parseInt(id));
+        const index = comment.findIndex(c => c.id === parseInt(id));
         if (index === -1) return null;
 
-        commentsData[index] = {
-            ...commentsData[index],
+        comment[index] = {
+            ...comment[index],
             content: data.content,
             updated_at: new Date().toISOString()
         };
 
-        return commentsData[index];
+        return comment[index];
     }
 
     /**
@@ -59,10 +59,10 @@ class CommentRepositoryImpl extends CommentRepository {
      * @returns {Promise<boolean>} 삭제 성공 여부
      */
     async delete(id) {
-        const index = commentsData.findIndex(comment => comment.id === parseInt(id));
+        const index = comment.findIndex(c => c.id === parseInt(id));
         if (index === -1) return false;
 
-        commentsData.splice(index, 1);
+        comment.splice(index, 1);
         return true;
     }
 
@@ -118,7 +118,7 @@ class CommentRepositoryImpl extends CommentRepository {
      * @inheritdoc
      */
     async findByArtworkId(artworkId, { limit = 10, offset = 0 }) {
-        return commentsData
+        return comment
             .filter(comment => comment.artwork_id === parseInt(artworkId))
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             .slice(offset, offset + limit);
@@ -128,21 +128,19 @@ class CommentRepositoryImpl extends CommentRepository {
      * @inheritdoc
      */
     async countByArtworkId(artworkId) {
-        return commentsData.filter(comment => comment.artwork_id === parseInt(artworkId)).length;
+        return comment.filter(comment => comment.artwork_id === parseInt(artworkId)).length;
     }
 
     /**
      * 공지사항 ID로 댓글을 조회합니다.
      * @param {number} noticeId - 공지사항 ID
-     * @param {number} limit - 한 페이지당 댓글 수
      * @param {number} offset - 시작 위치
+     * @param {number} limit - 한 페이지당 댓글 수
      * @returns {Promise<Array>} 댓글 목록
      */
-    async findByNoticeId(noticeId, limit, offset) {
-        return commentsData
-            .filter(comment => comment.notice_id === parseInt(noticeId))
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .slice(offset, offset + limit);
+    async findByNoticeId(noticeId, offset = 0, limit = 10) {
+        const comments = comment.filter(c => c.notice_id === parseInt(noticeId));
+        return comments.slice(offset, offset + limit);
     }
 
     /**
@@ -151,7 +149,15 @@ class CommentRepositoryImpl extends CommentRepository {
      * @returns {Promise<number>} 댓글 수
      */
     async countByNoticeId(noticeId) {
-        return commentsData.filter(comment => comment.notice_id === parseInt(noticeId)).length;
+        return comment.filter(c => c.notice_id === parseInt(noticeId)).length;
+    }
+
+    async deleteByNoticeId(noticeId) {
+        const initialLength = comment.length;
+        const remainingComments = comment.filter(c => c.notice_id !== parseInt(noticeId));
+        comment.length = 0;
+        comment.push(...remainingComments);
+        return initialLength - comment.length;
     }
 }
 
