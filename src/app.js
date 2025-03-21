@@ -58,6 +58,31 @@ app.use((req, res, next) => {
 // 라우터 설정
 app.use(router);
 
+// 404 에러 핸들러
+app.use((req, res) => {
+    if (req.xhr || req.headers.accept.includes('application/json')) {
+        return res.status(404).json({ error: '페이지를 찾을 수 없습니다.' });
+    }
+    res.status(404).render('common/error', {
+        title: '404 에러',
+        message: '페이지를 찾을 수 없습니다.'
+    });
+});
+
+// 전역 에러 핸들러
+app.use((err, req, res, _next) => {
+    console.error('에러 발생:', err);
+
+    if (req.xhr || req.headers.accept.includes('application/json')) {
+        return res.status(500).json({ error: '서버 에러가 발생했습니다.' });
+    }
+
+    res.status(500).render('common/error', {
+        title: '500 에러',
+        message: '서버 에러가 발생했습니다.'
+    });
+});
+
 // 서버 시작
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

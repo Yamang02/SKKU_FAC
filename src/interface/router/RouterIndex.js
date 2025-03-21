@@ -32,17 +32,32 @@ class RouterIndex {
 
         // 404 에러 처리
         this.router.use((req, res) => {
-            res.status(404).render('error/404', {
-                title: '페이지를 찾을 수 없습니다'
+            if (req.xhr || req.headers.accept.includes('application/json')) {
+                return res.status(404).json({ error: '페이지를 찾을 수 없습니다.' });
+            }
+            res.status(404).render('common/error', {
+                title: '404 에러',
+                message: '페이지를 찾을 수 없습니다.'
             });
         });
 
         // 500 에러 처리
         this.router.use((err, req, res, _next) => {
             console.error(err.stack);
-            res.status(500).render('error/500', {
-                title: '서버 오류',
-                error: process.env.NODE_ENV === 'development' ? err : {}
+
+            if (req.xhr || req.headers.accept.includes('application/json')) {
+                return res.status(500).json({
+                    error: process.env.NODE_ENV === 'development'
+                        ? err.message
+                        : '서버 에러가 발생했습니다.'
+                });
+            }
+
+            res.status(500).render('common/error', {
+                title: '500 에러',
+                message: process.env.NODE_ENV === 'development'
+                    ? err.message
+                    : '서버 에러가 발생했습니다.'
             });
         });
     }

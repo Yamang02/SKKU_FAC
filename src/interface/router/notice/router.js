@@ -1,27 +1,17 @@
 import express from 'express';
 import NoticeController from '../../controller/NoticeController.js';
-import NoticeApplicationService from '../../../application/notice/service/NoticeApplicationService.js';
-import NoticeRepositoryImpl from '../../../infrastructure/repository/NoticeRepositoryImpl.js';
-import CommentApplicationService from '../../../application/comment/service/CommentApplicationService.js';
-import CommentRepositoryImpl from '../../../infrastructure/repository/CommentRepositoryImpl.js';
+import { isAuthenticated, hasRole } from '../../middleware/auth.js';
 
 const router = express.Router();
-
-// 리포지토리 인스턴스 생성
-const noticeRepository = new NoticeRepositoryImpl();
-const commentRepository = new CommentRepositoryImpl();
-
-// 서비스 인스턴스 생성
-const noticeApplicationService = new NoticeApplicationService(noticeRepository);
-const commentApplicationService = new CommentApplicationService(commentRepository);
-
-// 컨트롤러 인스턴스 생성
-const noticeController = new NoticeController(noticeApplicationService, commentApplicationService);
+const noticeController = new NoticeController();
 
 // 공지사항 목록
-router.get('/', noticeController.getNoticeList.bind(noticeController));
+router.get('/', noticeController.getNoticeList);
+router.get('/:id', noticeController.getNoticeDetail);
 
-// 공지사항 상세
-router.get('/:id', noticeController.getNoticeDetail.bind(noticeController));
+// 공지사항 관리 (관리자 전용)
+router.post('/', isAuthenticated, hasRole(['ADMIN']), noticeController.createNotice);
+router.put('/:id', isAuthenticated, hasRole(['ADMIN']), noticeController.updateNotice);
+router.delete('/:id', isAuthenticated, hasRole(['ADMIN']), noticeController.deleteNotice);
 
 export default router;

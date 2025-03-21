@@ -3,6 +3,100 @@
  * 공지사항 관련 순수 도메인 로직을 처리합니다.
  */
 class NoticeDomainService {
+    constructor(noticeRepository) {
+        this.noticeRepository = noticeRepository;
+    }
+
+    /**
+     * 페이지네이션을 위한 페이지 배열을 생성합니다.
+     * @param {number} currentPage - 현재 페이지
+     * @param {number} totalPages - 전체 페이지 수
+     * @returns {Object} 페이지네이션 정보
+     */
+    createPaginationInfo(currentPage, totalPages) {
+        const maxPagesDisplayed = 5; // 한 번에 표시할 페이지 수
+        let startPage = Math.max(1, currentPage - Math.floor(maxPagesDisplayed / 2));
+        let endPage = startPage + maxPagesDisplayed - 1;
+
+        if (endPage > totalPages) {
+            endPage = totalPages;
+            startPage = Math.max(1, endPage - maxPagesDisplayed + 1);
+        }
+
+        const pages = Array.from(
+            { length: endPage - startPage + 1 },
+            (_, i) => startPage + i
+        );
+
+        return {
+            currentPage,
+            totalPages,
+            pages,
+            hasPrev: currentPage > 1,
+            hasNext: currentPage < totalPages,
+            showFirstPage: startPage > 1,
+            showLastPage: endPage < totalPages,
+            showFirstEllipsis: startPage > 2,
+            showLastEllipsis: endPage < totalPages - 1
+        };
+    }
+
+    async getNoticeList(page, limit, searchOptions = {}) {
+        const { searchType = 'all', keyword = '' } = searchOptions;
+        const offset = (page - 1) * limit;
+
+        // 검색 유형 유효성 검사
+        if (!this.validateSearchType(searchType)) {
+            throw new Error('유효하지 않은 검색 유형입니다.');
+        }
+
+        // 페이지네이션 유효성 검사
+        if (!this.validatePagination(page, limit)) {
+            throw new Error('유효하지 않은 페이지네이션 파라미터입니다.');
+        }
+
+        const notices = await this.noticeRepository.findBySearchType(searchType, keyword, offset, limit);
+        const totalCount = await this.noticeRepository.count(searchType, keyword);
+        const totalPages = Math.ceil(totalCount / limit);
+
+        return {
+            notices,
+            pagination: {
+                ...this.createPaginationInfo(page, totalPages),
+                totalItems: totalCount,
+                itemsPerPage: limit
+            }
+        };
+    }
+
+    async getNoticeDetail(noticeId) {
+        const notice = await this.noticeRepository.findById(noticeId);
+        if (!notice) {
+            throw new Error('공지사항을 찾을 수 없습니다.');
+        }
+        return notice;
+    }
+
+    validateNoticeData(noticeData) {
+        if (!noticeData.title || noticeData.title.trim().length === 0) {
+            throw new Error('제목은 필수 입력 항목입니다.');
+        }
+        if (!noticeData.content || noticeData.content.trim().length === 0) {
+            throw new Error('내용은 필수 입력 항목입니다.');
+        }
+        if (noticeData.title.length > 100) {
+            throw new Error('제목은 100자를 초과할 수 없습니다.');
+        }
+    }
+
+    async checkNoticeExists(noticeId) {
+        const notice = await this.noticeRepository.findById(noticeId);
+        if (!notice) {
+            throw new Error('공지사항을 찾을 수 없습니다.');
+        }
+        return notice;
+    }
+
     /**
      * 공지사항 제목의 유효성을 검사합니다.
      * @param {string} title - 공지사항 제목
