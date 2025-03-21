@@ -41,6 +41,7 @@ class ViewResolver {
         if (view.endsWith('.ejs')) {
             return view;
         }
+        // 경로에 .ejs를 추가
         return `${view}.ejs`;
     }
 

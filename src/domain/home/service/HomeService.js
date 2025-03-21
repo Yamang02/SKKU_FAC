@@ -16,7 +16,4 @@ class HomeService {
     }
 }
 
-const homeService = new HomeService();
-export const getFeaturedArtworks = () => homeService.getFeaturedArtworks();
-
 export default HomeService;

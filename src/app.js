@@ -3,6 +3,7 @@ import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import router from './interface/router/RouterIndex.js';
+import viewResolver from './presentation/view/ViewResolver.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -63,7 +64,7 @@ app.use((req, res) => {
     if (req.xhr || req.headers.accept.includes('application/json')) {
         return res.status(404).json({ error: '페이지를 찾을 수 없습니다.' });
     }
-    res.status(404).render('common/error', {
+    viewResolver.render(res, 'common/error', {
         title: '404 에러',
         message: '페이지를 찾을 수 없습니다.'
     });
@@ -77,7 +78,7 @@ app.use((err, req, res, _next) => {
         return res.status(500).json({ error: '서버 에러가 발생했습니다.' });
     }
 
-    res.status(500).render('common/error', {
+    viewResolver.render(res, 'common/error', {
         title: '500 에러',
         message: '서버 에러가 발생했습니다.'
     });
@@ -86,5 +87,5 @@ app.use((err, req, res, _next) => {
 // 서버 시작
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
 });

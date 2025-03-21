@@ -4,6 +4,72 @@ import artworksData from '../../../infrastructure/data/artwork.js';
 import * as exhibitionService from '../../exhibition/service/ExhibitionService.js';
 
 /**
+ * 작품 서비스
+ * 작품 관련 도메인 로직을 처리합니다.
+ */
+class ArtworkService {
+    constructor(artworkRepository) {
+        this.artworkRepository = artworkRepository;
+    }
+
+    /**
+     * 작품을 검색합니다.
+     * @param {Object} params - 검색 파라미터
+     */
+    async searchArtworks(params) {
+        return this.artworkRepository.searchArtworks(params);
+    }
+
+    /**
+     * 학과 목록을 조회합니다.
+     */
+    async getDepartments() {
+        return this.artworkRepository.getDepartments();
+    }
+
+    /**
+     * 연도 목록을 조회합니다.
+     */
+    async getYears() {
+        return this.artworkRepository.getYears();
+    }
+
+    /**
+     * 작품 ID로 작품을 조회합니다.
+     * @param {number} id - 작품 ID
+     */
+    async findById(id) {
+        return this.artworkRepository.findById(id);
+    }
+
+    /**
+     * 관련 작품 목록을 조회합니다.
+     * @param {number} artworkId - 작품 ID
+     */
+    async findRelatedArtworks(artworkId) {
+        return this.artworkRepository.findRelatedArtworks(artworkId);
+    }
+
+    /**
+     * 전시회 ID로 작품 목록을 조회합니다.
+     * @param {number} exhibitionId - 전시회 ID
+     */
+    async findByExhibitionId(exhibitionId) {
+        return this.artworkRepository.findByExhibitionId(exhibitionId);
+    }
+
+    /**
+     * 전시회 ID로 작품들을 삭제합니다.
+     * @param {number} exhibitionId - 전시회 ID
+     */
+    async deleteByExhibitionId(exhibitionId) {
+        return this.artworkRepository.deleteByExhibitionId(exhibitionId);
+    }
+}
+
+export default ArtworkService;
+
+/**
  * ID로 작품을 찾습니다.
  * @param {number} id 작품 ID
  * @returns {ArtworkDTO|null} 찾은 작품 DTO 또는 null
@@ -88,24 +154,6 @@ export function searchArtworks(filters = {}) {
         items: convertToDTO(artworkEntities),
         total
     };
-}
-
-/**
- * 학과 목록을 가져옵니다.
- * @returns {Array<string>} 학과 목록
- */
-export function getDepartments() {
-    const departments = [...new Set(artworksData.map(art => art.department))];
-    return departments.sort();
-}
-
-/**
- * 연도 목록을 가져옵니다.
- * @returns {Array<number>} 연도 목록
- */
-export function getYears() {
-    const years = [...new Set(artworksData.map(art => art.year))];
-    return years.sort((a, b) => b - a); // 내림차순 정렬
 }
 
 /**

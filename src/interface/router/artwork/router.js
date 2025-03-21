@@ -1,34 +1,26 @@
 import express from 'express';
 import ArtworkController from '../../controller/ArtworkController.js';
-import ArtworkApplicationService from '../../../application/artwork/service/ArtworkApplicationService.js';
-import CommentUseCase from '../../../application/comment/CommentUseCase.js';
-import ExhibitionApplicationService from '../../../application/exhibition/service/ExhibitionApplicationService.js';
-import ArtworkRepositoryImpl from '../../../infrastructure/repository/ArtworkRepositoryImpl.js';
-import ExhibitionRepositoryImpl from '../../../infrastructure/repository/ExhibitionRepositoryImpl.js';
+import ArtworkUseCase from '../../../application/artwork/ArtworkUseCase.js';
+import ArtworkService from '../../../domain/artwork/service/ArtworkService.js';
+import ArtworkRepository from '../../../infrastructure/repository/ArtworkRepository.js';
 
 const router = express.Router();
 
-// 의존성 주입
-const artworkRepository = new ArtworkRepositoryImpl();
-const exhibitionRepository = new ExhibitionRepositoryImpl();
+// 리포지토리 인스턴스 생성
+const artworkRepository = new ArtworkRepository();
 
-const artworkApplicationService = new ArtworkApplicationService(artworkRepository);
-const commentUseCase = new CommentUseCase();
-const exhibitionApplicationService = new ExhibitionApplicationService(exhibitionRepository);
+// 서비스 인스턴스 생성
+const artworkService = new ArtworkService(artworkRepository);
 
-const artworkController = new ArtworkController(
-    artworkApplicationService,
-    commentUseCase,
-    exhibitionApplicationService
-);
+// 유스케이스 인스턴스 생성
+const artworkUseCase = new ArtworkUseCase(artworkService);
 
-// 작품 목록 페이지
+// 컨트롤러 인스턴스 생성
+const artworkController = new ArtworkController(artworkUseCase);
+
+// 라우트 정의
 router.get('/', (req, res) => artworkController.getArtworkList(req, res));
-
-// 작품 상세 페이지
-router.get('/:id', (req, res) => artworkController.getArtworkDetail(req, res));
-
-// 전시회별 작품 목록 API
-router.get('/exhibition/:exhibitionId', (req, res) => artworkController.getArtworksByExhibition(req, res));
+router.get('/:id([0-9]+)', (req, res) => artworkController.getArtworkDetail(req, res));
+router.get('/exhibition/:exhibitionId([0-9]+)', (req, res) => artworkController.getArtworksByExhibition(req, res));
 
 export default router;
