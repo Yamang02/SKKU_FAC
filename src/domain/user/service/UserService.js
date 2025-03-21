@@ -1,8 +1,12 @@
 import UserRepositoryImpl from '../../../infrastructure/repository/UserRepositoryImpl.js';
 import bcrypt from 'bcrypt';
 import { UserRole } from '../../../infrastructure/data/user.js';
-import UserDto from '../dto/UserDTO.js';
+import UserDto from '../dto/UserDto.js';
 
+/**
+ * 사용자 서비스
+ * 사용자 관련 비즈니스 로직을 처리합니다.
+ */
 class UserService {
     constructor(userRepository = new UserRepositoryImpl()) {
         this.userRepository = userRepository;

@@ -1,41 +1,32 @@
 import viewResolver from '../../presentation/view/ViewResolver.js';
-import * as noticeData from '../../infrastructure/data/notice.js';
-import { getFeaturedArtworks } from '../../domain/home/service/HomeService.js';
 
 class HomeController {
-    constructor() {
-        // 메서드 바인딩
+    /**
+     * HomeController 생성자
+     * @param {HomeUseCase} homeUseCase - 홈 유스케이스
+     */
+    constructor(homeUseCase) {
+        this.homeUseCase = homeUseCase;
         this.getHome = this.getHome.bind(this);
     }
 
     async getHome(req, res) {
-        // 최근 공지사항 3개 가져오기
-        let recentNotices = [];
         try {
-            const allNotices = noticeData.findAll();
-            recentNotices = allNotices
-                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-                .slice(0, 3);
-        } catch (error) {
-            console.error('Error fetching notices:', error);
-            recentNotices = [];
-        }
+            const { recentNotices, featuredArtworks } = await this.homeUseCase.getHomePageData();
 
-        // Featured Artworks 가져오기
-        let featuredArtworks = [];
-        try {
-            featuredArtworks = getFeaturedArtworks() || [];
+            return viewResolver.render(res, 'home/HomePage', {
+                title: '홈',
+                recentNotices,
+                featuredArtworks,
+                user: req.session.user || null
+            });
         } catch (error) {
-            console.error('Error fetching artworks:', error);
-            featuredArtworks = [];
+            console.error('Error in getHome:', error);
+            return viewResolver.render(res, 'common/error', {
+                title: '오류가 발생했습니다',
+                message: '홈페이지를 불러오는 중 오류가 발생했습니다.'
+            });
         }
-
-        return viewResolver.render(res, 'home/HomePage', {
-            title: '홈',
-            recentNotices: recentNotices || [],
-            featuredArtworks: featuredArtworks || [],
-            user: req.session.user || null
-        });
     }
 }
 

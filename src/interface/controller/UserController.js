@@ -1,11 +1,12 @@
-import UserUseCase from '../../application/user/UserUseCase.js';
-import UserService from '../../domain/user/service/UserService.js';
 import SessionUtil from '../util/SessionUtil.js';
 
 class UserController {
-    constructor() {
-        const userService = new UserService();
-        this.userUseCase = new UserUseCase(userService);
+    /**
+     * UserController 생성자
+     * @param {UserUseCase} userUseCase - 유저 유스케이스
+     */
+    constructor(userUseCase) {
+        this.userUseCase = userUseCase;
 
         // 메서드 바인딩
         this.getLoginPage = this.getLoginPage.bind(this);

@@ -55,44 +55,51 @@ class NoticeUseCase {
         if (!this.noticeService.validateSearchType(searchType)) {
             throw new Error('유효하지 않은 검색 유형입니다.');
         }
-        if (!this.noticeService.validatePagination(page, limit)) {
-            throw new Error('유효하지 않은 페이지네이션 파라미터입니다.');
-        }
 
         const offset = (page - 1) * limit;
         const notices = await this.noticeService.findBySearchType(searchType, keyword, offset, limit);
         const totalCount = await this.noticeService.count(searchType, keyword);
-        const totalPages = Math.ceil(totalCount / limit);
 
-        return {
-            notices,
-            pagination: {
-                ...this.createPaginationInfo(page, totalPages),
-                totalItems: totalCount,
-                itemsPerPage: limit
-            }
-        };
+        const pagination = this.noticeService.createPaginationInfo({
+            currentPage: page,
+            totalItems: totalCount,
+            itemsPerPage: limit
+        });
+
+        return { notices, pagination };
     }
 
     /**
      * 공지사항 상세 정보를 조회합니다.
      * @param {number} noticeId - 공지사항 ID
-     * @param {number} commentPage - 댓글 페이지 번호
+     * @param {Object} params - 조회 파라미터
+     * @param {number} params.page - 댓글 페이지 번호
+     * @param {number} params.limit - 페이지당 댓글 수
      */
-    async getNoticeDetail(noticeId, commentPage = 1) {
-        const notice = await this.noticeService.findById(noticeId);
-        await this.noticeService.incrementViews(noticeId);
+    async getNoticeDetail(noticeId, { page = 1, limit = 10 } = {}) {
+        // 공지사항 조회 및 조회수 증가
+        const notice = await this.noticeService.getNoticeDetail(noticeId);
 
-        const { prevId, nextId } = await this.noticeService.findAdjacentIds(noticeId);
-        const comments = await this.commentService.getCommentsByNoticeId(noticeId, commentPage);
+        // 댓글 조회
+        const comments = await this.commentService.getCommentsByNoticeId(noticeId);
+        const commentsArray = Array.isArray(comments) ? comments : [];
+
+        // 댓글 페이지네이션
+        const pagination = this.noticeService.createPaginationInfo({
+            currentPage: page,
+            totalItems: commentsArray.length,
+            itemsPerPage: limit
+        });
+
+        // 현재 페이지의 댓글만 필터링
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const currentPageComments = commentsArray.slice(startIndex, endIndex);
 
         return {
-            notice: {
-                ...notice,
-                prevId,
-                nextId
-            },
-            ...comments
+            notice,
+            comments: currentPageComments,
+            pagination
         };
     }
 

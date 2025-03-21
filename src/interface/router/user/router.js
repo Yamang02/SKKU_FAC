@@ -1,9 +1,15 @@
 import express from 'express';
 import UserController from '../../controller/UserController.js';
-import { isAuthenticated, isAdmin } from '../../middleware/AuthorizationMiddleware.js';
+import UserService from '../../../domain/user/service/UserService.js';
+import UserUseCase from '../../../application/user/UserUseCase.js';
+import { isAuthenticated, isAdmin } from '../../middleware/auth.js';
 
 const router = express.Router();
-const userController = new UserController();
+
+// 의존성 주입
+const userService = new UserService();
+const userUseCase = new UserUseCase(userService);
+const userController = new UserController(userUseCase);
 
 // 로그인
 router.get('/login', userController.getLoginPage);
@@ -22,10 +28,10 @@ router.get('/profile/edit', isAuthenticated, userController.getProfileEditPage);
 router.post('/profile/edit', isAuthenticated, userController.updateProfile);
 
 // 사용자 관리 (관리자 전용)
-router.get('/management', isAuthenticated, isAdmin, userController.getUserList);
-router.get('/management/stats', isAuthenticated, isAdmin, userController.getDashboardStats);
-router.get('/management/:id', isAuthenticated, isAdmin, userController.getUserDetail);
-router.delete('/management/:id', isAuthenticated, isAdmin, userController.deleteUser);
-router.put('/management/:id/role', isAuthenticated, isAdmin, userController.updateUserRole);
+router.get('/management', isAdmin, userController.getUserList);
+router.get('/management/stats/dashboard', isAdmin, userController.getDashboardStats);
+router.get('/management/:id', isAdmin, userController.getUserDetail);
+router.delete('/management/:id', isAdmin, userController.deleteUser);
+router.put('/management/:id/role', isAdmin, userController.updateUserRole);
 
 export default router;

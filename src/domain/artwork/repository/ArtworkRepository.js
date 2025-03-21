@@ -4,12 +4,20 @@
  */
 class ArtworkRepository {
     /**
+     * 주목할 만한 작품 목록을 가져옵니다.
+     * @returns {Promise<Array<FeaturedArtworkDTO>>} 주목할 만한 작품 DTO 목록
+     */
+    async getFeaturedArtworks() {
+        throw new Error('Method not implemented');
+    }
+
+    /**
      * ID로 작품을 조회합니다.
      * @param {number} _id - 작품 ID
-     * @returns {Promise<Object>} 작품 객체
+     * @returns {Promise<Object|null>} 작품 객체 또는 null
      */
     async findById(_id) {
-        throw new Error('ArtworkRepository.findById() must be implemented');
+        throw new Error('Method not implemented');
     }
 
     /**

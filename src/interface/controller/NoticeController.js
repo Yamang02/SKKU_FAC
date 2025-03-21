@@ -1,12 +1,10 @@
-import NoticeUseCase from '../../application/notice/NoticeUseCase.js';
-import NoticeService from '../../domain/notice/service/NoticeService.js';
-import CommentService from '../../domain/comment/service/CommentService.js';
-
 class NoticeController {
-    constructor() {
-        this.noticeService = new NoticeService();
-        this.commentService = new CommentService();
-        this.noticeUseCase = new NoticeUseCase(this.noticeService, this.commentService);
+    /**
+     * NoticeController 생성자
+     * @param {NoticeUseCase} noticeUseCase - 공지사항 유스케이스
+     */
+    constructor(noticeUseCase) {
+        this.noticeUseCase = noticeUseCase;
 
         // 메서드 바인딩
         this.getNoticeList = this.getNoticeList.bind(this);
@@ -59,48 +57,15 @@ class NoticeController {
     async getNoticeDetail(req, res) {
         try {
             const noticeId = parseInt(req.params.id, 10);
-            const notice = await this.noticeService.findById(noticeId);
-            const comments = await this.commentService.getCommentsByNoticeId(noticeId);
-
-            // comments를 배열로 변환
-            const commentsArray = Array.isArray(comments) ? comments : [];
-
-            // 조회수 증가
-            await this.noticeService.incrementViews(noticeId);
-
-            const currentPage = parseInt(req.query.commentPage, 10) || 1;
-            const itemsPerPage = 10;
-            const totalItems = commentsArray.length;
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-            // 페이지 배열 생성 (예: [1, 2, 3, 4, 5])
-            const startPage = Math.max(1, currentPage - 2);
-            const endPage = Math.min(totalPages, startPage + 4);
-            const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
-
-            const pagination = {
-                totalItems,
-                currentPage,
-                totalPages,
-                itemsPerPage,
-                pages,
-                hasPrev: currentPage > 1,
-                hasNext: currentPage < totalPages,
-                showFirstPage: startPage > 1,
-                showLastPage: endPage < totalPages,
-                showFirstEllipsis: startPage > 2,
-                showLastEllipsis: endPage < totalPages - 1
-            };
-
-            // 현재 페이지에 해당하는 댓글만 필터링
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const currentPageComments = commentsArray.slice(startIndex, endIndex);
+            const { notice, comments, pagination } = await this.noticeUseCase.getNoticeDetail(noticeId, {
+                page: parseInt(req.query.commentPage, 10) || 1,
+                limit: 10
+            });
 
             res.render('notice/NoticeDetail', {
                 title: notice.title,
                 notice,
-                comments: currentPageComments,
+                comments,
                 pagination,
                 user: req.session.user || null
             });
