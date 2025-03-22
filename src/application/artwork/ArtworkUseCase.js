@@ -3,17 +3,33 @@
  * 작품 관련 애플리케이션 로직을 처리합니다.
  */
 
+import Pagination from '../../domain/common/pagination/Pagination.js';
+
 export default class ArtworkUseCase {
-    constructor(artworkService) {
+    constructor(artworkService, exhibitionService) {
         this.artworkService = artworkService;
+        this.exhibitionService = exhibitionService;
     }
 
     /**
      * 작품을 검색합니다.
-     * @param {Object} query - 검색 파라미터
+     * @param {Object} params - 검색 파라미터
      */
-    async searchArtworks(query) {
-        return await this.artworkService.searchArtworks(query);
+    async searchArtworks(params) {
+        const { page = 1, limit = 12 } = params;
+        const artworks = await this.artworkService.searchArtworks(params);
+        const exhibitions = await this.exhibitionService.getExhibitions();
+
+        const pagination = new Pagination(artworks.length, { page: parseInt(page), limit: parseInt(limit) });
+        const startIndex = (pagination.options.page - 1) * pagination.options.limit;
+        const endIndex = startIndex + pagination.options.limit;
+        const paginatedArtworks = artworks.slice(startIndex, endIndex);
+
+        return {
+            artworks: paginatedArtworks,
+            exhibitions,
+            pagination: pagination.toJSON()
+        };
     }
 
     /**

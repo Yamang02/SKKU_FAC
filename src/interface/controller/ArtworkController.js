@@ -14,10 +14,22 @@ export default class ArtworkController {
      */
     async getArtworkList(req, res) {
         try {
-            const artworks = await this.artworkUseCase.searchArtworks(req.query);
-            viewResolver.render(res, 'artwork/ArtworkList', { artworks });
+            const { artworks, exhibitions, pagination } = await this.artworkUseCase.searchArtworks(req.query);
+            viewResolver.render(res, 'artwork/ArtworkList', {
+                title: '작품 목록',
+                artworks: artworks || [],
+                exhibitions: exhibitions || [],
+                keyword: req.query.keyword || '',
+                exhibition: req.query.exhibition || '',
+                year: req.query.year || '',
+                department: req.query.department || '',
+                pagination
+            });
         } catch (error) {
-            viewResolver.render(res, 'common/error', { error });
+            viewResolver.render(res, 'common/error', {
+                title: '오류',
+                error
+            });
         }
     }
 
@@ -28,11 +40,20 @@ export default class ArtworkController {
         try {
             const artwork = await this.artworkUseCase.getArtworkById(req.params.id);
             if (!artwork) {
-                return viewResolver.render(res, 'common/error', { error: '작품을 찾을 수 없습니다.' });
+                return viewResolver.render(res, 'common/error', {
+                    title: '오류',
+                    error: { message: '작품을 찾을 수 없습니다.' }
+                });
             }
-            viewResolver.render(res, 'artwork/ArtworkDetail', { artwork });
+            viewResolver.render(res, 'artwork/ArtworkDetail', {
+                title: artwork.title,
+                artwork
+            });
         } catch (error) {
-            viewResolver.render(res, 'common/error', { error });
+            viewResolver.render(res, 'common/error', {
+                title: '오류',
+                error
+            });
         }
     }
 

@@ -5,16 +5,22 @@ export default class Exhibition {
         description,
         startDate,
         endDate,
-        category,
-        thumbnail = null
+        exhibitionType,
+        image = null,
+        subtitle = null,
+        location = null,
+        artists = []
     ) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.category = category;
-        this.thumbnail = thumbnail;
+        this.exhibitionType = exhibitionType;
+        this.image = image;
+        this.subtitle = subtitle;
+        this.location = location;
+        this.artists = artists;
     }
 
     validate() {

@@ -15,6 +15,14 @@ class ExhibitionService {
     }
 
     /**
+     * 모든 전시회를 조회합니다.
+     * @returns {Promise<Array>} 전시회 목록
+     */
+    async getExhibitions() {
+        return this.exhibitionRepository.findAll();
+    }
+
+    /**
      * 전시회 ID로 전시회를 조회합니다.
      * @param {number} id - 전시회 ID
      */

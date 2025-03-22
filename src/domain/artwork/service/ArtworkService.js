@@ -65,6 +65,13 @@ class ArtworkService {
     async deleteByExhibitionId(exhibitionId) {
         return this.artworkRepository.deleteByExhibitionId(exhibitionId);
     }
+
+    /**
+     * 추천 작품 목록을 조회합니다.
+     */
+    async getFeaturedArtworks() {
+        return this.artworkRepository.getFeaturedArtworks();
+    }
 }
 
 export default ArtworkService;

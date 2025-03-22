@@ -2,8 +2,8 @@
 <html lang="ko">
 
     <head>
-        <% const pageTitle='작품 검색 - SKKU 순수미술동아리 갤러리' ; const additionalStyles=['/css/artwork/ArtworkList.css']; %>
-            <%- include('../common/head', { pageTitle, additionalStyles }) %>
+        <%- include('../common/head', { pageTitle: '작품 검색 - SKKU 순수미술동아리 갤러리' , additionalStyles:
+            ['/css/artwork/ArtworkList.css'] }) %>
     </head>
 
     <body>
@@ -136,10 +136,10 @@
                         <div id="cardView" class="artwork-grid">
                             <% if (artworks && artworks.length> 0) { %>
                                 <% artworks.forEach(artwork=> { %>
-                                    <div class="card card--list" data-exhibition="<%= artwork.exhibition_code %>">
+                                    <div class="card card--list" data-exhibition="<%= artwork.exhibitionId %>">
                                         <a href="/artwork/<%= artwork.id %>" class="card__link">
                                             <div class="card__image-container">
-                                                <img src="<%= artwork.image %>" alt="<%= artwork.title %>"
+                                                <img src="<%= artwork.imageUrl %>" alt="<%= artwork.title %>"
                                                     class="card__image">
                                             </div>
                                             <div class="card__info">
@@ -181,7 +181,7 @@
                                         <tr data-id="<%= artwork.id %>"
                                             onclick="window.location.href='/artwork/<%= artwork.id %>'">
                                             <td>
-                                                <img src="<%= artwork.image %>" alt="<%= artwork.title %>"
+                                                <img src="<%= artwork.imageUrl %>" alt="<%= artwork.title %>"
                                                     class="artwork-thumbnail">
                                             </td>
                                             <td>
@@ -194,7 +194,7 @@
                                                 <%= artwork.department %>
                                             </td>
                                             <td>
-                                                <%= artwork.exhibition %>
+                                                <%= artwork.exhibitionId %>
                                             </td>
                                             <td>
                                                 <%= artwork.year %>

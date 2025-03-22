@@ -2,18 +2,22 @@ import express from 'express';
 import ArtworkController from '../../controller/ArtworkController.js';
 import ArtworkUseCase from '../../../application/artwork/ArtworkUseCase.js';
 import ArtworkService from '../../../domain/artwork/service/ArtworkService.js';
+import ExhibitionService from '../../../domain/exhibition/service/ExhibitionService.js';
 import ArtworkRepository from '../../../infrastructure/repository/ArtworkRepository.js';
+import ExhibitionRepository from '../../../infrastructure/repository/ExhibitionRepository.js';
 
 const router = express.Router();
 
 // 리포지토리 인스턴스 생성
 const artworkRepository = new ArtworkRepository();
+const exhibitionRepository = new ExhibitionRepository();
 
 // 서비스 인스턴스 생성
 const artworkService = new ArtworkService(artworkRepository);
+const exhibitionService = new ExhibitionService(exhibitionRepository);
 
 // 유스케이스 인스턴스 생성
-const artworkUseCase = new ArtworkUseCase(artworkService);
+const artworkUseCase = new ArtworkUseCase(artworkService, exhibitionService);
 
 // 컨트롤러 인스턴스 생성
 const artworkController = new ArtworkController(artworkUseCase);

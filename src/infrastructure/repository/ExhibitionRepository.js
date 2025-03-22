@@ -1,8 +1,17 @@
 import Exhibition from '../../domain/exhibition/Exhibition.js';
+import exhibitionData from '../data/exhibition.js';
 
 export default class ExhibitionRepository {
     constructor() {
-        this.exhibitions = [];
+        this.exhibitions = exhibitionData.map(data => new Exhibition(
+            data.id,
+            data.title,
+            data.description,
+            data.startDate,
+            data.endDate,
+            data.exhibitionType,
+            data.image
+        ));
     }
 
     async findAll() {
@@ -24,8 +33,11 @@ export default class ExhibitionRepository {
             exhibitionData.description,
             exhibitionData.startDate,
             exhibitionData.endDate,
-            exhibitionData.category,
-            exhibitionData.thumbnail
+            exhibitionData.exhibitionType,
+            exhibitionData.image,
+            exhibitionData.subtitle,
+            exhibitionData.location,
+            exhibitionData.artists
         );
         this.exhibitions.push(exhibition);
         return exhibition;

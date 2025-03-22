@@ -27,7 +27,10 @@ router.get('/', async (req, res) => {
             ...data
         });
     } catch (error) {
-        viewResolver.render(res, 'common/error', { error });
+        viewResolver.render(res, 'common/error', {
+            title: '오류',
+            error
+        });
     }
 });
 

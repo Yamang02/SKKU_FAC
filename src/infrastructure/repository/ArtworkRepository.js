@@ -1,36 +1,19 @@
 import { Artwork } from '../../domain/artwork/Artwork.js';
+import artworkData from '../data/artwork.js';
 
 export default class ArtworkRepository {
     constructor() {
-        this.artworks = [
-            new Artwork(
-                1,
-                '작품 1',
-                '작품 1의 설명입니다.',
-                '/images/artwork1.jpg',
-                '회화과',
-                2024,
-                1
-            ),
-            new Artwork(
-                2,
-                '작품 2',
-                '작품 2의 설명입니다.',
-                '/images/artwork2.jpg',
-                '조각과',
-                2024,
-                1
-            ),
-            new Artwork(
-                3,
-                '작품 3',
-                '작품 3의 설명입니다.',
-                '/images/artwork3.jpg',
-                '서예과',
-                2024,
-                1
-            )
-        ];
+        this.artworks = artworkData.map(data => new Artwork(
+            data.id,
+            data.title,
+            data.description,
+            data.image,
+            data.department,
+            data.year,
+            data.isFeatured,
+            data.exhibitionId,
+            data.artist
+        ));
     }
 
     async findAll() {
@@ -46,10 +29,18 @@ export default class ArtworkRepository {
     }
 
     async searchArtworks(query) {
-        return this.artworks.filter(artwork =>
-            artwork.title.toLowerCase().includes(query.toLowerCase()) ||
-            artwork.description.toLowerCase().includes(query.toLowerCase())
-        );
+        if (typeof query === 'object') {
+            return this.artworks;
+        }
+
+        if (typeof query === 'string') {
+            return this.artworks.filter(artwork =>
+                artwork.title.includes(query) ||
+                artwork.description.includes(query)
+            );
+        }
+
+        return this.artworks;
     }
 
     async getDepartments() {
@@ -68,7 +59,9 @@ export default class ArtworkRepository {
             artworkData.imageUrl,
             artworkData.department,
             artworkData.year,
-            artworkData.exhibitionId
+            artworkData.featured || false,
+            artworkData.exhibitionId,
+            artworkData.artist
         );
         this.artworks.push(artwork);
         return artwork;
@@ -97,7 +90,6 @@ export default class ArtworkRepository {
     }
 
     async getFeaturedArtworks() {
-        // 임시로 모든 작품을 반환
-        return this.artworks;
+        return this.artworks.filter(artwork => artwork.featured);
     }
 }
