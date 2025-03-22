@@ -62,6 +62,14 @@ class ExhibitionService {
     async delete(id) {
         return this.exhibitionRepository.delete(id);
     }
+
+    /**
+     * 전시회 코드로 전시회를 조회합니다.
+     * @param {number} code - 전시회 코드
+     */
+    async getExhibitionByCode(code) {
+        return this.exhibitionRepository.findById(code);
+    }
 }
 
 export default ExhibitionService;

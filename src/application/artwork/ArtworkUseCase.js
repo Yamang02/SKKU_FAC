@@ -51,7 +51,7 @@ export default class ArtworkUseCase {
      * @param {number} id - 작품 ID
      */
     async getArtworkById(id) {
-        return await this.artworkService.getArtworkById(id);
+        return await this.artworkService.findById(id);
     }
 
     /**
@@ -76,5 +76,14 @@ export default class ArtworkUseCase {
      */
     async deleteByExhibitionId(exhibitionId) {
         return await this.artworkService.deleteByExhibitionId(exhibitionId);
+    }
+
+    /**
+     * 작품의 댓글 목록을 조회합니다.
+     * @param {number} artworkId - 작품 ID
+     * @param {number} page - 페이지 번호
+     */
+    async getComments(artworkId, page = 1) {
+        return await this.artworkService.getComments(artworkId, page);
     }
 }

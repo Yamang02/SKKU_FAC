@@ -21,7 +21,10 @@ export default class ExhibitionController {
     async getExhibitionList(req, res) {
         try {
             const exhibitions = await this.exhibitionUseCase.findAll();
-            res.render('exhibition/list', { exhibitions });
+            res.render('exhibition/ExhibitionList', {
+                exhibitions,
+                title: '전시회 목록'
+            });
         } catch (error) {
             res.status(500).render('error', { error });
         }

@@ -45,9 +45,19 @@ export default class ArtworkController {
                     error: { message: '작품을 찾을 수 없습니다.' }
                 });
             }
+
+            // 댓글 데이터 가져오기
+            const { comments, pagination: commentPagination } = await this.artworkUseCase.getComments(req.params.id, req.query.page || 1);
+
+            // 관련 작품 데이터 가져오기
+            const relatedArtworks = await this.artworkUseCase.getRelatedArtworks(req.params.id);
+
             viewResolver.render(res, 'artwork/ArtworkDetail', {
                 title: artwork.title,
-                artwork
+                artwork,
+                comments,
+                commentPagination,
+                relatedArtworks
             });
         } catch (error) {
             viewResolver.render(res, 'common/error', {

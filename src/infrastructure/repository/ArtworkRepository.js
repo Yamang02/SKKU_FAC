@@ -1,5 +1,6 @@
 import { Artwork } from '../../domain/artwork/Artwork.js';
 import artworkData from '../data/artwork.js';
+import { getCommentsByArtworkId } from '../data/comment.js';
 
 export default class ArtworkRepository {
     constructor() {
@@ -91,5 +92,29 @@ export default class ArtworkRepository {
 
     async getFeaturedArtworks() {
         return this.artworks.filter(artwork => artwork.featured);
+    }
+
+    /**
+     * 작품의 댓글 목록을 조회합니다.
+     * @param {number} artworkId - 작품 ID
+     * @param {number} page - 페이지 번호
+     */
+    async getComments(artworkId, page = 1) {
+        return getCommentsByArtworkId(artworkId, page);
+    }
+
+    /**
+     * 관련 작품 목록을 조회합니다.
+     * @param {number} artworkId - 작품 ID
+     */
+    async getRelatedArtworks(artworkId) {
+        const artwork = this.artworks.find(art => art.id === artworkId);
+        if (!artwork) return [];
+
+        // 같은 전시회의 다른 작품들을 가져옵니다 (현재 작품 제외)
+        return this.artworks.filter(art =>
+            art.exhibitionId === artwork.exhibitionId &&
+            art.id !== artworkId
+        ).slice(0, 3); // 최대 3개까지만 표시
     }
 }
