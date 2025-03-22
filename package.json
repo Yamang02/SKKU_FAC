@@ -2,7 +2,7 @@
     "name": "skku-fac-gallery",
     "version": "1.0.0",
     "description": "SKKU Faculty Art Gallery Website",
-    "main": "app.js",
+    "main": "server.js",
     "type": "module",
     "_moduleAliases": {
         "@root": ".",
@@ -13,8 +13,8 @@
         "@presentation": "src/presentation"
     },
     "scripts": {
-        "start": "node app.js",
-        "dev": "nodemon app.js",
+        "start": "node server.js",
+        "dev": "nodemon server.js",
         "lint": "npx eslint --config ./config/.eslintrc.json src/",
         "lint:fix": "npx eslint --config ./config/.eslintrc.json src/ --fix",
         "lint:css": "npx stylelint --config ./config/.stylelintrc.json \"src/presentation/public/css/**/*.css\" --quiet",

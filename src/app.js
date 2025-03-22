@@ -2,90 +2,104 @@ import express from 'express';
 import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import router from './interface/router/RouterIndex.js';
 import viewResolver from './presentation/view/ViewResolver.js';
+import { setupContainer } from './infrastructure/di/setup.js';
+import { createRouters } from './interface/router/RouterIndex.js';
+
+// 리포지토리 imports
+import ExhibitionRepository from './infrastructure/repository/ExhibitionRepository.js';
+import ArtworkRepository from './infrastructure/repository/ArtworkRepository.js';
+import NoticeRepositoryImpl from './infrastructure/repository/NoticeRepositoryImpl.js';
+import CommentRepositoryImpl from './infrastructure/repository/CommentRepositoryImpl.js';
+import UserRepositoryImpl from './infrastructure/repository/UserRepositoryImpl.js';
+
+// 서비스 imports
+import ExhibitionService from './domain/exhibition/service/ExhibitionService.js';
+import ArtworkService from './domain/artwork/service/ArtworkService.js';
+import NoticeService from './domain/notice/service/NoticeService.js';
+import CommentService from './domain/comment/service/CommentService.js';
+import UserService from './domain/user/service/UserService.js';
+import HomeService from './domain/home/service/HomeService.js';
+
+// 유스케이스 imports
+import ExhibitionUseCase from './application/exhibition/ExhibitionUseCase.js';
+import ArtworkUseCase from './application/artwork/ArtworkUseCase.js';
+import NoticeUseCase from './application/notice/NoticeUseCase.js';
+import UserUseCase from './application/user/UserUseCase.js';
+import HomeUseCase from './application/home/HomeUseCase.js';
+
+// 컨트롤러 imports
+import ExhibitionController from './interface/controller/ExhibitionController.js';
+import ArtworkController from './interface/controller/ArtworkController.js';
+import NoticeController from './interface/controller/NoticeController.js';
+import UserController from './interface/controller/UserController.js';
+import AdminController from './interface/controller/AdminController.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const MemoryStore = session.MemoryStore;  // 세션 저장소 추가
+const MemoryStore = session.MemoryStore;
 
 // 미들웨어 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'presentation/public')));
 
-// 정적 파일 제공
-app.use(express.static(path.join(__dirname, 'presentation/public'), {
-    setHeaders: (res, path) => {
-        if (path.endsWith('.css')) {
-            res.setHeader('Content-Type', 'text/css');
-        }
+// 세션 설정
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    store: new MemoryStore(),
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24시간
     }
 }));
 
 // 뷰 엔진 설정
-app.set('views', path.join(__dirname, 'presentation/view'));
 app.set('view engine', 'ejs');
-
-// 세션 설정
-app.use(session({
-    secret: 'skku-fac-gallery-secret-key',
-    resave: true,  // 세션을 항상 저장
-    saveUninitialized: false,
-    store: new MemoryStore(),  // 메모리에 세션 저장
-    cookie: {
-        httpOnly: true,
-        secure: false,  // 개발 환경에서는 HTTP 사용
-        maxAge: 24 * 60 * 60 * 1000, // 24시간
-        path: '/'
-    },
-    name: 'sessionId'  // 세션 쿠키 이름 설정
-}));
+app.set('views', path.join(__dirname, 'presentation/view'));
 
 // 전역 미들웨어 - 사용자 정보를 모든 뷰에서 사용 가능하게 설정
 app.use((req, res, next) => {
-    console.log('\n[미들웨어] ---- 새 요청 시작 ----');
-    console.log('[미들웨어] 요청 URL:', req.url);
-    console.log('[미들웨어] 요청 메서드:', req.method);
-    console.log('[미들웨어] 세션 ID:', req.sessionID);
-    console.log('[미들웨어] 세션 정보:', req.session);
-    console.log('[미들웨어] 세션의 user 정보:', req.session.user);
     res.locals.user = req.session.user || null;
-    console.log('[미들웨어] locals에 설정된 정보:', res.locals.user);
-    console.log('[미들웨어] ---- 요청 처리 시작 ----\n');
     next();
 });
 
-// 라우터 설정
-app.use(router);
+// 의존성 주입 설정
+const container = setupContainer();
 
-// 404 에러 핸들러
+// 라우터 설정
+app.use('/', createRouters(container));
+
+// 404 에러 처리
 app.use((req, res) => {
-    if (req.xhr || req.headers.accept.includes('application/json')) {
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
         return res.status(404).json({ error: '페이지를 찾을 수 없습니다.' });
     }
-    viewResolver.render(res, 'common/error', {
+    res.status(404).render('common/error', {
         title: '404 에러',
         message: '페이지를 찾을 수 없습니다.'
     });
 });
 
-// 전역 에러 핸들러
+// 500 에러 처리
 app.use((err, req, res, _next) => {
-    console.error('에러 발생:', err);
-
-    if (req.xhr || req.headers.accept.includes('application/json')) {
-        return res.status(500).json({ error: '서버 에러가 발생했습니다.' });
+    console.error(err.stack);
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(500).json({
+            error: process.env.NODE_ENV === 'development'
+                ? err.message
+                : '서버 에러가 발생했습니다.'
+        });
     }
-
-    viewResolver.render(res, 'common/error', {
+    res.status(500).render('common/error', {
         title: '500 에러',
-        message: '서버 에러가 발생했습니다.'
+        message: process.env.NODE_ENV === 'development'
+            ? err.message
+            : '서버 에러가 발생했습니다.'
     });
 });
 
-// 서버 시작
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
-});
+export default app;

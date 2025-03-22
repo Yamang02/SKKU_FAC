@@ -1,3 +1,5 @@
+import Pagination from '../../domain/common/pagination/Pagination.js';
+
 export default class ExhibitionUseCase {
     constructor(exhibitionService, artworkService) {
         this.exhibitionService = exhibitionService;
@@ -36,7 +38,6 @@ export default class ExhibitionUseCase {
      * @param {string} params.category - 카테고리
      */
     async getExhibitionList({ page = 1, limit = 10, category = null } = {}) {
-        const offset = (page - 1) * limit;
         let exhibitions;
 
         if (category) {
@@ -45,23 +46,20 @@ export default class ExhibitionUseCase {
             exhibitions = await this.exhibitionService.findAll();
         }
 
-        const totalCount = exhibitions.length;
-        const totalPages = Math.ceil(totalCount / limit);
+        const pagination = new Pagination(exhibitions.length, {
+            page,
+            limit,
+            displayPageCount: 5
+        });
 
-        // 페이지네이션 처리
-        const startIndex = offset;
-        const endIndex = startIndex + limit;
-        const paginatedExhibitions = exhibitions.slice(startIndex, endIndex);
+        const paginatedExhibitions = exhibitions.slice(
+            pagination.options.offset,
+            pagination.options.offset + pagination.options.limit
+        );
 
         return {
             exhibitions: paginatedExhibitions,
-            pagination: {
-                currentPage: page,
-                totalPages,
-                totalCount,
-                hasNext: page < totalPages,
-                hasPrev: page > 1
-            }
+            pagination: pagination.toJSON()
         };
     }
 
