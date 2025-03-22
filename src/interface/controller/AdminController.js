@@ -1,3 +1,5 @@
+import ViewResolver from '../../presentation/view/ViewResolver.js';
+
 class AdminController {
     constructor() {
         // 메서드 바인딩
@@ -60,7 +62,7 @@ class AdminController {
                 currentPage: 'dashboard'
             };
 
-            res.render('admin/dashboard/index', mockData);
+            ViewResolver.render(res, 'admin/dashboard/index', mockData);
         } catch (error) {
             console.error('대시보드 조회 중 오류 발생:', error);
             res.status(500).send('서버 오류가 발생했습니다.');
