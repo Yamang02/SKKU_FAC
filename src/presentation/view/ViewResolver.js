@@ -27,7 +27,17 @@ class ViewResolver {
             user // 세션의 user 정보를 모든 뷰에 전달
         };
 
-        // 뷰 렌더링
+        // 관리자 페이지인 경우 레이아웃 적용
+        if (view.startsWith('admin/')) {
+            // content에 전달할 상대 경로 계산
+            const contentPath = viewPath.replace('admin/', '../');
+            return res.render('admin/layout/AdminLayout', {
+                ...renderData,
+                content: contentPath
+            });
+        }
+
+        // 일반 페이지 렌더링
         return res.render(viewPath, renderData);
     }
 

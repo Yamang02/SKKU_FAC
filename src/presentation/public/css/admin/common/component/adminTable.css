@@ -1,0 +1,23 @@
+/* 테이블 스타일 */
+.adminTable {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.adminTable th,
+.adminTable td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.adminTable th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.adminTable tr:hover {
+    background-color: #f8f9fa;
+}

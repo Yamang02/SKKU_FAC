@@ -1,0 +1,63 @@
+<div class="admin-main">
+    <div class="admin-dashboard">
+        <h1 class="admin-dashboard__title">관리자 대시보드</h1>
+        <div class="admin-dashboard__stats">
+            <div class="admin-dashboard__stat">
+                <h3 class="admin-dashboard__stat-title">총 사용자 수</h3>
+                <p class="admin-dashboard__stat-value">
+                    <%= stats.totalUsers %>
+                </p>
+            </div>
+            <div class="admin-dashboard__stat">
+                <h3 class="admin-dashboard__stat-title">활성 전시 수</h3>
+                <p class="admin-dashboard__stat-value">
+                    <%= stats.activeExhibitions %>
+                </p>
+            </div>
+            <div class="admin-dashboard__stat">
+                <h3 class="admin-dashboard__stat-title">총 작품 수</h3>
+                <p class="admin-dashboard__stat-value">
+                    <%= stats.totalArtworks %>
+                </p>
+            </div>
+            <div class="admin-dashboard__stat">
+                <h3 class="admin-dashboard__stat-title">월간 방문자</h3>
+                <p class="admin-dashboard__stat-value">
+                    <%= stats.monthlyVisitors %>
+                </p>
+            </div>
+        </div>
+        <div class="admin-dashboard__recent">
+            <h2 class="admin-dashboard__recent-title">최근 활동</h2>
+            <div class="admin-dashboard__activities">
+                <% recentActivities.forEach(activity=> { %>
+                    <div class="admin-dashboard__activity">
+                        <i class="<%= activity.icon %>"></i>
+                        <span>
+                            <%= activity.text %>
+                        </span>
+                        <small>
+                            <%= activity.time %>
+                        </small>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
+        <div class="admin-dashboard__notices">
+            <h2 class="admin-dashboard__notices-title">최근 공지사항</h2>
+            <div class="admin-dashboard__notices-list">
+                <% recentNotices.forEach(notice=> { %>
+                    <div
+                        class="admin-dashboard__notice <%= notice.isImportant ? 'admin-dashboard__notice--important' : '' %>">
+                        <h3>
+                            <%= notice.title %>
+                        </h3>
+                        <span>
+                            <%= notice.date %>
+                        </span>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+/* 헤더 스타일 */
+.adminHeader {
+    background-color: white;
+    padding: 15px 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 250px;
+    z-index: 100;
+}
+
+.adminHeaderTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.adminHeaderUser {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.adminHeaderUserName {
+    font-weight: 500;
+    color: #333;
+}
+
+.adminHeaderLogout {
+    padding: 6px 12px;
+    border: 1px solid #dc3545;
+    border-radius: 4px;
+    color: #dc3545;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.adminHeaderLogout:hover {
+    background-color: #dc3545;
+    color: white;
+}

@@ -1,0 +1,25 @@
+/* 페이지네이션 스타일 */
+.adminPagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.adminPagination button {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    background-color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.adminPagination button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.adminPagination button:hover:not(.active) {
+    background-color: #f8f9fa;
+}

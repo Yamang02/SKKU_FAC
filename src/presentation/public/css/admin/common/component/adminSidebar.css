@@ -1,0 +1,57 @@
+/* 사이드바 스타일 */
+.adminSidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 20px 0;
+    color: white;
+}
+
+.adminSidebarLogo {
+    padding: 0 20px;
+    margin-bottom: 30px;
+}
+
+.adminSidebarLogo h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.adminSidebarMenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.adminSidebarMenuItem {
+    margin-bottom: 5px;
+}
+
+.adminSidebarLink {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #ecf0f1;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.adminSidebarLink:hover,
+.adminSidebarLink.active {
+    background-color: #34495e;
+}
+
+.adminSidebarIcon {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+}
+
+.adminSidebarText {
+    font-size: 14px;
+    font-weight: 500;
+}

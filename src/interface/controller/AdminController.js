@@ -1,6 +1,6 @@
 import ViewResolver from '../../presentation/view/ViewResolver.js';
 
-class AdminController {
+export default class AdminController {
     constructor() {
         // 메서드 바인딩
         this.getDashboard = this.getDashboard.bind(this);
@@ -19,6 +19,8 @@ class AdminController {
         try {
             // TODO: 실제 데이터를 서비스에서 가져와야 합니다
             const mockData = {
+                title: '대시보드',
+                breadcrumb: '대시보드',
                 stats: {
                     totalUsers: 150,
                     activeExhibitions: 5,
@@ -62,7 +64,7 @@ class AdminController {
                 currentPage: 'dashboard'
             };
 
-            ViewResolver.render(res, 'admin/dashboard/AdminDashBoard', mockData);
+            ViewResolver.render(res, 'admin/AdminDashboard', mockData);
         } catch (error) {
             console.error('대시보드 조회 중 오류 발생:', error);
             res.status(500).send('서버 오류가 발생했습니다.');
@@ -71,7 +73,7 @@ class AdminController {
 
     async getUserManagement(req, res) {
         try {
-            ViewResolver.render(res, 'admin/management/UserManagement', {
+            ViewResolver.render(res, 'admin/UserManagement', {
                 title: '사용자 관리',
                 breadcrumb: '사용자 관리',
                 currentPage: 'users'
@@ -84,7 +86,7 @@ class AdminController {
 
     async getExhibitionManagement(req, res) {
         try {
-            res.render('admin/management/exhibition/index', {
+            ViewResolver.render(res, 'admin/ExhibitionManagement', {
                 title: '전시 관리',
                 breadcrumb: '전시 관리',
                 currentPage: 'exhibitions'
@@ -97,7 +99,7 @@ class AdminController {
 
     async getArtworkManagement(req, res) {
         try {
-            res.render('admin/management/artwork/index', {
+            ViewResolver.render(res, 'admin/ArtworkManagement', {
                 title: '작품 관리',
                 breadcrumb: '작품 관리',
                 currentPage: 'artworks'
@@ -110,7 +112,7 @@ class AdminController {
 
     async getNoticeManagement(req, res) {
         try {
-            res.render('admin/management/notice/index', {
+            ViewResolver.render(res, 'admin/NoticeManagement', {
                 title: '공지사항 관리',
                 breadcrumb: '공지사항 관리',
                 currentPage: 'notices'
@@ -121,5 +123,3 @@ class AdminController {
         }
     }
 }
-
-export default AdminController;

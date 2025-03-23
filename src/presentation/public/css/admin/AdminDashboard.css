@@ -1,0 +1,49 @@
+/* 대시보드 스타일 */
+.admin-dashboard {
+    padding: 20px;
+}
+
+.admin-dashboard__title {
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.admin-dashboard__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.admin-dashboard__stat {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-dashboard__stat-title {
+    margin: 0 0 10px 0;
+    color: #666;
+    font-size: 16px;
+}
+
+.admin-dashboard__stat-value {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+}
+
+.admin-dashboard__recent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-dashboard__recent-title {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 18px;
+}
