@@ -3,13 +3,57 @@ import bcrypt from 'bcrypt';
 // 비밀번호 해시 생성
 const hashedPassword = bcrypt.hashSync('1234', 10);
 
-// 사용자 유형 상수
+/**
+ * 사용자 역할 enum
+ */
 export const UserRole = {
-    ADMIN: 'ADMIN',           // 관리자
-    CLUB_MEMBER: 'MEMBER',    // 동아리 회원
-    ARTIST: 'ARTIST',         // 외부 작가
-    GUEST: 'GUEST'           // 일반 사용자
+    ADMIN: 'ADMIN',
+    ARTIST: 'ARTIST',
+    CLUB_MEMBER: 'CLUB_MEMBER',
+    GUEST: 'GUEST'
 };
+
+/**
+ * 사용자 상태 enum
+ */
+export const UserStatus = {
+    ACTIVE: 'ACTIVE',
+    INACTIVE: 'INACTIVE',
+    BLOCKED: 'BLOCKED'
+};
+
+/**
+ * 사용자 데이터 모델
+ */
+export class User {
+    constructor({
+        id,
+        username,
+        password,
+        name,
+        email,
+        role = UserRole.GUEST,
+        status = UserStatus.ACTIVE,
+        departmentId = null,
+        studentId = null,
+        artistInfo = null,
+        createdAt = new Date(),
+        updatedAt = new Date()
+    }) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.email = email;
+        this.role = role;
+        this.status = status;
+        this.departmentId = departmentId;
+        this.studentId = studentId;
+        this.artistInfo = artistInfo;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+}
 
 const user = [
     {

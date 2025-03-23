@@ -16,10 +16,11 @@
                         <h1 class="login-title">로그인</h1>
                         <% if (locals.error) { %>
                             <div class="alert alert-danger">
-                                <%= error %>
+                                <%= locals.error %>
                             </div>
                             <% } %>
                                 <form action="/user/login" method="POST">
+                                    <input type="hidden" name="redirectUrl" value="<%= redirectUrl || '/' %>">
                                     <div class="form-group">
                                         <label for="username">아이디</label>
                                         <input type="text" id="username" name="username" class="form-control"

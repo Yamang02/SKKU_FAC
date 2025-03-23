@@ -4,25 +4,33 @@
 class ProfileViewDto {
     constructor({
         title = '프로필',
-        user,
+        user = null,
         artworks = [],
         comments = [],
-        pagination = null
+        pagination = {
+            currentPage: 1,
+            totalPages: 1,
+            total: 0
+        }
     }) {
         this.title = title;
         this.user = user;
-        this.artworks = artworks;
-        this.comments = comments;
+        this.artworks = Array.isArray(artworks) ? artworks : [];
+        this.comments = Array.isArray(comments) ? comments : [];
         this.pagination = pagination;
     }
 
     toView() {
         return {
             title: this.title,
-            user: this.user,
-            artworks: this.artworks,
-            comments: this.comments,
-            pagination: this.pagination
+            user: this.user || {},
+            artworks: this.artworks || [],
+            comments: this.comments || [],
+            pagination: this.pagination || {
+                currentPage: 1,
+                totalPages: 1,
+                total: 0
+            }
         };
     }
 }

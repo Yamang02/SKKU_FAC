@@ -24,34 +24,34 @@
                                     <div class="form-group">
                                         <label for="username">사용자 ID</label>
                                         <input type="text" id="username" name="username" class="form-control"
-                                            value="<%= profileUser.username %>" readonly>
+                                            value="<%= user.username %>" readonly>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="name">이름</label>
                                         <input type="text" id="name" name="name" class="form-control"
-                                            value="<%= profileUser.name %>" required>
+                                            value="<%= user.name %>" required>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="email">이메일</label>
                                         <input type="email" id="email" name="email" class="form-control"
-                                            value="<%= profileUser.email %>" required>
+                                            value="<%= user.email %>" required>
                                     </div>
 
-                                    <% if (profileUser.role==='CLUB_MEMBER' ) { %>
+                                    <% if (user.role==='CLUB_MEMBER' ) { %>
                                         <div class="form-group">
                                             <label for="studentId">학번</label>
                                             <input type="text" id="studentId" name="studentId" class="form-control"
-                                                value="<%= profileUser.studentId || '' %>">
+                                                value="<%= user.studentId || '' %>">
                                         </div>
                                         <% } %>
 
-                                            <% if (profileUser.role==='ARTIST' ) { %>
+                                            <% if (user.role==='ARTIST' ) { %>
                                                 <div class="form-group">
                                                     <label for="artistInfo">작가 정보</label>
                                                     <textarea id="artistInfo" name="artistInfo"
-                                                        class="form-control"><%= profileUser.artistInfo || '' %></textarea>
+                                                        class="form-control"><%= user.artistInfo || '' %></textarea>
                                                 </div>
                                                 <% } %>
 

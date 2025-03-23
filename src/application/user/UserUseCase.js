@@ -38,9 +38,18 @@ class UserUseCase {
     }
 
     async getProfile(userId) {
-        const user = await this.userService.userRepository.findById(userId);
-        this.userService.validateUserStatus(user);
-        return user;
+        try {
+            const user = await this.userService.findUserWithDepartment(userId);
+            if (!user) {
+                throw new Error('사용자를 찾을 수 없습니다.');
+            }
+
+            this.userService.validateUserStatus(user);
+            return user;
+        } catch (error) {
+            console.error('프로필 조회 중 오류:', error);
+            throw error;
+        }
     }
 
     async updateProfile(userId, profileData) {
@@ -93,6 +102,15 @@ class UserUseCase {
 
     async getUserStats() {
         return await this.userService.getUserStats();
+    }
+
+    async getUserById(userId) {
+        const user = await this.userService.userRepository.findByIdWithDepartment(userId);
+        if (!user) {
+            throw new Error('사용자를 찾을 수 없습니다.');
+        }
+        this.userService.validateUserStatus(user);
+        return user;
     }
 }
 

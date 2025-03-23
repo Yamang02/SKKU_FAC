@@ -21,9 +21,13 @@
 
                                 <form class="register-form" action="/user/register" method="POST">
                                     <div class="form-group">
-                                        <input type="text" id="username" name="username" class="form-control"
-                                            value="<%= locals.formData?.username || '' %>" required
-                                            pattern="^[a-zA-Z0-9_]{4,20}$" placeholder="아이디">
+                                        <input type="text" id="name" name="name" class="form-control"
+                                            value="<%= locals.formData?.name || '' %>" required placeholder="이름">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="email" id="email" name="email" class="form-control"
+                                            value="<%= locals.formData?.email || '' %>" required placeholder="이메일">
                                     </div>
 
                                     <div class="form-group">
@@ -49,43 +53,15 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" id="name" name="name" class="form-control"
-                                            value="<%= locals.formData?.name || '' %>" required placeholder="이름">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <input type="email" id="email" name="email" class="form-control"
-                                            value="<%= locals.formData?.email || '' %>" required placeholder="이메일">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <select id="role" name="role" class="form-control" required>
-                                            <option value="">가입 유형을 선택하세요</option>
-                                            <option value="MEMBER">동아리 회원</option>
-                                            <option value="ARTIST">작가</option>
-                                            <option value="VISITOR">일반 방문자</option>
+                                        <select id="department" name="department" class="form-control" required>
+                                            <option value="">학과를 선택하세요</option>
+                                            <% departments.forEach(dept=> { %>
+                                                <option value="<%= dept.id %>" <%=locals.formData?.department===dept.id
+                                                    ? 'selected' : '' %>>
+                                                    <%= dept.name %>
+                                                </option>
+                                                <% }); %>
                                         </select>
-                                    </div>
-
-                                    <div class="club-member-field">
-                                        <div class="form-group">
-                                            <input type="text" id="studentId" name="studentId" class="form-control"
-                                                value="<%= locals.formData?.studentId || '' %>" pattern="[0-9]{10}"
-                                                placeholder="학번 (10자리)">
-                                        </div>
-                                    </div>
-
-                                    <div class="artist-field">
-                                        <div class="form-group">
-                                            <textarea id="artistBio" name="artistInfo[biography]" class="form-control"
-                                                placeholder="작가 소개"><%= locals.formData?.artistInfo?.biography || '' %></textarea>
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="url" id="artistWebsite" name="artistInfo[website]"
-                                                class="form-control"
-                                                value="<%= locals.formData?.artistInfo?.website || '' %>"
-                                                placeholder="웹사이트 (선택사항)">
-                                        </div>
                                     </div>
 
                                     <div class="form-group">

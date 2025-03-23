@@ -15,48 +15,27 @@
                         <h1 class="profile-title">프로필</h1>
                         <div class="profile-info">
                             <div class="info-group">
-                                <label>사용자 ID</label>
-                                <p>
-                                    <%= profileUser.username %>
-                                </p>
-                            </div>
-                            <div class="info-group">
                                 <label>이름</label>
                                 <p>
-                                    <%= profileUser.name %>
+                                    <%= user.name %>
                                 </p>
                             </div>
                             <div class="info-group">
                                 <label>이메일</label>
                                 <p>
-                                    <%= profileUser.email %>
+                                    <%= user.email %>
                                 </p>
                             </div>
                             <div class="info-group">
-                                <label>역할</label>
+                                <label>학과</label>
                                 <p>
-                                    <%= profileUser.role %>
+                                    <%= user.department ? user.department.name : '학과 정보 없음' %>
                                 </p>
                             </div>
-                            <% if (profileUser.studentId) { %>
-                                <div class="info-group">
-                                    <label>학번</label>
-                                    <p>
-                                        <%= profileUser.studentId %>
-                                    </p>
-                                </div>
-                                <% } %>
-                                    <% if (profileUser.artistInfo) { %>
-                                        <div class="info-group">
-                                            <label>작가 정보</label>
-                                            <p>
-                                                <%= profileUser.artistInfo %>
-                                            </p>
-                                        </div>
-                                        <% } %>
                         </div>
+
                         <div class="profile-actions">
-                            <a href="/user/profile/edit" class="btn btn--primary">프로필 수정</a>
+                            <a href="/user/profile/edit" class="btn btn--secondary">프로필 수정</a>
                             <a href="/user/logout" class="btn btn--secondary">로그아웃</a>
                         </div>
                     </div>

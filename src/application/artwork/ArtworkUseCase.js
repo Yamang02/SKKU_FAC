@@ -86,4 +86,23 @@ export default class ArtworkUseCase {
     async getComments(artworkId, page = 1) {
         return await this.artworkService.getComments(artworkId, page);
     }
+
+    async getUserArtworks(userId, page = 1, limit = 10) {
+        try {
+            const artworks = await this.artworkService.findByUserId(userId, page, limit);
+            return artworks || [];
+        } catch (error) {
+            console.error('사용자 작품 조회 중 오류:', error);
+            return [];
+        }
+    }
+
+    async getUserArtworksCount(userId) {
+        try {
+            return await this.artworkService.countByUserId(userId);
+        } catch (error) {
+            console.error('사용자 작품 수 조회 중 오류:', error);
+            return 0;
+        }
+    }
 }

@@ -170,6 +170,32 @@ class ArtworkService {
             total
         };
     }
+
+    async findByUserId(userId, page = 1, limit = 10) {
+        try {
+            const offset = (page - 1) * limit;
+            const artworks = await this.artworkRepository.findByUserId(userId, offset, limit);
+            return artworks.map(artwork => ({
+                id: artwork.id,
+                title: artwork.title,
+                description: artwork.description,
+                imageUrl: artwork.imageUrl,
+                createdAt: artwork.createdAt
+            }));
+        } catch (error) {
+            console.error('사용자 작품 조회 중 오류:', error);
+            return [];
+        }
+    }
+
+    async countByUserId(userId) {
+        try {
+            return await this.artworkRepository.countByUserId(userId);
+        } catch (error) {
+            console.error('사용자 작품 수 조회 중 오류:', error);
+            return 0;
+        }
+    }
 }
 
 export default ArtworkService;

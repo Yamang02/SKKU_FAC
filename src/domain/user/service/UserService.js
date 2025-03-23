@@ -2,14 +2,16 @@ import UserRepositoryImpl from '../../../infrastructure/repository/UserRepositor
 import bcrypt from 'bcrypt';
 import { UserRole } from '../../../infrastructure/data/user.js';
 import UserDto from '../dto/UserDto.js';
+import DepartmentRepositoryImpl from '../../../infrastructure/repository/DepartmentRepositoryImpl.js';
 
 /**
  * 사용자 서비스
  * 사용자 관련 비즈니스 로직을 처리합니다.
  */
 class UserService {
-    constructor(userRepository = new UserRepositoryImpl()) {
+    constructor(userRepository = new UserRepositoryImpl(), departmentRepository = new DepartmentRepositoryImpl()) {
         this.userRepository = userRepository;
+        this.departmentRepository = departmentRepository;
     }
 
     // 검증 메서드들
@@ -215,6 +217,34 @@ class UserService {
         });
 
         return UserDto.fromEntity(updatedUser);
+    }
+
+    async findById(userId) {
+        const user = await this.userRepository.findById(userId);
+        if (!user) {
+            return null;
+        }
+        return user;
+    }
+
+    async findUserWithDepartment(userId) {
+        const user = await this.userRepository.findById(userId);
+        if (!user) {
+            return null;
+        }
+
+        // 사용자 상태 검증
+        this.validateUserStatus(user);
+
+        let department = null;
+        if (user.departmentId) {
+            department = await this.departmentRepository.findById(user.departmentId);
+        }
+
+        return {
+            ...user,
+            department: department || { name: '학과 정보 없음' }
+        };
     }
 }
 

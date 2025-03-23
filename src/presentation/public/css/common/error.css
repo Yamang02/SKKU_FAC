@@ -40,6 +40,7 @@
 
 .back-button:hover {
     background-color: var(--color-primary-light);
+    color: white;
 }
 
 .card {

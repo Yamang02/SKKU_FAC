@@ -1,12 +1,10 @@
-import CommentService from '../../domain/comment/service/CommentService.js';
-
 /**
  * Comment 유스케이스
  * 댓글 관련 애플리케이션 로직을 처리합니다.
  */
 class CommentUseCase {
-    constructor() {
-        this.commentService = new CommentService();
+    constructor(commentService) {
+        this.commentService = commentService;
     }
 
     /**
@@ -42,29 +40,27 @@ class CommentUseCase {
      * @param {Object} commentData - 댓글 데이터
      * @returns {Promise<Object>} 생성된 댓글 정보
      */
-    async addComment(commentData) {
-        return this.commentService.addComment(commentData);
+    async createComment(commentData) {
+        return await this.commentService.create(commentData);
     }
 
     /**
      * 댓글을 수정합니다.
      * @param {number} commentId - 댓글 ID
      * @param {Object} commentData - 수정할 댓글 데이터
-     * @param {string} userId - 사용자 ID
      * @returns {Promise<Object>} 수정된 댓글 정보
      */
-    async updateComment(commentId, commentData, userId) {
-        return this.commentService.updateComment(commentId, commentData, userId);
+    async updateComment(commentId, commentData) {
+        return await this.commentService.update(commentId, commentData);
     }
 
     /**
      * 댓글을 삭제합니다.
      * @param {number} commentId - 댓글 ID
-     * @param {string} userId - 사용자 ID
      * @returns {Promise<boolean>} 삭제 성공 여부
      */
-    async deleteComment(commentId, userId) {
-        return this.commentService.deleteComment(commentId, userId);
+    async deleteComment(commentId) {
+        return await this.commentService.delete(commentId);
     }
 
     /**
@@ -74,6 +70,23 @@ class CommentUseCase {
      */
     async deleteNoticeComments(noticeId) {
         return this.commentService.deleteAllByNoticeId(noticeId);
+    }
+
+    /**
+     * 사용자의 댓글 목록을 조회합니다.
+     * @param {string} userId - 사용자 ID
+     * @param {number} page - 페이지 번호
+     * @param {number} limit - 페이지당 댓글 수
+     * @returns {Promise<Array>} 댓글 목록
+     */
+    async getUserComments(userId, page = 1, limit = 10) {
+        try {
+            const comments = await this.commentService.findByUserId(userId, page, limit);
+            return comments || [];
+        } catch (error) {
+            console.error('사용자 댓글 조회 중 오류:', error);
+            return [];
+        }
     }
 }
 

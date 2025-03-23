@@ -2,38 +2,8 @@ import express from 'express';
 import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import viewResolver from './presentation/view/ViewResolver.js';
 import { setupContainer } from './infrastructure/di/setup.js';
 import { createRouters } from './interface/router/RouterIndex.js';
-
-// 리포지토리 imports
-import ExhibitionRepository from './infrastructure/repository/ExhibitionRepository.js';
-import ArtworkRepository from './infrastructure/repository/ArtworkRepository.js';
-import NoticeRepositoryImpl from './infrastructure/repository/NoticeRepositoryImpl.js';
-import CommentRepositoryImpl from './infrastructure/repository/CommentRepositoryImpl.js';
-import UserRepositoryImpl from './infrastructure/repository/UserRepositoryImpl.js';
-
-// 서비스 imports
-import ExhibitionService from './domain/exhibition/service/ExhibitionService.js';
-import ArtworkService from './domain/artwork/service/ArtworkService.js';
-import NoticeService from './domain/notice/service/NoticeService.js';
-import CommentService from './domain/comment/service/CommentService.js';
-import UserService from './domain/user/service/UserService.js';
-import HomeService from './domain/home/service/HomeService.js';
-
-// 유스케이스 imports
-import ExhibitionUseCase from './application/exhibition/ExhibitionUseCase.js';
-import ArtworkUseCase from './application/artwork/ArtworkUseCase.js';
-import NoticeUseCase from './application/notice/NoticeUseCase.js';
-import UserUseCase from './application/user/UserUseCase.js';
-import HomeUseCase from './application/home/HomeUseCase.js';
-
-// 컨트롤러 imports
-import ExhibitionController from './interface/controller/ExhibitionController.js';
-import ArtworkController from './interface/controller/ArtworkController.js';
-import NoticeController from './interface/controller/NoticeController.js';
-import UserController from './interface/controller/UserController.js';
-import AdminController from './interface/controller/AdminController.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -72,7 +42,7 @@ const container = setupContainer();
 
 // 라우터 설정
 app.use('/', createRouters(container));
-
+console.log('모든 라우터 설정 완료');
 // 404 에러 처리
 app.use((req, res) => {
     if (req.xhr || req.headers.accept?.includes('application/json')) {

@@ -1,0 +1,49 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "ignorePatterns": [
+        "*.ejs"
+    ],
+    "rules": {
+        "no-console": [
+            "error",
+            {
+                "allow": [
+                    "log",
+                    "error",
+                    "warn",
+                    "info",
+                    "debug"
+                ]
+            }
+        ],
+        "no-unused-vars": [
+            "warn",
+            {
+                "argsIgnorePattern": "^_",
+                "varsIgnorePattern": "^_"
+            }
+        ]
+    },
+    "overrides": [
+        {
+            "files": [
+                "**/*.js"
+            ],
+            "env": {
+                "node": true
+            },
+            "rules": {
+                "no-console": "off"
+            }
+        }
+    ]
+}

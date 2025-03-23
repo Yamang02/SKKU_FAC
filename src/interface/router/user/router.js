@@ -1,15 +1,11 @@
 import express from 'express';
-import UserController from '../../controller/UserController.js';
-import UserService from '../../../domain/user/service/UserService.js';
-import UserUseCase from '../../../application/user/UserUseCase.js';
 import { isAuthenticated, isAdmin } from '../../middleware/auth.js';
+import di from '../../../infrastructure/config/DependencyInjection.js';
 
 const router = express.Router();
 
-// 의존성 주입
-const userService = new UserService();
-const userUseCase = new UserUseCase(userService);
-const userController = new UserController(userUseCase);
+// DI 컨테이너에서 컨트롤러 가져오기
+const userController = di.getInstance('UserController');
 
 // 로그인
 router.get('/login', userController.getLoginPage);

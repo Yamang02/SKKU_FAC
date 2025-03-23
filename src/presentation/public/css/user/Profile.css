@@ -3,20 +3,19 @@
 }
 
 .profile-card {
-    background: white;
+    background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 2rem;
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
 }
 
 .profile-title {
-    font-size: 1.5rem;
-    color: var(--text-color);
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 2rem;
+    text-align: center;
 }
 
 .profile-info {
@@ -24,28 +23,27 @@
 }
 
 .info-group {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .info-group label {
     display: block;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.25rem;
+    font-weight: bold;
+    color: #666;
+    margin-bottom: 0.5rem;
 }
 
 .info-group p {
-    font-size: 1rem;
-    color: var(--text-color);
+    color: #333;
     margin: 0;
+    font-size: 1.1rem;
 }
 
 .profile-actions {
     display: flex;
     gap: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
     justify-content: center;
+    margin-top: 2rem;
 }
 
 .form-group {
