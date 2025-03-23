@@ -17,10 +17,10 @@ export default class AdminController {
      */
     async getDashboard(req, res) {
         try {
-            // TODO: 실제 데이터를 서비스에서 가져와야 합니다
             const mockData = {
                 title: '대시보드',
                 breadcrumb: '대시보드',
+                currentPage: 'dashboard',
                 stats: {
                     totalUsers: 150,
                     activeExhibitions: 5,
@@ -47,79 +47,78 @@ export default class AdminController {
                 recentNotices: [
                     {
                         title: '시스템 점검 안내',
-                        date: '2024-03-19',
-                        isImportant: true
+                        date: '2024-03-19'
                     },
                     {
                         title: '3월 전시 일정 안내',
-                        date: '2024-03-18',
-                        isImportant: false
+                        date: '2024-03-18'
                     },
                     {
                         title: '신규 작가 모집',
-                        date: '2024-03-17',
-                        isImportant: false
+                        date: '2024-03-17'
                     }
-                ],
-                currentPage: 'dashboard'
+                ]
             };
 
             ViewResolver.render(res, 'admin/AdminDashboard', mockData);
         } catch (error) {
-            console.error('대시보드 조회 중 오류 발생:', error);
-            res.status(500).send('서버 오류가 발생했습니다.');
+            ViewResolver.renderError(res, error);
         }
     }
 
     async getUserManagement(req, res) {
         try {
-            ViewResolver.render(res, 'admin/UserManagement', {
-                title: '사용자 관리',
-                breadcrumb: '사용자 관리',
+            const mockData = {
+                title: '회원 관리',
+                breadcrumb: '회원 관리',
                 currentPage: 'users'
-            });
+            };
+
+            ViewResolver.render(res, 'admin/management/user/UserManagementList', mockData);
         } catch (error) {
-            console.error('사용자 관리 페이지 조회 중 오류 발생:', error);
-            res.status(500).send('서버 오류가 발생했습니다.');
+            ViewResolver.renderError(res, error);
         }
     }
 
     async getExhibitionManagement(req, res) {
         try {
-            ViewResolver.render(res, 'admin/ExhibitionManagement', {
+            const mockData = {
                 title: '전시 관리',
                 breadcrumb: '전시 관리',
                 currentPage: 'exhibitions'
-            });
+            };
+
+            ViewResolver.render(res, 'admin/management/exhibition/ExhibitionManagementList', mockData);
         } catch (error) {
-            console.error('전시 관리 페이지 조회 중 오류 발생:', error);
-            res.status(500).send('서버 오류가 발생했습니다.');
+            ViewResolver.renderError(res, error);
         }
     }
 
     async getArtworkManagement(req, res) {
         try {
-            ViewResolver.render(res, 'admin/ArtworkManagement', {
+            const mockData = {
                 title: '작품 관리',
                 breadcrumb: '작품 관리',
                 currentPage: 'artworks'
-            });
+            };
+
+            ViewResolver.render(res, 'admin/management/artwork/ArtworkManagementList', mockData);
         } catch (error) {
-            console.error('작품 관리 페이지 조회 중 오류 발생:', error);
-            res.status(500).send('서버 오류가 발생했습니다.');
+            ViewResolver.renderError(res, error);
         }
     }
 
     async getNoticeManagement(req, res) {
         try {
-            ViewResolver.render(res, 'admin/NoticeManagement', {
+            const mockData = {
                 title: '공지사항 관리',
                 breadcrumb: '공지사항 관리',
                 currentPage: 'notices'
-            });
+            };
+
+            ViewResolver.render(res, 'admin/management/notice/NoticeManagementList', mockData);
         } catch (error) {
-            console.error('공지사항 관리 페이지 조회 중 오류 발생:', error);
-            res.status(500).send('서버 오류가 발생했습니다.');
+            ViewResolver.renderError(res, error);
         }
     }
 }

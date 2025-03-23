@@ -1,0 +1,102 @@
+<div class="admin-user-management">
+    <!-- 필터 섹션 -->
+    <div class="admin-user-management__filters">
+        <div class="admin-user-management__filter-group">
+            <select class="admin-user-management__select">
+                <option value="">회원 상태</option>
+                <option value="active">활성</option>
+                <option value="inactive">비활성</option>
+                <option value="suspended">정지</option>
+            </select>
+            <select class="admin-user-management__select">
+                <option value="">회원 역할</option>
+                <option value="admin">관리자</option>
+                <option value="manager">매니저</option>
+                <option value="user">일반회원</option>
+            </select>
+            <button class="admin-button admin-button--primary">
+                <i class="fas fa-filter"></i>
+                필터 적용
+            </button>
+        </div>
+    </div>
+
+    <!-- 테이블 섹션 -->
+    <div class="admin-user-management__table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" class="admin-checkbox">
+                    </th>
+                    <th>ID</th>
+                    <th>역할</th>
+                    <th>이름</th>
+                    <th>학과</th>
+                    <th>이메일</th>
+                    <th>가입일</th>
+                    <th>최근 접속일</th>
+                    <th>상태</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(let i=0; i < 10; i++) { %>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="admin-checkbox">
+                        </td>
+                        <td>user<%= i + 1 %>
+                        </td>
+                        <td>
+                            <span
+                                class="admin-role-badge admin-role-badge--<%= i === 0 ? 'admin' : (i === 1 ? 'manager' : 'user') %>">
+                                <%= i===0 ? '관리자' : (i===1 ? '매니저' : '일반회원' ) %>
+                            </span>
+                        </td>
+                        <td>사용자<%= i + 1 %>
+                        </td>
+                        <td>
+                            <%= ['소프트웨어학과', '컴퓨터공학과' , '인공지능학과' , '전자전기공학부' , '기계공학부' ][i % 5] %>
+                        </td>
+                        <td>user<%= i + 1 %>@example.com</td>
+                        <td>2024-03-<%= 10 + i %>
+                        </td>
+                        <td>2024-03-<%= 18 + i %>
+                        </td>
+                        <td>
+                            <span class="admin-status-badge admin-status-badge--active">활성</span>
+                        </td>
+                        <td>
+                            <div class="admin-button-group">
+                                <button class="admin-button admin-button--secondary">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="admin-button admin-button--danger">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 페이지네이션 섹션 -->
+    <div class="admin-user-management__pagination">
+        <div class="admin-pagination">
+            <button class="admin-pagination__button">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="admin-pagination__button admin-pagination__button--active">1</button>
+            <button class="admin-pagination__button">2</button>
+            <button class="admin-pagination__button">3</button>
+            <button class="admin-pagination__button">4</button>
+            <button class="admin-pagination__button">5</button>
+            <button class="admin-pagination__button">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>

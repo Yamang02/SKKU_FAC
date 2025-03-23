@@ -21,6 +21,9 @@
 /* 대시보드 스타일 */
 @import url('./AdminDashboard.css');
 
+/* 페이지별 스타일 */
+@import url('./management/user/UserManagement.css');
+
 /* 레이아웃 */
 .admin-container {
     display: flex;

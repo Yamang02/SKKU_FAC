@@ -10,9 +10,14 @@
         <!-- Font Awesome -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         <!-- 관리자 페이지 스타일 -->
-        <link rel="stylesheet" href="/css/admin/common/reset.css">
+        <link rel="stylesheet" href="/css/admin/common/adminReset.css">
         <link rel="stylesheet" href="/css/admin/adminStyle.css">
-        <link rel="stylesheet" href="/css/admin/dashboard.css">
+        <% if (currentPage==='dashboard' ) { %>
+            <link rel="stylesheet" href="/css/admin/AdminDashboard.css">
+            <% } %>
+                <% if (currentPage==='users' ) { %>
+                    <link rel="stylesheet" href="/css/admin/management/user/UserManagementList.css">
+                    <% } %>
     </head>
 
     <body>
