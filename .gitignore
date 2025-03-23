@@ -131,3 +131,4 @@ dist
 
 # Exclude pre-commit hooks
 !.git/hooks/pre-commit
+restart-server.ps1

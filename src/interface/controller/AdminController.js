@@ -62,7 +62,7 @@ class AdminController {
                 currentPage: 'dashboard'
             };
 
-            ViewResolver.render(res, 'admin/dashboard/index', mockData);
+            ViewResolver.render(res, 'admin/dashboard/AdminDashBoard', mockData);
         } catch (error) {
             console.error('대시보드 조회 중 오류 발생:', error);
             res.status(500).send('서버 오류가 발생했습니다.');
