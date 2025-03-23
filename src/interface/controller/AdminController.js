@@ -1,4 +1,5 @@
 import ViewResolver from '../../presentation/view/ViewResolver.js';
+import { ViewPath } from '../../presentation/view/ViewPath.js';
 
 export default class AdminController {
     constructor() {
@@ -60,7 +61,7 @@ export default class AdminController {
                 ]
             };
 
-            ViewResolver.render(res, 'admin/AdminDashboard', mockData);
+            ViewResolver.render(res, ViewPath.ADMIN.DASHBOARD, mockData);
         } catch (error) {
             ViewResolver.renderError(res, error);
         }
@@ -74,7 +75,7 @@ export default class AdminController {
                 currentPage: 'users'
             };
 
-            ViewResolver.render(res, 'admin/management/user/UserManagementList', mockData);
+            ViewResolver.render(res, ViewPath.ADMIN.USER.LIST, mockData);
         } catch (error) {
             ViewResolver.renderError(res, error);
         }
@@ -88,7 +89,7 @@ export default class AdminController {
                 currentPage: 'exhibitions'
             };
 
-            ViewResolver.render(res, 'admin/management/exhibition/ExhibitionManagementList', mockData);
+            ViewResolver.render(res, ViewPath.ADMIN.EXHIBITION.LIST, mockData);
         } catch (error) {
             ViewResolver.renderError(res, error);
         }
@@ -102,7 +103,7 @@ export default class AdminController {
                 currentPage: 'artworks'
             };
 
-            ViewResolver.render(res, 'admin/management/artwork/ArtworkManagementList', mockData);
+            ViewResolver.render(res, ViewPath.ADMIN.ARTWORK.LIST, mockData);
         } catch (error) {
             ViewResolver.renderError(res, error);
         }
@@ -116,7 +117,7 @@ export default class AdminController {
                 currentPage: 'notices'
             };
 
-            ViewResolver.render(res, 'admin/management/notice/NoticeManagementList', mockData);
+            ViewResolver.render(res, ViewPath.ADMIN.NOTICE.LIST, mockData);
         } catch (error) {
             ViewResolver.renderError(res, error);
         }
