@@ -1,23 +1,61 @@
 /* 헤더 스타일 */
 .adminHeader {
-    background-color: white;
-    padding: 15px 20px;
+    background-color: #fff;
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 20px;
+    border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.adminHeader__top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: fixed;
-    top: 0;
-    right: 0;
-    left: 250px;
-    z-index: 100;
+    margin-bottom: 10px;
 }
 
-.adminHeaderTitle {
-    font-size: 20px;
-    font-weight: 600;
-    color: #333;
-    margin: 0;
+.adminHeader__title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2d3748;
+}
+
+.adminHeader__breadcrumb {
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.adminHeader__breadcrumb span {
+    margin: 0 5px;
+    color: #cbd5e0;
+}
+
+.adminHeader__search {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.adminHeader__search input {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    width: 200px;
+}
+
+.adminHeader__search button {
+    padding: 8px 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.adminHeader__search button:hover {
+    background-color: #2980b9;
 }
 
 .adminHeaderUser {

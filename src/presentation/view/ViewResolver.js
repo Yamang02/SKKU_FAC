@@ -29,7 +29,6 @@ class ViewResolver {
 
         // 관리자 페이지인 경우 레이아웃 적용
         if (view.startsWith('admin/')) {
-            // content에 전달할 상대 경로 계산
             const contentPath = viewPath.replace('admin/', '../');
             return res.render('admin/layout/AdminLayout', {
                 ...renderData,
