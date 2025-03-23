@@ -1,0 +1,42 @@
+<%- include('../../../common/head', { pageTitle: '작품 관리' }) %>
+
+    <div class="admin-container">
+        <%- include('../../component/sidebar') %>
+
+            <main class="admin-main">
+                <div class="admin-content">
+                    <div class="content-header">
+                        <h1>작품 관리</h1>
+                    </div>
+
+                    <div class="content-body">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>작품 목록</h2>
+                                <button class="btn btn-primary">새 작품 등록</button>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>제목</th>
+                                            <th>작가</th>
+                                            <th>카테고리</th>
+                                            <th>등록일</th>
+                                            <th>상태</th>
+                                            <th>작업</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- 작품 목록이 여기에 동적으로 추가됩니다 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+    </div>
+
+    <%- include('../../../common/footer') %>

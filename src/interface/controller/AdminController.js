@@ -71,7 +71,7 @@ class AdminController {
 
     async getUserManagement(req, res) {
         try {
-            res.render('admin/management/user/index', {
+            ViewResolver.render(res, 'admin/management/UserManagement', {
                 title: '사용자 관리',
                 breadcrumb: '사용자 관리',
                 currentPage: 'users'
