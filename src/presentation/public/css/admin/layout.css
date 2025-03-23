@@ -1,0 +1,62 @@
+/* 관리자 레이아웃 스타일 */
+:root {
+    --sidebar-width: 240px;
+    --header-height: 60px;
+}
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+}
+
+.admin-sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background-color: var(--admin-color-sidebar);
+    border-right: 1px solid var(--admin-color-border);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+}
+
+.admin-wrapper {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.admin-header {
+    height: var(--header-height);
+    background-color: var(--admin-color-white);
+    border-bottom: 1px solid var(--admin-color-border);
+    position: sticky;
+    top: 0;
+    z-index: 99;
+}
+
+.admin-main {
+    flex: 1;
+    background-color: var(--admin-color-background);
+    min-height: calc(100vh - var(--header-height));
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .admin-sidebar.show {
+        transform: translateX(0);
+    }
+
+    .admin-wrapper {
+        margin-left: 0;
+    }
+}
