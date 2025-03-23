@@ -22,6 +22,8 @@ class UserController {
         this.getProfilePage = this.getProfilePage.bind(this);
         this.getProfileEditPage = this.getProfileEditPage.bind(this);
         this.updateProfile = this.updateProfile.bind(this);
+        this.getForgotPasswordPage = this.getForgotPasswordPage.bind(this);
+        this.handleForgotPassword = this.handleForgotPassword.bind(this);
 
         // 관리 기능 바인딩
         this.getUserList = this.getUserList.bind(this);
@@ -66,6 +68,13 @@ class UserController {
                 { value: 'CLUB_MEMBER', label: '동아리 회원' },
                 { value: 'ARTIST', label: '외부 작가' },
                 { value: 'GUEST', label: '일반 사용자' }
+            ],
+            departments: [
+                { id: 1, name: '글로벌융합학부' },
+                { id: 2, name: '소프트웨어학과' },
+                { id: 3, name: '인공지능학과' },
+                { id: 4, name: '컴퓨터공학과' }
+                // 기타 학과들...
             ]
         });
     }
@@ -307,6 +316,29 @@ class UserController {
             res.render('common/error', {
                 title: '에러',
                 message: error.message
+            });
+        }
+    }
+
+    getForgotPasswordPage(req, res) {
+        res.render('user/ForgotPassword', {
+            title: '비밀번호 찾기'
+        });
+    }
+
+    async handleForgotPassword(req, res) {
+        try {
+            const { email } = req.body;
+            await this.userUseCase.sendPasswordResetEmail(email);
+            res.render('user/ForgotPassword', {
+                title: '비밀번호 찾기',
+                success: '비밀번호 재설정 링크가 이메일로 전송되었습니다.'
+            });
+        } catch (error) {
+            res.render('user/ForgotPassword', {
+                title: '비밀번호 찾기',
+                error: error.message,
+                email: req.body.email
             });
         }
     }

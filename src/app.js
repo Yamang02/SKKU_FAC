@@ -42,7 +42,7 @@ const container = setupContainer();
 
 // 라우터 설정
 app.use('/', createRouters(container));
-console.log('모든 라우터 설정 완료');
+console.log('라우터 설정 완료');
 // 404 에러 처리
 app.use((req, res) => {
     if (req.xhr || req.headers.accept?.includes('application/json')) {

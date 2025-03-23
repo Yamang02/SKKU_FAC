@@ -58,6 +58,8 @@ export const createRouters = (container) => {
     router.get('/user/profile', userController.getProfilePage.bind(userController));
     router.get('/user/profile/edit', userController.getProfileEditPage.bind(userController));
     router.post('/user/profile/edit', userController.updateProfile.bind(userController));
+    router.get('/user/forgot-password', userController.getForgotPasswordPage.bind(userController));
+    router.post('/user/forgot-password', userController.handleForgotPassword.bind(userController));
 
     // 관리자 라우터
     const adminController = container.get('adminController');
