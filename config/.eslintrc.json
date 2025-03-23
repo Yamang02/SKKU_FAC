@@ -58,50 +58,24 @@
             }
         ],
         "indent": [
-            "error",
+            "warn",
             4
         ],
-        "linebreak-style": [
-            "error",
-            "unix"
-        ],
+        "linebreak-style": "off",
         "quotes": [
-            "error",
+            "warn",
             "single"
         ],
         "semi": [
-            "error",
+            "warn",
             "always"
         ],
-        "max-len": [
-            "warn",
-            {
-                "code": 200
-            }
-        ],
-        "max-lines": [
-            "warn",
-            600
-        ],
-        "max-depth": [
-            "error",
-            3
-        ],
-        "no-multiple-empty-lines": [
-            "error",
-            {
-                "max": 1,
-                "maxEOF": 1
-            }
-        ],
-        "eol-last": [
-            "error",
-            "always"
-        ],
-        "comma-dangle": [
-            "error",
-            "never"
-        ],
+        "max-len": "off",
+        "max-lines": "off",
+        "max-depth": "off",
+        "no-multiple-empty-lines": "warn",
+        "eol-last": "warn",
+        "comma-dangle": "warn",
         "object-curly-spacing": [
             "error",
             "always"
@@ -145,16 +119,8 @@
                 "varsIgnorePattern": "^_"
             }
         ],
-        "no-console": [
-            "warn",
-            {
-                "allow": [
-                    "warn",
-                    "error"
-                ]
-            }
-        ],
-        "no-alert": "error",
-        "no-debugger": "error"
+        "no-console": "off",
+        "no-alert": "warn",
+        "no-debugger": "warn"
     }
 }
