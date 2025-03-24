@@ -1,4 +1,5 @@
-import _viewResolver from '../../presentation/view/ViewResolver.js';
+import ViewResolver from '../../presentation/view/ViewResolver.js';
+import { ViewPath } from '../../presentation/view/ViewPath.js';
 import _ExhibitionUseCase from '../../application/exhibition/ExhibitionUseCase.js';
 
 /**
@@ -21,12 +22,12 @@ export default class ExhibitionController {
     async getExhibitionList(req, res) {
         try {
             const exhibitions = await this.exhibitionUseCase.findAll();
-            res.render('exhibition/ExhibitionList', {
+            ViewResolver.render(res, ViewPath.EXHIBITION.LIST, {
                 exhibitions,
                 title: '전시회 목록'
             });
         } catch (error) {
-            res.status(500).render('error', { error });
+            ViewResolver.renderError(res, error);
         }
     }
 
@@ -39,11 +40,13 @@ export default class ExhibitionController {
         try {
             const exhibition = await this.exhibitionUseCase.findById(req.params.id);
             if (!exhibition) {
-                return res.status(404).render('error', { error: '전시회를 찾을 수 없습니다.' });
+                return ViewResolver.render(res, ViewPath.ERROR.ERROR, {
+                    error: '전시회를 찾을 수 없습니다.'
+                });
             }
-            res.render('exhibition/detail', { exhibition });
+            ViewResolver.render(res, ViewPath.EXHIBITION.DETAIL, { exhibition });
         } catch (error) {
-            res.status(500).render('error', { error });
+            ViewResolver.renderError(res, error);
         }
     }
 
@@ -53,7 +56,7 @@ export default class ExhibitionController {
      * @param {Object} res - Express 응답 객체
      */
     async getCreateExhibitionForm(req, res) {
-        res.render('exhibition/create');
+        ViewResolver.render(res, ViewPath.EXHIBITION.CREATE);
     }
 
     /**
@@ -66,7 +69,7 @@ export default class ExhibitionController {
             await this.exhibitionUseCase.create(req.body);
             res.redirect('/exhibitions');
         } catch (error) {
-            res.status(400).render('exhibition/create', { error });
+            ViewResolver.render(res, ViewPath.EXHIBITION.CREATE, { error });
         }
     }
 
@@ -79,11 +82,13 @@ export default class ExhibitionController {
         try {
             const exhibition = await this.exhibitionUseCase.findById(req.params.id);
             if (!exhibition) {
-                return res.status(404).render('error', { error: '전시회를 찾을 수 없습니다.' });
+                return ViewResolver.render(res, ViewPath.ERROR.ERROR, {
+                    error: '전시회를 찾을 수 없습니다.'
+                });
             }
-            res.render('exhibition/edit', { exhibition });
+            ViewResolver.render(res, ViewPath.EXHIBITION.EDIT, { exhibition });
         } catch (error) {
-            res.status(500).render('error', { error });
+            ViewResolver.renderError(res, error);
         }
     }
 
@@ -97,7 +102,7 @@ export default class ExhibitionController {
             await this.exhibitionUseCase.update(req.params.id, req.body);
             res.redirect('/exhibitions');
         } catch (error) {
-            res.status(400).render('exhibition/edit', { error });
+            ViewResolver.render(res, ViewPath.EXHIBITION.EDIT, { error });
         }
     }
 
@@ -111,7 +116,7 @@ export default class ExhibitionController {
             await this.exhibitionUseCase.delete(req.params.id);
             res.redirect('/exhibitions');
         } catch (error) {
-            res.status(500).render('error', { error });
+            ViewResolver.renderError(res, error);
         }
     }
 }

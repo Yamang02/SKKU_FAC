@@ -1,62 +1,58 @@
 /* 관리자 레이아웃 스타일 */
 :root {
-    --sidebar-width: 240px;
-    --header-height: 60px;
+    --sidebar-width: 290px;
+    --header-height: 80px;
+    --content-max-width: 1400px;
+    --content-padding: 32px;
 }
 
-.admin-layout {
+.admin-container {
     display: flex;
     min-height: 100vh;
-    position: relative;
+    background-color: var(--admin-color-background);
 }
 
-.admin-sidebar {
-    width: var(--sidebar-width);
-    min-width: var(--sidebar-width);
-    background-color: var(--admin-color-sidebar);
-    border-right: 1px solid var(--admin-color-border);
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 100;
-}
-
-.admin-wrapper {
+.admin-content {
     flex: 1;
-    margin-left: var(--sidebar-width);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-}
-
-.admin-header {
-    height: var(--header-height);
-    background-color: var(--admin-color-white);
-    border-bottom: 1px solid var(--admin-color-border);
-    position: sticky;
-    top: 0;
-    z-index: 99;
+    margin-left: var(--sidebar-width);
+    padding: var(--content-padding) calc((100% - var(--content-max-width)) / 2);
 }
 
 .admin-main {
     flex: 1;
-    background-color: var(--admin-color-background);
-    min-height: calc(100vh - var(--header-height));
+    width: 100%;
+    max-width: calc(var(--content-max-width) - var(--content-padding) * 2);
+    margin: 24px auto 0;
+    padding: var(--content-padding);
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 /* 반응형 디자인 */
+@media (max-width: 1600px) {
+    :root {
+        --content-max-width: 1200px;
+        --content-padding: 24px;
+    }
+}
+
 @media (max-width: 768px) {
-    .admin-sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
+    :root {
+        --content-max-width: 100%;
+        --content-padding: 16px;
     }
 
-    .admin-sidebar.show {
-        transform: translateX(0);
-    }
-
-    .admin-wrapper {
+    .admin-content {
         margin-left: 0;
+        padding: var(--content-padding);
+    }
+
+    .admin-main {
+        max-width: 100%;
+        margin-top: 16px;
     }
 }

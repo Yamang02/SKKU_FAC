@@ -5,28 +5,28 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>
-            <%= title %> - 관리자
+            <%= title %> - SKKU Art Gallery
         </title>
         <!-- Font Awesome -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-        <!-- 관리자 페이지 스타일 -->
-        <link rel="stylesheet" href="/css/admin/common/adminReset.css">
-        <link rel="stylesheet" href="/css/admin/adminStyle.css">
-        <% if (currentPage==='dashboard' ) { %>
-            <link rel="stylesheet" href="/css/admin/AdminDashboard.css">
-            <% } %>
-                <% if (currentPage==='users' ) { %>
-                    <link rel="stylesheet" href="/css/admin/management/user/UserManagementList.css">
-                    <% } %>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <!-- 기본 관리자 스타일 -->
+        <link rel="stylesheet" href="<%= CssPath.ADMIN.STYLE %>">
+        <!-- 페이지별 스타일 -->
+        <% const cssFiles=getPageCssFiles(currentPage); %>
+            <% cssFiles.forEach(cssFile=> { %>
+                <link rel="stylesheet" href="<%= cssFile %>">
+                <% }); %>
     </head>
 
     <body>
         <div class="admin-container">
-            <%- include('../component/Sidebar.ejs', { currentPage }) %>
-                <main class="admin-main">
-                    <%- include('../component/Header.ejs', { title, breadcrumb }) %>
-                        <%- include(content) %>
-                </main>
+            <%- include('AdminSidebar') %>
+                <div class="admin-content">
+                    <%- include('AdminHeader') %>
+                        <main class="admin-main">
+                            <%- include(content) %>
+                        </main>
+                </div>
         </div>
     </body>
 

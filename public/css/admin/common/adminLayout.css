@@ -1,0 +1,51 @@
+/* 기본 레이아웃 구조 */
+.admin-container {
+    display: flex !important;
+    min-height: 100vh !important;
+    background-color: var(--admin-color-background);
+}
+
+.admin-sidebar {
+    width: var(--admin-sidebar-width);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: var(--admin-color-sidebar);
+    border-right: 1px solid var(--admin-color-border);
+    z-index: 100;
+}
+
+.admin-content {
+    flex: 1 !important;
+    margin-left: var(--admin-sidebar-width);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+main.admin-main {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px;
+    height: 100%;
+    background-color: var(--admin-color-white);
+    border-radius: var(--admin-border-radius-lg);
+    box-shadow: var(--admin-shadow-sm);
+    padding: 24px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .admin-sidebar.show {
+        transform: translateX(0);
+    }
+
+    .admin-content {
+        margin-left: 0;
+    }
+}

@@ -1,10 +1,6 @@
 import express from 'express';
 import { isAdmin } from '../middleware/auth.js';
 
-/**
- * 라우터 인덱스
- * 모든 라우터를 중앙에서 관리하고 등록합니다.
- */
 export const createRouters = (container) => {
     const router = express.Router();
 

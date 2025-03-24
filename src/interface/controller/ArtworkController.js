@@ -2,7 +2,8 @@
  * 작품 컨트롤러
  * 작품 관련 HTTP 요청을 처리합니다.
  */
-import viewResolver from '../../presentation/view/ViewResolver.js';
+import ViewResolver from '../../presentation/view/ViewResolver.js';
+import { ViewPath } from '../../presentation/view/ViewPath.js';
 
 export default class ArtworkController {
     constructor(artworkUseCase) {
@@ -15,7 +16,7 @@ export default class ArtworkController {
     async getArtworkList(req, res) {
         try {
             const { artworks, exhibitions, pagination } = await this.artworkUseCase.searchArtworks(req.query);
-            viewResolver.render(res, 'artwork/ArtworkList', {
+            ViewResolver.render(res, ViewPath.ARTWORK.LIST, {
                 title: '작품 목록',
                 artworks: artworks || [],
                 exhibitions: exhibitions || [],
@@ -26,7 +27,7 @@ export default class ArtworkController {
                 pagination
             });
         } catch (error) {
-            viewResolver.render(res, 'common/error', {
+            ViewResolver.render(res, ViewPath.ERROR.ERROR, {
                 title: '오류',
                 error
             });
@@ -40,7 +41,7 @@ export default class ArtworkController {
         try {
             const artwork = await this.artworkUseCase.getArtworkById(req.params.id);
             if (!artwork) {
-                return viewResolver.render(res, 'common/error', {
+                return ViewResolver.render(res, ViewPath.ERROR.ERROR, {
                     title: '오류',
                     error: { message: '작품을 찾을 수 없습니다.' }
                 });
@@ -52,7 +53,7 @@ export default class ArtworkController {
             // 관련 작품 데이터 가져오기
             const relatedArtworks = await this.artworkUseCase.getRelatedArtworks(req.params.id);
 
-            viewResolver.render(res, 'artwork/ArtworkDetail', {
+            ViewResolver.render(res, ViewPath.ARTWORK.DETAIL, {
                 title: artwork.title,
                 artwork,
                 comments,
@@ -60,7 +61,7 @@ export default class ArtworkController {
                 relatedArtworks
             });
         } catch (error) {
-            viewResolver.render(res, 'common/error', {
+            ViewResolver.render(res, ViewPath.ERROR.ERROR, {
                 title: '오류',
                 error
             });

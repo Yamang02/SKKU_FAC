@@ -1,3 +1,6 @@
+import ViewResolver from '../../presentation/view/ViewResolver.js';
+import { ViewPath } from '../../presentation/view/ViewPath.js';
+
 class NoticeController {
     /**
      * NoticeController 생성자
@@ -32,7 +35,7 @@ class NoticeController {
                 return res.json(result);
             }
 
-            res.render('notice/NoticeList', {
+            ViewResolver.render(res, ViewPath.NOTICE.LIST, {
                 title: '공지사항',
                 searchType: req.query.searchType || 'all',
                 keyword: req.query.keyword || '',
@@ -42,7 +45,7 @@ class NoticeController {
             if (req.xhr || req.headers.accept.includes('application/json')) {
                 return res.status(500).json({ error: error.message });
             }
-            res.render('common/error', {
+            ViewResolver.render(res, ViewPath.ERROR.ERROR, {
                 title: '에러',
                 message: error.message
             });
@@ -62,7 +65,7 @@ class NoticeController {
                 limit: 10
             });
 
-            res.render('notice/NoticeDetail', {
+            ViewResolver.render(res, ViewPath.NOTICE.DETAIL, {
                 title: notice.title,
                 notice,
                 comments,
@@ -71,7 +74,7 @@ class NoticeController {
             });
         } catch (error) {
             console.error('Error in getNoticeDetail:', error);
-            res.render('common/error', {
+            ViewResolver.render(res, ViewPath.ERROR.ERROR, {
                 title: '오류가 발생했습니다',
                 message: error.message || '공지사항을 찾을 수 없습니다.'
             });
@@ -97,7 +100,7 @@ class NoticeController {
                 return res.status(400).json({ error: error.message });
             }
 
-            res.render('notice/NoticeForm', {
+            ViewResolver.render(res, ViewPath.NOTICE.CREATE, {
                 title: '공지사항 작성',
                 error: error.message,
                 formData: req.body
@@ -125,7 +128,7 @@ class NoticeController {
                 return res.status(400).json({ error: error.message });
             }
 
-            res.render('notice/NoticeForm', {
+            ViewResolver.render(res, ViewPath.NOTICE.EDIT, {
                 title: '공지사항 수정',
                 error: error.message,
                 formData: { ...req.body, id: req.params.id }
@@ -153,7 +156,7 @@ class NoticeController {
                 return res.status(400).json({ error: error.message });
             }
 
-            res.render('common/error', {
+            ViewResolver.render(res, ViewPath.ERROR.ERROR, {
                 title: '에러',
                 message: error.message
             });
