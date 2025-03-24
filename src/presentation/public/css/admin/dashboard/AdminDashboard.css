@@ -9,20 +9,11 @@
 }
 
 /* 타이틀 스타일 */
-.admin-dashboard__title,
-.admin-dashboard__recent-title,
-.admin-dashboard__notices-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #1a202c;
-    margin: 0 0 20px 0;
-    padding-left: 12px;
-    border-left: 4px solid var(--admin-color-primary);
-    line-height: 1.4;
-}
-
 .admin-dashboard__title {
     font-size: 30px;
+    font-weight: 600;
+    color: #1a202c;
+    padding-left: 12px;
     border-left: 4px solid var(--admin-color-primary-dark);
     margin: 12px 0 10px 0;
 }

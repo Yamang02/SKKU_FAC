@@ -1,96 +1,70 @@
 <!-- 페이지 헤더 -->
-<div class="admin-page-header">
-    <div class="admin-page-title">
-        <h1>
-            <%= title %>
-        </h1>
-    </div>
-    <div class="admin-page-actions">
-        <button type="button" class="admin-button admin-button--secondary" onclick="history.back()">
-            <i class="fas fa-arrow-left"></i> 목록으로
-        </button>
-    </div>
-</div>
-
-<div class="content-section">
-    <div class="section-header">
-        <h2>회원 상세 정보</h2>
-    </div>
-    <div class="section-content">
-        <form id="userForm" class="form-grid">
-            <!-- 기본 정보 -->
-            <div class="form-group">
-                <label>사용자 ID</label>
-                <input type="text" value="<%= user.username %>" readonly>
-            </div>
-            <div class="form-group">
-                <label>이름</label>
-                <input type="text" value="<%= user.name %>" readonly>
-            </div>
-            <div class="form-group">
-                <label>이메일</label>
-                <input type="email" value="<%= user.email %>" readonly>
-            </div>
-            <div class="form-group">
-                <label>소속</label>
-                <input type="text" value="<%= user.department %>" readonly>
-            </div>
-            <div class="form-group">
-                <label>학번</label>
-                <input type="text" value="<%= user.studentId || '-' %>" readonly>
-            </div>
-            <div class="form-group">
-                <label>권한</label>
-                <select disabled>
-                    <option value="ADMIN" <%=user.role==='ADMIN' ? 'selected' : '' %>>관리자</option>
-                    <option value="ARTIST" <%=user.role==='ARTIST' ? 'selected' : '' %>>작가</option>
-                    <option value="USER" <%=user.role==='USER' ? 'selected' : '' %>>일반 사용자</option>
-                    <option value="GUEST" <%=user.role==='GUEST' ? 'selected' : '' %>>게스트</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>상태</label>
-                <select disabled>
-                    <option value="ACTIVE" <%=user.status==='ACTIVE' ? 'selected' : '' %>>활성</option>
-                    <option value="INACTIVE" <%=user.status==='INACTIVE' ? 'selected' : '' %>>비활성</option>
-                    <option value="BLOCKED" <%=user.status==='BLOCKED' ? 'selected' : '' %>>차단</option>
-                </select>
-            </div>
-        </form>
-
-        <!-- 작가 정보 (role이 ARTIST인 경우에만 표시) -->
-        <% if (user.role==='ARTIST' && user.artistInfo) { %>
-            <div class="artist-info">
-                <h3>작가 정보</h3>
+<div class="admin-user-detail">
+    <div class="content-section">
+        <h2 class="admin-title">회원상세</h2>
+        <div class="section-content">
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>작가 소개</label>
-                    <textarea readonly><%= user.artistInfo.description %></textarea>
+                    <label>ID</label>
+                    <input type="text" value="<%= user.username %>" readonly>
                 </div>
                 <div class="form-group">
-                    <label>주요 작품</label>
-                    <textarea readonly><%= user.artistInfo.mainWorks %></textarea>
+                    <label>이름</label>
+                    <input type="text" value="<%= user.name %>" readonly>
+                </div>
+                <div class="form-group">
+                    <label>학번</label>
+                    <input type="text" value="<%= user.studentId || '-' %>" readonly>
+                </div>
+                <div class="form-group">
+                    <label>이메일</label>
+                    <input type="email" value="<%= user.email %>" readonly>
+                </div>
+                <div class="form-group">
+                    <label>역할</label>
+                    <select disabled>
+                        <option value="ADMIN" <%=user.role==='ADMIN' ? 'selected' : '' %>>관리자</option>
+                        <option value="ARTIST" <%=user.role==='ARTIST' ? 'selected' : '' %>>작가</option>
+                        <option value="CLUB_MEMBER" <%=user.role==='CLUB_MEMBER' ? 'selected' : '' %>>동아리 회원</option>
+                        <option value="GUEST" <%=user.role==='GUEST' ? 'selected' : '' %>>게스트</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>상태</label>
+                    <select disabled>
+                        <option value="ACTIVE" <%=user.status==='ACTIVE' ? 'selected' : '' %>>활성</option>
+                        <option value="INACTIVE" <%=user.status==='INACTIVE' ? 'selected' : '' %>>비활성</option>
+                        <option value="SUSPENDED" <%=user.status==='SUSPENDED' ? 'selected' : '' %>>정지</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>가입일</label>
+                    <input type="text" value="<%= new Date(user.createdAt).toLocaleDateString() %>" readonly>
+                </div>
+                <div class="form-group">
+                    <label>수정일</label>
+                    <input type="text" value="<%= new Date(user.updatedAt).toLocaleDateString() %>" readonly>
                 </div>
             </div>
-            <% } %>
-
-                <!-- 계정 관리 -->
-                <div class="action-buttons">
-                    <button type="button" class="btn btn-primary" onclick="handleEdit()">
-                        수정
-                    </button>
-                    <button type="button" class="btn btn-warning" onclick="handleResetPassword()">
-                        비밀번호 초기화
-                    </button>
-                    <% if (user.status==='ACTIVE' ) { %>
-                        <button type="button" class="btn btn-danger" onclick="handleBlockUser()">
-                            계정 차단
-                        </button>
-                        <% } else if (user.status==='BLOCKED' ) { %>
-                            <button type="button" class="btn btn-success" onclick="handleUnblockUser()">
-                                차단 해제
-                            </button>
-                            <% } %>
-                </div>
+        </div>
+        <div class="section-footer">
+            <div class="admin-button-group">
+                <button class="admin-button admin-button--secondary" onclick="handleEdit()">
+                    <i class="fas fa-edit"></i>
+                    수정
+                </button>
+                <button class="admin-button admin-button--danger" onclick="handleBlockUser()">
+                    <i class="fas fa-ban"></i>
+                    정지
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="admin-back-button-container">
+        <a href="/admin/management/user" class="admin-button admin-button--secondary">
+            <i class="fas fa-arrow-left"></i>
+            목록으로
+        </a>
     </div>
 </div>
 

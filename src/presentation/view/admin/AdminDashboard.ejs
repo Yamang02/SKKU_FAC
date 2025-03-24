@@ -27,7 +27,7 @@
         </div>
     </div>
     <div class="admin-dashboard__recent adminCard">
-        <h2 class="admin-dashboard__recent-title adminCardTitle">최근 활동</h2>
+        <h2 class="admin-title">최근 활동</h2>
         <div class="admin-dashboard__activities">
             <% recentActivities.forEach(activity=> { %>
                 <div class="admin-dashboard__activity">
@@ -43,7 +43,7 @@
         </div>
     </div>
     <div class="admin-dashboard__notices adminCard">
-        <h2 class="admin-dashboard__notices-title adminCardTitle">최근 공지사항</h2>
+        <h2 class="admin-title">최근 공지사항</h2>
         <div class="admin-dashboard__notices-list">
             <% recentNotices.forEach(notice=> { %>
                 <div class="admin-dashboard__notice <%= notice.isImportant ? 'adminStatusInactive' : '' %>">

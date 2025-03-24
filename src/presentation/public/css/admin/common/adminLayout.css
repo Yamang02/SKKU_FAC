@@ -26,9 +26,9 @@
     width: 100%;
     max-width: calc(var(--content-max-width) - var(--content-padding) * 2);
     margin: 24px auto 0;
-    background-color: white;
+    background-color: var(--admin-color-background);
     border-radius: 16px;
-
+    min-height: calc(100vh - 60px); /* 헤더 높이(60px)를 뺀 나머지 공간 */
 }
 
 /* 반응형 디자인 */
@@ -46,6 +46,8 @@
     }
 
     .admin-content {
+        height: 100%;
+        min-height: 100%;
         margin-left: 0;
         padding: var(--content-padding);
     }
