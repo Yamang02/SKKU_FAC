@@ -3,6 +3,7 @@
     position: sticky;
     top: 0;
     width: 100%;
+    min-width: calc(100% - var(--sidebar-width));
     max-width: calc(var(--content-max-width) - var(--content-padding) * 2);
     height: var(--header-height);
     margin: 0 auto;

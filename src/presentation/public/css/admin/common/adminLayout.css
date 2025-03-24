@@ -26,10 +26,9 @@
     width: 100%;
     max-width: calc(var(--content-max-width) - var(--content-padding) * 2);
     margin: 24px auto 0;
-    padding: var(--content-padding);
     background-color: white;
     border-radius: 16px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
 }
 
 /* 반응형 디자인 */
