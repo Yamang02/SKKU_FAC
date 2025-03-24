@@ -6,7 +6,17 @@ export const ViewPath = {
         DASHBOARD: 'admin/AdminDashboard.ejs',
         MANAGEMENT: {
             USER: {
-                LIST: 'admin/management/user/UserManagementList.ejs'
+                LIST: 'admin/management/user/UserManagementList.ejs',
+                DETAIL: 'admin/management/user/UserManagementDetail.ejs'
+            },
+            EXHIBITION: {
+                LIST: 'admin/management/exhibition/ExhibitionManagementList.ejs'
+            },
+            ARTWORK: {
+                LIST: 'admin/management/artwork/ArtworkManagementList.ejs'
+            },
+            NOTICE: {
+                LIST: 'admin/management/notice/NoticeManagementList.ejs'
             }
         }
     },

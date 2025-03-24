@@ -1,0 +1,162 @@
+<!-- 페이지 헤더 -->
+<div class="page-header">
+    <div class="page-title">
+        <h1>
+            <%= title %>
+        </h1>
+    </div>
+    <div class="page-actions">
+        <button type="button" class="btn btn-secondary" onclick="history.back()">
+            <i class="fas fa-arrow-left"></i> 목록으로
+        </button>
+    </div>
+</div>
+
+<!-- 사용자 정보 -->
+<div class="content-section">
+    <div class="section-header">
+        <h2>기본 정보</h2>
+        <div class="section-actions">
+            <button type="button" class="btn btn-primary" onclick="handleEdit()">
+                <i class="fas fa-edit"></i> 수정
+            </button>
+        </div>
+    </div>
+    <div class="section-content">
+        <form id="userForm" class="form-grid">
+            <!-- 기본 정보 -->
+            <div class="form-group">
+                <label>사용자 ID</label>
+                <input type="text" class="form-control" value="<%= user.username %>" readonly>
+            </div>
+            <div class="form-group">
+                <label>이름</label>
+                <input type="text" class="form-control" value="<%= user.name %>" readonly>
+            </div>
+            <div class="form-group">
+                <label>이메일</label>
+                <input type="email" class="form-control" value="<%= user.email %>" readonly>
+            </div>
+            <div class="form-group">
+                <label>소속</label>
+                <input type="text" class="form-control" value="<%= user.department %>" readonly>
+            </div>
+            <div class="form-group">
+                <label>학번</label>
+                <input type="text" class="form-control" value="<%= user.studentId || '-' %>" readonly>
+            </div>
+            <div class="form-group">
+                <label>권한</label>
+                <select class="form-control" disabled>
+                    <option value="ADMIN" <%=user.role==='ADMIN' ? 'selected' : '' %>>관리자</option>
+                    <option value="ARTIST" <%=user.role==='ARTIST' ? 'selected' : '' %>>작가</option>
+                    <option value="USER" <%=user.role==='USER' ? 'selected' : '' %>>일반 사용자</option>
+                    <option value="GUEST" <%=user.role==='GUEST' ? 'selected' : '' %>>게스트</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>상태</label>
+                <select class="form-control" disabled>
+                    <option value="ACTIVE" <%=user.status==='ACTIVE' ? 'selected' : '' %>>활성</option>
+                    <option value="INACTIVE" <%=user.status==='INACTIVE' ? 'selected' : '' %>>비활성</option>
+                    <option value="BLOCKED" <%=user.status==='BLOCKED' ? 'selected' : '' %>>차단</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 작가 정보 (role이 ARTIST인 경우에만 표시) -->
+<% if (user.role==='ARTIST' && user.artistInfo) { %>
+    <div class="content-section artist-info">
+        <div class="section-header">
+            <h2>작가 정보</h2>
+        </div>
+        <div class="section-content">
+            <form class="form-grid">
+                <div class="form-group">
+                    <label>작가 소개</label>
+                    <textarea class="form-control" rows="4" readonly><%= user.artistInfo.description %></textarea>
+                </div>
+                <div class="form-group">
+                    <label>주요 작품</label>
+                    <textarea class="form-control" rows="4" readonly><%= user.artistInfo.mainWorks %></textarea>
+                </div>
+            </form>
+        </div>
+    </div>
+    <% } %>
+
+        <!-- 계정 관리 -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2>계정 관리</h2>
+            </div>
+            <div class="section-content">
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-warning" onclick="handleResetPassword()">
+                        <i class="fas fa-key"></i> 비밀번호 초기화
+                    </button>
+                    <% if (user.status==='ACTIVE' ) { %>
+                        <button type="button" class="btn btn-danger" onclick="handleBlockUser()">
+                            <i class="fas fa-ban"></i> 계정 차단
+                        </button>
+                        <% } else if (user.status==='BLOCKED' ) { %>
+                            <button type="button" class="btn btn-success" onclick="handleUnblockUser()">
+                                <i class="fas fa-check"></i> 차단 해제
+                            </button>
+                            <% } %>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function handleEdit() {
+                // 수정 모드로 전환
+                const form = document.getElementById('userForm');
+                const inputs = form.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (input.type !== 'text' || input.value !== user.username) {
+                        input.readOnly = false;
+                        input.disabled = false;
+                    }
+                });
+
+                // 수정/취소 버튼으로 변경
+                const actionButtons = `
+        <button type="button" class="btn btn-success" onclick="handleSave()">
+            <i class="fas fa-save"></i> 저장
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="handleCancel()">
+            <i class="fas fa-times"></i> 취소
+        </button>
+    `;
+                document.querySelector('.section-actions').innerHTML = actionButtons;
+            }
+
+            function handleSave() {
+                // TODO: 저장 로직 구현
+            }
+
+            function handleCancel() {
+                location.reload();
+            }
+
+            function handleResetPassword() {
+                if (confirm('해당 사용자의 비밀번호를 초기화하시겠습니까?')) {
+                    // TODO: 비밀번호 초기화 로직 구현
+                }
+            }
+
+            function handleBlockUser() {
+                if (confirm('해당 사용자의 계정을 차단하시겠습니까?')) {
+                    // TODO: 계정 차단 로직 구현
+                }
+            }
+
+            function handleUnblockUser() {
+                if (confirm('해당 사용자의 계정 차단을 해제하시겠습니까?')) {
+                    // TODO: 차단 해제 로직 구현
+                }
+            }
+        </script>

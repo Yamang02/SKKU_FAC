@@ -1,11 +1,13 @@
 import ViewResolver from '../../presentation/view/ViewResolver.js';
 import { ViewPath } from '../../presentation/view/ViewPath.js';
+import users from '../../infrastructure/data/user.js';
 
 export default class AdminController {
     constructor() {
         // 메서드 바인딩
         this.getDashboard = this.getDashboard.bind(this);
         this.getUserManagement = this.getUserManagement.bind(this);
+        this.getUserDetail = this.getUserDetail.bind(this);
         this.getExhibitionManagement = this.getExhibitionManagement.bind(this);
         this.getArtworkManagement = this.getArtworkManagement.bind(this);
         this.getNoticeManagement = this.getNoticeManagement.bind(this);
@@ -72,10 +74,31 @@ export default class AdminController {
             const mockData = {
                 title: '회원 관리',
                 breadcrumb: '회원 관리',
-                currentPage: 'users'
+                currentPage: 'users',
+                users: users
             };
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.LIST, mockData);
+        } catch (error) {
+            ViewResolver.renderError(res, error);
+        }
+    }
+
+    async getUserDetail(req, res) {
+        try {
+            const userId = parseInt(req.params.id);
+            const user = users.find(u => u.id === userId);
+
+            if (!user) {
+                return res.status(404).send('사용자를 찾을 수 없습니다.');
+            }
+
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.DETAIL, {
+                title: '사용자 상세 정보',
+                breadcrumb: '회원 관리 > 상세',
+                currentPage: 'users',
+                user: user
+            });
         } catch (error) {
             ViewResolver.renderError(res, error);
         }
@@ -89,7 +112,7 @@ export default class AdminController {
                 currentPage: 'exhibitions'
             };
 
-            ViewResolver.render(res, ViewPath.ADMIN.EXHIBITION.LIST, mockData);
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.LIST, mockData);
         } catch (error) {
             ViewResolver.renderError(res, error);
         }
@@ -103,7 +126,7 @@ export default class AdminController {
                 currentPage: 'artworks'
             };
 
-            ViewResolver.render(res, ViewPath.ADMIN.ARTWORK.LIST, mockData);
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.LIST, mockData);
         } catch (error) {
             ViewResolver.renderError(res, error);
         }
@@ -117,7 +140,7 @@ export default class AdminController {
                 currentPage: 'notices'
             };
 
-            ViewResolver.render(res, ViewPath.ADMIN.NOTICE.LIST, mockData);
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.LIST, mockData);
         } catch (error) {
             ViewResolver.renderError(res, error);
         }

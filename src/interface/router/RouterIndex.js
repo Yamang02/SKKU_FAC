@@ -61,6 +61,7 @@ export const createRouters = (container) => {
     const adminController = container.get('adminController');
     router.get(['/admin', '/admin/dashboard'], isAdmin, adminController.getDashboard.bind(adminController));
     router.get(['/admin/management/user', '/admin/management/user/list'], isAdmin, adminController.getUserManagement.bind(adminController));
+    router.get('/admin/management/user/:id', isAdmin, adminController.getUserDetail.bind(adminController));
     router.get('/admin/management/exhibition', isAdmin, adminController.getExhibitionManagement.bind(adminController));
     router.get('/admin/management/artwork', isAdmin, adminController.getArtworkManagement.bind(adminController));
     router.get('/admin/management/notice', isAdmin, adminController.getNoticeManagement.bind(adminController));

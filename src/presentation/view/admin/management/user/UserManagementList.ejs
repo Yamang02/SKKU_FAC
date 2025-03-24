@@ -32,53 +32,63 @@
                     <th>ID</th>
                     <th>역할</th>
                     <th>이름</th>
-                    <th>학과</th>
+                    <th>학번</th>
                     <th>이메일</th>
                     <th>가입일</th>
-                    <th>최근 접속일</th>
+                    <th>수정일</th>
                     <th>상태</th>
                     <th>관리</th>
                 </tr>
             </thead>
             <tbody>
-                <% for(let i=0; i < 10; i++) { %>
+                <% users.forEach(user=> { %>
                     <tr>
                         <td>
                             <input type="checkbox" class="admin-checkbox">
                         </td>
-                        <td>user<%= i + 1 %>
+                        <td>
+                            <%= user.username %>
+                        </td>
+                        <td>
+                            <span class="admin-role-badge admin-role-badge--<%= user.role.toLowerCase() %>">
+                                <%= user.role==='ADMIN' ? '관리자' : user.role==='ARTIST' ? '작가' :
+                                    user.role==='CLUB_MEMBER' ? '동아리 회원' : '게스트' %>
+                            </span>
+                        </td>
+                        <td>
+                            <%= user.name %>
+                        </td>
+                        <td>
+                            <%= user.studentId || '-' %>
+                        </td>
+                        <td>
+                            <%= user.email %>
+                        </td>
+                        <td>
+                            <%= new Date(user.createdAt).toLocaleDateString() %>
+                        </td>
+                        <td>
+                            <%= new Date(user.updatedAt).toLocaleDateString() %>
                         </td>
                         <td>
                             <span
-                                class="admin-role-badge admin-role-badge--<%= i === 0 ? 'admin' : (i === 1 ? 'manager' : 'user') %>">
-                                <%= i===0 ? '관리자' : (i===1 ? '매니저' : '일반회원' ) %>
+                                class="admin-status-badge admin-status-badge--<%= user.status ? user.status.toLowerCase() : 'active' %>">
+                                <%= user.status || 'ACTIVE' %>
                             </span>
-                        </td>
-                        <td>사용자<%= i + 1 %>
-                        </td>
-                        <td>
-                            <%= ['소프트웨어학과', '컴퓨터공학과' , '인공지능학과' , '전자전기공학부' , '기계공학부' ][i % 5] %>
-                        </td>
-                        <td>user<%= i + 1 %>@example.com</td>
-                        <td>2024-03-<%= 10 + i %>
-                        </td>
-                        <td>2024-03-<%= 18 + i %>
-                        </td>
-                        <td>
-                            <span class="admin-status-badge admin-status-badge--active">활성</span>
                         </td>
                         <td>
                             <div class="admin-button-group">
-                                <button class="admin-button admin-button--secondary">
+                                <a href="/admin/management/user/<%= user.id %>"
+                                    class="admin-button admin-button--secondary">
                                     <i class="fas fa-edit"></i>
-                                </button>
+                                </a>
                                 <button class="admin-button admin-button--danger">
                                     <i class="fas fa-ban"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
-                    <% } %>
+                    <% }); %>
             </tbody>
         </table>
     </div>

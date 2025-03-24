@@ -3,7 +3,8 @@ export const CssPath = {
         STYLE: '/css/admin/AdminStyle.css',
         DASHBOARD: '/css/admin/AdminDashboard.css',
         USER: {
-            LIST: '/css/admin/management/user/UserManagementList.css'
+            LIST: '/css/admin/management/user/UserManagementList.css',
+            DETAIL: '/css/admin/management/user/UserManagementDetail.css'
         },
         EXHIBITION: {
             LIST: '/css/admin/management/exhibition/ExhibitionManagementList.css'
@@ -29,7 +30,7 @@ export function getPageCssFiles(currentPage) {
     const cssFiles = [];
 
     // 기본 관리자 스타일은 항상 포함
-    cssFiles.push(CssPath.ADMIN.LAYOUT);
+    cssFiles.push(CssPath.ADMIN.STYLE);
 
     // 페이지별 스타일 추가
     switch (currentPage) {
@@ -38,6 +39,9 @@ export function getPageCssFiles(currentPage) {
             break;
         case '/admin/users':
             cssFiles.push(CssPath.ADMIN.USER.LIST);
+            break;
+        case '/admin/management/user/:id':
+            cssFiles.push(CssPath.ADMIN.USER.DETAIL);
             break;
         case '/admin/exhibitions':
             cssFiles.push(CssPath.ADMIN.EXHIBITION.LIST);
