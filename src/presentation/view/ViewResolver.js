@@ -41,10 +41,8 @@ export default class ViewResolver {
 
     static renderError(res, error) {
         res.render(ViewPath.ERROR.ERROR, {
-            error: {
-                message: error.message || '알 수 없는 오류가 발생했습니다.',
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-            },
+            title: '오류 발생',
+            message: error.message || '알 수 없는 오류가 발생했습니다.',
             currentPage: '/error',
             getPageCssFiles,
             CssPath,
@@ -67,10 +65,7 @@ export default class ViewResolver {
         // ViewPath에서 URL 매핑
         const urlMap = {
             [ViewPath.ADMIN.DASHBOARD]: '/admin',
-            [ViewPath.ADMIN.USER.LIST]: '/admin/users',
-            [ViewPath.ADMIN.EXHIBITION.LIST]: '/admin/exhibitions',
-            [ViewPath.ADMIN.ARTWORK.LIST]: '/admin/artworks',
-            [ViewPath.ADMIN.NOTICE.LIST]: '/admin/notices',
+            [ViewPath.ADMIN.MANAGEMENT.USER.LIST]: '/admin/management/user/list',
             [ViewPath.HOME.MAIN]: '/',
             [ViewPath.EXHIBITION.LIST]: '/exhibitions',
             [ViewPath.EXHIBITION.DETAIL]: '/exhibitions',
@@ -97,7 +92,13 @@ export default class ViewResolver {
     static getRelativeContentPath(viewPath) {
         // admin/layout/AdminLayout.ejs에서 content 파일까지의 상대 경로 계산
         if (viewPath.startsWith('admin/')) {
-            return '../' + viewPath.split('/').pop();
+            const pathParts = viewPath.split('/');
+            // management 디렉토리가 포함된 경우 (회원관리 등)
+            if (pathParts.includes('management')) {
+                return '../' + pathParts.slice(1).join('/');
+            }
+            // 대시보드 등 다른 admin 페이지
+            return '../' + pathParts.pop();
         }
         return viewPath;
     }

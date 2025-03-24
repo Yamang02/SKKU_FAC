@@ -75,7 +75,7 @@ export default class AdminController {
                 currentPage: 'users'
             };
 
-            ViewResolver.render(res, ViewPath.ADMIN.USER.LIST, mockData);
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.LIST, mockData);
         } catch (error) {
             ViewResolver.renderError(res, error);
         }

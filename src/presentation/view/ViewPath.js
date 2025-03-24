@@ -3,32 +3,27 @@ export const ViewPath = {
     ADMIN: {
         ROOT: 'admin',
         LAYOUT: 'admin/layout/AdminLayout.ejs',
-        SIDEBAR: 'admin/layout/AdminSidebar.ejs',
-        HEADER: 'admin/layout/AdminHeader.ejs',
         DASHBOARD: 'admin/AdminDashboard.ejs',
-        USER: {
-            LIST: 'admin/management/user/UserManagementList.ejs'
-        },
-        EXHIBITION: {
-        },
-        ARTWORK: {
-
-        },
-        NOTICE: {
-            LIST: 'admin/notice/NoticeManagement.ejs',
+        MANAGEMENT: {
+            USER: {
+                LIST: 'admin/management/user/UserManagementList.ejs'
+            }
         }
     },
     USER: {
         LOGIN: 'user/Login.ejs',
         REGISTER: 'user/Register.ejs',
-        PROFILE: 'user/Profile.ejs'
+        PROFILE: 'user/Profile.ejs',
+        PROFILE_EDIT: 'user/ProfileEdit.ejs',
+        FORGOT_PASSWORD: 'user/ForgotPassword.ejs'
     },
     HOME: {
         MAIN: 'home/HomePage.ejs'
     },
     EXHIBITION: {
         LIST: 'exhibition/ExhibitionList.ejs',
-        DETAIL: 'exhibition/ExhibitionDetail.ejs'
+        DETAIL: 'exhibition/ExhibitionDetail.ejs',
+        DETAIL_MODAL: 'exhibition/ExhibitionDetailModal.ejs'
     },
     ARTWORK: {
         LIST: 'artwork/ArtworkList.ejs',
@@ -39,10 +34,13 @@ export const ViewPath = {
         DETAIL: 'notice/NoticeDetail.ejs'
     },
     ERROR: {
-        ERROR: 'error/Error.ejs'
+        ERROR: 'common/error.ejs'
     },
     COMMON: {
-        FOOTER: 'common/Footer.ejs',
-        HEADER: 'common/Header.ejs'
+        FOOTER: 'common/footer.ejs',
+        HEADER: 'common/header.ejs',
+        HEAD: 'common/head.ejs',
+        PAGINATION: 'common/pagination.ejs',
+        ABOUT: 'common/AboutPage.ejs'
     }
 };
