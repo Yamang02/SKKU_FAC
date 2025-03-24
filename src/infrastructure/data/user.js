@@ -63,7 +63,8 @@ const user = [
         name: '관리자',
         email: 'admin@skku.edu',
         role: UserRole.ADMIN,
-        studentId: null,  // 학번은 선택사항
+        status: UserStatus.ACTIVE,
+        studentId: null,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01')
     },
@@ -74,7 +75,8 @@ const user = [
         name: '홍길동',
         email: 'hong@skku.edu',
         role: UserRole.CLUB_MEMBER,
-        studentId: '2020123456',  // 동아리 회원의 경우 학번 입력 가능
+        status: UserStatus.ACTIVE,
+        studentId: '2020123456',
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01')
     },
@@ -85,8 +87,9 @@ const user = [
         name: '김작가',
         email: 'artist_kim@example.com',
         role: UserRole.ARTIST,
+        status: UserStatus.ACTIVE,
         studentId: null,
-        artistInfo: {  // 작가 추가 정보
+        artistInfo: {
             biography: '현대미술 작가',
             website: 'http://artist-kim.com'
         },
@@ -94,5 +97,45 @@ const user = [
         updatedAt: new Date('2024-01-02')
     }
 ];
+
+/**
+ * 사용자 데이터 접근을 위한 클래스
+ */
+export class UserDataAccess {
+    /**
+     * 모든 사용자 목록을 반환합니다.
+     * @returns {Array} 사용자 목록
+     */
+    static getAll() {
+        return user;
+    }
+
+    /**
+     * ID로 사용자를 찾습니다.
+     * @param {number} id - 사용자 ID
+     * @returns {Object|null} 사용자 객체 또는 null
+     */
+    static findById(id) {
+        return user.find(user => user.id === id) || null;
+    }
+
+    /**
+     * 역할로 사용자를 찾습니다.
+     * @param {string} role - 사용자 역할
+     * @returns {Array} 해당 역할의 사용자 목록
+     */
+    static findByRole(role) {
+        return user.filter(user => user.role === role);
+    }
+
+    /**
+     * 상태로 사용자를 찾습니다.
+     * @param {string} status - 사용자 상태
+     * @returns {Array} 해당 상태의 사용자 목록
+     */
+    static findByStatus(status) {
+        return user.filter(user => user.status === status);
+    }
+}
 
 export default user;

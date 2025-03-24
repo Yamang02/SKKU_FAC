@@ -1,6 +1,11 @@
 ---
 description: 
 globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
 alwaysApply: true
 ---
 Reference Directory Structure
@@ -26,3 +31,8 @@ Entities & Use Cases First: The core business logic should be independent of fra
 Clear Boundaries: Maintain clear domain boundaries using well-defined interfaces.
 
 Testability: Ensure components are loosely coupled and can be tested independently.
+
+Do not create files arbitrarily unless I explicitly request file creation via a prompt.
+
+Apply improvements only when I request them and minimize unintended impacts on other aspects of my project.
+

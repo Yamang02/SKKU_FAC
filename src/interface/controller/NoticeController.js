@@ -1,5 +1,5 @@
-import ViewResolver from '../../presentation/view/ViewResolver.js';
-import { ViewPath } from '../../presentation/view/ViewPath.js';
+import ViewResolver from '../../presentation/util/ViewResolver.js';
+import { ViewPath } from '../../presentation/constant/ViewPath.js';
 
 class NoticeController {
     /**
@@ -35,7 +35,8 @@ class NoticeController {
                 return res.json(result);
             }
 
-            ViewResolver.render(res, ViewPath.NOTICE.LIST, {
+            ViewResolver.render(res, ViewPath.MAIN.NOTICE.LIST, {
+                currentPage: req.path,
                 title: '공지사항',
                 searchType: req.query.searchType || 'all',
                 keyword: req.query.keyword || '',
@@ -45,10 +46,7 @@ class NoticeController {
             if (req.xhr || req.headers.accept.includes('application/json')) {
                 return res.status(500).json({ error: error.message });
             }
-            ViewResolver.render(res, ViewPath.ERROR.ERROR, {
-                title: '에러',
-                message: error.message
-            });
+            ViewResolver.renderError(res, error);
         }
     }
 
@@ -65,7 +63,8 @@ class NoticeController {
                 limit: 10
             });
 
-            ViewResolver.render(res, ViewPath.NOTICE.DETAIL, {
+            ViewResolver.render(res, ViewPath.MAIN.NOTICE.DETAIL, {
+                currentPage: req.path,
                 title: notice.title,
                 notice,
                 comments,
@@ -73,11 +72,7 @@ class NoticeController {
                 user: req.session.user || null
             });
         } catch (error) {
-            console.error('Error in getNoticeDetail:', error);
-            ViewResolver.render(res, ViewPath.ERROR.ERROR, {
-                title: '오류가 발생했습니다',
-                message: error.message || '공지사항을 찾을 수 없습니다.'
-            });
+            ViewResolver.renderError(res, error);
         }
     }
 
@@ -100,7 +95,8 @@ class NoticeController {
                 return res.status(400).json({ error: error.message });
             }
 
-            ViewResolver.render(res, ViewPath.NOTICE.CREATE, {
+            ViewResolver.render(res, ViewPath.MAIN.NOTICE.CREATE, {
+                currentPage: req.path,
                 title: '공지사항 작성',
                 error: error.message,
                 formData: req.body
@@ -128,7 +124,8 @@ class NoticeController {
                 return res.status(400).json({ error: error.message });
             }
 
-            ViewResolver.render(res, ViewPath.NOTICE.EDIT, {
+            ViewResolver.render(res, ViewPath.MAIN.NOTICE.EDIT, {
+                currentPage: req.path,
                 title: '공지사항 수정',
                 error: error.message,
                 formData: { ...req.body, id: req.params.id }
@@ -156,10 +153,7 @@ class NoticeController {
                 return res.status(400).json({ error: error.message });
             }
 
-            ViewResolver.render(res, ViewPath.ERROR.ERROR, {
-                title: '에러',
-                message: error.message
-            });
+            ViewResolver.renderError(res, error);
         }
     }
 }

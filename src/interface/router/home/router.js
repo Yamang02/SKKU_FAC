@@ -4,7 +4,7 @@ import HomeService from '../../../domain/home/service/HomeService.js';
 import NoticeService from '../../../domain/notice/service/NoticeService.js';
 import ArtworkRepository from '../../../infrastructure/repository/ArtworkRepository.js';
 import NoticeRepositoryImpl from '../../../infrastructure/repository/NoticeRepositoryImpl.js';
-import viewResolver from '../../../presentation/view/ViewResolver.js';
+import viewResolver from '../../../presentation/util/ViewResolver.js';
 
 const router = express.Router();
 

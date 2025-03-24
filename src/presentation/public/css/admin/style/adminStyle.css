@@ -1,0 +1,27 @@
+/* 기본 스타일 */
+@import url('/css/admin/common/adminReset.css');
+@import url('/css/admin/common/adminVariables.css');
+@import url('/css/admin/common/adminTypography.css');
+@import url('/css/admin/common/adminLayout.css');
+@import url('/css/admin/common/adminUtilities.css');
+@import url('/css/admin/common/adminResponsive.css');
+
+/* 컴포넌트 스타일 */
+@import url('/css/admin/common/component/adminHeader.css');
+@import url('/css/admin/common/component/adminSidebar.css');
+@import url('/css/admin/common/component/adminTable.css');
+@import url('/css/admin/common/component/adminButton.css');
+@import url('/css/admin/common/component/adminForm.css');
+@import url('/css/admin/common/component/adminAlert.css');
+@import url('/css/admin/common/component/adminPagination.css');
+@import url('/css/admin/common/component/adminModal.css');
+@import url('/css/admin/common/component/adminSearch.css');
+@import url('/css/admin/common/component/adminCard.css');
+@import url('/css/admin/common/component/adminStatus.css');
+
+/* 대시보드 스타일 */
+@import url('/css/admin/dashboard/AdminDashboard.css');
+
+/* 페이지별 스타일 */
+@import url('/css/admin/management/user/list/UserManagementList.css');
+@import url('/css/admin/management/user/detail/UserManagementDetail.css');

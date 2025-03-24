@@ -23,7 +23,7 @@ export const CssPath = {
 
 /**
  * 현재 페이지에 필요한 CSS 파일 경로들을 반환합니다.
- * @param {string} currentPage - 현재 페이지의 URL 경로
+ * @param {string} currentPage - 현재 페이지 식별자
  * @returns {string[]} CSS 파일 경로 배열
  */
 export function getPageCssFiles(currentPage) {
@@ -34,24 +34,24 @@ export function getPageCssFiles(currentPage) {
 
     // 페이지별 스타일 추가
     switch (currentPage) {
-        case '/admin':
-            cssFiles.push(CssPath.ADMIN.DASHBOARD);
-            break;
-        case '/admin/users':
-            cssFiles.push(CssPath.ADMIN.USER.LIST);
-            break;
-        case '/admin/management/user/:id':
-            cssFiles.push(CssPath.ADMIN.USER.DETAIL);
-            break;
-        case '/admin/exhibitions':
-            cssFiles.push(CssPath.ADMIN.EXHIBITION.LIST);
-            break;
-        case '/admin/artworks':
-            cssFiles.push(CssPath.ADMIN.ARTWORK.LIST);
-            break;
-        case '/admin/notices':
-            cssFiles.push(CssPath.ADMIN.NOTICE.LIST);
-            break;
+    case 'dashboard':
+        cssFiles.push(CssPath.ADMIN.DASHBOARD);
+        break;
+    case 'users':
+        cssFiles.push(CssPath.ADMIN.USER.LIST);
+        break;
+    case 'user-detail':
+        cssFiles.push(CssPath.ADMIN.USER.DETAIL);
+        break;
+    case 'exhibitions':
+        cssFiles.push(CssPath.ADMIN.EXHIBITION.LIST);
+        break;
+    case 'artworks':
+        cssFiles.push(CssPath.ADMIN.ARTWORK.LIST);
+        break;
+    case 'notices':
+        cssFiles.push(CssPath.ADMIN.NOTICE.LIST);
+        break;
     }
 
     return cssFiles;

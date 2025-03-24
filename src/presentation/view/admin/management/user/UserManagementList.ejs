@@ -1,41 +1,15 @@
-<div class="admin-user-management">
-    <!-- 필터 섹션 -->
-    <div class="admin-user-management__filters">
-        <div class="admin-user-management__filter-group">
-            <select class="admin-user-management__select">
-                <option value="">회원 상태</option>
-                <option value="active">활성</option>
-                <option value="inactive">비활성</option>
-                <option value="suspended">정지</option>
-            </select>
-            <select class="admin-user-management__select">
-                <option value="">회원 역할</option>
-                <option value="admin">관리자</option>
-                <option value="manager">매니저</option>
-                <option value="user">일반회원</option>
-            </select>
-            <button class="admin-button admin-button--primary">
-                <i class="fas fa-filter"></i>
-                필터 적용
-            </button>
-        </div>
+<div class="content-section">
+    <div class="section-header">
+        <h2>회원 관리</h2>
     </div>
-
-    <!-- 테이블 섹션 -->
-    <div class="admin-user-management__table-container">
-        <table class="admin-table">
+    <div class="section-content">
+        <table class="data-table">
             <thead>
                 <tr>
-                    <th>
-                        <input type="checkbox" class="admin-checkbox">
-                    </th>
                     <th>ID</th>
-                    <th>역할</th>
                     <th>이름</th>
-                    <th>학번</th>
                     <th>이메일</th>
-                    <th>가입일</th>
-                    <th>수정일</th>
+                    <th>역할</th>
                     <th>상태</th>
                     <th>관리</th>
                 </tr>
@@ -44,69 +18,26 @@
                 <% users.forEach(user=> { %>
                     <tr>
                         <td>
-                            <input type="checkbox" class="admin-checkbox">
-                        </td>
-                        <td>
                             <%= user.username %>
-                        </td>
-                        <td>
-                            <span class="admin-role-badge admin-role-badge--<%= user.role.toLowerCase() %>">
-                                <%= user.role==='ADMIN' ? '관리자' : user.role==='ARTIST' ? '작가' :
-                                    user.role==='CLUB_MEMBER' ? '동아리 회원' : '게스트' %>
-                            </span>
                         </td>
                         <td>
                             <%= user.name %>
                         </td>
                         <td>
-                            <%= user.studentId || '-' %>
-                        </td>
-                        <td>
                             <%= user.email %>
                         </td>
                         <td>
-                            <%= new Date(user.createdAt).toLocaleDateString() %>
+                            <%= user.role %>
                         </td>
                         <td>
-                            <%= new Date(user.updatedAt).toLocaleDateString() %>
+                            <%= user.status %>
                         </td>
                         <td>
-                            <span
-                                class="admin-status-badge admin-status-badge--<%= user.status ? user.status.toLowerCase() : 'active' %>">
-                                <%= user.status || 'ACTIVE' %>
-                            </span>
-                        </td>
-                        <td>
-                            <div class="admin-button-group">
-                                <a href="/admin/management/user/<%= user.id %>"
-                                    class="admin-button admin-button--secondary">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="admin-button admin-button--danger">
-                                    <i class="fas fa-ban"></i>
-                                </button>
-                            </div>
+                            <a href="/admin/management/user/<%= user.id %>" class="btn btn-primary">상세</a>
                         </td>
                     </tr>
                     <% }); %>
             </tbody>
         </table>
-    </div>
-
-    <!-- 페이지네이션 섹션 -->
-    <div class="admin-user-management__pagination">
-        <div class="admin-pagination">
-            <button class="admin-pagination__button">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="admin-pagination__button admin-pagination__button--active">1</button>
-            <button class="admin-pagination__button">2</button>
-            <button class="admin-pagination__button">3</button>
-            <button class="admin-pagination__button">4</button>
-            <button class="admin-pagination__button">5</button>
-            <button class="admin-pagination__button">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
     </div>
 </div>

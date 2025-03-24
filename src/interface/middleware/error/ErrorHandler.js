@@ -1,4 +1,4 @@
-import viewResolver from '../../../presentation/view/ViewResolver.js';
+import viewResolver from '../../../presentation/util/ViewResolver.js';
 import ApplicationError from './ApplicationError.js';
 
 /**

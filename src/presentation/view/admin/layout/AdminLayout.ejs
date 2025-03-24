@@ -12,10 +12,9 @@
         <!-- 기본 관리자 스타일 -->
         <link rel="stylesheet" href="<%= CssPath.ADMIN.STYLE %>">
         <!-- 페이지별 스타일 -->
-        <% const cssFiles=getPageCssFiles(currentPage); %>
-            <% cssFiles.forEach(cssFile=> { %>
-                <link rel="stylesheet" href="<%= cssFile %>">
-                <% }); %>
+        <% cssFiles.forEach(cssFile=> { %>
+            <link rel="stylesheet" href="<%= cssFile %>">
+            <% }); %>
     </head>
 
     <body>

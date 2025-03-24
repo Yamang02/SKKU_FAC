@@ -30,7 +30,8 @@ const getReturnUrl = (req) => {
 // 미들웨어 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'presentation/public')));
+app.use(express.static('public'));
+app.use('/css', express.static(path.join(__dirname, 'presentation/public/css')));
 
 // 세션 설정
 app.use(session({

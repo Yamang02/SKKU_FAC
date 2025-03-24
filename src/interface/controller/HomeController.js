@@ -1,6 +1,5 @@
-import viewResolver from '../../presentation/view/ViewResolver.js';
-import { ViewPath } from '../../presentation/view/ViewPath.js';
-
+import ViewResolver from '../../presentation/util/ViewResolver.js';
+import { ViewPath } from '../../presentation/constant/ViewPath.js';
 class HomeController {
     /**
      * HomeController 생성자
@@ -15,7 +14,7 @@ class HomeController {
         try {
             const { recentNotices, featuredArtworks } = await this.homeUseCase.getHomePageData();
 
-            return viewResolver.render(res, ViewPath.HOME.MAIN, {
+            return ViewResolver.render(res, ViewPath.HOME.MAIN, {
                 title: '홈',
                 recentNotices,
                 featuredArtworks,
@@ -23,7 +22,7 @@ class HomeController {
             });
         } catch (error) {
             console.error('Error in getHome:', error);
-            return viewResolver.render(res, ViewPath.ERROR.ERROR, {
+            return ViewResolver.render(res, ViewPath.ERROR.ERROR, {
                 title: '오류가 발생했습니다',
                 message: '홈페이지를 불러오는 중 오류가 발생했습니다.'
             });

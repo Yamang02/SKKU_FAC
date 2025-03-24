@@ -1,6 +1,6 @@
-import ViewResolver from '../../presentation/view/ViewResolver.js';
-import { ViewPath } from '../../presentation/view/ViewPath.js';
-import users from '../../infrastructure/data/user.js';
+import ViewResolver from '../../presentation/util/ViewResolver.js';
+import { ViewPath } from '../../presentation/constant/ViewPath.js';
+import { UserDataAccess } from '../../infrastructure/data/user.js';
 
 export default class AdminController {
     constructor() {
@@ -75,7 +75,7 @@ export default class AdminController {
                 title: '회원 관리',
                 breadcrumb: '회원 관리',
                 currentPage: 'users',
-                users: users
+                users: UserDataAccess.getAll()
             };
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.LIST, mockData);
@@ -87,7 +87,7 @@ export default class AdminController {
     async getUserDetail(req, res) {
         try {
             const userId = parseInt(req.params.id);
-            const user = users.find(u => u.id === userId);
+            const user = UserDataAccess.findById(userId);
 
             if (!user) {
                 return res.status(404).send('사용자를 찾을 수 없습니다.');
@@ -96,7 +96,7 @@ export default class AdminController {
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.DETAIL, {
                 title: '사용자 상세 정보',
                 breadcrumb: '회원 관리 > 상세',
-                currentPage: 'users',
+                currentPage: 'user-detail',
                 user: user
             });
         } catch (error) {
