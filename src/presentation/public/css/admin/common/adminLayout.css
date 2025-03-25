@@ -31,6 +31,15 @@
     min-height: calc(100vh - 60px); /* 헤더 높이(60px)를 뺀 나머지 공간 */
 }
 
+.admin-management {
+    padding: 20px;
+    background-color: #fff;
+}
+
+.admin-management__content {
+    margin-top: 20px;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 1600px) {
     :root {

@@ -1,0 +1,21 @@
+.admin-filter {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid var(--admin-color-border);
+    border-radius: var(--admin-border-radius-sm);
+}
+
+.admin-filter__group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.admin-filter__select {
+    padding: 6px 10px;
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    background-color: #fff;
+    min-width: 120px;
+    font-size: 14px;
+}

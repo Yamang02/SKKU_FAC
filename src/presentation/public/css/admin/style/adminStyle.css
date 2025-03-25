@@ -19,6 +19,8 @@
 @import url('/css/admin/common/component/adminCard.css');
 @import url('/css/admin/common/component/adminStatus.css');
 @import url('/css/admin/common/component/adminTitle.css');
+@import url('/css/admin/common/component/adminFilter.css');
+@import url('/css/admin/common/component/adminBadge.css');
 
 /* 대시보드 스타일 */
 @import url('/css/admin/dashboard/AdminDashboard.css');

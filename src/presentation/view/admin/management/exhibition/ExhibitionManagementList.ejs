@@ -1,19 +1,12 @@
 <div class="admin-management">
-    <h2 class="admin-title">회원목록</h2>
+    <h2 class="admin-title">전시회 목록</h2>
     <!-- 필터 섹션 -->
     <div class="admin-filter">
         <div class="admin-filter__group">
             <select class="admin-filter__select">
-                <option value="">회원 상태</option>
-                <option value="active">활성</option>
-                <option value="inactive">비활성</option>
-                <option value="suspended">정지</option>
-            </select>
-            <select class="admin-filter__select">
-                <option value="">회원 역할</option>
-                <option value="admin">관리자</option>
-                <option value="manager">매니저</option>
-                <option value="user">일반회원</option>
+                <option value="">전시 유형</option>
+                <option value="regular">정기</option>
+                <option value="special">특별</option>
             </select>
             <button class="admin-button admin-button--primary">
                 <i class="fas fa-filter"></i>
@@ -32,60 +25,49 @@
                             <input type="checkbox" class="admin-checkbox">
                         </th>
                         <th>ID</th>
-                        <th>역할</th>
-                        <th>이름</th>
-                        <th>학번</th>
-                        <th>이메일</th>
-                        <th>가입일</th>
-                        <th>수정일</th>
-                        <th>상태</th>
+                        <th>제목</th>
+                        <th>부제목</th>
+                        <th>전시 기간</th>
+                        <th>장소</th>
+                        <th>전시 유형</th>
                         <th>관리</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% users.forEach(user=> { %>
+                    <% exhibitions.forEach(exhibition=> { %>
                         <tr>
                             <td>
                                 <input type="checkbox" class="admin-checkbox">
                             </td>
                             <td>
-                                <%= user.username %>
+                                <%= exhibition.id %>
                             </td>
                             <td>
-                                <span class="admin-badge admin-badge--<%= user.role.toLowerCase() %>">
-                                    <%= user.role==='ADMIN' ? '관리자' : user.role==='ARTIST' ? '작가' :
-                                        user.role==='CLUB_MEMBER' ? '동아리 회원' : '게스트' %>
-                                </span>
+                                <%= exhibition.title %>
                             </td>
                             <td>
-                                <%= user.name %>
+                                <%= exhibition.subtitle %>
                             </td>
                             <td>
-                                <%= user.studentId || '-' %>
+                                <%= exhibition.startDate %> ~ <%= exhibition.endDate %>
                             </td>
                             <td>
-                                <%= user.email %>
+                                <%= exhibition.location %>
                             </td>
                             <td>
-                                <%= new Date(user.createdAt).toLocaleDateString() %>
-                            </td>
-                            <td>
-                                <%= new Date(user.updatedAt).toLocaleDateString() %>
-                            </td>
-                            <td>
-                                <span
-                                    class="admin-badge admin-badge--<%= user.status ? user.status.toLowerCase() : 'active' %>">
-                                    <%= user.status || 'ACTIVE' %>
+                                <span class="admin-badge admin-badge--<%= exhibition.exhibitionType %>">
+                                    <%= exhibition.exhibitionType==='regular' ? '정기' : '특별' %>
                                 </span>
                             </td>
                             <td>
                                 <div class="admin-button-group">
-                                    <a href="/admin/management/user/<%= user.id %>"
+                                    <a href="/admin/management/exhibition/<%= exhibition.id %>"
                                         class="admin-button admin-button--secondary">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button class="admin-button admin-button--danger">
-                                        <i class="fas fa-ban"></i>
+                                    <button class="admin-button admin-button--danger"
+                                        onclick="deleteExhibition(<%= exhibition.id %>)">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </td>
@@ -111,3 +93,28 @@
         </div>
     </div>
 </div>
+
+<script>
+    function deleteExhibition(id) {
+        if (confirm('정말로 이 전시회를 삭제하시겠습니까?')) {
+            fetch(`/api/admin/exhibition/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('전시회가 성공적으로 삭제되었습니다.');
+                        location.reload();
+                    } else {
+                        alert('전시회 삭제 중 오류가 발생했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('전시회 삭제 중 오류가 발생했습니다.');
+                });
+        }
+    }
+</script>

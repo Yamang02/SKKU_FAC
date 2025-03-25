@@ -1,27 +1,27 @@
-.admin-user-management {
+.admin-exhibition-management {
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    min-height: calc(100vh - 100px); /* 헤더(60px)와 패딩(40px)을 뺀 나머지 공간 */
+    min-height: calc(100vh - 100px);
 }
 
 /* 필터 섹션 */
-.admin-user-management__filters {
+.admin-exhibition-management__filters {
     margin-bottom: 20px;
     padding: 15px;
     background-color: #f8fafc;
     border-radius: 6px;
 }
 
-.admin-user-management__filter-group {
+.admin-exhibition-management__filter-group {
     display: flex;
     gap: 10px;
     align-items: center;
     flex-wrap: wrap;
 }
 
-.admin-user-management__select {
+.admin-exhibition-management__select {
     padding: 8px 12px;
     border: 1px solid #e2e8f0;
     border-radius: 4px;
@@ -30,7 +30,7 @@
 }
 
 /* 테이블 섹션 */
-.admin-user-management__table-container {
+.admin-exhibition-management__table-container {
     margin-bottom: 20px;
     overflow-x: auto;
 }
@@ -112,7 +112,7 @@
 }
 
 /* 페이지네이션 */
-.admin-user-management__pagination {
+.admin-exhibition-management__pagination {
     display: flex;
     justify-content: center;
     margin-top: 20px;

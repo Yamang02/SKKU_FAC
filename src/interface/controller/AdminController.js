@@ -1,6 +1,7 @@
 import ViewResolver from '../../presentation/util/ViewResolver.js';
 import { ViewPath } from '../../presentation/constant/ViewPath.js';
 import { UserDataAccess } from '../../infrastructure/data/user.js';
+import exhibition from '../../infrastructure/data/exhibition.js';
 
 export default class AdminController {
     constructor() {
@@ -107,9 +108,10 @@ export default class AdminController {
     async getExhibitionManagement(req, res) {
         try {
             const mockData = {
-                title: '전시 관리',
-                breadcrumb: '전시 관리',
-                currentPage: 'exhibitions'
+                title: '전시회 관리',
+                breadcrumb: '전시회 관리',
+                currentPage: 'exhibitions',
+                exhibitions: exhibition
             };
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.LIST, mockData);
