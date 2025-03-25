@@ -11,7 +11,8 @@ export const ViewPath = {
                 DETAIL: 'admin/management/user/UserManagementDetail.ejs'
             },
             EXHIBITION: {
-                LIST: 'admin/management/exhibition/ExhibitionManagementList.ejs'
+                LIST: 'admin/management/exhibition/ExhibitionManagementList.ejs',
+                DETAIL: 'admin/management/exhibition/ExhibitionManagementDetail.ejs'
             },
             ARTWORK: {
                 LIST: 'admin/management/artwork/ArtworkManagementList.ejs'

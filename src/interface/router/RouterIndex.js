@@ -60,9 +60,17 @@ export const createRouters = (container) => {
     // 관리자 라우터
     const adminController = container.get('adminController');
     router.get(['/admin', '/admin/dashboard'], isAdmin, adminController.getDashboard.bind(adminController));
+
+    // 관리자 사용자 관리
     router.get(['/admin/management/user', '/admin/management/user/list'], isAdmin, adminController.getUserManagement.bind(adminController));
     router.get('/admin/management/user/:id', isAdmin, adminController.getUserDetail.bind(adminController));
-    router.get('/admin/management/exhibition', isAdmin, adminController.getExhibitionManagement.bind(adminController));
+
+    // 관리자 전시회 관리
+    router.get(['/admin/management/exhibition', '/admin/management/exhibition/list'], isAdmin, exhibitionController.getAdminExhibitionList.bind(exhibitionController));
+    router.get('/admin/management/exhibition/:id', isAdmin, exhibitionController.getAdminExhibitionDetail.bind(exhibitionController));
+    router.put('/admin/management/exhibition/:id', isAdmin, exhibitionController.updateAdminExhibition.bind(exhibitionController));
+    router.delete('/admin/management/exhibition/:id', isAdmin, exhibitionController.deleteAdminExhibition.bind(exhibitionController));
+
     router.get('/admin/management/artwork', isAdmin, adminController.getArtworkManagement.bind(adminController));
     router.get('/admin/management/notice', isAdmin, adminController.getNoticeManagement.bind(adminController));
 

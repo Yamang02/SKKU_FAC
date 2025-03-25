@@ -137,4 +137,84 @@ export default class ExhibitionController {
             ViewResolver.renderError(res, error);
         }
     }
+
+    /**
+     * 관리자 전시회 목록 페이지를 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
+    async getAdminExhibitionList(req, res) {
+        try {
+            const exhibitions = await this.exhibitionUseCase.findAll();
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.LIST, {
+                currentPage: req.path,
+                exhibitions,
+                title: '전시회 관리'
+            });
+        } catch (error) {
+            ViewResolver.renderError(res, error);
+        }
+    }
+
+    /**
+     * 관리자 전시회 상세 페이지를 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
+    async getAdminExhibitionDetail(req, res) {
+        try {
+            const exhibition = await this.exhibitionUseCase.findById(parseInt(req.params.id));
+            if (!exhibition) {
+                return ViewResolver.renderError(res, new Error('전시회를 찾을 수 없습니다.'));
+            }
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
+                currentPage: req.path,
+                exhibition,
+                title: '전시회 상세'
+            });
+        } catch (error) {
+            ViewResolver.renderError(res, error);
+        }
+    }
+
+    /**
+     * 관리자 전시회 수정을 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
+    async updateAdminExhibition(req, res) {
+        try {
+            const { id } = req.params;
+            const updateData = req.body;
+            const updatedExhibition = await this.exhibitionUseCase.update(parseInt(id), updateData);
+
+            if (!updatedExhibition) {
+                return res.status(404).json({ success: false, message: '전시회를 찾을 수 없습니다.' });
+            }
+
+            res.json({ success: true, data: updatedExhibition });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    /**
+     * 관리자 전시회 삭제를 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
+    async deleteAdminExhibition(req, res) {
+        try {
+            const { id } = req.params;
+            const result = await this.exhibitionUseCase.delete(parseInt(id));
+
+            if (!result) {
+                return res.status(404).json({ success: false, message: '전시회를 찾을 수 없습니다.' });
+            }
+
+            res.json({ success: true });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
 }
