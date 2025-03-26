@@ -25,8 +25,4 @@
 /* 대시보드 스타일 */
 @import url('/css/admin/dashboard/AdminDashboard.css');
 
-/* 페이지별 스타일 */
-@import url('/css/admin/management/user/list/UserManagementList.css');
-@import url('/css/admin/management/user/detail/UserManagementDetail.css');
-
 

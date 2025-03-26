@@ -6,9 +6,9 @@ import ArtworkController from '../../../interface/controller/ArtworkController.j
 export const setupArtworkModule = (container) => {
     const repository = new ArtworkRepository();
     const service = new ArtworkService(repository);
-    const exhibitionService = container.get('exhibitionService');
-    const useCase = new ArtworkUseCase(service, exhibitionService);
-    const controller = new ArtworkController(useCase);
+    const exhibitionUseCase = container.get('exhibitionUseCase');
+    const useCase = new ArtworkUseCase(service, exhibitionUseCase);
+    const controller = new ArtworkController(useCase, exhibitionUseCase);
 
     container.register('artworkRepository', repository);
     container.register('artworkService', service);

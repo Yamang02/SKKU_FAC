@@ -18,7 +18,7 @@ export default class ArtworkUseCase {
     async searchArtworks(params) {
         const { page = 1, limit = 12 } = params;
         const artworks = await this.artworkService.searchArtworks(params);
-        const exhibitions = await this.exhibitionService.getExhibitions();
+        const exhibitions = await this.exhibitionService.findAll();
 
         const pagination = new Pagination(artworks.length, { page: parseInt(page), limit: parseInt(limit) });
         const startIndex = (pagination.options.page - 1) * pagination.options.limit;
@@ -104,5 +104,40 @@ export default class ArtworkUseCase {
             console.error('사용자 작품 수 조회 중 오류:', error);
             return 0;
         }
+    }
+
+    /**
+     * 모든 작품 목록을 조회합니다.
+     * @returns {Promise<Array>} 작품 목록
+     */
+    async getAllArtworks() {
+        return await this.artworkService.findAll();
+    }
+
+    /**
+     * 작품을 수정합니다.
+     * @param {number} id - 작품 ID
+     * @param {Object} updateData - 수정할 데이터
+     * @returns {Promise<Object>} 수정된 작품
+     */
+    async update(id, updateData) {
+        return await this.artworkService.update(id, updateData);
+    }
+
+    /**
+     * 작품을 삭제합니다.
+     * @param {number} id - 작품 ID
+     * @returns {Promise<boolean>} 삭제 성공 여부
+     */
+    async delete(id) {
+        return await this.artworkService.delete(id);
+    }
+
+    /**
+     * 모든 작가 목록을 조회합니다.
+     * @returns {Promise<Array>} 작가 목록
+     */
+    async getAllArtists() {
+        return await this.artworkService.getArtists();
     }
 }

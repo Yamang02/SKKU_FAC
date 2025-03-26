@@ -5,8 +5,21 @@ import { ViewPath } from '../../presentation/constant/ViewPath.js';
  * 작품 관련 컨트롤러
  */
 export default class ArtworkController {
-    constructor(artworkUseCase) {
+    constructor(artworkUseCase, exhibitionUseCase) {
+        if (!artworkUseCase) throw new Error('ArtworkUseCase is required');
+        if (!exhibitionUseCase) throw new Error('ExhibitionUseCase is required');
+
         this.artworkUseCase = artworkUseCase;
+        this.exhibitionUseCase = exhibitionUseCase;
+
+        // 메서드 바인딩
+        this.getArtworkList = this.getArtworkList.bind(this);
+        this.getArtworkDetail = this.getArtworkDetail.bind(this);
+        this.getArtworksByExhibition = this.getArtworksByExhibition.bind(this);
+        this.getAdminArtworkList = this.getAdminArtworkList.bind(this);
+        this.getAdminArtworkDetail = this.getAdminArtworkDetail.bind(this);
+        this.updateAdminArtwork = this.updateAdminArtwork.bind(this);
+        this.deleteAdminArtwork = this.deleteAdminArtwork.bind(this);
     }
 
     /**
@@ -71,6 +84,101 @@ export default class ArtworkController {
             res.json(artworks);
         } catch (error) {
             res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+     * 관리자 작품 목록 페이지를 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
+    async getAdminArtworkList(req, res) {
+        try {
+            const [artworks, exhibitions, artists] = await Promise.all([
+                this.artworkUseCase.getAllArtworks(),
+                this.exhibitionUseCase.findAll(),
+                this.artworkUseCase.getAllArtists()
+            ]);
+
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.LIST, {
+                currentPage: req.path,
+                artworks,
+                exhibitions,
+                artists,
+                title: '작품 관리'
+            });
+        } catch (error) {
+            ViewResolver.renderError(res, error);
+        }
+    }
+
+    /**
+     * 관리자 작품 상세 페이지를 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
+    async getAdminArtworkDetail(req, res) {
+        try {
+            const [artwork, exhibitions, artists] = await Promise.all([
+                this.artworkUseCase.getArtworkById(parseInt(req.params.id)),
+                this.exhibitionUseCase.findAll(),
+                this.artworkUseCase.getAllArtists()
+            ]);
+
+            if (!artwork) {
+                return ViewResolver.renderError(res, new Error('작품을 찾을 수 없습니다.'));
+            }
+
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.DETAIL, {
+                currentPage: req.path,
+                artwork,
+                exhibitions,
+                artists,
+                title: '작품 상세'
+            });
+        } catch (error) {
+            ViewResolver.renderError(res, error);
+        }
+    }
+
+    /**
+     * 관리자 작품 수정을 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
+    async updateAdminArtwork(req, res) {
+        try {
+            const { id } = req.params;
+            const updateData = req.body;
+            const updatedArtwork = await this.artworkUseCase.update(parseInt(id), updateData);
+
+            if (!updatedArtwork) {
+                return res.status(404).json({ success: false, message: '작품을 찾을 수 없습니다.' });
+            }
+
+            res.json({ success: true, data: updatedArtwork });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    /**
+     * 관리자 작품 삭제를 처리합니다.
+     * @param {Object} req - Express 요청 객체
+     * @param {Object} res - Express 응답 객체
+     */
+    async deleteAdminArtwork(req, res) {
+        try {
+            const { id } = req.params;
+            const result = await this.artworkUseCase.delete(parseInt(id));
+
+            if (!result) {
+                return res.status(404).json({ success: false, message: '작품을 찾을 수 없습니다.' });
+            }
+
+            res.json({ success: true });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 }

@@ -1,0 +1,105 @@
+<div class="admin-management">
+    <h2 class="admin-title">작품목록</h2>
+    <!-- 필터 섹션 -->
+    <div class="admin-filter">
+        <div class="admin-filter__group">
+            <select class="admin-filter__select">
+                <option value="">전시회</option>
+                <% exhibitions.forEach(exhibition=> { %>
+                    <option value="<%= exhibition.id %>">
+                        <%= exhibition.title %>
+                    </option>
+                    <% }); %>
+            </select>
+            <select class="admin-filter__select">
+                <option value="">작가</option>
+                <% artists.forEach(artist=> { %>
+                    <option value="<%= artist.id %>">
+                        <%= artist.name %>
+                    </option>
+                    <% }); %>
+            </select>
+            <button class="admin-button admin-button--primary">
+                <i class="fas fa-filter"></i>
+                필터 적용
+            </button>
+        </div>
+    </div>
+
+    <div class="admin-management__content">
+        <!-- 테이블 섹션 -->
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" class="admin-checkbox">
+                        </th>
+                        <th>ID</th>
+                        <th>제목</th>
+                        <th>작가</th>
+                        <th>전시회</th>
+                        <th>생성일</th>
+                        <th>수정일</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% artworks.forEach(artwork=> { %>
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="admin-checkbox">
+                            </td>
+                            <td>
+                                <%= artwork.id %>
+                            </td>
+                            <td>
+                                <%= artwork.title %>
+                            </td>
+                            <td>
+                                <%= artwork.artist.name %>
+                            </td>
+                            <td>
+                                <span class="admin-badge admin-badge--<%= artwork.exhibition.exhibitionType %>">
+                                    <%= artwork.exhibition.title %>
+                                </span>
+                            </td>
+                            <td>
+                                <%= new Date(artwork.createdAt).toLocaleDateString() %>
+                            </td>
+                            <td>
+                                <%= new Date(artwork.updatedAt).toLocaleDateString() %>
+                            </td>
+                            <td>
+                                <div class="admin-button-group">
+                                    <a href="/admin/management/artwork/<%= artwork.id %>"
+                                        class="admin-button admin-button--secondary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="admin-button admin-button--danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 페이지네이션 섹션 -->
+        <div class="admin-pagination">
+            <button class="admin-pagination__button">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="admin-pagination__button admin-pagination__button--active">1</button>
+            <button class="admin-pagination__button">2</button>
+            <button class="admin-pagination__button">3</button>
+            <button class="admin-pagination__button">4</button>
+            <button class="admin-pagination__button">5</button>
+            <button class="admin-pagination__button">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>

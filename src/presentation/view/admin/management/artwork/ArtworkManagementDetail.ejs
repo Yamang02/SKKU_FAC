@@ -1,0 +1,156 @@
+<!-- 페이지 헤더 -->
+<div class="admin-management">
+    <div class="content-section">
+        <h2 class="admin-title">작품 상세</h2>
+        <div class="section-content">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>ID</label>
+                    <input type="text" value="<%= artwork.id %>" readonly>
+                </div>
+                <div class="form-group">
+                    <label>제목</label>
+                    <input type="text" value="<%= artwork.title %>" readonly>
+                </div>
+                <div class="form-group">
+                    <label>작가</label>
+                    <select disabled>
+                        <% artists.forEach(artist=> { %>
+                            <option value="<%= artist.id %>" <%=artwork.artistId===artist.id ? 'selected' : '' %>>
+                                <%= artist.name %>
+                            </option>
+                            <% }); %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>전시회</label>
+                    <select disabled>
+                        <% exhibitions.forEach(exhibition=> { %>
+                            <option value="<%= exhibition.id %>" <%=artwork.exhibitionId===exhibition.id ? 'selected'
+                                : '' %>>
+                                <%= exhibition.title %>
+                            </option>
+                            <% }); %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>설명</label>
+                    <textarea readonly><%= artwork.description %></textarea>
+                </div>
+                <div class="form-group">
+                    <label>이미지</label>
+                    <div class="image-preview">
+                        <img src="<%= artwork.imageUrl %>" alt="<%= artwork.title %>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>생성일</label>
+                    <input type="text" value="<%= new Date(artwork.createdAt).toLocaleDateString() %>" readonly>
+                </div>
+                <div class="form-group">
+                    <label>수정일</label>
+                    <input type="text" value="<%= new Date(artwork.updatedAt).toLocaleDateString() %>" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="section-footer">
+            <div class="admin-button-group">
+                <button class="admin-button admin-button--secondary" onclick="handleEdit()">
+                    <i class="fas fa-edit"></i>
+                    수정
+                </button>
+                <button class="admin-button admin-button--danger" onclick="handleDelete()">
+                    <i class="fas fa-trash"></i>
+                    삭제
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="admin-back-button-container">
+        <a href="/admin/management/artwork" class="admin-button admin-button--secondary">
+            <i class="fas fa-arrow-left"></i>
+            목록으로
+        </a>
+    </div>
+</div>
+
+<script>
+    function handleEdit() {
+        const form = document.querySelector('.form-grid');
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (input.type !== 'text' || input.value !== artwork.id) {
+                input.readOnly = false;
+                input.disabled = false;
+            }
+        });
+
+        const actionButtons = `
+            <button type="button" class="admin-button admin-button--primary" onclick="handleSave()">
+                <i class="fas fa-save"></i>
+                저장
+            </button>
+            <button type="button" class="admin-button admin-button--secondary" onclick="handleCancel()">
+                <i class="fas fa-times"></i>
+                취소
+            </button>
+        `;
+        document.querySelector('.admin-button-group').innerHTML = actionButtons;
+    }
+
+    function handleSave() {
+        const formData = {
+            title: document.querySelector('input[value="<%= artwork.title %>"]').value,
+            artistId: document.querySelector('select').value,
+            exhibitionId: document.querySelectorAll('select')[1].value,
+            description: document.querySelector('textarea').value
+        };
+
+        fetch(`/api/admin/artwork/<%= artwork.id %>`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('작품 정보가 성공적으로 수정되었습니다.');
+                    location.reload();
+                } else {
+                    alert('작품 정보 수정 중 오류가 발생했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('작품 정보 수정 중 오류가 발생했습니다.');
+            });
+    }
+
+    function handleCancel() {
+        location.reload();
+    }
+
+    function handleDelete() {
+        if (confirm('정말로 이 작품을 삭제하시겠습니까?')) {
+            fetch(`/api/admin/artwork/<%= artwork.id %>`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('작품이 성공적으로 삭제되었습니다.');
+                        window.location.href = '/admin/management/artwork';
+                    } else {
+                        alert('작품 삭제 중 오류가 발생했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('작품 삭제 중 오류가 발생했습니다.');
+                });
+        }
+    }
+</script>

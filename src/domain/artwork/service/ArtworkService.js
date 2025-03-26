@@ -1,5 +1,5 @@
 import Artwork from '../entity/Artwork.js';
-import ArtworkDTO from '../dto/ArtworkDTO.js';
+import ArtworkDto from '../dto/ArtworkDto.js';
 import artworksData from '../../../infrastructure/data/artwork.js';
 import exhibitionData from '../../../infrastructure/data/exhibition.js';
 
@@ -44,11 +44,9 @@ class ArtworkService {
 
         const artworkEntity = new Artwork(artwork);
         const exhibition = exhibitionData.find(exh => exh.id === parseInt(artwork.exhibitionId));
-
-        // DTO 변환 시 전시회 정보 추가
         const dto = this.convertToDTO([artworkEntity])[0];
         if (exhibition) {
-            dto.exhibition = exhibition.title;
+            dto.exhibition = exhibition;
         }
 
         return dto;
@@ -105,12 +103,16 @@ class ArtworkService {
     /**
      * 작품 엔티티 목록을 DTO로 변환합니다.
      * @param {Array<Artwork>} artworks 작품 엔티티 목록
-     * @returns {Array<ArtworkDTO>} 작품 DTO 목록
+     * @returns {Array<ArtworkDto>} 작품 DTO 목록
      */
     convertToDTO(artworks) {
         return artworks.map(artwork => {
             const exhibition = exhibitionData.find(exh => exh.id === parseInt(artwork.exhibitionId));
-            return new ArtworkDTO(artwork, exhibition);
+            const dto = new ArtworkDto(artwork, exhibition);
+            if (exhibition) {
+                dto.exhibition = exhibition;
+            }
+            return dto;
         });
     }
 
@@ -195,6 +197,50 @@ class ArtworkService {
             console.error('사용자 작품 수 조회 중 오류:', error);
             return 0;
         }
+    }
+
+    /**
+     * 모든 작품을 조회합니다.
+     * @returns {Promise<Array>} 작품 목록
+     */
+    async findAll() {
+        const artworkEntities = artworksData.map(art => new Artwork(art));
+        return this.convertToDTO(artworkEntities);
+    }
+
+    /**
+     * 작품을 수정합니다.
+     * @param {number} id - 작품 ID
+     * @param {Object} updateData - 수정할 데이터
+     * @returns {Promise<Object>} 수정된 작품
+     */
+    async update(id, updateData) {
+        const artwork = await this.artworkRepository.update(id, updateData);
+        if (!artwork) return null;
+        return new ArtworkDto(artwork);
+    }
+
+    /**
+     * 작품을 삭제합니다.
+     * @param {number} id - 작품 ID
+     * @returns {Promise<boolean>} 삭제 성공 여부
+     */
+    async delete(id) {
+        return await this.artworkRepository.delete(id);
+    }
+
+    /**
+     * 모든 작가 목록을 조회합니다.
+     * @returns {Promise<Array>} 작가 목록
+     */
+    async getArtists() {
+        // 작품 데이터에서 고유한 작가 정보 추출
+        const artists = Array.from(new Set(artworksData.map(artwork => artwork.artist)))
+            .map((name, index) => ({
+                id: index + 1,
+                name
+            }));
+        return artists;
     }
 }
 

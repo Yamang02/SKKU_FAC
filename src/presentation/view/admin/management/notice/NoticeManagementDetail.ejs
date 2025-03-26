@@ -1,0 +1,108 @@
+<div class="admin-management">
+    <h2 class="admin-title">
+        <%= notice ? '공지사항 수정' : '공지사항 작성' %>
+    </h2>
+
+    <div class="admin-management__content">
+        <form method="POST"
+            action="<%= notice ? `/admin/management/notice/${notice.id}` : '/admin/management/notice' %>"
+            class="admin-form">
+            <div class="admin-form__group">
+                <label class="admin-form__label" for="title">제목</label>
+                <input type="text" id="title" name="title" class="admin-form__input"
+                    value="<%= notice ? notice.title : '' %>" required>
+            </div>
+
+            <div class="admin-form__group">
+                <label class="admin-form__label" for="content">내용</label>
+                <textarea id="content" name="content" class="admin-form__textarea" rows="10"
+                    required><%= notice ? notice.content : '' %></textarea>
+            </div>
+
+            <div class="admin-form__group">
+                <div class="admin-form__checkbox-group">
+                    <input type="checkbox" id="isImportant" name="isImportant" class="admin-form__checkbox" <%=notice &&
+                        notice.isImportant ? 'checked' : '' %>>
+                    <label class="admin-form__checkbox-label" for="isImportant">중요 공지사항</label>
+                </div>
+            </div>
+
+            <div class="admin-form__group">
+                <label class="admin-form__label" for="status">상태</label>
+                <select id="status" name="status" class="admin-form__select">
+                    <option value="active" <%=notice && notice.status==='active' ? 'selected' : '' %>>활성</option>
+                    <option value="inactive" <%=notice && notice.status==='inactive' ? 'selected' : '' %>>비활성</option>
+                </select>
+            </div>
+
+            <div class="admin-form__group">
+                <label class="admin-form__label">작성자</label>
+                <p class="admin-form__text">
+                    <%= notice ? notice.author : user.name %>
+                </p>
+            </div>
+
+            <% if (notice) { %>
+                <div class="admin-form__group">
+                    <label class="admin-form__label">조회수</label>
+                    <p class="admin-form__text">
+                        <%= notice.views %>
+                    </p>
+                </div>
+
+                <div class="admin-form__group">
+                    <label class="admin-form__label">작성일</label>
+                    <p class="admin-form__text">
+                        <%= new Date(notice.createdAt).toLocaleString() %>
+                    </p>
+                </div>
+
+                <div class="admin-form__group">
+                    <label class="admin-form__label">수정일</label>
+                    <p class="admin-form__text">
+                        <%= new Date(notice.updatedAt).toLocaleString() %>
+                    </p>
+                </div>
+                <% } %>
+
+                    <div class="admin-form__actions">
+                        <button type="submit" class="admin-button admin-button--primary">
+                            <%= notice ? '수정' : '작성' %>
+                        </button>
+                        <% if (notice) { %>
+                            <button type="button" class="admin-button admin-button--danger"
+                                onclick="deleteNotice(<%= notice.id %>)">
+                                삭제
+                            </button>
+                            <% } %>
+                                <a href="/admin/management/notice/list" class="admin-button admin-button--secondary">
+                                    목록
+                                </a>
+                    </div>
+        </form>
+    </div>
+</div>
+
+<% if (notice) { %>
+    <script>
+        function deleteNotice(id) {
+            if (confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
+                fetch(`/admin/management/notice/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = '/admin/management/notice/list';
+                    } else {
+                        alert('삭제에 실패했습니다.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('삭제 중 오류가 발생했습니다.');
+                });
+            }
+        }
+    </script>
+    <% } %>

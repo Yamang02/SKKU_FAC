@@ -58,21 +58,35 @@ export const createRouters = (container) => {
     router.post('/user/forgot-password', userController.handleForgotPassword.bind(userController));
 
     // 관리자 라우터
+    const adminRouter = express.Router();
+
+    // 관리자 대시보드
     const adminController = container.get('adminController');
-    router.get(['/admin', '/admin/dashboard'], isAdmin, adminController.getDashboard.bind(adminController));
+    adminRouter.get(['/', '/dashboard'], isAdmin, adminController.getDashboard.bind(adminController));
 
     // 관리자 사용자 관리
-    router.get(['/admin/management/user', '/admin/management/user/list'], isAdmin, adminController.getUserManagement.bind(adminController));
-    router.get('/admin/management/user/:id', isAdmin, adminController.getUserDetail.bind(adminController));
+    adminRouter.get(['/management/user', '/management/user/list'], isAdmin, adminController.getUserManagement.bind(adminController));
+    adminRouter.get('/management/user/:id', isAdmin, adminController.getUserDetail.bind(adminController));
 
     // 관리자 전시회 관리
-    router.get(['/admin/management/exhibition', '/admin/management/exhibition/list'], isAdmin, exhibitionController.getAdminExhibitionList.bind(exhibitionController));
-    router.get('/admin/management/exhibition/:id', isAdmin, exhibitionController.getAdminExhibitionDetail.bind(exhibitionController));
-    router.put('/admin/management/exhibition/:id', isAdmin, exhibitionController.updateAdminExhibition.bind(exhibitionController));
-    router.delete('/admin/management/exhibition/:id', isAdmin, exhibitionController.deleteAdminExhibition.bind(exhibitionController));
+    adminRouter.get(['/management/exhibition', '/management/exhibition/list'], isAdmin, exhibitionController.getAdminExhibitionList.bind(exhibitionController));
+    adminRouter.get('/management/exhibition/:id', isAdmin, exhibitionController.getAdminExhibitionDetail.bind(exhibitionController));
+    adminRouter.put('/management/exhibition/:id', isAdmin, exhibitionController.updateAdminExhibition.bind(exhibitionController));
+    adminRouter.delete('/management/exhibition/:id', isAdmin, exhibitionController.deleteAdminExhibition.bind(exhibitionController));
 
-    router.get('/admin/management/artwork', isAdmin, adminController.getArtworkManagement.bind(adminController));
-    router.get('/admin/management/notice', isAdmin, adminController.getNoticeManagement.bind(adminController));
+    // 관리자 작품 관리
+    adminRouter.get(['/management/artwork', '/management/artwork/list'], isAdmin, artworkController.getAdminArtworkList.bind(artworkController));
+    adminRouter.get('/management/artwork/:id', isAdmin, artworkController.getAdminArtworkDetail.bind(artworkController));
+    adminRouter.put('/management/artwork/:id', isAdmin, artworkController.updateAdminArtwork.bind(artworkController));
+    adminRouter.delete('/management/artwork/:id', isAdmin, artworkController.deleteAdminArtwork.bind(artworkController));
+
+    // 관리자 공지사항 관리
+    adminRouter.get(['/management/notice', '/management/notice/list'], isAdmin, noticeController.getAdminNoticeList.bind(noticeController));
+    adminRouter.get('/management/notice/:id', isAdmin, noticeController.getAdminNoticeDetail.bind(noticeController));
+    adminRouter.put('/management/notice/:id', isAdmin, noticeController.updateAdminNotice.bind(noticeController));
+    adminRouter.delete('/management/notice/:id', isAdmin, noticeController.deleteAdminNotice.bind(noticeController));
+
+    router.use('/admin', adminRouter);
 
     return router;
 };

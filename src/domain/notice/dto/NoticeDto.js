@@ -14,6 +14,7 @@ class NoticeDto {
         this.views = notice.views;
         this.isImportant = notice.is_important;
         this.images = notice.images || [];
+        this.status = notice.status;
     }
 
     formatDate(date) {
@@ -55,6 +56,21 @@ class NoticeDto {
             views: this.views,
             isImportant: this.isImportant,
             images: this.images
+        };
+    }
+
+    /**
+     * 공지사항 목록을 위한 간단한 DTO로 변환합니다.
+     */
+    toListDTO() {
+        return {
+            id: this.id,
+            title: this.title,
+            author: this.author,
+            createdAt: this.createdAt,
+            isImportant: this.isImportant,
+            views: this.views,
+            status: this.status
         };
     }
 }

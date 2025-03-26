@@ -1,4 +1,5 @@
 import express from 'express';
+import { isAuthenticated, isAdmin } from '../../middleware/auth.js';
 import NoticeController from '../../controller/NoticeController.js';
 import NoticeUseCase from '../../../application/notice/NoticeUseCase.js';
 import NoticeService from '../../../domain/notice/service/NoticeService.js';
@@ -22,13 +23,17 @@ const noticeUseCase = new NoticeUseCase(noticeService, commentService);
 // 컨트롤러 계층
 const noticeController = new NoticeController(noticeUseCase);
 
-// 공지사항 목록
+// 공지사항 목록 (일반)
 router.get('/', noticeController.getNoticeList);
 router.get('/:id', noticeController.getNoticeDetail);
 
-// 공지사항 관리 (관리자 전용)
-router.post('/', noticeController.createNotice);
-router.put('/:id', noticeController.updateNotice);
-router.delete('/:id', noticeController.deleteNotice);
+// 관리자 공지사항 관리
+router.get('/admin/management/notice/list', isAuthenticated, isAdmin, noticeController.renderNoticeList);
+router.get('/admin/management/notice/create', isAuthenticated, isAdmin, noticeController.renderCreateNotice);
+router.get('/admin/management/notice/:id', isAuthenticated, isAdmin, noticeController.renderNoticeDetail);
+router.get('/admin/management/notice/:id/edit', isAuthenticated, isAdmin, noticeController.renderEditNotice);
+router.post('/admin/management/notice', isAuthenticated, isAdmin, noticeController.createNotice);
+router.post('/admin/management/notice/:id', isAuthenticated, isAdmin, noticeController.updateNotice);
+router.delete('/admin/management/notice/:id', isAuthenticated, isAdmin, noticeController.deleteNotice);
 
 export default router;

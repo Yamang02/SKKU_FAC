@@ -3,18 +3,42 @@
  * 작품 데이터를 전송하기 위한 객체입니다.
  */
 class ArtworkDto {
-    constructor(artwork) {
+    constructor(artwork, exhibition = null) {
         this.id = artwork.id;
         this.title = artwork.title;
-        this.description = artwork.description;
         this.artist = artwork.artist;
-        this.department = artwork.department;
+        this.description = artwork.description;
+        this.imageUrl = artwork.imageUrl;
         this.year = artwork.year;
-        this.featured = artwork.featured;
-        this.exhibition_id = artwork.exhibition_id;
-        this.images = artwork.images;
-        this.created_at = artwork.created_at;
-        this.updated_at = artwork.updated_at;
+        this.department = artwork.department;
+        this.isFeatured = artwork.isFeatured;
+        this.createdAt = artwork.createdAt;
+        this.updatedAt = artwork.updatedAt;
+        this.exhibitionId = artwork.exhibitionId;
+
+        // 전시회 정보가 있는 경우에만 exhibition 속성 설정
+        if (exhibition) {
+            this.exhibition = {
+                id: exhibition.id,
+                title: exhibition.title,
+                exhibitionType: exhibition.exhibitionType,
+                startDate: exhibition.startDate,
+                endDate: exhibition.endDate,
+                description: exhibition.description,
+                imageUrl: exhibition.imageUrl
+            };
+        } else {
+            // 전시회 정보가 없는 경우 기본값 설정
+            this.exhibition = {
+                id: null,
+                title: '전시회 없음',
+                exhibitionType: 'none',
+                startDate: null,
+                endDate: null,
+                description: '',
+                imageUrl: ''
+            };
+        }
     }
 }
 

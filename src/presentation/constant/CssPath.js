@@ -3,7 +3,6 @@
  */
 export const CssPath = {
     ADMIN: {
-        LAYOUT: '/css/admin/layout/AdminLayout.css',
         STYLE: '/css/admin/style/adminStyle.css',
         DASHBOARD: '/css/admin/dashboard/AdminDashboard.css',
         MANAGEMENT: {
@@ -12,65 +11,38 @@ export const CssPath = {
                 DETAIL: '/css/admin/management/user/detail/UserManagementDetail.css'
             },
             EXHIBITION: {
-                LIST: '/css/admin/management/exhibition/list/ExhibitionManagementList.css'
+                LIST: '/css/admin/management/exhibition/list/ExhibitionManagementList.css',
+                DETAIL: '/css/admin/management/exhibition/detail/ExhibitionManagementDetail.css'
             },
             ARTWORK: {
-                LIST: '/css/admin/management/artwork/list/ArtworkManagementList.css'
+                LIST: '/css/admin/management/artwork/list/ArtworkManagementList.css',
+                DETAIL: '/css/admin/management/artwork/detail/ArtworkManagementDetail.css'
             },
             NOTICE: {
-                LIST: '/css/admin/management/notice/list/NoticeManagementList.css'
+                LIST: '/css/admin/management/notice/list/NoticeManagementList.css',
+                DETAIL: '/css/admin/management/notice/detail/NoticeManagementDetail.css'
             }
         }
     },
     MAIN: {
+        BASE: {
+            RESET: '/css/common/base/reset.css',
+            TYPOGRAPHY: '/css/common/base/typography.css',
+            VARIABLES: '/css/common/base/variables.css'
+        },
         STYLE: '/css/style.css',
         EXHIBITION: {
-            LIST: '/css/exhibition/ExhibitionList.css'
+            LIST: '/css/main/exhibition/ExhibitionList.css',
+            DETAIL: '/css/main/exhibition/ExhibitionDetail.css'
         },
         ARTWORK: {
-            LIST: '/css/artwork/ArtworkList.css',
-            DETAIL: '/css/artwork/ArtworkDetail.css'
+            LIST: '/css/main/artwork/ArtworkList.css',
+            DETAIL: '/css/main/artwork/ArtworkDetail.css'
         },
         NOTICE: {
-            LIST: '/css/notice/NoticeList.css',
-            DETAIL: '/css/notice/NoticeDetail.css'
+            LIST: '/css/main/notice/NoticeList.css',
+            DETAIL: '/css/main/notice/NoticeDetail.css'
         }
     }
 };
 
-/**
- * 현재 페이지에 필요한 CSS 파일 목록을 반환합니다.
- * @param {string} currentPage - 현재 페이지 URL
- * @returns {Array} CSS 파일 경로 목록
- */
-export function getPageCssFiles(currentPage) {
-    const cssFiles = [];
-
-    // URL 패턴에 따른 CSS 매핑
-    const cssMapping = {
-        // 관리자 페이지
-        '/admin/dashboard': [CssPath.ADMIN.LAYOUT, CssPath.ADMIN.STYLE, CssPath.ADMIN.DASHBOARD],
-        '/admin/management/user': [CssPath.ADMIN.LAYOUT, CssPath.ADMIN.STYLE, CssPath.ADMIN.MANAGEMENT.USER.LIST],
-        '/admin/management/user/:id': [CssPath.ADMIN.LAYOUT, CssPath.ADMIN.STYLE, CssPath.ADMIN.MANAGEMENT.USER.DETAIL],
-        '/admin/management/exhibition': [CssPath.ADMIN.LAYOUT, CssPath.ADMIN.STYLE, CssPath.ADMIN.MANAGEMENT.EXHIBITION.LIST],
-        '/admin/management/artwork': [CssPath.ADMIN.LAYOUT, CssPath.ADMIN.STYLE, CssPath.ADMIN.MANAGEMENT.ARTWORK.LIST],
-        '/admin/management/notice': [CssPath.ADMIN.LAYOUT, CssPath.ADMIN.STYLE, CssPath.ADMIN.MANAGEMENT.NOTICE.LIST],
-
-        // 메인 페이지
-        '/exhibition': [CssPath.MAIN.STYLE, CssPath.MAIN.EXHIBITION.LIST],
-        '/artwork': [CssPath.MAIN.STYLE, CssPath.MAIN.ARTWORK.LIST],
-        '/artwork/:id': [CssPath.MAIN.STYLE, CssPath.MAIN.ARTWORK.DETAIL],
-        '/notice': [CssPath.MAIN.STYLE, CssPath.MAIN.NOTICE.LIST],
-        '/notice/:id': [CssPath.MAIN.STYLE, CssPath.MAIN.NOTICE.DETAIL]
-    };
-
-    // URL 패턴 매칭
-    for (const [pattern, files] of Object.entries(cssMapping)) {
-        if (currentPage.match(new RegExp(pattern.replace(':id', '\\d+')))) {
-            cssFiles.push(...files);
-            break;
-        }
-    }
-
-    return cssFiles;
-}

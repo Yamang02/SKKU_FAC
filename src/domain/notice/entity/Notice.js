@@ -1,26 +1,33 @@
 /**
- * Notice 엔티티 클래스
- * 공지사항의 핵심 비즈니스 규칙과 속성을 포함합니다.
+ * 공지사항 엔티티 클래스
  */
 class Notice {
-    constructor(id, title, content, author, createdAt, views = 0, isImportant = false) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
-        this.author = author;
-        this.createdAt = createdAt;
-        this.views = views;
-        this.isImportant = isImportant;
+    constructor(data) {
+        this.id = data.id;
+        this.title = data.title;
+        this.content = data.content;
+        this.author = data.author;
+        this.createdAt = data.createdAt;
+        this.updatedAt = data.updatedAt;
+        this.isImportant = data.isImportant || false;
+        this.views = data.views || 0;
+        this.status = data.status || 'active'; // active, inactive
     }
 
+    /**
+     * 공지사항을 수정합니다.
+     * @param {Object} updateData - 수정할 데이터
+     */
+    update(updateData) {
+        Object.assign(this, updateData);
+        this.updatedAt = new Date().toISOString();
+    }
+
+    /**
+     * 조회수를 증가시킵니다.
+     */
     incrementViews() {
         this.views += 1;
-    }
-
-    update(title, content, isImportant) {
-        this.title = title;
-        this.content = content;
-        this.isImportant = isImportant;
     }
 
     toDTO() {

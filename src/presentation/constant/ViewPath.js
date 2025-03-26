@@ -15,10 +15,12 @@ export const ViewPath = {
                 DETAIL: 'admin/management/exhibition/ExhibitionManagementDetail.ejs'
             },
             ARTWORK: {
-                LIST: 'admin/management/artwork/ArtworkManagementList.ejs'
+                LIST: 'admin/management/artwork/ArtworkManagementList.ejs',
+                DETAIL: 'admin/management/artwork/ArtworkManagementDetail.ejs'
             },
             NOTICE: {
-                LIST: 'admin/management/notice/NoticeManagementList.ejs'
+                LIST: 'admin/management/notice/NoticeManagementList.ejs',
+                DETAIL: 'admin/management/notice/NoticeManagementDetail.ejs'
             }
         }
     },

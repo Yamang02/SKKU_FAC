@@ -1,3 +1,7 @@
+import Notice from '../entity/Notice.js';
+import NoticeDto from '../dto/NoticeDto.js';
+import * as noticeData from '../../../infrastructure/data/notice.js';
+
 /**
  * Notice 서비스
  * 공지사항 관련 도메인 로직을 처리합니다.
@@ -11,24 +15,114 @@ class NoticeService {
         this.noticeRepository = noticeRepository;
     }
 
+    /**
+     * 공지사항 목록을 조회합니다.
+     * @param {Object} params - 검색 파라미터
+     */
+    async searchNotices(params) {
+        return this.noticeRepository.searchNotices(params);
+    }
+
+    /**
+     * 공지사항 ID로 공지사항을 조회합니다.
+     * @param {number} id - 공지사항 ID
+     */
+    async findById(id) {
+        const notice = await noticeData.findById(parseInt(id));
+        if (!notice) return null;
+
+        const noticeEntity = new Notice(notice);
+        return new NoticeDto(noticeEntity);
+    }
+
+    /**
+     * 공지사항을 생성합니다.
+     * @param {Object} noticeData - 공지사항 데이터
+     */
+    async create(noticeData) {
+        const notice = await this.noticeRepository.create(noticeData);
+        return new NoticeDto(notice);
+    }
+
+    /**
+     * 공지사항을 수정합니다.
+     * @param {number} id - 공지사항 ID
+     * @param {Object} updateData - 수정할 데이터
+     */
+    async update(id, updateData) {
+        const notice = await this.noticeRepository.update(id, updateData);
+        if (!notice) return null;
+        return new NoticeDto(notice);
+    }
+
+    /**
+     * 공지사항을 삭제합니다.
+     * @param {number} id - 공지사항 ID
+     */
+    async delete(id) {
+        return await this.noticeRepository.delete(id);
+    }
+
+    /**
+     * 공지사항 조회수를 증가시킵니다.
+     * @param {number} id - 공지사항 ID
+     */
+    async incrementViews(id) {
+        return await this.noticeRepository.incrementViews(id);
+    }
+
+    /**
+     * 공지사항 목록을 검색 조건에 따라 가져옵니다.
+     * @param {Object} filters 검색 필터
+     * @returns {Object} 공지사항 목록과 총 개수
+     */
+    async searchNoticesWithFilters(filters = {}) {
+        const { keyword, isImportant, status, limit = 10, offset = 0 } = filters;
+
+        // 필터링 로직
+        let filteredNotices = await noticeData.findAll();
+
+        if (keyword) {
+            const searchTerm = keyword.toLowerCase();
+            filteredNotices = filteredNotices.filter(notice =>
+                notice.title.toLowerCase().includes(searchTerm) ||
+                notice.content.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        if (isImportant !== undefined) {
+            filteredNotices = filteredNotices.filter(notice =>
+                notice.isImportant === isImportant
+            );
+        }
+
+        if (status) {
+            filteredNotices = filteredNotices.filter(notice =>
+                notice.status === status
+            );
+        }
+
+        // 총 개수
+        const total = filteredNotices.length;
+
+        // 페이지네이션
+        const paginatedNotices = filteredNotices.slice(offset, offset + limit);
+
+        // 엔티티 변환
+        const noticeEntities = paginatedNotices.map(n => new Notice(n));
+
+        return {
+            items: noticeEntities.map(n => new NoticeDto(n).toListDTO()),
+            total
+        };
+    }
+
     async findBySearchType(searchType, keyword, offset, limit) {
         return this.noticeRepository.findBySearchType(searchType, keyword, offset, limit);
     }
 
     async count(searchType, keyword) {
         return this.noticeRepository.count(searchType, keyword);
-    }
-
-    async findById(noticeId) {
-        const notice = await this.noticeRepository.findById(noticeId);
-        if (!notice) {
-            throw new Error('공지사항을 찾을 수 없습니다.');
-        }
-        return notice;
-    }
-
-    async incrementViews(noticeId) {
-        return this.noticeRepository.incrementViews(noticeId);
     }
 
     async findAdjacentIds(currentId) {
