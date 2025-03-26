@@ -1,48 +1,42 @@
 <!DOCTYPE html>
 <html lang="ko">
 
-    <head>
-        <% const pageTitle=title; const additionalStyles=['/css/user/Profile.css']; %>
-            <%- include('../common/head', { pageTitle, additionalStyles }) %>
-    </head>
-
     <body>
-        <%- include('../common/header') %>
 
-            <main class="profile-page">
-                <div class="container">
-                    <div class="profile-card">
-                        <h1 class="profile-title">프로필</h1>
-                        <div class="profile-info">
-                            <div class="info-group">
-                                <label>이름</label>
-                                <p>
-                                    <%= user.name %>
-                                </p>
-                            </div>
-                            <div class="info-group">
-                                <label>이메일</label>
-                                <p>
-                                    <%= user.email %>
-                                </p>
-                            </div>
-                            <div class="info-group">
-                                <label>학과</label>
-                                <p>
-                                    <%= user.department ? user.department.name : '학과 정보 없음' %>
-                                </p>
-                            </div>
+
+        <main class="profile-page">
+            <div class="container">
+                <div class="profile-card">
+                    <h1 class="profile-title">프로필</h1>
+                    <div class="profile-info">
+                        <div class="info-group">
+                            <label>이름</label>
+                            <p>
+                                <%= user.name %>
+                            </p>
                         </div>
-
-                        <div class="profile-actions">
-                            <a href="/user/profile/edit" class="btn btn--secondary">프로필 수정</a>
-                            <a href="/user/logout" class="btn btn--secondary">로그아웃</a>
+                        <div class="info-group">
+                            <label>이메일</label>
+                            <p>
+                                <%= user.email %>
+                            </p>
+                        </div>
+                        <div class="info-group">
+                            <label>학과</label>
+                            <p>
+                                <%= user.department ? user.department.name : '학과 정보 없음' %>
+                            </p>
                         </div>
                     </div>
-                </div>
-            </main>
 
-            <%- include('../common/footer') %>
+                    <div class="profile-actions">
+                        <a href="/user/profile/edit" class="btn btn--secondary">프로필 수정</a>
+                        <a href="/user/logout" class="btn btn--secondary">로그아웃</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
     </body>
 
 </html>

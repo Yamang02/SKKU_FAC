@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
-  <rect width="400" height="300" fill="#f0f4f8"/>
-  <rect x="100" y="50" width="200" height="150" fill="#e1e8ed" rx="5" ry="5"/>
-  <rect x="120" y="70" width="70" height="90" fill="#1a73e8" rx="2" ry="2"/>
-  <rect x="210" y="70" width="70" height="60" fill="#4285f4" rx="2" ry="2"/>
-  <rect x="210" y="140" width="70" height="40" fill="#0d47a1" opacity="0.7" rx="2" ry="2"/>
-  <circle cx="200" cy="220" r="15" fill="#1a73e8"/>
-  <text x="200" y="250" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#072b61">전시회 이미지</text>
-</svg>

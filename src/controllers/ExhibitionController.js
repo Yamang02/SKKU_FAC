@@ -1,6 +1,7 @@
 import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
 import ExhibitionRepository from '../repositories/ExhibitionRepository.js';
+import Page from '../models/common/page/Page.js';
 
 /**
  * 전시회 컨트롤러
@@ -16,14 +17,30 @@ export default class ExhibitionController {
      */
     async getExhibitionList(req, res) {
         try {
-            const { page = 1, limit = 12, search } = req.query;
-            const exhibitions = await this.exhibitionRepository.findExhibitions({ page, limit, search });
+            const { page = 1, limit = 12, sortField = 'startDate', sortOrder = 'desc', searchType, keyword } = req.query;
+            const exhibitions = await this.exhibitionRepository.findExhibitions({ page, limit, sortField, sortOrder, searchType, keyword });
+
+            const pageOptions = {
+                page,
+                limit,
+                baseUrl: '/exhibition',
+                sortField,
+                sortOrder,
+                filters: { searchType, keyword },
+                previousUrl: Page.getPreviousPageUrl(req),
+                currentUrl: Page.getCurrentPageUrl(req)
+            };
+
+            const pageData = new Page(exhibitions.total, pageOptions);
 
             ViewResolver.render(res, ViewPath.MAIN.EXHIBITION.LIST, {
                 title: '전시회 목록',
-                exhibitions,
-                currentPage: page,
-                totalPages: Math.ceil(exhibitions.total / limit)
+                exhibitions: exhibitions.items || [],
+                page: pageData,
+                searchType,
+                keyword,
+                sortField,
+                sortOrder
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -127,14 +144,27 @@ export default class ExhibitionController {
      */
     async getAdminExhibitionList(req, res) {
         try {
-            const { page = 1, limit = 12, search } = req.query;
-            const exhibitions = await this.exhibitionRepository.findExhibitions({ page, limit, search });
+            const { page = 1, limit = 12, sortField = 'createdAt', sortOrder = 'desc', search } = req.query;
+            const exhibitions = await this.exhibitionRepository.findExhibitions({ page, limit, sortField, sortOrder, search });
+
+            const pageOptions = {
+                page,
+                limit,
+                baseUrl: '/admin/management/exhibition',
+                sortField,
+                sortOrder,
+                filters: { search },
+                previousUrl: Page.getPreviousPageUrl(req),
+                currentUrl: Page.getCurrentPageUrl(req)
+            };
+
+            const pageData = new Page(exhibitions.total, pageOptions);
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.LIST, {
                 title: '전시회 관리',
-                exhibitions,
-                currentPage: page,
-                totalPages: Math.ceil(exhibitions.total / limit)
+                exhibitions: exhibitions.items || [],
+                page: pageData,
+                search
             });
         } catch (error) {
             ViewResolver.renderError(res, error);

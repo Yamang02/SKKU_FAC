@@ -2,6 +2,7 @@ import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
 import ArtworkRepository from '../repositories/ArtworkRepository.js';
 import ExhibitionRepository from '../repositories/ExhibitionRepository.js';
+import Page from '../models/common/page/Page.js';
 
 /**
  * 작품 관련 컨트롤러
@@ -17,14 +18,46 @@ export default class ArtworkController {
      */
     async getArtworkList(req, res) {
         try {
-            const { page = 1, limit = 12, search, exhibitionId } = req.query;
-            const artworks = await this.artworkRepository.findArtworks({ page, limit, search, exhibitionId });
+            const { page = 1, limit = 12, sortField = 'createdAt', sortOrder = 'desc', searchType, keyword } = req.query;
+            const [artworks, exhibitionResult] = await Promise.all([
+                this.artworkRepository.findArtworks({ page, limit, sortField, sortOrder, searchType, keyword }),
+                this.exhibitionRepository.findExhibitions({ limit: 100 })
+            ]);
+
+            const pageOptions = {
+                page,
+                limit,
+                baseUrl: '/artwork',
+                sortField,
+                sortOrder,
+                filters: { searchType, keyword },
+                previousUrl: Page.getPreviousPageUrl(req),
+                currentUrl: Page.getCurrentPageUrl(req)
+            };
+
+            const pageData = new Page(artworks.total || 0, pageOptions);
+
+            // 전시회 데이터 가공
+            const exhibitions = exhibitionResult && exhibitionResult.items ? exhibitionResult.items : [];
+            const processedExhibitions = exhibitions.map(ex => ({
+                id: ex.id || '',
+                code: ex.id ? ex.id.toString() : '',
+                title: ex.title || '',
+                subtitle: ex.description || '',
+                image: ex.imageUrl || '/images/exhibition-placeholder.jpg'
+            }));
 
             ViewResolver.render(res, ViewPath.MAIN.ARTWORK.LIST, {
                 title: '작품 목록',
-                artworks,
-                currentPage: page,
-                totalPages: Math.ceil(artworks.total / limit)
+                artworks: artworks && artworks.items ? artworks.items : [],
+                exhibitions: processedExhibitions,
+                page: pageData,
+                searchType: searchType || '',
+                keyword: keyword || '',
+                sortField: sortField || 'createdAt',
+                sortOrder: sortOrder || 'desc',
+                total: artworks && artworks.total ? artworks.total : 0,
+                selectedExhibition: req.query.exhibition || ''
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -57,17 +90,33 @@ export default class ArtworkController {
     async getArtworkDetail(req, res) {
         try {
             const { id } = req.params;
+            const { page: commentPage = 1 } = req.query;
             const artwork = await this.artworkRepository.findById(id);
             if (!artwork) {
                 throw new Error('작품을 찾을 수 없습니다.');
             }
 
-            const relatedArtworks = await this.artworkRepository.findRelated(id);
+            const comments = await this.artworkRepository.findComments(id, { page: commentPage });
+            const relatedArtworks = await this.artworkRepository.findRelatedArtworks(id);
+            const exhibitions = await this.exhibitionRepository.findExhibitions();
+
+            const commentPageOptions = {
+                page: commentPage,
+                limit: 10,
+                baseUrl: `/artwork/${id}`,
+                previousUrl: Page.getPreviousPageUrl(req),
+                currentUrl: Page.getCurrentPageUrl(req)
+            };
+
+            const commentPageData = new Page(comments.total, commentPageOptions);
 
             ViewResolver.render(res, ViewPath.MAIN.ARTWORK.DETAIL, {
                 title: artwork.title,
                 artwork,
-                relatedArtworks
+                comments: comments.items,
+                relatedArtworks: relatedArtworks.items,
+                exhibitions: exhibitions.items,
+                page: commentPageData
             });
         } catch (error) {
             ViewResolver.renderError(res, error);

@@ -1,0 +1,124 @@
+<main>
+    <section class="idx-hero-section">
+        <div class="container idx-hero">
+            <div class="idx-hero__content">
+                <h1>현대 미술 특별전</h1>
+            </div>
+        </div>
+    </section>
+
+    <section class="idx-featured-section">
+        <div class="container idx-content">
+            <header class="idx-featured__header">
+                <h2 class="idx-featured__title">Featured Artworks</h2>
+                <a href="/artwork" class="idx-featured__link">
+                    <span class="link-text">모든 작품 보기</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16" class="link-icon">
+                        <path
+                            d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                        <path
+                            d="M5.354 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L11.293 8 5.354 2.354a.5.5 0 0 1 0-.708z" />
+                    </svg>
+                </a>
+            </header>
+            <div class="artwork-grid">
+                <% featuredArtworks.forEach(artwork=> { %>
+                    <div class="card card--home" data-artwork-id="<%= artwork.id %>">
+                        <div class="card__link">
+                            <div class="card__image-container">
+                                <img src="<%= artwork.imageUrl %>" alt="<%= artwork.title %>" class="card__image">
+                            </div>
+                            <div class="card__info">
+                                <h3 class="card__title">
+                                    <%= artwork.title %>
+                                </h3>
+                                <p class="card__subtitle">
+                                    <%= artwork.artist %>
+                                </p>
+                                <div class="card__meta">
+                                    <%= artwork.department %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% }); %>
+            </div>
+        </div>
+    </section>
+
+    <!-- 최근 공지사항 섹션 -->
+    <section class="idx-notice-section">
+        <div class="container idx-content">
+            <header class="idx-featured__header">
+                <h2 class="idx-featured__title">공지사항</h2>
+                <a href="/notice" class="idx-featured__link">
+                    <span class="link-text">더보기</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16" class="link-icon">
+                        <path
+                            d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                        <path
+                            d="M5.354 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L11.293 8 5.354 2.354a.5.5 0 0 1 0-.708z" />
+                    </svg>
+                </a>
+            </header>
+            <div class="notice-list">
+                <% if (recentNotices && recentNotices.length> 0) { %>
+                    <% recentNotices.forEach(notice=> { %>
+                        <a href="/notice/<%= notice.id %>" class="notice-item">
+                            <div class="notice-item__content">
+                                <% if (notice.is_important) { %>
+                                    <span class="notice-badge important">중요</span>
+                                    <% } %>
+                                        <h3 class="notice-item__title">
+                                            <%= notice.title %>
+                                        </h3>
+                                        <div class="notice-item__meta">
+                                            <span class="notice-item__date">
+                                                <%= notice.created_at %>
+                                            </span>
+                                            <span class="notice-item__author">
+                                                <%= notice.author %>
+                                            </span>
+                                        </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                viewBox="0 0 16 16" class="notice-item__arrow">
+                                <path
+                                    d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                            </svg>
+                        </a>
+                        <% }); %>
+                            <% } else { %>
+                                <div class="notice-empty">
+                                    <p>등록된 공지사항이 없습니다.</p>
+                                </div>
+                                <% } %>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- 작품 상세 모달 -->
+<div id="artwork-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-modal">&times;</span>
+        <div class="modal-body">
+            <div class="modal-image-container">
+                <img src="" alt="" class="modal-image" id="modal-image">
+            </div>
+            <div class="modal-info">
+                <div class="modal-info-content">
+                    <div class="modal-title" id="modal-title"></div>
+                    <div class="modal-artist" id="modal-artist"></div>
+                    <div class="modal-department"></div>
+                    <div class="modal-exhibition"></div>
+                    <a href="#" class="detail-button" id="detail-link">작품 상세보기</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="/js/page/home/HomePage.js"></script>

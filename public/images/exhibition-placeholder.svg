@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" version="1.1" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="300" fill="#f5f5f5"/>
+    <g fill="#ddd">
+        <rect x="50" y="50" width="300" height="200"/>
+        <path d="m100 100h200v20h-200z"/>
+        <path d="m100 140h200v20h-200z"/>
+    </g>
+    <text x="200" y="150" text-anchor="middle" fill="#999" font-family="Arial" font-size="16">전시회 이미지 없음</text>
+</svg>

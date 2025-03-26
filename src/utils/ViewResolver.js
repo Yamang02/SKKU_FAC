@@ -1,6 +1,5 @@
-import { CssResolver } from './CssResolver.js';
 import { ViewPath } from '../constants/ViewPath.js';
-import { CssPath } from '../constants/CssPath.js';
+
 
 /**
  * 뷰 렌더링을 담당하는 유틸리티 클래스
@@ -12,26 +11,29 @@ export default class ViewResolver {
      * @param {string} viewPath - 렌더링할 뷰 경로
      * @param {Object} data - 뷰에 전달할 데이터
      */
-    static render(res, viewPath, data = {}) {
+    static async render(res, viewPath, data = {}) {
         try {
             // 레이아웃 결정
             const layout = this.determineLayout(viewPath);
 
-            // CSS 파일 목록 추가
-            const cssFiles = CssResolver.getPageCssFiles(data.currentPage || '');
-
             // 공통 데이터 설정
             const commonData = {
                 ...data,
-                cssFiles,
-                CssPath,
                 ViewPath
             };
 
-            // 레이아웃과 함께 렌더링
-            res.render(layout, {
-                ...commonData,
-                content: viewPath
+            // 컨텐츠를 먼저 렌더링
+            res.render(viewPath, commonData, (err, html) => {
+                if (err) {
+                    this.renderError(res, err);
+                    return;
+                }
+
+                // 레이아웃과 함께 렌더링
+                res.render(layout, {
+                    ...commonData,
+                    content: html
+                });
             });
         } catch (error) {
             this.renderError(res, error);
@@ -45,16 +47,26 @@ export default class ViewResolver {
         console.error('View Rendering Error:', error);
         const layout = this.determineLayout(ViewPath.ERROR);
 
-        res.render(layout, {
-            content: ViewPath.ERROR,
+        // 에러 페이지 HTML을 먼저 렌더링
+        res.render(ViewPath.ERROR, {
             message: error.message || '페이지를 불러오는 중 오류가 발생했습니다.',
             error: {
                 code: error.code || 500,
                 stack: error.stack
             },
-            cssFiles: [],
-            CssPath,
             ViewPath
+        }, (err, html) => {
+            if (err) {
+                console.error('Error page rendering failed:', err);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+
+            // 레이아웃과 함께 렌더링
+            res.render(layout, {
+                content: html,
+                ViewPath
+            });
         });
     }
 

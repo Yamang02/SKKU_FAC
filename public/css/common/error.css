@@ -4,87 +4,104 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: calc(100vh - 200px);
+    min-height: calc(100vh - 80px); /* 헤더 높이(80px)를 제외한 높이 */
     padding: 2rem;
+    background-color: #f8f9fa;
+    margin-top: 80px; /* 헤더 높이만큼 상단 여백 추가 */
 }
 
 .error-container {
     max-width: 600px;
     width: 100%;
-    padding: 2rem;
+    padding: 3rem;
     background-color: #fff;
-    border-radius: 8px;
+    border-radius: 12px;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: auto;
 }
 
 .error-container h1 {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     color: var(--color-primary);
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: 2.5rem;
+    font-weight: 700;
 }
 
 .error-message {
     color: #dc3545;
-    margin: 1rem 0;
-    font-size: 1.1rem;
+    margin: 1.5rem 0;
+    font-size: 1.2rem;
+    line-height: 1.6;
 }
 
 .error-code {
     color: #6c757d;
-    font-size: 0.9rem;
-    margin: 0.5rem 0;
+    font-size: 1rem;
+    margin: 1rem 0;
+    padding: 0.5rem 1rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    display: inline-block;
 }
 
 .error-stack {
     background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
+    padding: 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
     font-family: monospace;
     overflow-x: auto;
-    margin: 1rem 0;
+    margin: 1.5rem 0;
     text-align: left;
     white-space: pre-wrap;
     word-break: break-all;
+    border: 1px solid #e9ecef;
 }
 
 .button-container {
-    margin-top: 2rem;
+    margin-top: 2.5rem;
     text-align: center;
 }
 
 .back-button {
     display: inline-block;
-    padding: 0.75rem 1.5rem;
+    padding: 1rem 2rem;
     background-color: var(--color-primary);
     color: white;
-    border-radius: 4px;
+    border-radius: 6px;
     text-decoration: none;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
     font-weight: 500;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .back-button:hover {
     background-color: var(--color-primary-dark);
     color: white;
     text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
+    .error-page {
+        padding: 1rem;
+    }
+
     .error-container {
+        padding: 2rem;
         margin: 1rem;
-        padding: 1.5rem;
     }
 
     .error-container h1 {
-        font-size: 1.75rem;
+        font-size: 2rem;
     }
 
     .error-message {
-        font-size: 1rem;
+        font-size: 1.1rem;
     }
 
     .back-button {
@@ -111,8 +128,4 @@
 .btn-primary {
     padding: 10px 25px;
     font-size: 1.1rem;
-}
-
-.fas {
-    margin-right: 8px;
 }

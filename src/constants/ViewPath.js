@@ -26,7 +26,7 @@ export const ViewPath = {
     MAIN: {
         LAYOUT: 'main/layout/MainLayout.ejs',
         HOME: 'main/home/HomePage.ejs',
-        ABOUT: 'main/about/AboutPage.ejs',
+        ABOUT: 'main/about/about.ejs',
         USER: {
             LOGIN: 'main/user/Login.ejs',
             REGISTER: 'main/user/RegisterPage.ejs',

@@ -78,19 +78,9 @@
         </div>
 
         <!-- 페이지네이션 섹션 -->
-        <div class="admin-pagination">
-            <button class="admin-pagination__button">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="admin-pagination__button admin-pagination__button--active">1</button>
-            <button class="admin-pagination__button">2</button>
-            <button class="admin-pagination__button">3</button>
-            <button class="admin-pagination__button">4</button>
-            <button class="admin-pagination__button">5</button>
-            <button class="admin-pagination__button">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
+        <% if (typeof page !=='undefined' && page) { %>
+            <%- include('../../../../common/pagination', { page }) %>
+                <% } %>
     </div>
 </div>
 

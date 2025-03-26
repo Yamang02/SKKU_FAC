@@ -1,6 +1,7 @@
 import ViewResolver from '../utils/ViewResolver.js';
 import { ViewPath } from '../constants/ViewPath.js';
 import NoticeRepository from '../repositories/NoticeRepository.js';
+import Page from '../models/common/page/Page.js';
 
 export default class NoticeController {
     constructor() {
@@ -12,14 +13,26 @@ export default class NoticeController {
      */
     async getNoticeList(req, res) {
         try {
-            const { page = 1, limit = 12, search } = req.query;
-            const notices = await this.noticeRepository.findNotices({ page, limit, search });
+            const { page = 1, limit = 12, searchType, keyword } = req.query;
+            const notices = await this.noticeRepository.findNotices({ page, limit, searchType, keyword });
+
+            const pageOptions = {
+                page,
+                limit,
+                baseUrl: '/notice',
+                filters: { searchType, keyword },
+                previousUrl: Page.getPreviousPageUrl(req),
+                currentUrl: Page.getCurrentPageUrl(req)
+            };
+
+            const pageData = new Page(notices.total, pageOptions);
 
             ViewResolver.render(res, ViewPath.MAIN.NOTICE.LIST, {
                 title: '공지사항',
-                notices,
-                currentPage: page,
-                totalPages: Math.ceil(notices.total / limit)
+                notices: notices.items,
+                page: pageData,
+                searchType,
+                keyword
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -32,14 +45,28 @@ export default class NoticeController {
     async getNoticeDetail(req, res) {
         try {
             const { id } = req.params;
-            const notice = await this.noticeRepository.findById(id);
+            const { page: commentPage = 1 } = req.query;
+            const notice = await this.noticeRepository.findNoticeById(id);
             if (!notice) {
                 throw new Error('공지사항을 찾을 수 없습니다.');
             }
 
+            const comments = await this.noticeRepository.findComments(id, { page: commentPage });
+            const commentPageOptions = {
+                page: commentPage,
+                limit: 10,
+                baseUrl: `/notice/${id}`,
+                previousUrl: Page.getPreviousPageUrl(req),
+                currentUrl: Page.getCurrentPageUrl(req)
+            };
+
+            const commentPageData = new Page(comments.total, commentPageOptions);
+
             ViewResolver.render(res, ViewPath.MAIN.NOTICE.DETAIL, {
                 title: notice.title,
-                notice
+                notice,
+                comments: comments.items,
+                page: commentPageData
             });
         } catch (error) {
             ViewResolver.renderError(res, error);

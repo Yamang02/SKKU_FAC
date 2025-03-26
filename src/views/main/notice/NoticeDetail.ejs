@@ -1,0 +1,87 @@
+<div class="notice-detail-container">
+    <!-- 공지사항 헤더 -->
+    <div class="notice-detail-header">
+        <% if (notice.is_important) { %>
+            <span class="notice-badge important">중요</span>
+            <% } %>
+                <h1 class="notice-detail-title">
+                    <%= notice.title %>
+                </h1>
+                <div class="notice-meta">
+                    <span class="notice-author">
+                        <%= notice.author %>
+                    </span>
+                    <span class="notice-date">
+                        <%= notice.created_at %>
+                    </span>
+                    <span class="notice-views">조회수 <%= notice.views %></span>
+                </div>
+    </div>
+
+    <!-- 공지사항 본문 -->
+    <div class="notice-detail-content">
+        <!-- 이미지 갤러리 (이미지가 있는 경우) -->
+        <% if (notice.images && notice.images.length> 0) { %>
+            <div class="notice-images">
+                <% notice.images.forEach((image, index)=> { %>
+                    <div class="notice-image-wrapper">
+                        <img src="<%= image %>" alt="공지사항 이미지 <%= index + 1 %>" class="notice-image">
+                    </div>
+                    <% }); %>
+            </div>
+            <% } %>
+
+                <!-- 본문 내용 -->
+                <div class="notice-content">
+                    <%- notice.detailContent %>
+                </div>
+    </div>
+
+    <!-- 이전/다음 글 네비게이션 -->
+    <nav class="notice-navigation">
+        <a href="/notice/<%= notice.prevId %>" class="btn--nav btn--prev" <%=!notice.prevId ? 'style="display: none;"'
+            : '' %>>
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <a href="/notice" class="btn--list">
+            <i class="fas fa-list"></i>
+            <span>목록으로</span>
+        </a>
+        <a href="/notice/<%= notice.nextId %>" class="btn--nav btn--next" <%=!notice.nextId ? 'style="display: none;"'
+            : '' %>>
+            <i class="fas fa-chevron-right"></i>
+        </a>
+    </nav>
+</div>
+
+<!-- 댓글 섹션 -->
+<section class="comments-section">
+    <h3>댓글</h3>
+    <div class="comments-list">
+        <% if (comments && comments.length> 0) { %>
+            <% comments.forEach(comment=> { %>
+                <div class="comment">
+                    <div class="comment__header">
+                        <span class="comment__author">
+                            <%= comment.author %>
+                        </span>
+                        <span class="comment__date">
+                            <%= comment.createdAt %>
+                        </span>
+                    </div>
+                    <div class="comment__content">
+                        <%= comment.content %>
+                    </div>
+                </div>
+                <% }); %>
+                    <% } else { %>
+                        <p class="no-comments">아직 댓글이 없습니다.</p>
+                        <% } %>
+    </div>
+
+    <!-- 댓글 페이지네이션 -->
+    <%- include('../../common/pagination', { page: page, name: 'comments' }) %>
+</section>
+
+<!-- 외부 스크립트 파일 로드 -->
+<script src="/js/page/notice/NoticeDetail.js"></script>

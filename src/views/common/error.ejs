@@ -1,36 +1,25 @@
-<!DOCTYPE html>
-<html lang="ko">
-
-    <body>
-
-        <main class="error-page">
-            <div class="error-container">
-                <h1>
-                    <% if (typeof error !=='undefined' && error.code===404) { %>
-                        404 - 페이지를 찾을 수 없습니다
-                        <% } else { %>
-                            오류가 발생했습니다
-                            <% } %>
-                </h1>
-                <p class="error-message">
-                    <%= typeof message !=='undefined' ? message : '알 수 없는 오류가 발생했습니다.' %>
-                </p>
-                <% if (typeof error !=='undefined' && error.code) { %>
-                    <p class="error-code">에러 코드: <%= error.code %>
-                    </p>
-                    <% } %>
-                        <% if (process.env.NODE_ENV==='development' && typeof error !=='undefined' && error.stack) { %>
-                            <pre class="error-stack"><%= error.stack %></pre>
-                            <% } %>
-                                <div class="button-container">
-                                    <% const finalReturnUrl=typeof returnUrl !=='undefined' ? returnUrl : '/' ; %>
-                                        <a href="<%= finalReturnUrl %>" class="back-button">
-                                            <%= finalReturnUrl==='/admin' ? '대시보드로' : '이전 페이지로' %> 돌아가기
-                                        </a>
-                                </div>
-            </div>
-        </main>
-
-    </body>
-
-</html>
+<div class="error-container">
+    <h1>
+        <% if (typeof error !=='undefined' && error.code===404) { %>
+            404 - 페이지를 찾을 수 없습니다
+            <% } else { %>
+                오류가 발생했습니다
+                <% } %>
+    </h1>
+    <p class="error-message">
+        <%= typeof message !=='undefined' ? message : '알 수 없는 오류가 발생했습니다.' %>
+    </p>
+    <% if (typeof error !=='undefined' && error.code) { %>
+        <p class="error-code">에러 코드: <%= error.code %>
+        </p>
+        <% } %>
+            <% if (process.env.NODE_ENV==='development' && typeof error !=='undefined' && error.stack) { %>
+                <pre class="error-stack"><%= error.stack %></pre>
+                <% } %>
+                    <div class="button-container">
+                        <% const finalReturnUrl=typeof returnUrl !=='undefined' ? returnUrl : '/' ; %>
+                            <a href="<%= finalReturnUrl %>" class="back-button">
+                                <%= finalReturnUrl==='/admin' ? '대시보드로' : '이전 페이지로' %> 돌아가기
+                            </a>
+                    </div>
+</div>

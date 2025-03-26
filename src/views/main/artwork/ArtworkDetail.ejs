@@ -1,0 +1,155 @@
+<div class="artwork-detail-container">
+    <!-- 작품 이미지 섹션 -->
+    <section class="artwork-image-section">
+        <div class="artwork-image-wrapper">
+            <img src="<%= artwork.image %>" alt="<%= artwork.title %>" class="artwork-main-image">
+        </div>
+    </section>
+
+    <!-- 작품 정보 섹션 -->
+    <section class="artwork-info-section">
+        <div class="artwork-detail-header">
+            <h1 class="artwork-detail-title">
+                <%= artwork.title %>
+            </h1>
+            <p class="artwork-detail-artist">
+                <%= artwork.artist %>
+            </p>
+            <p class="artwork-detail-department">
+                <%= artwork.department %>
+            </p>
+        </div>
+
+        <div class="artwork-details">
+            <div class="detail-group">
+                <h2><i class="fas fa-info-circle icon-margin"></i>작품 정보</h2>
+                <div class="detail-item">
+                    <span class="label">제작 연도</span>
+                    <span class="value">
+                        <%= artwork.year %>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">매체</span>
+                    <span class="value">
+                        <%= artwork.medium %>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">크기</span>
+                    <span class="value">
+                        <%= artwork.size %>
+                    </span>
+                </div>
+            </div>
+
+            <div class="detail-group">
+                <h2><i class="fas fa-align-left icon-margin"></i>작품 설명</h2>
+                <p class="artwork-description">
+                    <%= artwork.description %>
+                </p>
+            </div>
+
+            <div class="detail-group">
+                <h2><i class="fas fa-calendar-alt icon-margin"></i>전시 정보</h2>
+                <p class="exhibition-info">
+                    <%= artwork.exhibition %>
+                </p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- 댓글 섹션 -->
+<section class="comments-section">
+    <h3>댓글</h3>
+    <div class="comments-list">
+        <% if (comments && comments.length> 0) { %>
+            <% comments.forEach(comment=> { %>
+                <div class="comment">
+                    <div class="comment__header">
+                        <span class="comment__author">
+                            <%= comment.author %>
+                        </span>
+                        <span class="comment__date">
+                            <%= comment.createdAt %>
+                        </span>
+                    </div>
+                    <div class="comment__content">
+                        <%= comment.content %>
+                    </div>
+                </div>
+                <% }); %>
+                    <% } else { %>
+                        <p class="no-comments">아직 댓글이 없습니다.</p>
+                        <% } %>
+    </div>
+
+    <!-- 댓글 페이지네이션 -->
+    <%- include('../../common/pagination', { page: page, name: 'comments' }) %>
+</section>
+
+<!-- 관련 작품 섹션 -->
+<div class="related-artworks-wrapper">
+    <div class="related-artworks">
+        <div class="related-artworks-container">
+            <div class="related-artworks-header">
+                <h2 class="related-artworks-title">다른 작품</h2>
+            </div>
+            <div class="related-artworks-list">
+                <% if (relatedArtworks && relatedArtworks.length> 0) { %>
+                    <% relatedArtworks.forEach(relatedArtwork=> { %>
+                        <div class="card card--related">
+                            <a href="/artwork/<%= relatedArtwork.id %>" class="card__link">
+                                <% if (relatedArtwork.image) { %>
+                                    <div class="card__image-container">
+                                        <img src="<%= relatedArtwork.image %>"
+                                            alt="<%= relatedArtwork.title || '작품 이미지' %>" class="card__image"
+                                            onerror="this.onerror=null; this.src='/images/default-artwork.svg'">
+                                    </div>
+                                    <% } else { %>
+                                        <div class="card__image-placeholder">
+                                            <img src="/images/default-artwork.svg"
+                                                alt="<%= relatedArtwork.title || '작품 이미지' %>" class="card__image">
+                                        </div>
+                                        <% } %>
+                                            <div class="card__info">
+                                                <h3 class="card__title">
+                                                    <%= relatedArtwork.title || '제목 없음' %>
+                                                </h3>
+                                                <p class="card__subtitle">
+                                                    <%= relatedArtwork.artist || '작가 미상' %>
+                                                </p>
+                                                <div class="card__meta">
+                                                    <%= relatedArtwork.department || '' %>
+                                                </div>
+                                            </div>
+                            </a>
+                        </div>
+                        <% }); %>
+                            <% } else { %>
+                                <div class="empty-state">
+                                    <i class="fas fa-image"></i>
+                                    <p>관련된 다른 작품이 없습니다.</p>
+                                </div>
+                                <% } %>
+            </div>
+            <div class="list-action">
+                <div class="action-group">
+                    <button class="btn btn--round btn--scroll" aria-label="이전 작품">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <a href="/artwork" class="btn btn--round btn--list">
+                        <i class="fas fa-th-large"></i>
+                        <span>작품 목록</span>
+                    </a>
+                    <button class="btn btn--round btn--scroll" aria-label="다음 작품">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/page/artwork/ArtworkDetail.js"></script>

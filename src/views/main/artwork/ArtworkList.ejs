@@ -1,226 +1,218 @@
-<!DOCTYPE html>
-<html lang="ko">
+<div class="container">
+    <h1 class="text-center" style="margin: 60px 0 40px 0;">작품 검색</h1>
 
-    <head>
-        <%- include('../common/head', { pageTitle: '작품 검색 - SKKU 순수미술동아리 갤러리' , additionalStyles:
-            ['/css/artwork/ArtworkList.css'] }) %>
-    </head>
-
-    <body>
-        <%- include('../common/header') %>
-
-            <main class="main-content">
-                <div class="container">
-                    <h1 class="text-center" style="margin: 60px 0 40px 0;">작품 검색</h1>
-
-                    <!-- 전시회 캐러셀 섹션 -->
-                    <section class="exhibition-carousel">
-                        <h2 class="section-title">전시회별 작품</h2>
-                        <div class="carousel-container">
-                            <button class="carousel-arrow carousel-prev">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <div class="carousel-track-container">
-                                <div class="carousel-track">
-                                    <!-- 모든 작품 카드 -->
-                                    <div class="carousel-slide" data-exhibition="all">
-                                        <div class="card card--carousel card--all">
-                                            <i class="card__icon fas fa-images"></i>
-                                            <h3 class="card__title">모든 작품</h3>
-                                            <p class="card__subtitle">전체 작품 컬렉션</p>
-                                            <div class="card__meta">총 <strong>
-                                                    <%= artworks ? artworks.length : 0 %>
-                                                </strong>개의 작품</div>
-                                        </div>
+    <!-- 전시회 캐러셀 섹션 -->
+    <section class="exhibition-carousel">
+        <h2 class="section-title">전시회별 작품</h2>
+        <div class="carousel-container">
+            <button class="carousel-arrow carousel-prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="carousel-track-container">
+                <div class="carousel-track">
+                    <!-- 모든 작품 카드 -->
+                    <div class="carousel-slide" data-exhibition="all">
+                        <div class="card card--carousel card--all">
+                            <i class="card__icon fas fa-images"></i>
+                            <h3 class="card__title">모든 작품</h3>
+                            <p class="card__subtitle">전체 작품 컬렉션</p>
+                            <div class="card__meta">총 <strong>
+                                    <%= typeof total !=='undefined' ? total : 0 %>
+                                </strong>개의 작품</div>
+                        </div>
+                    </div>
+                    <% if (typeof exhibitions !=='undefined' && Array.isArray(exhibitions) && exhibitions.length> 0) {
+                        %>
+                        <% exhibitions.forEach((exhibition, index)=> { %>
+                            <div class="carousel-slide" data-exhibition="<%= exhibition.code || '' %>">
+                                <div class="card card--carousel">
+                                    <div class="card__image-container">
+                                        <img src="<%= exhibition.image || '/images/exhibition-placeholder.svg' %>"
+                                            alt="<%= exhibition.title || '' %>" class="card__image"
+                                            onerror="this.onerror=null; this.src='/images/exhibition-placeholder.svg';">
                                     </div>
-                                    <% exhibitions.forEach((exhibition, index)=> { %>
-                                        <div class="carousel-slide" data-exhibition="<%= exhibition.code %>">
-                                            <div class="card card--carousel">
-                                                <div class="card__image-container">
-                                                    <img src="<%= exhibition.image %>" alt="<%= exhibition.title %>"
-                                                        class="card__image">
-                                                </div>
-                                                <div class="card__info">
-                                                    <h3 class="card__title">
-                                                        <%= exhibition.title %>
-                                                    </h3>
-                                                    <% if (exhibition.subtitle) { %>
-                                                        <p class="card__subtitle">
-                                                            <%= exhibition.subtitle %>
-                                                        </p>
-                                                        <% } %>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <% }); %>
+                                    <div class="card__info">
+                                        <h3 class="card__title">
+                                            <%= exhibition.title || '' %>
+                                        </h3>
+                                        <% if (exhibition.subtitle) { %>
+                                            <p class="card__subtitle">
+                                                <%= exhibition.subtitle %>
+                                            </p>
+                                            <% } %>
+                                    </div>
                                 </div>
                             </div>
-                            <button class="carousel-arrow carousel-next">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                    </section>
+                            <% }); %>
+                                <% } %>
+                </div>
+            </div>
+            <button class="carousel-arrow carousel-next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
 
-                    <!-- 상세 검색 토글 버튼 -->
-                    <div class="search-toggle-container">
-                        <button id="advancedSearchToggle">
-                            <i class="fas fa-sliders-h"></i> 상세 검색 필터
-                            <i class="fas fa-chevron-down toggle-icon"></i>
-                        </button>
+    <!-- 상세 검색 토글 버튼 -->
+    <div class="search-toggle-container">
+        <button id="advancedSearchToggle">
+            <i class="fas fa-sliders-h"></i> 상세 검색 필터
+            <i class="fas fa-chevron-down toggle-icon"></i>
+        </button>
+    </div>
+
+    <!-- 상세 검색 패널 (기본적으로 숨겨짐) -->
+    <section id="advancedSearchPanel" class="advanced-search-panel">
+        <div class="panel-content">
+            <form class="search-form" id="searchForm" method="get" action="">
+                <div class="search-simple-layout">
+                    <div class="search-column keyword-column">
+                        <label for="keyword" class="form-label">작품 검색</label>
+                        <div class="search-input-wrapper">
+                            <input type="text" id="keyword" name="keyword" class="search-input"
+                                placeholder="작품명, 작가명, 키워드 등을 입력하세요"
+                                value="<%= typeof keyword !== 'undefined' ? keyword : '' %>">
+                        </div>
                     </div>
 
-                    <!-- 상세 검색 패널 (기본적으로 숨겨짐) -->
-                    <section id="advancedSearchPanel" class="advanced-search-panel">
-                        <div class="panel-content">
-                            <form class="search-form" id="searchForm" method="get" action="">
-                                <div class="search-simple-layout">
-                                    <div class="search-column keyword-column">
-                                        <label for="keyword" class="form-label">작품 검색</label>
-                                        <div class="search-input-wrapper">
-                                            <input type="text" id="keyword" name="keyword" class="search-input"
-                                                placeholder="작품명, 작가명, 키워드 등을 입력하세요" value="<%= keyword || '' %>">
-                                        </div>
-                                    </div>
-
-                                    <div class="search-column">
-                                        <label for="exhibition" class="form-label">전시회</label>
-                                        <select id="exhibition" name="exhibition" class="form-select">
-                                            <option value="">모든 전시회</option>
-                                            <% exhibitions.forEach(ex=> { %>
-                                                <% if (ex.code !=='all' ) { %>
-                                                    <option value="<%= ex.code %>" <%=exhibition===ex.code ? 'selected'
-                                                        : '' %>><%= ex.title %>
-                                                    </option>
-                                                    <% } %>
-                                                        <% }); %>
-                                        </select>
-                                    </div>
-
-                                    <div class="search-column">
-                                        <label for="year" class="form-label">제작 연도</label>
-                                        <input type="text" id="year" name="year" class="form-input"
-                                            placeholder="예: 2023" value="<%= year || '' %>">
-                                    </div>
-
-                                    <div class="search-column search-buttons">
-                                        <button type="submit" class="btn btn-search">검색</button>
-                                        <button type="reset" class="btn btn-reset">초기화</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </section>
-
-                    <!-- 결과 컨트롤 섹션 -->
-                    <section class="results-control">
-                        <!-- 결과 수 표시 -->
-                        <div class="results-info">
-                            <p id="resultCount">총 <strong>
-                                    <%= artworks ? artworks.length : 0 %>
-                                </strong>개의 작품이 검색되었습니다.</p>
-                        </div>
-
-                        <!-- 뷰 전환 버튼 -->
-                        <div class="view-toggle">
-                            <button id="cardViewBtn" class="btn btn--toggle active" title="카드 뷰">
-                                <i class="fas fa-th"></i>
-                            </button>
-                            <button id="tableViewBtn" class="btn btn--toggle" title="테이블 뷰">
-                                <i class="fas fa-list"></i>
-                            </button>
-                        </div>
-                    </section>
-
-                    <!-- 작품 목록 섹션 (카드 뷰) -->
-                    <section class="artwork-list-section">
-                        <div id="cardView" class="artwork-grid">
-                            <% if (artworks && artworks.length> 0) { %>
-                                <% artworks.forEach(artwork=> { %>
-                                    <div class="card card--list" data-exhibition="<%= artwork.exhibitionId %>">
-                                        <a href="/artwork/<%= artwork.id %>" class="card__link">
-                                            <div class="card__image-container">
-                                                <img src="<%= artwork.imageUrl %>" alt="<%= artwork.title %>"
-                                                    class="card__image">
-                                            </div>
-                                            <div class="card__info">
-                                                <h3 class="card__title">
-                                                    <%= artwork.title %>
-                                                </h3>
-                                                <p class="card__subtitle">
-                                                    <%= artwork.artist %>
-                                                </p>
-                                                <div class="card__meta">
-                                                    <%= artwork.department %>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                    <% }); %>
-                                        <% } else { %>
-                                            <div class="no-results">
-                                                <p>검색 결과가 없습니다.</p>
-                                            </div>
-                                            <% } %>
-                        </div>
-
-                        <!-- 테이블 뷰 (기본적으로 숨겨짐) -->
-                        <table id="tableView" class="table-view" style="display: none;">
-                            <thead>
-                                <tr>
-                                    <th>이미지</th>
-                                    <th>작품명</th>
-                                    <th>작가</th>
-                                    <th>학과</th>
-                                    <th>전시회</th>
-                                    <th>제작 연도</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% if (artworks && artworks.length> 0) { %>
-                                    <% artworks.forEach(artwork=> { %>
-                                        <tr data-id="<%= artwork.id %>"
-                                            onclick="window.location.href='/artwork/<%= artwork.id %>'">
-                                            <td>
-                                                <img src="<%= artwork.imageUrl %>" alt="<%= artwork.title %>"
-                                                    class="artwork-thumbnail">
-                                            </td>
-                                            <td>
-                                                <%= artwork.title %>
-                                            </td>
-                                            <td>
-                                                <%= artwork.artist %>
-                                            </td>
-                                            <td>
-                                                <%= artwork.department %>
-                                            </td>
-                                            <td>
-                                                <%= artwork.exhibitionId %>
-                                            </td>
-                                            <td>
-                                                <%= artwork.year %>
-                                            </td>
-                                        </tr>
-                                        <% }); %>
-                                            <% } else { %>
-                                                <tr>
-                                                    <td colspan="6" class="no-results">검색 결과가 없습니다.</td>
-                                                </tr>
+                    <div class="search-column">
+                        <label for="exhibition" class="form-label">전시회</label>
+                        <select id="exhibition" name="exhibition" class="form-select">
+                            <option value="">모든 전시회</option>
+                            <% if (typeof exhibitions !=='undefined' && Array.isArray(exhibitions) &&
+                                exhibitions.length> 0) { %>
+                                <% exhibitions.forEach(ex=> { %>
+                                    <% if (ex.code !=='all' ) { %>
+                                        <option value="<%= ex.code || '' %>" <%=(typeof selectedExhibition
+                                            !=='undefined' && selectedExhibition===ex.code) ? 'selected' : '' %>>
+                                            <%= ex.title || '' %>
+                                        </option>
+                                        <% } %>
+                                            <% }); %>
                                                 <% } %>
-                            </tbody>
-                        </table>
-                    </section>
+                        </select>
+                    </div>
 
-                    <!-- 페이지네이션 -->
-                    <div class="artwork-pagination">
-                        <%- include('../common/pagination', { pagination: pagination, baseUrl: '?keyword=' + (keyword
-                            || '' ) + '&exhibition=' + (exhibition || '' ) + '&year=' + (year || '' ) + '&department=' +
-                            (department || '' ) + '&page=' }) %>
+                    <div class="search-column">
+                        <label for="year" class="form-label">제작 연도</label>
+                        <input type="text" id="year" name="year" class="form-input" placeholder="예: 2023"
+                            value="<%= typeof year !== 'undefined' ? year : '' %>">
+                    </div>
+
+                    <div class="search-column search-buttons">
+                        <button type="submit" class="btn btn-search">검색</button>
+                        <button type="reset" class="btn btn-reset">초기화</button>
                     </div>
                 </div>
-            </main>
+            </form>
+        </div>
+    </section>
 
-            <%- include('../common/footer') %>
-                <script src="/js/page/artwork/ArtworkList.js"></script>
-    </body>
+    <!-- 결과 컨트롤 섹션 -->
+    <section class="results-control">
+        <!-- 결과 수 표시 -->
+        <div class="results-info">
+            <p id="resultCount">총 <strong>
+                    <%= typeof total !=='undefined' ? total : 0 %>
+                </strong>개의 작품이 검색되었습니다.</p>
+        </div>
 
-</html>
+        <!-- 뷰 전환 버튼 -->
+        <div class="view-toggle">
+            <button id="cardViewBtn" class="btn btn--toggle active" title="카드 뷰">
+                <i class="fas fa-th"></i>
+            </button>
+            <button id="tableViewBtn" class="btn btn--toggle" title="테이블 뷰">
+                <i class="fas fa-list"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- 작품 목록 섹션 (카드 뷰) -->
+    <section class="artwork-list-section">
+        <div id="cardView" class="artwork-grid">
+            <% if (typeof artworks !=='undefined' && Array.isArray(artworks) && artworks.length> 0) { %>
+                <% artworks.forEach(artwork=> { %>
+                    <div class="card card--list" data-exhibition="<%= artwork.exhibitionId || '' %>">
+                        <a href="/artwork/<%= artwork.id || '' %>" class="card__link">
+                            <div class="card__image-container">
+                                <img src="<%= artwork.imageUrl || '/images/artwork-placeholder.svg' %>"
+                                    alt="<%= artwork.title || '' %>" class="card__image"
+                                    onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
+                            </div>
+                            <div class="card__info">
+                                <h3 class="card__title">
+                                    <%= artwork.title || '' %>
+                                </h3>
+                                <p class="card__subtitle">
+                                    <%= artwork.artist || '' %>
+                                </p>
+                                <div class="card__meta">
+                                    <%= artwork.department || '' %>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <% }); %>
+                        <% } else { %>
+                            <div class="no-results">
+                                <p>검색 결과가 없습니다.</p>
+                            </div>
+                            <% } %>
+        </div>
+
+        <!-- 테이블 뷰 (기본적으로 숨겨짐) -->
+        <table id="tableView" class="table-view" style="display: none;">
+            <thead>
+                <tr>
+                    <th>이미지</th>
+                    <th>작품명</th>
+                    <th>작가</th>
+                    <th>학과</th>
+                    <th>전시회</th>
+                    <th>제작 연도</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (typeof artworks !=='undefined' && Array.isArray(artworks) && artworks.length> 0) { %>
+                    <% artworks.forEach(artwork=> { %>
+                        <tr data-id="<%= artwork.id || '' %>"
+                            onclick="window.location.href='/artwork/<%= artwork.id || '' %>'">
+                            <td>
+                                <img src="<%= artwork.imageUrl || '/images/artwork-placeholder.svg' %>"
+                                    alt="<%= artwork.title || '' %>" class="artwork-thumbnail"
+                                    onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
+                            </td>
+                            <td>
+                                <%= artwork.title || '' %>
+                            </td>
+                            <td>
+                                <%= artwork.artist || '' %>
+                            </td>
+                            <td>
+                                <%= artwork.department || '' %>
+                            </td>
+                            <td>
+                                <%= artwork.exhibitionId || '' %>
+                            </td>
+                            <td>
+                                <%= artwork.year || '' %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="6" class="no-results">검색 결과가 없습니다.</td>
+                                </tr>
+                                <% } %>
+            </tbody>
+        </table>
+
+        <!-- 페이지네이션 -->
+        <% if (typeof page !=='undefined' && page) { %>
+            <%- include('../../common/pagination', { page }) %>
+                <% } %>
+    </section>
+</div>
+
+<script src="/js/page/artwork/ArtworkList.js"></script>
