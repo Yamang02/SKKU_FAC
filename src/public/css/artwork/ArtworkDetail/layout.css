@@ -1,0 +1,186 @@
+/* 작품 상세 페이지 레이아웃 */
+.artwork-detail-page {
+    padding: 40px 20px;
+    min-height: 100vh;
+    background-color: #f9f9f9;
+    overflow: visible;
+}
+
+.artwork-detail-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+    align-items: start;
+}
+
+/* 이미지 섹션 */
+.artwork-image-section {
+    position: sticky;
+    top: calc(var(--header-height) + 20px);
+    height: fit-content;
+    align-self: flex-start;
+}
+
+.artwork-image-wrapper {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.artwork-main-image {
+    width: 100%;
+    height: auto;
+    min-height: 400px;
+    min-width: 400px;
+    border-radius: 4px;
+    object-fit: contain;
+}
+
+/* 정보 섹션 */
+.artwork-info-section {
+    padding: 20px 0;
+}
+
+/* 푸터 수정 */
+.artwork-detail-footer {
+    margin-top: 80px;
+    padding: 60px 0;
+    background-color: #f8f9fa;
+    border-top: 1px solid #eee;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 60px;
+}
+
+.footer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.footer-section h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer-section a {
+    color: var(--color-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.3s;
+}
+
+.footer-section a:hover {
+    color: var(--color-primary);
+}
+
+.footer-bottom {
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+.footer-bottom p {
+    color: var(--color-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1600px) {
+    .related-artworks {
+        margin: 80px 0;
+    }
+}
+
+@media (max-width: 1200px) {
+    .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .comments-section,
+    .related-artworks,
+    .header-actions {
+        width: calc(100% - 40px);
+        margin: 40px 20px;
+        padding: 30px;
+    }
+}
+
+/* 태블릿 및 모바일 레이아웃 */
+@media (max-width: 1023px) {
+    .artwork-detail-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .artwork-image-section {
+        position: sticky;
+        top: calc(var(--header-height) + 20px);
+        height: fit-content;
+        max-height: 80vh;
+        overflow: hidden;
+    }
+}
+
+@media (max-width: 768px) {
+    .artwork-image-section {
+        position: sticky;
+        top: calc(var(--header-height) + 10px);
+        height: fit-content;
+        max-height: 70vh;
+    }
+
+    .artwork-detail-container,
+    .comments-section {
+        padding: 20px;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .footer-container {
+        padding: 0 20px;
+    }
+
+    .footer-bottom {
+        margin-top: 40px;
+        padding-top: 20px;
+    }
+
+    .header-actions {
+        margin-top: 30px;
+        padding: 0;
+    }
+
+    .artwork-main-image {
+        min-height: 300px;
+        min-width: 300px;
+    }
+}

@@ -2,15 +2,9 @@ import express from 'express';
 import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { pageTracker } from './middleware/PageTracker.js';
-
-// 라우터 import
-import homeRouter from './routes/home/HomeRouter.js';
-import noticeRouter from './routes/notice/NoticeRouter.js';
-import exhibitionRouter from './routes/exhibition/ExhibitionRouter.js';
-import artworkRouter from './routes/artwork/ArtworkRouter.js';
-import userRouter from './routes/user/UserRouter.js';
-import adminRouter from './routes/admin/AdminRouter.js';
+import { setupContainer } from './infrastructure/di/setup.js';
+import { createRouters } from './interface/router/RouterIndex.js';
+import { pageTracker } from './interface/middleware/PageTracker.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -36,10 +30,8 @@ const getReturnUrl = (req) => {
 // 미들웨어 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../public')));
-app.use('/css', express.static(path.join(__dirname, '../public/css')));
-app.use('/js', express.static(path.join(__dirname, '../public/js')));
-app.use('/images', express.static(path.join(__dirname, '../public/images')));
+app.use(express.static('public'));
+app.use('/css', express.static(path.join(__dirname, 'presentation/public/css')));
 
 // 세션 설정
 app.use(session({
@@ -53,7 +45,7 @@ app.use(pageTracker);
 
 // 뷰 엔진 설정
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'presentation/view'));
 
 // 전역 미들웨어 - 사용자 정보를 모든 뷰에서 사용 가능하게 설정
 app.use((req, res, next) => {
@@ -61,14 +53,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// 라우터 설정
-app.use('/', homeRouter);
-app.use('/notice', noticeRouter);
-app.use('/exhibition', exhibitionRouter);
-app.use('/artwork', artworkRouter);
-app.use('/user', userRouter);
-app.use('/admin', adminRouter);
+// 의존성 주입 설정
+const container = setupContainer();
 
+// 라우터 설정
+app.use('/', createRouters(container));
 console.log('라우터 설정 완료');
 
 // 404 에러 처리
@@ -112,7 +101,7 @@ app.use((err, req, res, _next) => {
         returnUrl,
         isAdminPath,
         error: {
-            code: 500,
+            ...err,
             stack: process.env.NODE_ENV === 'development' ? err.stack : null
         }
     });

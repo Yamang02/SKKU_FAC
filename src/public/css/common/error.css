@@ -1,0 +1,118 @@
+/* 에러 페이지 */
+
+.error-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    padding: 2rem;
+}
+
+.error-container {
+    max-width: 600px;
+    width: 100%;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.error-container h1 {
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.error-message {
+    color: #dc3545;
+    margin: 1rem 0;
+    font-size: 1.1rem;
+}
+
+.error-code {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}
+
+.error-stack {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: monospace;
+    overflow-x: auto;
+    margin: 1rem 0;
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.button-container {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.back-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    font-weight: 500;
+}
+
+.back-button:hover {
+    background-color: var(--color-primary-dark);
+    color: white;
+    text-decoration: none;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .error-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .error-container h1 {
+        font-size: 1.75rem;
+    }
+
+    .error-message {
+        font-size: 1rem;
+    }
+
+    .back-button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.card-text {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+.btn-primary {
+    padding: 10px 25px;
+    font-size: 1.1rem;
+}
+
+.fas {
+    margin-right: 8px;
+}

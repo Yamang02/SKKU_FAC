@@ -1,0 +1,113 @@
+/* 헤더 스타일 */
+.adminHeader {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    min-width: calc(100% - var(--sidebar-width));
+    max-width: calc(var(--content-max-width) - var(--content-padding) * 2);
+    height: var(--header-height);
+    margin: 0 auto;
+    padding: 0 32px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 99;
+}
+
+.adminHeader__top {
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.adminHeader__title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0;
+}
+
+.adminHeader__breadcrumb {
+    color: #64748b;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.adminHeader__breadcrumb span {
+    margin: 0 8px;
+    color: #94a3b8;
+}
+
+.adminHeader__search {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.adminHeader__search input {
+    padding: 8px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    width: 240px;
+    transition: border-color 0.2s;
+}
+
+.adminHeader__search input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.adminHeader__search button {
+    padding: 8px 16px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.adminHeader__search button:hover {
+    background-color: #2563eb;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .adminHeader {
+        padding: 0 20px;
+    }
+
+    .adminHeader__search input {
+        width: 160px;
+    }
+}
+
+.adminHeaderUser {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.adminHeaderUserName {
+    font-weight: 500;
+    color: #333;
+}
+
+.adminHeaderLogout {
+    padding: 6px 12px;
+    border: 1px solid #dc3545;
+    border-radius: 4px;
+    color: #dc3545;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.adminHeaderLogout:hover {
+    background-color: #dc3545;
+    color: white;
+}

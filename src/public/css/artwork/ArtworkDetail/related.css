@@ -1,0 +1,200 @@
+/* 관련 작품 섹션 스타일 */
+.related-artworks {
+    width: 100%;
+    max-width: 1560px;
+    margin: 40px auto;
+    padding: 40px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
+}
+
+.related-artworks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    position: relative;
+    z-index: 3;
+    background-color: #fff;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.related-artworks-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    padding-left: 20px;
+}
+
+.related-artworks-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.related-artworks-list {
+    display: flex;
+    gap: 30px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 10px 5px;
+    margin: -10px -5px;
+    width: 100%;
+    min-height: 360px;
+    border-left: 5px solid #fff;
+    border-right: 5px solid #fff;
+    position: relative;
+}
+
+.related-artworks-list::-webkit-scrollbar {
+    display: none;
+}
+
+.related-artworks-container::before,
+.related-artworks-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 120px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.related-artworks-container::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+.related-artworks-container::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+.related-artworks-list::before,
+.related-artworks-list::after {
+    display: none;
+}
+
+/* 관련 작품 특화 카드 스타일 */
+.card--related {
+    /* 관련 작품 페이지에만 필요한 특화 스타일이 있다면 여기에 추가 */
+}
+
+/*
+ * 레거시 클래스 지원 (기존 코드와의 호환성을 위해 유지)
+ * 새로운 프로젝트에서는 .card 클래스를 직접 사용하는 것을 권장합니다.
+ */
+.related-artwork-card {
+    /* .card--related 클래스의 스타일을 상속 */
+}
+
+.related-artwork-image {
+    /* .card__image 클래스의 스타일을 상속 */
+}
+
+.related-artwork-info {
+    /* .card__info 클래스의 스타일을 상속 */
+}
+
+.related-artwork-title {
+    /* .card__title 클래스의 스타일을 상속 */
+}
+
+.related-artwork-artist {
+    /* .card__subtitle 클래스의 스타일을 상속 */
+}
+
+/* 상태 표시 스타일 */
+.loading-state,
+.error-state,
+.empty-state {
+    width: 100%;
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: var(--color-secondary);
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.error-state i,
+.empty-state i {
+    font-size: 48px;
+    color: #ddd;
+}
+
+/* 작품 카드 스타일 */
+.artwork-image-placeholder {
+    width: 100%;
+    height: 280px;
+    min-height: 280px;
+    min-width: 280px;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.artwork-image-placeholder::before {
+    content: '\f03e';
+    font-family: 'Font Awesome 6 Free';
+    font-size: 48px;
+    color: #ddd;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .related-artworks {
+        width: calc(100% - 30px);
+        margin: 30px 15px;
+        padding: 20px;
+    }
+
+    .related-artworks-title {
+        font-size: 1.5rem;
+    }
+
+    .related-artwork-card {
+        min-width: 240px;
+    }
+
+    .related-artwork-image {
+        height: 240px;
+        min-height: 240px;
+        min-width: 240px;
+    }
+
+    .artwork-image-placeholder {
+        height: 240px;
+        min-height: 240px;
+        min-width: 240px;
+    }
+}

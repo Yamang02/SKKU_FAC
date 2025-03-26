@@ -1,0 +1,46 @@
+/* 버튼 스타일 */
+.admin-button {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+}
+
+.admin-button--primary {
+    background-color: #1976d2;
+    color: white;
+}
+
+.admin-button--primary:hover {
+    background-color: #1565c0;
+}
+
+.admin-button--secondary {
+    background-color: #f5f5f5;
+    color: #424242;
+}
+
+.admin-button--secondary:hover {
+    background-color: #e0e0e0;
+}
+
+.admin-button--danger {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+.admin-button--danger:hover {
+    background-color: #ffcdd2;
+}
+
+.admin-button-group {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+}

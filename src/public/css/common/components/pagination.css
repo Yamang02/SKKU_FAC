@@ -1,0 +1,123 @@
+/*
+ * 페이지네이션 컴포넌트 스타일
+ *
+ * 이 파일은 애플리케이션 전체에서 사용되는 페이지네이션 스타일을 정의합니다.
+ * BEM 방법론을 따라 클래스명을 구성했습니다.
+ */
+
+/* 페이지네이션 컨테이너 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 40px 0;
+}
+
+/* 페이지네이션 버튼 */
+.pagination__btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background-color: white;
+    color: var(--color-text-primary);
+    text-decoration: none;
+}
+
+.pagination__btn i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+/* 페이지네이션 점 (생략 부호) */
+.pagination__dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    color: var(--color-text-primary);
+}
+
+/* 활성화된 페이지 버튼 */
+.pagination__btn--active {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* 버튼 호버 효과 */
+.pagination__btn:hover:not(.pagination__btn--active) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* 비활성화된 버튼 */
+.pagination__btn--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 이전/다음 버튼 */
+.pagination__btn--prev,
+.pagination__btn--next {
+    /* 기본 스타일은 pagination__btn과 동일 */
+}
+
+/* 컨텍스트별 페이지네이션 컨테이너 */
+.comments__pagination {
+    margin-top: 40px;
+}
+
+.artwork-pagination {
+    margin-top: 40px;
+    margin-bottom: 60px;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .pagination {
+        gap: 8px;
+        margin: 30px 0;
+    }
+
+    .pagination__btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+
+    .pagination__btn i {
+        font-size: 0.9rem;
+    }
+
+    .pagination__dots {
+        width: 20px;
+    }
+
+    .artwork-pagination {
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pagination {
+        gap: 6px;
+    }
+
+    .pagination__btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.85rem;
+    }
+}
