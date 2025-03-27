@@ -260,20 +260,37 @@ export default class ArtworkController {
      */
     async getManagementArtworkList(req, res) {
         try {
-            const { page = 1, limit = 12, search, exhibitionId } = req.query;
+            const { page = 1, limit = 10, keyword, exhibitionId, artistId } = req.query;
+            const filters = { keyword, exhibitionId, artistId };
+
             const [artworks, exhibitions, artists] = await Promise.all([
-                this.artworkRepository.findArtworks({ page, limit, search, exhibitionId }),
+                this.artworkRepository.findArtworks({
+                    page: parseInt(page),
+                    limit: parseInt(limit),
+                    ...filters
+                }),
                 this.exhibitionRepository.findExhibitions({ limit: 100 }),
                 this.artworkRepository.findArtists({ limit: 100 })
             ]);
 
+            const pageOptions = {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                baseUrl: '/admin/management/artwork',
+                filters,
+                previousUrl: Page.getPreviousPageUrl(req),
+                currentUrl: Page.getCurrentPageUrl(req)
+            };
+
+            const pageData = new Page(artworks.total, pageOptions);
+
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.LIST, {
                 title: '작품 관리',
-                artworks: artworks && artworks.items ? artworks.items : [],
-                exhibitions: exhibitions && exhibitions.items ? exhibitions.items : [],
-                artists: artists && artists.items ? artists.items : [],
-                currentPage: page,
-                totalPages: Math.ceil(artworks.total / limit)
+                artworks: artworks.items || [],
+                exhibitions: exhibitions.items || [],
+                artists: artists.items || [],
+                page: pageData,
+                filters
             });
         } catch (error) {
             ViewResolver.renderError(res, error);

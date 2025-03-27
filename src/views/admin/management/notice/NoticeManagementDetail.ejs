@@ -78,13 +78,18 @@
                                 삭제
                             </button>
                             <% } %>
-                                <a href="/admin/management/notice/list" class="admin-button admin-button--secondary">
-                                    목록
-                                </a>
                     </div>
         </form>
     </div>
 </div>
+<div class="admin-back-button-container">
+    <a onclick="history.back()" class="admin-button admin-button--backtolist">
+        <i class="fas fa-list"></i>
+        목록으로
+    </a>
+</div>
+
+
 
 <% if (notice) { %>
     <script>

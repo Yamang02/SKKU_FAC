@@ -90,12 +90,6 @@
     border-top: 1px solid #e0e0e0;
 }
 
-.admin-back-button-container {
-    display: flex;
-    justify-content: flex-start;
-    margin-top: 1rem;
-}
-
 /* 비활성화된 입력 필드 스타일 */
 .form-group input:disabled,
 .form-group select:disabled,

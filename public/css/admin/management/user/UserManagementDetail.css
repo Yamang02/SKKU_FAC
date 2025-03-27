@@ -60,12 +60,6 @@
     gap: 10px;
 }
 
-.admin-back-button-container {
-    display: flex;
-    justify-content: flex-start;
-    margin-top: 20px;
-}
-
 .section-header {
     margin-bottom: 20px;
 }

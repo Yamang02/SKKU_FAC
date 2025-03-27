@@ -114,25 +114,29 @@
 
         <!-- 페이지네이션 섹션 -->
         <div class="admin-pagination">
-            <% if (result && result.totalPages> 1) { %>
+            <% if (typeof page !=='undefined' && page) { %>
                 <button class="admin-pagination__button" onclick="goToPage(1)">
                     <i class="fas fa-angle-double-left"></i>
                 </button>
-                <button class="admin-pagination__button" onclick="goToPage(<%= page - 1 %>)" <%=page <=1 ? 'disabled'
-                    : '' %>>
+                <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage - 1 %>)"
+                    <%=!page.hasPreviousPage ? 'disabled' : '' %>>
                     <i class="fas fa-angle-left"></i>
                 </button>
-                <% for(let i=Math.max(1, page - 2); i <=Math.min(result.totalPages, page + 2); i++) { %>
-                    <button class="admin-pagination__button <%= i === page ? 'admin-pagination__button--active' : '' %>"
+
+                <% for (let i=Math.max(1, page.currentPage - 2); i <=Math.min(page.totalPages, page.currentPage + 2);
+                    i++) { %>
+                    <button
+                        class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>"
                         onclick="goToPage(<%= i %>)">
                         <%= i %>
                     </button>
                     <% } %>
-                        <button class="admin-pagination__button" onclick="goToPage(<%= page + 1 %>)" <%=page>=
-                            result.totalPages ? 'disabled' : '' %>>
+
+                        <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage + 1 %>)"
+                            <%=!page.hasNextPage ? 'disabled' : '' %>>
                             <i class="fas fa-angle-right"></i>
                         </button>
-                        <button class="admin-pagination__button" onclick="goToPage(<%= result.totalPages %>)">
+                        <button class="admin-pagination__button" onclick="goToPage(<%= page.totalPages %>)">
                             <i class="fas fa-angle-double-right"></i>
                         </button>
                         <% } %>

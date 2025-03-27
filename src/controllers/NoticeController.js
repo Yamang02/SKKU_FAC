@@ -113,20 +113,47 @@ export default class NoticeController {
      */
     async getManagementNoticeList(req, res) {
         try {
-            const { page = 1, limit = 12, search, status, isImportant } = req.query;
-            const notices = await this.noticeRepository.findNotices({ page, limit, search, status, isImportant });
+            const { page = 1, limit = 10, keyword, status, isImportant } = req.query;
+
+            // isImportant 값 변환 (string -> boolean)
+            let parsedIsImportant = undefined;
+            if (isImportant === 'true') parsedIsImportant = true;
+            if (isImportant === 'false') parsedIsImportant = false;
+
+            const filters = {
+                keyword,
+                status,
+                isImportant: parsedIsImportant
+            };
+
+            const notices = await this.noticeRepository.findNotices({
+                page: parseInt(page),
+                limit: parseInt(limit),
+                ...filters
+            });
+
+            const pageOptions = {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                baseUrl: '/admin/management/notice',
+                filters,
+                previousUrl: Page.getPreviousPageUrl(req),
+                currentUrl: Page.getCurrentPageUrl(req)
+            };
+
+            const pageData = new Page(notices.total, pageOptions);
+
+            const result = {
+                notices: notices.items || [],
+                total: notices.total,
+                totalPages: Math.ceil(notices.total / limit)
+            };
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.LIST, {
                 title: '공지사항 관리',
-                result: {
-                    notices: notices.items || []
-                },
-                currentPage: page,
-                totalPages: Math.ceil(notices.total / limit),
-                filters: {
-                    status,
-                    isImportant
-                }
+                result,
+                page: pageData,
+                filters
             });
         } catch (error) {
             ViewResolver.renderError(res, error);

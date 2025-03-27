@@ -56,25 +56,26 @@
                 </div>
             </div>
         </div>
-        <div class="section-footer">
-            <div class="admin-button-group">
-                <button class="admin-button admin-button--secondary" onclick="handleEdit()">
-                    <i class="fas fa-edit"></i>
-                    수정
-                </button>
-                <button class="admin-button admin-button--danger" onclick="handleDelete()">
-                    <i class="fas fa-trash"></i>
-                    삭제
-                </button>
-            </div>
+
+    </div>
+    <div class="section-footer">
+        <div class="admin-button-group">
+            <button class="admin-button admin-button--secondary" onclick="handleEdit()">
+                <i class="fas fa-edit"></i>
+                수정
+            </button>
+            <button class="admin-button admin-button--danger" onclick="handleDelete()">
+                <i class="fas fa-trash"></i>
+                삭제
+            </button>
         </div>
     </div>
-    <div class="admin-back-button-container">
-        <a href="/admin/management/artwork" class="admin-button admin-button--secondary">
-            <i class="fas fa-arrow-left"></i>
-            목록으로
-        </a>
-    </div>
+</div>
+<div class="admin-back-button-container">
+    <a onclick="history.back()" class="admin-button admin-button--backtolist">
+        <i class="fas fa-list"></i>
+        목록으로
+    </a>
 </div>
 
 <script>

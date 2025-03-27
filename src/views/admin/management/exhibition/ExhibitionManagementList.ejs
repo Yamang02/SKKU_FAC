@@ -4,15 +4,29 @@
 
 <div class="admin-management">
     <h2 class="admin-title">전시회 목록</h2>
+
+    <!-- 컨트롤 섹션 -->
+    <div class="admin-control">
+        <div class="admin-control__group">
+            <button class="admin-button admin-button--primary"
+                onclick="location.href='/admin/management/exhibition/create'">
+                <i class="fas fa-plus"></i>
+                전시회 등록
+            </button>
+        </div>
+    </div>
+
     <!-- 필터 섹션 -->
     <div class="admin-filter">
         <div class="admin-filter__group">
-            <select class="admin-filter__select">
+            <select class="admin-filter__select" name="exhibitionType">
                 <option value="">전시 유형</option>
-                <option value="regular">정기</option>
-                <option value="special">특별</option>
+                <option value="regular" <%=filters?.exhibitionType==='regular' ? 'selected' : '' %>>정기</option>
+                <option value="special" <%=filters?.exhibitionType==='special' ? 'selected' : '' %>>특별</option>
             </select>
-            <button class="admin-button admin-button--primary">
+            <input type="text" class="admin-filter__input" name="keyword" placeholder="검색어"
+                value="<%= filters?.keyword || '' %>">
+            <button class="admin-button admin-button--primary" id="btnApplyFilter">
                 <i class="fas fa-filter"></i>
                 필터 적용
             </button>
@@ -38,72 +52,86 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% exhibitions.forEach(exhibition=> { %>
-                        <tr>
-                            <td>
-                                <input type="checkbox" class="admin-checkbox">
-                            </td>
-                            <td>
-                                <%= exhibition.id %>
-                            </td>
-                            <td>
-                                <%= exhibition.title %>
-                            </td>
-                            <td>
-                                <%= exhibition.subtitle %>
-                            </td>
-                            <td>
-                                <%= exhibition.startDate %> ~ <%= exhibition.endDate %>
-                            </td>
-                            <td>
-                                <%= exhibition.location %>
-                            </td>
-                            <td>
-                                <span class="admin-badge admin-badge--<%= exhibition.exhibitionType %>">
-                                    <%= exhibition.exhibitionType==='regular' ? '정기' : '특별' %>
-                                </span>
-                            </td>
-                            <td>
-                                <div class="admin-button-group">
-                                    <a href="/admin/management/exhibition/<%= exhibition.id %>"
-                                        class="admin-button admin-button--secondary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button class="admin-button admin-button--danger"
-                                        onclick="deleteExhibition(<%= exhibition.id %>)">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <% }); %>
+                    <% if (exhibitions && exhibitions.length> 0) { %>
+                        <% exhibitions.forEach(exhibition=> { %>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="admin-checkbox">
+                                </td>
+                                <td>
+                                    <%= exhibition.id %>
+                                </td>
+                                <td>
+                                    <%= exhibition.title %>
+                                </td>
+                                <td>
+                                    <%= exhibition.subtitle %>
+                                </td>
+                                <td>
+                                    <%= exhibition.startDate %> ~ <%= exhibition.endDate %>
+                                </td>
+                                <td>
+                                    <%= exhibition.location %>
+                                </td>
+                                <td>
+                                    <span class="admin-badge admin-badge--<%= exhibition.exhibitionType %>">
+                                        <%= exhibition.exhibitionType==='regular' ? '정기' : '특별' %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="admin-button-group">
+                                        <a href="/admin/management/exhibition/<%= exhibition.id %>"
+                                            class="admin-button admin-button--secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="admin-button admin-button--danger"
+                                            onclick="deleteExhibition(<%= exhibition.id %>)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="8" class="admin-table__empty">
+                                            등록된 전시회가 없습니다.
+                                        </td>
+                                    </tr>
+                                    <% } %>
                 </tbody>
             </table>
         </div>
 
         <!-- 페이지네이션 섹션 -->
-        <% if (typeof page !=='undefined' && page) { %>
-            <div class="admin-pagination">
-                <% if (page.hasPreviousPage) { %>
-                    <a href="<%= page.previousPageUrl %>" class="admin-pagination__button">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
+        <div class="admin-pagination">
+            <% if (typeof page !=='undefined' && page) { %>
+                <button class="admin-pagination__button" onclick="goToPage(1)">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage - 1 %>)"
+                    <%=!page.hasPreviousPage ? 'disabled' : '' %>>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+
+                <% for (let i=Math.max(1, page.currentPage - 2); i <=Math.min(page.totalPages, page.currentPage + 2);
+                    i++) { %>
+                    <button
+                        class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>"
+                        onclick="goToPage(<%= i %>)">
+                        <%= i %>
+                    </button>
                     <% } %>
 
-                        <% for (let i=page.startPage; i <=page.endPage; i++) { %>
-                            <a href="<%= page.getPageUrl(i) %>"
-                                class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>">
-                                <%= i %>
-                            </a>
-                            <% } %>
-
-                                <% if (page.hasNextPage) { %>
-                                    <a href="<%= page.nextPageUrl %>" class="admin-pagination__button">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                    <% } %>
-            </div>
-            <% } %>
+                        <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage + 1 %>)"
+                            <%=!page.hasNextPage ? 'disabled' : '' %>>
+                            <i class="fas fa-angle-right"></i>
+                        </button>
+                        <button class="admin-pagination__button" onclick="goToPage(<%= page.totalPages %>)">
+                            <i class="fas fa-angle-double-right"></i>
+                        </button>
+                        <% } %>
+        </div>
     </div>
 </div>
 
@@ -130,4 +158,34 @@
                 });
         }
     }
+
+    function goToPage(page) {
+        const currentUrl = new URL(window.location.href);
+        const searchParams = currentUrl.searchParams;
+        searchParams.set('page', page);
+        window.location.href = currentUrl.toString();
+    }
+
+    document.getElementById('btnApplyFilter').addEventListener('click', function () {
+        const exhibitionType = document.querySelector('select[name="exhibitionType"]').value;
+        const keyword = document.querySelector('input[name="keyword"]').value;
+
+        const currentUrl = new URL(window.location.href);
+        const searchParams = currentUrl.searchParams;
+
+        if (exhibitionType) {
+            searchParams.set('exhibitionType', exhibitionType);
+        } else {
+            searchParams.delete('exhibitionType');
+        }
+
+        if (keyword) {
+            searchParams.set('keyword', keyword);
+        } else {
+            searchParams.delete('keyword');
+        }
+
+        searchParams.set('page', 1);
+        window.location.href = currentUrl.toString();
+    });
 </script>

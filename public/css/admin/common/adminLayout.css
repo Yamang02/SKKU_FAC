@@ -33,13 +33,17 @@
 
 .admin-management {
     padding: 20px;
-    background-color: #fff;
 }
 
 .admin-management__content {
     margin-top: 20px;
 }
 
+.admin-back-button-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
 /* 반응형 디자인 */
 @media (max-width: 1600px) {
     :root {

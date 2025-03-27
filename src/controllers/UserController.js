@@ -3,6 +3,7 @@ import UserRepository from '../repositories/UserRepository.js';
 import bcrypt from 'bcrypt';
 import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
+import Page from '../models/common/page/Page.js';
 
 export default class UserController {
     constructor() {
@@ -243,12 +244,31 @@ export default class UserController {
      */
     async getManagementUserList(req, res) {
         try {
-            const users = await this.userRepository.findUsers();
+            const { page = 1, limit = 10, status, role, keyword } = req.query;
+            const filters = { status, role, keyword };
+
+            const users = await this.userRepository.findUsers({
+                page: parseInt(page),
+                limit: parseInt(limit),
+                ...filters
+            });
+
+            const pageOptions = {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                baseUrl: '/admin/management/user',
+                filters,
+                previousUrl: Page.getPreviousPageUrl(req),
+                currentUrl: Page.getCurrentPageUrl(req)
+            };
+
+            const pageData = new Page(users.total, pageOptions);
+
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.LIST, {
-                currentPage: req.path,
-                users: users.items,
-                total: users.total,
-                title: '사용자 관리'
+                title: '사용자 관리',
+                users: users.items || [],
+                page: pageData,
+                filters
             });
         } catch (error) {
             ViewResolver.renderError(res, error);

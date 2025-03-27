@@ -1,25 +1,43 @@
+<style>
+    @import url('/css/admin/management/artwork/ArtworkManagementList.css');
+</style>
+
 <div class="admin-management">
     <h2 class="admin-title">작품목록</h2>
+
+    <!-- 컨트롤 섹션 -->
+    <div class="admin-control">
+        <div class="admin-control__group">
+            <button class="admin-button admin-button--primary"
+                onclick="location.href='/admin/management/artwork/create'">
+                <i class="fas fa-plus"></i>
+                작품 등록
+            </button>
+        </div>
+    </div>
+
     <!-- 필터 섹션 -->
     <div class="admin-filter">
         <div class="admin-filter__group">
-            <select class="admin-filter__select">
+            <select class="admin-filter__select" name="exhibitionId">
                 <option value="">전시회</option>
                 <% exhibitions.forEach(exhibition=> { %>
-                    <option value="<%= exhibition.id %>">
+                    <option value="<%= exhibition.id %>" <%=filters?.exhibitionId==exhibition.id ? 'selected' : '' %>>
                         <%= exhibition.title %>
                     </option>
                     <% }); %>
             </select>
-            <select class="admin-filter__select">
+            <select class="admin-filter__select" name="artistId">
                 <option value="">작가</option>
                 <% artists.forEach(artist=> { %>
-                    <option value="<%= artist.id %>">
+                    <option value="<%= artist.id %>" <%=filters?.artistId==artist.id ? 'selected' : '' %>>
                         <%= artist.name %>
                     </option>
                     <% }); %>
             </select>
-            <button class="admin-button admin-button--primary">
+            <input type="text" class="admin-filter__input" name="keyword" placeholder="검색어"
+                value="<%= filters?.keyword || '' %>">
+            <button class="admin-button admin-button--primary" id="btnApplyFilter">
                 <i class="fas fa-filter"></i>
                 필터 적용
             </button>
@@ -45,61 +63,149 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% artworks.forEach(artwork=> { %>
-                        <tr>
-                            <td>
-                                <input type="checkbox" class="admin-checkbox">
-                            </td>
-                            <td>
-                                <%= artwork.id %>
-                            </td>
-                            <td>
-                                <%= artwork.title %>
-                            </td>
-                            <td>
-                                <%= artwork.artist.name %>
-                            </td>
-                            <td>
-                                <span class="admin-badge admin-badge--<%= artwork.exhibition.exhibitionType %>">
-                                    <%= artwork.exhibition.title %>
-                                </span>
-                            </td>
-                            <td>
-                                <%= new Date(artwork.createdAt).toLocaleDateString() %>
-                            </td>
-                            <td>
-                                <%= new Date(artwork.updatedAt).toLocaleDateString() %>
-                            </td>
-                            <td>
-                                <div class="admin-button-group">
-                                    <a href="/admin/management/artwork/<%= artwork.id %>"
-                                        class="admin-button admin-button--secondary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button class="admin-button admin-button--danger">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <% }); %>
+                    <% if (artworks && artworks.length> 0) { %>
+                        <% artworks.forEach(artwork=> { %>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="admin-checkbox">
+                                </td>
+                                <td>
+                                    <%= artwork.id %>
+                                </td>
+                                <td>
+                                    <%= artwork.title %>
+                                </td>
+                                <td>
+                                    <%= artwork.artist.name %>
+                                </td>
+                                <td>
+                                    <% if (artwork.exhibition) { %>
+                                        <span class="admin-badge admin-badge--<%= artwork.exhibition.exhibitionType %>">
+                                            <%= artwork.exhibition.title %>
+                                        </span>
+                                        <% } else { %>
+                                            -
+                                            <% } %>
+                                </td>
+                                <td>
+                                    <%= new Date(artwork.createdAt).toLocaleDateString() %>
+                                </td>
+                                <td>
+                                    <%= new Date(artwork.updatedAt).toLocaleDateString() %>
+                                </td>
+                                <td>
+                                    <div class="admin-button-group">
+                                        <a href="/admin/management/artwork/<%= artwork.id %>"
+                                            class="admin-button admin-button--secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="admin-button admin-button--danger"
+                                            onclick="deleteArtwork(<%= artwork.id %>)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="8" class="admin-table__empty">
+                                            등록된 작품이 없습니다.
+                                        </td>
+                                    </tr>
+                                    <% } %>
                 </tbody>
             </table>
         </div>
 
         <!-- 페이지네이션 섹션 -->
         <div class="admin-pagination">
-            <button class="admin-pagination__button">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="admin-pagination__button admin-pagination__button--active">1</button>
-            <button class="admin-pagination__button">2</button>
-            <button class="admin-pagination__button">3</button>
-            <button class="admin-pagination__button">4</button>
-            <button class="admin-pagination__button">5</button>
-            <button class="admin-pagination__button">
-                <i class="fas fa-chevron-right"></i>
-            </button>
+            <% if (typeof page !=='undefined' && page) { %>
+                <button class="admin-pagination__button" onclick="goToPage(1)">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage - 1 %>)"
+                    <%=!page.hasPreviousPage ? 'disabled' : '' %>>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+
+                <% for (let i=Math.max(1, page.currentPage - 2); i <=Math.min(page.totalPages, page.currentPage + 2);
+                    i++) { %>
+                    <button
+                        class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>"
+                        onclick="goToPage(<%= i %>)">
+                        <%= i %>
+                    </button>
+                    <% } %>
+
+                        <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage + 1 %>)"
+                            <%=!page.hasNextPage ? 'disabled' : '' %>>
+                            <i class="fas fa-angle-right"></i>
+                        </button>
+                        <button class="admin-pagination__button" onclick="goToPage(<%= page.totalPages %>)">
+                            <i class="fas fa-angle-double-right"></i>
+                        </button>
+                        <% } %>
         </div>
     </div>
 </div>
+
+<script>
+    function deleteArtwork(id) {
+        if (confirm('정말로 이 작품을 삭제하시겠습니까?')) {
+            fetch(`/admin/management/artwork/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    alert('작품이 성공적으로 삭제되었습니다.');
+                    window.location.reload();
+                } else {
+                    alert('작품 삭제 중 오류가 발생했습니다.');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('작품 삭제 중 오류가 발생했습니다.');
+            });
+        }
+    }
+
+    function goToPage(page) {
+        const currentUrl = new URL(window.location.href);
+        const searchParams = currentUrl.searchParams;
+        searchParams.set('page', page);
+        window.location.href = currentUrl.toString();
+    }
+
+    document.getElementById('btnApplyFilter').addEventListener('click', function () {
+        const exhibitionId = document.querySelector('select[name="exhibitionId"]').value;
+        const artistId = document.querySelector('select[name="artistId"]').value;
+        const keyword = document.querySelector('input[name="keyword"]').value;
+
+        const currentUrl = new URL(window.location.href);
+        const searchParams = currentUrl.searchParams;
+
+        if (exhibitionId) {
+            searchParams.set('exhibitionId', exhibitionId);
+        } else {
+            searchParams.delete('exhibitionId');
+        }
+
+        if (artistId) {
+            searchParams.set('artistId', artistId);
+        } else {
+            searchParams.delete('artistId');
+        }
+
+        if (keyword) {
+            searchParams.set('keyword', keyword);
+        } else {
+            searchParams.delete('keyword');
+        }
+
+        searchParams.set('page', 1);
+        window.location.href = currentUrl.toString();
+    });
+</script>
