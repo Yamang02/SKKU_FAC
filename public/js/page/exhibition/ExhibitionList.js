@@ -201,10 +201,19 @@ function showExhibitionModal(data) {
         };
     }
 
-    // 등록 버튼 이벤트
-    const registerButton = modal.querySelector('#modal-register');
-    if (registerButton) {
-        registerButton.href = `/exhibition/${data.id}/register`;
+    // 출품하기 버튼 이벤트
+    const submitButton = modal.querySelector('#modal-submit-link');
+    if (submitButton) {
+        submitButton.href = `/artwork/register?exhibition=${data.id}`;
+        submitButton.onclick = () => {
+            closeModal(modal);
+        };
+    }
+
+    // 작품 조회 버튼 이벤트
+    const viewButton = modal.querySelector('#modal-view-link');
+    if (viewButton) {
+        viewButton.href = `/exhibition/${data.id}/artworks`;
     }
 }
 

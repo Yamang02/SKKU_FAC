@@ -128,10 +128,19 @@ export default class ArtworkController {
      */
     async getArtworkCreatePage(req, res) {
         try {
+            // 로그인 체크
+            if (!req.session.user) {
+                return res.redirect('/user/login?returnUrl=/artwork/register');
+            }
+
             const exhibitions = await this.exhibitionRepository.findExhibitions({ limit: 100 });
-            ViewResolver.render(res, ViewPath.ARTWORK.CREATE, {
+            const exhibitionId = req.query.exhibition;
+
+            ViewResolver.render(res, ViewPath.MAIN.ARTWORK.REGISTER, {
                 title: '작품 등록',
-                exhibitions
+                exhibitions: exhibitions.items || [],
+                selectedExhibitionId: exhibitionId,
+                user: req.session.user
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -143,21 +152,46 @@ export default class ArtworkController {
      */
     async createArtwork(req, res) {
         try {
-            const { title, description, exhibitionId, imageUrl, isFeatured } = req.body;
+            // 로그인 체크
+            if (!req.session.user) {
+                return res.redirect('/user/login?returnUrl=/artwork/register');
+            }
+
+            const { title, description, exhibitionId, medium, size } = req.body;
+            const imageFile = req.file;
+
+            if (!imageFile) {
+                throw new Error('작품 이미지를 업로드해주세요.');
+            }
+
+            if (!title) {
+                throw new Error('작품 제목을 입력해주세요.');
+            }
+
             const artwork = await this.artworkRepository.createArtwork({
                 title,
+                artist_name: req.session.user.name,
+                department: req.session.user.department,
+                student_id: req.session.user.studentId,
                 description,
-                exhibition_id: exhibitionId,
-                image_url: imageUrl,
-                is_featured: isFeatured === 'true',
+                exhibition_id: exhibitionId || null,
+                medium,
+                size,
+                image_url: imageFile.path,
+                is_featured: false, // 추천 작품은 관리자만 설정 가능
                 created_by: req.session.user.id
             });
 
-            res.redirect(`/artworks/${artwork.id}`);
+            res.redirect(`/artwork/${artwork.id}`);
         } catch (error) {
-            ViewResolver.render(res, ViewPath.ARTWORK.CREATE, {
+            // 에러 발생 시 등록 페이지로 돌아가면서 에러 메시지 전달
+            const exhibitions = await this.exhibitionRepository.findExhibitions({ limit: 100 });
+            ViewResolver.render(res, ViewPath.MAIN.ARTWORK.REGISTER, {
                 title: '작품 등록',
-                error: error.message
+                exhibitions: exhibitions.items || [],
+                error: error.message,
+                formData: req.body, // 이전 입력 데이터 유지
+                user: req.session.user
             });
         }
     }

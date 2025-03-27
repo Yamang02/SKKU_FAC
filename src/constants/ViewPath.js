@@ -40,7 +40,8 @@ export const ViewPath = {
         },
         ARTWORK: {
             LIST: 'main/artwork/ArtworkList.ejs',
-            DETAIL: 'main/artwork/ArtworkDetail.ejs'
+            DETAIL: 'main/artwork/ArtworkDetail.ejs',
+            REGISTER: 'main/artwork/ArtworkRegister.ejs'
         },
         NOTICE: {
             LIST: 'main/notice/NoticeList.ejs',

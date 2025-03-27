@@ -3,6 +3,7 @@ import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { pageTracker } from './middleware/PageTracker.js';
+import { createUploadDirs } from './utils/createUploadDirs.js';
 
 // 라우터 import
 import homeRouter from './routes/home/HomeRouter.js';
@@ -15,6 +16,9 @@ import adminRouter from './routes/admin/AdminRouter.js';
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// 업로드 디렉토리 생성
+createUploadDirs();
 
 /**
  * 이전 페이지 URL 결정

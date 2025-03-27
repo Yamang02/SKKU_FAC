@@ -1,9 +1,41 @@
 import express from 'express';
+import multer from 'multer';
+import path from 'path';
 import { isAdmin } from '../../middleware/auth.js';
 import ArtworkController from '../../controllers/ArtworkController.js';
 
 const ArtworkRouter = express.Router();
 const artworkController = new ArtworkController();
+
+// 파일 업로드 설정
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/artworks');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB 제한
+    },
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('지원하지 않는 파일 형식입니다. JPEG, PNG, GIF 파일만 업로드 가능합니다.'));
+        }
+    }
+});
+
+// 작품 등록 라우트
+ArtworkRouter.get('/register', (req, res) => artworkController.getArtworkCreatePage(req, res));
+ArtworkRouter.post('/register', upload.single('image'), (req, res) => artworkController.createArtwork(req, res));
 
 // 관리자용 작품 라우트 (가장 구체적인 경로)
 ArtworkRouter.get('/management', isAdmin, (req, res) => artworkController.getAdminArtworkList(req, res));
