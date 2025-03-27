@@ -156,17 +156,17 @@ function updateModalContent(modal, artwork, artworkId) {
 
     // 작가 업데이트
     if (modalArtist) {
-        modalArtist.textContent = `작가: ${artwork.artist}`;
+        modalArtist.textContent = artwork.artist;
     }
 
     // 학과 업데이트
     if (modalDepartment) {
-        modalDepartment.textContent = `학과: ${artwork.department}`;
+        modalDepartment.textContent = artwork.department;
     }
 
     // 전시회 업데이트
     if (modalExhibition) {
-        modalExhibition.textContent = `전시: ${artwork.exhibition || '없음'}`;
+        modalExhibition.textContent = artwork.exhibition || '없음';
     }
 
     // 상세 페이지 링크 업데이트

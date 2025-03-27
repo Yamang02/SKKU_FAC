@@ -301,3 +301,170 @@
         transform: translateY(-8px);
     }
 }
+
+/* 홈페이지 작품 모달 스타일 */
+#artwork-modal .modal-content {
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+#artwork-modal .modal-body {
+    display: flex;
+    flex: 1;
+    gap: 2rem;
+    padding: 2rem;
+    align-items: stretch;
+}
+
+#artwork-modal .modal-image-container {
+    flex: 1;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-background-light);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    padding: 1rem;
+}
+
+#artwork-modal .modal-image-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+#artwork-modal .modal-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 500px;
+    padding: 1.5rem;
+    position: relative;
+    background-color: #ffffff;
+    border-radius: var(--border-radius-md);
+}
+
+#artwork-modal .modal-info-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+#artwork-modal .modal-info h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 2rem;
+}
+
+#artwork-modal .artwork-info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+#artwork-modal .info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    background-color: var(--color-background-light);
+    border-radius: var(--border-radius-sm);
+    transition: all 0.3s ease;
+}
+
+#artwork-modal .info-item:hover {
+    transform: translateX(4px);
+    background-color: var(--color-background);
+}
+
+#artwork-modal .info-item svg {
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+#artwork-modal .info-item p {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.modal-detail-link {
+    width: 85%;
+    padding: 1rem 2rem;
+    background-color: var(--color-primary);
+    color: white;
+    text-align: center;
+    border-radius: var(--border-radius-md);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    margin: 2rem auto 0;
+}
+
+#artwork-modal .close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    border: none;
+}
+
+#artwork-modal .close:hover {
+    transform: rotate(90deg);
+    background-color: var(--exhibition-primary-light, var(--color-background-light));
+}
+
+@media (max-width: 768px) {
+    #artwork-modal .modal-body {
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+
+    #artwork-modal .modal-image-container {
+        height: 300px;
+    }
+
+    #artwork-modal .modal-info {
+        height: auto;
+        min-height: 300px;
+        padding: 1.2rem;
+    }
+
+    #artwork-modal .modal-info h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    #artwork-modal .info-item {
+        padding: 0.8rem 1rem;
+    }
+
+    #artwork-modal .info-item p {
+        font-size: 1rem;
+    }
+
+    #artwork-modal .info-item svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .modal-detail-link {
+        width: 100%;
+        padding: 0.8rem 1.5rem;
+        margin-top: 1.5rem;
+    }
+}
