@@ -125,14 +125,8 @@ export default class ArtworkRepository {
     /**
      * 추천 작품을 조회합니다.
      */
-    async findFeaturedArtworks() {
-        try {
-            // 최근 6개의 작품을 반환
-            return this.artworks.slice(0, 6);
-        } catch (error) {
-            console.error('주요 작품 조회 중 오류:', error);
-            throw error;
-        }
+    async findFeaturedArtworks(limit = 6) {
+        return this.artworks.filter(artwork => artwork.isFeatured).slice(0, limit);
     }
 
     async findComments(artworkId, { page = 1, limit = 10 } = {}) {

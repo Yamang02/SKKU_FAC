@@ -25,26 +25,26 @@
 }
 
 .profile-info-user {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
     margin-bottom: 2rem;
 }
 
 .profile-group-user {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
-.profile-group-user label {
+.profile-label-user {
+    display: block;
+    margin-bottom: 0.5rem;
     font-weight: 500;
-    color: var(--color-text-secondary);
+    color: var(--text-color);
 }
 
-.profile-group-user p {
-    color: var(--color-text-primary);
-    font-size: 1.1rem;
+.profile-value-user {
+    padding: 0.5rem;
+    background-color: var(--bg-color-light);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
 }
 
 .profile-actions-user {
@@ -55,26 +55,43 @@
 }
 
 .btn-primary-user,
+.btn-secondary-user,
 .btn-danger-user {
-    padding: 0.8rem 1.5rem;
-    border-radius: var(--border-radius-md);
-    font-weight: 500;
-    text-align: center;
-    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
-    min-width: 120px;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.2s;
 }
 
 .btn-primary-user {
-    background-color: var(--color-primary);
+    background-color: var(--primary-color);
     color: white;
-    border: none;
+}
+
+.btn-primary-user:hover {
+    background-color: var(--primary-color-dark);
+}
+
+.btn-secondary-user {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+}
+
+.btn-secondary-user:hover {
+    background-color: var(--secondary-color-dark);
 }
 
 .btn-danger-user {
-    background-color: var(--color-danger);
+    background-color: var(--danger-color);
     color: white;
-    border: none;
+}
+
+.btn-danger-user:hover {
+    background-color: var(--danger-color-dark);
 }
 
 .alert-danger-user,
@@ -110,7 +127,38 @@
     }
 
     .btn-primary-user,
+    .btn-secondary-user,
     .btn-danger-user {
         width: 100%;
     }
+}
+
+/* 모달 스타일 */
+.modal-content {
+    background-color: var(--bg-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+}
+
+.modal-title {
+    color: var(--text-color);
+    margin: 0;
+}
+
+.modal-body {
+    padding: 1rem;
+    color: var(--text-color);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
 }

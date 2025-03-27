@@ -2,9 +2,7 @@
  * 공지사항 목록 페이지
  * 공지사항 목록의 기능을 처리합니다.
  */
-<style ref="stylesheet">
-    @import url('../../css/notice/NoticeList.css');
-</style>
+
 
 document.addEventListener('DOMContentLoaded', () => {
     initSearch();

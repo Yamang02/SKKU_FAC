@@ -1,4 +1,5 @@
 // 모달 및 토스트 유틸리티
+
 const Modal = {
     show({ title, content, confirmText = '확인', cancelText = '취소', type = 'primary' }) {
         return new Promise((resolve) => {

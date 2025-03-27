@@ -2,9 +2,7 @@
  * 작품 상세 페이지
  * 작품 상세 페이지의 모든 기능을 처리합니다.
  */
-<style ref="stylesheet">
-    @import url('../../css/artwork/ArtworkDetail.css');
-</style>
+
 import { showErrorMessage } from '/js/common/util/index.js';
 
 // 애니메이션 관련 함수

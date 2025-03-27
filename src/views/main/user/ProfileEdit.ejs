@@ -1,80 +1,58 @@
 <style ref="stylesheet">
+    @import url('/css/common/components/page.css');
     @import url('/css/user/ProfileEdit.css');
 </style>
-<main class="profile-page">
-    <div class="container">
-        <div class="profile-card">
-            <h1 class="profile-title">프로필 수정</h1>
 
+<div class="page-container-user">
+    <div class="page-content-user">
+        <div class="page-card-user">
+            <h1 class="page-title-user">프로필 수정</h1>
             <% if (locals.error) { %>
-                <div class="alert alert-danger">
+                <div class="alert-danger-user">
                     <%= error %>
                 </div>
                 <% } %>
-
-                    <form class="profile-form" action="/user/profile/edit" method="POST">
-                        <div class="form-group">
-                            <label for="username">사용자 ID</label>
-                            <input type="text" id="username" name="username" class="form-control"
+                    <form class="form-user" action="/user/profile/edit" method="POST">
+                        <div class="form-group-user">
+                            <label class="form-label-user" for="username">사용자 ID</label>
+                            <input type="text" id="username" name="username" class="form-control-user"
                                 value="<%= user.username %>" readonly>
                         </div>
-
-                        <div class="form-group">
-                            <label for="name">이름</label>
-                            <input type="text" id="name" name="name" class="form-control" value="<%= user.name %>"
+                        <div class="form-group-user">
+                            <label class="form-label-user" for="name">이름</label>
+                            <input type="text" id="name" name="name" class="form-control-user" value="<%= user.name %>"
                                 required>
                         </div>
-
-                        <div class="form-group">
-                            <label for="email">이메일</label>
-                            <input type="email" id="email" name="email" class="form-control" value="<%= user.email %>"
-                                required>
+                        <div class="form-group-user">
+                            <label class="form-label-user" for="email">이메일</label>
+                            <input type="email" id="email" name="email" class="form-control-user"
+                                value="<%= user.email %>" required>
                         </div>
-
-                        <% if (user.role==='CLUB_MEMBER' ) { %>
-                            <div class="form-group">
-                                <label for="studentId">학번</label>
-                                <input type="text" id="studentId" name="studentId" class="form-control"
-                                    value="<%= user.studentId || '' %>">
-                            </div>
-                            <% } %>
-
-                                <% if (user.role==='ARTIST' ) { %>
-                                    <div class="form-group">
-                                        <label for="artistInfo">작가 정보</label>
-                                        <textarea id="artistInfo" name="artistInfo"
-                                            class="form-control"><%= user.artistInfo || '' %></textarea>
-                                    </div>
-                                    <% } %>
-
-                                        <div class="form-group">
-                                            <label for="newPassword">새 비밀번호 (변경시에만 입력)</label>
-                                            <div class="password-input-group">
-                                                <input type="password" id="newPassword" name="newPassword"
-                                                    class="form-control">
-                                                <button type="button" class="toggle-password">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="confirmNewPassword">새 비밀번호 확인</label>
-                                            <div class="password-input-group">
-                                                <input type="password" id="confirmNewPassword" name="confirmNewPassword"
-                                                    class="form-control">
-                                                <button type="button" class="toggle-password">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div class="button-group">
-                                            <button type="submit" class="btn btn--primary">저장</button>
-                                            <a href="/user/profile" class="btn btn--secondary">취소</a>
-                                        </div>
+                        <div class="form-group-user">
+                            <label class="form-label-user" for="department">학과</label>
+                            <input type="text" id="department" name="department" class="form-control-user"
+                                value="<%= user.department ? user.department.name : '' %>">
+                        </div>
+                        <div class="form-group-user">
+                            <label class="form-label-user" for="currentPassword">현재 비밀번호</label>
+                            <input type="password" id="currentPassword" name="currentPassword" class="form-control-user"
+                                placeholder="현재 비밀번호를 입력하세요">
+                        </div>
+                        <div class="form-group-user">
+                            <label class="form-label-user" for="newPassword">새 비밀번호</label>
+                            <input type="password" id="newPassword" name="newPassword" class="form-control-user"
+                                placeholder="새 비밀번호를 입력하세요">
+                        </div>
+                        <div class="form-group-user">
+                            <label class="form-label-user" for="confirmPassword">새 비밀번호 확인</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control-user"
+                                placeholder="새 비밀번호를 다시 입력하세요">
+                        </div>
+                        <div class="form-actions-user">
+                            <button type="submit" class="btn-primary-user">저장</button>
+                            <a href="/user/profile" class="btn-secondary-user">취소</a>
+                        </div>
                     </form>
         </div>
     </div>
-</main>
-<script src="/js/page/user/Profile.js"></script>
+</div>

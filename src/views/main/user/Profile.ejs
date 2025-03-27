@@ -19,16 +19,16 @@
                         <% } %>
                             <div class="profile-info-user">
                                 <div class="profile-group-user">
-                                    <label>사용자 ID</label>
-                                    <p>
+                                    <label class="profile-label-user">사용자 ID</label>
+                                    <div class="profile-value-user">
                                         <%= user.username %>
-                                    </p>
+                                    </div>
                                 </div>
                                 <div class="profile-group-user">
-                                    <label>이름</label>
-                                    <p>
+                                    <label class="profile-label-user">이름</label>
+                                    <div class="profile-value-user">
                                         <%= user.name %>
-                                    </p>
+                                    </div>
                                 </div>
                                 <div class="profile-group-user">
                                     <label class="profile-label-user">이메일</label>
@@ -57,10 +57,9 @@
                             </div>
                             <div class="profile-actions-user">
                                 <a href="/user/profile/edit" class="btn-primary-user">프로필 수정</a>
+                                <button id="logout-btn" class="btn-secondary-user">로그아웃</button>
                                 <button type="button" class="btn-danger-user" data-bs-toggle="modal"
-                                    data-bs-target="#deleteAccountModal">
-                                    계정 삭제
-                                </button>
+                                    data-bs-target="#deleteAccountModal">계정 삭제</button>
                             </div>
         </div>
     </div>
@@ -88,4 +87,5 @@
     </div>
 </div>
 
+<script src="/js/common/components/modal.js"></script>
 <script src="/js/page/user/Profile.js"></script>
