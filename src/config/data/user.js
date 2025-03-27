@@ -52,6 +52,8 @@ export class User {
         this.artistInfo = artistInfo;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.department = '';
+        this.studentYear = '';
     }
 }
 

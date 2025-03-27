@@ -1,18 +1,27 @@
+/* 프로필 수정 페이지 고유 스타일 */
 .form-group-user input[type="password"] {
     width: 100%;
     padding: 0.8rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 1rem;
     transition: border-color 0.3s ease;
 }
 
 .form-group-user input[type="password"]:focus {
-    border-color: var(--color-primary);
+    border-color: var(--primary-color);
     outline: none;
-    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.1);
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
 }
 
 .form-group-user input[type="password"]::placeholder {
-    color: #999;
+    color: var(--color-text-secondary);
 }
+
+@media (max-width: 768px) {
+    .form-group-user input[type="password"] {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+}
+

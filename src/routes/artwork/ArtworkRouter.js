@@ -10,6 +10,16 @@ ArtworkRouter.get('/', (req, res) => artworkController.getArtworkList(req, res))
 ArtworkRouter.get('/:id', (req, res) => artworkController.getArtworkDetail(req, res));
 ArtworkRouter.get('/exhibition/:exhibitionId', (req, res) => artworkController.getArtworksByExhibition(req, res));
 
+// API 엔드포인트
+ArtworkRouter.get('/api/:id', async (req, res) => {
+    try {
+        const artwork = await artworkController.getArtworkById(req.params.id);
+        res.json(artwork);
+    } catch (error) {
+        res.status(404).json({ error: error.message });
+    }
+});
+
 // 관리자용 작품 라우트
 ArtworkRouter.get('/management', isAdmin, (req, res) => artworkController.getAdminArtworkList(req, res));
 ArtworkRouter.get('/management/:id', isAdmin, (req, res) => artworkController.getAdminArtworkDetail(req, res));

@@ -68,15 +68,47 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+    // 로그아웃 버튼 이벤트
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
+    }
+
+    // 모달 관련 이벤트
+    const modal = document.getElementById('deleteAccountModal');
+    const deleteBtn = document.querySelector('[data-bs-target="#deleteAccountModal"]');
+
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            modal.style.display = 'block';
+        });
+    }
+});
+
+// 모달 닫기 함수
+function closeModal() {
+    const modal = document.getElementById('deleteAccountModal');
+    modal.style.display = 'none';
+}
+
+// 모달 외부 클릭시 닫기
+window.addEventListener('click', function (event) {
+    const modal = document.getElementById('deleteAccountModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+});
+
+// ESC 키로 모달 닫기
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        closeModal();
     }
 });
 
 async function handleLogout() {
     try {
-        const response = await fetch('/api/auth/logout', {
+        const response = await fetch('/user/logout', {
             method: 'POST',
             credentials: 'include'
         });

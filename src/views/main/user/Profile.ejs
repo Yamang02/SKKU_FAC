@@ -1,11 +1,11 @@
 <style ref="stylesheet">
-    @import url('/css/common/components/page.css');
+    @import url('/css/common/components/usercommon.css');
     @import url('/css/user/Profile.css');
 </style>
 
 <div class="page-container-user">
     <div class="page-content-user">
-        <div class="page-card-user">
+        <div class="page-card-user profile-page">
             <h1 class="page-title-user">프로필</h1>
             <% if (locals.error) { %>
                 <div class="alert-danger-user">
@@ -18,74 +18,148 @@
                         </div>
                         <% } %>
                             <div class="profile-info-user">
-                                <div class="profile-group-user">
-                                    <label class="profile-label-user">사용자 ID</label>
-                                    <div class="profile-value-user">
-                                        <%= user.username %>
+                                <div class="profile-grid">
+                                    <div class="profile-group-user">
+                                        <label class="profile-label-user">사용자 ID</label>
+                                        <div class="profile-value-user">
+                                            <%= user.username %>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="profile-group-user">
-                                    <label class="profile-label-user">이름</label>
-                                    <div class="profile-value-user">
-                                        <%= user.name %>
+                                    <div class="profile-group-user">
+                                        <label class="profile-label-user">이름</label>
+                                        <div class="profile-value-user">
+                                            <%= user.name %>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="profile-group-user">
-                                    <label class="profile-label-user">이메일</label>
-                                    <div class="profile-value-user">
-                                        <%= user.email %>
+                                    <div class="profile-group-user">
+                                        <label class="profile-label-user">이메일</label>
+                                        <div class="profile-value-user">
+                                            <%= user.email %>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="profile-group-user">
-                                    <label class="profile-label-user">학과</label>
-                                    <div class="profile-value-user">
-                                        <%= user.department ? user.department.name : '학과 정보 없음' %>
+                                    <div class="student-info-group">
+                                        <div class="profile-group-user">
+                                            <label class="profile-label-user">학과</label>
+                                            <div class="profile-value-user">
+                                                <%= user.department || '학과 정보 없음' %>
+                                            </div>
+                                        </div>
+                                        <div class="profile-group-user">
+                                            <label class="profile-label-user">학번</label>
+                                            <div class="profile-value-user">
+                                                <%= user.studentYear ? user.studentYear + '학번' : '미입력' %>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="profile-group-user">
-                                    <label class="profile-label-user">회원 유형</label>
-                                    <div class="profile-value-user">
-                                        <%= user.role %>
-                                    </div>
-                                </div>
-                                <div class="profile-group-user">
-                                    <label class="profile-label-user">가입일</label>
-                                    <div class="profile-value-user">
-                                        <%= new Date(user.created_at).toLocaleDateString() %>
+                                    <div class="role-info-group">
+                                        <div class="profile-group-user">
+                                            <label class="profile-label-user">회원 유형</label>
+                                            <div class="profile-value-user">
+                                                <%= user.role %>
+                                            </div>
+                                        </div>
+                                        <div class="profile-group-user">
+                                            <label class="profile-label-user">가입일</label>
+                                            <div class="profile-value-user">
+                                                <%= new Date(user.createdAt).toLocaleDateString() %>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="profile-actions-user">
-                                <a href="/user/profile/edit" class="btn-primary-user">프로필 수정</a>
-                                <button id="logout-btn" class="btn-secondary-user">로그아웃</button>
+                            <div class="button-group-user">
+                                <a href="/user/profile/edit" class="btn-primary-user">
+                                    <i class="fas fa-edit"></i>
+                                    프로필 수정
+                                </a>
+                                <button id="logout-btn" class="btn-secondary-user">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    로그아웃
+                                </button>
                                 <button type="button" class="btn-danger-user" data-bs-toggle="modal"
-                                    data-bs-target="#deleteAccountModal">계정 삭제</button>
+                                    data-bs-target="#deleteAccountModal">
+                                    <i class="fas fa-trash-alt"></i>
+                                    계정 삭제
+                                </button>
+                            </div>
+
+                            <!-- 계정 삭제 모달 -->
+                            <div class="delete-account-modal-user" id="deleteAccountModal">
+                                <div class="modal-content-user">
+                                    <div class="modal-header-user">
+                                        <h5 class="modal-title-user">계정 삭제 확인</h5>
+                                        <button type="button" class="modal-close-user" id="closeDeleteAccountModal">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body-user">
+                                        정말로 계정을 삭제하시겠습니까?<br>
+                                        이 작업은 되돌릴 수 없습니다.
+                                    </div>
+                                    <div class="modal-footer-user">
+                                        <button type="button" class="btn-secondary-user" id="cancelDeleteAccount">
+                                            <i class="fas fa-times"></i>
+                                            취소
+                                        </button>
+                                        <form action="/user/profile/delete" method="POST">
+                                            <button type="submit" class="btn-danger-user">
+                                                <i class="fas fa-trash-alt"></i>
+                                                삭제
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
         </div>
     </div>
 </div>
 
-<!-- 계정 삭제 모달 -->
-<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteAccountModalLabel">계정 삭제 확인</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-secondary-user" data-bs-dismiss="modal">취소</button>
-                <form action="/user/profile/delete" method="POST" style="display: inline;">
-                    <button type="submit" class="btn-danger-user">삭제</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('deleteAccountModal');
+        const openModalBtn = document.querySelector('[data-bs-toggle="modal"]');
+        const closeModalBtn = document.getElementById('closeDeleteAccountModal');
+        const cancelBtn = document.getElementById('cancelDeleteAccount');
 
-<script src="/js/common/components/modal.js"></script>
+        function openModal() {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        function handleModalClose() {
+            closeModal();
+        }
+
+        openModalBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+        });
+
+        closeModalBtn.addEventListener('click', handleModalClose);
+        cancelBtn.addEventListener('click', handleModalClose);
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) {
+                handleModalClose();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('show')) {
+                handleModalClose();
+            }
+        });
+    });
+</script>
+
 <script src="/js/page/user/Profile.js"></script>

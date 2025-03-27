@@ -311,4 +311,25 @@ export default class ArtworkController {
             ViewResolver.renderError(res, error);
         }
     }
+
+    /**
+     * 작품 상세 정보를 JSON 형식으로 반환합니다.
+     */
+    async getArtworkById(id) {
+        const artwork = await this.artworkRepository.findArtworkById(id);
+        if (!artwork) {
+            throw new Error('작품을 찾을 수 없습니다.');
+        }
+
+        // 클라이언트에 필요한 데이터만 반환
+        return {
+            id: artwork.id,
+            title: artwork.title,
+            artist: artwork.artist,
+            department: artwork.department,
+            exhibition: artwork.exhibition ? artwork.exhibition.title : null,
+            imageUrl: artwork.image_url || '/images/artwork-placeholder.jpg',
+            description: artwork.description
+        };
+    }
 }

@@ -172,29 +172,31 @@ export default class UserController {
      */
     async updateProfile(req, res) {
         try {
-            const { name, currentPassword, newPassword } = req.body;
-            const user = await this.userRepository.findUserById(req.session.user.id);
+            const userId = req.session.user.id;
+            const { name, email, department, studentYear } = req.body;
 
+            const user = await this.userRepository.findUserById(userId);
             if (!user) {
                 throw new Error('사용자를 찾을 수 없습니다.');
             }
 
-            const updateData = { name };
+            const updateData = {
+                name,
+                email,
+                department,
+                studentYear,
+                updatedAt: new Date()
+            };
 
-            if (currentPassword && newPassword) {
-                const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
-                if (!isPasswordValid) {
-                    throw new Error('현재 비밀번호가 일치하지 않습니다.');
-                }
-                updateData.password = await bcrypt.hash(newPassword, 10);
-            }
+            await this.userRepository.updateUser(userId, updateData);
+            req.session.user = { ...req.session.user, ...updateData };
 
-            await this.userRepository.updateUser(req.session.user.id, updateData);
-            res.redirect('/users/profile');
+            res.redirect('/user/profile');
         } catch (error) {
-            ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE, {
-                title: '프로필',
-                user: await this.userRepository.findUserById(req.session.user.id),
+            console.error('프로필 수정 중 오류 발생:', error);
+            ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE_EDIT, {
+                title: '프로필 수정',
+                profile: await this.userRepository.findUserById(req.session.user.id),
                 error: error.message
             });
         }

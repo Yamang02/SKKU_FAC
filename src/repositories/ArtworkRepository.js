@@ -135,7 +135,8 @@ export default class ArtworkRepository {
             items: [],
             total: 0,
             page: Number(page),
-            totalPages: 1
+            totalPages: 1,
+            limit: Number(limit)
         };
     }
 }

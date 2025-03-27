@@ -1,5 +1,5 @@
 <style ref="stylesheet">
-    @import url('/css/common/components/page.css');
+    @import url('/css/common/components/usercommon.css');
     @import url('/css/user/Register.css');
 </style>
 <div class="page-container-user">
@@ -13,17 +13,17 @@
                 <% } %>
                     <form class="form-user" action="/user/register" method="POST">
                         <div class="form-group-user">
-                            <label for="username">아이디</label>
+                            <label class="form-label-user" for="username">아이디</label>
                             <input type="text" id="username" name="username" class="form-control-user"
                                 value="<%= locals.formData?.username || '' %>" required placeholder="아이디를 입력하세요">
                         </div>
                         <div class="form-group-user">
-                            <label for="email">이메일</label>
+                            <label class="form-label-user" for="email">이메일</label>
                             <input type="email" id="email" name="email" class="form-control-user"
                                 value="<%= locals.formData?.email || '' %>" required placeholder="이메일을 입력하세요">
                         </div>
                         <div class="form-group-user">
-                            <label for="password">비밀번호</label>
+                            <label class="form-label-user" for="password">비밀번호</label>
                             <div class="password-input-group-user">
                                 <input type="password" id="password" name="password" class="form-control-user" required
                                     placeholder="비밀번호를 입력하세요">
@@ -33,24 +33,26 @@
                             </div>
                         </div>
                         <div class="form-group-user">
-                            <label for="name">이름</label>
+                            <label class="form-label-user" for="name">이름</label>
                             <input type="text" id="name" name="name" class="form-control-user"
                                 value="<%= locals.formData?.name || '' %>" required placeholder="이름을 입력하세요">
                         </div>
-                        <div class="form-group-user">
-                            <label for="department">학과</label>
-                            <select id="department" name="department" class="form-control-user" required>
-                                <option value="">학과를 선택하세요</option>
-                                <% departments.forEach(dept=> { %>
-                                    <option value="<%= dept.id %>" <%=locals.formData?.department===dept.id ? 'selected'
-                                        : '' %>>
-                                        <%= dept.name %>
-                                    </option>
-                                    <% }); %>
-                            </select>
+                        <div class="student-info-group">
+                            <div class="form-group-user">
+                                <label class="form-label-user" for="department">학과</label>
+                                <input type="text" id="department" name="department" class="form-control-user"
+                                    value="<%= locals.formData?.department || '' %>" required
+                                    placeholder="소속 학과를 입력하세요">
+                            </div>
+                            <div class="form-group-user">
+                                <label class="form-label-user" for="studentYear">학번(2자리)</label>
+                                <input type="text" id="studentYear" name="studentYear" class="form-control-user"
+                                    value="<%= locals.formData?.studentYear || '' %>" required pattern="[0-9]{2}"
+                                    maxlength="2" placeholder="ex) 19" title="입학년도 2자리를 입력하세요">
+                            </div>
                         </div>
                         <div class="form-group-user">
-                            <label for="role">회원 유형</label>
+                            <label class="form-label-user" for="role">회원 유형</label>
                             <select id="role" name="role" class="form-control-user" required>
                                 <option value="">회원 유형을 선택하세요</option>
                                 <% roles.forEach(role=> { %>
@@ -61,9 +63,11 @@
                                     <% }); %>
                             </select>
                         </div>
-                        <div class="form-group-user">
+
+                        <div class="button-group-user">
                             <button type="submit" class="btn-primary-user btn-block-user">회원가입</button>
                         </div>
+
                         <div class="form-links-user">
                             <a href="/user/login" class="link-user">이미 계정이 있으신가요? 로그인</a>
                         </div>
