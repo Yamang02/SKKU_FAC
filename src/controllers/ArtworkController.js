@@ -258,14 +258,20 @@ export default class ArtworkController {
     /**
      * 관리자용 작품 목록 페이지를 렌더링합니다.
      */
-    async getAdminArtworkList(req, res) {
+    async getManagementArtworkList(req, res) {
         try {
             const { page = 1, limit = 12, search, exhibitionId } = req.query;
-            const artworks = await this.artworkRepository.findArtworks({ page, limit, search, exhibitionId });
+            const [artworks, exhibitions, artists] = await Promise.all([
+                this.artworkRepository.findArtworks({ page, limit, search, exhibitionId }),
+                this.exhibitionRepository.findExhibitions({ limit: 100 }),
+                this.artworkRepository.findArtists({ limit: 100 })
+            ]);
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.LIST, {
                 title: '작품 관리',
-                artworks,
+                artworks: artworks && artworks.items ? artworks.items : [],
+                exhibitions: exhibitions && exhibitions.items ? exhibitions.items : [],
+                artists: artists && artists.items ? artists.items : [],
                 currentPage: page,
                 totalPages: Math.ceil(artworks.total / limit)
             });
@@ -277,17 +283,25 @@ export default class ArtworkController {
     /**
      * 관리자용 작품 상세 페이지를 렌더링합니다.
      */
-    async getAdminArtworkDetail(req, res) {
+    async getManagementArtworkDetail(req, res) {
         try {
             const { id } = req.params;
-            const artwork = await this.artworkRepository.findArtworkById(id);
+            const [artwork, exhibitions, artists] = await Promise.all([
+                this.artworkRepository.findArtworkById(id),
+                this.exhibitionRepository.findExhibitions(),
+                this.artworkRepository.findArtists({ limit: 100 })
+            ]);
+
             if (!artwork) {
                 throw new Error('작품을 찾을 수 없습니다.');
             }
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.DETAIL, {
                 title: '작품 상세',
-                artwork
+                artwork,
+                exhibitions: exhibitions.items || [],
+                artists: artists.items || [],
+                isEdit: true
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -297,20 +311,22 @@ export default class ArtworkController {
     /**
      * 관리자용 작품 수정 페이지를 렌더링합니다.
      */
-    async getAdminArtworkEditPage(req, res) {
+    async getManagementArtworkEditPage(req, res) {
         try {
             const { id } = req.params;
-            const artwork = await this.artworkRepository.findArtworkById(id);
+            const [artwork, exhibitions] = await Promise.all([
+                this.artworkRepository.findArtworkById(id),
+                this.exhibitionRepository.findExhibitions()
+            ]);
+
             if (!artwork) {
                 throw new Error('작품을 찾을 수 없습니다.');
             }
 
-            const exhibitions = await this.exhibitionRepository.findExhibitions();
-
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.DETAIL, {
                 title: '작품 수정',
                 artwork,
-                exhibitions,
+                exhibitions: exhibitions.items || [],
                 isEdit: true
             });
         } catch (error) {
@@ -319,9 +335,9 @@ export default class ArtworkController {
     }
 
     /**
-     * 작품을 수정합니다.
+     * 관리자용 작품 정보를 수정합니다.
      */
-    async updateAdminArtwork(req, res) {
+    async updateManagementArtwork(req, res) {
         try {
             const { id } = req.params;
             const artworkData = req.body;
@@ -334,9 +350,9 @@ export default class ArtworkController {
     }
 
     /**
-     * 작품을 삭제합니다.
+     * 관리자용 작품을 삭제합니다.
      */
-    async deleteAdminArtwork(req, res) {
+    async deleteManagementArtwork(req, res) {
         try {
             const { id } = req.params;
             await this.artworkRepository.deleteArtwork(id);

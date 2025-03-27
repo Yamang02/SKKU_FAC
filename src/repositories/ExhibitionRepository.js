@@ -34,7 +34,18 @@ export default class ExhibitionRepository {
      * ID로 전시회를 조회합니다.
      */
     async findExhibitionById(id) {
-        return this.exhibitions.find(exhibition => exhibition.id === id);
+        console.log('Repository - 검색할 ID:', id, '타입:', typeof id);
+        console.log('Repository - 전체 전시회 목록:', this.exhibitions);
+
+        // ID를 숫자로 변환하여 비교
+        const numId = parseInt(id, 10);
+        const found = this.exhibitions.find(exhibition => {
+            console.log('비교 - 전시회 ID:', exhibition.id, '타입:', typeof exhibition.id);
+            return parseInt(exhibition.id, 10) === numId;
+        });
+
+        console.log('Repository - 찾은 전시회:', found);
+        return found;
     }
 
     /**

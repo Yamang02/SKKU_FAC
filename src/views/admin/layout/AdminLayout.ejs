@@ -10,20 +10,18 @@
         <!-- Font Awesome -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <!-- 기본 관리자 스타일 -->
-        <link rel="stylesheet" href="<%= CssPath.ADMIN.STYLE %>">
-        <!-- 페이지별 스타일 -->
-        <% cssFiles.forEach(cssFile=> { %>
-            <link rel="stylesheet" href="<%= cssFile %>">
-            <% }); %>
+        <style>
+            @import url('/css/admin/style/adminStyle.css');
+        </style>
     </head>
 
     <body>
         <div class="admin-container">
-            <%- include('AdminSidebar') %>
+            <%- include('./AdminSidebar') %>
                 <div class="admin-content">
-                    <%- include('AdminHeader') %>
+                    <%- include('./AdminHeader') %>
                         <main class="admin-main">
-                            <%- include(content) %>
+                            <%- content %>
                         </main>
                 </div>
         </div>

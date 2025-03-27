@@ -241,12 +241,13 @@ export default class UserController {
     /**
      * 관리자용 사용자 목록을 조회합니다.
      */
-    async getUserList(req, res) {
+    async getManagementUserList(req, res) {
         try {
             const users = await this.userRepository.findUsers();
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.LIST, {
                 currentPage: req.path,
-                users,
+                users: users.items,
+                total: users.total,
                 title: '사용자 관리'
             });
         } catch (error) {
@@ -257,9 +258,14 @@ export default class UserController {
     /**
      * 관리자용 사용자 상세를 조회합니다.
      */
-    async getUserDetail(req, res) {
+    async getManagementUserDetail(req, res) {
         try {
-            const user = await this.userRepository.findUserById(parseInt(req.params.id));
+            const userId = parseInt(req.params.id, 10);
+            if (isNaN(userId)) {
+                return ViewResolver.renderError(res, new Error('잘못된 사용자 ID입니다.'));
+            }
+
+            const user = await this.userRepository.findUserById(userId);
             if (!user) {
                 return ViewResolver.renderError(res, new Error('사용자를 찾을 수 없습니다.'));
             }

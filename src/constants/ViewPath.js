@@ -4,6 +4,7 @@
 export const ViewPath = {
     ADMIN: {
         LAYOUT: 'admin/layout/AdminLayout.ejs',
+        DASHBOARD: 'admin/AdminDashboard.ejs',
         MANAGEMENT: {
             USER: {
                 LIST: 'admin/management/user/UserManagementList.ejs',
@@ -48,5 +49,8 @@ export const ViewPath = {
             DETAIL: 'main/notice/NoticeDetail.ejs'
         }
     },
-    ERROR: 'common/error.ejs'
+    ERROR: 'common/error.ejs',
+    COMMON: {
+        PAGINATION: 'common/pagination.ejs'
+    }
 };

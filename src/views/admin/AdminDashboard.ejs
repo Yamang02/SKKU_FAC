@@ -29,7 +29,7 @@
     <div class="admin-dashboard__recent adminCard">
         <h2 class="admin-title">최근 활동</h2>
         <div class="admin-dashboard__activities">
-            <% recentActivities.forEach(activity=> { %>
+            <% recentActivities.forEach(function(activity) { %>
                 <div class="admin-dashboard__activity">
                     <i class="<%= activity.icon %>"></i>
                     <span>
@@ -39,13 +39,13 @@
                         <%= activity.time %>
                     </small>
                 </div>
-                <% }) %>
+                <% }); %>
         </div>
     </div>
     <div class="admin-dashboard__notices adminCard">
         <h2 class="admin-title">최근 공지사항</h2>
         <div class="admin-dashboard__notices-list">
-            <% recentNotices.forEach(notice=> { %>
+            <% recentNotices.forEach(function(notice) { %>
                 <div class="admin-dashboard__notice <%= notice.isImportant ? 'adminStatusInactive' : '' %>">
                     <h3>
                         <%= notice.title %>
@@ -54,7 +54,7 @@
                         <%= notice.date %>
                     </span>
                 </div>
-                <% }) %>
+                <% }); %>
         </div>
     </div>
 </div>

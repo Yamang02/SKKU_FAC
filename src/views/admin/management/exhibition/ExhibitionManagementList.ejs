@@ -1,3 +1,7 @@
+<style>
+    @import url('/css/admin/management/exhibition/ExhibitionManagementList.css');
+</style>
+
 <div class="admin-management">
     <h2 class="admin-title">전시회 목록</h2>
     <!-- 필터 섹션 -->
@@ -79,8 +83,27 @@
 
         <!-- 페이지네이션 섹션 -->
         <% if (typeof page !=='undefined' && page) { %>
-            <%- include('../../../../common/pagination', { page }) %>
-                <% } %>
+            <div class="admin-pagination">
+                <% if (page.hasPreviousPage) { %>
+                    <a href="<%= page.previousPageUrl %>" class="admin-pagination__button">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    <% } %>
+
+                        <% for (let i=page.startPage; i <=page.endPage; i++) { %>
+                            <a href="<%= page.getPageUrl(i) %>"
+                                class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>">
+                                <%= i %>
+                            </a>
+                            <% } %>
+
+                                <% if (page.hasNextPage) { %>
+                                    <a href="<%= page.nextPageUrl %>" class="admin-pagination__button">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                    <% } %>
+            </div>
+            <% } %>
     </div>
 </div>
 

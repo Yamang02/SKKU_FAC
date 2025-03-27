@@ -76,10 +76,6 @@
     flex-direction: column;
 }
 
-.keyword-column {
-    margin-bottom: 10px;
-}
-
 .search-buttons {
     display: flex;
     justify-content: flex-end;

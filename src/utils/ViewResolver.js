@@ -1,5 +1,9 @@
 import { ViewPath } from '../constants/ViewPath.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * 뷰 렌더링을 담당하는 유틸리티 클래스
@@ -16,11 +20,15 @@ export default class ViewResolver {
             // 레이아웃 결정
             const layout = this.determineLayout(viewPath);
 
+            // 현재 페이지 결정
+            const currentPage = this.determineCurrentPage(viewPath);
+
             // 공통 데이터 설정
             const commonData = {
                 ...data,
                 ViewPath,
-                view: viewPath
+                view: viewPath,
+                currentPage
             };
 
             // 컨텐츠를 먼저 렌더링
@@ -33,7 +41,8 @@ export default class ViewResolver {
                 // 레이아웃과 함께 렌더링
                 res.render(layout, {
                     ...commonData,
-                    content: html
+                    content: html,
+                    layoutPath: layout
                 });
             });
         } catch (error) {
@@ -43,6 +52,8 @@ export default class ViewResolver {
 
     /**
      * 에러 페이지를 렌더링합니다.
+     * @param {Response} res - Express Response 객체
+     * @param {Error} error - 에러 객체
      */
     static renderError(res, error) {
         console.error('View Rendering Error:', error);
@@ -55,7 +66,8 @@ export default class ViewResolver {
                 code: error.code || 500,
                 stack: error.stack
             },
-            ViewPath
+            ViewPath,
+            currentPage: 'error'
         }, (err, html) => {
             if (err) {
                 console.error('Error page rendering failed:', err);
@@ -66,7 +78,9 @@ export default class ViewResolver {
             // 레이아웃과 함께 렌더링
             res.render(layout, {
                 content: html,
-                ViewPath
+                ViewPath,
+                layoutPath: layout,
+                currentPage: 'error'
             });
         });
     }
@@ -77,44 +91,22 @@ export default class ViewResolver {
      * @returns {string} 레이아웃 경로
      */
     static determineLayout(viewPath) {
-        return viewPath.startsWith('admin/') ? ViewPath.ADMIN.LAYOUT : ViewPath.MAIN.LAYOUT;
+        // 관리자 페이지 체크
+        const isAdminView = viewPath.startsWith('admin/');
+        return isAdminView ? ViewPath.ADMIN.LAYOUT : ViewPath.MAIN.LAYOUT;
     }
 
     /**
-     * 현재 페이지에 필요한 뷰 경로를 반환합니다.
-     * @param {string} currentPage - 현재 페이지 URL
-     * @returns {string} 뷰 경로
+     * 뷰 경로에 따른 현재 페이지를 결정합니다.
+     * @param {string} viewPath - 뷰 경로
+     * @returns {string} 현재 페이지 식별자
      */
-    static getPageViewPath(currentPage) {
-        // URL 패턴에 따른 뷰 매핑
-        const viewMapping = {
-            '/admin/management/user': ViewPath.ADMIN.MANAGEMENT.USER.LIST,
-            '/admin/management/user/:id': ViewPath.ADMIN.MANAGEMENT.USER.DETAIL,
-            '/admin/management/exhibition': ViewPath.ADMIN.MANAGEMENT.EXHIBITION.LIST,
-            '/admin/management/exhibition/:id': ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL,
-            '/admin/management/artwork': ViewPath.ADMIN.MANAGEMENT.ARTWORK.LIST,
-            '/admin/management/artwork/:id': ViewPath.ADMIN.MANAGEMENT.ARTWORK.DETAIL,
-            '/admin/management/notice': ViewPath.ADMIN.MANAGEMENT.NOTICE.LIST,
-            '/admin/management/notice/:id': ViewPath.ADMIN.MANAGEMENT.NOTICE.DETAIL,
-            '/exhibition': ViewPath.MAIN.EXHIBITION.LIST,
-            '/exhibition/:id': ViewPath.MAIN.EXHIBITION.DETAIL,
-            '/artwork': ViewPath.MAIN.ARTWORK.LIST,
-            '/artwork/:id': ViewPath.MAIN.ARTWORK.DETAIL,
-            '/notice': ViewPath.MAIN.NOTICE.LIST,
-            '/notice/:id': ViewPath.MAIN.NOTICE.DETAIL,
-            '/login': ViewPath.MAIN.USER.LOGIN,
-            '/register': ViewPath.MAIN.USER.REGISTER,
-            '/profile': ViewPath.MAIN.USER.PROFILE
-        };
-
-        // URL 패턴 매칭
-        for (const [pattern, viewPath] of Object.entries(viewMapping)) {
-            if (currentPage.match(new RegExp(pattern.replace(':id', '\\d+')))) {
-                return viewPath;
-            }
-        }
-
-        // 기본 뷰 반환
-        return ViewPath.MAIN.HOME;
+    static determineCurrentPage(viewPath) {
+        if (viewPath === ViewPath.ADMIN.DASHBOARD) return 'dashboard';
+        if (viewPath === ViewPath.ADMIN.MANAGEMENT.USER.LIST) return 'user';
+        if (viewPath === ViewPath.ADMIN.MANAGEMENT.EXHIBITION.LIST) return 'exhibition';
+        if (viewPath === ViewPath.ADMIN.MANAGEMENT.ARTWORK.LIST) return 'artwork';
+        if (viewPath === ViewPath.ADMIN.MANAGEMENT.NOTICE.LIST) return 'notice';
+        return '';
     }
 }

@@ -1,5 +1,5 @@
 import express from 'express';
-import { isAdmin, isAuthenticated, isNotAuthenticated } from '../../middleware/auth.js';
+import { isAuthenticated, isNotAuthenticated } from '../../middleware/auth.js';
 import UserController from '../../controllers/UserController.js';
 
 const UserRouter = express.Router();
@@ -23,10 +23,5 @@ UserRouter.post('/profile/delete', isAuthenticated, (req, res) => userController
 UserRouter.get('/forgot-password', isNotAuthenticated, (req, res) => userController.getForgotPasswordPage(req, res));
 UserRouter.post('/forgot-password', isNotAuthenticated, (req, res) => userController.handleForgotPassword(req, res));
 
-// 관리자 사용자 관리 라우트
-UserRouter.get('/admin/management/user/list', isAdmin, (req, res) => userController.getUserList(req, res));
-UserRouter.get('/admin/management/user/:id', isAdmin, (req, res) => userController.getUserDetail(req, res));
-UserRouter.delete('/admin/management/user/:id', isAdmin, (req, res) => userController.deleteUser(req, res));
-UserRouter.put('/admin/management/user/:id/role', isAdmin, (req, res) => userController.updateUserRole(req, res));
 
 export default UserRouter;

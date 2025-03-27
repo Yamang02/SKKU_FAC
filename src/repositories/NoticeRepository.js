@@ -8,13 +8,25 @@ export default class NoticeRepository {
     /**
      * 모든 공지사항을 조회합니다.
      */
-    async findNotices({ page = 1, limit = 10, search } = {}) {
+    async findNotices({ page = 1, limit = 10, search, status, isImportant } = {}) {
         let filteredNotices = [...this.notices];
 
         if (search) {
             filteredNotices = filteredNotices.filter(notice =>
                 notice.title.includes(search) ||
                 notice.content.includes(search)
+            );
+        }
+
+        if (status) {
+            filteredNotices = filteredNotices.filter(notice =>
+                notice.status === status
+            );
+        }
+
+        if (isImportant !== undefined) {
+            filteredNotices = filteredNotices.filter(notice =>
+                notice.is_important === (isImportant === 'true')
             );
         }
 

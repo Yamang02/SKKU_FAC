@@ -1,3 +1,6 @@
+<style>
+    @import url('/css/admin/management/user/UserManagementDetail.css');
+</style>
 <!-- 페이지 헤더 -->
 <div class="admin-user-detail">
     <div class="content-section">
@@ -25,7 +28,8 @@
                     <select disabled>
                         <option value="ADMIN" <%=user.role==='ADMIN' ? 'selected' : '' %>>관리자</option>
                         <option value="ARTIST" <%=user.role==='ARTIST' ? 'selected' : '' %>>작가</option>
-                        <option value="CLUB_MEMBER" <%=user.role==='CLUB_MEMBER' ? 'selected' : '' %>>동아리 회원</option>
+                        <option value="CLUB_MEMBER" <%=user.role==='CLUB_MEMBER' ? 'selected' : '' %>>동아리 회원
+                        </option>
                         <option value="GUEST" <%=user.role==='GUEST' ? 'selected' : '' %>>게스트</option>
                     </select>
                 </div>
@@ -61,7 +65,7 @@
         </div>
     </div>
     <div class="admin-back-button-container">
-        <a href="/admin/management/user" class="admin-button admin-button--secondary">
+        <a href="/admin/management/user/list" class="admin-button admin-button--secondary">
             <i class="fas fa-arrow-left"></i>
             목록으로
         </a>
@@ -80,13 +84,13 @@
         });
 
         const actionButtons = `
-            <button type="button" class="btn btn-success" onclick="handleSave()">
-                저장
-            </button>
-            <button type="button" class="btn btn-secondary" onclick="handleCancel()">
-                취소
-            </button>
-        `;
+        <button type="button" class="btn btn-success" onclick="handleSave()">
+            저장
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="handleCancel()">
+            취소
+        </button>
+    `;
         document.querySelector('.action-buttons').innerHTML = actionButtons;
     }
 

@@ -129,6 +129,29 @@ export default class ArtworkRepository {
         return this.artworks.filter(artwork => artwork.isFeatured).slice(0, limit);
     }
 
+    /**
+     * 모든 작가를 조회합니다.
+     */
+    async findArtists({ page = 1, limit = 100 } = {}) {
+        // 작품 목록에서 중복 없는 작가 목록 추출
+        const artists = [...new Set(this.artworks.map(artwork => artwork.artist_name))]
+            .map(name => ({
+                id: name,
+                name: name
+            }));
+
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        const total = artists.length;
+
+        return {
+            items: artists.slice(start, end),
+            total,
+            page: Number(page),
+            totalPages: Math.ceil(total / limit)
+        };
+    }
+
     async findComments(artworkId, { page = 1, limit = 10 } = {}) {
         // 임시로 빈 댓글 목록 반환
         return {

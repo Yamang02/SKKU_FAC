@@ -142,7 +142,7 @@ export default class ExhibitionController {
     /**
      * 관리자용 전시회 목록 페이지를 렌더링합니다.
      */
-    async getAdminExhibitionList(req, res) {
+    async getManagementExhibitionList(req, res) {
         try {
             const { page = 1, limit = 12, sortField = 'createdAt', sortOrder = 'desc', search } = req.query;
             const exhibitions = await this.exhibitionRepository.findExhibitions({ page, limit, sortField, sortOrder, search });
@@ -174,10 +174,14 @@ export default class ExhibitionController {
     /**
      * 관리자용 전시회 상세 페이지를 렌더링합니다.
      */
-    async getAdminExhibitionDetail(req, res) {
+    async getManagementExhibitionDetail(req, res) {
         try {
             const { id } = req.params;
-            const exhibition = await this.exhibitionRepository.findById(id);
+            console.log('요청된 전시회 ID:', id);
+
+            const exhibition = await this.exhibitionRepository.findExhibitionById(id);
+            console.log('조회된 전시회 정보:', exhibition);
+
             if (!exhibition) {
                 throw new Error('전시회를 찾을 수 없습니다.');
             }
@@ -187,6 +191,7 @@ export default class ExhibitionController {
                 exhibition
             });
         } catch (error) {
+            console.error('전시회 상세 조회 중 에러 발생:', error);
             ViewResolver.renderError(res, error);
         }
     }

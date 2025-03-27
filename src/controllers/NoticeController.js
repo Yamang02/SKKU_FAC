@@ -111,16 +111,22 @@ export default class NoticeController {
     /**
      * 관리자용 공지사항 목록 페이지를 렌더링합니다.
      */
-    async getAdminNoticeList(req, res) {
+    async getManagementNoticeList(req, res) {
         try {
-            const { page = 1, limit = 12, search } = req.query;
-            const notices = await this.noticeRepository.findNotices({ page, limit, search });
+            const { page = 1, limit = 12, search, status, isImportant } = req.query;
+            const notices = await this.noticeRepository.findNotices({ page, limit, search, status, isImportant });
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.LIST, {
                 title: '공지사항 관리',
-                notices,
+                result: {
+                    notices: notices.items || []
+                },
                 currentPage: page,
-                totalPages: Math.ceil(notices.total / limit)
+                totalPages: Math.ceil(notices.total / limit),
+                filters: {
+                    status,
+                    isImportant
+                }
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -130,7 +136,7 @@ export default class NoticeController {
     /**
      * 관리자용 공지사항 상세 페이지를 렌더링합니다.
      */
-    async getAdminNoticeDetail(req, res) {
+    async getManagementNoticeDetail(req, res) {
         try {
             const { id } = req.params;
             const notice = await this.noticeRepository.findNoticeById(id);
@@ -140,7 +146,9 @@ export default class NoticeController {
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.DETAIL, {
                 title: '공지사항 상세',
-                notice
+                notice,
+                isCreate: false,
+                isEdit: false
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
