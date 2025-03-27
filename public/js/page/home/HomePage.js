@@ -137,11 +137,11 @@ function closeModal(modal) {
 function updateModalContent(modal, artwork, artworkId) {
     // 모달 내부 요소 선택
     const modalImage = document.getElementById('modal-image');
-    const modalTitle = document.querySelector('.modal-title');
-    const modalArtist = document.querySelector('.modal-artist');
-    const modalDepartment = document.querySelector('.modal-department');
-    const modalExhibition = document.querySelector('.modal-exhibition');
-    const modalLink = document.querySelector('.detail-button');
+    const modalTitle = document.getElementById('modal-title');
+    const modalArtist = document.getElementById('modal-artist');
+    const modalDepartment = document.getElementById('modal-department');
+    const modalExhibition = document.getElementById('modal-exhibition');
+    const modalLink = document.getElementById('modal-link');
 
     // 이미지 업데이트
     if (modalImage) {
