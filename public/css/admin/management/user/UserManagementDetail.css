@@ -60,54 +60,10 @@
     gap: 10px;
 }
 
-.admin-button-group {
-    display: flex;
-    gap: 8px;
-}
-
-.admin-button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.admin-button--secondary {
-    background-color: #6c757d;
-    color: white;
-}
-
-.admin-button--danger {
-    background-color: #dc3545;
-    color: white;
-}
-
 .admin-back-button-container {
     display: flex;
     justify-content: flex-start;
     margin-top: 20px;
-}
-
-.admin-back-button-container .admin-button {
-    padding: 10px 20px;
-    font-size: 1rem;
-    background-color: var(--admin-color-primary-dark);
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.admin-back-button-container .admin-button:hover {
-    background-color: var(--admin-color-primary);
 }
 
 .section-header {
@@ -193,16 +149,6 @@
 
 .btn-secondary:hover {
     background-color: #718096;
-}
-
-.admin-button-group .admin-button--secondary {
-    background-color: #e2e8f0;
-    color: #4a5568;
-}
-
-.admin-button-group .admin-button--secondary:hover {
-    background-color: var(--admin-color-primary);
-    color: #fff;
 }
 
 @media (max-width: 768px) {

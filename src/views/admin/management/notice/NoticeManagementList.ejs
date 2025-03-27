@@ -1,5 +1,14 @@
 <div class="admin-management">
     <h2 class="admin-title">공지사항 목록</h2>
+    <!-- 컨트롤 섹션-->
+    <div class="admin-control">
+        <div class="admin-control__group">
+            <button class="admin-button admin-button--primary">
+                <i class="fas fa-plus"></i>
+                공지사항 작성
+            </button>
+        </div>
+    </div>
     <!-- 필터 섹션 -->
     <div class="admin-filter">
         <div class="admin-filter__group">
@@ -129,41 +138,34 @@
                         <% } %>
         </div>
 
-        <!-- 작성 버튼 -->
-        <div class="admin-management__actions">
-            <a href="/admin/management/notice/create" class="admin-button admin-button--success">
-                <i class="fas fa-plus"></i>
-                공지사항 작성
-            </a>
-        </div>
     </div>
-</div>
 
-<script>
-    function deleteNotice(id) {
-        if (confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
-            fetch(`/admin/management/notice/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }).then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    alert('삭제에 실패했습니다.');
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-                alert('삭제 중 오류가 발생했습니다.');
-            });
+
+    <script>
+        function deleteNotice(id) {
+            if (confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
+                fetch(`/admin/management/notice/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('삭제에 실패했습니다.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('삭제 중 오류가 발생했습니다.');
+                });
+            }
         }
-    }
 
-    function goToPage(page) {
-        const currentUrl = new URL(window.location.href);
-        const searchParams = currentUrl.searchParams;
-        searchParams.set('page', page);
-        window.location.href = currentUrl.toString();
-    }
-</script>
+        function goToPage(page) {
+            const currentUrl = new URL(window.location.href);
+            const searchParams = currentUrl.searchParams;
+            searchParams.set('page', page);
+            window.location.href = currentUrl.toString();
+        }
+    </script>

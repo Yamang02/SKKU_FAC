@@ -15,6 +15,8 @@
 .admin-button--primary {
     background-color: #1976d2;
     color: white;
+    height: fit-content;
+    padding: 5px 10px 5px 10px;
 }
 
 .admin-button--primary:hover {
