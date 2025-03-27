@@ -1,42 +1,37 @@
-<!DOCTYPE html>
-<html lang="ko">
+<style ref="stylesheet">
+    @import url('/css/common/components/page.css');
+    @import url('/css/user/Profile.css');
+</style>
 
-    <body>
-
-
-        <main class="profile-page">
-            <div class="container">
-                <div class="profile-card">
-                    <h1 class="profile-title">프로필</h1>
-                    <div class="profile-info">
-                        <div class="info-group">
-                            <label>이름</label>
-                            <p>
-                                <%= user.name %>
-                            </p>
-                        </div>
-                        <div class="info-group">
-                            <label>이메일</label>
-                            <p>
-                                <%= user.email %>
-                            </p>
-                        </div>
-                        <div class="info-group">
-                            <label>학과</label>
-                            <p>
-                                <%= user.department ? user.department.name : '학과 정보 없음' %>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="profile-actions">
-                        <a href="/user/profile/edit" class="btn btn--secondary">프로필 수정</a>
-                        <a href="/user/logout" class="btn btn--secondary">로그아웃</a>
-                    </div>
+<div class="page-container profile-page">
+    <div class="page-content">
+        <div class="page-card profile-card">
+            <h1 class="profile-title">프로필</h1>
+            <div class="profile-info">
+                <div class="info-group">
+                    <label>이름</label>
+                    <p>
+                        <%= user.name %>
+                    </p>
+                </div>
+                <div class="info-group">
+                    <label>이메일</label>
+                    <p>
+                        <%= user.email %>
+                    </p>
+                </div>
+                <div class="info-group">
+                    <label>학과</label>
+                    <p>
+                        <%= user.department ? user.department.name : '학과 정보 없음' %>
+                    </p>
                 </div>
             </div>
-        </main>
 
-    </body>
-
-</html>
+            <div class="profile-actions">
+                <a href="/user/profile/edit" class="btn btn--secondary">프로필 수정</a>
+                <a href="/user/logout" class="btn btn--secondary">로그아웃</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -40,7 +40,7 @@
     font-weight: 600;
 }
 
-.search-form {
+.search-form--notice {
     display: flex;
     justify-content: flex-end;
     width: 600px;

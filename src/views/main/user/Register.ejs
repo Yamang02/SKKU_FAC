@@ -1,95 +1,81 @@
-<!DOCTYPE html>
-<html lang="ko">
-
-    <head>
-        <% const pageTitle='회원가입 - SKKU FAC Gallery' ; const additionalStyles=['/css/user/Register.css']; %>
-            <%- include('../common/head', { pageTitle, additionalStyles }) %>
-    </head>
-
-    <body>
-        <%- include('../common/header') %>
-
-            <main class="register-page">
-                <div class="container">
-                    <div class="register-card">
-                        <h2 class="register-title">회원가입</h2>
-                        <% if (locals.error) { %>
-                            <div class="alert alert-danger">
-                                <%= error %>
-                            </div>
-                            <% } %>
-
-                                <form class="register-form" action="/user/register" method="POST">
-                                    <div class="form-group">
-                                        <input type="text" id="name" name="name" class="form-control"
-                                            value="<%= locals.formData?.name || '' %>" required placeholder="이름">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <input type="email" id="email" name="email" class="form-control"
-                                            value="<%= locals.formData?.email || '' %>" required placeholder="이메일">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <div class="password-input-group">
-                                            <input type="password" id="password" name="password" class="form-control"
-                                                required
-                                                pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
-                                                placeholder="비밀번호">
-                                            <button type="button" class="toggle-password" aria-label="비밀번호 표시">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <div class="password-input-group">
-                                            <input type="password" id="confirmPassword" name="confirmPassword"
-                                                class="form-control" required placeholder="비밀번호 확인">
-                                            <button type="button" class="toggle-password" aria-label="비밀번호 표시">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <select id="department" name="department" class="form-control" required>
-                                            <option value="">학과를 선택하세요</option>
-                                            <% departments.forEach(dept=> { %>
-                                                <option value="<%= dept.id %>" <%=locals.formData?.department===dept.id
-                                                    ? 'selected' : '' %>>
-                                                    <%= dept.name %>
-                                                </option>
-                                                <% }); %>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <select id="role" name="role" class="form-control" required>
-                                            <option value="">회원 유형을 선택하세요</option>
-                                            <% roles.forEach(role=> { %>
-                                                <option value="<%= role.value %>" <%=locals.formData?.role===role.value
-                                                    ? 'selected' : '' %>>
-                                                    <%= role.label %>
-                                                </option>
-                                                <% }); %>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-primary">회원가입</button>
-                                    </div>
-
-                                    <div class="login-link">
-                                        이미 계정이 있으신가요? <a href="/user/login">로그인</a>
-                                    </div>
-                                </form>
-                    </div>
+<style ref="stylesheet">
+    @import url('/css/common/components/page.css');
+    @import url('/css/user/Register.css');
+</style>
+<div class="page-container register-page">
+    <div class="page-content">
+        <div class="page-card register-card">
+            <h2 class="register-title">회원가입</h2>
+            <% if (locals.error) { %>
+                <div class="alert alert-danger">
+                    <%= error %>
                 </div>
-            </main>
+                <% } %>
 
-            <%- include('../common/footer') %>
-                <script src="/js/page/user/Register.js"></script>
-    </body>
+                    <form class="register-form" action="/user/register" method="POST">
+                        <div class="form-group">
+                            <input type="text" id="name" name="name" class="form-control"
+                                value="<%= locals.formData?.name || '' %>" required placeholder="이름">
+                        </div>
 
-</html>
+                        <div class="form-group">
+                            <input type="email" id="email" name="email" class="form-control"
+                                value="<%= locals.formData?.email || '' %>" required placeholder="이메일">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="password-input-group">
+                                <input type="password" id="password" name="password" class="form-control" required
+                                    pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
+                                    placeholder="비밀번호">
+                                <button type="button" class="toggle-password" aria-label="비밀번호 표시">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="password-input-group">
+                                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+                                    required placeholder="비밀번호 확인">
+                                <button type="button" class="toggle-password" aria-label="비밀번호 표시">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <select id="department" name="department" class="form-control" required>
+                                <option value="">학과를 선택하세요</option>
+                                <% departments.forEach(dept=> { %>
+                                    <option value="<%= dept.id %>" <%=locals.formData?.department===dept.id ? 'selected'
+                                        : '' %>>
+                                        <%= dept.name %>
+                                    </option>
+                                    <% }); %>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <select id="role" name="role" class="form-control" required>
+                                <option value="">회원 유형을 선택하세요</option>
+                                <% roles.forEach(role=> { %>
+                                    <option value="<%= role.value %>" <%=locals.formData?.role===role.value ? 'selected'
+                                        : '' %>>
+                                        <%= role.label %>
+                                    </option>
+                                    <% }); %>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">회원가입</button>
+                        </div>
+
+                        <div class="login-link">
+                            이미 계정이 있으신가요? <a href="/user/login">로그인</a>
+                        </div>
+                    </form>
+        </div>
+    </div>
+</div>

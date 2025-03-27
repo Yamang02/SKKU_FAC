@@ -4,6 +4,9 @@
  * 이 파일은 메인 페이지의 모든 인터랙션을 관리합니다.
  * - 작품 모달 기능
  */
+<style ref="stylesheet">
+    @import url('../../css/home/HomePage.css');
+</style>
 
 // 모듈 스코프에서 실행
 document.addEventListener('DOMContentLoaded', function () {

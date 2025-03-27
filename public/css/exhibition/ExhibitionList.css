@@ -1,8 +1,3 @@
-/* 전시회 목록 페이지 스타일 */
-@import url('../common/base/variables.css');
-@import url('../common/components/card.css');
-@import url('../common/components/button.css');
-@import url('../common/components/modal.css');
 
 /* 전시회 페이지 커스텀 변수 */
 :root {
@@ -43,7 +38,7 @@
 }
 
 /* 검색 폼 */
-.search-form {
+.search-form--exhibition {
     width: 100%;
     display: block;
 }
@@ -53,6 +48,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 100%;
 }
 
 /* 검색 필터 그룹 */
@@ -60,6 +56,7 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 15px;
+    width: 100%;
 }
 
 @media (max-width: 992px) {

@@ -1,3 +1,6 @@
+<style ref="stylesheet">
+    @import url('../../../public/css/exhibition/ExhibitionList.css');
+</style>
 <section class="exhibition-container">
     <header class="exhibition-header">
         <h1 class="exhibition-title">전시회 목록</h1>
@@ -5,7 +8,7 @@
 
     <!-- 검색 섹션 -->
     <section class="search-container">
-        <form class="search-form" id="searchForm" method="get" action="">
+        <form class="search-form--exhibition" id="searchForm" method="get" action="">
             <div class="search-layout">
                 <div class="search-column keyword-column">
                     <label for="keyword" class="form-label">전시회 검색</label>
@@ -155,5 +158,47 @@
         <button id="reset-search" class="reset-button">검색 초기화</button>
     </div>
 </section>
+
+<!-- 전시회 상세 모달 -->
+<div id="exhibition-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-modal">&times;</span>
+        <div class="modal-body">
+            <div class="modal-image-container">
+                <img src="" alt="" class="modal-image" id="modal-image">
+            </div>
+            <div class="modal-info">
+                <div class="modal-info-header">
+                    <h2 class="modal-title" id="modal-title"></h2>
+                    <p class="modal-period" id="modal-period"></p>
+                    <p class="modal-location" id="modal-location"></p>
+                </div>
+                <div class="modal-description" id="modal-description"></div>
+                <div class="modal-info-list">
+                    <div class="info-item">
+                        <span class="info-label">전시 유형</span>
+                        <span class="info-value" id="modal-type"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">관람 시간</span>
+                        <span class="info-value" id="modal-hours"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">입장료</span>
+                        <span class="info-value" id="modal-admission"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">카테고리</span>
+                        <span class="info-value" id="modal-category"></span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <a href="#" class="action-button primary-action" id="modal-register">전시회 등록</a>
+                    <button class="action-button secondary-action" id="modal-share">공유하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="/js/page/exhibition/ExhibitionList.js"></script>

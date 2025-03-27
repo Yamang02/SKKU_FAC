@@ -2,7 +2,6 @@
  * 작품 목록 페이지
  * 작품 목록의 모든 기능을 처리합니다.
  */
-
 // 애니메이션 관련 함수
 function fadeIn(element, callback) {
     if (!element) return;

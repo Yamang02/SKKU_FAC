@@ -34,7 +34,7 @@ export default class NoticeRepository {
      * ID로 공지사항을 조회합니다.
      */
     async findNoticeById(id) {
-        return this.notices.find(notice => notice.id === id);
+        return this.notices.find(notice => notice.id === String(id));
     }
 
     /**

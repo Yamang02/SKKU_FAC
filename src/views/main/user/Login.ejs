@@ -1,6 +1,10 @@
-<main class="login-page">
-    <div class="container">
-        <div class="login-card">
+<style ref="stylesheet">
+    @import url('/css/common/components/page.css');
+    @import url('/css/user/Login.css');
+</style>
+<div class="page-container login-page">
+    <div class="page-content">
+        <div class="page-card login-card">
             <h1 class="login-title">로그인</h1>
             <% if (locals.error) { %>
                 <div class="alert alert-danger">
@@ -8,7 +12,7 @@
                 </div>
                 <% } %>
                     <form action="/user/login" method="POST">
-                        <input type="hidden" name="redirectUrl" value="<%= redirectUrl || '/' %>">
+                        <input type="hidden" name="redirectUrl" value="<%= locals.redirectUrl || '/' %>">
                         <div class="form-group">
                             <label for="username">아이디</label>
                             <input type="text" id="username" name="username" class="form-control"
@@ -44,6 +48,6 @@
                     </form>
         </div>
     </div>
-</main>
+</div>
 
 <script src="/js/page/user/Login.js"></script>

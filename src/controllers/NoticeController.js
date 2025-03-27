@@ -93,7 +93,7 @@ export default class NoticeController {
     async getNoticeEditPage(req, res) {
         try {
             const { id } = req.params;
-            const notice = await this.noticeRepository.findById(id);
+            const notice = await this.noticeRepository.findNoticeById(id);
             if (!notice) {
                 throw new Error('공지사항을 찾을 수 없습니다.');
             }
@@ -133,7 +133,7 @@ export default class NoticeController {
     async getAdminNoticeDetail(req, res) {
         try {
             const { id } = req.params;
-            const notice = await this.noticeRepository.findById(id);
+            const notice = await this.noticeRepository.findNoticeById(id);
             if (!notice) {
                 throw new Error('공지사항을 찾을 수 없습니다.');
             }

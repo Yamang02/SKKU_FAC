@@ -19,7 +19,8 @@ export default class ViewResolver {
             // 공통 데이터 설정
             const commonData = {
                 ...data,
-                ViewPath
+                ViewPath,
+                view: viewPath
             };
 
             // 컨텐츠를 먼저 렌더링

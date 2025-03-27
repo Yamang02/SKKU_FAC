@@ -127,31 +127,32 @@ function initExhibitionCards() {
 
 // 전시회 모달
 function showExhibitionModal(data) {
-    const modal = document.getElementById('exhibitionDetailModal');
+    const modal = document.getElementById('exhibition-modal');
     if (!modal) return;
 
     // 모달 내용 업데이트
-    modal.querySelector('#exhibitionModalImage').src = data.imageUrl;
-    modal.querySelector('#exhibitionModalImage').alt = data.title;
-    modal.querySelector('#exhibitionModalTitle').textContent = data.title;
-    modal.querySelector('#exhibitionModalPeriod').textContent = `${data.startDate} - ${data.endDate}`;
-    modal.querySelector('#exhibitionModalDescription').textContent = data.description;
-    modal.querySelector('#exhibitionModalType').textContent = data.type;
-    modal.querySelector('#exhibitionModalViewingHours').textContent = data.viewingHours;
+    const modalImage = modal.querySelector('#modal-image');
+    const modalTitle = modal.querySelector('#modal-title');
+    const modalPeriod = modal.querySelector('#modal-period');
+    const modalLocation = modal.querySelector('#modal-location');
+    const modalDescription = modal.querySelector('#modal-description');
+    const modalType = modal.querySelector('#modal-type');
+    const modalHours = modal.querySelector('#modal-hours');
+    const modalAdmission = modal.querySelector('#modal-admission');
+    const modalCategory = modal.querySelector('#modal-category');
 
-    // 전시 장소 정보 업데이트
-    const locationList = modal.querySelector('#exhibitionModalLocations');
-    locationList.innerHTML = `
-        <div class="location-item">
-            <span class="location-name">${data.location}</span>
-        </div>
-    `;
-
-    // 작품 목록 버튼 링크 설정
-    const artworksButton = modal.querySelector('#exhibitionModalArtworksButton');
-    if (artworksButton) {
-        artworksButton.href = `/exhibitions/${data.id}/artworks`;
+    if (modalImage) {
+        modalImage.src = data.imageUrl || '/images/exhibition-placeholder.svg';
+        modalImage.alt = data.title;
     }
+    if (modalTitle) modalTitle.textContent = data.title;
+    if (modalPeriod) modalPeriod.textContent = `${data.startDate} - ${data.endDate}`;
+    if (modalLocation) modalLocation.textContent = data.location;
+    if (modalDescription) modalDescription.textContent = data.description;
+    if (modalType) modalType.textContent = data.exhibitionType === 'special' ? '특별 전시회' : '정기 전시회';
+    if (modalHours) modalHours.textContent = data.viewingHours;
+    if (modalAdmission) modalAdmission.textContent = data.admission;
+    if (modalCategory) modalCategory.textContent = data.category;
 
     // 모달 표시
     document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
@@ -162,7 +163,7 @@ function showExhibitionModal(data) {
     }, 10);
 
     // 닫기 버튼 이벤트
-    const closeButton = modal.querySelector('#closeExhibitionModal');
+    const closeButton = modal.querySelector('#close-modal');
     if (closeButton) {
         closeButton.onclick = () => closeModal(modal);
     }
@@ -182,6 +183,29 @@ function showExhibitionModal(data) {
         }
     };
     document.addEventListener('keydown', escHandler);
+
+    // 공유하기 버튼 이벤트
+    const shareButton = modal.querySelector('#modal-share');
+    if (shareButton) {
+        shareButton.onclick = async () => {
+            try {
+                await navigator.share({
+                    title: data.title,
+                    text: data.description,
+                    url: window.location.href
+                });
+            } catch (err) {
+                console.warn('공유하기가 지원되지 않는 환경입니다:', err);
+                alert('이 브라우저에서는 공유하기 기능을 지원하지 않습니다.');
+            }
+        };
+    }
+
+    // 등록 버튼 이벤트
+    const registerButton = modal.querySelector('#modal-register');
+    if (registerButton) {
+        registerButton.href = `/exhibition/${data.id}/register`;
+    }
 }
 
 // 모달 닫기 함수

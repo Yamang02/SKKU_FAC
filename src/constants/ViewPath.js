@@ -29,8 +29,10 @@ export const ViewPath = {
         ABOUT: 'main/about/about.ejs',
         USER: {
             LOGIN: 'main/user/Login.ejs',
-            REGISTER: 'main/user/RegisterPage.ejs',
-            PROFILE: 'main/user/ProfilePage.ejs'
+            REGISTER: 'main/user/Register.ejs',
+            PROFILE: 'main/user/Profile.ejs',
+            PROFILE_EDIT: 'main/user/ProfileEdit.ejs',
+            FORGOT_PASSWORD: 'main/user/ForgotPassword.ejs'
         },
         EXHIBITION: {
             LIST: 'main/exhibition/ExhibitionList.ejs',

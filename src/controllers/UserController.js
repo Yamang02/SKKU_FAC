@@ -25,24 +25,27 @@ export default class UserController {
      */
     async login(req, res) {
         try {
-            const { email, password } = req.body;
-            const user = await this.userRepository.findUserByEmail(email);
+            const { username, password } = req.body;
+            const user = await this.userRepository.findUserByUsername(username);
 
             if (!user) {
-                throw new Error('이메일 또는 비밀번호가 일치하지 않습니다.');
+                throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
             }
 
             const isPasswordValid = await bcrypt.compare(password, user.password);
             if (!isPasswordValid) {
-                throw new Error('이메일 또는 비밀번호가 일치하지 않습니다.');
+                throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
             }
 
             SessionUtil.createSession(req, user);
-            res.redirect('/');
+            const redirectUrl = req.body.redirectUrl || '/';
+            res.redirect(redirectUrl);
         } catch (error) {
             ViewResolver.render(res, ViewPath.MAIN.USER.LOGIN, {
                 title: '로그인',
-                error: error.message
+                error: error.message,
+                username: req.body.username,
+                redirectUrl: req.body.redirectUrl
             });
         }
     }

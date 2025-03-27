@@ -855,3 +855,21 @@
     transform: scale(0.95);
     transition: transform 0.2s ease;
 }
+
+.btn-search--artworklist {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 80px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-search--artworklist:hover {
+    background-color: var(--color-primary-dark);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
