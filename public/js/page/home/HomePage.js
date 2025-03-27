@@ -4,12 +4,9 @@
  * 이 파일은 메인 페이지의 모든 인터랙션을 관리합니다.
  * - 작품 모달 기능
  */
-<style ref="stylesheet">
-    @import url('../../css/home/HomePage.css');
-</style>
 
 // 모듈 스코프에서 실행
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     // 모달 초기화
     initModal();
 });
@@ -38,24 +35,25 @@ function initModal() {
         const artworkId = card.dataset.artworkId;
 
         // 카드 클릭 이벤트
-        card.addEventListener('click', function (e) {
+        card.addEventListener('click', async function (e) {
             // 기본 동작 방지 (링크 이동 등)
             e.preventDefault();
 
-            // 카드에서 직접 데이터 추출
-            const artwork = {
-                title: card.querySelector('.card__title').textContent.trim(),
-                artist: card.querySelector('.card__subtitle').textContent.trim(),
-                department: card.querySelector('.card__meta').textContent.trim(),
-                image: card.querySelector('.card__image').src,
-                exhibition: '' // 카드에 전시회 정보가 없으면 빈 문자열 사용
-            };
+            try {
+                const response = await fetch(`/api/artworks/${artworkId}`);
+                if (!response.ok) throw new Error('작품 정보를 불러올 수 없습니다.');
 
-            // 모달 내용 업데이트
-            updateModalContent(modal, artwork, artworkId);
+                const artwork = await response.json();
 
-            // 모달 표시
-            showModal(modal);
+                // 모달 내용 업데이트
+                updateModalContent(modal, artwork, artworkId);
+
+                // 모달 표시
+                showModal(modal);
+            } catch (error) {
+                console.error('작품 정보 로딩 중 오류:', error);
+                alert('작품 정보를 불러오는 중 오류가 발생했습니다.');
+            }
         });
 
         // 카드 내부 링크 요소에도 이벤트 추가 (이벤트 버블링 방지)
@@ -101,81 +99,78 @@ function showModal(modal) {
 
     // body에 modal-open 클래스 추가
     document.body.classList.add('modal-open');
-
-    // 스크롤바 너비가 0이 아닌 경우에만 패딩 적용
-    if (scrollBarWidth > 0) {
-        document.body.style.paddingRight = scrollBarWidth + 'px';
-    }
+    document.body.style.paddingRight = `${scrollBarWidth}px`;
 
     // 모달 표시
     modal.style.display = 'block';
+    modal.classList.add('show');
 
-    // 트랜지션을 위한 지연
-    setTimeout(() => {
-        modal.style.opacity = '1';
-    }, 10);
+    // 모달 내부 스크롤 초기화
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.scrollTop = 0;
+    }
 }
 
 /**
- * 모달 내용 업데이트
+ * 모달 닫기 함수
+ * @param {HTMLElement} modal - 모달 요소
+ */
+function closeModal(modal) {
+    // body에서 modal-open 클래스 제거
+    document.body.classList.remove('modal-open');
+    document.body.style.paddingRight = '';
+
+    // 모달 숨기기
+    modal.classList.remove('show');
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
+}
+
+/**
+ * 모달 내용 업데이트 함수
  * @param {HTMLElement} modal - 모달 요소
  * @param {Object} artwork - 작품 데이터
  * @param {string} artworkId - 작품 ID
  */
 function updateModalContent(modal, artwork, artworkId) {
-    const modalImage = modal.querySelector('.modal-image');
-    const modalTitle = modal.querySelector('.modal-title');
-    const modalArtist = modal.querySelector('.modal-artist');
-    const modalDepartment = modal.querySelector('.modal-department');
-    const modalExhibition = modal.querySelector('.modal-exhibition');
-    const detailLink = modal.querySelector('#detail-link');
+    // 모달 내부 요소 선택
+    const modalImage = document.getElementById('modal-image');
+    const modalTitle = document.querySelector('.modal-title');
+    const modalArtist = document.querySelector('.modal-artist');
+    const modalDepartment = document.querySelector('.modal-department');
+    const modalExhibition = document.querySelector('.modal-exhibition');
+    const modalLink = document.querySelector('.detail-button');
 
+    // 이미지 업데이트
     if (modalImage) {
-        modalImage.src = artwork.image;
+        modalImage.src = artwork.imageUrl;
         modalImage.alt = artwork.title;
     }
 
+    // 제목 업데이트
     if (modalTitle) {
         modalTitle.textContent = artwork.title;
     }
 
+    // 작가 업데이트
     if (modalArtist) {
-        modalArtist.textContent = artwork.artist;
+        modalArtist.textContent = `작가: ${artwork.artist}`;
     }
 
+    // 학과 업데이트
     if (modalDepartment) {
-        modalDepartment.textContent = artwork.department || '';
+        modalDepartment.textContent = `학과: ${artwork.department}`;
     }
 
+    // 전시회 업데이트
     if (modalExhibition) {
-        modalExhibition.textContent = artwork.exhibition || '';
+        modalExhibition.textContent = `전시: ${artwork.exhibition || '없음'}`;
     }
 
-    if (detailLink) {
-        detailLink.href = `/artwork/${artworkId}`;
+    // 상세 페이지 링크 업데이트
+    if (modalLink) {
+        modalLink.href = `/artwork/${artworkId}`;
     }
-}
-
-/**
- * 모달 닫기
- * @param {HTMLElement} modal - 모달 요소
- */
-function closeModal(modal) {
-    if (!modal) {
-        return;
-    }
-
-    // 페이드 아웃
-    modal.style.opacity = '0';
-
-    // 트랜지션 후 숨김 처리
-    setTimeout(() => {
-        modal.style.display = 'none';
-
-        // body에서 modal-open 클래스 제거
-        document.body.classList.remove('modal-open');
-
-        // body 패딩 초기화
-        document.body.style.paddingRight = '';
-    }, 300);
 }

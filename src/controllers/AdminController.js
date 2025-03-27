@@ -17,13 +17,13 @@ export default class AdminController {
     async getDashboard(req, res) {
         try {
             const [users, exhibitions, artworks] = await Promise.all([
-                this.userRepository.findUsers(),
+                this.userRepository.findAll(),
                 this.exhibitionRepository.findExhibitions(),
                 this.artworkRepository.findArtworks()
             ]);
 
             const mockData = {
-                totalUsers: users.total,
+                totalUsers: users.length,
                 activeExhibitions: exhibitions.items.filter(e => new Date(e.end_date) >= new Date()).length,
                 totalArtworks: artworks.total,
                 recentActivities: [
@@ -71,7 +71,7 @@ export default class AdminController {
      */
     async getUserDetail(req, res) {
         try {
-            const user = await this.userRepository.findById(req.params.id);
+            const user = await this.userRepository.findUserById(req.params.id);
             if (!user) {
                 return ViewResolver.renderError(res, new Error('사용자를 찾을 수 없습니다.'));
             }

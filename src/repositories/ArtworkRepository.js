@@ -42,7 +42,7 @@ export default class ArtworkRepository {
      * ID로 작품을 조회합니다.
      */
     async findArtworkById(id) {
-        return this.artworks.find(artwork => artwork.id === id);
+        return this.artworks.find(artwork => artwork.id === Number(id));
     }
 
     /**
@@ -109,13 +109,39 @@ export default class ArtworkRepository {
      * 추천 작품을 조회합니다.
      */
     async findRelatedArtworks(artworkId) {
-        return this.getRelatedArtworks(artworkId);
+        const artwork = await this.findArtworkById(artworkId);
+        if (!artwork) return { items: [], total: 0 };
+
+        const relatedArtworks = this.artworks
+            .filter(a => a.id !== artworkId && a.exhibition_id === artwork.exhibition_id)
+            .slice(0, 4);
+
+        return {
+            items: relatedArtworks,
+            total: relatedArtworks.length
+        };
     }
 
     /**
      * 추천 작품을 조회합니다.
      */
-    async findFeaturedArtworks(limit = 6) {
-        return this.artworks.filter(artwork => artwork.isFeatured).slice(0, limit);
+    async findFeaturedArtworks() {
+        try {
+            // 최근 6개의 작품을 반환
+            return this.artworks.slice(0, 6);
+        } catch (error) {
+            console.error('주요 작품 조회 중 오류:', error);
+            throw error;
+        }
+    }
+
+    async findComments(artworkId, { page = 1, limit = 10 } = {}) {
+        // 임시로 빈 댓글 목록 반환
+        return {
+            items: [],
+            total: 0,
+            page: Number(page),
+            totalPages: 1
+        };
     }
 }

@@ -1,4 +1,3 @@
-
 /* 전시회 페이지 커스텀 변수 */
 :root {
     --exhibition-primary: #072B61;
@@ -619,5 +618,103 @@
         top: 10px;
         width: 32px;
         height: 32px;
+    }
+}
+
+/* 전시회 모달 스타일 */
+.modal-info--exhibition {
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-info--exhibition h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.modal-description--exhibition {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.modal-date--exhibition {
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+}
+
+.modal-date--exhibition::before {
+    content: '\f073';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 0.5rem;
+}
+
+.modal-location--exhibition {
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 2rem;
+}
+
+.modal-location--exhibition::before {
+    content: '\f3c5';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 0.5rem;
+}
+
+.modal-buttons--exhibition {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.modal-buttons--exhibition .btn {
+    flex: 1;
+    text-align: center;
+    padding: 0.8rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.modal-buttons--exhibition .btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.modal-buttons--exhibition .btn-primary:hover {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-2px);
+}
+
+.modal-buttons--exhibition .btn-secondary {
+    background-color: #f8f9fa;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.modal-buttons--exhibition .btn-secondary:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .modal-info--exhibition {
+        padding: 1.5rem;
+    }
+
+    .modal-info--exhibition h2 {
+        font-size: 1.5rem;
+    }
+
+    .modal-buttons--exhibition {
+        flex-direction: column;
     }
 }

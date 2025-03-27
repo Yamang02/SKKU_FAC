@@ -91,7 +91,7 @@ export default class ArtworkController {
         try {
             const { id } = req.params;
             const { page: commentPage = 1 } = req.query;
-            const artwork = await this.artworkRepository.findById(id);
+            const artwork = await this.artworkRepository.findArtworkById(id);
             if (!artwork) {
                 throw new Error('작품을 찾을 수 없습니다.');
             }
@@ -246,7 +246,7 @@ export default class ArtworkController {
     async getAdminArtworkDetail(req, res) {
         try {
             const { id } = req.params;
-            const artwork = await this.artworkRepository.findById(id);
+            const artwork = await this.artworkRepository.findArtworkById(id);
             if (!artwork) {
                 throw new Error('작품을 찾을 수 없습니다.');
             }
@@ -266,12 +266,12 @@ export default class ArtworkController {
     async getAdminArtworkEditPage(req, res) {
         try {
             const { id } = req.params;
-            const artwork = await this.artworkRepository.findById(id);
+            const artwork = await this.artworkRepository.findArtworkById(id);
             if (!artwork) {
                 throw new Error('작품을 찾을 수 없습니다.');
             }
 
-            const exhibitions = await this.exhibitionRepository.findAll();
+            const exhibitions = await this.exhibitionRepository.findExhibitions();
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.DETAIL, {
                 title: '작품 수정',
@@ -292,7 +292,7 @@ export default class ArtworkController {
             const { id } = req.params;
             const artworkData = req.body;
 
-            await this.artworkRepository.update(id, artworkData);
+            await this.artworkRepository.updateArtwork(id, artworkData);
             res.redirect('/admin/management/artwork');
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -305,7 +305,7 @@ export default class ArtworkController {
     async deleteAdminArtwork(req, res) {
         try {
             const { id } = req.params;
-            await this.artworkRepository.delete(id);
+            await this.artworkRepository.deleteArtwork(id);
             res.redirect('/admin/management/artwork');
         } catch (error) {
             ViewResolver.renderError(res, error);

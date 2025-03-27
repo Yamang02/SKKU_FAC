@@ -34,7 +34,7 @@ export default class NoticeRepository {
      * ID로 공지사항을 조회합니다.
      */
     async findNoticeById(id) {
-        return this.notices.find(notice => notice.id === String(id));
+        return this.notices.find(notice => notice.id === Number(id));
     }
 
     /**
@@ -82,5 +82,33 @@ export default class NoticeRepository {
      */
     async findImportantNotices() {
         return this.notices.filter(notice => notice.is_important);
+    }
+
+    /**
+     * 공지사항의 댓글을 조회합니다.
+     */
+    async findComments(noticeId, { page = 1, limit = 10 } = {}) {
+        // 임시로 더미 댓글 데이터 반환
+        const dummyComments = [
+            {
+                id: 1,
+                content: '좋은 공지사항 감사합니다.',
+                author: '홍길동',
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 2,
+                content: '잘 읽었습니다.',
+                author: '김철수',
+                created_at: new Date().toISOString()
+            }
+        ];
+
+        return {
+            items: dummyComments,
+            total: dummyComments.length,
+            page: Number(page),
+            totalPages: Math.ceil(dummyComments.length / limit)
+        };
     }
 }

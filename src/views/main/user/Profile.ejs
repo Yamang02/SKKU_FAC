@@ -19,10 +19,16 @@
                         <% } %>
                             <div class="profile-info-user">
                                 <div class="profile-group-user">
-                                    <label class="profile-label-user">이름</label>
-                                    <div class="profile-value-user">
+                                    <label>사용자 ID</label>
+                                    <p>
+                                        <%= user.username %>
+                                    </p>
+                                </div>
+                                <div class="profile-group-user">
+                                    <label>이름</label>
+                                    <p>
                                         <%= user.name %>
-                                    </div>
+                                    </p>
                                 </div>
                                 <div class="profile-group-user">
                                     <label class="profile-label-user">이메일</label>

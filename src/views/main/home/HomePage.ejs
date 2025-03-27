@@ -1,5 +1,5 @@
 <style ref="stylesheet">
-    @import url('../../../public/css/home/HomePage.css');
+    @import url('/css/home/HomePage.css');
 </style>
 <section class="idx-hero-section">
     <div class="container idx-hero">
@@ -101,26 +101,23 @@
     </div>
 </section>
 
-
-<!-- 작품 상세 모달 -->
+<!-- 작품 모달 -->
 <div id="artwork-modal" class="modal">
     <div class="modal-content">
-        <span class="close" id="close-modal">&times;</span>
+        <span id="close-modal" class="close">&times;</span>
         <div class="modal-body">
             <div class="modal-image-container">
-                <img src="" alt="" class="modal-image" id="modal-image">
+                <img id="modal-image" src="" alt="">
             </div>
             <div class="modal-info">
-                <div class="modal-info-content">
-                    <div class="modal-title" id="modal-title"></div>
-                    <div class="modal-artist" id="modal-artist"></div>
-                    <div class="modal-department"></div>
-                    <div class="modal-exhibition"></div>
-                    <a href="#" class="detail-button" id="detail-link">작품 상세보기</a>
-                </div>
+                <h2 class="modal-title"></h2>
+                <p class="modal-artist"></p>
+                <p class="modal-department"></p>
+                <p class="modal-exhibition"></p>
+                <a href="#" class="detail-button btn btn-primary">상세보기</a>
             </div>
         </div>
     </div>
 </div>
 
-<script type="module" src="/js/page/home/HomePage.js"></script>
+<script src="/js/page/home/HomePage.js"></script>

@@ -1,166 +1,116 @@
 /* 프로필 페이지 스타일 */
 .page-container-user {
-    min-height: 100vh;
-    background-color: #ffffff;
-    padding: 2rem;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--spacing-md);
 }
 
 .page-content-user {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-lg);
 }
 
 .page-card-user {
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-    padding: 2.5rem;
-    margin: 2rem auto;
-    max-width: 480px;
-    transition: transform 0.2s ease-in-out;
-}
-
-.page-card-user:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .page-title-user {
     font-size: 2rem;
-    font-weight: 700;
-    color: #333;
+    color: var(--color-text-primary);
     margin-bottom: 2rem;
     text-align: center;
 }
 
 .profile-info-user {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
     margin-bottom: 2rem;
 }
 
 .profile-group-user {
-    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.profile-label-user {
-    display: block;
+.profile-group-user label {
     font-weight: 500;
-    color: #666;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+    color: var(--color-text-secondary);
 }
 
-.profile-value-user {
-    font-size: 1rem;
-    color: #333;
-    padding: 0.75rem;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
+.profile-group-user p {
+    color: var(--color-text-primary);
+    font-size: 1.1rem;
 }
 
 .profile-actions-user {
     display: flex;
     gap: 1rem;
+    justify-content: center;
     margin-top: 2rem;
 }
 
-.btn-primary-user {
-    background-color: #4A90E2;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
+.btn-primary-user,
+.btn-danger-user {
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--border-radius-md);
     font-weight: 500;
-    border-radius: 8px;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-    text-decoration: none;
     text-align: center;
-    flex: 1;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-width: 120px;
 }
 
-.btn-primary-user:hover {
-    background-color: #357ABD;
-    transform: translateY(-1px);
+.btn-primary-user {
+    background-color: var(--color-primary);
     color: white;
-    text-decoration: none;
+    border: none;
 }
 
 .btn-danger-user {
-    background-color: #dc3545;
+    background-color: var(--color-danger);
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    border-radius: 8px;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-    flex: 1;
 }
 
-.btn-danger-user:hover {
-    background-color: #c82333;
-    transform: translateY(-1px);
-}
-
-.btn-secondary-user {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    border-radius: 8px;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-}
-
-.btn-secondary-user:hover {
-    background-color: #5a6268;
-    transform: translateY(-1px);
+.alert-danger-user,
+.alert-success-user {
+    padding: 1rem;
+    border-radius: var(--border-radius-md);
+    margin-bottom: 1.5rem;
 }
 
 .alert-danger-user {
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    background-color: #FFF3F3;
-    color: #E53935;
-    border: 1px solid #FFCDD2;
+    background-color: var(--color-danger-light);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
 }
 
 .alert-success-user {
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    background-color: #F1F8E9;
-    color: #43A047;
-    border: 1px solid #DCEDC8;
+    background-color: var(--color-success-light);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
 }
 
-@media (max-width: 480px) {
-    .page-card-user {
-        padding: 20px;
+@media (max-width: 768px) {
+    .page-content-user {
+        padding: var(--spacing-md);
     }
 
     .page-title-user {
-        font-size: 20px;
-    }
-
-    .profile-value-user {
-        font-size: 14px;
-    }
-
-    .btn-primary-user,
-    .btn-danger-user,
-    .btn-secondary-user {
-        padding: 10px;
-        font-size: 14px;
+        font-size: 1.5rem;
     }
 
     .profile-actions-user {
         flex-direction: column;
+    }
+
+    .btn-primary-user,
+    .btn-danger-user {
+        width: 100%;
     }
 }
