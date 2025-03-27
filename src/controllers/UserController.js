@@ -62,8 +62,23 @@ export default class UserController {
      * 회원가입 페이지를 렌더링합니다.
      */
     getRegisterPage(req, res) {
+        const departments = [
+            { id: 'art', name: '미술학과' },
+            { id: 'design', name: '디자인학과' },
+            { id: 'craft', name: '공예학과' },
+            { id: 'digital', name: '디지털아트학과' }
+        ];
+
+        const roles = [
+            { value: 'student', label: '학생' },
+            { value: 'professor', label: '교수' },
+            { value: 'staff', label: '교직원' }
+        ];
+
         ViewResolver.render(res, ViewPath.MAIN.USER.REGISTER, {
-            title: '회원가입'
+            title: '회원가입',
+            departments,
+            roles
         });
     }
 
@@ -72,19 +87,28 @@ export default class UserController {
      */
     async register(req, res) {
         try {
-            const { email, password, name } = req.body;
-            const existingUser = await this.userRepository.findUserByEmail(email);
+            const { username, email, password, name, department, role } = req.body;
 
-            if (existingUser) {
+            // 이메일 중복 확인
+            const existingEmail = await this.userRepository.findUserByEmail(email);
+            if (existingEmail) {
                 throw new Error('이미 사용 중인 이메일입니다.');
+            }
+
+            // 사용자명 중복 확인
+            const existingUsername = await this.userRepository.findUserByUsername(username);
+            if (existingUsername) {
+                throw new Error('이미 사용 중인 아이디입니다.');
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
             const user = await this.userRepository.createUser({
+                username,
                 email,
                 password: hashedPassword,
                 name,
-                role: 'user'
+                department,
+                role
             });
 
             SessionUtil.createSession(req, user);
@@ -92,7 +116,19 @@ export default class UserController {
         } catch (error) {
             ViewResolver.render(res, ViewPath.MAIN.USER.REGISTER, {
                 title: '회원가입',
-                error: error.message
+                error: error.message,
+                departments: [
+                    { id: 'art', name: '미술학과' },
+                    { id: 'design', name: '디자인학과' },
+                    { id: 'craft', name: '공예학과' },
+                    { id: 'digital', name: '디지털아트학과' }
+                ],
+                roles: [
+                    { value: 'student', label: '학생' },
+                    { value: 'professor', label: '교수' },
+                    { value: 'staff', label: '교직원' }
+                ],
+                formData: req.body
             });
         }
     }
@@ -179,7 +215,7 @@ export default class UserController {
     async handleForgotPassword(req, res) {
         try {
             const { email } = req.body;
-            const user = await this.userRepository.findByEmail(email);
+            const user = await this.userRepository.findUserByEmail(email);
 
             if (!user) {
                 throw new Error('해당 이메일로 등록된 사용자가 없습니다.');
@@ -190,7 +226,7 @@ export default class UserController {
 
             ViewResolver.render(res, ViewPath.MAIN.USER.FORGOT_PASSWORD, {
                 title: '비밀번호 찾기',
-                message
+                success: message
             });
         } catch (error) {
             ViewResolver.render(res, ViewPath.MAIN.USER.FORGOT_PASSWORD, {

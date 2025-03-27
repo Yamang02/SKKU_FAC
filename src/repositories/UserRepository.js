@@ -45,6 +45,13 @@ export default class UserRepository {
     }
 
     /**
+     * 사용자명으로 사용자를 조회합니다.
+     */
+    async findUserByUsername(username) {
+        return this.users.find(user => user.username === username);
+    }
+
+    /**
      * 새로운 사용자를 생성합니다.
      */
     async createUser(userData) {

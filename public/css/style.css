@@ -9,57 +9,57 @@
  * 1. Base Styles
  * 기본 색상, 폰트, 타이포그래피 등 기본적인 스타일을 정의합니다. */
 
-@import url('common/base/variables.css');
-@import url('common/base/reset.css');
-@import url('common/base/typography.css');
-@import url('common/base/media-queries.css');
+ @import url('common/base/variables.css');
+ @import url('common/base/reset.css');
+ @import url('common/base/typography.css');
+ @import url('common/base/media-queries.css');
 
-/*
- * 2. Utils
- * 유틸리티 클래스 및 믹스인 함수를 정의합니다.
- */
-@import url('common/util/helpers.css');
-@import url('common/util/common.css');
+ /*
+  * 2. Utils
+  * 유틸리티 클래스 및 믹스인 함수를 정의합니다.
+  */
+ @import url('common/util/helpers.css');
+ @import url('common/util/common.css');
 
-/*
- * 3. Components
- * 재사용 가능한 UI 컴포넌트를 정의합니다.
+ /*
+  * 3. Components
+  * 재사용 가능한 UI 컴포넌트를 정의합니다.
+  */
+ @import url('common/components/header.css');
+ @import url('common/components/modal.css');
+ @import url('common/components/nav.css');
+ @import url('common/components/card.css');
+ @import url('common/components/button.css');
+ @import url('common/components/pagination.css');
+ @import url('common/components/footer.css');
+ /*
+ @import url('common/components/hero.css');
+ @import url('common/components/form.css');
  */
-@import url('common/components/header.css');
-@import url('common/components/modal.css');
-@import url('common/components/nav.css');
-@import url('common/components/card.css');
-@import url('common/components/button.css');
-@import url('common/components/pagination.css');
-@import url('common/components/footer.css');
-/*
-@import url('common/components/hero.css');
-@import url('common/components/form.css');
-*/
 
-/*
- * 4. Layouts
- * 페이지 레이아웃 및 그리드를 정의합니다.
- */
-@import url('common/layout/main.css');
-@import url('common/layout/grid.css');
-@import url('common/layout/container.css');
+ /*
+  * 4. Layouts
+  * 페이지 레이아웃 및 그리드를 정의합니다.
+  */
+ @import url('common/layout/main.css');
+ @import url('common/layout/grid.css');
+ @import url('common/layout/container.css');
 
-/*
- * 5. Pages
- * 특정 페이지에 대한 스타일을 정의합니다.
- */
-@import url('home/HomePage.css');
-@import url('artwork/ArtworkDetail.css');
-@import url('artwork/ArtworkList.css');
-@import url('exhibition/ExhibitionList.css');
-@import url('notice/NoticeList.css');
-@import url('common/error.css');
-@import url('common/AboutPage.css');
+ /*
+  * 5. Pages
+  * 특정 페이지에 대한 스타일을 정의합니다.
+  */
+ @import url('home/HomePage.css');
+ @import url('artwork/ArtworkDetail.css');
+ @import url('artwork/ArtworkList.css');
+ @import url('exhibition/ExhibitionList.css');
+ @import url('notice/NoticeList.css');
+ @import url('common/error.css');
+ @import url('common/AboutPage.css');
 
-/*
- * 6. 기타 유틸리티 클래스
- * 전역적으로 사용되는 유틸리티 클래스를 정의합니다.
- * 이 섹션은 마지막에 임포트하여 필요한 경우 다른 스타일을 오버라이드 할 수 있습니다.
- */
-/* @import url('common/util/common.css'); */
+ /*
+  * 6. 기타 유틸리티 클래스
+  * 전역적으로 사용되는 유틸리티 클래스를 정의합니다.
+  * 이 섹션은 마지막에 임포트하여 필요한 경우 다른 스타일을 오버라이드 할 수 있습니다.
+  */
+ /* @import url('common/util/common.css'); */
