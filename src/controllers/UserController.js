@@ -38,7 +38,16 @@ export default class UserController {
                 throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
             }
 
-            await SessionUtil.saveUserToSession(req, user);
+            // 필요한 사용자 정보를 세션에 저장
+            const sessionUser = {
+                id: user.id,
+                username: user.username,
+                name: user.name,
+                role: user.role,
+                isAdmin: user.role === 'admin'
+            };
+            await SessionUtil.saveUserToSession(req, sessionUser);
+
             const redirectUrl = req.body.redirectUrl || '/';
             res.redirect(redirectUrl);
         } catch (error) {

@@ -3,6 +3,7 @@ import ViewResolver from '../utils/ViewResolver.js';
 import UserRepository from '../repositories/UserRepository.js';
 import ExhibitionRepository from '../repositories/ExhibitionRepository.js';
 import ArtworkRepository from '../repositories/ArtworkRepository.js';
+import TimeFormatter from '../utils/TimeFormatter.js';
 
 export default class AdminController {
     constructor() {
@@ -37,7 +38,7 @@ export default class AdminController {
             ].map(activity => ({
                 icon: activityIcons[activity.type],
                 text: activity.message,
-                time: this.formatTimeAgo(activity.timestamp)
+                time: TimeFormatter.formatTimeAgo(activity.timestamp)
             }));
 
             // 임시 공지사항 데이터
@@ -69,20 +70,6 @@ export default class AdminController {
             ViewResolver.renderError(res, error);
         }
     }
-
-    /**
-     * 시간을 사람이 읽기 쉬운 형식으로 변환합니다.
-     */
-    formatTimeAgo(date) {
-        const now = new Date();
-        const diff = now - date;
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-
-        if (days > 0) return `${days}일 전`;
-        if (hours > 0) return `${hours}시간 전`;
-        if (minutes > 0) return `${minutes}분 전`;
-        return '방금 전';
-    }
 }
+
+

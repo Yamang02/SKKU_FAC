@@ -40,10 +40,9 @@ AdminRouter.delete('/management/artwork/:id([0-9]+)', isAdmin, (req, res) => art
 // 공지사항 관리
 AdminRouter.get('/management/notice', isAdmin, (req, res) => noticeController.getManagementNoticeList(req, res));
 AdminRouter.get('/management/notice/:id([0-9]+)', isAdmin, (req, res) => noticeController.getManagementNoticeDetail(req, res));
-AdminRouter.get('/management/notice/create', isAdmin, (req, res) => noticeController.getNoticeCreatePage(req, res));
-AdminRouter.get('/management/notice/:id([0-9]+)/edit', isAdmin, (req, res) => noticeController.getNoticeEditPage(req, res));
-AdminRouter.post('/management/notice/create', isAdmin, (req, res) => noticeController.createNotice(req, res));
-AdminRouter.put('/management/notice/:id([0-9]+)', isAdmin, (req, res) => noticeController.updateNotice(req, res));
+AdminRouter.get('/management/notice/register', isAdmin, (req, res) => noticeController.getNoticeRegisterPage(req, res));
+AdminRouter.post('/management/notice', isAdmin, (req, res) => noticeController.createNotice(req, res));
+AdminRouter.put('/management/notice/:id([0-9]+)/edit', isAdmin, (req, res) => noticeController.updateNotice(req, res));
 AdminRouter.delete('/management/notice/:id([0-9]+)', isAdmin, (req, res) => noticeController.deleteNotice(req, res));
 
 export default AdminRouter;

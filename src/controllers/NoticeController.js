@@ -76,11 +76,13 @@ export default class NoticeController {
     /**
      * 공지사항 작성 페이지를 렌더링합니다.
      */
-    async getNoticeCreatePage(req, res) {
+    async getNoticeRegisterPage(req, res) {
         try {
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.DETAIL, {
                 title: '공지사항 작성',
-                isCreate: true
+                notice: null,
+                isCreate: true,
+                user: req.session.user
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -188,10 +190,17 @@ export default class NoticeController {
     async createNotice(req, res) {
         try {
             const noticeData = req.body;
-            await this.noticeRepository.create(noticeData);
-            res.redirect('/admin/management/notice');
+            console.log('Received Notice Data:', noticeData); // POST된 내용 로그 출력
+
+            // 공지사항 생성 로직
+            const createdNotice = await this.noticeRepository.createNotice(noticeData);
+
+            // 생성된 공지의 ID를 사용하여 상세 관리 페이지로 이동
+            res.status(200).json({ success: true, redirectUrl: `/admin/management/notice/${createdNotice.id}` });
         } catch (error) {
-            ViewResolver.renderError(res, error);
+            console.error('Error creating notice:', error);
+            // 생성 실패 시 작성 페이지에 남아 있도록 함
+            res.status(500).json({ success: false, message: '공지사항 생성 중 오류가 발생했습니다.' });
         }
     }
 

@@ -7,7 +7,7 @@
     </h2>
 
     <div class="admin-management__content">
-        <form method="POST"
+        <form id="noticeForm" method="POST"
             action="<%= notice ? `/admin/management/notice/${notice.id}` : '/admin/management/notice' %>"
             class="admin-form">
             <div class="admin-form__group">
@@ -89,8 +89,6 @@
     </a>
 </div>
 
-
-
 <% if (notice) { %>
     <script>
         function deleteNotice(id) {
@@ -114,3 +112,44 @@
         }
     </script>
     <% } %>
+
+        <script>
+            document.getElementById('noticeForm').addEventListener('submit', handleNoticeFormSubmit);
+
+            async function handleNoticeFormSubmit(event) {
+                event.preventDefault();
+
+                const formData = new FormData(this);
+                const noticeData = {
+                    title: formData.get('title'),
+                    content: formData.get('content'),
+                    status: formData.get('status'),
+                    isImportant: formData.get('isImportant') === 'on',
+                    author: '<%= user.username %>',
+                    authorName: '<%= user.name %>',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                try {
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(noticeData)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        window.location.href = result.redirectUrl;
+                    } else {
+                        alert(result.message || '공지사항 생성에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('공지사항 생성 중 오류가 발생했습니다.');
+                }
+            }
+        </script>

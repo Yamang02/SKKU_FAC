@@ -65,6 +65,12 @@ app.use((req, res, next) => {
     next();
 });
 
+// 요청에 대한 로그 추가
+app.use((req, res, next) => {
+    console.log(`Request URL: ${req.originalUrl}, Method: ${req.method}`);
+    next();
+});
+
 // 라우터 설정
 app.use('/', homeRouter);
 app.use('/notice', noticeRouter);
@@ -77,6 +83,7 @@ console.log('라우터 설정 완료');
 
 // 404 에러 처리
 app.use((req, res) => {
+    console.log(`404 Error - URL: ${req.originalUrl}`);
     const returnUrl = getReturnUrl(req);
     const isAdminPath = req.originalUrl.startsWith('/admin');
 
@@ -97,7 +104,7 @@ app.use((req, res) => {
 
 // 500 에러 처리
 app.use((err, req, res, _next) => {
-    console.error(err.stack);
+    console.error(`500 Error - URL: ${req.originalUrl}, Error: ${err.message}`);
     const returnUrl = getReturnUrl(req);
     const isAdminPath = req.originalUrl.startsWith('/admin');
 
