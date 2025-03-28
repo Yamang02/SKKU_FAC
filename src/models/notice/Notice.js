@@ -12,6 +12,14 @@
  * @property {'active'|'inactive'} status - 상태
  */
 
+// /**
+//  * @typedef {Object} Comment
+//  * @property {number} id - 댓글 ID
+//  * @property {string} content - 댓글 내용
+//  * @property {string} author - 작성자 ID
+//  * @property {string} createdAt - 생성일시
+//  */
+
 /**
  * 새로운 공지사항 객체를 생성합니다.
  * @param {Object} data - 공지사항 데이터

@@ -45,28 +45,14 @@ export default class NoticeController {
     async getNoticeDetail(req, res) {
         try {
             const { id } = req.params;
-            const { page: commentPage = 1 } = req.query;
             const notice = await this.noticeRepository.findNoticeById(id);
             if (!notice) {
                 throw new Error('공지사항을 찾을 수 없습니다.');
             }
 
-            const comments = await this.noticeRepository.findComments(id, { page: commentPage });
-            const commentPageOptions = {
-                page: commentPage,
-                limit: 10,
-                baseUrl: `/notice/${id}`,
-                previousUrl: Page.getPreviousPageUrl(req),
-                currentUrl: Page.getCurrentPageUrl(req)
-            };
-
-            const commentPageData = new Page(comments.total, commentPageOptions);
-
             ViewResolver.render(res, ViewPath.MAIN.NOTICE.DETAIL, {
                 title: notice.title,
-                notice,
-                comments: comments.items,
-                page: commentPageData
+                notice
             });
         } catch (error) {
             ViewResolver.renderError(res, error);

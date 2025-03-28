@@ -134,3 +134,34 @@ export const findImportantNotices = async () => {
     return notices.filter(notice => notice.is_important);
 };
 
+// /**
+//  * 공지사항의 댓글을 조회합니다.
+//  * @param {number} noticeId - 공지사항 ID
+//  * @param {Object} options - 페이지네이션 옵션
+//  * @returns {Promise<Object>} 댓글 목록과 페이지네이션 정보
+//  */
+// export const findComments = async (noticeId, { page = 1, limit = 10 } = {}) => {
+//     // 임시로 더미 댓글 데이터 반환
+//     const dummyComments = [
+//         {
+//             id: 1,
+//             content: '좋은 공지사항 감사합니다.',
+//             author: '홍길동',
+//             created_at: new Date().toISOString()
+//         },
+//         {
+//             id: 2,
+//             content: '잘 읽었습니다.',
+//             author: '김철수',
+//             created_at: new Date().toISOString()
+//         }
+//     ];
+//
+//     return {
+//         items: dummyComments,
+//         total: dummyComments.length,
+//         page: Number(page),
+//         totalPages: Math.ceil(dummyComments.length / limit)
+//     };
+// };
+

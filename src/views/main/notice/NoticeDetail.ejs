@@ -36,7 +36,7 @@
 
                 <!-- 본문 내용 -->
                 <div class="notice-content">
-                    <%- notice.content %>
+                    <%= notice.content %>
                 </div>
     </div>
 
@@ -56,35 +56,6 @@
         </a>
     </nav>
 </div>
-
-<!-- 댓글 섹션 -->
-<section class="comments-section">
-    <h3>댓글</h3>
-    <div class="comments-list">
-        <% if (comments && comments.length> 0) { %>
-            <% comments.forEach(comment=> { %>
-                <div class="comment">
-                    <div class="comment__header">
-                        <span class="comment__author">
-                            <%= comment.author %>
-                        </span>
-                        <span class="comment__date">
-                            <%= comment.createdAt %>
-                        </span>
-                    </div>
-                    <div class="comment__content">
-                        <%= comment.content %>
-                    </div>
-                </div>
-                <% }); %>
-                    <% } else { %>
-                        <p class="no-comments">아직 댓글이 없습니다.</p>
-                        <% } %>
-    </div>
-
-    <!-- 댓글 페이지네이션 -->
-    <%- include('../../common/pagination', { page: page, name: 'comments' }) %>
-</section>
 
 <!-- 외부 스크립트 파일 로드 -->
 <script src="/js/page/notice/NoticeDetail.js"></script>

@@ -55,148 +55,90 @@ const Toast = {
     }
 };
 
-// 댓글 관련 기능
-document.addEventListener('DOMContentLoaded', () => {
-    const commentForm = document.querySelector('.comment-form');
-    const commentInput = commentForm.querySelector('.comment-form__input');
-    const clearButton = commentForm.querySelector('.btn--comment-clear');
+// 댓글 관련 코드 주석 처리
+// const handleCommentSubmit = async (e) => {
+//     e.preventDefault();
+//     const formData = new FormData(e.target);
+//     const commentData = {
+//         content: formData.get('content'),
+//         noticeId: noticeId
+//     };
 
-    // 댓글 입력 폼 초기화
-    const clearCommentForm = () => {
-        if (commentInput.value.trim()) {
-            Modal.show({
-                content: '작성 중인 내용을 모두 지우시겠습니까?',
-                type: 'danger'
-            }).then((confirmed) => {
-                if (confirmed) {
-                    commentInput.value = '';
-                    Toast.show('댓글이 초기화되었습니다.');
-                }
-            });
-        }
-    };
+//     try {
+//         const response = await fetch('/api/comments', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify(commentData)
+//         });
 
-    // 댓글 작성
-    const handleCommentSubmit = async (e) => {
-        e.preventDefault();
-        const content = commentInput.value.trim();
+//         if (response.ok) {
+//             window.location.reload();
+//         } else {
+//             alert('댓글 작성에 실패했습니다.');
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//         alert('댓글 작성 중 오류가 발생했습니다.');
+//     }
+// };
 
-        if (!content) {
-            Toast.show('댓글 내용을 입력해주세요.', 'error');
-            return;
-        }
+// const handleCommentEdit = async (commentId, content) => {
+//     try {
+//         const response = await fetch(`/api/comments/${commentId}`, {
+//             method: 'PUT',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify({ content })
+//         });
 
-        try {
-            const response = await fetch('/api/comments', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ content })
-            });
+//         if (response.ok) {
+//             window.location.reload();
+//         } else {
+//             alert('댓글 수정에 실패했습니다.');
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//         alert('댓글 수정 중 오류가 발생했습니다.');
+//     }
+// };
 
-            if (!response.ok) throw new Error('댓글 작성에 실패했습니다.');
+// const handleCommentDelete = async (commentId) => {
+//     if (!confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
+//         return;
+//     }
 
-            Toast.show('댓글이 작성되었습니다.', 'success');
-            commentInput.value = '';
-            location.reload();
-        } catch (error) {
-            Toast.show(error.message, 'error');
-        }
-    };
+//     try {
+//         const response = await fetch(`/api/comments/${commentId}`, {
+//             method: 'DELETE'
+//         });
 
-    // 댓글 수정
-    const handleCommentEdit = async (commentId) => {
-        const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`).closest('.comment');
-        const contentElement = commentElement.querySelector('.comment__content');
-        const originalContent = contentElement.textContent.trim();
+//         if (response.ok) {
+//             window.location.reload();
+//         } else {
+//             alert('댓글 삭제에 실패했습니다.');
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//         alert('댓글 삭제 중 오류가 발생했습니다.');
+//     }
+// };
 
-        // 수정 모드로 전환
-        contentElement.innerHTML = `
-            <textarea class="comment-form__input">${originalContent}</textarea>
-            <div class="comment__edit-actions">
-                <button class="btn btn--secondary" data-action="cancel">취소</button>
-                <button class="btn btn--primary" data-action="save">저장</button>
-            </div>
-        `;
+// 이벤트 리스너 주석 처리
+// commentForm.addEventListener('submit', handleCommentSubmit);
 
-        const handleEditAction = async (e) => {
-            const action = e.target.dataset.action;
-            if (!action) return;
-
-            if (action === 'cancel') {
-                contentElement.innerHTML = originalContent;
-            } else if (action === 'save') {
-                const newContent = contentElement.querySelector('textarea').value.trim();
-
-                if (!newContent) {
-                    Toast.show('댓글 내용을 입력해주세요.', 'error');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`/api/comments/${commentId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ content: newContent })
-                    });
-
-                    if (!response.ok) throw new Error('댓글 수정에 실패했습니다.');
-
-                    Toast.show('댓글이 수정되었습니다.', 'success');
-                    contentElement.innerHTML = newContent;
-                } catch (error) {
-                    Toast.show(error.message, 'error');
-                }
-            }
-
-            contentElement.removeEventListener('click', handleEditAction);
-        };
-
-        contentElement.addEventListener('click', handleEditAction);
-    };
-
-    // 댓글 삭제
-    const handleCommentDelete = async (commentId) => {
-        const confirmed = await Modal.show({
-            title: '댓글 삭제',
-            content: '정말 이 댓글을 삭제하시겠습니까?',
-            confirmText: '삭제',
-            type: 'danger'
-        });
-
-        if (confirmed) {
-            try {
-                const response = await fetch(`/api/comments/${commentId}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.ok) throw new Error('댓글 삭제에 실패했습니다.');
-
-                Toast.show('댓글이 삭제되었습니다.', 'success');
-                document.querySelector(`[data-comment-id="${commentId}"]`).closest('.comment').remove();
-            } catch (error) {
-                Toast.show(error.message, 'error');
-            }
-        }
-    };
-
-    // 이벤트 리스너 등록
-    clearButton.addEventListener('click', clearCommentForm);
-    commentForm.addEventListener('submit', handleCommentSubmit);
-
-    // 댓글 수정/삭제 버튼 이벤트 위임
-    document.querySelector('.comments__list').addEventListener('click', (e) => {
-        const actionButton = e.target.closest('.btn--action');
-        if (!actionButton) return;
-
-        const commentId = actionButton.dataset.commentId;
-        if (actionButton.classList.contains('btn--delete')) {
-            handleCommentDelete(commentId);
-        } else {
-            handleCommentEdit(commentId);
-        }
-    });
-});
+// document.querySelector('.comments__list').addEventListener('click', (e) => {
+//     const target = e.target;
+//     if (target.classList.contains('comment__edit-btn')) {
+//         const commentId = target.dataset.commentId;
+//         const content = prompt('수정할 내용을 입력하세요:', target.dataset.content);
+//         if (content !== null) {
+//             handleCommentEdit(commentId, content);
+//         }
+//     } else if (target.classList.contains('comment__delete-btn')) {
+//         const commentId = target.dataset.commentId;
+//         handleCommentDelete(commentId);
+//     }
+// });

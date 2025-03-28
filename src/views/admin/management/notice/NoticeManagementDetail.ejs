@@ -96,6 +96,9 @@
         event.preventDefault();
 
         const formData = new FormData(this);
+        const now = new Date().toISOString();
+        const isEdit = '<%= notice ? true : false %>' === 'true';
+
         const noticeData = {
             title: formData.get('title'),
             content: formData.get('content'),
@@ -103,10 +106,14 @@
             isImportant: formData.get('isImportant') === 'on',
             author: '<%= user.username %>',
             authorName: '<%= user.name %>',
-            updatedAt: new Date().toISOString()
+            updatedAt: now
         };
 
-        const isEdit = '<%= notice ? true : false %>' === 'true';
+        // 생성 시에만 createdAt 추가
+        if (!isEdit) {
+            noticeData.createdAt = now;
+        }
+
         const method = isEdit ? 'PUT' : 'POST';
         const url = isEdit ? `/admin/management/notice/<%= notice?.id %>/edit` : '/admin/management/notice';
 
