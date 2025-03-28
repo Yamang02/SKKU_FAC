@@ -89,67 +89,77 @@
     </a>
 </div>
 
-<% if (notice) { %>
-    <script>
-        function deleteNotice(id) {
-            if (confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
-                fetch(`/admin/management/notice/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }).then(response => {
-                    if (response.ok) {
-                        window.location.href = '/admin/management/notice/list';
-                    } else {
-                        alert('삭제에 실패했습니다.');
-                    }
-                }).catch(error => {
-                    console.error('Error:', error);
-                    alert('삭제 중 오류가 발생했습니다.');
-                });
-            }
-        }
-    </script>
-    <% } %>
+<script>
+    document.getElementById('noticeForm').addEventListener('submit', handleNoticeFormSubmit);
 
-        <script>
-            document.getElementById('noticeForm').addEventListener('submit', handleNoticeFormSubmit);
+    async function handleNoticeFormSubmit(event) {
+        event.preventDefault();
 
-            async function handleNoticeFormSubmit(event) {
-                event.preventDefault();
+        const formData = new FormData(this);
+        const noticeData = {
+            title: formData.get('title'),
+            content: formData.get('content'),
+            status: formData.get('status'),
+            isImportant: formData.get('isImportant') === 'on',
+            author: '<%= user.username %>',
+            authorName: '<%= user.name %>',
+            updatedAt: new Date().toISOString()
+        };
 
-                const formData = new FormData(this);
-                const noticeData = {
-                    title: formData.get('title'),
-                    content: formData.get('content'),
-                    status: formData.get('status'),
-                    isImportant: formData.get('isImportant') === 'on',
-                    author: '<%= user.username %>',
-                    authorName: '<%= user.name %>',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                };
+        const isEdit = '<%= notice ? true : false %>' === 'true';
+        const method = isEdit ? 'PUT' : 'POST';
+        const url = isEdit ? `/admin/management/notice/<%= notice?.id %>/edit` : '/admin/management/notice';
 
-                try {
-                    const response = await fetch(this.action, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(noticeData)
-                    });
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(noticeData)
+            });
 
-                    const result = await response.json();
+            const result = await response.json();
 
-                    if (result.success) {
-                        window.location.href = result.redirectUrl;
-                    } else {
-                        alert(result.message || '공지사항 생성에 실패했습니다.');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('공지사항 생성 중 오류가 발생했습니다.');
+            if (result.success) {
+                if (isEdit) {
+                    alert('공지사항이 성공적으로 수정되었습니다.');
+                } else {
+                    alert('공지사항이 성공적으로 등록되었습니다.');
                 }
+                window.location.href = result.redirectUrl;
+            } else {
+                alert(result.message || `공지사항 ${isEdit ? '수정' : '생성'}에 실패했습니다.`);
             }
-        </script>
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`공지사항 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다.`);
+        }
+    }
+
+    async function deleteNotice(id) {
+        if (!confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/admin/management/notice/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                window.location.href = result.redirectUrl;
+            } else {
+                alert(result.message || '공지사항 삭제에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('공지사항 삭제 중 오류가 발생했습니다.');
+        }
+    }
+</script>

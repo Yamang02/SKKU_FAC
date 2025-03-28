@@ -211,10 +211,37 @@ export default class NoticeController {
         try {
             const { id } = req.params;
             const noticeData = req.body;
-            await this.noticeRepository.update(id, noticeData);
-            res.redirect('/admin/management/notice');
+            console.log('Updating Notice Data:', noticeData); // 수정된 내용 로그 출력
+
+            // 공지사항 존재 여부 확인
+            const existingNotice = await this.noticeRepository.findNoticeById(id);
+            if (!existingNotice) {
+                return res.status(404).json({
+                    success: false,
+                    message: '수정할 공지사항을 찾을 수 없습니다.'
+                });
+            }
+
+            // 공지사항 수정 로직
+            const updatedNotice = await this.noticeRepository.updateNotice(id, noticeData);
+            if (!updatedNotice) {
+                return res.status(500).json({
+                    success: false,
+                    message: '공지사항 수정에 실패했습니다.'
+                });
+            }
+
+            // 수정된 공지의 상세 페이지로 이동
+            res.status(200).json({
+                success: true,
+                redirectUrl: `/admin/management/notice/${id}`
+            });
         } catch (error) {
-            ViewResolver.renderError(res, error);
+            console.error('Error updating notice:', error);
+            res.status(500).json({
+                success: false,
+                message: '공지사항 수정 중 오류가 발생했습니다.'
+            });
         }
     }
 
@@ -224,10 +251,37 @@ export default class NoticeController {
     async deleteNotice(req, res) {
         try {
             const { id } = req.params;
-            await this.noticeRepository.delete(id);
-            res.redirect('/admin/management/notice');
+            console.log('Deleting Notice ID:', id); // 삭제할 공지사항 ID 로그 출력
+
+            // 공지사항 존재 여부 확인
+            const existingNotice = await this.noticeRepository.findNoticeById(id);
+            if (!existingNotice) {
+                return res.status(404).json({
+                    success: false,
+                    message: '삭제할 공지사항을 찾을 수 없습니다.'
+                });
+            }
+
+            // 공지사항 삭제 로직
+            const isDeleted = await this.noticeRepository.deleteNotice(id);
+            if (!isDeleted) {
+                return res.status(500).json({
+                    success: false,
+                    message: '공지사항 삭제에 실패했습니다.'
+                });
+            }
+
+            // 삭제 성공 시 목록 페이지로 이동
+            res.status(200).json({
+                success: true,
+                redirectUrl: '/admin/management/notice'
+            });
         } catch (error) {
-            ViewResolver.renderError(res, error);
+            console.error('Error deleting notice:', error);
+            res.status(500).json({
+                success: false,
+                message: '공지사항 삭제 중 오류가 발생했습니다.'
+            });
         }
     }
 }

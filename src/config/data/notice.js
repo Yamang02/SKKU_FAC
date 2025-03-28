@@ -1,88 +1,136 @@
-/**
- * 공지사항 샘플 데이터
- */
+// 공지사항 Mock 데이터
 const notices = [
     {
         id: 1,
-        title: '2024년도 성균관대학교 미술관 개관 안내',
-        content: '안녕하세요. 성균관대학교 미술관입니다.\n\n2024년도 성균관대학교 미술관이 개관되었습니다.\n\n개관 시간: 평일 10:00 - 18:00\n주말 및 공휴일: 10:00 - 17:00\n\n많은 관람 부탁드립니다.',
-        author: '관리자',
-        createdAt: '2024-01-01T00:00:00.000Z',
-        updatedAt: '2024-01-01T00:00:00.000Z',
-        isImportant: true,
-        views: 150,
-        status: 'active'
+        title: '2024학년도 1학기 학사일정 안내',
+        content: '2024학년도 1학기 학사일정을 안내드립니다.\n\n1. 개강: 2024년 3월 4일\n2. 수강신청: 2024년 2월 19일 ~ 2월 23일\n3. 중간고사: 2024년 4월 15일 ~ 4월 19일\n4. 기말고사: 2024년 6월 17일 ~ 6월 21일\n\n자세한 일정은 포털을 참고해주세요.',
+        author: '학사지원팀',
+        status: 'active',
+        is_important: true,
+        created_at: '2024-02-15T09:00:00Z',
+        updated_at: '2024-02-15T09:00:00Z'
     },
     {
         id: 2,
-        title: '2024년도 전시 일정 안내',
-        content: '2024년도 성균관대학교 미술관 전시 일정을 안내드립니다.\n\n1. 2024년 1월 - 2월: 신년 특별전\n2. 2024년 3월 - 4월: 신진 작가전\n3. 2024년 5월 - 6월: 졸업 작품전\n4. 2024년 7월 - 8월: 여름 특별전\n5. 2024년 9월 - 10월: 가을 특별전\n6. 2024년 11월 - 12월: 연말 특별전\n\n자세한 내용은 추후 공지하겠습니다.',
-        author: '관리자',
-        createdAt: '2024-01-02T00:00:00.000Z',
-        updatedAt: '2024-01-02T00:00:00.000Z',
-        isImportant: true,
-        views: 120,
-        status: 'active'
+        title: '2024학년도 1학기 장학금 신청 안내',
+        content: '2024학년도 1학기 장학금 신청이 시작됩니다.\n\n1. 신청기간: 2024년 2월 26일 ~ 3월 1일\n2. 신청방법: 포털 → 장학금 → 장학금신청\n3. 제출서류: 성적증명서, 가계수급자증명서 등\n\n자세한 내용은 장학팀으로 문의해주세요.',
+        author: '장학팀',
+        status: 'active',
+        is_important: true,
+        created_at: '2024-02-14T14:30:00Z',
+        updated_at: '2024-02-14T14:30:00Z'
     },
     {
         id: 3,
-        title: '미술관 휴관 안내',
-        content: '2024년 2월 9일(금)부터 2월 12일(월)까지 설 연휴로 인해 미술관이 휴관됩니다.\n\n2월 13일(화)부터 정상 운영됩니다.\n\n불편을 드려 죄송합니다.',
-        author: '관리자',
-        createdAt: '2024-01-03T00:00:00.000Z',
-        updatedAt: '2024-01-03T00:00:00.000Z',
-        isImportant: false,
-        views: 80,
-        status: 'active'
+        title: '2024학년도 1학기 수강신청 안내',
+        content: '2024학년도 1학기 수강신청 일정을 안내드립니다.\n\n1. 수강신청 기간: 2024년 2월 19일 ~ 2월 23일\n2. 수강정정 기간: 2024년 3월 4일 ~ 3월 8일\n3. 수강포기 기간: 2024년 4월 1일 ~ 4월 5일\n\n수강신청 전에 수강신청 가이드를 확인해주세요.',
+        author: '교무팀',
+        status: 'active',
+        is_important: false,
+        created_at: '2024-02-13T10:00:00Z',
+        updated_at: '2024-02-13T10:00:00Z'
     }
 ];
 
 /**
  * 모든 공지사항을 반환합니다.
- * @returns {Array} 공지사항 목록
+ * @returns {Promise<Array<import('../../models/notice/Notice').Notice>>} 공지사항 목록
  */
-export const findAll = () => {
-    return [...notices];
-};
+export const findNotices = async ({ page = 1, limit = 10, search, status, isImportant } = {}) => {
+    let filteredNotices = [...notices];
 
-/**
- * 검색 조건에 맞는 공지사항을 반환합니다.
- * @param {string} searchType - 검색 유형 (all, title, content)
- * @param {string} keyword - 검색어
- * @returns {Array} 검색된 공지사항 목록
- */
-export const findBySearchType = (searchType, keyword) => {
-    if (!keyword) return [...notices];
+    if (search) {
+        filteredNotices = filteredNotices.filter(notice =>
+            notice.title.includes(search) ||
+            notice.content.includes(search)
+        );
+    }
 
-    return notices.filter(notice => {
-        switch (searchType) {
-        case 'title':
-            return notice.title.includes(keyword);
-        case 'content':
-            return notice.content.includes(keyword);
-        case 'all':
-        default:
-            return notice.title.includes(keyword) || notice.content.includes(keyword);
-        }
-    });
+    if (status) {
+        filteredNotices = filteredNotices.filter(notice =>
+            notice.status === status
+        );
+    }
+
+    if (isImportant !== undefined) {
+        filteredNotices = filteredNotices.filter(notice =>
+            notice.is_important === (isImportant === 'true')
+        );
+    }
+
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const total = filteredNotices.length;
+
+    return {
+        items: filteredNotices.slice(start, end),
+        total,
+        page: Number(page),
+        totalPages: Math.ceil(total / limit)
+    };
 };
 
 /**
  * ID로 공지사항을 찾습니다.
  * @param {number} id - 공지사항 ID
- * @returns {Object|null} 찾은 공지사항 또는 null
+ * @returns {Promise<import('../../models/notice/Notice').Notice|null>} 찾은 공지사항 또는 null
  */
-export const findById = (id) => {
-    return notices.find(notice => notice.id === id) || null;
+export const findNoticeById = async (id) => {
+    return notices.find(notice => notice.id === Number(id)) || null;
 };
 
 /**
- * 공지사항의 조회수를 증가시킵니다.
- * @param {number} id - 공지사항 ID
+ * 새로운 공지사항을 생성합니다.
+ * @param {Object} data - 공지사항 데이터
+ * @returns {Promise<import('../../models/notice/Notice').Notice>} 생성된 공지사항
  */
-export const incrementViews = (id) => {
-    const notice = notices.find(n => n.id === id);
-    if (notice) {
-        notice.views += 1;
-    }
+export const createNotice = async (data) => {
+    const newNotice = {
+        ...data,
+        id: Math.max(...notices.map(n => n.id)) + 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+    };
+    notices.push(newNotice);
+    return newNotice;
 };
+
+/**
+ * 공지사항을 수정합니다.
+ * @param {number} id - 공지사항 ID
+ * @param {Object} data - 수정할 데이터
+ * @returns {Promise<import('../../models/notice/Notice').Notice|null>} 수정된 공지사항 또는 null
+ */
+export const updateNotice = async (id, data) => {
+    const index = notices.findIndex(notice => notice.id === Number(id));
+    if (index === -1) return null;
+
+    notices[index] = {
+        ...notices[index],
+        ...data,
+        updated_at: new Date().toISOString()
+    };
+    return notices[index];
+};
+
+/**
+ * 공지사항을 삭제합니다.
+ * @param {number} id - 공지사항 ID
+ * @returns {Promise<boolean>} 성공 여부
+ */
+export const deleteNotice = async (id) => {
+    const index = notices.findIndex(notice => notice.id === Number(id));
+    if (index === -1) return false;
+
+    notices.splice(index, 1);
+    return true;
+};
+
+/**
+ * 중요 공지사항을 조회합니다.
+ * @returns {Promise<Array<import('../../models/notice/Notice').Notice>>} 중요 공지사항 목록
+ */
+export const findImportantNotices = async () => {
+    return notices.filter(notice => notice.is_important);
+};
+
