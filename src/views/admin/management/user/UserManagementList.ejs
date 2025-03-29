@@ -8,10 +8,6 @@
     <!-- 컨트롤 섹션 -->
     <div class="admin-control">
         <div class="admin-control__group">
-            <button class="admin-button admin-button--primary" onclick="location.href='/admin/management/user/create'">
-                <i class="fas fa-plus"></i>
-                회원 등록
-            </button>
         </div>
     </div>
 
@@ -97,15 +93,15 @@
                                         <%= user.status || 'ACTIVE' %>
                                     </span>
                                 </td>
-                                <td>
-                                    <div class="admin-button-group">
-                                        <a href="/admin/management/user/<%= user.id %>"
-                                            class="admin-button admin-button--secondary">
+                                <td class="admin-table__cell">
+                                    <div class="admin-table__actions">
+                                        <button class="admin-button admin-button--secondary"
+                                            onclick="location.href='/admin/management/user/<%= user.id %>'">
                                             <i class="fas fa-edit"></i>
-                                        </a>
+                                        </button>
                                         <button class="admin-button admin-button--danger"
-                                            onclick="toggleUserStatus('<%= user.id %>', '<%= user.status || 'ACTIVE' %>')">
-                                            <i class="fas fa-ban"></i>
+                                            onclick="deleteUser(<%= user.id %>)">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -217,4 +213,31 @@
         searchParams.set('page', 1);
         window.location.href = currentUrl.toString();
     });
+
+    async function deleteUser(id) {
+        if (confirm('정말로 이 회원을 삭제하시겠습니까?\n\n' +
+            '⚠️ 경고: 이 작업은 되돌릴 수 없습니다.\n' +
+            '• 해당 회원의 모든 정보가 영구적으로 삭제됩니다.\n' +
+            '• 회원과 관련된 모든 데이터가 함께 삭제됩니다.\n' +
+            '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.')) {
+
+            try {
+                const response = await fetch(`/admin/management/user/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('회원이 삭제되었습니다.');
+                    window.location.reload();
+                } else {
+                    alert(result.message || '회원 삭제 중 오류가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('회원 삭제 중 오류가 발생했습니다.');
+            }
+        }
+    }
 </script>

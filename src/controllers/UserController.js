@@ -3,7 +3,6 @@ import UserRepository from '../repositories/UserRepository.js';
 import bcrypt from 'bcrypt';
 import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
-import Page from '../models/common/page/Page.js';
 
 export default class UserController {
     constructor() {
@@ -253,8 +252,8 @@ export default class UserController {
      */
     async getManagementUserList(req, res) {
         try {
-            const { page = 1, limit = 10, status, role, keyword } = req.query;
-            const filters = { status, role, keyword };
+            const { page = 1, limit = 10, keyword } = req.query;
+            const filters = { keyword };
 
             const users = await this.userRepository.findUsers({
                 page: parseInt(page),
@@ -262,21 +261,19 @@ export default class UserController {
                 ...filters
             });
 
-            const pageOptions = {
-                page: parseInt(page),
-                limit: parseInt(limit),
-                baseUrl: '/admin/management/user',
-                filters,
-                previousUrl: Page.getPreviousPageUrl(req),
-                currentUrl: Page.getCurrentPageUrl(req)
-            };
-
-            const pageData = new Page(users.total, pageOptions);
-
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.LIST, {
-                title: '사용자 관리',
+                title: '회원 관리',
                 users: users.items || [],
-                page: pageData,
+                result: {
+                    total: users.total,
+                    totalPages: Math.ceil(users.total / limit)
+                },
+                page: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(users.total / limit),
+                    hasPreviousPage: parseInt(page) > 1,
+                    hasNextPage: parseInt(page) < Math.ceil(users.total / limit)
+                },
                 filters
             });
         } catch (error) {
@@ -289,19 +286,16 @@ export default class UserController {
      */
     async getManagementUserDetail(req, res) {
         try {
-            const userId = parseInt(req.params.id, 10);
-            if (isNaN(userId)) {
-                return ViewResolver.renderError(res, new Error('잘못된 사용자 ID입니다.'));
+            const { id } = req.params;
+            const user = await this.userRepository.findUserById(id);
+
+            if (!user) {
+                throw new Error('회원을 찾을 수 없습니다.');
             }
 
-            const user = await this.userRepository.findUserById(userId);
-            if (!user) {
-                return ViewResolver.renderError(res, new Error('사용자를 찾을 수 없습니다.'));
-            }
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.DETAIL, {
-                currentPage: req.path,
-                user,
-                title: '사용자 상세'
+                title: '회원 상세',
+                user
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -326,6 +320,64 @@ export default class UserController {
             res.redirect('/admin/management/user/list');
         } catch (error) {
             ViewResolver.renderError(res, error);
+        }
+    }
+
+    /**
+     * 관리자용 회원 정보를 수정합니다.
+     */
+    async updateManagementUser(req, res) {
+        try {
+            const { id } = req.params;
+            const { role, status } = req.body;
+
+            const result = await this.userRepository.updateUser(id, { role, status });
+
+            if (result) {
+                res.json({
+                    success: true,
+                    message: '회원 정보가 수정되었습니다.'
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: '회원을 찾을 수 없습니다.'
+                });
+            }
+        } catch (error) {
+            console.error('Error updating user:', error);
+            res.status(500).json({
+                success: false,
+                message: '회원 정보 수정 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * 관리자용 회원을 삭제합니다.
+     */
+    async deleteManagementUser(req, res) {
+        try {
+            const { id } = req.params;
+            const result = await this.userRepository.deleteUser(id);
+
+            if (result) {
+                res.json({
+                    success: true,
+                    message: '회원이 삭제되었습니다.'
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: '회원을 찾을 수 없습니다.'
+                });
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            res.status(500).json({
+                success: false,
+                message: '회원 삭제 중 오류가 발생했습니다.'
+            });
         }
     }
 }

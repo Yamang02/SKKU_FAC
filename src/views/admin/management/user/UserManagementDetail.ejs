@@ -1,6 +1,7 @@
 <style>
     @import url('/css/admin/management/user/UserManagementDetail.css');
 </style>
+
 <!-- 페이지 헤더 -->
 <div class="admin-user-detail">
     <div class="content-section">
@@ -25,20 +26,16 @@
                 </div>
                 <div class="form-group">
                     <label>역할</label>
-                    <select disabled>
+                    <select name="role" required>
+                        <option value="USER" <%=user.role==='USER' ? 'selected' : '' %>>일반 사용자</option>
                         <option value="ADMIN" <%=user.role==='ADMIN' ? 'selected' : '' %>>관리자</option>
-                        <option value="ARTIST" <%=user.role==='ARTIST' ? 'selected' : '' %>>작가</option>
-                        <option value="CLUB_MEMBER" <%=user.role==='CLUB_MEMBER' ? 'selected' : '' %>>동아리 회원
-                        </option>
-                        <option value="GUEST" <%=user.role==='GUEST' ? 'selected' : '' %>>게스트</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>상태</label>
-                    <select disabled>
+                    <select name="status" required>
                         <option value="ACTIVE" <%=user.status==='ACTIVE' ? 'selected' : '' %>>활성</option>
                         <option value="INACTIVE" <%=user.status==='INACTIVE' ? 'selected' : '' %>>비활성</option>
-                        <option value="SUSPENDED" <%=user.status==='SUSPENDED' ? 'selected' : '' %>>정지</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -46,25 +43,28 @@
                     <input type="text" value="<%= new Date(user.createdAt).toLocaleDateString() %>" readonly>
                 </div>
                 <div class="form-group">
-                    <label>수정일</label>
-                    <input type="text" value="<%= new Date(user.updatedAt).toLocaleDateString() %>" readonly>
+                    <label>마지막 로그인</label>
+                    <input type="text"
+                        value="<%= user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : '없음' %>"
+                        readonly>
                 </div>
             </div>
         </div>
         <div class="section-footer">
             <div class="admin-button-group">
-                <button class="admin-button admin-button--secondary" onclick="handleEdit()">
-                    <i class="fas fa-edit"></i>
-                    수정
+                <button class="admin-button admin-button--primary" onclick="handleSave()">
+                    <i class="fas fa-save"></i>
+                    저장
                 </button>
-                <button class="admin-button admin-button--danger" onclick="handleBlockUser()">
-                    <i class="fas fa-ban"></i>
-                    정지
+                <button class="admin-button admin-button--danger" onclick="handleDelete()">
+                    <i class="fas fa-trash"></i>
+                    삭제
                 </button>
             </div>
         </div>
     </div>
 </div>
+
 <div class="admin-back-button-container">
     <a onclick="history.back()" class="admin-button admin-button--backtolist">
         <i class="fas fa-list"></i>
@@ -73,6 +73,63 @@
 </div>
 
 <script>
+    async function handleSave() {
+        const role = document.querySelector('select[name="role"]').value;
+        const status = document.querySelector('select[name="status"]').value;
+
+        try {
+            const response = await fetch(`/admin/management/user/<%= user.id %>`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    role,
+                    status
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('회원 정보가 저장되었습니다.');
+                window.location.href = '/admin/management/user';
+            } else {
+                alert(result.message || '회원 정보 저장 중 오류가 발생했습니다.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('회원 정보 저장 중 오류가 발생했습니다.');
+        }
+    }
+
+    async function handleDelete() {
+        if (confirm('정말로 이 회원을 삭제하시겠습니까?\n\n' +
+            '⚠️ 경고: 이 작업은 되돌릴 수 없습니다.\n' +
+            '• 해당 회원의 모든 정보가 영구적으로 삭제됩니다.\n' +
+            '• 회원과 관련된 모든 데이터가 함께 삭제됩니다.\n' +
+            '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.')) {
+
+            try {
+                const response = await fetch(`/admin/management/user/<%= user.id %>`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('회원이 삭제되었습니다.');
+                    window.location.href = '/admin/management/user';
+                } else {
+                    alert(result.message || '회원 삭제 중 오류가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('회원 삭제 중 오류가 발생했습니다.');
+            }
+        }
+    }
+
     function handleEdit() {
         const form = document.getElementById('userForm');
         const inputs = form.querySelectorAll('input, select');
@@ -92,10 +149,6 @@
         </button>
     `;
         document.querySelector('.action-buttons').innerHTML = actionButtons;
-    }
-
-    function handleSave() {
-        // TODO: 저장 로직 구현
     }
 
     function handleCancel() {

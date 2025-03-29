@@ -34,7 +34,7 @@ export default class UserRepository {
      * ID로 사용자를 조회합니다.
      */
     async findUserById(id) {
-        return this.users.find(user => user.id === id);
+        return this.users.find(user => user.id === Number(id));
     }
 
     /**
@@ -69,7 +69,7 @@ export default class UserRepository {
      * 사용자 정보를 수정합니다.
      */
     async updateUser(id, userData) {
-        const index = this.users.findIndex(user => user.id === id);
+        const index = this.users.findIndex(user => user.id === Number(id));
         if (index === -1) return null;
 
         this.users[index] = {
@@ -84,7 +84,7 @@ export default class UserRepository {
      * 사용자를 삭제합니다.
      */
     async deleteUser(id) {
-        const index = this.users.findIndex(user => user.id === id);
+        const index = this.users.findIndex(user => user.id === Number(id));
         if (index === -1) return false;
 
         this.users.splice(index, 1);

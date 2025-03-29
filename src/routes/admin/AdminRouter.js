@@ -18,10 +18,10 @@ const noticeController = new NoticeController();
 AdminRouter.get(['/', '/dashboard'], isAdmin, (req, res) => adminController.getDashboard(req, res));
 
 // 사용자 관리
-AdminRouter.get('/management/user/list', isAdmin, (req, res) => userController.getManagementUserList(req, res));
+AdminRouter.get('/management/user', isAdmin, (req, res) => userController.getManagementUserList(req, res));
 AdminRouter.get('/management/user/:id([0-9]+)', isAdmin, (req, res) => userController.getManagementUserDetail(req, res));
-AdminRouter.post('/management/user/:id([0-9]+)/delete', isAdmin, (req, res) => userController.deleteUser(req, res));
-AdminRouter.post('/management/user/:id([0-9]+)/role', isAdmin, (req, res) => userController.updateUserRole(req, res));
+AdminRouter.put('/management/user/:id([0-9]+)', isAdmin, (req, res) => userController.updateManagementUser(req, res));
+AdminRouter.delete('/management/user/:id([0-9]+)', isAdmin, (req, res) => userController.deleteManagementUser(req, res));
 
 // 전시회 관리
 AdminRouter.get('/management/exhibition', isAdmin, (req, res) => exhibitionController.getManagementExhibitionList(req, res));
