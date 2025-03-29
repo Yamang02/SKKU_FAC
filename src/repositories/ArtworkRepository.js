@@ -98,7 +98,7 @@ export default class ArtworkRepository {
      * 작품을 삭제합니다.
      */
     async deleteArtwork(id) {
-        const index = this.artworks.findIndex(artwork => artwork.id === id);
+        const index = this.artworks.findIndex(artwork => artwork.id === Number(id));
         if (index === -1) return false;
 
         this.artworks.splice(index, 1);

@@ -33,10 +33,6 @@ AdminRouter.delete('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => 
 
 // 작품 관리
 AdminRouter.get('/management/artwork', isAdmin, (req, res) => artworkController.getManagementArtworkList(req, res));
-AdminRouter.get('/management/artwork/register', isAdmin, (req, res) => artworkController.getManagementArtworkCreatePage(req, res));
-AdminRouter.post('/management/artwork/register', isAdmin, (req, res) => artworkController.createManagementArtwork(req, res));
-AdminRouter.get('/management/artwork/:id([0-9]+)', isAdmin, (req, res) => artworkController.getManagementArtworkDetail(req, res));
-AdminRouter.put('/management/artwork/:id([0-9]+)', isAdmin, (req, res) => artworkController.updateManagementArtwork(req, res));
 AdminRouter.delete('/management/artwork/:id([0-9]+)', isAdmin, (req, res) => artworkController.deleteManagementArtwork(req, res));
 
 // 공지사항 관리

@@ -1,7 +1,3 @@
-<style>
-    @import url('/css/admin/management/artwork/ArtworkManagementList.css');
-</style>
-
 <div class="admin-management">
     <h2 class="admin-title">작품목록</h2>
 
@@ -19,14 +15,6 @@
     <!-- 필터 섹션 -->
     <div class="admin-filter">
         <div class="admin-filter__group">
-            <select class="admin-filter__select" name="exhibitionId">
-                <option value="">전시회</option>
-                <% exhibitions.forEach(exhibition=> { %>
-                    <option value="<%= exhibition.id %>" <%=filters?.exhibitionId==exhibition.id ? 'selected' : '' %>>
-                        <%= exhibition.title %>
-                    </option>
-                    <% }); %>
-            </select>
             <select class="admin-filter__select" name="artistId">
                 <option value="">작가</option>
                 <% artists.forEach(artist=> { %>
@@ -56,7 +44,6 @@
                         <th>ID</th>
                         <th>제목</th>
                         <th>작가</th>
-                        <th>전시회</th>
                         <th>생성일</th>
                         <th>수정일</th>
                         <th>관리</th>
@@ -79,15 +66,6 @@
                                     <%= artwork.artist.name %>
                                 </td>
                                 <td>
-                                    <% if (artwork.exhibition) { %>
-                                        <span class="admin-badge admin-badge--<%= artwork.exhibition.exhibitionType %>">
-                                            <%= artwork.exhibition.title %>
-                                        </span>
-                                        <% } else { %>
-                                            -
-                                            <% } %>
-                                </td>
-                                <td>
                                     <%= new Date(artwork.createdAt).toLocaleDateString() %>
                                 </td>
                                 <td>
@@ -95,10 +73,6 @@
                                 </td>
                                 <td>
                                     <div class="admin-button-group">
-                                        <a href="/admin/management/artwork/<%= artwork.id %>"
-                                            class="admin-button admin-button--secondary">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
                                         <button class="admin-button admin-button--danger"
                                             onclick="deleteArtwork(<%= artwork.id %>)">
                                             <i class="fas fa-trash"></i>
@@ -109,7 +83,7 @@
                             <% }); %>
                                 <% } else { %>
                                     <tr>
-                                        <td colspan="8" class="admin-table__empty">
+                                        <td colspan="7" class="admin-table__empty">
                                             등록된 작품이 없습니다.
                                         </td>
                                     </tr>
@@ -151,24 +125,31 @@
 </div>
 
 <script>
-    function deleteArtwork(id) {
-        if (confirm('정말로 이 작품을 삭제하시겠습니까?')) {
+    async function deleteArtwork(id) {
+        if (confirm('정말로 이 작품을 삭제하시겠습니까?\n\n' +
+            '⚠️ 경고: 이 작업은 되돌릴 수 없습니다.\n' +
+            '• 해당 작품의 모든 정보가 영구적으로 삭제됩니다.\n' +
+            '• 작품과 관련된 모든 데이터(이미지, 설명, 댓글 등)가 함께 삭제됩니다.\n' +
+            '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.')) {
             fetch(`/admin/management/artwork/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            }).then(response => {
-                if (response.ok) {
-                    alert('작품이 성공적으로 삭제되었습니다.');
-                    window.location.reload();
-                } else {
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert(result.message);
+                        window.location.href = '/admin/management/artwork';
+                    } else {
+                        alert(result.message || '작품 삭제에 실패했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                     alert('작품 삭제 중 오류가 발생했습니다.');
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-                alert('작품 삭제 중 오류가 발생했습니다.');
-            });
+                });
         }
     }
 
@@ -180,18 +161,11 @@
     }
 
     document.getElementById('btnApplyFilter').addEventListener('click', function () {
-        const exhibitionId = document.querySelector('select[name="exhibitionId"]').value;
         const artistId = document.querySelector('select[name="artistId"]').value;
         const keyword = document.querySelector('input[name="keyword"]').value;
 
         const currentUrl = new URL(window.location.href);
         const searchParams = currentUrl.searchParams;
-
-        if (exhibitionId) {
-            searchParams.set('exhibitionId', exhibitionId);
-        } else {
-            searchParams.delete('exhibitionId');
-        }
 
         if (artistId) {
             searchParams.set('artistId', artistId);
@@ -205,7 +179,6 @@
             searchParams.delete('keyword');
         }
 
-        searchParams.set('page', 1);
         window.location.href = currentUrl.toString();
     });
 </script>

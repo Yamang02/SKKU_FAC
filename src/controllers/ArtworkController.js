@@ -259,36 +259,32 @@ export default class ArtworkController {
      */
     async getManagementArtworkList(req, res) {
         try {
-            const { page = 1, limit = 10, keyword, exhibitionId, artistId } = req.query;
-            const filters = { keyword, exhibitionId, artistId };
+            const { page = 1, limit = 10, artistId, keyword } = req.query;
+            const filters = { artistId, keyword };
 
-            const [artworks, exhibitions, artists] = await Promise.all([
-                this.artworkRepository.findArtworks({
-                    page: parseInt(page),
-                    limit: parseInt(limit),
-                    ...filters
-                }),
-                this.exhibitionRepository.findExhibitions({ limit: 100 }),
-                this.artworkRepository.findArtists({ limit: 100 })
-            ]);
-
-            const pageOptions = {
+            const artworks = await this.artworkRepository.findArtworks({
                 page: parseInt(page),
                 limit: parseInt(limit),
-                baseUrl: '/admin/management/artwork',
-                filters,
-                previousUrl: Page.getPreviousPageUrl(req),
-                currentUrl: Page.getCurrentPageUrl(req)
-            };
+                ...filters
+            });
 
-            const pageData = new Page(artworks.total, pageOptions);
+            const artists = await this.artworkRepository.findArtists();
+            const artistsList = artists?.items || artists || [];
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.LIST, {
                 title: '작품 관리',
                 artworks: artworks.items || [],
-                exhibitions: exhibitions.items || [],
-                artists: artists.items || [],
-                page: pageData,
+                artists: artistsList,
+                result: {
+                    total: artworks.total,
+                    totalPages: Math.ceil(artworks.total / limit)
+                },
+                page: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(artworks.total / limit),
+                    hasPreviousPage: parseInt(page) > 1,
+                    hasNextPage: parseInt(page) < Math.ceil(artworks.total / limit)
+                },
                 filters
             });
         } catch (error) {
@@ -377,10 +373,25 @@ export default class ArtworkController {
     async deleteManagementArtwork(req, res) {
         try {
             const { id } = req.params;
-            await this.artworkRepository.deleteArtwork(id);
-            res.redirect('/admin/management/artwork');
+            const result = await this.artworkRepository.deleteArtwork(id);
+
+            if (result) {
+                res.json({
+                    success: true,
+                    message: '작품이 삭제되었습니다.'
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: '작품을 찾을 수 없습니다.'
+                });
+            }
         } catch (error) {
-            ViewResolver.renderError(res, error);
+            console.error('Error deleting artwork:', error);
+            res.status(500).json({
+                success: false,
+                message: '작품 삭제 중 오류가 발생했습니다.'
+            });
         }
     }
 
