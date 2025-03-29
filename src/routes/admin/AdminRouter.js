@@ -25,10 +25,11 @@ AdminRouter.post('/management/user/:id([0-9]+)/role', isAdmin, (req, res) => use
 
 // 전시회 관리
 AdminRouter.get('/management/exhibition', isAdmin, (req, res) => exhibitionController.getManagementExhibitionList(req, res));
+AdminRouter.get('/management/exhibition/register', isAdmin, (req, res) => exhibitionController.getExhibitionCreatePage(req, res));
 AdminRouter.get('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.getManagementExhibitionDetail(req, res));
-AdminRouter.post('/management/exhibition/create', isAdmin, (req, res) => exhibitionController.createExhibition(req, res));
-AdminRouter.put('/management/exhibition/:id', isAdmin, (req, res) => exhibitionController.updateExhibition(req, res));
-AdminRouter.delete('/management/exhibition/:id', isAdmin, (req, res) => exhibitionController.deleteExhibition(req, res));
+AdminRouter.post('/management/exhibition/register', isAdmin, (req, res) => exhibitionController.createExhibition(req, res));
+AdminRouter.put('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.updateExhibition(req, res));
+AdminRouter.delete('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.deleteExhibition(req, res));
 
 // 작품 관리
 AdminRouter.get('/management/artwork', isAdmin, (req, res) => artworkController.getManagementArtworkList(req, res));

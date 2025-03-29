@@ -69,13 +69,35 @@ export default class ExhibitionController {
 
     /**
      * 전시회 생성 페이지를 처리합니다.
-     * @param {Object} req - Express 요청 객체
-     * @param {Object} res - Express 응답 객체
      */
-    getExhibitionCreatePage(req, res) {
-        ViewResolver.render(res, ViewPath.EXHIBITION.CREATE, {
-            title: '전시회 생성'
-        });
+    async getExhibitionCreatePage(req, res) {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const exhibition = {
+                id: '',
+                title: '',
+                exhibitionType: 'regular',
+                location: '',
+                isSubmissionOpen: true,
+                startDate: today,
+                endDate: today,
+                description: '',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
+                title: '전시회 등록',
+                mode: 'create',
+                exhibition
+            });
+        } catch (error) {
+            console.error('Error in getExhibitionCreatePage:', error);
+            res.status(500).json({
+                success: false,
+                message: '전시회 등록 페이지를 불러오는 중 오류가 발생했습니다.'
+            });
+        }
     }
 
     /**
@@ -83,11 +105,31 @@ export default class ExhibitionController {
      */
     async createExhibition(req, res) {
         try {
-            const exhibitionData = req.body;
-            await this.exhibitionRepository.create(exhibitionData);
-            res.redirect('/admin/management/exhibition');
+            console.log('전시회 생성 요청:', req.body);
+            const exhibitionData = {
+                ...req.body,
+                isSubmissionOpen: req.body.isSubmissionOpen === 'true',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            // ID 생성 로직을 레포지토리에서 처리
+            const newExhibition = await this.exhibitionRepository.createExhibition(exhibitionData);
+            console.log('생성된 전시회:', newExhibition);
+
+            if (!newExhibition || !newExhibition.id) {
+                throw new Error('전시회 생성 중 오류가 발생했습니다: ID가 생성되지 않았습니다.');
+            }
+
+            res.json({
+                success: true,
+                message: '전시회가 성공적으로 등록되었습니다.',
+                exhibition: newExhibition,
+                redirectUrl: `/admin/management/exhibition/${newExhibition.id}`
+            });
         } catch (error) {
-            ViewResolver.renderError(res, error);
+            console.error('전시회 생성 중 에러 발생:', error);
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -117,12 +159,19 @@ export default class ExhibitionController {
      */
     async updateExhibition(req, res) {
         try {
+            console.log('전시회 수정 요청:', req.body);
             const { id } = req.params;
-            const exhibitionData = req.body;
-            await this.exhibitionRepository.update(id, exhibitionData);
-            res.redirect('/admin/management/exhibition');
+            const exhibitionData = {
+                ...req.body,
+                isSubmissionOpen: req.body.isSubmissionOpen === 'true',
+                updatedAt: new Date().toISOString()
+            };
+
+            await this.exhibitionRepository.updateExhibition(id, exhibitionData);
+            res.json({ success: true, message: '전시회가 성공적으로 수정되었습니다.' });
         } catch (error) {
-            ViewResolver.renderError(res, error);
+            console.error('전시회 수정 중 에러 발생:', error);
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -131,11 +180,18 @@ export default class ExhibitionController {
      */
     async deleteExhibition(req, res) {
         try {
+            console.log('전시회 삭제 요청:', req.params);
             const { id } = req.params;
-            await this.exhibitionRepository.delete(id);
-            res.redirect('/admin/management/exhibition');
+            const result = await this.exhibitionRepository.deleteExhibition(parseInt(id, 10));
+
+            if (!result) {
+                throw new Error('전시회를 찾을 수 없습니다.');
+            }
+
+            res.json({ success: true, message: '전시회가 성공적으로 삭제되었습니다.' });
         } catch (error) {
-            ViewResolver.renderError(res, error);
+            console.error('전시회 삭제 중 에러 발생:', error);
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
@@ -195,6 +251,7 @@ export default class ExhibitionController {
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
                 title: '전시회 상세',
+                mode: 'detail',
                 exhibition: {
                     ...exhibition,
                     isSubmissionOpen: exhibition.isSubmissionOpen || false

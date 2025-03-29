@@ -34,16 +34,10 @@ export default class ExhibitionRepository {
      * ID로 전시회를 조회합니다.
      */
     async findExhibitionById(id) {
-        console.log('Repository - 검색할 ID:', id, '타입:', typeof id);
-        console.log('Repository - 전체 전시회 목록:', this.exhibitions);
-
-        // ID를 숫자로 변환하여 비교
         const numId = parseInt(id, 10);
-        const found = this.exhibitions.find(exhibition => {
-            console.log('비교 - 전시회 ID:', exhibition.id, '타입:', typeof exhibition.id);
-            return parseInt(exhibition.id, 10) === numId;
-        });
+        if (isNaN(numId)) return null;
 
+        const found = this.exhibitions.find(exhibition => exhibition.id === numId);
         console.log('Repository - 찾은 전시회:', found);
         return found;
     }
@@ -53,11 +47,13 @@ export default class ExhibitionRepository {
      */
     async createExhibition(exhibitionData) {
         const newExhibition = {
-            id: (Math.max(...this.exhibitions.map(e => e.id)) + 1).toString(),
             ...exhibitionData,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            id: Math.max(...this.exhibitions.map(e => e.id)) + 1,
+            isSubmissionOpen: exhibitionData.isSubmissionOpen === 'true' || exhibitionData.isSubmissionOpen === true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         };
+
         this.exhibitions.push(newExhibition);
         return newExhibition;
     }
@@ -66,13 +62,14 @@ export default class ExhibitionRepository {
      * 전시회 정보를 수정합니다.
      */
     async updateExhibition(id, exhibitionData) {
-        const index = this.exhibitions.findIndex(exhibition => exhibition.id === id);
+        const index = this.exhibitions.findIndex(exhibition => exhibition.id === Number(id));
         if (index === -1) return null;
 
         this.exhibitions[index] = {
             ...this.exhibitions[index],
             ...exhibitionData,
-            updated_at: new Date().toISOString()
+            isSubmissionOpen: exhibitionData.isSubmissionOpen === 'true' || exhibitionData.isSubmissionOpen === true,
+            updatedAt: new Date().toISOString()
         };
         return this.exhibitions[index];
     }
@@ -81,7 +78,7 @@ export default class ExhibitionRepository {
      * 전시회를 삭제합니다.
      */
     async deleteExhibition(id) {
-        const index = this.exhibitions.findIndex(exhibition => exhibition.id === id);
+        const index = this.exhibitions.findIndex(exhibition => exhibition.id === Number(id));
         if (index === -1) return false;
 
         this.exhibitions.splice(index, 1);
@@ -94,8 +91,8 @@ export default class ExhibitionRepository {
     async findActiveExhibitions() {
         const now = new Date();
         return this.exhibitions.filter(exhibition => {
-            const startDate = new Date(exhibition.start_date);
-            const endDate = new Date(exhibition.end_date);
+            const startDate = new Date(exhibition.startDate);
+            const endDate = new Date(exhibition.endDate);
             return startDate <= now && now <= endDate;
         });
     }

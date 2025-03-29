@@ -78,6 +78,11 @@
     color: #333;
 }
 
+.form-group .required {
+    color: #dc3545;
+    margin-left: 4px;
+}
+
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -85,7 +90,7 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     width: 100%;
-    background-color: #f8f9fa;
+    background-color: #fff;
 }
 
 .form-group textarea {
@@ -98,6 +103,20 @@
 .form-group textarea[readonly] {
     background-color: #f8f9fa;
     cursor: not-allowed;
+}
+
+/* 생성 모드에서의 입력 필드 스타일 */
+.form-grid[data-mode="create"] input:not([readonly]),
+.form-grid[data-mode="create"] select:not([disabled]),
+.form-grid[data-mode="create"] textarea:not([readonly]) {
+    background-color: #fff;
+}
+
+/* 수정 모드에서의 입력 필드 스타일 */
+.form-grid.editing input:not([readonly]),
+.form-grid.editing select:not([disabled]),
+.form-grid.editing textarea:not([readonly]) {
+    background-color: #fff;
 }
 
 /* 관리 버튼 스타일링 */
