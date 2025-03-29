@@ -6,9 +6,10 @@ const notices = [
         content: '2024학년도 1학기 학사일정을 안내드립니다.\n\n1. 개강: 2024년 3월 4일\n2. 수강신청: 2024년 2월 19일 ~ 2월 23일\n3. 중간고사: 2024년 4월 15일 ~ 4월 19일\n4. 기말고사: 2024년 6월 17일 ~ 6월 21일\n\n자세한 일정은 포털을 참고해주세요.',
         author: '학사지원팀',
         status: 'active',
-        is_important: true,
-        created_at: '2024-02-15T09:00:00Z',
-        updated_at: '2024-02-15T09:00:00Z'
+        isImportant: true,
+        createdAt: '2024-02-15T09:00:00Z',
+        updatedAt: '2024-02-15T09:00:00Z',
+        views: 0
     },
     {
         id: 2,
@@ -16,9 +17,10 @@ const notices = [
         content: '2024학년도 1학기 장학금 신청이 시작됩니다.\n\n1. 신청기간: 2024년 2월 26일 ~ 3월 1일\n2. 신청방법: 포털 → 장학금 → 장학금신청\n3. 제출서류: 성적증명서, 가계수급자증명서 등\n\n자세한 내용은 장학팀으로 문의해주세요.',
         author: '장학팀',
         status: 'active',
-        is_important: true,
-        created_at: '2024-02-14T14:30:00Z',
-        updated_at: '2024-02-14T14:30:00Z'
+        isImportant: true,
+        createdAt: '2024-02-14T14:30:00Z',
+        updatedAt: '2024-02-14T14:30:00Z',
+        views: 0
     },
     {
         id: 3,
@@ -26,9 +28,10 @@ const notices = [
         content: '2024학년도 1학기 수강신청 일정을 안내드립니다.\n\n1. 수강신청 기간: 2024년 2월 19일 ~ 2월 23일\n2. 수강정정 기간: 2024년 3월 4일 ~ 3월 8일\n3. 수강포기 기간: 2024년 4월 1일 ~ 4월 5일\n\n수강신청 전에 수강신청 가이드를 확인해주세요.',
         author: '교무팀',
         status: 'active',
-        is_important: false,
-        created_at: '2024-02-13T10:00:00Z',
-        updated_at: '2024-02-13T10:00:00Z'
+        isImportant: false,
+        createdAt: '2024-02-13T10:00:00Z',
+        updatedAt: '2024-02-13T10:00:00Z',
+        views: 0
     }
 ];
 
@@ -36,13 +39,13 @@ const notices = [
  * 모든 공지사항을 반환합니다.
  * @returns {Promise<Array<import('../../models/notice/Notice').Notice>>} 공지사항 목록
  */
-export const findNotices = async ({ page = 1, limit = 10, search, status, isImportant } = {}) => {
+export const findNotices = async ({ page = 1, limit = 10, keyword, status, isImportant } = {}) => {
     let filteredNotices = [...notices];
 
-    if (search) {
+    if (keyword) {
         filteredNotices = filteredNotices.filter(notice =>
-            notice.title.includes(search) ||
-            notice.content.includes(search)
+            notice.title.includes(keyword) ||
+            notice.content.includes(keyword)
         );
     }
 
@@ -54,7 +57,7 @@ export const findNotices = async ({ page = 1, limit = 10, search, status, isImpo
 
     if (isImportant !== undefined) {
         filteredNotices = filteredNotices.filter(notice =>
-            notice.is_important === (isImportant === 'true')
+            notice.isImportant === (isImportant === 'true')
         );
     }
 
@@ -88,8 +91,9 @@ export const createNotice = async (data) => {
     const newNotice = {
         ...data,
         id: Math.max(...notices.map(n => n.id)) + 1,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        views: 0
     };
     notices.push(newNotice);
     return newNotice;
@@ -108,7 +112,7 @@ export const updateNotice = async (id, data) => {
     notices[index] = {
         ...notices[index],
         ...data,
-        updated_at: new Date().toISOString()
+        updatedAt: new Date().toISOString()
     };
     return notices[index];
 };
@@ -131,7 +135,7 @@ export const deleteNotice = async (id) => {
  * @returns {Promise<Array<import('../../models/notice/Notice').Notice>>} 중요 공지사항 목록
  */
 export const findImportantNotices = async () => {
-    return notices.filter(notice => notice.is_important);
+    return notices.filter(notice => notice.isImportant);
 };
 
 // /**

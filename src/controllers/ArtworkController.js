@@ -302,25 +302,31 @@ export default class ArtworkController {
     async getManagementArtworkDetail(req, res) {
         try {
             const { id } = req.params;
-            const [artwork, exhibitions, artists] = await Promise.all([
-                this.artworkRepository.findArtworkById(id),
-                this.exhibitionRepository.findExhibitions(),
-                this.artworkRepository.findArtists({ limit: 100 })
-            ]);
+            const artwork = await this.artworkRepository.findArtworkById(id);
 
             if (!artwork) {
-                throw new Error('작품을 찾을 수 없습니다.');
+                return res.status(404).render('error', {
+                    message: '작품을 찾을 수 없습니다.',
+                    error: {}
+                });
             }
+
+            const exhibitions = await this.exhibitionRepository.findExhibitions({ limit: 100 });
+            const artists = await this.artworkRepository.findArtists();
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.DETAIL, {
                 title: '작품 상세',
                 artwork,
                 exhibitions: exhibitions.items || [],
-                artists: artists.items || [],
-                isEdit: true
+                artists: artists || [],
+                user: req.user
             });
         } catch (error) {
-            ViewResolver.renderError(res, error);
+            console.error('Error fetching artwork:', error);
+            res.status(500).render('error', {
+                message: '작품 정보를 불러오는 중 오류가 발생했습니다.',
+                error: process.env.NODE_ENV === 'development' ? error : {}
+            });
         }
     }
 
@@ -375,6 +381,55 @@ export default class ArtworkController {
             res.redirect('/admin/management/artwork');
         } catch (error) {
             ViewResolver.renderError(res, error);
+        }
+    }
+
+    /**
+     * 관리자용 작품 등록 페이지를 렌더링합니다.
+     */
+    async getManagementArtworkCreatePage(req, res) {
+        try {
+            const exhibitions = await this.exhibitionRepository.findExhibitions({ limit: 100 });
+            const artists = await this.artworkRepository.findArtists();
+
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.DETAIL, {
+                title: '작품 등록',
+                artwork: null,
+                exhibitions: exhibitions.items || [],
+                artists: artists || [],
+                user: req.user
+            });
+        } catch (error) {
+            ViewResolver.renderError(res, error);
+        }
+    }
+
+    /**
+     * 관리자용 작품을 등록합니다.
+     */
+    async createManagementArtwork(req, res) {
+        try {
+            const artworkData = req.body;
+            const result = await this.artworkRepository.createArtwork(artworkData);
+
+            if (result) {
+                res.json({
+                    success: true,
+                    message: '작품이 등록되었습니다.',
+                    redirectUrl: '/admin/management/artwork'
+                });
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: '작품 등록에 실패했습니다.'
+                });
+            }
+        } catch (error) {
+            console.error('Error creating artwork:', error);
+            res.status(500).json({
+                success: false,
+                message: '작품 등록 중 오류가 발생했습니다.'
+            });
         }
     }
 

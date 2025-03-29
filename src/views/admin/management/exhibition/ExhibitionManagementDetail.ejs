@@ -9,85 +9,78 @@
             <%= mode==='create' ? '전시회 등록' : '전시회 상세' %>
         </h2>
         <div class="section-content">
-            <form id="exhibitionForm" class="form-grid" data-mode="<%= mode %>" onsubmit="handleSubmit(event)">
+            <form id="exhibitionForm" class="form-grid">
                 <div class="form-group">
                     <label>ID</label>
-                    <input type="text" name="id" value="<%= exhibition.id %>" readonly>
+                    <input type="text" name="id" value="<%= exhibition ? exhibition.id : '' %>" readonly>
                 </div>
                 <div class="form-group">
                     <label>제목 <span class="required">*</span></label>
-                    <input type="text" name="title" value="<%= exhibition.title %>" <%=mode==='detail' ? 'readonly'
-                        : 'required' %>>
+                    <input type="text" name="title" value="<%= exhibition ? exhibition.title : '' %>" required>
                 </div>
                 <div class="form-group">
                     <label>전시 유형</label>
-                    <select name="exhibitionType" <%=mode==='detail' ? 'disabled' : '' %>>
-                        <option value="regular" <%=exhibition.exhibitionType==='regular' ? 'selected' : '' %>>정기
+                    <select name="exhibitionType">
+                        <option value="regular" <%=exhibition && exhibition.exhibitionType==='regular' ? 'selected' : ''
+                            %>>정기
                         </option>
-                        <option value="special" <%=exhibition.exhibitionType==='special' ? 'selected' : '' %>>특별
+                        <option value="special" <%=exhibition && exhibition.exhibitionType==='special' ? 'selected' : ''
+                            %>>특별
                         </option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>장소</label>
-                    <input type="text" name="location" value="<%= exhibition.location %>" <%=mode==='detail'
-                        ? 'readonly' : '' %>>
+                    <input type="text" name="location" value="<%= exhibition ? exhibition.location : '' %>">
                 </div>
                 <div class="form-group">
                     <label>출품가능 여부</label>
-                    <select name="isSubmissionOpen" <%=mode==='detail' ? 'disabled' : '' %>>
-                        <option value="true" <%=exhibition.isSubmissionOpen ? 'selected' : '' %>>출품 가능</option>
-                        <option value="false" <%=!exhibition.isSubmissionOpen ? 'selected' : '' %>>출품 불가능</option>
+                    <select name="isSubmissionOpen">
+                        <option value="true" <%=exhibition && exhibition.isSubmissionOpen ? 'selected' : '' %>>출품 가능
+                        </option>
+                        <option value="false" <%=exhibition && !exhibition.isSubmissionOpen ? 'selected' : '' %>>출품 불가능
+                        </option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>시작일 <span class="required">*</span></label>
-                    <input type="date" name="startDate" value="<%= exhibition.startDate %>" <%=mode==='detail'
-                        ? 'readonly' : 'required' %>>
+                    <input type="date" id="startDate" name="startDate"
+                        value="<%= exhibition ? exhibition.startDate : '' %>" required>
                 </div>
                 <div class="form-group">
                     <label>종료일 <span class="required">*</span></label>
-                    <input type="date" name="endDate" value="<%= exhibition.endDate %>" <%=mode==='detail' ? 'readonly'
-                        : 'required' %>>
+                    <input type="date" id="endDate" name="endDate" value="<%= exhibition ? exhibition.endDate : '' %>"
+                        required>
                 </div>
                 <div class="form-group">
                     <label>설명</label>
-                    <textarea name="description" <%=mode==='detail' ? 'readonly' : ''
-                        %>><%= exhibition.description %></textarea>
+                    <textarea name="description"><%= exhibition ? exhibition.description : '' %></textarea>
                 </div>
-                <div class="form-group">
-                    <label>생성일</label>
-                    <input type="text" name="createdAt"
-                        value="<%= new Date(exhibition.createdAt).toLocaleDateString() %>" readonly>
-                </div>
-                <div class="form-group">
-                    <label>수정일</label>
-                    <input type="text" name="updatedAt"
-                        value="<%= new Date(exhibition.updatedAt).toLocaleDateString() %>" readonly>
-                </div>
+                <% if (exhibition) { %>
+                    <div class="form-group">
+                        <label>생성일</label>
+                        <input type="text" name="createdAt"
+                            value="<%= new Date(exhibition.createdAt).toLocaleDateString() %>" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>수정일</label>
+                        <input type="text" name="updatedAt"
+                            value="<%= new Date(exhibition.updatedAt).toLocaleDateString() %>" readonly>
+                    </div>
+                    <% } %>
             </form>
         </div>
         <div class="section-footer">
-            <div class="admin-button-group">
-                <% if (mode==='create' ) { %>
-                    <button type="submit" form="exhibitionForm" class="admin-button admin-button--primary">
-                        <i class="fas fa-save"></i>
-                        등록
+            <div class="admin-form__actions">
+                <button type="submit" form="exhibitionForm" class="admin-button admin-button--primary">
+                    <%= exhibition ? '저장' : '작성' %>
+                </button>
+                <% if (exhibition) { %>
+                    <button type="button" class="admin-button admin-button--danger"
+                        onclick="handleDelete(<%= exhibition.id %>)">
+                        삭제
                     </button>
-                    <button type="button" class="admin-button admin-button--secondary" onclick="handleCancel()">
-                        <i class="fas fa-times"></i>
-                        취소
-                    </button>
-                    <% } else { %>
-                        <button type="button" class="admin-button admin-button--secondary" onclick="handleEdit()">
-                            <i class="fas fa-edit"></i>
-                            수정
-                        </button>
-                        <button type="button" class="admin-button admin-button--danger" onclick="handleDelete()">
-                            <i class="fas fa-trash"></i>
-                            삭제
-                        </button>
-                        <% } %>
+                    <% } %>
             </div>
         </div>
     </div>
@@ -100,86 +93,82 @@
 </div>
 
 <script>
-    function handleSubmit(event) {
+    document.getElementById('exhibitionForm').addEventListener('submit', handleExhibitionFormSubmit);
+
+    // 시작일과 종료일을 당일로 자동 입력
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date().toISOString().split('T')[0];
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+
+        if (!startDateInput.value) {
+            startDateInput.value = today;
+        }
+        if (!endDateInput.value) {
+            endDateInput.value = today;
+        }
+    });
+
+    async function handleExhibitionFormSubmit(event) {
         event.preventDefault();
 
-        const form = event.target;
-        const formData = new FormData(form);
-        const startDate = new Date(formData.get('startDate'));
-        const endDate = new Date(formData.get('endDate'));
-
-        if (startDate > endDate) {
-            alert('시작일은 종료일보다 이전이어야 합니다.');
-            form.startDate.focus();
+        if (!confirm('저장하시겠습니까?')) {
             return;
         }
 
-        const data = Object.fromEntries(formData.entries());
-        const action = form.dataset.mode === 'create' ? 'create' : 'update';
-        const url = action === 'create'
-            ? '/admin/management/exhibition/register'
-            : `/admin/management/exhibition/${data.id}`;
-        const method = action === 'create' ? 'POST' : 'PUT';
+        const formData = new FormData(this);
+        const now = new Date().toISOString();
+        const isEdit = <%= exhibition ? true : false %>;
 
-        fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    alert(result.message);
-                    if (result.redirectUrl) {
-                        window.location.href = result.redirectUrl;
-                    } else {
-                        window.location.href = '/admin/management/exhibition';
-                    }
-                } else {
-                    alert(result.message || '오류가 발생했습니다.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('오류가 발생했습니다.');
+        const exhibitionData = {
+            title: formData.get('title'),
+            exhibitionType: formData.get('exhibitionType'),
+            location: formData.get('location'),
+            isSubmissionOpen: formData.get('isSubmissionOpen') === 'true',
+            startDate: formData.get('startDate'),
+            endDate: formData.get('endDate'),
+            description: formData.get('description'),
+            updatedAt: now
+        };
+
+        // 생성 시에만 createdAt 추가
+        if (!isEdit) {
+            exhibitionData.createdAt = now;
+        }
+
+        const method = isEdit ? 'PUT' : 'POST';
+        const url = isEdit ? `/admin/management/exhibition/${formData.get('id')}` : '/admin/management/exhibition/registration';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(exhibitionData)
             });
-    }
 
-    function handleEdit() {
-        const form = document.getElementById('exhibitionForm');
-        form.classList.add('editing');
-        const inputs = form.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            if (input.name !== 'id' && input.name !== 'createdAt' && input.name !== 'updatedAt') {
-                input.readOnly = false;
-                input.disabled = false;
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        });
 
-        const actionButtons = `
-            <button type="submit" form="exhibitionForm" class="admin-button admin-button--primary">
-                <i class="fas fa-save"></i>
-                저장
-            </button>
-            <button type="button" class="admin-button admin-button--secondary" onclick="handleCancel()">
-                <i class="fas fa-times"></i>
-                취소
-            </button>
-        `;
-        document.querySelector('.admin-button-group').innerHTML = actionButtons;
+            const result = await response.json();
+
+            if (result.success) {
+                alert('저장되었습니다.');
+                window.location.href = '/admin/management/exhibition';
+            } else {
+                alert(result.message || '저장에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('저장 중 오류가 발생했습니다.');
+        }
     }
 
-    function handleCancel() {
-        const form = document.getElementById('exhibitionForm');
-        form.classList.remove('editing');
-        location.reload();
-    }
-
-    function handleDelete() {
+    function handleDelete(id) {
         if (confirm('정말로 이 전시회를 삭제하시겠습니까?')) {
-            fetch(`/admin/management/exhibition/<%= exhibition.id %>`, {
+            fetch(`/admin/management/exhibition/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'

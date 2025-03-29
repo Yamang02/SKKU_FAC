@@ -5,7 +5,7 @@
     <div class="admin-control">
         <div class="admin-control__group">
             <button class="admin-button admin-button--primary"
-                onclick="location.href='/admin/management/exhibition/register'">
+                onclick="location.href='/admin/management/exhibition/registration'">
                 <i class="fas fa-plus"></i>
                 전시회 등록
             </button>
@@ -137,7 +137,7 @@
 <script>
     function deleteExhibition(id) {
         if (confirm('정말로 이 전시회를 삭제하시겠습니까?')) {
-            fetch(`/api/admin/exhibition/${id}`, {
+            fetch(`/admin/management/exhibition/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'

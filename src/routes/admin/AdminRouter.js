@@ -25,25 +25,26 @@ AdminRouter.post('/management/user/:id([0-9]+)/role', isAdmin, (req, res) => use
 
 // 전시회 관리
 AdminRouter.get('/management/exhibition', isAdmin, (req, res) => exhibitionController.getManagementExhibitionList(req, res));
-AdminRouter.get('/management/exhibition/register', isAdmin, (req, res) => exhibitionController.getExhibitionCreatePage(req, res));
+AdminRouter.get('/management/exhibition/registration', isAdmin, (req, res) => exhibitionController.getManagementExhibitionRegistrationPage(req, res));
+AdminRouter.post('/management/exhibition/registration', isAdmin, (req, res) => exhibitionController.createManagementExhibition(req, res));
 AdminRouter.get('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.getManagementExhibitionDetail(req, res));
-AdminRouter.post('/management/exhibition/register', isAdmin, (req, res) => exhibitionController.createExhibition(req, res));
-AdminRouter.put('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.updateExhibition(req, res));
-AdminRouter.delete('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.deleteExhibition(req, res));
+AdminRouter.put('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.updateManagementExhibition(req, res));
+AdminRouter.delete('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.deleteManagementExhibition(req, res));
 
 // 작품 관리
 AdminRouter.get('/management/artwork', isAdmin, (req, res) => artworkController.getManagementArtworkList(req, res));
+AdminRouter.get('/management/artwork/register', isAdmin, (req, res) => artworkController.getManagementArtworkCreatePage(req, res));
+AdminRouter.post('/management/artwork/register', isAdmin, (req, res) => artworkController.createManagementArtwork(req, res));
 AdminRouter.get('/management/artwork/:id([0-9]+)', isAdmin, (req, res) => artworkController.getManagementArtworkDetail(req, res));
-AdminRouter.get('/management/artwork/:id([0-9]+)/edit', isAdmin, (req, res) => artworkController.getManagementArtworkEditPage(req, res));
 AdminRouter.put('/management/artwork/:id([0-9]+)', isAdmin, (req, res) => artworkController.updateManagementArtwork(req, res));
 AdminRouter.delete('/management/artwork/:id([0-9]+)', isAdmin, (req, res) => artworkController.deleteManagementArtwork(req, res));
 
 // 공지사항 관리
 AdminRouter.get('/management/notice', isAdmin, (req, res) => noticeController.getManagementNoticeList(req, res));
+AdminRouter.get('/management/notice/registration', isAdmin, (req, res) => noticeController.getManagementNoticeRegistrationPage(req, res));
+AdminRouter.post('/management/notice/registration', isAdmin, (req, res) => noticeController.createManagementNotice(req, res));
 AdminRouter.get('/management/notice/:id([0-9]+)', isAdmin, (req, res) => noticeController.getManagementNoticeDetail(req, res));
-AdminRouter.get('/management/notice/register', isAdmin, (req, res) => noticeController.getNoticeRegisterPage(req, res));
-AdminRouter.post('/management/notice', isAdmin, (req, res) => noticeController.createNotice(req, res));
-AdminRouter.put('/management/notice/:id([0-9]+)/edit', isAdmin, (req, res) => noticeController.updateNotice(req, res));
-AdminRouter.delete('/management/notice/:id([0-9]+)', isAdmin, (req, res) => noticeController.deleteNotice(req, res));
+AdminRouter.put('/management/notice/:id([0-9]+)', isAdmin, (req, res) => noticeController.updateManagementNotice(req, res));
+AdminRouter.delete('/management/notice/:id([0-9]+)', isAdmin, (req, res) => noticeController.deleteManagementNotice(req, res));
 
 export default AdminRouter;

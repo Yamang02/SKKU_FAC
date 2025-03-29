@@ -46,14 +46,24 @@ export default class ExhibitionRepository {
      * 새로운 전시회를 생성합니다.
      */
     async createExhibition(exhibitionData) {
+        // 현재 가장 큰 ID 찾기
+        const maxId = this.exhibitions.reduce((max, exhibition) => {
+            const currentId = parseInt(exhibition.id, 10);
+            return isNaN(currentId) ? max : Math.max(max, currentId);
+        }, 0);
+
+        // 새로운 ID 생성 (현재 최대 ID + 1)
+        const newId = maxId + 1;  // number 타입으로 유지
+
         const newExhibition = {
+            id: newId,  // number 타입으로 저장
             ...exhibitionData,
-            id: Math.max(...this.exhibitions.map(e => e.id)) + 1,
             isSubmissionOpen: exhibitionData.isSubmissionOpen === 'true' || exhibitionData.isSubmissionOpen === true,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
 
+        console.log('생성할 전시회:', newExhibition);
         this.exhibitions.push(newExhibition);
         return newExhibition;
     }
@@ -62,12 +72,16 @@ export default class ExhibitionRepository {
      * 전시회 정보를 수정합니다.
      */
     async updateExhibition(id, exhibitionData) {
-        const index = this.exhibitions.findIndex(exhibition => exhibition.id === Number(id));
+        const numId = parseInt(id, 10);
+        if (isNaN(numId)) return null;
+
+        const index = this.exhibitions.findIndex(exhibition => exhibition.id === numId);
         if (index === -1) return null;
 
         this.exhibitions[index] = {
             ...this.exhibitions[index],
             ...exhibitionData,
+            id: numId,  // ID는 변경하지 않음
             isSubmissionOpen: exhibitionData.isSubmissionOpen === 'true' || exhibitionData.isSubmissionOpen === true,
             updatedAt: new Date().toISOString()
         };
@@ -78,7 +92,10 @@ export default class ExhibitionRepository {
      * 전시회를 삭제합니다.
      */
     async deleteExhibition(id) {
-        const index = this.exhibitions.findIndex(exhibition => exhibition.id === Number(id));
+        const numId = parseInt(id, 10);
+        if (isNaN(numId)) return false;
+
+        const index = this.exhibitions.findIndex(exhibition => exhibition.id === numId);
         if (index === -1) return false;
 
         this.exhibitions.splice(index, 1);

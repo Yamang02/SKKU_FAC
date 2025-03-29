@@ -3,11 +3,10 @@
     <!-- 컨트롤 섹션-->
     <div class="admin-control">
         <div class="admin-control__group">
-            <button class="admin-button admin-button--primary"
-                onclick="location.href='/admin/management/notice/register'">
+            <a href="/admin/management/notice/registration" class="admin-button admin-button--primary">
                 <i class="fas fa-plus"></i>
-                공지사항 작성
-            </button>
+                공지사항 등록
+            </a>
         </div>
     </div>
     <!-- 필터 섹션 -->
@@ -53,8 +52,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% if (result && result.notices && result.notices.length> 0) { %>
-                        <% result.notices.forEach(notice=> { %>
+                    <% if (notices && notices.length> 0) { %>
+                        <% notices.forEach(notice=> { %>
                             <tr>
                                 <td>
                                     <input type="checkbox" class="admin-checkbox">

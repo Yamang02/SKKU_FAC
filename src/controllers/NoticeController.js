@@ -8,13 +8,19 @@ export default class NoticeController {
         this.noticeRepository = new NoticeRepository();
     }
 
+    // ===== 사용자용 메서드 =====
     /**
      * 공지사항 목록 페이지를 렌더링합니다.
      */
     async getNoticeList(req, res) {
         try {
-            const { page = 1, limit = 12, searchType, keyword } = req.query;
-            const notices = await this.noticeRepository.findNotices({ page, limit, searchType, keyword });
+            const { page = 1, limit = 10, searchType = 'all', keyword = '' } = req.query;
+            const notices = await this.noticeRepository.findNotices({
+                page,
+                limit,
+                searchType,
+                keyword
+            });
 
             const pageOptions = {
                 page,
@@ -25,11 +31,11 @@ export default class NoticeController {
                 currentUrl: Page.getCurrentPageUrl(req)
             };
 
-            const pageData = new Page(notices.total, pageOptions);
+            const pageData = new Page(notices.total || 0, pageOptions);
 
             ViewResolver.render(res, ViewPath.MAIN.NOTICE.LIST, {
                 title: '공지사항',
-                notices: notices.items,
+                notices: notices.items || [],
                 page: pageData,
                 searchType,
                 keyword
@@ -46,6 +52,7 @@ export default class NoticeController {
         try {
             const { id } = req.params;
             const notice = await this.noticeRepository.findNoticeById(id);
+
             if (!notice) {
                 throw new Error('공지사항을 찾을 수 없습니다.');
             }
@@ -59,15 +66,50 @@ export default class NoticeController {
         }
     }
 
+    // ===== 관리자용 메서드 =====
     /**
-     * 공지사항 작성 페이지를 렌더링합니다.
+     * 관리자용 공지사항 목록 페이지를 렌더링합니다.
      */
-    async getNoticeRegisterPage(req, res) {
+    async getManagementNoticeList(req, res) {
+        try {
+            const { page = 1, limit = 10, status, isImportant, keyword } = req.query;
+            const filters = { status, isImportant, keyword };
+
+            const notices = await this.noticeRepository.findNotices({
+                page: parseInt(page),
+                limit: parseInt(limit),
+                ...filters
+            });
+
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.LIST, {
+                title: '공지사항 관리',
+                notices: notices.items || [],
+                result: {
+                    total: notices.total,
+                    totalPages: Math.ceil(notices.total / limit)
+                },
+                page: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(notices.total / limit),
+                    hasPreviousPage: parseInt(page) > 1,
+                    hasNextPage: parseInt(page) < Math.ceil(notices.total / limit)
+                },
+                filters
+            });
+        } catch (error) {
+            ViewResolver.renderError(res, error);
+        }
+    }
+
+    /**
+     * 관리자용 공지사항 등록 페이지를 렌더링합니다.
+     */
+    async getManagementNoticeRegistrationPage(req, res) {
         try {
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.DETAIL, {
-                title: '공지사항 작성',
+                title: '공지사항 등록',
                 notice: null,
-                isCreate: true,
+                mode: 'create',
                 user: req.session.user
             });
         } catch (error) {
@@ -76,75 +118,42 @@ export default class NoticeController {
     }
 
     /**
-     * 공지사항 수정 페이지를 렌더링합니다.
+     * 관리자용 공지사항을 등록합니다.
      */
-    async getNoticeEditPage(req, res) {
+    async createManagementNotice(req, res) {
         try {
-            const { id } = req.params;
-            const notice = await this.noticeRepository.findNoticeById(id);
-            if (!notice) {
-                throw new Error('공지사항을 찾을 수 없습니다.');
+            if (!req.session.user) {
+                return res.status(401).json({
+                    success: false,
+                    message: '로그인이 필요합니다.'
+                });
             }
 
-            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.DETAIL, {
-                title: '공지사항 수정',
-                notice,
-                isEdit: true
-            });
+            const noticeData = {
+                ...req.body,
+                author: req.session.user.name
+            };
+
+            const result = await this.noticeRepository.createNotice(noticeData);
+
+            if (result) {
+                res.json({
+                    success: true,
+                    message: '공지사항이 등록되었습니다.',
+                    redirectUrl: '/admin/management/notice'
+                });
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: '공지사항 등록에 실패했습니다.'
+                });
+            }
         } catch (error) {
-            ViewResolver.renderError(res, error);
-        }
-    }
-
-    /**
-     * 관리자용 공지사항 목록 페이지를 렌더링합니다.
-     */
-    async getManagementNoticeList(req, res) {
-        try {
-            const { page = 1, limit = 10, keyword, status, isImportant } = req.query;
-
-            // isImportant 값 변환 (string -> boolean)
-            let parsedIsImportant = undefined;
-            if (isImportant === 'true') parsedIsImportant = true;
-            if (isImportant === 'false') parsedIsImportant = false;
-
-            const filters = {
-                keyword,
-                status,
-                isImportant: parsedIsImportant
-            };
-
-            const notices = await this.noticeRepository.findNotices({
-                page: parseInt(page),
-                limit: parseInt(limit),
-                ...filters
+            console.error('Error creating notice:', error);
+            res.status(500).json({
+                success: false,
+                message: '공지사항 등록 중 오류가 발생했습니다.'
             });
-
-            const pageOptions = {
-                page: parseInt(page),
-                limit: parseInt(limit),
-                baseUrl: '/admin/management/notice',
-                filters,
-                previousUrl: Page.getPreviousPageUrl(req),
-                currentUrl: Page.getCurrentPageUrl(req)
-            };
-
-            const pageData = new Page(notices.total, pageOptions);
-
-            const result = {
-                notices: notices.items || [],
-                total: notices.total,
-                totalPages: Math.ceil(notices.total / limit)
-            };
-
-            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.LIST, {
-                title: '공지사항 관리',
-                result,
-                page: pageData,
-                filters
-            });
-        } catch (error) {
-            ViewResolver.renderError(res, error);
         }
     }
 
@@ -155,6 +164,7 @@ export default class NoticeController {
         try {
             const { id } = req.params;
             const notice = await this.noticeRepository.findNoticeById(id);
+
             if (!notice) {
                 throw new Error('공지사항을 찾을 수 없습니다.');
             }
@@ -162,8 +172,8 @@ export default class NoticeController {
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.DETAIL, {
                 title: '공지사항 상세',
                 notice,
-                isCreate: false,
-                isEdit: false
+                mode: 'edit',
+                user: req.session.user
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -171,103 +181,41 @@ export default class NoticeController {
     }
 
     /**
-     * 공지사항을 생성합니다.
+     * 관리자용 공지사항을 수정합니다.
      */
-    async createNotice(req, res) {
-        try {
-            const noticeData = req.body;
-            console.log('Received Notice Data:', noticeData); // POST된 내용 로그 출력
-
-            // 공지사항 생성 로직
-            const createdNotice = await this.noticeRepository.createNotice(noticeData);
-
-            // 생성된 공지의 ID를 사용하여 상세 관리 페이지로 이동
-            res.status(200).json({ success: true, redirectUrl: `/admin/management/notice/${createdNotice.id}` });
-        } catch (error) {
-            console.error('Error creating notice:', error);
-            // 생성 실패 시 작성 페이지에 남아 있도록 함
-            res.status(500).json({ success: false, message: '공지사항 생성 중 오류가 발생했습니다.' });
-        }
-    }
-
-    /**
-     * 공지사항을 수정합니다.
-     */
-    async updateNotice(req, res) {
+    async updateManagementNotice(req, res) {
         try {
             const { id } = req.params;
             const noticeData = req.body;
-            console.log('Updating Notice Data:', noticeData); // 수정된 내용 로그 출력
 
-            // 공지사항 존재 여부 확인
-            const existingNotice = await this.noticeRepository.findNoticeById(id);
-            if (!existingNotice) {
-                return res.status(404).json({
-                    success: false,
-                    message: '수정할 공지사항을 찾을 수 없습니다.'
-                });
+            const result = await this.noticeRepository.updateNotice(id, noticeData);
+            if (result) {
+                res.json({ success: true, message: '공지사항이 수정되었습니다.' });
+            } else {
+                res.status(404).json({ success: false, message: '공지사항을 찾을 수 없습니다.' });
             }
-
-            // 공지사항 수정 로직
-            const updatedNotice = await this.noticeRepository.updateNotice(id, noticeData);
-            if (!updatedNotice) {
-                return res.status(500).json({
-                    success: false,
-                    message: '공지사항 수정에 실패했습니다.'
-                });
-            }
-
-            // 수정된 공지의 상세 페이지로 이동
-            res.status(200).json({
-                success: true,
-                redirectUrl: `/admin/management/notice/${id}`
-            });
         } catch (error) {
             console.error('Error updating notice:', error);
-            res.status(500).json({
-                success: false,
-                message: '공지사항 수정 중 오류가 발생했습니다.'
-            });
+            res.status(500).json({ success: false, message: '공지사항 수정 중 오류가 발생했습니다.' });
         }
     }
 
     /**
-     * 공지사항을 삭제합니다.
+     * 관리자용 공지사항을 삭제합니다.
      */
-    async deleteNotice(req, res) {
+    async deleteManagementNotice(req, res) {
         try {
             const { id } = req.params;
-            console.log('Deleting Notice ID:', id); // 삭제할 공지사항 ID 로그 출력
+            const result = await this.noticeRepository.deleteNotice(id);
 
-            // 공지사항 존재 여부 확인
-            const existingNotice = await this.noticeRepository.findNoticeById(id);
-            if (!existingNotice) {
-                return res.status(404).json({
-                    success: false,
-                    message: '삭제할 공지사항을 찾을 수 없습니다.'
-                });
+            if (result) {
+                res.json({ success: true, message: '공지사항이 삭제되었습니다.' });
+            } else {
+                res.status(404).json({ success: false, message: '공지사항을 찾을 수 없습니다.' });
             }
-
-            // 공지사항 삭제 로직
-            const isDeleted = await this.noticeRepository.deleteNotice(id);
-            if (!isDeleted) {
-                return res.status(500).json({
-                    success: false,
-                    message: '공지사항 삭제에 실패했습니다.'
-                });
-            }
-
-            // 삭제 성공 시 목록 페이지로 이동
-            res.status(200).json({
-                success: true,
-                redirectUrl: '/admin/management/notice'
-            });
         } catch (error) {
             console.error('Error deleting notice:', error);
-            res.status(500).json({
-                success: false,
-                message: '공지사항 삭제 중 오류가 발생했습니다.'
-            });
+            res.status(500).json({ success: false, message: '공지사항 삭제 중 오류가 발생했습니다.' });
         }
     }
 }
