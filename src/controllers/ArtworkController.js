@@ -43,7 +43,6 @@ export default class ArtworkController {
                 id: ex.id || '',
                 code: ex.id ? ex.id.toString() : '',
                 title: ex.title || '',
-                subtitle: ex.description || '',
                 image: ex.imageUrl || '/images/exhibition-placeholder.jpg'
             }));
 

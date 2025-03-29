@@ -157,7 +157,10 @@ export default class ExhibitionController {
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.LIST, {
                 title: '전시회 관리',
-                exhibitions: exhibitions.items || [],
+                exhibitions: exhibitions.items.map(exhibition => ({
+                    ...exhibition,
+                    isSubmissionOpen: exhibition.isSubmissionOpen || false
+                })) || [],
                 result: {
                     total: exhibitions.total,
                     totalPages: Math.ceil(exhibitions.total / limit)
@@ -192,7 +195,10 @@ export default class ExhibitionController {
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
                 title: '전시회 상세',
-                exhibition
+                exhibition: {
+                    ...exhibition,
+                    isSubmissionOpen: exhibition.isSubmissionOpen || false
+                }
             });
         } catch (error) {
             console.error('전시회 상세 조회 중 에러 발생:', error);

@@ -16,10 +16,6 @@
                     <input type="text" value="<%= exhibition.title %>" readonly>
                 </div>
                 <div class="form-group">
-                    <label>부제목</label>
-                    <input type="text" value="<%= exhibition.subtitle %>" readonly>
-                </div>
-                <div class="form-group">
                     <label>전시 유형</label>
                     <select disabled>
                         <option value="regular" <%=exhibition.exhibitionType==='regular' ? 'selected' : '' %>>정기
@@ -29,16 +25,23 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>장소</label>
+                    <input type="text" value="<%= exhibition.location %>" readonly>
+                </div>
+                <div class="form-group">
+                    <label>출품가능 여부</label>
+                    <select disabled>
+                        <option value="true" <%=exhibition.isSubmissionOpen ? 'selected' : '' %>>출품 가능</option>
+                        <option value="false" <%=!exhibition.isSubmissionOpen ? 'selected' : '' %>>출품 불가능</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>시작일</label>
                     <input type="date" value="<%= exhibition.startDate %>" readonly>
                 </div>
                 <div class="form-group">
                     <label>종료일</label>
                     <input type="date" value="<%= exhibition.endDate %>" readonly>
-                </div>
-                <div class="form-group">
-                    <label>장소</label>
-                    <input type="text" value="<%= exhibition.location %>" readonly>
                 </div>
                 <div class="form-group">
                     <label>설명</label>
@@ -103,8 +106,8 @@
     function handleSave() {
         const formData = {
             title: document.querySelector('input[value="<%= exhibition.title %>"]').value,
-            subtitle: document.querySelector('input[value="<%= exhibition.subtitle %>"]').value,
             exhibitionType: document.querySelector('select').value,
+            isSubmissionOpen: document.querySelector('select').value === 'true',
             startDate: document.querySelector('input[type="date"]').value,
             endDate: document.querySelector('input[type="date"]:last-of-type').value,
             location: document.querySelector('input[value="<%= exhibition.location %>"]').value,

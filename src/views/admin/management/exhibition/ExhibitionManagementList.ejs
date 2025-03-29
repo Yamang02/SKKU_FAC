@@ -44,9 +44,9 @@
                         </th>
                         <th>ID</th>
                         <th>제목</th>
-                        <th>부제목</th>
                         <th>전시 기간</th>
                         <th>장소</th>
+                        <th>출품가능</th>
                         <th>전시 유형</th>
                         <th>관리</th>
                     </tr>
@@ -65,13 +65,16 @@
                                     <%= exhibition.title %>
                                 </td>
                                 <td>
-                                    <%= exhibition.subtitle %>
-                                </td>
-                                <td>
                                     <%= exhibition.startDate %> ~ <%= exhibition.endDate %>
                                 </td>
                                 <td>
                                     <%= exhibition.location %>
+                                </td>
+                                <td>
+                                    <span
+                                        class="admin-badge admin-badge--<%= exhibition.isSubmissionOpen ? 'success' : 'danger' %>">
+                                        <%= exhibition.isSubmissionOpen ? '가능' : '불가능' %>
+                                    </span>
                                 </td>
                                 <td>
                                     <span class="admin-badge admin-badge--<%= exhibition.exhibitionType %>">

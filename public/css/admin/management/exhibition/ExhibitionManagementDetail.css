@@ -12,53 +12,104 @@
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: #fff;
+
+}
+
+/* 제목(70%) + 전시유형(30%) */
+.form-grid .form-group:nth-child(2) {
+    grid-column: span 8;
+}
+
+.form-grid .form-group:nth-child(3) {
+    grid-column: span 4;
+}
+
+/* 장소(70%) + 출품가능여부(30%) */
+.form-grid .form-group:nth-child(4) {
+    grid-column: span 8;
+}
+
+.form-grid .form-group:nth-child(5) {
+    grid-column: span 4;
+}
+
+/* 시작일(50%) + 종료일(50%) */
+.form-grid .form-group:nth-child(6),
+.form-grid .form-group:nth-child(7) {
+    grid-column: span 6;
+}
+
+/* 설명(100%) */
+.form-grid .form-group:nth-child(8) {
+    grid-column: span 12;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 1.5rem;
+}
+
+/* ID(40%) + 생성일(30%) + 수정일(30%) */
+.form-grid .form-group:nth-child(1) {
+    grid-column: span 5;
+    order: 9;
+}
+
+.form-grid .form-group:nth-child(9) {
+    grid-column: span 4;
+    order: 10;
+}
+
+.form-grid .form-group:nth-child(10) {
+    grid-column: span 3;
+    order: 11;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
 .form-group label {
-    font-weight: 500;
-    color: #4a5568;
+    font-weight: 600;
+    color: #333;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-    padding: 8px 12px;
-    border: 1px solid #e2e8f0;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    background-color: #fff;
-    color: #2d3748;
+    width: 100%;
+    background-color: #f8f9fa;
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
 }
 
 .form-group input[readonly],
 .form-group select[disabled],
 .form-group textarea[readonly] {
-    background-color: #f8fafc;
+    background-color: #f8f9fa;
     cursor: not-allowed;
 }
 
-.form-group textarea {
-    min-height: 100px;
-    resize: vertical;
-}
-
-/* 설명 필드는 전체 너비 사용 */
-.form-group:nth-last-child(3) {
-    grid-column: 1 / -1;
-}
-
+/* 관리 버튼 스타일링 */
 .section-footer {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+    margin-top: 2rem;
+    padding: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.admin-button-group {
     display: flex;
+    gap: 1rem;
     justify-content: flex-end;
 }
 
