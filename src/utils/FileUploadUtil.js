@@ -30,7 +30,8 @@ export default class FileUploadUtil {
      * @returns {string} 웹 URL
      */
     static convertToWebUrl(filePath) {
-        return filePath.replace('public', '').replace(/\\/g, '/');
+        // public/uploads/artworks/... -> /uploads/artworks/...
+        return filePath.replace(/^public/, '');
     }
 
     /**

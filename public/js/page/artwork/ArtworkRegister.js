@@ -159,7 +159,7 @@ function initSubmitButton() {
 
             // 성공 시 작품 상세 페이지로 이동
             alert('작품이 성공적으로 등록되었습니다.');
-            window.location.href = `/artwork/${result.id}`;
+            window.location.href = `/artwork/${result.artwork.id}`;
         } catch (error) {
             console.error('작품 등록 중 오류:', error);
             showError('formError', error.message);

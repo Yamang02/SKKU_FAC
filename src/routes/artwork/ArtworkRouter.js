@@ -59,13 +59,15 @@ ArtworkRouter.get('/api/:id', async (req, res) => {
 // 전시회 작품 라우트
 ArtworkRouter.get('/exhibition/:exhibitionId', (req, res) => artworkController.getArtworksByExhibition(req, res));
 
-// 일반 작품 라우트 (가장 일반적인 경로)
-ArtworkRouter.get('/', (req, res) => artworkController.getArtworkList(req, res));
+// 작품 상세 페이지 라우트 (가장 먼저 처리되어야 함)
 ArtworkRouter.get('/:id', (req, res) => {
     console.log('[일반] 작품 상세 페이지 요청:', req.params.id);
     console.log('[일반] 요청 URL:', req.originalUrl);
     console.log('[일반] 요청 경로:', req.path);
     artworkController.getArtworkDetail(req, res);
 });
+
+// 작품 목록 라우트 (마지막에 처리)
+ArtworkRouter.get('/', (req, res) => artworkController.getArtworkList(req, res));
 
 export default ArtworkRouter;

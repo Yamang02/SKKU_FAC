@@ -8,9 +8,9 @@ export default class Artwork {
         description,
         department,
         student_id,
-        artist_name,
+        artist,
         image_path = null,
-        image_url = null,
+        image = null,
         created_at = new Date(),
         updated_at = new Date()
     }) {
@@ -19,9 +19,9 @@ export default class Artwork {
         this.description = description;
         this.department = department;
         this.student_id = student_id;
-        this.artist_name = artist_name;
+        this.artist = artist;
         this.image_path = image_path;
-        this.image_url = image_url;
+        this.image = image;
         this.created_at = created_at;
         this.updated_at = updated_at;
     }
@@ -48,9 +48,9 @@ export default class Artwork {
             description: this.description,
             department: this.department,
             student_id: this.student_id,
-            artist_name: this.artist_name,
+            artist: this.artist,
             image_path: this.image_path,
-            image_url: this.image_url,
+            image: this.image,
             created_at: this.created_at,
             updated_at: this.updated_at
         };
@@ -61,11 +61,7 @@ export default class Artwork {
      * @param {Object} data - 업데이트할 데이터
      */
     update(data) {
-        Object.keys(data).forEach(key => {
-            if (Object.prototype.hasOwnProperty.call(this, key)) {
-                this[key] = data[key];
-            }
-        });
+        Object.assign(this, data);
         this.updated_at = new Date();
     }
 }
