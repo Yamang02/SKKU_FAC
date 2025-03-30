@@ -2,7 +2,6 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import ArtworkController from '../../controllers/ArtworkController.js';
-import { isAuthenticated } from '../../middlewares/auth.js';
 import { FilePath } from '../../constants/Path.js';
 
 const ArtworkRouter = express.Router();
