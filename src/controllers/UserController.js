@@ -51,7 +51,7 @@ export default class UserController {
                 username: user.username,
                 name: user.name,
                 role: user.role,
-                isAdmin: user.role === 'admin'
+                isAdmin: user.role === 'ADMIN'
             };
             console.log('세션에 저장할 사용자 정보:', sessionUser);
             await SessionUtil.saveUserToSession(req, sessionUser);

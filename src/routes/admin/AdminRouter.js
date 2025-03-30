@@ -18,7 +18,7 @@ const noticeController = new NoticeController();
 AdminRouter.get(['/', '/dashboard'], isAdmin, (req, res) => adminController.getDashboard(req, res));
 
 // 사용자 관리
-AdminRouter.get(['/management/user', '/management/user/list'], isAdmin, (req, res) => adminController.getUserManagement(req, res));
+AdminRouter.get(['/management/user', '/management/user/list'], isAdmin, (req, res) => userController.getManagementUserList(req, res));
 AdminRouter.get('/management/user/:id([0-9]+)', isAdmin, (req, res) => userController.getManagementUserDetail(req, res));
 AdminRouter.put('/management/user/:id([0-9]+)', isAdmin, (req, res) => userController.updateManagementUserInfo(req, res));
 AdminRouter.put('/management/user/:id([0-9]+)/role', isAdmin, (req, res) => userController.updateManagementUserRole(req, res));
