@@ -106,20 +106,7 @@ document.addEventListener('keydown', function (event) {
     }
 });
 
-async function handleLogout() {
-    try {
-        const response = await fetch('/user/logout', {
-            method: 'POST',
-            credentials: 'include'
-        });
-
-        if (response.ok) {
-            window.location.href = '/';
-        } else {
-            throw new Error('로그아웃 실패');
-        }
-    } catch (error) {
-        console.error('로그아웃 중 오류:', error);
-        alert('로그아웃 중 오류가 발생했습니다.');
-    }
+// 로그아웃 처리
+function handleLogout() {
+    window.location.href = '/user/logout';
 }

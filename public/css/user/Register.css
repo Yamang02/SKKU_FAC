@@ -23,3 +23,65 @@
         width: 100%;
     }
 }
+
+/* 학과와 학번 입력 필드 레이아웃 */
+.input-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+    width: 100%;
+}
+
+.input-col {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.input-col.department {
+    grid-column: 1;
+}
+
+.input-col.student-year {
+    grid-column: 2;
+}
+
+/* 체크박스 그룹 스타일 */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* 비밀번호 입력 필드 그룹 스타일 */
+.password-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-input-group .form-control-user {
+    width: 100%;
+    padding-right: 40px; /* 토글 버튼을 위한 여백 */
+}
+
+.password-input-group .toggle-password-user {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+
+.password-input-group .toggle-password-user:hover {
+    color: #333;
+}

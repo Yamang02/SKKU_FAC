@@ -12,7 +12,7 @@ export default class UserController {
     /**
      * 로그인 페이지를 렌더링합니다.
      */
-    getLoginPage(req, res) {
+    getUserLoginPage(req, res) {
         const redirectUrl = req.query.redirect || '/';
         ViewResolver.render(res, ViewPath.MAIN.USER.LOGIN, {
             title: '로그인',
@@ -23,7 +23,7 @@ export default class UserController {
     /**
      * 로그인을 처리합니다.
      */
-    async login(req, res) {
+    async loginUser(req, res) {
         try {
             const { username, password } = req.body;
             const user = await this.userRepository.findUserByUsername(username);
@@ -62,41 +62,41 @@ export default class UserController {
     /**
      * 로그아웃을 처리합니다.
      */
-    logout(req, res) {
-        SessionUtil.destroySession(req);
-        res.redirect('/');
+    async logoutUser(req, res) {
+        try {
+            await SessionUtil.destroySession(req);
+            res.redirect('/');
+        } catch (error) {
+            console.error('로그아웃 중 오류 발생:', error);
+            res.redirect('/');
+        }
     }
 
     /**
      * 회원가입 페이지를 렌더링합니다.
      */
-    getRegisterPage(req, res) {
-        const departments = [
-            { id: 'art', name: '미술학과' },
-            { id: 'design', name: '디자인학과' },
-            { id: 'craft', name: '공예학과' },
-            { id: 'digital', name: '디지털아트학과' }
-        ];
-
-        const roles = [
-            { value: 'student', label: '학생' },
-            { value: 'professor', label: '교수' },
-            { value: 'staff', label: '교직원' }
-        ];
-
+    getUserRegistrationPage(req, res) {
         ViewResolver.render(res, ViewPath.MAIN.USER.REGISTER, {
-            title: '회원가입',
-            departments,
-            roles
+            title: '회원가입'
         });
     }
 
     /**
      * 회원가입을 처리합니다.
      */
-    async register(req, res) {
+    async registerUser(req, res) {
         try {
-            const { username, email, password, name, department, role } = req.body;
+            const {
+                username,
+                email,
+                password,
+                name,
+                department,
+                studentYear,
+                role,
+                isClubMember,
+                affiliation
+            } = req.body;
 
             // 이메일 중복 확인
             const existingEmail = await this.userRepository.findUserByEmail(email);
@@ -111,32 +111,43 @@ export default class UserController {
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
-            const user = await this.userRepository.createUser({
+
+            // 사용자 데이터 구성
+            const userData = {
                 username,
                 email,
                 password: hashedPassword,
                 name,
-                department,
-                role
-            });
+                role,
+                isClubMember: role === 'SKKU_MEMBER' ? Boolean(isClubMember) : false
+            };
 
-            SessionUtil.createSession(req, user);
+            // 역할에 따른 추가 정보 설정
+            if (role === 'SKKU_MEMBER') {
+                userData.department = department;
+                userData.studentYear = studentYear;
+            } else if (role === 'EXTERNAL_MEMBER') {
+                userData.affiliation = affiliation;
+            }
+
+            const user = await this.userRepository.createUser(userData);
+
+            // 세션에 필요한 사용자 정보만 저장
+            const sessionUser = {
+                id: user.id,
+                username: user.username,
+                name: user.name,
+                role: user.role,
+                isAdmin: user.role === 'admin',
+                isClubMember: user.isClubMember
+            };
+            await SessionUtil.saveUserToSession(req, sessionUser);
+
             res.redirect('/');
         } catch (error) {
             ViewResolver.render(res, ViewPath.MAIN.USER.REGISTER, {
                 title: '회원가입',
                 error: error.message,
-                departments: [
-                    { id: 'art', name: '미술학과' },
-                    { id: 'design', name: '디자인학과' },
-                    { id: 'craft', name: '공예학과' },
-                    { id: 'digital', name: '디지털아트학과' }
-                ],
-                roles: [
-                    { value: 'student', label: '학생' },
-                    { value: 'professor', label: '교수' },
-                    { value: 'staff', label: '교직원' }
-                ],
                 formData: req.body
             });
         }
@@ -145,7 +156,7 @@ export default class UserController {
     /**
      * 프로필 페이지를 렌더링합니다.
      */
-    async getProfilePage(req, res) {
+    async getUserProfilePage(req, res) {
         try {
             const user = await this.userRepository.findUserById(req.session.user.id);
             if (!user) {
@@ -164,7 +175,7 @@ export default class UserController {
     /**
      * 프로필 수정 페이지를 렌더링합니다.
      */
-    async getProfileEditPage(req, res) {
+    async getUserProfileEditPage(req, res) {
         try {
             const user = await this.userRepository.findUserById(req.session.user.id);
             ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE_EDIT, {
@@ -179,7 +190,7 @@ export default class UserController {
     /**
      * 프로필을 수정합니다.
      */
-    async updateProfile(req, res) {
+    async updateUserProfile(req, res) {
         try {
             const userId = req.session.user.id;
             const { name, email, department, studentYear } = req.body;
@@ -214,7 +225,7 @@ export default class UserController {
     /**
      * 비밀번호 찾기 페이지를 렌더링합니다.
      */
-    getForgotPasswordPage(req, res) {
+    getUserPasswordResetPage(req, res) {
         ViewResolver.render(res, ViewPath.MAIN.USER.FORGOT_PASSWORD, {
             title: '비밀번호 찾기'
         });
@@ -223,7 +234,7 @@ export default class UserController {
     /**
      * 비밀번호 찾기를 처리합니다.
      */
-    async handleForgotPassword(req, res) {
+    async handleUserPasswordReset(req, res) {
         try {
             const { email } = req.body;
             const user = await this.userRepository.findUserByEmail(email);
@@ -305,16 +316,35 @@ export default class UserController {
     /**
      * 관리자용 사용자 삭제를 처리합니다.
      */
-    async deleteUser(req, res) {
+    async deleteManagementUser(req, res) {
         try {
-            await this.userRepository.deleteUser(req.params.id);
-            res.redirect('/admin/management/user/list');
+            const { id } = req.params;
+            const result = await this.userRepository.deleteUser(id);
+
+            if (result) {
+                res.json({
+                    success: true,
+                    message: '회원이 삭제되었습니다.'
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: '회원을 찾을 수 없습니다.'
+                });
+            }
         } catch (error) {
-            ViewResolver.renderError(res, error);
+            console.error('Error deleting user:', error);
+            res.status(500).json({
+                success: false,
+                message: '회원 삭제 중 오류가 발생했습니다.'
+            });
         }
     }
 
-    async updateUserRole(req, res) {
+    /**
+     * 관리자용 사용자 역할을 수정합니다.
+     */
+    async updateManagementUserRole(req, res) {
         try {
             await this.userRepository.updateRole(req.params.id, req.body.role);
             res.redirect('/admin/management/user/list');
@@ -326,7 +356,7 @@ export default class UserController {
     /**
      * 관리자용 회원 정보를 수정합니다.
      */
-    async updateManagementUser(req, res) {
+    async updateManagementUserInfo(req, res) {
         try {
             const { id } = req.params;
             const { role, status } = req.body;
@@ -349,34 +379,6 @@ export default class UserController {
             res.status(500).json({
                 success: false,
                 message: '회원 정보 수정 중 오류가 발생했습니다.'
-            });
-        }
-    }
-
-    /**
-     * 관리자용 회원을 삭제합니다.
-     */
-    async deleteManagementUser(req, res) {
-        try {
-            const { id } = req.params;
-            const result = await this.userRepository.deleteUser(id);
-
-            if (result) {
-                res.json({
-                    success: true,
-                    message: '회원이 삭제되었습니다.'
-                });
-            } else {
-                res.status(404).json({
-                    success: false,
-                    message: '회원을 찾을 수 없습니다.'
-                });
-            }
-        } catch (error) {
-            console.error('Error deleting user:', error);
-            res.status(500).json({
-                success: false,
-                message: '회원 삭제 중 오류가 발생했습니다.'
             });
         }
     }

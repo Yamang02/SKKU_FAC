@@ -14,7 +14,9 @@ export default class UserRepository {
         if (search) {
             filteredUsers = filteredUsers.filter(user =>
                 user.name.includes(search) ||
-                user.email.includes(search)
+                user.email.includes(search) ||
+                (user.role === 'SKKU_MEMBER' && user.department?.includes(search)) ||
+                (user.role === 'EXTERNAL_MEMBER' && user.affiliation?.includes(search))
             );
         }
 
@@ -56,11 +58,32 @@ export default class UserRepository {
      */
     async createUser(userData) {
         const newUser = {
-            id: (Math.max(...this.users.map(u => u.id)) + 1).toString(),
-            ...userData,
+            id: this.users.length > 0 ? Math.max(...this.users.map(u => u.id)) + 1 : 1,
+            username: userData.username,
+            email: userData.email,
+            password: userData.password,
+            name: userData.name,
+            role: userData.role,
+            status: 'ACTIVE',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
+
+        // 역할별 추가 정보
+        if (userData.role === 'SKKU_MEMBER') {
+            Object.assign(newUser, {
+                department: userData.department,
+                studentYear: userData.studentYear,
+                memberType: userData.memberType || 'STUDENT',
+                isClubMember: Boolean(userData.isClubMember)
+            });
+        } else if (userData.role === 'EXTERNAL_MEMBER') {
+            Object.assign(newUser, {
+                affiliation: userData.affiliation,
+                affiliationType: userData.affiliationType || 'INDIVIDUAL'
+            });
+        }
+
         this.users.push(newUser);
         return newUser;
     }
@@ -72,12 +95,43 @@ export default class UserRepository {
         const index = this.users.findIndex(user => user.id === Number(id));
         if (index === -1) return null;
 
-        this.users[index] = {
-            ...this.users[index],
+        const currentUser = this.users[index];
+        const updatedUser = {
+            ...currentUser,
             ...userData,
             updated_at: new Date().toISOString()
         };
-        return this.users[index];
+
+        // 역할이 변경된 경우 이전 역할의 필드 제거
+        if (userData.role && userData.role !== currentUser.role) {
+            if (currentUser.role === 'SKKU_MEMBER') {
+                delete updatedUser.department;
+                delete updatedUser.studentYear;
+                delete updatedUser.memberType;
+                delete updatedUser.isClubMember;
+            } else if (currentUser.role === 'EXTERNAL_MEMBER') {
+                delete updatedUser.affiliation;
+                delete updatedUser.affiliationType;
+            }
+
+            // 새로운 역할의 기본값 설정
+            if (userData.role === 'SKKU_MEMBER') {
+                Object.assign(updatedUser, {
+                    department: userData.department,
+                    studentYear: userData.studentYear,
+                    memberType: userData.memberType || 'STUDENT',
+                    isClubMember: Boolean(userData.isClubMember)
+                });
+            } else if (userData.role === 'EXTERNAL_MEMBER') {
+                Object.assign(updatedUser, {
+                    affiliation: userData.affiliation,
+                    affiliationType: userData.affiliationType || 'INDIVIDUAL'
+                });
+            }
+        }
+
+        this.users[index] = updatedUser;
+        return updatedUser;
     }
 
     /**

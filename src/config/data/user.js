@@ -1,16 +1,11 @@
-import bcrypt from 'bcrypt';
-
-// 비밀번호 해시 생성
-const hashedPassword = bcrypt.hashSync('1234', 10);
 
 /**
  * 사용자 역할 enum
  */
 export const UserRole = {
     ADMIN: 'ADMIN',
-    ARTIST: 'ARTIST',
-    CLUB_MEMBER: 'CLUB_MEMBER',
-    GUEST: 'GUEST'
+    SKKU_MEMBER: 'SKKU_MEMBER',
+    EXTERNAL_MEMBER: 'EXTERNAL_MEMBER'
 };
 
 /**
@@ -57,59 +52,77 @@ export class User {
     }
 }
 
-const user = [
-    {
-        id: 1,
-        username: 'admin',
-        password: hashedPassword,
-        name: '관리자',
-        email: 'admin@skku.edu',
-        role: UserRole.ADMIN,
-        status: UserStatus.ACTIVE,
-        studentId: null,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-    },
-    {
-        id: 2,
-        username: 'honggildong',
-        password: hashedPassword,
-        name: '홍길동',
-        email: 'hong@skku.edu',
-        role: UserRole.CLUB_MEMBER,
-        status: UserStatus.ACTIVE,
-        studentId: '2020123456',
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
-    },
-    {
-        id: 3,
-        username: 'artist_kim',
-        password: hashedPassword,
-        name: '김작가',
-        email: 'artist_kim@example.com',
-        role: UserRole.ARTIST,
-        status: UserStatus.ACTIVE,
-        studentId: null,
-        artistInfo: {
-            biography: '현대미술 작가',
-            website: 'http://artist-kim.com'
-        },
-        createdAt: new Date('2024-01-02'),
-        updatedAt: new Date('2024-01-02')
-    }
-];
-
-/**
- * 사용자 데이터 접근을 위한 클래스
- */
 export class UserDataAccess {
-    /**
-     * 모든 사용자 목록을 반환합니다.
-     * @returns {Array} 사용자 목록
-     */
+    static users = [
+        {
+            id: 1,
+            username: 'admin',
+            email: 'admin@skku.edu',
+            password: '$2b$10$Uc0KiMJ3s0jjndFgQ.AAj.eBAGUJZCUxBrqxue4PtH5PKyYrRqIXi', // 'admin'
+            name: '관리자',
+            role: UserRole.ADMIN,
+            status: UserStatus.ACTIVE,
+            created_at: '2024-01-01T00:00:00.000Z',
+            updated_at: '2024-01-01T00:00:00.000Z'
+        },
+        {
+            id: 2,
+            username: 'student1',
+            email: 'student1@skku.edu',
+            password: '$2b$10$Uc0KiMJ3s0jjndFgQ.AAj.eBAGUJZCUxBrqxue4PtH5PKyYrRqIXi', // 'password'
+            name: '김성균',
+            role: UserRole.SKKU_MEMBER,
+            status: UserStatus.ACTIVE,
+            department: '미술학과',
+            studentYear: '23',
+            memberType: 'STUDENT',
+            isClubMember: true,
+            created_at: '2024-01-02T00:00:00.000Z',
+            updated_at: '2024-01-02T00:00:00.000Z'
+        },
+        {
+            id: 3,
+            username: 'graduate1',
+            email: 'graduate1@gmail.com',
+            password: '$2b$10$Uc0KiMJ3s0jjndFgQ.AAj.eBAGUJZCUxBrqxue4PtH5PKyYrRqIXi', // 'password'
+            name: '이예술',
+            role: UserRole.SKKU_MEMBER,
+            status: UserStatus.ACTIVE,
+            department: '디자인학과',
+            studentYear: '18',
+            memberType: 'GRADUATE',
+            isClubMember: false,
+            created_at: '2024-01-03T00:00:00.000Z',
+            updated_at: '2024-01-03T00:00:00.000Z'
+        },
+        {
+            id: 4,
+            username: 'external1',
+            email: 'external1@example.com',
+            password: '$2b$10$Uc0KiMJ3s0jjndFgQ.AAj.eBAGUJZCUxBrqxue4PtH5PKyYrRqIXi', // 'password'
+            name: '박미술',
+            role: UserRole.EXTERNAL_MEMBER,
+            status: UserStatus.ACTIVE,
+            affiliation: '한국예술협회',
+            created_at: '2024-01-04T00:00:00.000Z',
+            updated_at: '2024-01-04T00:00:00.000Z'
+        },
+        {
+            id: 5,
+            username: 'external2',
+            email: 'external2@example.com',
+            password: '$2b$10$Uc0KiMJ3s0jjndFgQ.AAj.eBAGUJZCUxBrqxue4PtH5PKyYrRqIXi', // 'password'
+            name: '최작가',
+            role: UserRole.EXTERNAL_MEMBER,
+            status: UserStatus.ACTIVE,
+            affiliation: '프리랜서 작가',
+            created_at: '2024-01-05T00:00:00.000Z',
+            updated_at: '2024-01-05T00:00:00.000Z'
+        }
+    ];
+
     static getAll() {
-        return user;
+        return this.users;
     }
 
     /**
@@ -118,7 +131,7 @@ export class UserDataAccess {
      * @returns {Object|null} 사용자 객체 또는 null
      */
     static findById(id) {
-        return user.find(user => user.id === id) || null;
+        return this.users.find(user => user.id === id) || null;
     }
 
     /**
@@ -127,7 +140,7 @@ export class UserDataAccess {
      * @returns {Array} 해당 역할의 사용자 목록
      */
     static findByRole(role) {
-        return user.filter(user => user.role === role);
+        return this.users.filter(user => user.role === role);
     }
 
     /**
@@ -136,8 +149,8 @@ export class UserDataAccess {
      * @returns {Array} 해당 상태의 사용자 목록
      */
     static findByStatus(status) {
-        return user.filter(user => user.status === status);
+        return this.users.filter(user => user.status === status);
     }
 }
 
-export default user;
+export default UserDataAccess.users;

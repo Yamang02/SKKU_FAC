@@ -2,15 +2,16 @@
  * 회원가입 페이지 JavaScript
  */
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('.register-form');
+    const form = document.querySelector('.form-user');
     const roleSelect = document.getElementById('role');
-    const clubMemberField = document.querySelector('.club-member-field');
-    const artistField = document.querySelector('.artist-field');
+    const clubMemberGroup = document.getElementById('clubMemberGroup');
+    const skkuFields = document.getElementById('skkuFields');
+    const affiliationGroup = document.getElementById('affiliationGroup');
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
 
     // 비밀번호 토글 기능
-    document.querySelectorAll('.toggle-password').forEach(button => {
+    document.querySelectorAll('.toggle-password-user').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
             const input = button.previousElementSibling;
@@ -23,25 +24,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 가입 유형에 따른 필드 표시/숨김
+    // 회원 유형 선택에 따른 필드 표시/숨김
     const updateFields = () => {
         const selectedRole = roleSelect.value;
 
         // 모든 필드 초기화
-        clubMemberField.style.display = 'none';
-        artistField.style.display = 'none';
+        clubMemberGroup.style.display = 'none';
+        skkuFields.style.display = 'none';
+        affiliationGroup.style.display = 'none';
 
         // 필수 필드 초기화
-        document.getElementById('studentId').required = false;
-        document.getElementById('artistBio').required = false;
+        document.getElementById('department').required = false;
+        document.getElementById('studentYear').required = false;
+        document.getElementById('affiliation').required = false;
 
         // 선택된 역할에 따라 필드 표시 및 필수 설정
-        if (selectedRole === 'MEMBER') {
-            clubMemberField.style.display = 'block';
-            document.getElementById('studentId').required = true;
-        } else if (selectedRole === 'ARTIST') {
-            artistField.style.display = 'block';
-            document.getElementById('artistBio').required = true;
+        if (selectedRole === 'SKKU_MEMBER') {
+            clubMemberGroup.style.display = 'block';
+            skkuFields.style.display = 'block';
+            document.getElementById('department').required = true;
+            document.getElementById('studentYear').required = true;
+        } else if (selectedRole === 'EXTERNAL_MEMBER') {
+            affiliationGroup.style.display = 'block';
+            document.getElementById('affiliation').required = true;
         }
     };
 
@@ -49,48 +54,36 @@ document.addEventListener('DOMContentLoaded', () => {
     updateFields(); // 초기 상태 설정
 
     // 폼 유효성 검사
-    const validateForm = (e) => {
-        let isValid = true;
-        let errorMessage = '';
+    form.addEventListener('submit', function (e) {
+        const errorDiv = document.querySelector('.alert-danger-user');
+        errorDiv.textContent = '';
 
-        // 비밀번호 일치 확인
+        // 비밀번호 확인
         if (password.value !== confirmPassword.value) {
-            isValid = false;
-            errorMessage = '비밀번호가 일치하지 않습니다.';
-        }
-
-        // 가입 유형별 필수 필드 검사
-        const selectedRole = roleSelect.value;
-        if (selectedRole === 'MEMBER') {
-            const studentId = document.getElementById('studentId').value;
-            if (!studentId) {
-                isValid = false;
-                errorMessage = '학번을 입력해주세요.';
-            } else if (!/^\d{10}$/.test(studentId)) {
-                isValid = false;
-                errorMessage = '학번은 10자리 숫자여야 합니다.';
-            }
-        } else if (selectedRole === 'ARTIST') {
-            const artistBio = document.getElementById('artistBio').value;
-            if (!artistBio.trim()) {
-                isValid = false;
-                errorMessage = '작가 소개를 입력해주세요.';
-            }
-        }
-
-        if (!isValid) {
             e.preventDefault();
-            showError(errorMessage);
+            errorDiv.textContent = '비밀번호가 일치하지 않습니다.';
+            return;
         }
-    };
 
-    form.addEventListener('submit', validateForm);
+        // 성균관대 재학/졸업생인 경우 학번 형식 검사
+        if (roleSelect.value === 'SKKU_MEMBER') {
+            const studentYear = document.getElementById('studentYear').value;
+            if (!/^\d{2}$/.test(studentYear)) {
+                e.preventDefault();
+                errorDiv.textContent = '학번은 2자리 숫자여야 합니다.';
+                return;
+            }
+        }
+
+        // 유효성 검사 통과 시 폼 제출 진행
+        // e.preventDefault() 호출하지 않음
+    });
 
     // 에러 메시지 표시
     const showError = (message) => {
-        const alertContainer = document.querySelector('.alert-danger') || (() => {
+        const alertContainer = document.querySelector('.alert-danger-user') || (() => {
             const alert = document.createElement('div');
-            alert.classList.add('alert', 'alert-danger');
+            alert.classList.add('alert-danger-user');
             form.insertBefore(alert, form.firstChild);
             return alert;
         })();
