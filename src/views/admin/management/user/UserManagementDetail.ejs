@@ -7,7 +7,9 @@
     <div class="content-section">
         <h2 class="admin-title">회원상세</h2>
         <div class="section-content">
+            <!-- 기본 정보 -->
             <div class="form-grid">
+                <h3 class="section-subtitle">기본 정보</h3>
                 <div class="form-group">
                     <label>ID</label>
                     <input type="text" value="<%= user.username %>" readonly>
@@ -17,18 +19,16 @@
                     <input type="text" value="<%= user.name %>" readonly>
                 </div>
                 <div class="form-group">
-                    <label>학번</label>
-                    <input type="text" value="<%= user.studentId || '-' %>" readonly>
-                </div>
-                <div class="form-group">
                     <label>이메일</label>
                     <input type="email" value="<%= user.email %>" readonly>
                 </div>
                 <div class="form-group">
                     <label>역할</label>
                     <select name="role" required>
-                        <option value="USER" <%=user.role==='USER' ? 'selected' : '' %>>일반 사용자</option>
                         <option value="ADMIN" <%=user.role==='ADMIN' ? 'selected' : '' %>>관리자</option>
+                        <option value="SKKU_MEMBER" <%=user.role==='SKKU_MEMBER' ? 'selected' : '' %>>성균관대 구성원</option>
+                        <option value="EXTERNAL_MEMBER" <%=user.role==='EXTERNAL_MEMBER' ? 'selected' : '' %>>외부인
+                        </option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -36,17 +36,55 @@
                     <select name="status" required>
                         <option value="ACTIVE" <%=user.status==='ACTIVE' ? 'selected' : '' %>>활성</option>
                         <option value="INACTIVE" <%=user.status==='INACTIVE' ? 'selected' : '' %>>비활성</option>
+                        <option value="BLOCKED" <%=user.status==='BLOCKED' ? 'selected' : '' %>>차단</option>
                     </select>
                 </div>
+            </div>
+
+            <!-- 상세 정보 -->
+            <div class="form-grid">
+                <h3 class="section-subtitle">상세 정보</h3>
+                <% if (user.role==='SKKU_MEMBER' || (user.role==='ADMIN' && user.department)) { %>
+                    <div class="form-group">
+                        <label>학과</label>
+                        <input type="text" value="<%= user.department || '-' %>" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>학년</label>
+                        <input type="text" value="<%= user.studentYear || '-' %>" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>동아리 회원</label>
+                        <input type="text" value="<%= user.artistInfo?.isClubMember ? '예' : '아니오' %>" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>회원 유형</label>
+                        <input type="text" value="<%= user.artistInfo?.memberType === 'STUDENT' ? '학생' : '졸업생' %>"
+                            readonly>
+                    </div>
+                    <% } else if (user.role==='EXTERNAL_MEMBER' ) { %>
+                        <div class="form-group">
+                            <label>소속</label>
+                            <input type="text" value="<%= user.artistInfo?.affiliation || '-' %>" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>소속 유형</label>
+                            <input type="text"
+                                value="<%= user.artistInfo?.affiliationType === 'INDIVIDUAL' ? '개인' : '단체' %>" readonly>
+                        </div>
+                        <% } %>
+            </div>
+
+            <!-- 시스템 정보 -->
+            <div class="form-grid">
+                <h3 class="section-subtitle">시스템 정보</h3>
                 <div class="form-group">
                     <label>가입일</label>
                     <input type="text" value="<%= new Date(user.createdAt).toLocaleDateString() %>" readonly>
                 </div>
                 <div class="form-group">
-                    <label>마지막 로그인</label>
-                    <input type="text"
-                        value="<%= user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : '없음' %>"
-                        readonly>
+                    <label>수정일</label>
+                    <input type="text" value="<%= new Date(user.updatedAt).toLocaleDateString() %>" readonly>
                 </div>
             </div>
         </div>
@@ -92,7 +130,7 @@
             const result = await response.json();
 
             if (result.success) {
-                alert('회원 정보가 저장되었습니다.');
+                alert(result.message);
                 window.location.href = '/admin/management/user';
             } else {
                 alert(result.message || '회원 정보 저장 중 오류가 발생했습니다.');
@@ -118,7 +156,7 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    alert('회원이 삭제되었습니다.');
+                    alert(result.message);
                     window.location.href = '/admin/management/user';
                 } else {
                     alert(result.message || '회원 삭제 중 오류가 발생했습니다.');

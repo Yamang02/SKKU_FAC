@@ -99,34 +99,30 @@ export default class UserRepository {
         const updatedUser = {
             ...currentUser,
             ...userData,
-            updated_at: new Date().toISOString()
+            updatedAt: new Date().toISOString()
         };
 
-        // 역할이 변경된 경우 이전 역할의 필드 제거
+        // 역할이 변경된 경우
         if (userData.role && userData.role !== currentUser.role) {
-            if (currentUser.role === 'SKKU_MEMBER') {
-                delete updatedUser.department;
-                delete updatedUser.studentYear;
-                delete updatedUser.memberType;
-                delete updatedUser.isClubMember;
-            } else if (currentUser.role === 'EXTERNAL_MEMBER') {
-                delete updatedUser.affiliation;
-                delete updatedUser.affiliationType;
-            }
-
-            // 새로운 역할의 기본값 설정
+            // 이전 역할의 정보는 유지하고, 새로운 역할의 기본값만 설정
             if (userData.role === 'SKKU_MEMBER') {
-                Object.assign(updatedUser, {
-                    department: userData.department,
-                    studentYear: userData.studentYear,
-                    memberType: userData.memberType || 'STUDENT',
-                    isClubMember: Boolean(userData.isClubMember)
-                });
+                // SKKU_MEMBER로 변경 시
+                if (!updatedUser.department) updatedUser.department = '';
+                if (!updatedUser.studentYear) updatedUser.studentYear = '';
+                if (!updatedUser.artistInfo) {
+                    updatedUser.artistInfo = {
+                        memberType: 'STUDENT',
+                        isClubMember: false
+                    };
+                }
             } else if (userData.role === 'EXTERNAL_MEMBER') {
-                Object.assign(updatedUser, {
-                    affiliation: userData.affiliation,
-                    affiliationType: userData.affiliationType || 'INDIVIDUAL'
-                });
+                // EXTERNAL_MEMBER로 변경 시
+                if (!updatedUser.artistInfo) {
+                    updatedUser.artistInfo = {
+                        affiliation: '',
+                        affiliationType: 'INDIVIDUAL'
+                    };
+                }
             }
         }
 

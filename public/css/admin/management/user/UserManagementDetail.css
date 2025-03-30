@@ -24,8 +24,9 @@
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
+    margin-bottom: 20px;
 }
 
 .form-group {
@@ -68,6 +69,20 @@
     font-size: 1.5rem;
     color: #2d3748;
     margin: 0;
+}
+
+.section-content {
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+    margin-top: 20px;
+}
+
+.section-subtitle {
+    grid-column: span 2;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
 }
 
 .artist-info {
@@ -158,3 +173,4 @@
         width: 100%;
     }
 }
+

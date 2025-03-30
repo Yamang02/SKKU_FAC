@@ -301,71 +301,51 @@ export default class UserController {
     }
 
     /**
-     * 관리자용 사용자 삭제를 처리합니다.
+     * 관리자용 사용자 정보를 수정합니다.
      */
-    async deleteManagementUser(req, res) {
+    async updateManagementUser(req, res) {
         try {
-            const { id } = req.params;
-            const result = await this.userRepository.deleteUser(id);
+            const userId = req.params.id;
+            const updateData = req.body;
 
-            if (result) {
-                res.json({
-                    success: true,
-                    message: '회원이 삭제되었습니다.'
-                });
-            } else {
-                res.status(404).json({
-                    success: false,
-                    message: '회원을 찾을 수 없습니다.'
-                });
+            const user = await this.userRepository.findUserById(userId);
+            if (!user) {
+                throw new Error('사용자를 찾을 수 없습니다.');
             }
+
+            await this.userRepository.updateUser(userId, updateData);
+            res.json({
+                success: true,
+                message: '회원 정보가 저장되었습니다.'
+            });
         } catch (error) {
-            console.error('Error deleting user:', error);
             res.status(500).json({
                 success: false,
-                message: '회원 삭제 중 오류가 발생했습니다.'
+                message: error.message || '회원 정보 저장 중 오류가 발생했습니다.'
             });
         }
     }
 
     /**
-     * 관리자용 사용자 역할을 수정합니다.
+     * 관리자용 사용자를 삭제합니다.
      */
-    async updateManagementUserRole(req, res) {
+    async deleteManagementUser(req, res) {
         try {
-            await this.userRepository.updateRole(req.params.id, req.body.role);
-            res.redirect('/admin/management/user/list');
-        } catch (error) {
-            ViewResolver.renderError(res, error);
-        }
-    }
+            const userId = req.params.id;
+            const success = await this.userRepository.deleteUser(userId);
 
-    /**
-     * 관리자용 회원 정보를 수정합니다.
-     */
-    async updateManagementUserInfo(req, res) {
-        try {
-            const { id } = req.params;
-            const { role, status } = req.body;
-
-            const result = await this.userRepository.updateUser(id, { role, status });
-
-            if (result) {
-                res.json({
-                    success: true,
-                    message: '회원 정보가 수정되었습니다.'
-                });
-            } else {
-                res.status(404).json({
-                    success: false,
-                    message: '회원을 찾을 수 없습니다.'
-                });
+            if (!success) {
+                throw new Error('사용자를 찾을 수 없습니다.');
             }
+
+            res.json({
+                success: true,
+                message: '회원이 삭제되었습니다.'
+            });
         } catch (error) {
-            console.error('Error updating user:', error);
             res.status(500).json({
                 success: false,
-                message: '회원 정보 수정 중 오류가 발생했습니다.'
+                message: error.message || '회원 삭제 중 오류가 발생했습니다.'
             });
         }
     }
