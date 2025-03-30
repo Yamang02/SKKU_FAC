@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 
 /**
  * 사용자 역할 enum
@@ -17,6 +18,9 @@ export const UserStatus = {
     BLOCKED: 'BLOCKED'
 };
 
+// 1234 비밀번호의 해시값
+const DEFAULT_PASSWORD_HASH = '$2b$10$XQtbnjX6k/Q8CebfuYbI2./5pFAol2JBBEF1jz2BB9vc4ykEV.PbW';
+
 /**
  * 사용자 데이터 모델
  */
@@ -24,7 +28,7 @@ export class User {
     constructor({
         id,
         username,
-        password,
+        password = DEFAULT_PASSWORD_HASH,
         name,
         email,
         role = UserRole.GUEST,
@@ -58,7 +62,7 @@ export class UserDataAccess {
             id: 1,
             username: 'admin',
             email: 'admin@skku.edu',
-            password: '$2b$10$Uc0KiMJ3s0jjndFgQ.AAj.eBAGUJZCUxBrqxue4PtH5PKyYrRqIXi', // 'admin'
+            password: DEFAULT_PASSWORD_HASH,
             name: '관리자',
             role: UserRole.ADMIN,
             status: UserStatus.ACTIVE,
@@ -69,7 +73,7 @@ export class UserDataAccess {
             id: 2,
             username: 'student1',
             email: 'student1@skku.edu',
-            password: '$2b$10$Uc0KiMJ3s0jjndFgQ.AAj.eBAGUJZCUxBrqxue4PtH5PKyYrRqIXi', // 'password'
+            password: DEFAULT_PASSWORD_HASH,
             name: '김성균',
             role: UserRole.SKKU_MEMBER,
             status: UserStatus.ACTIVE,
@@ -84,7 +88,7 @@ export class UserDataAccess {
             id: 3,
             username: 'graduate1',
             email: 'graduate1@gmail.com',
-            password: '$2b$10$Uc0KiMJ3s0jjndFgQ.AAj.eBAGUJZCUxBrqxue4PtH5PKyYrRqIXi', // 'password'
+            password: DEFAULT_PASSWORD_HASH,
             name: '이예술',
             role: UserRole.SKKU_MEMBER,
             status: UserStatus.ACTIVE,
@@ -99,7 +103,7 @@ export class UserDataAccess {
             id: 4,
             username: 'external1',
             email: 'external1@example.com',
-            password: '$2b$10$Uc0KiMJ3s0jjndFgQ.AAj.eBAGUJZCUxBrqxue4PtH5PKyYrRqIXi', // 'password'
+            password: DEFAULT_PASSWORD_HASH,
             name: '박미술',
             role: UserRole.EXTERNAL_MEMBER,
             status: UserStatus.ACTIVE,
@@ -111,7 +115,7 @@ export class UserDataAccess {
             id: 5,
             username: 'external2',
             email: 'external2@example.com',
-            password: '$2b$10$Uc0KiMJ3s0jjndFgQ.AAj.eBAGUJZCUxBrqxue4PtH5PKyYrRqIXi', // 'password'
+            password: DEFAULT_PASSWORD_HASH,
             name: '최작가',
             role: UserRole.EXTERNAL_MEMBER,
             status: UserStatus.ACTIVE,
