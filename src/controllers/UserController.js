@@ -165,15 +165,22 @@ export default class UserController {
     /**
      * 프로필 페이지를 렌더링합니다.
      */
-    getUserProfilePage(req, res) {
-        ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE);
-    }
+    async getUserProfilePage(req, res) {
+        try {
+            const userId = req.session.user.id;
+            const user = await this.userRepository.findUserById(userId);
 
-    /**
-     * 프로필 수정 페이지를 렌더링합니다.
-     */
-    getUserProfileEditPage(req, res) {
-        ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE_EDIT);
+            if (!user) {
+                throw new Error('사용자를 찾을 수 없습니다.');
+            }
+
+            ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE, {
+                user
+            });
+        } catch (error) {
+            console.error('프로필 페이지 조회 중 오류 발생:', error);
+            ViewResolver.renderError(res, error);
+        }
     }
 
     /**

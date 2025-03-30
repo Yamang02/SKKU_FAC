@@ -181,6 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
     saveProfileBtn.addEventListener('click', async () => {
         const formData = {
             name: document.getElementById('name-input').value,
+            email: document.getElementById('email-input').value,
             currentPassword: document.getElementById('current-password-input').value,
             newPassword: document.getElementById('new-password-input').value,
             confirmPassword: document.getElementById('confirm-password-input').value,

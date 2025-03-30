@@ -94,7 +94,7 @@
                                     </div>
                                 </div>
                                 <div class="profile-info">
-                                    <div class="profile-info__label">동아리 회원</div>
+                                    <div class="profile-info__label">동아리 회원여부</div>
                                     <div class="profile-info__value">
                                         <span class="profile-info__text" id="isClubMember-text">
                                             <%= user.isClubMember===true ? '동아리 회원' : '일반 회원' %>
@@ -102,7 +102,7 @@
                                         <div class="profile-info__checkbox" style="display: none;">
                                             <input type="checkbox" id="isClubMember-input" <%=user.isClubMember===true
                                                 ? 'checked' : '' %>>
-                                            <label for="isClubMember-input">동아리 회원</label>
+                                            <label for="isClubMember-input">동아리 회원입니다</label>
                                         </div>
                                     </div>
                                 </div>
@@ -192,7 +192,7 @@
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" name="isClubMember" id="isClubMember"
                                 <%=user.isClubMember ? 'checked' : '' %>>
-                            <label class="form-check-label" for="isClubMember">동아리 회원</label>
+                            <label class="form-check-label" for="isClubMember">동아리 회원여부</label>
                         </div>
                     </div>
                     <% } else if (user.role==='EXTERNAL_MEMBER' ) { %>
