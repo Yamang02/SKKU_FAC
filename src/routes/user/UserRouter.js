@@ -16,9 +16,8 @@ UserRouter.post('/registration', isNotAuthenticated, (req, res) => userControlle
 
 // 프로필
 UserRouter.get('/profile', isAuthenticated, (req, res) => userController.getUserProfilePage(req, res));
-UserRouter.get('/profile/edit', isAuthenticated, (req, res) => userController.getUserProfileEditPage(req, res));
-UserRouter.post('/profile/edit', isAuthenticated, (req, res) => userController.updateUserProfile(req, res));
-UserRouter.post('/profile/delete', isAuthenticated, (req, res) => userController.deleteUser(req, res));
+UserRouter.put('/profile', isAuthenticated, (req, res) => userController.updateUserProfile(req, res));
+UserRouter.delete('/profile', isAuthenticated, (req, res) => userController.deleteUserAccount(req, res));
 
 // 비밀번호 찾기
 UserRouter.get('/password/reset', isNotAuthenticated, (req, res) => userController.getUserPasswordResetPage(req, res));

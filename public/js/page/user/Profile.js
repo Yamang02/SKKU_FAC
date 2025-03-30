@@ -155,12 +155,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // 계정 삭제
     deleteAccountBtn.addEventListener('click', () => {
         if (confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-            fetch('/user/profile/delete', {
-                method: 'POST'
+            fetch('/user/profile', {
+                method: 'DELETE'
             })
                 .then(response => {
                     if (response.ok) {
-                        window.location.href = '/user/logout';
+                        window.location.href = '/';
                     } else {
                         return response.json();
                     }
@@ -181,42 +181,53 @@ document.addEventListener('DOMContentLoaded', function () {
     saveProfileBtn.addEventListener('click', async () => {
         const formData = {
             name: document.getElementById('name-input').value,
-            email: document.getElementById('email-input').value,
-            currentPassword: document.getElementById('current-password-input').value,
-            newPassword: document.getElementById('new-password-input').value,
-            confirmPassword: document.getElementById('confirm-password-input').value,
             department: document.getElementById('department-input')?.value || '',
             studentYear: document.getElementById('studentYear-input')?.value || '',
             isClubMember: document.getElementById('isClubMember-input')?.checked || false,
             affiliation: document.getElementById('affiliation-input')?.value || ''
         };
 
-        // 비밀번호 유효성 검사
-        if (formData.newPassword || formData.confirmPassword) {
-            if (!formData.currentPassword) {
+        // 비밀번호 변경 시에만 비밀번호 관련 데이터 추가
+        const currentPassword = document.getElementById('current-password-input').value;
+        const newPassword = document.getElementById('new-password-input').value;
+        const confirmPassword = document.getElementById('confirm-password-input').value;
+
+        if (newPassword || confirmPassword || currentPassword) {
+            if (!currentPassword) {
                 alert('현재 비밀번호를 입력해주세요.');
                 return;
             }
-            if (formData.newPassword !== formData.confirmPassword) {
+            if (!newPassword) {
+                alert('새 비밀번호를 입력해주세요.');
+                return;
+            }
+            if (newPassword !== confirmPassword) {
                 alert('새 비밀번호가 일치하지 않습니다.');
                 return;
             }
+
+            Object.assign(formData, {
+                currentPassword,
+                newPassword
+            });
         }
 
         try {
-            const response = await fetch('/user/profile/edit', {
-                method: 'POST',
+            const response = await fetch('/user/profile', {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(formData)
             });
 
-            if (response.ok) {
+            const result = await response.json();
+
+            if (result.success) {
+                alert(result.message || '프로필이 성공적으로 수정되었습니다.');
                 window.location.reload();
             } else {
-                const error = await response.json();
-                alert(error.message || '프로필 수정 중 오류가 발생했습니다.');
+                alert(result.message || '프로필 수정 중 오류가 발생했습니다.');
             }
         } catch (error) {
             console.error('프로필 수정 중 오류:', error);

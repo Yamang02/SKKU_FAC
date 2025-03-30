@@ -1,4 +1,5 @@
 import ViewResolver from '../utils/ViewResolver.js';
+import { ViewPath } from '../constants/ViewPath.js';
 import { UserRole } from '../config/data/user.js';
 
 /**
@@ -12,7 +13,7 @@ export const isAuthenticated = (req, res, next) => {
             return res.status(401).json({ error: '로그인이 필요합니다.' });
         }
         req.session.returnTo = req.originalUrl;
-        return ViewResolver.render(res, 'user/Login', {
+        return ViewResolver.render(res, ViewPath.ERROR, {
             error: '로그인이 필요한 서비스입니다.',
             returnTo: req.originalUrl
         });
@@ -26,7 +27,7 @@ export const isAdmin = (req, res, next) => {
         if (req.xhr || req.headers.accept?.includes('application/json')) {
             return res.status(403).json({ error: '권한이 없습니다.' });
         }
-        return ViewResolver.render(res, 'common/error', {
+        return ViewResolver.render(res, ViewPath.ERROR, {
             title: '접근 제한',
             message: '관리자만 접근할 수 있습니다.'
         });

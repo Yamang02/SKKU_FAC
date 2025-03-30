@@ -189,7 +189,11 @@ export default class UserController {
     async updateUserProfile(req, res) {
         try {
             const userId = req.session.user.id;
-            const { name, email, department, studentYear } = req.body;
+            const {
+                name, email, department, studentYear,
+                isClubMember, affiliation,
+                currentPassword, newPassword
+            } = req.body;
 
             const user = await this.userRepository.findUserById(userId);
             if (!user) {
@@ -201,19 +205,46 @@ export default class UserController {
                 email,
                 department,
                 studentYear,
+                isClubMember,
+                affiliation,
                 updatedAt: new Date()
             };
 
-            await this.userRepository.updateUser(userId, updateData);
-            req.session.user = { ...req.session.user, ...updateData };
+            // 비밀번호 변경 처리
+            if (newPassword) {
+                // 현재 비밀번호 확인
+                const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+                if (!isPasswordValid) {
+                    throw new Error('현재 비밀번호가 일치하지 않습니다.');
+                }
 
-            res.redirect('/user/profile');
+                // 새 비밀번호 해싱
+                const hashedPassword = await bcrypt.hash(newPassword, 10);
+                updateData.password = hashedPassword;
+            }
+
+            await this.userRepository.updateUser(userId, updateData);
+
+            // 세션 업데이트 (비밀번호 제외)
+            req.session.user = {
+                ...req.session.user,
+                name,
+                email,
+                department,
+                studentYear,
+                isClubMember,
+                affiliation
+            };
+
+            res.json({
+                success: true,
+                message: '프로필이 성공적으로 수정되었습니다.'
+            });
         } catch (error) {
             console.error('프로필 수정 중 오류 발생:', error);
-            ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE_EDIT, {
-                title: '프로필 수정',
-                profile: await this.userRepository.findUserById(req.session.user.id),
-                error: error.message
+            res.status(500).json({
+                success: false,
+                message: error.message || '프로필 수정 중 오류가 발생했습니다.'
             });
         }
     }
@@ -353,6 +384,34 @@ export default class UserController {
             res.status(500).json({
                 success: false,
                 message: error.message || '회원 삭제 중 오류가 발생했습니다.'
+            });
+        }
+    }
+
+    /**
+     * 사용자 계정을 삭제합니다.
+     */
+    async deleteUserAccount(req, res) {
+        try {
+            const userId = req.session.user.id;  // 세션에서 현재 로그인한 사용자의 ID를 가져옴
+            const success = await this.userRepository.deleteUser(userId);
+
+            if (!success) {
+                throw new Error('계정 삭제에 실패했습니다.');
+            }
+
+            // 세션 삭제
+            await SessionUtil.destroySession(req);
+
+            res.json({
+                success: true,
+                message: '계정이 성공적으로 삭제되었습니다.'
+            });
+        } catch (error) {
+            console.error('계정 삭제 중 오류 발생:', error);
+            res.status(500).json({
+                success: false,
+                message: error.message || '계정 삭제 중 오류가 발생했습니다.'
             });
         }
     }
