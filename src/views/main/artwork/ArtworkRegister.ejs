@@ -4,95 +4,98 @@
 
 <div class="artwork-register-container">
     <h1 class="register-title">작품 등록</h1>
-
-    <% if (locals.error) { %>
-        <div class="error-message">
-            <%= error %>
+    <div class="form-grid">
+        <!-- 이미지 업로드 섹션 -->
+        <div class="image-upload-section">
+            <div class="image-preview-container" id="imagePreview">
+                <img src="/images/artwork-placeholder.svg" alt="작품 이미지 미리보기" id="previewImage">
+                <div class="image-upload-overlay">
+                    <span>이미지를 클릭하거나 드래그하여 업로드</span>
+                    <div class="image-upload-info">
+                        <p>지원 형식: JPG, PNG, GIF</p>
+                        <p>최대 크기: 5MB</p>
+                    </div>
+                </div>
+            </div>
+            <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
+            <div class="form-error" id="imageError"></div>
         </div>
-        <% } %>
 
-            <form class="artwork-form" id="artworkForm" enctype="multipart/form-data">
-                <div class="form-grid">
-                    <!-- 이미지 업로드 섹션 -->
-                    <div class="image-upload-section">
-                        <div class="image-preview-container" id="imagePreview">
-                            <img src="/images/artwork-placeholder.svg" alt="작품 이미지 미리보기" id="previewImage">
-                            <div class="image-upload-overlay">
-                                <span>이미지를 클릭하거나 드래그하여 업로드</span>
-                            </div>
-                        </div>
-                        <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
-                    </div>
+        <!-- 기본 정보 입력 섹션 -->
+        <div class="basic-info-section">
+            <div class="form-group">
+                <label for="title" class="form-label">작품 제목 <span class="required">*</span></label>
+                <input type="text" id="title" name="title" class="form-input" required
+                    value="<%= formData?.title || '' %>" maxlength="100">
+                <div class="form-error" id="titleError"></div>
+            </div>
 
-                    <!-- 기본 정보 입력 섹션 -->
-                    <div class="basic-info-section">
-                        <div class="form-group">
-                            <label for="title" class="form-label">작품 제목 <span class="required">*</span></label>
-                            <input type="text" id="title" name="title" class="form-input" required
-                                value="<%= locals.formData?.title || '' %>">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">작가 정보</label>
-                            <div class="artist-info">
-                                <p><strong>이름:</strong>
-                                    <%= locals.user?.name %>
-                                </p>
-                                <p><strong>학과:</strong>
-                                    <%= locals.user?.department %>
-                                </p>
-                                <p><strong>학번:</strong>
-                                    <%= locals.user?.studentId %>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="medium" class="form-label">매체</label>
-                            <input type="text" id="medium" name="medium" class="form-input"
-                                value="<%= locals.formData?.medium || '' %>" placeholder="예: 캔버스에 유화, 디지털 프린트 등">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="size" class="form-label">크기</label>
-                            <input type="text" id="size" name="size" class="form-input"
-                                value="<%= locals.formData?.size || '' %>" placeholder="예: 100x100cm">
-                        </div>
-                    </div>
+            <div class="form-group">
+                <label class="form-label">작가 정보</label>
+                <div class="artist-info">
+                    <p><strong>이름:</strong>
+                        <%= user?.name || '' %>
+                    </p>
+                    <p><strong>소속:</strong>
+                        <% if (user?.role==='ADMIN' || user?.role==='SKKU_MEMBER' ) { %>
+                            <%= user?.department %>
+                                <%= user?.studentYear %>
+                                    <input type="hidden" name="department"
+                                        value="<%= user?.department %> <%= user?.studentYear %>">
+                                    <% } else { %>
+                                        <%= user?.affiliation %>
+                                            <input type="hidden" name="department" value="<%= user?.affiliation %>">
+                                            <% } %>
+                    </p>
                 </div>
+            </div>
 
-                <!-- 추가 정보 섹션 -->
-                <div class="additional-info-section">
-                    <div class="description-section">
-                        <div class="form-group">
-                            <label for="description" class="form-label">작품 설명</label>
-                            <textarea id="description" name="description" class="form-textarea"
-                                placeholder="작품에 대한 설명을 입력하세요"><%= locals.formData?.description || '' %></textarea>
-                        </div>
-                    </div>
+            <div class="form-group">
+                <label for="medium" class="form-label">매체</label>
+                <input type="text" id="medium" name="medium" class="form-input" value="<%= formData?.medium || '' %>"
+                    placeholder="예: 캔버스에 유화, 디지털 프린트 등">
+            </div>
 
-                    <div class="exhibition-section">
-                        <div class="form-group">
-                            <label for="exhibition" class="form-label">전시회 선택</label>
-                            <select id="exhibition" name="exhibitionId" class="form-select">
-                                <option value="">전시회 선택 (선택사항)</option>
-                                <% locals.exhibitions?.forEach(exhibition=> { %>
-                                    <option value="<%= exhibition.id %>"
-                                        <%=(locals.formData?.exhibitionId===exhibition.id ||
-                                        locals.selectedExhibitionId===exhibition.id) ? 'selected' : '' %>>
-                                        <%= exhibition.title %>
-                                    </option>
-                                    <% }); %>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+            <div class="form-group">
+                <label for="size" class="form-label">크기</label>
+                <input type="text" id="size" name="size" class="form-input" value="<%= formData?.size || '' %>"
+                    placeholder="예: 100x100cm">
+            </div>
+        </div>
+    </div>
 
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
-                    <button type="submit" class="btn btn-primary">등록하기</button>
-                </div>
-            </form>
-</div>
+    <!-- 추가 정보 섹션 -->
+    <div class="additional-info-section">
+        <div class="description-section">
+            <div class="form-group">
+                <label for="description" class="form-label">작품 설명</label>
+                <textarea id="description" name="description" class="form-textarea"
+                    placeholder="작품에 대한 설명을 입력하세요"><%= '' %></textarea>
+            </div>
+        </div>
 
-<script src="/js/page/artwork/ArtworkRegister.js"></script>
+        <div class="exhibition-section">
+            <div class="form-group">
+                <label for="exhibition" class="form-label">전시회 선택</label>
+                <select id="exhibition" name="exhibitionId" class="form-select">
+                    <option value="">전시회 선택 (선택사항)</option>
+                    <% exhibitions?.forEach(exhibition=> { %>
+                        <option value="<%= exhibition.id %>" <%=(formData?.exhibitionId===exhibition.id ||
+                            selectedExhibitionId===exhibition.id) ? 'selected' : '' %>>
+                            <%= exhibition.title %>
+                        </option>
+                        <% }); %>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+        <button type="submit" class="btn btn-primary">등록하기</button>
+    </div>
+    <div id="formError" class="form-error"></div>
+    <div>
+    </div>
+
+    <script src="/js/page/artwork/ArtworkRegister.js"></script>

@@ -1,8 +1,9 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import { isAdmin } from '../../middleware/auth.js';
 import ArtworkController from '../../controllers/ArtworkController.js';
+import { isAuthenticated } from '../../middlewares/auth.js';
+import { FilePath } from '../../constants/Path.js';
 
 const ArtworkRouter = express.Router();
 const artworkController = new ArtworkController();
@@ -10,15 +11,18 @@ const artworkController = new ArtworkController();
 // 파일 업로드 설정
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/uploads/artworks');
+        cb(null, FilePath.UPLOAD.ARTWORKS);
     },
     filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+        // 파일 확장자 추출
+        const ext = path.extname(file.originalname);
+        // 임시 파일명 생성 (컨트롤러에서 실제 파일명으로 변경)
+        const tempFilename = `temp_${Date.now()}${ext}`;
+        cb(null, tempFilename);
     }
 });
 
-const upload = multer({
+const uploadMiddleware = multer({
     storage: storage,
     limits: {
         fileSize: 5 * 1024 * 1024 // 5MB 제한
@@ -34,14 +38,8 @@ const upload = multer({
 });
 
 // 작품 등록 라우트
-ArtworkRouter.get('/register', (req, res) => artworkController.getArtworkCreatePage(req, res));
-ArtworkRouter.post('/register', upload.single('image'), (req, res) => artworkController.createArtwork(req, res));
-
-// 관리자용 작품 라우트 (가장 구체적인 경로)
-ArtworkRouter.get('/management', isAdmin, (req, res) => artworkController.getAdminArtworkList(req, res));
-ArtworkRouter.get('/management/:id', isAdmin, (req, res) => artworkController.getAdminArtworkDetail(req, res));
-ArtworkRouter.put('/management/:id', isAdmin, (req, res) => artworkController.updateAdminArtwork(req, res));
-ArtworkRouter.delete('/management/:id', isAdmin, (req, res) => artworkController.deleteAdminArtwork(req, res));
+ArtworkRouter.get('/registration', (req, res) => artworkController.getArtworkRegisterPage(req, res));
+ArtworkRouter.post('/registration', uploadMiddleware.single('image'), (req, res) => artworkController.createArtwork(req, res));
 
 // API 엔드포인트
 ArtworkRouter.get('/api/:id', async (req, res) => {

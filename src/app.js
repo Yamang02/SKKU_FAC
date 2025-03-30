@@ -1,5 +1,6 @@
 import express from 'express';
 import session from 'express-session';
+import flash from 'connect-flash';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { pageTracker } from './middleware/PageTracker.js';
@@ -51,6 +52,9 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
+// Flash 메시지 미들웨어 등록
+app.use(flash());
 
 // 페이지 추적 미들웨어 등록
 app.use(pageTracker);

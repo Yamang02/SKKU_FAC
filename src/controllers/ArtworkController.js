@@ -1,8 +1,13 @@
 import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
+import FileUploadUtil from '../utils/FileUploadUtil.js';
 import ArtworkRepository from '../repositories/ArtworkRepository.js';
 import ExhibitionRepository from '../repositories/ExhibitionRepository.js';
+import UserRepository from '../repositories/UserRepository.js';
+import Artwork from '../models/artwork/Artwork.js';
 import Page from '../models/common/page/Page.js';
+import path from 'path';
+import fs from 'fs';
 
 /**
  * 작품 관련 컨트롤러
@@ -11,6 +16,7 @@ export default class ArtworkController {
     constructor() {
         this.artworkRepository = new ArtworkRepository();
         this.exhibitionRepository = new ExhibitionRepository();
+        this.userRepository = new UserRepository();
     }
 
     /**
@@ -125,13 +131,14 @@ export default class ArtworkController {
     /**
      * 작품 등록 페이지를 렌더링합니다.
      */
-    async getArtworkCreatePage(req, res) {
+    async getArtworkRegisterPage(req, res) {
         try {
             // 로그인 체크
             if (!req.session.user) {
-                return res.redirect('/user/login?returnUrl=/artwork/register');
+                return res.redirect('/user/login?returnUrl=/artwork/registration');
             }
 
+            const user = await this.userRepository.findUserById(req.session.user.id);
             const exhibitions = await this.exhibitionRepository.findExhibitions({ limit: 100 });
             const exhibitionId = req.query.exhibition;
 
@@ -139,7 +146,10 @@ export default class ArtworkController {
                 title: '작품 등록',
                 exhibitions: exhibitions.items || [],
                 selectedExhibitionId: exhibitionId,
-                user: req.session.user
+                user: user,
+                error: req.flash('error')[0] || null,
+                success: req.flash('success')[0] || null,
+                formData: {}
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -150,47 +160,105 @@ export default class ArtworkController {
      * 작품을 등록합니다.
      */
     async createArtwork(req, res) {
+        let uploadedImage = null;
         try {
-            // 로그인 체크
             if (!req.session.user) {
-                return res.redirect('/user/login?returnUrl=/artwork/register');
+                return res.status(401).json({
+                    success: false,
+                    message: '로그인이 필요합니다.'
+                });
             }
 
-            const { title, description, exhibitionId, medium, size } = req.body;
-            const imageFile = req.file;
+            const { title, description, exhibitionId } = req.body;
+            uploadedImage = req.file;
 
-            if (!imageFile) {
-                throw new Error('작품 이미지를 업로드해주세요.');
-            }
-
+            // 1. 필수 필드 검증
             if (!title) {
-                throw new Error('작품 제목을 입력해주세요.');
+                return res.status(400).json({
+                    success: false,
+                    message: '작품 제목을 입력해주세요.'
+                });
             }
 
-            const artwork = await this.artworkRepository.createArtwork({
+            if (!uploadedImage) {
+                return res.status(400).json({
+                    success: false,
+                    message: '작품 이미지를 업로드해주세요.'
+                });
+            }
+
+            // 2. 이미지 저장
+            let filePath = null;
+            let imageUrl = null;
+
+            try {
+                const result = await FileUploadUtil.saveImage({
+                    file: uploadedImage,
+                    artwork_id: 'temp',  // 임시 ID
+                    title,
+                    artist_name: req.session.user.name,
+                    department: req.session.user.department || ''
+                });
+                filePath = result.filePath;
+                imageUrl = result.imageUrl;
+            } catch (error) {
+                // 이미지 저장 중 발생한 에러 처리
+                return res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+
+            // 3. Artwork 모델 인스턴스 생성
+            const artwork = new Artwork({
                 title,
-                artist_name: req.session.user.name,
-                department: req.session.user.department,
-                student_id: req.session.user.studentId,
-                description,
-                exhibition_id: exhibitionId || null,
-                medium,
-                size,
-                image_url: imageFile.path,
-                is_featured: false, // 추천 작품은 관리자만 설정 가능
-                created_by: req.session.user.id
+                description: description || '',
+                department: req.session.user.department || '',
+                student_id: req.session.user.studentYear || '',
+                artist_name: req.session.user.name || '',
+                image_path: filePath,
+                image_url: imageUrl,
+                exhibition_id: exhibitionId || null
             });
 
-            res.redirect(`/artwork/${artwork.id}`);
+            // 4. 작품 저장
+            const savedArtwork = await this.artworkRepository.createArtwork(artwork.toJSON());
+
+            // 5. 이미지 파일명 업데이트
+            if (filePath && imageUrl) {
+                const newFilePath = path.join(
+                    path.dirname(filePath),
+                    path.basename(filePath).replace('temp', savedArtwork.id)
+                );
+                const newImageUrl = imageUrl.replace('temp', savedArtwork.id);
+
+                await fs.promises.rename(filePath, newFilePath);
+
+                // 6. 작품 정보 업데이트
+                artwork.update({
+                    image_path: newFilePath,
+                    image_url: newImageUrl
+                });
+                await this.artworkRepository.updateArtwork(savedArtwork.id, artwork.toJSON());
+            }
+
+            // 7. 성공 응답
+            return res.json({
+                success: true,
+                message: '작품이 성공적으로 등록되었습니다.',
+                id: savedArtwork.id
+            });
         } catch (error) {
-            // 에러 발생 시 등록 페이지로 돌아가면서 에러 메시지 전달
-            const exhibitions = await this.exhibitionRepository.findExhibitions({ limit: 100 });
-            ViewResolver.render(res, ViewPath.MAIN.ARTWORK.REGISTER, {
-                title: '작품 등록',
-                exhibitions: exhibitions.items || [],
-                error: error.message,
-                formData: req.body, // 이전 입력 데이터 유지
-                user: req.session.user
+            console.error('작품 등록 중 오류:', error);
+
+            // 임시 파일이 있다면 삭제
+            if (uploadedImage && uploadedImage.path) {
+                await FileUploadUtil.deleteFile(uploadedImage.path);
+            }
+
+            return res.status(500).json({
+                success: false,
+                message: error.message || '작품 등록 중 오류가 발생했습니다.'
             });
         }
     }

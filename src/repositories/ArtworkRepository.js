@@ -69,9 +69,13 @@ export default class ArtworkRepository {
      * 새로운 작품을 생성합니다.
      */
     async createArtwork(artworkData) {
+        const newId = this.artworks.length > 0
+            ? Math.max(...this.artworks.map(a => Number(a.id))) + 1
+            : 1;
+
         const newArtwork = {
-            id: (Math.max(...this.artworks.map(a => a.id)) + 1).toString(),
             ...artworkData,
+            id: newId,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
@@ -161,5 +165,22 @@ export default class ArtworkRepository {
             totalPages: 1,
             limit: Number(limit)
         };
+    }
+
+    /**
+     * 작품 제목과 작가 이름으로 작품을 조회
+     * @param {string} title - 작품 제목
+     * @param {string} artist_name - 작가 이름
+     * @returns {Promise<Object|null>} 작품 정보
+     */
+    async findByTitleAndArtist(title, artist_name) {
+        const query = `
+            SELECT * FROM artworks
+            WHERE title = ? AND artist_name = ?
+            ORDER BY created_at DESC
+            LIMIT 1
+        `;
+        const [rows] = await this.db.query(query, [title, artist_name]);
+        return rows[0] || null;
     }
 }
