@@ -68,115 +68,158 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    // 모달 관련 요소
-    const editProfileModal = document.getElementById('editProfileModal');
-    const deleteAccountModal = document.getElementById('deleteAccountModal');
+    // 요소 선택
     const editProfileBtn = document.getElementById('edit-profile-btn');
     const saveProfileBtn = document.getElementById('save-profile-btn');
-    const confirmDeleteBtn = document.getElementById('confirmDeleteAccount');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const logoutBtn = document.getElementById('logout-btn');
+    const deleteAccountBtn = document.getElementById('delete-account-btn');
+    const profileContent = document.querySelector('.profile-content');
 
-    // 모달 열기 함수
-    function openModal(modal) {
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-    }
+    // 비밀번호 필드 요소들
+    const passwordFields = document.getElementById('password-fields');
+    const newPasswordFields = document.getElementById('new-password-fields');
+    const confirmPasswordFields = document.getElementById('confirm-password-fields');
 
-    // 모달 닫기 함수
-    function closeModal(modal) {
-        modal.classList.remove('show');
-        document.body.style.overflow = '';
-    }
+    // 초기 버튼 상태 설정
+    saveProfileBtn.style.display = 'none';
+    cancelEditBtn.style.display = 'none';
+    editProfileBtn.style.display = 'inline-flex';
+    logoutBtn.style.display = 'inline-flex';
+    deleteAccountBtn.style.display = 'inline-flex';
 
-    // 모달 외부 클릭시 닫기
-    window.addEventListener('click', function (event) {
-        if (event.target === editProfileModal) {
-            closeModal(editProfileModal);
-        }
-        if (event.target === deleteAccountModal) {
-            closeModal(deleteAccountModal);
-        }
-    });
-
-    // ESC 키로 모달 닫기
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-            closeModal(editProfileModal);
-            closeModal(deleteAccountModal);
-        }
-    });
-
-    // 모달 닫기 버튼 이벤트
-    document.querySelectorAll('.modal-close').forEach(button => {
-        button.addEventListener('click', function () {
-            const modal = this.closest('.modal');
-            closeModal(modal);
+    // 수정 모드로 전환
+    editProfileBtn.addEventListener('click', () => {
+        // 모든 텍스트를 입력 필드로 변경
+        document.querySelectorAll('.profile-info__text').forEach(text => {
+            text.style.display = 'none';
         });
+        document.querySelectorAll('.profile-info__input, .profile-info__checkbox').forEach(input => {
+            input.style.display = 'block';
+        });
+
+        // 비밀번호 필드 표시
+        passwordFields.style.display = 'grid';
+        newPasswordFields.style.display = 'grid';
+        confirmPasswordFields.style.display = 'grid';
+
+        // 버튼 상태 변경
+        editProfileBtn.style.display = 'none';
+        saveProfileBtn.style.display = 'inline-flex';
+        cancelEditBtn.style.display = 'inline-flex';
+        logoutBtn.style.display = 'none';
+        deleteAccountBtn.style.display = 'none';
+
+        // 수정 모드 클래스 추가
+        profileContent.classList.add('edit-mode');
     });
 
-    // 프로필 수정 버튼 클릭 이벤트
-    editProfileBtn.addEventListener('click', function () {
-        openModal(editProfileModal);
+    // 수정 취소
+    cancelEditBtn.addEventListener('click', () => {
+        // 모든 입력 필드를 텍스트로 변경
+        document.querySelectorAll('.profile-info__text').forEach(text => {
+            text.style.display = 'inline-block';
+        });
+        document.querySelectorAll('.profile-info__input, .profile-info__checkbox').forEach(input => {
+            input.style.display = 'none';
+        });
+
+        // 비밀번호 필드 숨김
+        passwordFields.style.display = 'none';
+        newPasswordFields.style.display = 'none';
+        confirmPasswordFields.style.display = 'none';
+
+        // 비밀번호 입력값 초기화
+        document.getElementById('current-password-input').value = '';
+        document.getElementById('new-password-input').value = '';
+        document.getElementById('confirm-password-input').value = '';
+
+        // 버튼 상태 변경
+        editProfileBtn.style.display = 'inline-flex';
+        saveProfileBtn.style.display = 'none';
+        cancelEditBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-flex';
+        deleteAccountBtn.style.display = 'inline-flex';
+
+        // 수정 모드 클래스 제거
+        profileContent.classList.remove('edit-mode');
     });
 
-    // 프로필 저장 버튼 클릭 이벤트
-    saveProfileBtn.addEventListener('click', async function () {
-        const form = document.getElementById('edit-profile-form');
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+    // 로그아웃
+    logoutBtn.addEventListener('click', () => {
+        if (confirm('로그아웃 하시겠습니까?')) {
+            window.location.href = '/user/logout';
+        }
+    });
 
-        // 비밀번호 확인
-        if (data.newPassword && data.newPassword !== data.confirmPassword) {
-            alert('새 비밀번호가 일치하지 않습니다.');
-            return;
+    // 계정 삭제
+    deleteAccountBtn.addEventListener('click', () => {
+        if (confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+            fetch('/user/profile/delete', {
+                method: 'POST'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/user/logout';
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(error => {
+                    if (error) {
+                        alert(error.message || '계정 삭제 중 오류가 발생했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('계정 삭제 중 오류:', error);
+                    alert('계정 삭제 중 오류가 발생했습니다.');
+                });
+        }
+    });
+
+    // 프로필 저장
+    saveProfileBtn.addEventListener('click', async () => {
+        const formData = {
+            name: document.getElementById('name-input').value,
+            currentPassword: document.getElementById('current-password-input').value,
+            newPassword: document.getElementById('new-password-input').value,
+            confirmPassword: document.getElementById('confirm-password-input').value,
+            department: document.getElementById('department-input')?.value || '',
+            studentYear: document.getElementById('studentYear-input')?.value || '',
+            isClubMember: document.getElementById('isClubMember-input')?.checked || false,
+            affiliation: document.getElementById('affiliation-input')?.value || ''
+        };
+
+        // 비밀번호 유효성 검사
+        if (formData.newPassword || formData.confirmPassword) {
+            if (!formData.currentPassword) {
+                alert('현재 비밀번호를 입력해주세요.');
+                return;
+            }
+            if (formData.newPassword !== formData.confirmPassword) {
+                alert('새 비밀번호가 일치하지 않습니다.');
+                return;
+            }
         }
 
         try {
-            const response = await fetch('/user/profile/update', {
+            const response = await fetch('/user/profile/edit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(formData)
             });
 
-            const result = await response.json();
-
-            if (result.success) {
-                alert('프로필이 성공적으로 업데이트되었습니다.');
+            if (response.ok) {
                 window.location.reload();
             } else {
-                alert(result.message || '프로필 업데이트에 실패했습니다.');
+                const error = await response.json();
+                alert(error.message || '프로필 수정 중 오류가 발생했습니다.');
             }
         } catch (error) {
-            console.error('프로필 업데이트 중 오류 발생:', error);
-            alert('프로필 업데이트 중 오류가 발생했습니다.');
-        }
-    });
-
-    // 로그아웃 버튼 클릭 이벤트
-    logoutBtn.addEventListener('click', function () {
-        window.location.href = '/user/logout';
-    });
-
-    // 계정 삭제 확인 버튼 클릭 이벤트
-    confirmDeleteBtn.addEventListener('click', async function () {
-        try {
-            const response = await fetch('/user/profile/delete', {
-                method: 'POST'
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert('계정이 성공적으로 삭제되었습니다.');
-                window.location.href = '/';
-            } else {
-                alert(result.message || '계정 삭제에 실패했습니다.');
-            }
-        } catch (error) {
-            console.error('계정 삭제 중 오류 발생:', error);
-            alert('계정 삭제 중 오류가 발생했습니다.');
+            console.error('프로필 수정 중 오류:', error);
+            alert('프로필 수정 중 오류가 발생했습니다.');
         }
     });
 });
