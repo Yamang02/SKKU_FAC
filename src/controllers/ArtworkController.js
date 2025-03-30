@@ -2,7 +2,6 @@ import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
 import FileUploadUtil from '../utils/FileUploadUtil.js';
 import ArtworkRepository from '../repositories/ArtworkRepository.js';
-import ExhibitionRepository from '../repositories/ExhibitionRepository.js';
 import UserRepository from '../repositories/UserRepository.js';
 import Artwork from '../models/artwork/Artwork.js';
 import Page from '../models/common/page/Page.js';
@@ -15,7 +14,6 @@ import fs from 'fs';
 export default class ArtworkController {
     constructor() {
         this.artworkRepository = new ArtworkRepository();
-        this.exhibitionRepository = new ExhibitionRepository();
         this.userRepository = new UserRepository();
     }
 
@@ -542,5 +540,31 @@ export default class ArtworkController {
             imageUrl: artwork.image_url || '/images/artwork-placeholder.jpg',
             description: artwork.description
         };
+    }
+
+    async getArtworkModalData(req, res) {
+        try {
+            const artwork = await this.artworkRepository.findById(req.params.id);
+            if (!artwork) {
+                return res.status(404).json({ message: '작품을 찾을 수 없습니다.' });
+            }
+
+            const artist = await this.userRepository.findById(artwork.artistId);
+            const exhibition = artwork.exhibitionId ?
+                await this.exhibitionRepository.findById(artwork.exhibitionId) : null;
+
+            const modalData = {
+                title: artwork.title,
+                imageUrl: artwork.imageUrl,
+                artist: artist ? artist.name : null,
+                department: artwork.department,
+                exhibition: exhibition ? exhibition.name : null
+            };
+
+            res.json(modalData);
+        } catch (error) {
+            console.error('모달 데이터 조회 중 오류:', error);
+            res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+        }
     }
 }
