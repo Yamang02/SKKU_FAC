@@ -29,6 +29,7 @@
     display: flex;
     align-items: center;
     gap: 20px;
+    flex-wrap: nowrap;
 }
 
 .nav-links li {
@@ -151,6 +152,8 @@
         transition: all 0.3s ease;
         z-index: 99;
         gap: 10px;
+        max-height: calc(100vh - 70px);
+        overflow-y: auto;
     }
 
     .nav-links.active {
@@ -162,6 +165,8 @@
     .nav-links a {
         font-size: 14px;
         padding: 6px 10px;
+        width: 100%;
+        text-align: center;
     }
 
     .dropdown-menu {
@@ -171,6 +176,7 @@
         display: none;
         border: none;
         min-width: auto;
+        width: 100%;
     }
 
     .dropdown.active .dropdown-menu {
@@ -178,13 +184,25 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (min-width: 769px) and (max-width: 1200px) {
     .nav-links {
-        gap: 5px;
+        gap: 15px;
     }
 
     .nav-links a {
+        font-size: 14px;
         padding: 6px 8px;
+    }
+}
+
+@media (min-width: 1201px) {
+    .nav-links {
+        gap: 20px;
+    }
+
+    .nav-links a {
+        font-size: 16px;
+        padding: 8px 12px;
     }
 }
 

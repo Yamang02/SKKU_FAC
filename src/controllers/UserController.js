@@ -1,8 +1,9 @@
 import SessionUtil from '../utils/SessionUtil.js';
 import UserRepository from '../repositories/UserRepository.js';
-import bcrypt from 'bcrypt';
-import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
+import { ViewPath } from '../constants/ViewPath.js';
+import bcrypt from 'bcrypt';
+
 
 export default class UserController {
     constructor() {
@@ -13,11 +14,7 @@ export default class UserController {
      * 로그인 페이지를 렌더링합니다.
      */
     getUserLoginPage(req, res) {
-        const redirectUrl = req.query.redirect || '/';
-        ViewResolver.render(res, ViewPath.MAIN.USER.LOGIN, {
-            title: '로그인',
-            redirectUrl
-        });
+        ViewResolver.render(res, ViewPath.MAIN.USER.LOGIN);
     }
 
     /**
@@ -26,13 +23,24 @@ export default class UserController {
     async loginUser(req, res) {
         try {
             const { username, password } = req.body;
+            console.log('로그인 시도:', { username });
+
             const user = await this.userRepository.findUserByUsername(username);
+            console.log('사용자 조회 결과:', user ? {
+                id: user.id,
+                username: user.username,
+                role: user.role,
+                hasPassword: !!user.password
+            } : '사용자 없음');
 
             if (!user) {
                 throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
             }
 
+            console.log('비밀번호 비교 시작');
             const isPasswordValid = await bcrypt.compare(password, user.password);
+            console.log('비밀번호 비교 결과:', isPasswordValid);
+
             if (!isPasswordValid) {
                 throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
             }
@@ -45,11 +53,14 @@ export default class UserController {
                 role: user.role,
                 isAdmin: user.role === 'admin'
             };
+            console.log('세션에 저장할 사용자 정보:', sessionUser);
             await SessionUtil.saveUserToSession(req, sessionUser);
 
             const redirectUrl = req.body.redirectUrl || '/';
+            console.log('리다이렉트 URL:', redirectUrl);
             res.redirect(redirectUrl);
         } catch (error) {
+            console.error('로그인 처리 중 오류:', error);
             ViewResolver.render(res, ViewPath.MAIN.USER.LOGIN, {
                 title: '로그인',
                 error: error.message,
@@ -76,9 +87,7 @@ export default class UserController {
      * 회원가입 페이지를 렌더링합니다.
      */
     getUserRegistrationPage(req, res) {
-        ViewResolver.render(res, ViewPath.MAIN.USER.REGISTER, {
-            title: '회원가입'
-        });
+        ViewResolver.render(res, ViewPath.MAIN.USER.REGISTER);
     }
 
     /**
@@ -156,35 +165,15 @@ export default class UserController {
     /**
      * 프로필 페이지를 렌더링합니다.
      */
-    async getUserProfilePage(req, res) {
-        try {
-            const user = await this.userRepository.findUserById(req.session.user.id);
-            if (!user) {
-                throw new Error('사용자를 찾을 수 없습니다.');
-            }
-
-            ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE, {
-                title: '프로필',
-                user
-            });
-        } catch (error) {
-            ViewResolver.renderError(res, error);
-        }
+    getUserProfilePage(req, res) {
+        ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE);
     }
 
     /**
      * 프로필 수정 페이지를 렌더링합니다.
      */
-    async getUserProfileEditPage(req, res) {
-        try {
-            const user = await this.userRepository.findUserById(req.session.user.id);
-            ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE_EDIT, {
-                title: '프로필 수정',
-                profile: user
-            });
-        } catch (error) {
-            ViewResolver.renderError(res, error);
-        }
+    getUserProfileEditPage(req, res) {
+        ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE_EDIT);
     }
 
     /**
@@ -223,12 +212,10 @@ export default class UserController {
     }
 
     /**
-     * 비밀번호 찾기 페이지를 렌더링합니다.
+     * 비밀번호 재설정 페이지를 렌더링합니다.
      */
     getUserPasswordResetPage(req, res) {
-        ViewResolver.render(res, ViewPath.MAIN.USER.FORGOT_PASSWORD, {
-            title: '비밀번호 찾기'
-        });
+        ViewResolver.render(res, ViewPath.MAIN.USER.FORGOT_PASSWORD);
     }
 
     /**
