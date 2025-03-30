@@ -65,8 +65,8 @@ export default class UserRepository {
             name: userData.name,
             role: userData.role,
             status: 'ACTIVE',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         };
 
         // 역할별 추가 정보

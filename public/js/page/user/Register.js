@@ -54,14 +54,15 @@ document.addEventListener('DOMContentLoaded', () => {
     updateFields(); // 초기 상태 설정
 
     // 폼 유효성 검사
-    form.addEventListener('submit', function (e) {
-        const errorDiv = document.querySelector('.alert-danger-user');
-        errorDiv.textContent = '';
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault(); // 기본 제출 동작 방지
+
+        // 에러 메시지 초기화
+        showError(''); // 에러 메시지 숨김
 
         // 비밀번호 확인
         if (password.value !== confirmPassword.value) {
-            e.preventDefault();
-            errorDiv.textContent = '비밀번호가 일치하지 않습니다.';
+            showError('비밀번호가 일치하지 않습니다.');
             return;
         }
 
@@ -69,28 +70,63 @@ document.addEventListener('DOMContentLoaded', () => {
         if (roleSelect.value === 'SKKU_MEMBER') {
             const studentYear = document.getElementById('studentYear').value;
             if (!/^\d{2}$/.test(studentYear)) {
-                e.preventDefault();
-                errorDiv.textContent = '학번은 2자리 숫자여야 합니다.';
+                showError('학번은 2자리 숫자여야 합니다.');
                 return;
             }
         }
 
-        // 유효성 검사 통과 시 폼 제출 진행
-        // e.preventDefault() 호출하지 않음
+        try {
+            // 폼 데이터를 객체로 변환
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: password.value,
+                confirmPassword: confirmPassword.value,
+                name: document.getElementById('name').value,
+                role: roleSelect.value,
+                department: document.getElementById('department')?.value || '',
+                studentYear: document.getElementById('studentYear')?.value || '',
+                isClubMember: document.getElementById('isClubMember')?.checked || false,
+                affiliation: document.getElementById('affiliation')?.value || ''
+            };
+
+            const response = await fetch('/user/registration', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // 성공 시 로그인 페이지로 즉시 이동
+                window.location.href = '/user/login';
+            } else {
+                showError(data.message || '회원가입 중 오류가 발생했습니다.');
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            showError('서버 오류가 발생했습니다. 다시 시도해주세요.');
+        }
     });
 
     // 에러 메시지 표시
     const showError = (message) => {
-        const alertContainer = document.querySelector('.alert-danger-user') || (() => {
-            const alert = document.createElement('div');
-            alert.classList.add('alert-danger-user');
-            form.insertBefore(alert, form.firstChild);
-            return alert;
-        })();
+        const alertContainer = document.querySelector('.alert-danger-user');
+        if (!alertContainer) return; // 요소가 없으면 함수 종료
+
+        if (!message) {
+            alertContainer.style.display = 'none';
+            return;
+        }
 
         alertContainer.textContent = message;
         alertContainer.style.display = 'block';
 
+        // 3초 후 에러 메시지 숨김
         setTimeout(() => {
             alertContainer.style.display = 'none';
         }, 3000);

@@ -23,23 +23,18 @@ export default class UserController {
     async loginUser(req, res) {
         try {
             const { username, password } = req.body;
-            console.log('로그인 시도:', { username });
+
 
             const user = await this.userRepository.findUserByUsername(username);
-            console.log('사용자 조회 결과:', user ? {
-                id: user.id,
-                username: user.username,
-                role: user.role,
-                hasPassword: !!user.password
-            } : '사용자 없음');
+
 
             if (!user) {
                 throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
             }
 
-            console.log('비밀번호 비교 시작');
+
             const isPasswordValid = await bcrypt.compare(password, user.password);
-            console.log('비밀번호 비교 결과:', isPasswordValid);
+
 
             if (!isPasswordValid) {
                 throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
@@ -57,7 +52,6 @@ export default class UserController {
             await SessionUtil.saveUserToSession(req, sessionUser);
 
             const redirectUrl = req.body.redirectUrl || '/';
-            console.log('리다이렉트 URL:', redirectUrl);
             res.redirect(redirectUrl);
         } catch (error) {
             console.error('로그인 처리 중 오류:', error);
@@ -152,12 +146,15 @@ export default class UserController {
             };
             await SessionUtil.saveUserToSession(req, sessionUser);
 
-            res.redirect('/');
+            // JSON 응답으로 변경
+            res.json({
+                success: true,
+                message: '회원가입이 완료되었습니다. 로그인해주세요.'
+            });
         } catch (error) {
-            ViewResolver.render(res, ViewPath.MAIN.USER.REGISTER, {
-                title: '회원가입',
-                error: error.message,
-                formData: req.body
+            res.status(400).json({
+                success: false,
+                message: error.message
             });
         }
     }
@@ -190,7 +187,7 @@ export default class UserController {
         try {
             const userId = req.session.user.id;
             const {
-                name, email, department, studentYear,
+                name, department, studentYear,
                 isClubMember, affiliation,
                 currentPassword, newPassword
             } = req.body;
@@ -202,7 +199,6 @@ export default class UserController {
 
             const updateData = {
                 name,
-                email,
                 department,
                 studentYear,
                 isClubMember,
@@ -229,7 +225,6 @@ export default class UserController {
             req.session.user = {
                 ...req.session.user,
                 name,
-                email,
                 department,
                 studentYear,
                 isClubMember,
