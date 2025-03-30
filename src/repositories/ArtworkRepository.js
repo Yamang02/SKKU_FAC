@@ -1,167 +1,193 @@
-import artwork from '../config/data/artwork.js';
+import Artwork from '../models/artwork/Artwork.js';
 import { getRelatedArtworks } from '../config/data/relatedArtwork.js';
-import fs from 'fs';
+import artworkData from '../config/data/artwork.js';
+
 import path from 'path';
 
 export default class ArtworkRepository {
     constructor() {
-        this.artworks = artwork;
+        // TODO: DB 연동 시 아래 코드로 변경
+        /*
+        this.db = new Database(); // DB 연결 설정
+        */
+
+        // 현재는 임시 데이터 사용
+        this.artworks = artworkData.map(data => new Artwork({
+            ...data,
+            artistName: data.artist_name,
+            imagePath: data.image_path,
+            exhibitionId: data.exhibition_id,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at
+        }));
         this.getRelatedArtworks = getRelatedArtworks;
         this.artworkFilePath = path.join(process.cwd(), 'src', 'config', 'data', 'artwork.js');
     }
 
     /**
      * 모든 작품을 조회합니다.
+     * @returns {Promise<Array<Artwork>>} 작품 목록
      */
-    async findArtworks({ page = 1, limit = 12, search, exhibitionId } = {}) {
+    async findAll() {
+        // TODO: DB 연동 시 아래 쿼리로 변경
+        /*
+        const query = `
+            SELECT
+                a.*,
+                u.name as artist_name,
+                e.title as exhibition_title
+            FROM artworks a
+            LEFT JOIN users u ON a.artist_id = u.id
+            LEFT JOIN exhibitions e ON a.exhibition_id = e.id
+            ORDER BY a.created_at DESC
+        `;
+        const [rows] = await this.db.query(query);
+        return rows.map(row => new Artwork({
+            ...row,
+            artistName: row.artist_name,
+            imagePath: row.image_path,
+            exhibitionId: row.exhibition_id,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at
+        }));
+        */
+
+        return this.artworks;
+    }
+
+    /**
+     * 모든 작품을 반환합니다.
+     * @returns {Promise<Array<Artwork>>} 작품 목록
+     */
+    async findArtworks({ page = 1, limit = 10, sortField = 'createdAt', sortOrder = 'desc', searchType, keyword, artistId, exhibitionId } = {}) {
         let filteredArtworks = [...this.artworks];
 
-        if (search) {
-            filteredArtworks = filteredArtworks.filter(artwork =>
-                artwork.title.includes(search) ||
-                artwork.description.includes(search)
-            );
+        // 검색 조건 적용
+        if (searchType && keyword) {
+            filteredArtworks = filteredArtworks.filter(artwork => {
+                switch (searchType) {
+                    case 'title':
+                        return artwork.title.toLowerCase().includes(keyword.toLowerCase());
+                    case 'artist':
+                        return artwork.artistName.toLowerCase().includes(keyword.toLowerCase());
+                    case 'department':
+                        return artwork.department.toLowerCase().includes(keyword.toLowerCase());
+                    default:
+                        return true;
+                }
+            });
         }
 
+        // 작가 ID로 필터링
+        if (artistId) {
+            filteredArtworks = filteredArtworks.filter(artwork => artwork.artistId === artistId);
+        }
+
+        // 전시회 ID로 필터링
         if (exhibitionId) {
-            filteredArtworks = filteredArtworks.filter(artwork =>
-                artwork.exhibition_id === exhibitionId
-            );
+            filteredArtworks = filteredArtworks.filter(artwork => artwork.exhibitionId === exhibitionId);
         }
 
-        const start = (page - 1) * limit;
-        const end = start + limit;
-        const total = filteredArtworks.length;
+        // 정렬 적용
+        filteredArtworks.sort((a, b) => {
+            const aValue = a[sortField];
+            const bValue = b[sortField];
+            return sortOrder === 'asc' ?
+                (aValue > bValue ? 1 : -1) :
+                (aValue < bValue ? 1 : -1);
+        });
+
+        // 페이지네이션 적용
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedArtworks = filteredArtworks.slice(startIndex, endIndex);
 
         return {
-            items: filteredArtworks.slice(start, end),
-            total,
-            page: Number(page),
-            totalPages: Math.ceil(total / limit)
+            items: paginatedArtworks,
+            total: filteredArtworks.length,
+            page,
+            limit,
+            totalPages: Math.ceil(filteredArtworks.length / limit)
         };
     }
 
     /**
-     * ID로 작품을 조회합니다.
+     * ID로 작품을 찾습니다.
      * @param {string|number} id - 작품 ID
-     * @returns {Promise<Object|null>} 작품 정보
+     * @returns {Promise<Artwork|null>} 작품 정보
      */
     async findArtworkById(id) {
-        return this.artworks.find(artwork => artwork.id === Number(id));
+        const artwork = this.artworks.find(a => a.id === Number(id));
+        return artwork || null;
     }
 
     /**
-     * 전시회 ID로 작품을 조회합니다.
+     * 전시회 ID로 작품을 찾습니다.
+     * @param {string|number} exhibitionId - 전시회 ID
+     * @returns {Promise<Array<Artwork>>} 작품 목록
      */
-    async findArtworksByExhibitionId(exhibitionId, { page = 1, limit = 12 } = {}) {
-        const filteredArtworks = this.artworks.filter(artwork =>
-            artwork.exhibition_id === exhibitionId
-        );
+    async findArtworksByExhibitionId(exhibitionId, params = {}) {
+        const { page = 1, limit = 10 } = params;
+        const filteredArtworks = this.artworks.filter(a => a.exhibitionId === Number(exhibitionId));
 
-        const start = (page - 1) * limit;
-        const end = start + limit;
-        const total = filteredArtworks.length;
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedArtworks = filteredArtworks.slice(startIndex, endIndex);
 
         return {
-            items: filteredArtworks.slice(start, end),
-            total,
-            page: Number(page),
-            totalPages: Math.ceil(total / limit)
+            items: paginatedArtworks,
+            total: filteredArtworks.length
         };
     }
 
     /**
-     * 새로운 작품을 생성합니다.
+     * 작품을 생성합니다.
      * @param {Object} artworkData - 작품 데이터
-     * @returns {Promise<Object>} 생성된 작품 정보
+     * @returns {Promise<Artwork>} 생성된 작품
      */
     async createArtwork(artworkData) {
-        // 새로운 ID 생성
         const newId = this.artworks.length > 0
-            ? Math.max(...this.artworks.map(a => Number(a.id))) + 1
+            ? Math.max(...this.artworks.map(a => a.id)) + 1
             : 1;
 
-        // 새로운 작품 객체 생성
-        const newArtwork = {
+        const artwork = new Artwork({
+            ...artworkData,
             id: newId,
-            title: artworkData.title,
-            artist: artworkData.artist_name,
-            department: artworkData.department,
-            year: new Date().getFullYear().toString(),
-            medium: artworkData.medium || '',
-            size: artworkData.size || '',
-            description: artworkData.description || '',
-            image: artworkData.image_url || '/images/artwork-placeholder.jpg',
-            exhibition: artworkData.exhibition_title || '',
-            exhibitionId: artworkData.exhibition_id || null,
-            isFeatured: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-        };
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        });
 
-        // 메모리에 작품 추가
-        this.artworks.push(newArtwork);
-
-        // 파일에 작품 데이터 저장
-        const fileContent = `/**
- * 작품 데이터
- */
-const artwork = ${JSON.stringify(this.artworks, null, 4)};
-
-export default artwork;
-`;
-
-        try {
-            await fs.promises.writeFile(this.artworkFilePath, fileContent, 'utf8');
-        } catch (error) {
-            console.error('작품 데이터 파일 저장 중 오류:', error);
-            throw new Error('작품 데이터를 저장하는 중 오류가 발생했습니다.');
-        }
-
-        return newArtwork;
+        this.artworks.push(artwork);
+        return artwork;
     }
 
     /**
-     * 작품 정보를 수정합니다.
+     * 작품을 수정합니다.
      * @param {string|number} id - 작품 ID
-     * @param {Object} artworkData - 업데이트할 작품 데이터
-     * @returns {Promise<Object|null>} 업데이트된 작품 정보
+     * @param {Object} artworkData - 수정할 작품 데이터
+     * @returns {Promise<Artwork|null>} 수정된 작품
      */
     async updateArtwork(id, artworkData) {
-        const index = this.artworks.findIndex(artwork => artwork.id === id);
+        const index = this.artworks.findIndex(a => a.id === Number(id));
         if (index === -1) return null;
 
-        // 메모리 데이터 업데이트
-        this.artworks[index] = {
+        const updatedArtwork = new Artwork({
             ...this.artworks[index],
             ...artworkData,
-            updated_at: new Date().toISOString()
-        };
+            updatedAt: new Date().toISOString()
+        });
 
-        // 파일에 데이터 저장
-        const fileContent = `/**
- * 작품 데이터
- */
-const artwork = ${JSON.stringify(this.artworks, null, 4)};
-
-export default artwork;
-`;
-
-        try {
-            await fs.promises.writeFile(this.artworkFilePath, fileContent, 'utf8');
-        } catch (error) {
-            console.error('작품 데이터 파일 저장 중 오류:', error);
-            throw new Error('작품 데이터를 저장하는 중 오류가 발생했습니다.');
-        }
-
-        return this.artworks[index];
+        this.artworks[index] = updatedArtwork;
+        return updatedArtwork;
     }
 
     /**
      * 작품을 삭제합니다.
+     * @param {string|number} id - 작품 ID
+     * @returns {Promise<boolean>} 삭제 성공 여부
      */
     async deleteArtwork(id) {
-        const index = this.artworks.findIndex(artwork => artwork.id === Number(id));
+        const index = this.artworks.findIndex(a => a.id === Number(id));
         if (index === -1) return false;
 
         this.artworks.splice(index, 1);
@@ -169,61 +195,61 @@ export default artwork;
     }
 
     /**
-     * 추천 작품을 조회합니다.
+     * 모든 작가 목록을 반환합니다.
+     * @returns {Promise<Array<Object>>} 작가 목록
+     */
+    async findArtists() {
+        const uniqueArtists = [...new Set(this.artworks.map(a => a.artistName))];
+        return uniqueArtists.map(artistName => ({
+            id: artistName,
+            name: artistName
+        }));
+    }
+
+    /**
+     * 관련 작품을 찾습니다.
+     * @param {string|number} artworkId - 작품 ID
+     * @returns {Promise<Array<Artwork>>} 관련 작품 목록
      */
     async findRelatedArtworks(artworkId) {
-        const artwork = await this.findArtworkById(artworkId);
-        if (!artwork) return { items: [], total: 0 };
-
-        const relatedArtworks = this.artworks
-            .filter(a => a.id !== artworkId && a.exhibition_id === artwork.exhibition_id)
-            .slice(0, 4);
-
-        return {
-            items: relatedArtworks,
-            total: relatedArtworks.length
-        };
+        const relatedIds = this.getRelatedArtworks(artworkId);
+        return this.artworks.filter(a => relatedIds.includes(a.id));
     }
 
     /**
-     * 추천 작품을 조회합니다.
+     * 추천 작품을 찾습니다.
+     * @param {number} limit - 반환할 작품 수
+     * @returns {Promise<Array<Artwork>>} 추천 작품 목록
      */
     async findFeaturedArtworks(limit = 6) {
-        return this.artworks.filter(artwork => artwork.isFeatured).slice(0, limit);
+        // TODO: DB 연동 시 아래 쿼리로 변경
+        /*
+        const query = `
+            SELECT * FROM artworks
+            WHERE is_featured = true
+            ORDER BY created_at DESC
+            LIMIT ?
+        `;
+        const [rows] = await this.db.query(query, [limit]);
+        return rows.map(row => new Artwork(row));
+        */
+
+        // 현재는 메모리에서 필터링
+        return this.artworks
+            .filter(artwork => artwork.isFeatured)
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .slice(0, limit);
     }
 
     /**
-     * 모든 작가를 조회합니다.
+     * 작품 댓글을 찾습니다.
+     * @param {string|number} artworkId - 작품 ID
+     * @param {Object} params - 페이지네이션 파라미터
+     * @returns {Promise<Array<Object>>} 댓글 목록
      */
-    async findArtists({ page = 1, limit = 100 } = {}) {
-        // 작품 목록에서 중복 없는 작가 목록 추출
-        const artists = [...new Set(this.artworks.map(artwork => artwork.artist_name))]
-            .map(name => ({
-                id: name,
-                name: name
-            }));
-
-        const start = (page - 1) * limit;
-        const end = start + limit;
-        const total = artists.length;
-
-        return {
-            items: artists.slice(start, end),
-            total,
-            page: Number(page),
-            totalPages: Math.ceil(total / limit)
-        };
-    }
-
-    async findComments(artworkId, { page = 1, limit = 10 } = {}) {
-        // 임시로 빈 댓글 목록 반환
-        return {
-            items: [],
-            total: 0,
-            page: Number(page),
-            totalPages: 1,
-            limit: Number(limit)
-        };
+    async findComments(artworkId, { _page = 1, _limit = 10 } = {}) {
+        // TODO: 댓글 기능 구현
+        return [];
     }
 
     /**

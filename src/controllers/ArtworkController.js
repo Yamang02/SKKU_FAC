@@ -3,6 +3,7 @@ import ViewResolver from '../utils/ViewResolver.js';
 import FileUploadUtil from '../utils/FileUploadUtil.js';
 import ArtworkRepository from '../repositories/ArtworkRepository.js';
 import UserRepository from '../repositories/UserRepository.js';
+import ExhibitionRepository from '../repositories/ExhibitionRepository.js';
 import Artwork from '../models/artwork/Artwork.js';
 import Page from '../models/common/page/Page.js';
 import path from 'path';
@@ -15,6 +16,7 @@ export default class ArtworkController {
     constructor() {
         this.artworkRepository = new ArtworkRepository();
         this.userRepository = new UserRepository();
+        this.exhibitionRepository = new ExhibitionRepository();
     }
 
     /**
@@ -544,26 +546,61 @@ export default class ArtworkController {
 
     async getArtworkModalData(req, res) {
         try {
-            const artwork = await this.artworkRepository.findById(req.params.id);
+            const artwork = await this.artworkRepository.findArtworkById(req.params.id);
             if (!artwork) {
                 return res.status(404).json({ message: '작품을 찾을 수 없습니다.' });
             }
 
-            const artist = await this.userRepository.findById(artwork.artistId);
+            console.log('[API] 작품 정보:', artwork);
+            console.log('[API] 작가 ID:', artwork.artistId);
+
+            const artist = await this.userRepository.findUserById(artwork.artistId);
+            console.log('[API] 작가 정보:', artist);
+
             const exhibition = artwork.exhibitionId ?
-                await this.exhibitionRepository.findById(artwork.exhibitionId) : null;
+                await this.exhibitionRepository.findExhibitionById(artwork.exhibitionId) : null;
+            console.log('[API] 전시회 정보:', exhibition);
 
             const modalData = {
                 title: artwork.title,
-                imageUrl: artwork.imageUrl,
+                imageUrl: artwork.image,
                 artist: artist ? artist.name : null,
                 department: artwork.department,
-                exhibition: exhibition ? exhibition.name : null
+                exhibition: exhibition ? exhibition.title : null
             };
 
             res.json(modalData);
         } catch (error) {
             console.error('모달 데이터 조회 중 오류:', error);
+            res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+        }
+    }
+
+    async getArtworkCardData(req, res) {
+        try {
+            const artwork = await this.artworkRepository.findArtworkById(req.params.id);
+            if (!artwork) {
+                return res.status(404).json({ message: '작품을 찾을 수 없습니다.' });
+            }
+
+            const artist = await this.userRepository.findUserById(artwork.artistId);
+
+            const cardData = {
+                id: artwork.id,
+                title: artwork.title,
+                artist: {
+                    name: artist ? artist.name : null,
+                    department: artist.department + artist.studentYear ? artist.studentYear : ''
+                },
+                image: {
+                    path: artwork.image,
+                    alt: artwork.title
+                }
+            };
+
+            res.json(cardData);
+        } catch (error) {
+            console.error('카드 데이터 조회 중 오류:', error);
             res.status(500).json({ message: '서버 오류가 발생했습니다.' });
         }
     }

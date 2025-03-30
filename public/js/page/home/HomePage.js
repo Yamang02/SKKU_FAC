@@ -40,7 +40,7 @@ function initModal() {
             e.preventDefault();
 
             try {
-                const response = await fetch(`/home/api/artworkmodal/${artworkId}`);
+                const response = await fetch(`/api/artworkmodal/${artworkId}`);
                 if (!response.ok) throw new Error('작품 정보를 불러올 수 없습니다.');
 
                 const artwork = await response.json();

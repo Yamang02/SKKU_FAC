@@ -1,29 +1,75 @@
 /**
- * 작품 모델 클래스
+ * 작품 모델
  */
 export default class Artwork {
     constructor({
-        id = null,
+        id = 0,
         title,
-        description,
+        artistId,
+        artistName,
         department,
-        student_id,
-        artist,
-        image_path = null,
-        image = null,
-        created_at = new Date(),
-        updated_at = new Date()
+        year,
+        medium,
+        size,
+        description,
+        image,
+        imagePath,
+        exhibitionId,
+        exhibitionTitle,
+        isFeatured = false,
+        createdAt,
+        updatedAt
     }) {
         this.id = id;
         this.title = title;
-        this.description = description;
+        this.artistId = artistId;
+        this.artistName = artistName;
         this.department = department;
-        this.student_id = student_id;
-        this.artist = artist;
-        this.image_path = image_path;
+        this.year = year;
+        this.medium = medium;
+        this.size = size;
+        this.description = description;
         this.image = image;
-        this.created_at = created_at;
-        this.updated_at = updated_at;
+        this.imagePath = imagePath;
+        this.exhibitionId = exhibitionId;
+        this.exhibitionTitle = exhibitionTitle;
+        this.isFeatured = isFeatured;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    /**
+     * 작품 데이터를 JSON 형태로 변환합니다.
+     * @returns {Object} JSON 형태의 작품 데이터
+     */
+    toJSON() {
+        return {
+            id: this.id,
+            title: this.title,
+            artistId: this.artistId,
+            artistName: this.artistName,
+            department: this.department,
+            year: this.year,
+            medium: this.medium,
+            size: this.size,
+            description: this.description,
+            image: this.image,
+            imagePath: this.imagePath,
+            exhibitionId: this.exhibitionId,
+            exhibitionTitle: this.exhibitionTitle,
+            isFeatured: this.isFeatured,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt
+        };
+    }
+
+    /**
+     * 작품 데이터를 업데이트합니다.
+     * @param {Object} data - 업데이트할 데이터
+     */
+    update(data) {
+        Object.assign(this, data);
+        this.updatedAt = new Date();
     }
 
     /**
@@ -35,33 +81,5 @@ export default class Artwork {
             throw new Error('작품 제목을 입력해주세요.');
         }
         return true;
-    }
-
-    /**
-     * 작품 데이터를 객체로 변환
-     * @returns {Object} 작품 데이터 객체
-     */
-    toJSON() {
-        return {
-            id: this.id,
-            title: this.title,
-            description: this.description,
-            department: this.department,
-            student_id: this.student_id,
-            artist: this.artist,
-            image_path: this.image_path,
-            image: this.image,
-            created_at: this.created_at,
-            updated_at: this.updated_at
-        };
-    }
-
-    /**
-     * 작품 데이터를 업데이트
-     * @param {Object} data - 업데이트할 데이터
-     */
-    update(data) {
-        Object.assign(this, data);
-        this.updated_at = new Date();
     }
 }

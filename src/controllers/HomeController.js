@@ -7,10 +7,6 @@ export default class HomeController {
     constructor() {
         this.noticeRepository = new NoticeRepository();
         this.artworkRepository = new ArtworkRepository();
-
-        // 메서드 바인딩
-        this.getHomePage = this.getHomePage.bind(this);
-        this.getAboutPage = this.getAboutPage.bind(this);
     }
 
     /**
