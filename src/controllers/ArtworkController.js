@@ -148,18 +148,46 @@ export default class ArtworkController {
     async createArtwork(req, res) {
         let uploadedImage = null;
         try {
+            console.log('[ArtworkController] 작품 등록 요청 시작');
+            console.log('[ArtworkController] 세션 정보:', req.session);
+
+            // 세션 유효성 검사
             if (!req.session.user) {
+                console.log('[ArtworkController] 세션 없음 - 로그인 필요');
                 return res.status(401).json({
                     success: false,
-                    message: '로그인이 필요합니다.'
+                    message: '로그인이 필요합니다.',
+                    redirectUrl: '/user/login'
+                });
+            }
+
+            // 세션에서 사용자 정보 가져오기
+            const user = await this.userRepository.findUserById(req.session.user.id);
+            if (!user) {
+                console.log('[ArtworkController] 사용자 정보 없음');
+                return res.status(401).json({
+                    success: false,
+                    message: '사용자 정보를 찾을 수 없습니다.',
+                    redirectUrl: '/user/login'
                 });
             }
 
             const { title, description, exhibitionId, medium, size, department } = req.body;
             uploadedImage = req.file;
 
+            console.log('[ArtworkController] 요청 데이터:', {
+                title,
+                description,
+                exhibitionId,
+                medium,
+                size,
+                department,
+                userId: user.id
+            });
+
             // 1. 필수 필드 검증
             if (!title) {
+                console.log('[ArtworkController] 제목 누락');
                 return res.status(400).json({
                     success: false,
                     message: '작품 제목을 입력해주세요.'
@@ -167,6 +195,7 @@ export default class ArtworkController {
             }
 
             if (!uploadedImage) {
+                console.log('[ArtworkController] 이미지 누락');
                 return res.status(400).json({
                     success: false,
                     message: '작품 이미지를 업로드해주세요.'
@@ -178,11 +207,14 @@ export default class ArtworkController {
                 ? Math.max(...this.artworkRepository.artworks.map(a => Number(a.id))) + 1
                 : 1;
 
+            console.log('[ArtworkController] 생성된 작품 ID:', newId);
+
             // 2. 이미지 저장
             let filePath = null;
             let imageUrl = null;
 
             try {
+                console.log('[ArtworkController] 이미지 저장 시작');
                 const result = await FileUploadUtil.saveImage({
                     file: uploadedImage,
                     artwork_id: 'temp',  // 임시 ID 사용
@@ -192,30 +224,47 @@ export default class ArtworkController {
                 });
                 filePath = result.filePath;
                 imageUrl = result.imageUrl;
+                console.log('[ArtworkController] 이미지 저장 완료:', { filePath, imageUrl });
             } catch (error) {
-                // 이미지 저장 중 발생한 에러 처리
+                console.error('[ArtworkController] 이미지 저장 실패:', error);
                 return res.status(400).json({
                     success: false,
                     message: error.message
                 });
             }
 
-            // 3. Artwork 모델 인스턴스 생성 (임시 URL 포함)
+            // 3. Artwork 모델 인스턴스 생성
+            const now = new Date().toISOString();
+
+            // exhibitionId 처리 - 값이 있을 때만 숫자로 변환
+            const parsedExhibitionId = exhibitionId ? Number(exhibitionId) : null;
+            console.log('[ArtworkController] 전시회 ID 처리:', {
+                원본: exhibitionId,
+                변환: parsedExhibitionId,
+                타입: typeof parsedExhibitionId
+            });
+
             const artwork = new Artwork({
                 id: newId,
                 title,
                 description: description || '',
                 department: department || '',
-                artist: req.session.user.name || '',
-                image: imageUrl,  // image_url 대신 image 사용
-                image_path: filePath,
-                exhibition_id: exhibitionId || null,
+                artistId: req.session.user.id || 0,
+                image: imageUrl,
+                imagePath: filePath,
+                exhibitionId: parsedExhibitionId,
                 medium: medium || '',
-                size: size || ''
+                size: size || '',
+                createdAt: now,
+                updatedAt: now
             });
 
-            // 4. 작품 저장 (임시 URL 포함)
+            console.log('[ArtworkController] 작품 모델 생성:', artwork.toJSON());
+
+            // 4. 작품 저장
+            console.log('[ArtworkController] 레포지토리에 작품 저장 시작');
             const savedArtwork = await this.artworkRepository.createArtwork(artwork.toJSON());
+            console.log('[ArtworkController] 레포지토리에 작품 저장 완료:', savedArtwork);
 
             // 5. 이미지 파일명 업데이트
             if (filePath && imageUrl) {
@@ -230,7 +279,7 @@ export default class ArtworkController {
 
                     // 6. 작품 정보 업데이트 (최종 URL 포함)
                     artwork.update({
-                        image_path: newFilePath,
+                        imagePath: newFilePath,
                         image: newImageUrl  // image_url 대신 image 사용
                     });
                     await this.artworkRepository.updateArtwork(savedArtwork.id, artwork.toJSON());
@@ -251,7 +300,7 @@ export default class ArtworkController {
                     title: savedArtwork.title,
                     artist: savedArtwork.artist,
                     department: savedArtwork.department,
-                    image: artwork.image,  // image_url 대신 image 사용
+                    image: artwork.image,
                     description: savedArtwork.description,
                     medium: savedArtwork.medium,
                     size: savedArtwork.size,
@@ -260,7 +309,7 @@ export default class ArtworkController {
                 }
             });
         } catch (error) {
-            console.error('작품 등록 중 오류:', error);
+            console.error('[ArtworkController] 작품 등록 중 오류:', error);
 
             // 임시 파일이 있다면 삭제
             if (uploadedImage && uploadedImage.path) {

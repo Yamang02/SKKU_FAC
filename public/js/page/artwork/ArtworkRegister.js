@@ -87,9 +87,10 @@ function initSubmitButton() {
         // 에러 메시지 초기화
         clearErrors();
 
-        // 필수 필드 검증
+        // 입력값 가져오기
         const title = document.getElementById('title').value.trim();
         const image = document.getElementById('imageInput').files[0];
+        const department = document.getElementById('department-input').value.trim();
 
         let isValid = true;
         let errorMessage = '';
@@ -123,10 +124,22 @@ function initSubmitButton() {
             formData.append('description', document.getElementById('description').value.trim());
             formData.append('medium', document.getElementById('medium').value.trim());
             formData.append('size', document.getElementById('size').value.trim());
+            formData.append('department', department);
 
             const exhibitionSelect = document.getElementById('exhibition');
             if (exhibitionSelect && exhibitionSelect.value) {
                 formData.append('exhibitionId', exhibitionSelect.value);
+                console.log('전시회 ID 추가:', exhibitionSelect.value, typeof exhibitionSelect.value);
+            }
+
+            // 디버깅: FormData 내용 확인
+            console.log('FormData 값:');
+            for (let [key, value] of formData.entries()) {
+                if (key !== 'image') {
+                    console.log(`${key}: ${value}`);
+                } else {
+                    console.log(`${key}: [File 객체]`);
+                }
             }
 
             const response = await fetch('/artwork/registration', {
@@ -134,34 +147,21 @@ function initSubmitButton() {
                 body: formData
             });
 
-            let result;
-            try {
-                // Content-Type 확인
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    result = await response.json();
-                } else {
-                    // JSON이 아닌 경우 텍스트로 처리
-                    const text = await response.text();
-                    result = {
-                        success: false,
-                        message: text
-                    };
-                }
-            } catch (error) {
-                console.error('응답 처리 중 오류:', error);
-                throw new Error('서버 응답을 처리할 수 없습니다.');
-            }
+            const result = await response.json();
 
-            if (!response.ok || !result.success) {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    // 세션 만료 또는 인증 오류
+                    window.location.href = result.redirectUrl || '/user/login';
+                    return;
+                }
                 throw new Error(result.message || '작품 등록에 실패했습니다.');
             }
 
             // 성공 시 작품 상세 페이지로 이동
-            alert('작품이 성공적으로 등록되었습니다.');
             window.location.href = `/artwork/${result.artwork.id}`;
         } catch (error) {
-            console.error('작품 등록 중 오류:', error);
+            console.error('Error:', error);
             showError('formError', error.message);
 
             // 제출 버튼 활성화

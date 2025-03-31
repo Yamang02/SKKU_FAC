@@ -40,11 +40,12 @@
                         <% if (user?.role==='ADMIN' || user?.role==='SKKU_MEMBER' ) { %>
                             <%= user?.department %>
                                 <%= user?.studentYear %>
-                                    <input type="hidden" name="department"
+                                    <input type="hidden" id="department-input" name="department"
                                         value="<%= user?.department %> <%= user?.studentYear %>">
                                     <% } else { %>
                                         <%= user?.affiliation %>
-                                            <input type="hidden" name="department" value="<%= user?.affiliation %>">
+                                            <input type="hidden" id="department-input" name="department"
+                                                value="<%= user?.affiliation %>">
                                             <% } %>
                     </p>
                 </div>

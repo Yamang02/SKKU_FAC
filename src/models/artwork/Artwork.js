@@ -4,21 +4,22 @@
 export default class Artwork {
     constructor({
         id = 0,
-        title,
-        artistId,
-        artistName,
-        department,
-        year,
-        medium,
-        size,
-        description,
-        image,
-        imagePath,
-        exhibitionId,
-        exhibitionTitle,
+        title = '',
+        artistId = 0,
+        department = '',
+        year = '',
+        medium = '',
+        size = '',
+        description = '',
+        image = '',
+        imagePath = '',
+        exhibitionId = 0,
         isFeatured = false,
-        createdAt,
-        updatedAt
+        createdAt = '',
+        updatedAt = '',
+        // DTO시 분리될 정보
+        exhibitionTitle = '',
+        artistName = ''
     }) {
         this.id = id;
         this.title = title;

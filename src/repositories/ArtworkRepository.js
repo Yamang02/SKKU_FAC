@@ -1,8 +1,8 @@
 import Artwork from '../models/artwork/Artwork.js';
 import { getRelatedArtworks } from '../config/data/relatedArtwork.js';
 import artworkData from '../config/data/artwork.js';
-
 import path from 'path';
+import fs from 'fs/promises';
 
 export default class ArtworkRepository {
     constructor() {
@@ -66,14 +66,14 @@ export default class ArtworkRepository {
         if (searchType && keyword) {
             filteredArtworks = filteredArtworks.filter(artwork => {
                 switch (searchType) {
-                    case 'title':
-                        return artwork.title.toLowerCase().includes(keyword.toLowerCase());
-                    case 'artist':
-                        return artwork.artistName.toLowerCase().includes(keyword.toLowerCase());
-                    case 'department':
-                        return artwork.department.toLowerCase().includes(keyword.toLowerCase());
-                    default:
-                        return true;
+                case 'title':
+                    return artwork.title.toLowerCase().includes(keyword.toLowerCase());
+                case 'artist':
+                    return artwork.artistName.toLowerCase().includes(keyword.toLowerCase());
+                case 'department':
+                    return artwork.department.toLowerCase().includes(keyword.toLowerCase());
+                default:
+                    return true;
                 }
             });
         }
@@ -141,24 +141,70 @@ export default class ArtworkRepository {
     }
 
     /**
+     * 작품 데이터를 파일에 저장합니다.
+     * @private
+     */
+    async _saveToFile() {
+        const artworkContent = `/**
+ * 작품 데이터
+ */
+const artwork = ${JSON.stringify(this.artworks.map(artwork => ({
+        id: artwork.id,
+        title: artwork.title,
+        artistId: artwork.artistId,
+        exhibitionId: artwork.exhibitionId,
+        department: artwork.department || '',
+        medium: artwork.medium || '',
+        size: artwork.size || '',
+        description: artwork.description || '',
+        image: artwork.image,
+        isFeatured: artwork.isFeatured || false,
+        createdAt: artwork.createdAt,
+        updatedAt: artwork.updatedAt
+    })), null, 2)};
+
+export default artwork;
+`;
+        await fs.writeFile(this.artworkFilePath, artworkContent, 'utf8');
+    }
+
+    /**
      * 작품을 생성합니다.
      * @param {Object} artworkData - 작품 데이터
      * @returns {Promise<Artwork>} 생성된 작품
      */
     async createArtwork(artworkData) {
-        const newId = this.artworks.length > 0
-            ? Math.max(...this.artworks.map(a => a.id)) + 1
-            : 1;
+        console.log('[ArtworkRepository] 작품 저장 시작:', artworkData);
+        try {
+            // 작품 데이터 검증
+            if (!artworkData || !artworkData.id) {
+                console.error('[ArtworkRepository] 유효하지 않은 작품 데이터');
+                throw new Error('유효하지 않은 작품 데이터입니다.');
+            }
 
-        const artwork = new Artwork({
-            ...artworkData,
-            id: newId,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        });
+            // exhibitionId 처리 - 작품 데이터에 exhibitionId가 있는 경우 숫자로 변환
+            if (artworkData.exhibitionId !== undefined && artworkData.exhibitionId !== null) {
+                artworkData.exhibitionId = Number(artworkData.exhibitionId);
+                console.log('[ArtworkRepository] exhibitionId 변환:', artworkData.exhibitionId);
+            }
 
-        this.artworks.push(artwork);
-        return artwork;
+            // 중복 ID 체크
+            if (this.artworks.some(a => a.id === artworkData.id)) {
+                console.error('[ArtworkRepository] 중복된 작품 ID:', artworkData.id);
+                throw new Error('이미 존재하는 작품 ID입니다.');
+            }
+
+            // 작품 추가
+            this.artworks.push(artworkData);
+            console.log('[ArtworkRepository] 작품 저장 완료:', artworkData);
+
+            // 파일에 저장
+            await this._saveToFile();
+            return artworkData;
+        } catch (error) {
+            console.error('[ArtworkRepository] 작품 저장 중 오류:', error);
+            throw error;
+        }
     }
 
     /**
@@ -178,6 +224,7 @@ export default class ArtworkRepository {
         });
 
         this.artworks[index] = updatedArtwork;
+        await this._saveToFile();
         return updatedArtwork;
     }
 
@@ -191,6 +238,7 @@ export default class ArtworkRepository {
         if (index === -1) return false;
 
         this.artworks.splice(index, 1);
+        await this._saveToFile();
         return true;
     }
 

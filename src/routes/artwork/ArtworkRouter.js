@@ -8,7 +8,7 @@ const artworkController = new ArtworkController();
 
 // 작품 등록 라우트
 ArtworkRouter.get('/registration', (req, res) => artworkController.getArtworkRegisterPage(req, res));
-ArtworkRouter.post('/registration', uploadMiddleware.single('image'), (req, res) => artworkController.createArtwork(req, res));
+ArtworkRouter.post('/registration', uploadMiddleware, (req, res) => artworkController.createArtwork(req, res));
 
 // API 엔드포인트
 ArtworkRouter.get('/api/:id([0-9]+)', async (req, res) => {

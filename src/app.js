@@ -50,7 +50,14 @@ app.use('/images', express.static(path.join(__dirname, '../public/images')));
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24시간
+    },
+    name: 'sessionId',
+    rolling: true
 }));
 
 // Flash 메시지 미들웨어 등록
