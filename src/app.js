@@ -36,7 +36,7 @@ if (process.env.NODE_ENV === 'production' || process.env.ENABLE_AUTH === 'true')
     app.use(basicAuth({
         users: { [ADMIN_USER]: ADMIN_PASSWORD },
         challenge: true,
-        realm: 'SKKU Gallery Development Preview',
+        realm: 'SKKU Gallery Development Preview'
     }));
 }
 

@@ -1,13 +1,16 @@
 import SessionUtil from '../utils/SessionUtil.js';
 import UserRepository from '../repositories/UserRepository.js';
+import ArtworkRepository from '../repositories/ArtworkRepository.js';
 import ViewResolver from '../utils/ViewResolver.js';
 import { ViewPath } from '../constants/ViewPath.js';
 import bcrypt from 'bcrypt';
+import Page from '../models/common/page/Page.js';
 
 
 export default class UserController {
     constructor() {
         this.userRepository = new UserRepository();
+        this.artworkRepository = new ArtworkRepository();
     }
 
     /**
@@ -292,19 +295,17 @@ export default class UserController {
                 ...filters
             });
 
+            const pageData = new Page(users.total, {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                baseUrl: '/admin/management/user',
+                filters
+            });
+
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.LIST, {
                 title: '회원 관리',
                 users: users.items || [],
-                result: {
-                    total: users.total,
-                    totalPages: Math.ceil(users.total / limit)
-                },
-                page: {
-                    currentPage: parseInt(page),
-                    totalPages: Math.ceil(users.total / limit),
-                    hasPreviousPage: parseInt(page) > 1,
-                    hasNextPage: parseInt(page) < Math.ceil(users.total / limit)
-                },
+                page: pageData,
                 filters
             });
         } catch (error) {

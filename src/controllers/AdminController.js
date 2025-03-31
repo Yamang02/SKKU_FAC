@@ -4,6 +4,8 @@ import UserRepository from '../repositories/UserRepository.js';
 import ExhibitionRepository from '../repositories/ExhibitionRepository.js';
 import ArtworkRepository from '../repositories/ArtworkRepository.js';
 import TimeFormatter from '../utils/TimeFormatter.js';
+import ArtworkListDTO from '../models/artwork/dto/ArtworkListDTO.js';
+import Page from '../models/common/page/Page.js';
 
 export default class AdminController {
     constructor() {
@@ -20,8 +22,14 @@ export default class AdminController {
             const [users, exhibitions, artworks] = await Promise.all([
                 this.userRepository.findUsers(),
                 this.exhibitionRepository.findExhibitions(),
-                this.artworkRepository.findArtworks()
+                this.artworkRepository.findArtworks({ limit: 10 }) // 최근 10개 작품만 조회
             ]);
+
+            const pageData = new Page(users.total, {
+                page: 1,
+                limit: 10,
+                baseUrl: '/admin/dashboard'
+            });
 
             // 활동 타입별 아이콘 매핑
             const activityIcons = {
@@ -48,10 +56,19 @@ export default class AdminController {
                 { title: '전시회 등록 가이드', date: '2024-03-24', isImportant: false }
             ];
 
+            // ArtworkListDTO를 사용하여 작품 데이터 변환
+            const artworkListDTO = new ArtworkListDTO(
+                artworks.items,
+                artworks.total,
+                1,
+                artworks.items.length
+            );
+
             ViewResolver.render(res, ViewPath.ADMIN.DASHBOARD, {
                 title: '관리자 대시보드',
                 breadcrumb: '대시보드',
                 currentPage: 'dashboard',
+                page: pageData,
                 stats: {
                     totalUsers: users.total || 0,
                     activeExhibitions: exhibitions.items.filter(e => new Date(e.end_date) >= new Date()).length,
@@ -63,6 +80,7 @@ export default class AdminController {
                         artworkDistribution: [30, 25, 20, 15, 10]
                     }
                 },
+                recentArtworks: artworkListDTO.toJSON(),
                 recentActivities,
                 recentNotices
             });

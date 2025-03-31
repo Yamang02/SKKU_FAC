@@ -1,14 +1,12 @@
 import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
 import NoticeRepository from '../repositories/NoticeRepository.js';
-import ArtworkRepository from '../repositories/ArtworkRepository.js';
-import UserRepository from '../repositories/UserRepository.js';
+import ArtworkService from '../services/artwork/ArtworkService.js';
 
 export default class HomeController {
     constructor() {
         this.noticeRepository = new NoticeRepository();
-        this.artworkRepository = new ArtworkRepository();
-        this.userRepository = new UserRepository();
+        this.artworkService = new ArtworkService();
     }
 
     /**
@@ -21,10 +19,20 @@ export default class HomeController {
             // 최근 공지사항을 가져옵니다
             const notices = await this.noticeRepository.findNotices({ page: 1, limit: 5 });
 
+            // 추천 작품 목록을 가져옵니다
+            const artworks = await this.artworkService.getArtworkList({
+                page: 1,
+                limit: 6,
+                sortField: 'createdAt',
+                sortOrder: 'desc',
+                isFeatured: true
+            });
+
             ViewResolver.render(res, ViewPath.MAIN.HOME, {
                 title: '성미회 홈',
                 currentPage: req.path,
-                recentNotices: notices.items
+                recentNotices: notices.items,
+                featuredArtworks: artworks.items
             });
         } catch (error) {
             console.error('홈 페이지 데이터 조회 중 오류:', error);
