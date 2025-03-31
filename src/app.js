@@ -22,6 +22,11 @@ const __dirname = path.dirname(__filename);
 // 업로드 디렉토리 생성
 createUploadDirs();
 
+// 헬스체크 엔드포인트 추가 (인증 이전에 설정)
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
 // 환경 변수에서 인증 정보 가져오기
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'skku2024';
