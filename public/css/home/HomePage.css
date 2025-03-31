@@ -29,7 +29,7 @@
 
 /* 추천 작품 섹션 */
 .idx-featured-section {
-    padding: 40px 0 80px;
+    padding: 40px 0 40px;
 }
 
 .idx-content {
@@ -158,7 +158,7 @@
 
 /* 공지사항 섹션 */
 .idx-notice-section {
-    padding: 4rem 0;
+    padding: 2rem 0;
     background-color: var(--color-background);
 }
 

@@ -572,80 +572,110 @@ export default class ArtworkController {
      */
     async getArtworkById(id) {
         const artwork = await this.artworkRepository.findArtworkById(id);
-        if (!artwork) {
-            throw new Error('작품을 찾을 수 없습니다.');
-        }
-
-        // 클라이언트에 필요한 데이터만 반환
-        return {
-            id: artwork.id,
-            title: artwork.title,
-            artist: artwork.artist,
-            department: artwork.department,
-            exhibition: artwork.exhibition ? artwork.exhibition.title : null,
-            imageUrl: artwork.image || '/images/artwork-placeholder.jpg',
-            description: artwork.description
-        };
+        return artwork;
     }
 
-    async getArtworkModalData(req, res) {
+    async getArtworkData(req, res) {
         try {
-            const artwork = await this.artworkRepository.findArtworkById(req.params.id);
+            const { id } = req.params;
+            const { type = 'default' } = req.query;
+
+            // 작품 정보 조회
+            const artwork = await this.artworkRepository.findArtworkById(id);
             if (!artwork) {
                 return res.status(404).json({ message: '작품을 찾을 수 없습니다.' });
             }
 
-            console.log('[API] 작품 정보:', artwork);
-            console.log('[API] 작가 ID:', artwork.artistId);
+            // 작가 정보 조회
+            const artist = artwork.artistId ?
+                await this.userRepository.findUserById(artwork.artistId) : null;
 
-            const artist = await this.userRepository.findUserById(artwork.artistId);
-            console.log('[API] 작가 정보:', artist);
+            // 전시회 정보 조회 (필요한 경우에만)
+            let exhibition = null;
+            if (type === 'modal' && artwork.exhibitionId) {
+                exhibition = await this.exhibitionRepository.findExhibitionById(artwork.exhibitionId);
+            }
 
-            const exhibition = artwork.exhibitionId ?
-                await this.exhibitionRepository.findExhibitionById(artwork.exhibitionId) : null;
-            console.log('[API] 전시회 정보:', exhibition);
+            // 데이터 타입에 따라 응답 형식 변경
+            let responseData = {};
 
-            const modalData = {
-                title: artwork.title,
-                imageUrl: artwork.image,
-                artist: artist ? artist.name : null,
-                department: artwork.department,
-                exhibition: exhibition ? exhibition.title : null
-            };
+            switch (type) {
+                case 'modal':
+                    responseData = {
+                        title: artwork.title,
+                        imageUrl: artwork.image,
+                        artist: artist ? artist.name : null,
+                        department: artwork.department,
+                        exhibition: exhibition ? exhibition.title : null
+                    };
+                    break;
 
-            res.json(modalData);
+                case 'card':
+                    responseData = {
+                        id: artwork.id,
+                        title: artwork.title,
+                        artist: {
+                            name: artist ? artist.name : null,
+                            department: artwork.department
+                        },
+                        image: {
+                            path: artwork.image,
+                            alt: artwork.title
+                        }
+                    };
+                    break;
+
+                default:
+                    // 기본 응답 (모든 정보 포함)
+                    responseData = {
+                        id: artwork.id,
+                        title: artwork.title,
+                        description: artwork.description,
+                        image: artwork.image,
+                        artist: artist ? {
+                            id: artist.id,
+                            name: artist.name,
+                            department: artist.department
+                        } : null,
+                        department: artwork.department,
+                        exhibition: exhibition ? {
+                            id: exhibition.id,
+                            title: exhibition.title
+                        } : null,
+                        medium: artwork.medium,
+                        size: artwork.size,
+                        year: artwork.year
+                    };
+            }
+
+            res.json(responseData);
         } catch (error) {
-            console.error('모달 데이터 조회 중 오류:', error);
+            console.error('작품 데이터 조회 중 오류:', error);
             res.status(500).json({ message: '서버 오류가 발생했습니다.' });
         }
     }
 
-    async getArtworkCardData(req, res) {
+    /**
+     * 주요 작품 목록을 반환합니다.
+     * @param {Request} req - Express Request 객체
+     * @param {Response} res - Express Response 객체
+     * @returns {Promise<Array>} 주요 작품 목록
+     */
+    async getFeaturedArtworks(_req, _res) {
         try {
-            const artwork = await this.artworkRepository.findArtworkById(req.params.id);
-            if (!artwork) {
-                return res.status(404).json({ message: '작품을 찾을 수 없습니다.' });
-            }
+            // 주요 작품 조회 (최대 6개)
+            const featuredArtworks = await this.artworkRepository.findFeaturedArtworks(6);
 
-            const artist = await this.userRepository.findUserById(artwork.artistId);
-
-            const cardData = {
+            // 기본 정보만 포함된 배열로 변환
+            const simplifiedArtworks = featuredArtworks.map(artwork => ({
                 id: artwork.id,
-                title: artwork.title,
-                artist: {
-                    name: artist ? artist.name : null,
-                    department: artist.department + artist.studentYear ? artist.studentYear : ''
-                },
-                image: {
-                    path: artwork.image,
-                    alt: artwork.title
-                }
-            };
+                title: artwork.title
+            }));
 
-            res.json(cardData);
+            return simplifiedArtworks;
         } catch (error) {
-            console.error('카드 데이터 조회 중 오류:', error);
-            res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+            console.error('주요 작품 목록 조회 중 오류:', error);
+            throw error;
         }
     }
 }

@@ -84,3 +84,35 @@ export async function fetchExhibitions() {
         throw error;
     }
 }
+
+/**
+ * 작품 데이터 가져오기 (통합 API)
+ * @param {string} artworkId - 작품 ID
+ * @param {string} type - 데이터 타입 ('modal', 'card', 'default')
+ * @returns {Promise<Object>} 작품 데이터
+ */
+export async function fetchArtworkData(artworkId, type = 'default') {
+    try {
+        showLoading(true);
+
+        // URL 파라미터 생성
+        const queryParams = new URLSearchParams();
+        queryParams.append('type', type);
+
+        // API 요청
+        const response = await fetch(`/artwork/api/data/${artworkId}?${queryParams.toString()}`);
+
+        if (!response.ok) {
+            throw new Error(`API 오류: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(`작품 데이터(ID: ${artworkId}, 타입: ${type})를 가져오는 중 오류 발생:`, error);
+        showErrorMessage('작품 정보를 불러오는데 실패했습니다.');
+        throw error;
+    } finally {
+        showLoading(false);
+    }
+}

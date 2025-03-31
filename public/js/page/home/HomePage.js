@@ -3,50 +3,206 @@
  *
  * 이 파일은 메인 페이지의 모든 인터랙션을 관리합니다.
  * - 작품 모달 기능
+ * - 주요 작품 데이터 로딩 및 표시
  */
 
 // 모듈 스코프에서 실행
 document.addEventListener('DOMContentLoaded', () => {
+    // 작품 카드 로드
+    loadFeaturedArtworks();
+
     // 모달 초기화
     initModal();
 });
 
 /**
- * 모달 초기화
+ * 주요 작품 데이터를 불러와 카드를 생성합니다.
  */
-function initModal() {
-    // 카드 요소 선택
-    const cards = document.querySelectorAll('.card.card--home');
+async function loadFeaturedArtworks() {
+    try {
+        const container = document.getElementById('featured-artworks-container');
+        if (!container) return;
 
-    if (cards.length === 0) {
-        return;
+        // 로딩 표시
+        container.innerHTML = '<div class="loading-spinner">작품을 불러오는 중입니다...</div>';
+
+        // API 요청 - /api/featured-artworks 엔드포인트 호출
+        const response = await fetch('/artwork/api/featured-artworks');
+
+        if (!response.ok) {
+            throw new Error('작품 데이터를 불러올 수 없습니다.');
+        }
+
+        const data = await response.json();
+
+        // 불러온 데이터로 작품 카드 생성
+        if (data && Array.isArray(data)) {
+            // 컨테이너 비우기
+            container.innerHTML = '';
+
+            // 각 작품에 대한 카드 생성
+            for (const artwork of data) {
+                // 카드 생성
+                const card = await createArtworkCard(artwork);
+
+                // 컨테이너에 카드 추가
+                container.appendChild(card);
+            }
+
+            // 카드가 없는 경우
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-artwork-container">
+                        <div class="empty-artwork-message">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM3 2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v8l-2.083-2.083a.5.5 0 0 0-.76.063L8 11 5.835 9.7a.5.5 0 0 0-.611.076L3 12V2z"/>
+                            </svg>
+                            <h3>주요 작품이 없습니다</h3>
+                            <p>곧 새로운 작품이 전시될 예정입니다.</p>
+                        </div>
+                    </div>
+                `;
+
+                // 스타일 추가
+                const style = document.createElement('style');
+                style.textContent = `
+                    .empty-artwork-container {
+                        width: 100%;
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                        gap: 24px;
+                    }
+                    .empty-artwork-message {
+                        background-color: #f8f9fa;
+                        border-radius: 8px;
+                        padding: 48px 20px;
+                        text-align: center;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 380px;
+                        border: 1px solid #e9ecef;
+                        grid-column: 1 / -1;
+                    }
+                    .empty-artwork-message svg {
+                        margin-bottom: 16px;
+                        color: #adb5bd;
+                    }
+                    .empty-artwork-message h3 {
+                        font-size: 1.25rem;
+                        margin-bottom: 8px;
+                        color: #495057;
+                    }
+                    .empty-artwork-message p {
+                        color: #6c757d;
+                        font-size: 0.9rem;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    } catch (error) {
+        console.error('작품 데이터 로딩 중 오류:', error);
+        const container = document.getElementById('featured-artworks-container');
+        if (container) {
+            container.innerHTML = `
+                <div class="empty-artwork-container">
+                    <div class="error-message">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"/>
+                            <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995z"/>
+                        </svg>
+                        <h3>작품 로딩 실패</h3>
+                        <p>작품 정보를 불러오는 중 오류가 발생했습니다.</p>
+                    </div>
+                </div>
+            `;
+
+            // 스타일 추가 (이미 추가되지 않았다면)
+            if (!document.querySelector('style[data-for="artwork-messages"]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-for', 'artwork-messages');
+                style.textContent = `
+                    .empty-artwork-container {
+                        width: 100%;
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                        gap: 24px;
+                    }
+                    .error-message {
+                        background-color: #fff8f8;
+                        border-radius: 8px;
+                        padding: 48px 20px;
+                        text-align: center;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 380px;
+                        border: 1px solid #f8d7da;
+                        grid-column: 1 / -1;
+                    }
+                    .error-message svg {
+                        margin-bottom: 16px;
+                        color: #dc3545;
+                    }
+                    .error-message h3 {
+                        font-size: 1.25rem;
+                        margin-bottom: 8px;
+                        color: #721c24;
+                    }
+                    .error-message p {
+                        color: #721c24;
+                        font-size: 0.9rem;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
     }
+}
 
-    // 모달 요소 선택
-    const modal = document.getElementById('artwork-modal');
-    const closeBtn = document.getElementById('close-modal');
+/**
+ * 작품 데이터를 사용하여 카드 DOM 요소를 생성합니다.
+ * @param {Object} artwork - 작품 데이터
+ * @returns {HTMLElement} - 카드 DOM 요소
+ */
+async function createArtworkCard(artwork) {
+    try {
+        // 카드 데이터 가져오기
+        const cardData = await fetchArtworkCardData(artwork.id);
 
-    if (!modal || !closeBtn) {
-        return;
-    }
+        // 카드 DOM 생성
+        const card = document.createElement('div');
+        card.className = 'card card--home';
+        card.dataset.artworkId = artwork.id;
 
-    // 각 카드에 클릭 이벤트 추가
-    cards.forEach((card) => {
-        const artworkId = card.dataset.artworkId;
+        // 카드 내용 생성
+        card.innerHTML = `
+            <div class="card__link">
+                <div class="card__image-container">
+                    <img src="${cardData.image.path}" alt="${cardData.image.alt}" class="card__image">
+                </div>
+                <div class="card__info">
+                    <h3 class="card__title">${cardData.title}</h3>
+                    <p class="card__subtitle">${cardData.artist.name || '작가 미상'}</p>
+                    <div class="card__meta">${cardData.artist.department || ''}</div>
+                </div>
+            </div>
+        `;
 
-        // 카드 클릭 이벤트
+        // 카드 클릭 이벤트 추가
         card.addEventListener('click', async function (e) {
-            // 기본 동작 방지 (링크 이동 등)
             e.preventDefault();
 
             try {
-                const response = await fetch(`/api/artworkmodal/${artworkId}`);
-                if (!response.ok) throw new Error('작품 정보를 불러올 수 없습니다.');
-
-                const artwork = await response.json();
+                const modal = document.getElementById('artwork-modal');
+                const modalData = await fetchArtworkModalData(artwork.id);
 
                 // 모달 내용 업데이트
-                updateModalContent(modal, artwork, artworkId);
+                updateModalContent(modal, modalData, artwork.id);
 
                 // 모달 표시
                 showModal(modal);
@@ -56,18 +212,58 @@ function initModal() {
             }
         });
 
-        // 카드 내부 링크 요소에도 이벤트 추가 (이벤트 버블링 방지)
-        const cardLink = card.querySelector('.card__link');
-        if (cardLink) {
-            cardLink.addEventListener('click', function (e) {
-                e.preventDefault(); // 기본 동작 방지
-                e.stopPropagation(); // 이벤트 버블링 방지
+        return card;
+    } catch (error) {
+        console.error(`작품 카드(ID: ${artwork.id}) 생성 중 오류:`, error);
 
-                // 부모 카드의 클릭 이벤트 트리거
-                card.click();
-            });
-        }
-    });
+        // 에러 발생 시 기본 카드 반환
+        const errorCard = document.createElement('div');
+        errorCard.className = 'card card--home card--error';
+        errorCard.innerHTML = `
+            <div class="card__link">
+                <div class="card__info">
+                    <h3 class="card__title">로딩 실패</h3>
+                    <p class="card__subtitle">작품 정보를 불러오는데 실패했습니다.</p>
+                </div>
+            </div>
+        `;
+        return errorCard;
+    }
+}
+
+/**
+ * 작품 카드 데이터를 가져옵니다.
+ * @param {string} artworkId - 작품 ID
+ * @returns {Promise<Object>} - 카드 데이터
+ */
+async function fetchArtworkCardData(artworkId) {
+    const response = await fetch(`/artwork/api/data/${artworkId}?type=card`);
+    if (!response.ok) throw new Error('작품 카드 데이터를 불러올 수 없습니다.');
+    return await response.json();
+}
+
+/**
+ * 작품 모달 데이터를 가져옵니다.
+ * @param {string} artworkId - 작품 ID
+ * @returns {Promise<Object>} - 모달 데이터
+ */
+async function fetchArtworkModalData(artworkId) {
+    const response = await fetch(`/artwork/api/data/${artworkId}?type=modal`);
+    if (!response.ok) throw new Error('작품 모달 데이터를 불러올 수 없습니다.');
+    return await response.json();
+}
+
+/**
+ * 모달 초기화
+ */
+function initModal() {
+    // 모달 요소 선택
+    const modal = document.getElementById('artwork-modal');
+    const closeBtn = document.getElementById('close-modal');
+
+    if (!modal || !closeBtn) {
+        return;
+    }
 
     // 닫기 버튼 이벤트
     closeBtn.addEventListener('click', function () {
