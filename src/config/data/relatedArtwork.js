@@ -95,10 +95,27 @@ const relatedArtworks = {
 };
 
 /**
- * 작품 ID로 관련 작품 목록을 가져옵니다.
+ * 작품 ID로 관련 작품 ID 목록을 가져옵니다.
  * @param {number} artworkId - 작품 ID
- * @returns {Array} 관련 작품 목록
+ * @returns {Array<number>} 관련 작품 ID 목록
  */
 export function getRelatedArtworks(artworkId) {
-    return relatedArtworks[artworkId] || [];
+    try {
+        // artworkId가 숫자가 아니면 변환
+        const numId = Number(artworkId);
+        if (isNaN(numId)) {
+            return [];
+        }
+
+        // 관련 작품 데이터가 없으면 빈 배열 반환
+        if (!relatedArtworks[numId]) {
+            return [];
+        }
+
+        // ID 목록만 추출하여 반환
+        const relatedIds = relatedArtworks[numId].map(item => Number(item.id));
+        return relatedIds;
+    } catch (error) {
+        return [];
+    }
 }

@@ -34,11 +34,18 @@ export default class ExhibitionRepository {
      * ID로 전시회를 조회합니다.
      */
     async findExhibitionById(id) {
+        // id가 null, undefined 또는 빈 문자열인 경우
+        if (id === null || id === undefined || id === '') {
+            return null;
+        }
+
         const numId = parseInt(id, 10);
-        if (isNaN(numId)) return null;
+
+        if (isNaN(numId)) {
+            return null;
+        }
 
         const found = this.exhibitions.find(exhibition => exhibition.id === numId);
-        console.log('Repository - 찾은 전시회:', found);
         return found;
     }
 

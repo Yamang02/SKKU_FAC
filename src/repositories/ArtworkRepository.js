@@ -12,14 +12,17 @@ export default class ArtworkRepository {
         */
 
         // 현재는 임시 데이터 사용
-        this.artworks = artworkData.map(data => new Artwork({
-            ...data,
-            artistName: data.artist_name,
-            imagePath: data.image_path,
-            exhibitionId: data.exhibition_id,
-            createdAt: data.created_at,
-            updatedAt: data.updated_at
-        }));
+        this.artworks = artworkData.map(data => {
+            return new Artwork({
+                ...data,
+                artistName: data.artistName || '',
+                imagePath: data.imagePath || '',
+                exhibitionId: data.exhibitionId !== undefined ? data.exhibitionId : 0,
+                createdAt: data.createdAt || '',
+                updatedAt: data.updatedAt || ''
+            });
+        });
+
         this.getRelatedArtworks = getRelatedArtworks;
         this.artworkFilePath = path.join(process.cwd(), 'src', 'config', 'data', 'artwork.js');
     }
@@ -66,14 +69,14 @@ export default class ArtworkRepository {
         if (searchType && keyword) {
             filteredArtworks = filteredArtworks.filter(artwork => {
                 switch (searchType) {
-                case 'title':
-                    return artwork.title.toLowerCase().includes(keyword.toLowerCase());
-                case 'artist':
-                    return artwork.artistName.toLowerCase().includes(keyword.toLowerCase());
-                case 'department':
-                    return artwork.department.toLowerCase().includes(keyword.toLowerCase());
-                default:
-                    return true;
+                    case 'title':
+                        return artwork.title.toLowerCase().includes(keyword.toLowerCase());
+                    case 'artist':
+                        return artwork.artistName.toLowerCase().includes(keyword.toLowerCase());
+                    case 'department':
+                        return artwork.department.toLowerCase().includes(keyword.toLowerCase());
+                    default:
+                        return true;
                 }
             });
         }
@@ -149,19 +152,19 @@ export default class ArtworkRepository {
  * 작품 데이터
  */
 const artwork = ${JSON.stringify(this.artworks.map(artwork => ({
-        id: artwork.id,
-        title: artwork.title,
-        artistId: artwork.artistId,
-        exhibitionId: artwork.exhibitionId,
-        department: artwork.department || '',
-        medium: artwork.medium || '',
-        size: artwork.size || '',
-        description: artwork.description || '',
-        image: artwork.image,
-        isFeatured: artwork.isFeatured || false,
-        createdAt: artwork.createdAt,
-        updatedAt: artwork.updatedAt
-    })), null, 2)};
+            id: artwork.id,
+            title: artwork.title,
+            artistId: artwork.artistId,
+            exhibitionId: artwork.exhibitionId,
+            department: artwork.department || '',
+            medium: artwork.medium || '',
+            size: artwork.size || '',
+            description: artwork.description || '',
+            image: artwork.image,
+            isFeatured: artwork.isFeatured || false,
+            createdAt: artwork.createdAt,
+            updatedAt: artwork.updatedAt
+        })), null, 2)};
 
 export default artwork;
 `;
@@ -174,37 +177,27 @@ export default artwork;
      * @returns {Promise<Artwork>} 생성된 작품
      */
     async createArtwork(artworkData) {
-        console.log('[ArtworkRepository] 작품 저장 시작:', artworkData);
-        try {
-            // 작품 데이터 검증
-            if (!artworkData || !artworkData.id) {
-                console.error('[ArtworkRepository] 유효하지 않은 작품 데이터');
-                throw new Error('유효하지 않은 작품 데이터입니다.');
-            }
-
-            // exhibitionId 처리 - 작품 데이터에 exhibitionId가 있는 경우 숫자로 변환
-            if (artworkData.exhibitionId !== undefined && artworkData.exhibitionId !== null) {
-                artworkData.exhibitionId = Number(artworkData.exhibitionId);
-                console.log('[ArtworkRepository] exhibitionId 변환:', artworkData.exhibitionId);
-            }
-
-            // 중복 ID 체크
-            if (this.artworks.some(a => a.id === artworkData.id)) {
-                console.error('[ArtworkRepository] 중복된 작품 ID:', artworkData.id);
-                throw new Error('이미 존재하는 작품 ID입니다.');
-            }
-
-            // 작품 추가
-            this.artworks.push(artworkData);
-            console.log('[ArtworkRepository] 작품 저장 완료:', artworkData);
-
-            // 파일에 저장
-            await this._saveToFile();
-            return artworkData;
-        } catch (error) {
-            console.error('[ArtworkRepository] 작품 저장 중 오류:', error);
-            throw error;
+        // 작품 데이터 검증
+        if (!artworkData || !artworkData.id) {
+            throw new Error('유효하지 않은 작품 데이터입니다.');
         }
+
+        // exhibitionId 처리 - 작품 데이터에 exhibitionId가 있는 경우 숫자로 변환
+        if (artworkData.exhibitionId !== undefined && artworkData.exhibitionId !== null) {
+            artworkData.exhibitionId = Number(artworkData.exhibitionId);
+        }
+
+        // 중복 ID 체크
+        if (this.artworks.some(a => a.id === artworkData.id)) {
+            throw new Error('이미 존재하는 작품 ID입니다.');
+        }
+
+        // 작품 추가
+        this.artworks.push(artworkData);
+
+        // 파일에 저장
+        await this._saveToFile();
+        return artworkData;
     }
 
     /**
@@ -257,11 +250,30 @@ export default artwork;
     /**
      * 관련 작품을 찾습니다.
      * @param {string|number} artworkId - 작품 ID
-     * @returns {Promise<Array<Artwork>>} 관련 작품 목록
+     * @returns {Promise<{items: Array<Artwork>, total: number}>} 관련 작품 목록
      */
     async findRelatedArtworks(artworkId) {
-        const relatedIds = this.getRelatedArtworks(artworkId);
-        return this.artworks.filter(a => relatedIds.includes(a.id));
+        try {
+            const numId = Number(artworkId);
+
+            // 관련 작품 ID 목록 가져오기
+            const relatedIds = this.getRelatedArtworks ? this.getRelatedArtworks(numId) : [];
+
+            // ID가 없거나 비어있으면 빈 배열 반환
+            if (!relatedIds || !Array.isArray(relatedIds) || relatedIds.length === 0) {
+                return { items: [], total: 0 };
+            }
+
+            // 관련 작품 찾기
+            const relatedArtworks = this.artworks.filter(a => relatedIds.includes(Number(a.id)));
+
+            return {
+                items: relatedArtworks,
+                total: relatedArtworks.length
+            };
+        } catch (error) {
+            return { items: [], total: 0 };
+        }
     }
 
     /**

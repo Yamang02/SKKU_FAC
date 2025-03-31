@@ -12,9 +12,9 @@ const artwork = [
         'size': 'test',
         'description': 'test',
         'image': '\\uploads\\artworks\\1-뱀과_소년-김성균-미술학과_23_2025-03-31T00-42-11-331Z.png',
-        'isFeatured': false,
-        'createdAt': '',
-        'updatedAt': ''
+        'isFeatured': true,
+        'createdAt': '2025-03-31T00:47:09.707Z',
+        'updatedAt': '2025-03-31T00:47:09.719Z'
     },
     {
         'id': 2,
@@ -26,7 +26,7 @@ const artwork = [
         'size': 'test',
         'description': 'test',
         'image': '\\uploads\\artworks\\2-양과_장미-김성균-미술학과_23_2025-03-31T00-47-09-705Z.png',
-        'isFeatured': false,
+        'isFeatured': true,
         'createdAt': '2025-03-31T00:47:09.707Z',
         'updatedAt': '2025-03-31T00:47:09.719Z'
     }

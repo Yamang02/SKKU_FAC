@@ -5,7 +5,8 @@
     <!-- 작품 이미지 섹션 -->
     <section class="artwork-image-section">
         <div class="artwork-image-wrapper">
-            <img src="<%= artwork.image %>" alt="<%= artwork.title %>" class="artwork-main-image">
+            <img src="<%= artwork.image || '/images/artwork-placeholder.svg' %>" alt="<%= artwork.title %>"
+                class="artwork-main-image" onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
         </div>
     </section>
 
@@ -16,10 +17,10 @@
                 <%= artwork.title %>
             </h1>
             <p class="artwork-detail-artist">
-                <%= artwork.artist %>
+                <%= artwork.artist || '작가 미상' %>
             </p>
             <p class="artwork-detail-department">
-                <%= artwork.department %>
+                <%= artwork.department || '' %>
             </p>
         </div>
 
@@ -29,19 +30,19 @@
                 <div class="detail-item">
                     <span class="label">제작 연도</span>
                     <span class="value">
-                        <%= artwork.year %>
+                        <%= artwork.year || '미표기' %>
                     </span>
                 </div>
                 <div class="detail-item">
                     <span class="label">매체</span>
                     <span class="value">
-                        <%= artwork.medium %>
+                        <%= artwork.medium || '미표기' %>
                     </span>
                 </div>
                 <div class="detail-item">
                     <span class="label">크기</span>
                     <span class="value">
-                        <%= artwork.size %>
+                        <%= artwork.size || '미표기' %>
                     </span>
                 </div>
             </div>
@@ -49,14 +50,14 @@
             <div class="detail-group">
                 <h2><i class="fas fa-align-left icon-margin"></i>작품 설명</h2>
                 <p class="artwork-description">
-                    <%= artwork.description %>
+                    <%= artwork.description || '작품에 대한 설명이 없습니다.' %>
                 </p>
             </div>
 
             <div class="detail-group">
                 <h2><i class="fas fa-calendar-alt icon-margin"></i>전시 정보</h2>
                 <p class="exhibition-info">
-                    <%= artwork.exhibition %>
+                    <%= artwork.exhibition || '없음' %>
                 </p>
             </div>
         </div>
