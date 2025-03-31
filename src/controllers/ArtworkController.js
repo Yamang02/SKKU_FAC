@@ -1,22 +1,19 @@
 import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
-import FileUploadUtil from '../utils/FileUploadUtil.js';
-import ArtworkRepository from '../repositories/ArtworkRepository.js';
 import UserRepository from '../repositories/UserRepository.js';
 import ExhibitionRepository from '../repositories/ExhibitionRepository.js';
 import ArtworkService from '../services/artwork/ArtworkService.js';
-import Page from '../models/common/page/Page.js';
-import ArtworkRequestDTO from '../models/artwork/dto/ArtworkRequestDTO.js';
-import ArtworkResponseDTO from '../models/artwork/dto/ArtworkResponseDTO.js';
-import Artwork from '../models/artwork/Artwork.js';
-import fs from 'fs';
+import {
+    ArtworkNotFoundError,
+    ArtworkValidationError,
+    ArtworkUploadError
+} from '../models/common/error/ArtworkError.js';
 
 /**
  * 작품 관련 컨트롤러
  */
 export default class ArtworkController {
     constructor() {
-        this.artworkRepository = new ArtworkRepository();
         this.userRepository = new UserRepository();
         this.exhibitionRepository = new ExhibitionRepository();
         this.artworkService = new ArtworkService();
@@ -28,33 +25,30 @@ export default class ArtworkController {
     async getArtworkList(req, res) {
         try {
             const { page = 1, limit = 12, sortField = 'createdAt', sortOrder = 'desc', searchType, keyword } = req.query;
-            const artworkList = await this.artworkService.getArtworkList({ page, limit, sortField, sortOrder, searchType, keyword });
-
-            const pageOptions = {
+            const artworkList = await this.artworkService.getArtworkList({
                 page,
                 limit,
-                baseUrl: '/artwork',
                 sortField,
                 sortOrder,
-                filters: { searchType, keyword },
-                previousUrl: Page.getPreviousPageUrl(req),
-                currentUrl: Page.getCurrentPageUrl(req)
-            };
-
-            const pageData = new Page(artworkList.total, pageOptions);
+                searchType,
+                keyword,
+                baseUrl: '/artwork'
+            });
 
             ViewResolver.render(res, ViewPath.MAIN.ARTWORK.LIST, {
                 title: '작품 목록',
                 artworks: artworkList.items,
-                page: pageData,
+                page: artworkList.page,
                 searchType: searchType || '',
                 keyword: keyword || '',
-                sortField: sortField || 'createdAt',
-                sortOrder: sortOrder || 'desc',
                 total: artworkList.total
             });
         } catch (error) {
-            ViewResolver.renderError(res, error);
+            if (error instanceof ArtworkNotFoundError) {
+                ViewResolver.renderError(res, error, 404);
+            } else {
+                ViewResolver.renderError(res, error, 500);
+            }
         }
     }
 
@@ -70,7 +64,8 @@ export default class ArtworkController {
                 limit,
                 exhibitionId,
                 sortField: 'createdAt',
-                sortOrder: 'desc'
+                sortOrder: 'desc',
+                baseUrl: `/artwork/exhibition/${exhibitionId}`
             });
 
             ViewResolver.render(res, ViewPath.MAIN.ARTWORK.EXHIBITION, {
@@ -134,12 +129,12 @@ export default class ArtworkController {
      * 작품을 등록합니다.
      */
     async createArtwork(req, res) {
-        let uploadedImage = null;
         try {
             // 1. 세션 유효성 검사
             if (!req.session.user) {
                 return res.status(401).json({
                     success: false,
+                    code: 'AUTH_REQUIRED',
                     message: '로그인이 필요합니다.',
                     redirectUrl: '/user/login'
                 });
@@ -150,117 +145,49 @@ export default class ArtworkController {
             if (!user) {
                 return res.status(401).json({
                     success: false,
+                    code: 'USER_NOT_FOUND',
                     message: '사용자 정보를 찾을 수 없습니다.',
                     redirectUrl: '/user/login'
                 });
             }
 
-            // 3. 요청 데이터 가져오기
-            const { title, description, exhibitionId, medium, size, department } = req.body;
-            uploadedImage = req.file;
-
-            // 4. 필수 필드 검증
-            if (!title) {
-                return res.status(400).json({
-                    success: false,
-                    message: '작품 제목을 입력해주세요.'
-                });
-            }
-
-            if (!uploadedImage) {
-                return res.status(400).json({
-                    success: false,
-                    message: '작품 이미지를 업로드해주세요.'
-                });
-            }
-
-            // 5. 새로운 ID 생성
-            const newId = this.artworkRepository.artworks.length > 0
-                ? Math.max(...this.artworkRepository.artworks.map(a => Number(a.id))) + 1
-                : 1;
-
-            // 6. 이미지 저장
-            let filePath = null;
-            let imageUrl = null;
-
-            try {
-                const result = await FileUploadUtil.saveImage({
-                    file: uploadedImage,
-                    artwork_id: newId,
-                    title,
-                    artist_name: user.name,
-                    department: department || ''
-                });
-                filePath = result.filePath;
-                imageUrl = result.imageUrl;
-            } catch (error) {
-                return res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
-            }
-
-            // 7. 전시회 ID 처리
-            let parsedExhibitionId = null;
-            if (exhibitionId && exhibitionId !== '0') {
-                parsedExhibitionId = Number(exhibitionId);
-                // 0 또는 NaN인 경우 null로 설정
-                if (parsedExhibitionId === 0 || isNaN(parsedExhibitionId)) {
-                    parsedExhibitionId = null;
-                }
-            }
-
-            // 8. RequestDTO 생성
-            const requestDTO = new ArtworkRequestDTO({
-                title,
-                description: description || '',
-                department: department || '',
+            // 3. 요청 데이터 준비
+            const artworkData = {
+                ...req.body,
                 artistId: user.id,
-                image: imageUrl,
-                imagePath: filePath,
-                exhibitionId: parsedExhibitionId,
-                medium: medium || '',
-                size: size || '',
-                year: new Date().getFullYear().toString(),
-                isFeatured: false
-            });
+                artistName: user.name
+            };
 
-            // 9. DTO 유효성 검사
-            requestDTO.validate();
+            // 4. 작품 생성
+            const artwork = await this.artworkService.createArtwork(artworkData, req.file);
 
-            // 10. Artwork 모델 인스턴스 생성
-            const artwork = new Artwork({
-                ...requestDTO,
-                id: newId,
-                artistName: user.name,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            });
-
-            // 11. 작품 저장
-            const savedArtwork = await this.artworkRepository.createArtwork(artwork.toJSON());
-
-            // 12. ResponseDTO 생성 및 응답 전송
-            const responseDTO = new ArtworkResponseDTO(savedArtwork);
+            // 5. 응답 전송
             return res.json({
                 success: true,
+                code: 'ARTWORK_CREATED',
                 message: '작품이 성공적으로 등록되었습니다.',
-                artwork: responseDTO.toJSON()
+                artwork: artwork.toJSON()
             });
         } catch (error) {
-            // 임시 파일이 있다면 삭제
-            if (uploadedImage && uploadedImage.path) {
-                try {
-                    await fs.promises.unlink(uploadedImage.path);
-                } catch (unlinkError) {
-                    // 임시 파일 삭제 실패
-                }
+            if (error instanceof ArtworkValidationError) {
+                return res.status(400).json({
+                    success: false,
+                    code: error.code,
+                    message: error.message
+                });
+            } else if (error instanceof ArtworkUploadError) {
+                return res.status(500).json({
+                    success: false,
+                    code: error.code,
+                    message: error.message
+                });
+            } else {
+                return res.status(500).json({
+                    success: false,
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: '작품 등록 중 오류가 발생했습니다.'
+                });
             }
-
-            return res.status(500).json({
-                success: false,
-                message: '작품 등록 중 오류가 발생했습니다: ' + error.message
-            });
         }
     }
 
@@ -287,17 +214,70 @@ export default class ArtworkController {
      */
     async updateArtwork(req, res) {
         try {
-            const { id } = req.params;
-            const artworkData = req.body;
-            const result = await this.artworkService.updateArtwork(id, artworkData);
-
-            if (result) {
-                res.json({ success: true, message: '작품이 수정되었습니다.' });
-            } else {
-                res.status(404).json({ success: false, message: '작품을 찾을 수 없습니다.' });
+            // 1. 세션 유효성 검사
+            if (!req.session.user) {
+                return res.status(401).json({
+                    success: false,
+                    code: 'AUTH_REQUIRED',
+                    message: '로그인이 필요합니다.',
+                    redirectUrl: '/user/login'
+                });
             }
+
+            // 2. 사용자 정보 가져오기
+            const user = await this.userRepository.findUserById(req.session.user.id);
+            if (!user) {
+                return res.status(401).json({
+                    success: false,
+                    code: 'USER_NOT_FOUND',
+                    message: '사용자 정보를 찾을 수 없습니다.',
+                    redirectUrl: '/user/login'
+                });
+            }
+
+            // 3. 작품 수정
+            const { id } = req.params;
+            const artworkData = {
+                ...req.body,
+                artistId: user.id,
+                artistName: user.name
+            };
+
+            const artwork = await this.artworkService.updateArtwork(id, artworkData, req.file);
+
+            // 4. 응답 전송
+            return res.json({
+                success: true,
+                code: 'ARTWORK_UPDATED',
+                message: '작품이 성공적으로 수정되었습니다.',
+                artwork: artwork.toJSON()
+            });
         } catch (error) {
-            res.status(500).json({ success: false, message: '작품 수정 중 오류가 발생했습니다.' });
+            if (error instanceof ArtworkNotFoundError) {
+                return res.status(404).json({
+                    success: false,
+                    code: error.code,
+                    message: error.message
+                });
+            } else if (error instanceof ArtworkValidationError) {
+                return res.status(400).json({
+                    success: false,
+                    code: error.code,
+                    message: error.message
+                });
+            } else if (error instanceof ArtworkUploadError) {
+                return res.status(500).json({
+                    success: false,
+                    code: error.code,
+                    message: error.message
+                });
+            } else {
+                return res.status(500).json({
+                    success: false,
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: '작품 수정 중 오류가 발생했습니다.'
+                });
+            }
         }
     }
 
@@ -308,14 +288,35 @@ export default class ArtworkController {
         try {
             const { id } = req.params;
             const result = await this.artworkService.deleteArtwork(id);
-
-            if (result) {
-                res.json({ success: true, message: '작품이 삭제되었습니다.' });
-            } else {
-                res.status(404).json({ success: false, message: '작품을 찾을 수 없습니다.' });
+            if (!result) {
+                throw new Error('삭제 중 오류 발생');
             }
+
+            res.json({
+                success: true,
+                code: 'ARTWORK_DELETED',
+                message: '작품이 삭제되었습니다.'
+            });
         } catch (error) {
-            res.status(500).json({ success: false, message: '작품 삭제 중 오류가 발생했습니다.' });
+            if (error instanceof ArtworkNotFoundError) {
+                return res.status(404).json({
+                    success: false,
+                    code: error.code,
+                    message: error.message
+                });
+            } else if (error instanceof ArtworkUploadError) {
+                return res.status(500).json({
+                    success: false,
+                    code: error.code,
+                    message: error.message
+                });
+            } else {
+                return res.status(500).json({
+                    success: false,
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: '작품 삭제 중 오류가 발생했습니다.'
+                });
+            }
         }
     }
 
@@ -325,23 +326,24 @@ export default class ArtworkController {
     async getManagementArtworkList(req, res) {
         try {
             const { page = 1, limit = 10, sortField = 'createdAt', sortOrder = 'desc', keyword } = req.query;
-            const artworkList = await this.artworkService.getManagementArtworkList({ page, limit, sortField, sortOrder, keyword });
 
-            const pageOptions = {
-                page,
-                limit,
-                baseUrl: '/admin/management/artwork',
-                filters: { keyword },
-                previousUrl: Page.getPreviousPageUrl(req),
-                currentUrl: Page.getCurrentPageUrl(req)
-            };
-
-            const pageData = new Page(artworkList.total, pageOptions);
+            // 작품 목록과 작가 목록을 동시에 조회
+            const [artworkList, artists] = await Promise.all([
+                this.artworkService.getManagementArtworkList({
+                    page,
+                    limit,
+                    sortField,
+                    sortOrder,
+                    keyword
+                }),
+                this.artworkService.getArtists()
+            ]);
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.LIST, {
                 title: '작품 관리',
                 artworks: artworkList.items,
-                page: pageData,
+                page: artworkList.page,
+                artists: artists,
                 filters: { keyword }
             });
         } catch (error) {
@@ -373,7 +375,7 @@ export default class ArtworkController {
         try {
             const { id } = req.params;
             const [artwork, exhibitions] = await Promise.all([
-                this.artworkRepository.findArtworkById(id),
+                this.artworkService.getArtworkById(id),
                 this.exhibitionRepository.findExhibitions()
             ]);
 
@@ -460,7 +462,7 @@ export default class ArtworkController {
     async getManagementArtworkCreatePage(req, res) {
         try {
             const exhibitions = await this.exhibitionRepository.findExhibitions({ limit: 100 });
-            const artists = await this.artworkRepository.findArtists();
+            const artists = await this.artworkService.getArtists();
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.DETAIL, {
                 title: '작품 등록',
@@ -506,7 +508,7 @@ export default class ArtworkController {
      * 작품 상세 정보를 JSON 형식으로 반환합니다.
      */
     async getArtworkById(id) {
-        const artwork = await this.artworkRepository.findArtworkById(id);
+        const artwork = await this.artworkService.getArtworkById(id);
         return artwork;
     }
 
@@ -538,21 +540,19 @@ export default class ArtworkController {
     }
 
     /**
-     * 추천 작품 목록을 JSON 형식으로 반환합니다.
+     * 추천 작품 목록을 반환합니다.
      */
     async getFeaturedArtworks(req, res) {
         try {
             const { limit = 6 } = req.query;
-            const artworkList = await this.artworkService.getArtworkList({
-                page: 1,
-                limit,
-                sortField: 'createdAt',
-                sortOrder: 'desc',
-                isFeatured: true
-            });
-            res.json(artworkList);
+            const artworks = await this.artworkService.getFeaturedArtworks(Number(limit));
+            res.json({ success: true, data: artworks });
         } catch (error) {
-            res.status(500).json({ success: false, message: '추천 작품 목록을 불러오는데 실패했습니다.' });
+            console.error('추천 작품 조회 중 오류 발생:', error);
+            res.status(500).json({
+                success: false,
+                message: '작품 데이터를 불러올 수 없습니다.'
+            });
         }
     }
 }

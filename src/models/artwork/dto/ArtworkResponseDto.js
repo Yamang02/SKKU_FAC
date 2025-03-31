@@ -1,14 +1,13 @@
-import ArtworkSimpleDTO from './ArtworkSimpleDTO.js';
-
 /**
- * 작품 상세 정보를 위한 DTO
+ * 작품 응답 데이터를 위한 DTO
  */
-export default class ArtworkDetailDTO {
+export default class ArtworkResponseDTO {
     constructor(data = {}) {
         this.id = data.id;
         this.title = data.title;
         this.description = data.description;
         this.image = data.image;
+        this.imagePath = data.imagePath;
         this.artistId = data.artistId;
         this.artistName = data.artistName;
         this.department = data.department;
@@ -16,15 +15,15 @@ export default class ArtworkDetailDTO {
         this.exhibitionName = data.exhibitionName;
         this.createdAt = data.createdAt;
         this.updatedAt = data.updatedAt;
-        this.relatedArtworks = Array.isArray(data.relatedArtworks) ? data.relatedArtworks : [];
     }
 
     toJSON() {
-        const baseData = {
+        return {
             id: this.id,
             title: this.title,
             description: this.description,
             image: this.image,
+            imagePath: this.imagePath,
             artistId: this.artistId,
             artistName: this.artistName,
             department: this.department,
@@ -33,19 +32,5 @@ export default class ArtworkDetailDTO {
             createdAt: this.createdAt,
             updatedAt: this.updatedAt
         };
-
-        try {
-            baseData.relatedArtworks = this.relatedArtworks.map(item => {
-                if (item instanceof ArtworkSimpleDTO) {
-                    return item.toJSON();
-                }
-                return item;
-            });
-        } catch (error) {
-            console.error('연관 작품 변환 중 오류 발생:', error);
-            baseData.relatedArtworks = [];
-        }
-
-        return baseData;
     }
 }

@@ -62,7 +62,7 @@ export default class ArtworkRepository {
      * 모든 작품을 반환합니다.
      * @returns {Promise<Array<Artwork>>} 작품 목록
      */
-    async findArtworks({ page = 1, limit = 10, sortField = 'createdAt', sortOrder = 'desc', searchType, keyword, artistId, exhibitionId } = {}) {
+    async findArtworks({ page = 1, limit = 10, sortField = 'createdAt', sortOrder = 'desc', searchType, keyword, artistId, exhibitionId, isFeatured } = {}) {
         let filteredArtworks = [...this.artworks];
 
         // 검색 조건 적용
@@ -83,12 +83,17 @@ export default class ArtworkRepository {
 
         // 작가 ID로 필터링
         if (artistId) {
-            filteredArtworks = filteredArtworks.filter(artwork => artwork.artistId === artistId);
+            filteredArtworks = filteredArtworks.filter(artwork => artwork.artistId === Number(artistId));
         }
 
         // 전시회 ID로 필터링
         if (exhibitionId) {
-            filteredArtworks = filteredArtworks.filter(artwork => artwork.exhibitionId === exhibitionId);
+            filteredArtworks = filteredArtworks.filter(artwork => artwork.exhibitionId === Number(exhibitionId));
+        }
+
+        // 추천 작품 필터링
+        if (isFeatured !== undefined) {
+            filteredArtworks = filteredArtworks.filter(artwork => artwork.isFeatured === isFeatured);
         }
 
         // 정렬 적용
@@ -108,8 +113,8 @@ export default class ArtworkRepository {
         return {
             items: paginatedArtworks,
             total: filteredArtworks.length,
-            page,
-            limit,
+            page: Number(page),
+            limit: Number(limit),
             totalPages: Math.ceil(filteredArtworks.length / limit)
         };
     }
@@ -182,7 +187,7 @@ export default artwork;
             throw new Error('유효하지 않은 작품 데이터입니다.');
         }
 
-        // exhibitionId 처리 - 작품 데이터에 exhibitionId가 있는 경우 숫자로 변환
+        // exhibitionId 처리
         if (artworkData.exhibitionId !== undefined && artworkData.exhibitionId !== null) {
             artworkData.exhibitionId = Number(artworkData.exhibitionId);
         }
@@ -192,12 +197,16 @@ export default artwork;
             throw new Error('이미 존재하는 작품 ID입니다.');
         }
 
+        // Artwork 인스턴스 생성 및 검증
+        const artwork = new Artwork(artworkData);
+        artwork.validate();
+
         // 작품 추가
-        this.artworks.push(artworkData);
+        this.artworks.push(artwork);
 
         // 파일에 저장
         await this._saveToFile();
-        return artworkData;
+        return artwork;
     }
 
     /**
@@ -210,11 +219,18 @@ export default artwork;
         const index = this.artworks.findIndex(a => a.id === Number(id));
         if (index === -1) return null;
 
+        // exhibitionId 처리
+        if (artworkData.exhibitionId !== undefined && artworkData.exhibitionId !== null) {
+            artworkData.exhibitionId = Number(artworkData.exhibitionId);
+        }
+
+        // Artwork 인스턴스 생성 및 검증
         const updatedArtwork = new Artwork({
             ...this.artworks[index],
             ...artworkData,
             updatedAt: new Date().toISOString()
         });
+        updatedArtwork.validate();
 
         this.artworks[index] = updatedArtwork;
         await this._saveToFile();

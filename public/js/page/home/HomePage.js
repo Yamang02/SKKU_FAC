@@ -26,22 +26,22 @@ async function loadFeaturedArtworks() {
         // 로딩 표시
         container.innerHTML = '<div class="loading-spinner">작품을 불러오는 중입니다...</div>';
 
-        // API 요청 - /api/featured-artworks 엔드포인트 호출
-        const response = await fetch('/artwork/api/featured-artworks');
+        // API 요청 - /api/featured 엔드포인트 호출
+        const response = await fetch('/artwork/api/featured');
 
         if (!response.ok) {
             throw new Error('작품 데이터를 불러올 수 없습니다.');
         }
 
-        const data = await response.json();
+        const result = await response.json();
 
         // 불러온 데이터로 작품 카드 생성
-        if (data && Array.isArray(data)) {
+        if (result.success && Array.isArray(result.data)) {
             // 컨테이너 비우기
             container.innerHTML = '';
 
             // 각 작품에 대한 카드 생성
-            for (const artwork of data) {
+            for (const artwork of result.data) {
                 // 카드 생성
                 const card = await createArtworkCard(artwork);
 
@@ -50,7 +50,7 @@ async function loadFeaturedArtworks() {
             }
 
             // 카드가 없는 경우
-            if (data.length === 0) {
+            if (result.data.length === 0) {
                 container.innerHTML = `
                     <div class="empty-artwork-container">
                         <div class="empty-artwork-message">
