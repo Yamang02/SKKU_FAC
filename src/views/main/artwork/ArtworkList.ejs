@@ -1,5 +1,5 @@
 <style ref="stylesheet">
-    @import url('../../../public/css/artwork/ArtworkList.css');
+    @import url('/css/artwork/ArtworkList.css');
 </style>
 <div class="container">
     <h1 class="text-center" style="margin: 60px 0 40px 0;">작품 검색</h1>
@@ -134,34 +134,13 @@
     <!-- 작품 목록 섹션 (카드 뷰) -->
     <section class="artwork-list-section">
         <div id="cardView" class="artwork-grid">
-            <% if (typeof artworks !=='undefined' && Array.isArray(artworks) && artworks.length> 0) { %>
-                <% artworks.forEach(artwork=> { %>
-                    <div class="card card--list" data-exhibition="<%= artwork.exhibitionId || '' %>">
-                        <a href="/artwork/<%= artwork.id || '' %>" class="card__link">
-                            <div class="card__image-container">
-                                <img src="<%= artwork.imageUrl || '/images/artwork-placeholder.svg' %>"
-                                    alt="<%= artwork.title || '' %>" class="card__image"
-                                    onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
-                            </div>
-                            <div class="card__info">
-                                <h3 class="card__title">
-                                    <%= artwork.title || '' %>
-                                </h3>
-                                <p class="card__subtitle">
-                                    <%= artwork.artist || '' %>
-                                </p>
-                                <div class="card__meta">
-                                    <%= artwork.department || '' %>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <% }); %>
-                        <% } else { %>
-                            <div class="no-results">
-                                <p>검색 결과가 없습니다.</p>
-                            </div>
-                            <% } %>
+            <!-- 작품 카드가 여기에 동적으로 로드됩니다 -->
+            <div class="loading-artwork">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>작품을 불러오는 중입니다...</p>
+                </div>
+            </div>
         </div>
 
         <!-- 테이블 뷰 (기본적으로 숨겨짐) -->
@@ -176,38 +155,8 @@
                     <th>제작 연도</th>
                 </tr>
             </thead>
-            <tbody>
-                <% if (typeof artworks !=='undefined' && Array.isArray(artworks) && artworks.length> 0) { %>
-                    <% artworks.forEach(artwork=> { %>
-                        <tr data-id="<%= artwork.id || '' %>"
-                            onclick="window.location.href='/artwork/<%= artwork.id || '' %>'">
-                            <td>
-                                <img src="<%= artwork.imageUrl || '/images/artwork-placeholder.svg' %>"
-                                    alt="<%= artwork.title || '' %>" class="artwork-thumbnail"
-                                    onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
-                            </td>
-                            <td>
-                                <%= artwork.title || '' %>
-                            </td>
-                            <td>
-                                <%= artwork.artist || '' %>
-                            </td>
-                            <td>
-                                <%= artwork.department || '' %>
-                            </td>
-                            <td>
-                                <%= artwork.exhibitionId || '' %>
-                            </td>
-                            <td>
-                                <%= artwork.year || '' %>
-                            </td>
-                        </tr>
-                        <% }); %>
-                            <% } else { %>
-                                <tr>
-                                    <td colspan="6" class="no-results">검색 결과가 없습니다.</td>
-                                </tr>
-                                <% } %>
+            <tbody id="tableViewBody">
+                <!-- 테이블 내용이 여기에 동적으로 로드됩니다 -->
             </tbody>
         </table>
 

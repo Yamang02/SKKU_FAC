@@ -2,6 +2,62 @@
  * 작품 목록 페이지
  * 작품 목록의 모든 기능을 처리합니다.
  */
+// API 함수 - 서버에서 가져오기
+function fetchArtworkList(params = {}) {
+    return new Promise((resolve, reject) => {
+        try {
+            showLoading(true);
+
+            // URL 파라미터 생성
+            const queryParams = new URLSearchParams();
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined && value !== null && value !== '') {
+                    queryParams.append(key, value);
+                }
+            });
+
+            // API 요청
+            fetch(`/artwork/api/list?${queryParams.toString()}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`API 오류: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    resolve(data);
+                })
+                .catch(error => {
+                    console.error('작품 목록을 가져오는 중 오류 발생:', error);
+                    showErrorMessage('작품 목록을 불러오는데 실패했습니다.');
+                    reject(error);
+                })
+                .finally(() => {
+                    showLoading(false);
+                });
+        } catch (error) {
+            console.error('작품 목록을 가져오는 중 오류 발생:', error);
+            showErrorMessage('작품 목록을 불러오는데 실패했습니다.');
+            showLoading(false);
+            reject(error);
+        }
+    });
+}
+
+// 유틸리티 함수
+function showLoading(isShow) {
+    // 로딩 표시 로직 구현
+    const loadingEl = document.querySelector('.loading-artwork');
+    if (loadingEl) {
+        loadingEl.style.display = isShow ? 'flex' : 'none';
+    }
+}
+
+function showErrorMessage(message) {
+    console.error(message);
+    // 오류 메시지 표시 로직 구현
+}
+
 // 애니메이션 관련 함수
 function fadeIn(element, callback) {
     if (!element) return;
@@ -151,13 +207,35 @@ function filterArtworksByExhibition(exhibition) {
             fadeOut(artwork);
         }
     });
+
+    // URL 파라미터에 전시회 필터 적용
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (exhibition === 'all') {
+        urlParams.delete('exhibition');
+    } else {
+        urlParams.set('exhibition', exhibition);
+    }
+
+    // 검색 필드가 있다면 URL에 유지
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        const keyword = searchForm.querySelector('#keyword').value;
+        if (keyword) {
+            urlParams.set('keyword', keyword);
+        }
+    }
+
+    // URL 업데이트 (페이지 리로드 없이)
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
 }
 
 // 페이지 초기화
 document.addEventListener('DOMContentLoaded', () => {
     initCarousel();
     initViewToggle();
-    initArtworkGrid();
+    loadArtworkList(); // 작품 목록 로딩
     initFilters();
     initPagination();
 
@@ -241,4 +319,189 @@ function initPagination() {
 
     scrollContainer.addEventListener('scroll', updatePaginationButtons);
     updatePaginationButtons();
+}
+
+/**
+ * 작품 목록을 로드하고 표시합니다.
+ */
+async function loadArtworkList() {
+    const cardView = document.getElementById('cardView');
+    const tableViewBody = document.getElementById('tableViewBody');
+    const resultCount = document.getElementById('resultCount');
+
+    try {
+        // 현재 URL에서 쿼리 파라미터 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const params = {
+            page: urlParams.get('page') || 1,
+            limit: urlParams.get('limit') || 12,
+            sortField: urlParams.get('sortField') || 'createdAt',
+            sortOrder: urlParams.get('sortOrder') || 'desc',
+            searchType: urlParams.get('searchType') || '',
+            keyword: urlParams.get('keyword') || '',
+            exhibition: urlParams.get('exhibition') || ''
+        };
+
+        // API 호출
+        const data = await fetchArtworkList(params);
+
+        // 카드 뷰 업데이트
+        if (cardView) {
+            cardView.innerHTML = ''; // 기존 내용 비우기
+
+            if (data.items && data.items.length > 0) {
+                // 각 작품에 대한 카드 생성
+                data.items.forEach(artwork => {
+                    const card = createArtworkCard(artwork);
+                    cardView.appendChild(card);
+                });
+            } else {
+                // 결과가 없는 경우
+                cardView.innerHTML = '<div class="no-results"><p>검색 결과가 없습니다.</p></div>';
+            }
+        }
+
+        // 테이블 뷰 업데이트
+        if (tableViewBody) {
+            tableViewBody.innerHTML = ''; // 기존 내용 비우기
+
+            if (data.items && data.items.length > 0) {
+                // 각 작품에 대한 테이블 행 생성
+                data.items.forEach(artwork => {
+                    const row = createArtworkTableRow(artwork);
+                    tableViewBody.appendChild(row);
+                });
+            } else {
+                // 결과가 없는 경우
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = '<td colspan="6" class="no-results">검색 결과가 없습니다.</td>';
+                tableViewBody.appendChild(emptyRow);
+            }
+        }
+
+        // 결과 개수 표시 업데이트
+        if (resultCount) {
+            resultCount.innerHTML = `총 <strong>${data.total}</strong>개의 작품이 검색되었습니다.`;
+        }
+    } catch (error) {
+        console.error('작품 목록을 로드하는 중 오류 발생:', error);
+
+        // 오류 메시지 표시
+        if (cardView) {
+            cardView.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>작품 목록을 불러오는 중 오류가 발생했습니다.</p>
+                </div>
+            `;
+        }
+    }
+}
+
+/**
+ * 작품 데이터로 카드 요소를 생성합니다.
+ * @param {Object} artwork - 작품 데이터
+ * @returns {HTMLElement} 생성된 카드 요소
+ */
+function createArtworkCard(artwork) {
+    const card = document.createElement('div');
+    card.className = 'card card--list';
+    card.dataset.exhibition = artwork.exhibitionId || '';
+
+    let artistName = '작가 미상';
+    let artistDept = '';
+
+    if (artwork.artist) {
+        if (typeof artwork.artist === 'string') {
+            artistName = artwork.artist;
+        } else if (artwork.artist.name) {
+            artistName = artwork.artist.name;
+            artistDept = artwork.artist.department || '';
+        }
+    }
+
+    // 이미지 경로 처리
+    let imagePath = '/images/artwork-placeholder.svg';
+    let imageAlt = artwork.title || '';
+
+    if (artwork.image) {
+        if (typeof artwork.image === 'string') {
+            imagePath = artwork.image;
+        } else if (artwork.image.path) {
+            imagePath = artwork.image.path;
+            imageAlt = artwork.image.alt || artwork.title || '';
+        }
+    }
+
+    card.innerHTML = `
+        <a href="/artwork/${artwork.id}" class="card__link">
+            <div class="card__image-container">
+                <img src="${imagePath}"
+                     alt="${imageAlt}"
+                     class="card__image"
+                     onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
+            </div>
+            <div class="card__info">
+                <h3 class="card__title">${artwork.title || ''}</h3>
+                <p class="card__subtitle">${artistName}</p>
+                <div class="card__meta">${artistDept}</div>
+            </div>
+        </a>
+    `;
+
+    return card;
+}
+
+/**
+ * 작품 데이터로 테이블 행 요소를 생성합니다.
+ * @param {Object} artwork - 작품 데이터
+ * @returns {HTMLElement} 생성된 테이블 행 요소
+ */
+function createArtworkTableRow(artwork) {
+    const row = document.createElement('tr');
+    row.dataset.id = artwork.id || '';
+    row.onclick = function () {
+        window.location.href = `/artwork/${artwork.id}`;
+    };
+
+    let artistName = '작가 미상';
+    let artistDept = '';
+
+    if (artwork.artist) {
+        if (typeof artwork.artist === 'string') {
+            artistName = artwork.artist;
+        } else if (artwork.artist.name) {
+            artistName = artwork.artist.name;
+            artistDept = artwork.artist.department || '';
+        }
+    }
+
+    // 이미지 경로 처리
+    let imagePath = '/images/artwork-placeholder.svg';
+    let imageAlt = artwork.title || '';
+
+    if (artwork.image) {
+        if (typeof artwork.image === 'string') {
+            imagePath = artwork.image;
+        } else if (artwork.image.path) {
+            imagePath = artwork.image.path;
+            imageAlt = artwork.image.alt || artwork.title || '';
+        }
+    }
+
+    row.innerHTML = `
+        <td>
+            <img src="${imagePath}"
+                 alt="${imageAlt}"
+                 class="artwork-thumbnail"
+                 onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
+        </td>
+        <td>${artwork.title || ''}</td>
+        <td>${artistName}</td>
+        <td>${artistDept}</td>
+        <td>${artwork.exhibition || ''}</td>
+        <td>${artwork.year || ''}</td>
+    `;
+
+    return row;
 }

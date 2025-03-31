@@ -41,6 +41,12 @@ ArtworkRouter.get('/api/featured-artworks', async (req, res) => {
     }
 });
 
+// 작품 목록 API 엔드포인트
+ArtworkRouter.get('/api/list', (req, res) => {
+    console.log('[API] 작품 목록 요청');
+    artworkController.getArtworkListData(req, res);
+});
+
 // 이전 모달 API 엔드포인트 (새 엔드포인트로 리디렉션)
 ArtworkRouter.get('/api/artworkmodal/:id([0-9]+)', (req, res) => {
     req.query.type = 'modal';

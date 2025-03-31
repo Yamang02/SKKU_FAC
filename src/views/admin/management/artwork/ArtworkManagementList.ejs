@@ -58,13 +58,27 @@
                                     <%= artwork.title %>
                                 </td>
                                 <td>
-                                    <%= artwork.artist.name %>
+                                    <% if (artwork.artist && artwork.artist.name) { %>
+                                        <%= artwork.artist.name %>
+                                            <% } else if (artwork.artistName) { %>
+                                                <%= artwork.artistName %>
+                                                    <% } else { %>
+                                                        작가 미상
+                                                        <% } %>
                                 </td>
                                 <td>
-                                    <%= new Date(artwork.createdAt).toLocaleDateString() %>
+                                    <% if (artwork.createdAt) { %>
+                                        <%= new Date(artwork.createdAt).toLocaleDateString() %>
+                                            <% } else { %>
+                                                정보 없음
+                                                <% } %>
                                 </td>
                                 <td>
-                                    <%= new Date(artwork.updatedAt).toLocaleDateString() %>
+                                    <% if (artwork.updatedAt) { %>
+                                        <%= new Date(artwork.updatedAt).toLocaleDateString() %>
+                                            <% } else { %>
+                                                정보 없음
+                                                <% } %>
                                 </td>
                                 <td>
                                     <div class="admin-button-group">
