@@ -134,7 +134,9 @@
 
 /* 홈 페이지 특화 카드 스타일 */
 .card--home {
+    height: 100%;
     cursor: pointer;
+    padding: 10px;
     will-change: transform, box-shadow;
     transform: translateY(0);
     transition: transform 2.5s cubic-bezier(0.19, 1, 0.22, 1),
