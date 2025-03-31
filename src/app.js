@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { pageTracker } from './middleware/PageTracker.js';
 import { createUploadDirs } from './utils/createUploadDirs.js';
+import basicAuth from 'express-basic-auth';
 
 // 라우터 import
 import homeRouter from './routes/home/HomeRouter.js';
@@ -20,6 +21,19 @@ const __dirname = path.dirname(__filename);
 
 // 업로드 디렉토리 생성
 createUploadDirs();
+
+// 환경 변수에서 인증 정보 가져오기
+const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'skku2024';
+
+// 개발 환경 또는 명시적으로 활성화된 경우에만 기본 인증 적용
+if (process.env.NODE_ENV === 'production' || process.env.ENABLE_AUTH === 'true') {
+    app.use(basicAuth({
+        users: { [ADMIN_USER]: ADMIN_PASSWORD },
+        challenge: true,
+        realm: 'SKKU Gallery Development Preview',
+    }));
+}
 
 /**
  * 이전 페이지 URL 결정
