@@ -1,11 +1,11 @@
 import ViewResolver from '../utils/ViewResolver.js';
 import { ViewPath } from '../constants/ViewPath.js';
-import NoticeRepository from '../repositories/NoticeRepository.js';
-import Page from '../models/common/page/Page.js';
+import NoticeService from '../services/notice/NoticeService.js';
+import { NoticeNotFoundError, NoticeValidationError, NoticePermissionError } from '../models/common/error/NoticeError.js';
 
 export default class NoticeController {
     constructor() {
-        this.noticeRepository = new NoticeRepository();
+        this.noticeService = new NoticeService();
     }
 
     // ===== 사용자용 메서드 =====
@@ -14,31 +14,17 @@ export default class NoticeController {
      */
     async getNoticeList(req, res) {
         try {
-            const { page = 1, limit = 10, searchType = 'all', keyword = '' } = req.query;
-            const notices = await this.noticeRepository.findNotices({
-                page,
-                limit,
-                searchType,
-                keyword
+            const { notices, page } = await this.noticeService.getNoticeList({
+                ...req.query,
+                isManagement: false
             });
-
-            const pageOptions = {
-                page,
-                limit,
-                baseUrl: '/notice',
-                filters: { searchType, keyword },
-                previousUrl: Page.getPreviousPageUrl(req),
-                currentUrl: Page.getCurrentPageUrl(req)
-            };
-
-            const pageData = new Page(notices.total || 0, pageOptions);
 
             ViewResolver.render(res, ViewPath.MAIN.NOTICE.LIST, {
                 title: '공지사항',
-                notices: notices.items || [],
-                page: pageData,
-                searchType,
-                keyword
+                notices,
+                page,
+                searchType: req.query.searchType || 'all',
+                keyword: req.query.keyword || ''
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -50,18 +36,19 @@ export default class NoticeController {
      */
     async getNoticeDetail(req, res) {
         try {
-            const { id } = req.params;
-            const notice = await this.noticeRepository.findNoticeById(id);
-
-            if (!notice) {
-                throw new Error('공지사항을 찾을 수 없습니다.');
-            }
+            const notice = await this.noticeService.getNoticeDetail(
+                req.params.id,
+                req.session.id
+            );
 
             ViewResolver.render(res, ViewPath.MAIN.NOTICE.DETAIL, {
                 title: notice.title,
                 notice
             });
         } catch (error) {
+            if (error instanceof NoticeNotFoundError) {
+                return ViewResolver.renderError(res, error, 404);
+            }
             ViewResolver.renderError(res, error);
         }
     }
@@ -72,29 +59,21 @@ export default class NoticeController {
      */
     async getManagementNoticeList(req, res) {
         try {
-            const { page = 1, limit = 10, status, isImportant, keyword } = req.query;
-            const filters = { status, isImportant, keyword };
-
-            const notices = await this.noticeRepository.findNotices({
-                page: parseInt(page),
-                limit: parseInt(limit),
-                ...filters
+            const { notices, page } = await this.noticeService.getNoticeList({
+                ...req.query,
+                isManagement: true,
+                status: req.query.status || 'active'
             });
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.LIST, {
                 title: '공지사항 관리',
-                notices: notices.items || [],
-                result: {
-                    total: notices.total,
-                    totalPages: Math.ceil(notices.total / limit)
-                },
-                page: {
-                    currentPage: parseInt(page),
-                    totalPages: Math.ceil(notices.total / limit),
-                    hasPreviousPage: parseInt(page) > 1,
-                    hasNextPage: parseInt(page) < Math.ceil(notices.total / limit)
-                },
-                filters
+                notices,
+                page,
+                filters: {
+                    status: req.query.status || 'active',
+                    isImportant: req.query.isImportant,
+                    keyword: req.query.keyword
+                }
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -129,30 +108,28 @@ export default class NoticeController {
                 });
             }
 
-            const noticeData = {
-                ...req.body,
-                author: req.session.user.name
-            };
+            await this.noticeService.createNotice(
+                req.body,
+                req.session.user.id,
+                req.session.user.name
+            );
 
-            const result = await this.noticeRepository.createNotice(noticeData);
-
-            if (result) {
-                res.json({
-                    success: true,
-                    message: '공지사항이 등록되었습니다.',
-                    redirectUrl: '/admin/management/notice'
-                });
-            } else {
-                res.status(400).json({
-                    success: false,
-                    message: '공지사항 등록에 실패했습니다.'
-                });
-            }
+            res.json({
+                success: true,
+                message: '공지사항이 등록되었습니다.',
+                redirectUrl: '/admin/management/notice'
+            });
         } catch (error) {
             console.error('Error creating notice:', error);
+            if (error instanceof NoticeValidationError) {
+                return res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
             res.status(500).json({
                 success: false,
-                message: '공지사항 등록 중 오류가 발생했습니다.'
+                message: error.message || '공지사항 등록 중 오류가 발생했습니다.'
             });
         }
     }
@@ -162,12 +139,10 @@ export default class NoticeController {
      */
     async getManagementNoticeDetail(req, res) {
         try {
-            const { id } = req.params;
-            const notice = await this.noticeRepository.findNoticeById(id);
-
-            if (!notice) {
-                throw new Error('공지사항을 찾을 수 없습니다.');
-            }
+            const notice = await this.noticeService.getNoticeDetail(
+                req.params.id,
+                null
+            );
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.NOTICE.DETAIL, {
                 title: '공지사항 상세',
@@ -176,6 +151,9 @@ export default class NoticeController {
                 user: req.session.user
             });
         } catch (error) {
+            if (error instanceof NoticeNotFoundError) {
+                return ViewResolver.renderError(res, error, 404);
+            }
             ViewResolver.renderError(res, error);
         }
     }
@@ -185,18 +163,36 @@ export default class NoticeController {
      */
     async updateManagementNotice(req, res) {
         try {
-            const { id } = req.params;
-            const noticeData = req.body;
+            await this.noticeService.updateNotice(
+                req.params.id,
+                req.body,
+                req.session.user.id,
+                req.session.user.name
+            );
 
-            const result = await this.noticeRepository.updateNotice(id, noticeData);
-            if (result) {
-                res.json({ success: true, message: '공지사항이 수정되었습니다.' });
-            } else {
-                res.status(404).json({ success: false, message: '공지사항을 찾을 수 없습니다.' });
-            }
+            res.json({
+                success: true,
+                message: '공지사항이 수정되었습니다.'
+            });
         } catch (error) {
             console.error('Error updating notice:', error);
-            res.status(500).json({ success: false, message: '공지사항 수정 중 오류가 발생했습니다.' });
+            if (error instanceof NoticeNotFoundError) {
+                return res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+            if (error instanceof NoticeValidationError ||
+                error instanceof NoticePermissionError) {
+                return res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+            res.status(500).json({
+                success: false,
+                message: error.message || '공지사항 수정 중 오류가 발생했습니다.'
+            });
         }
     }
 
@@ -205,17 +201,33 @@ export default class NoticeController {
      */
     async deleteManagementNotice(req, res) {
         try {
-            const { id } = req.params;
-            const result = await this.noticeRepository.deleteNotice(id);
+            await this.noticeService.deleteNotice(
+                req.params.id,
+                req.session.user.id
+            );
 
-            if (result) {
-                res.json({ success: true, message: '공지사항이 삭제되었습니다.' });
-            } else {
-                res.status(404).json({ success: false, message: '공지사항을 찾을 수 없습니다.' });
-            }
+            res.json({
+                success: true,
+                message: '공지사항이 삭제되었습니다.'
+            });
         } catch (error) {
             console.error('Error deleting notice:', error);
-            res.status(500).json({ success: false, message: '공지사항 삭제 중 오류가 발생했습니다.' });
+            if (error instanceof NoticeNotFoundError) {
+                return res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+            if (error instanceof NoticePermissionError) {
+                return res.status(403).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+            res.status(500).json({
+                success: false,
+                message: error.message || '공지사항 삭제 중 오류가 발생했습니다.'
+            });
         }
     }
 }

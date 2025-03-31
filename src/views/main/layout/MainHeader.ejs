@@ -8,7 +8,7 @@
             <a href="/about">소개</a>
             <% if (locals.user) { %>
                 <div class="user-section">
-                    <a href="/user/profile" class="user-profile">
+                    <a href="/user/me" class="user-profile">
                         <%= user.username %>
                     </a>
                     <% if (user.role==='ADMIN' ) { %>

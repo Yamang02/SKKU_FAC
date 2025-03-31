@@ -1,16 +1,11 @@
 import SessionUtil from '../utils/SessionUtil.js';
-import UserRepository from '../repositories/UserRepository.js';
-import ArtworkRepository from '../repositories/ArtworkRepository.js';
 import ViewResolver from '../utils/ViewResolver.js';
 import { ViewPath } from '../constants/ViewPath.js';
-import bcrypt from 'bcrypt';
-import Page from '../models/common/page/Page.js';
-
+import UserService from '../services/user/UserService.js';
 
 export default class UserController {
     constructor() {
-        this.userRepository = new UserRepository();
-        this.artworkRepository = new ArtworkRepository();
+        this.userService = new UserService();
     }
 
     /**
@@ -27,31 +22,20 @@ export default class UserController {
         try {
             const { username, password } = req.body;
 
+            // 서비스를 통한 인증 처리
+            const user = await this.userService.authenticate(username, password);
 
-            const user = await this.userRepository.findUserByUsername(username);
-
-
-            if (!user) {
-                throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
-            }
-
-
-            const isPasswordValid = await bcrypt.compare(password, user.password);
-
-
-            if (!isPasswordValid) {
-                throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
-            }
-
-            // 필요한 사용자 정보를 세션에 저장
+            // 세션에 저장할 사용자 정보 구성
             const sessionUser = {
                 id: user.id,
                 username: user.username,
                 name: user.name,
                 role: user.role,
-                isAdmin: user.role === 'ADMIN'
+                isAdmin: user.role === 'ADMIN',
+                isClubMember: user.isClubMember
             };
-            console.log('세션에 저장할 사용자 정보:', sessionUser);
+
+            // 세션에 사용자 정보 저장
             await SessionUtil.saveUserToSession(req, sessionUser);
 
             const redirectUrl = req.body.redirectUrl || '/';
@@ -92,72 +76,29 @@ export default class UserController {
      */
     async registerUser(req, res) {
         try {
-            const {
-                username,
-                email,
-                password,
-                name,
-                department,
-                studentYear,
-                role,
-                isClubMember,
-                affiliation
-            } = req.body;
+            // 서비스를 통한 사용자 생성
+            const user = await this.userService.createUser(req.body);
 
-            // 이메일 중복 확인
-            const existingEmail = await this.userRepository.findUserByEmail(email);
-            if (existingEmail) {
-                throw new Error('이미 사용 중인 이메일입니다.');
-            }
-
-            // 사용자명 중복 확인
-            const existingUsername = await this.userRepository.findUserByUsername(username);
-            if (existingUsername) {
-                throw new Error('이미 사용 중인 아이디입니다.');
-            }
-
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            // 사용자 데이터 구성
-            const userData = {
-                username,
-                email,
-                password: hashedPassword,
-                name,
-                role,
-                isClubMember: role === 'SKKU_MEMBER' ? Boolean(isClubMember) : false
-            };
-
-            // 역할에 따른 추가 정보 설정
-            if (role === 'SKKU_MEMBER') {
-                userData.department = department;
-                userData.studentYear = studentYear;
-            } else if (role === 'EXTERNAL_MEMBER') {
-                userData.affiliation = affiliation;
-            }
-
-            const user = await this.userRepository.createUser(userData);
-
-            // 세션에 필요한 사용자 정보만 저장
+            // 세션에 저장할 사용자 정보 구성
             const sessionUser = {
                 id: user.id,
                 username: user.username,
                 name: user.name,
                 role: user.role,
-                isAdmin: user.role === 'admin',
+                isAdmin: user.role === 'ADMIN',
                 isClubMember: user.isClubMember
             };
+
+            // 세션에 사용자 정보 저장
             await SessionUtil.saveUserToSession(req, sessionUser);
 
-            // JSON 응답으로 변경
-            res.json({
-                success: true,
-                message: '회원가입이 완료되었습니다. 로그인해주세요.'
+            ViewResolver.render(res, ViewPath.MAIN.USER.REGISTER, {
+                success: '회원가입이 완료되었습니다. 로그인해주세요.'
             });
         } catch (error) {
-            res.status(400).json({
-                success: false,
-                message: error.message
+            ViewResolver.render(res, ViewPath.MAIN.USER.REGISTER, {
+                error: error.message,
+                formData: req.body
             });
         }
     }
@@ -168,11 +109,7 @@ export default class UserController {
     async getUserProfilePage(req, res) {
         try {
             const userId = req.session.user.id;
-            const user = await this.userRepository.findUserById(userId);
-
-            if (!user) {
-                throw new Error('사용자를 찾을 수 없습니다.');
-            }
+            const user = await this.userService.getUserDetail(userId);
 
             ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE, {
                 user
@@ -189,49 +126,19 @@ export default class UserController {
     async updateUserProfile(req, res) {
         try {
             const userId = req.session.user.id;
-            const {
-                name, department, studentYear,
-                isClubMember, affiliation,
-                currentPassword, newPassword
-            } = req.body;
+            const updateData = req.body;
 
-            const user = await this.userRepository.findUserById(userId);
-            if (!user) {
-                throw new Error('사용자를 찾을 수 없습니다.');
-            }
-
-            const updateData = {
-                name,
-                department,
-                studentYear,
-                isClubMember,
-                affiliation,
-                updatedAt: new Date()
-            };
-
-            // 비밀번호 변경 처리
-            if (newPassword) {
-                // 현재 비밀번호 확인
-                const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
-                if (!isPasswordValid) {
-                    throw new Error('현재 비밀번호가 일치하지 않습니다.');
-                }
-
-                // 새 비밀번호 해싱
-                const hashedPassword = await bcrypt.hash(newPassword, 10);
-                updateData.password = hashedPassword;
-            }
-
-            await this.userRepository.updateUser(userId, updateData);
+            // 서비스를 통한 사용자 정보 수정
+            const updatedUser = await this.userService.updateUser(userId, updateData);
 
             // 세션 업데이트 (비밀번호 제외)
             req.session.user = {
                 ...req.session.user,
-                name,
-                department,
-                studentYear,
-                isClubMember,
-                affiliation
+                name: updatedUser.name,
+                department: updatedUser.department,
+                studentYear: updatedUser.studentYear,
+                isClubMember: updatedUser.isClubMember,
+                affiliation: updatedUser.affiliation
             };
 
             res.json({
@@ -260,11 +167,7 @@ export default class UserController {
     async handleUserPasswordReset(req, res) {
         try {
             const { email } = req.body;
-            const user = await this.userRepository.findUserByEmail(email);
-
-            if (!user) {
-                throw new Error('해당 이메일로 등록된 사용자가 없습니다.');
-            }
+            await this.userService.resetPassword(email);
 
             // TODO: 비밀번호 재설정 이메일 발송 로직 구현
             const message = '비밀번호 재설정 링크가 이메일로 발송되었습니다.';
@@ -287,26 +190,17 @@ export default class UserController {
     async getManagementUserList(req, res) {
         try {
             const { page = 1, limit = 10, keyword } = req.query;
-            const filters = { keyword };
-
-            const users = await this.userRepository.findUsers({
+            const userList = await this.userService.getUserList({
                 page: parseInt(page),
                 limit: parseInt(limit),
-                ...filters
-            });
-
-            const pageData = new Page(users.total, {
-                page: parseInt(page),
-                limit: parseInt(limit),
-                baseUrl: '/admin/management/user',
-                filters
+                keyword
             });
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.LIST, {
                 title: '회원 관리',
-                users: users.items || [],
-                page: pageData,
-                filters
+                users: userList.items || [],
+                page: userList.page,
+                filters: { keyword }
             });
         } catch (error) {
             ViewResolver.renderError(res, error);
@@ -319,11 +213,7 @@ export default class UserController {
     async getManagementUserDetail(req, res) {
         try {
             const { id } = req.params;
-            const user = await this.userRepository.findUserById(id);
-
-            if (!user) {
-                throw new Error('회원을 찾을 수 없습니다.');
-            }
+            const user = await this.userService.getUserDetail(id);
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.DETAIL, {
                 title: '회원 상세',
@@ -342,12 +232,7 @@ export default class UserController {
             const userId = req.params.id;
             const updateData = req.body;
 
-            const user = await this.userRepository.findUserById(userId);
-            if (!user) {
-                throw new Error('사용자를 찾을 수 없습니다.');
-            }
-
-            await this.userRepository.updateUser(userId, updateData);
+            await this.userService.updateUser(userId, updateData);
             res.json({
                 success: true,
                 message: '회원 정보가 저장되었습니다.'
@@ -366,11 +251,7 @@ export default class UserController {
     async deleteManagementUser(req, res) {
         try {
             const userId = req.params.id;
-            const success = await this.userRepository.deleteUser(userId);
-
-            if (!success) {
-                throw new Error('사용자를 찾을 수 없습니다.');
-            }
+            await this.userService.deleteUser(userId);
 
             res.json({
                 success: true,
@@ -389,12 +270,8 @@ export default class UserController {
      */
     async deleteUserAccount(req, res) {
         try {
-            const userId = req.session.user.id;  // 세션에서 현재 로그인한 사용자의 ID를 가져옴
-            const success = await this.userRepository.deleteUser(userId);
-
-            if (!success) {
-                throw new Error('계정 삭제에 실패했습니다.');
-            }
+            const userId = req.session.user.id;
+            await this.userService.deleteUser(userId);
 
             // 세션 삭제
             await SessionUtil.destroySession(req);

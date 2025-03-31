@@ -22,22 +22,6 @@
             </div>
 
             <div class="admin-form__group">
-                <div class="admin-form__checkbox-group">
-                    <input type="checkbox" id="isImportant" name="isImportant" class="admin-form__checkbox" <%=notice &&
-                        notice.isImportant ? 'checked' : '' %>>
-                    <label class="admin-form__checkbox-label" for="isImportant">중요 공지사항</label>
-                </div>
-            </div>
-
-            <div class="admin-form__group">
-                <label class="admin-form__label" for="status">상태</label>
-                <select id="status" name="status" class="admin-form__select">
-                    <option value="active" <%=notice && notice.status==='active' ? 'selected' : '' %>>활성</option>
-                    <option value="inactive" <%=notice && notice.status==='inactive' ? 'selected' : '' %>>비활성</option>
-                </select>
-            </div>
-
-            <div class="admin-form__group">
                 <label class="admin-form__label">작성자</label>
                 <p class="admin-form__text">
                     <%= notice ? notice.author : user.name %>
@@ -55,17 +39,36 @@
                 <div class="admin-form__group">
                     <label class="admin-form__label">작성일</label>
                     <p class="admin-form__text">
-                        <%= new Date(notice.createdAt).toLocaleString() %>
+                        <%= notice.formattedCreatedAt %>
                     </p>
                 </div>
 
                 <div class="admin-form__group">
                     <label class="admin-form__label">수정일</label>
                     <p class="admin-form__text">
-                        <%= new Date(notice.updatedAt).toLocaleString() %>
+                        <%= notice.formattedUpdatedAt %>
                     </p>
                 </div>
                 <% } %>
+
+                    <div class="admin-form__group">
+                        <label class="admin-form__label">중요 공지</label>
+                        <div class="admin-form__checkbox">
+                            <input type="checkbox" id="isImportant" name="isImportant" <%=notice && notice.isImportant
+                                ? 'checked' : '' %>>
+                            <label for="isImportant">중요 공지로 설정</label>
+                        </div>
+                    </div>
+
+                    <div class="admin-form__group">
+                        <label class="admin-form__label" for="status">상태</label>
+                        <select id="status" name="status" class="admin-form__select">
+                            <option value="active" <%=notice && notice.status==='active' ? 'selected' : '' %>>활성
+                            </option>
+                            <option value="inactive" <%=notice && notice.status==='inactive' ? 'selected' : '' %>>비활성
+                            </option>
+                        </select>
+                    </div>
 
                     <div class="admin-form__actions">
                         <button type="submit" class="admin-button admin-button--primary">

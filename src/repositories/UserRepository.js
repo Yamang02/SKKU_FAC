@@ -12,15 +12,16 @@ export default class UserRepository {
      * @param {Object} options - 조회 옵션
      * @returns {Promise<Object>} 페이지네이션된 사용자 목록
      */
-    async findUsers({ page = 1, limit = 10, search, role } = {}) {
+    async findUsers({ page = 1, limit = 10, keyword, role } = {}) {
         let filteredUsers = [...this.users];
 
         // 검색 조건 적용
-        if (search) {
+        if (keyword) {
             filteredUsers = filteredUsers.filter(user =>
-                user.name.toLowerCase().includes(search.toLowerCase()) ||
-                user.email.toLowerCase().includes(search.toLowerCase()) ||
-                user.department.toLowerCase().includes(search.toLowerCase())
+                user.name.toLowerCase().includes(keyword.toLowerCase()) ||
+                user.email.toLowerCase().includes(keyword.toLowerCase()) ||
+                user.department?.toLowerCase().includes(keyword.toLowerCase()) ||
+                user.username.toLowerCase().includes(keyword.toLowerCase())
             );
         }
 
@@ -61,6 +62,15 @@ export default class UserRepository {
     }
 
     /**
+     * 사용자명으로 사용자를 조회합니다.
+     * @param {string} username - 사용자명
+     * @returns {Promise<User|null>} 사용자 정보
+     */
+    async findUserByUsername(username) {
+        return this.users.find(user => user.username === username) || null;
+    }
+
+    /**
      * 작가 목록을 조회합니다.
      * @returns {Promise<Array<User>>} 작가 목록
      */
@@ -85,9 +95,6 @@ export default class UserRepository {
             updatedAt: new Date().toISOString()
         });
 
-        // 유효성 검사
-        user.validate();
-
         // 저장
         this.users.push(user);
         return user;
@@ -101,24 +108,20 @@ export default class UserRepository {
      */
     async updateUser(id, userData) {
         const index = this.users.findIndex(user => user.id === Number(id));
-        if (index === -1) return null;
+        if (index === -1) {
+            return null;
+        }
 
-        // 현재 사용자 정보 가져오기
-        const currentUser = this.users[index];
-
-        // 새로운 User 엔티티 생성
-        const updatedUser = new User({
-            ...currentUser,
+        // User 엔티티 업데이트
+        const user = new User({
+            ...this.users[index],
             ...userData,
             updatedAt: new Date().toISOString()
         });
 
-        // 유효성 검사
-        updatedUser.validate();
-
         // 저장
-        this.users[index] = updatedUser;
-        return updatedUser;
+        this.users[index] = user;
+        return user;
     }
 
     /**
@@ -128,7 +131,9 @@ export default class UserRepository {
      */
     async deleteUser(id) {
         const index = this.users.findIndex(user => user.id === Number(id));
-        if (index === -1) return false;
+        if (index === -1) {
+            return false;
+        }
 
         this.users.splice(index, 1);
         return true;

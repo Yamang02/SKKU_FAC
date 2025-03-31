@@ -4,7 +4,7 @@
 <div class="notice-detail-container">
     <!-- 공지사항 헤더 -->
     <div class="notice-detail-header">
-        <% if (notice.is_important) { %>
+        <% if (notice.isImportant) { %>
             <span class="notice-badge important">중요</span>
             <% } %>
                 <h1 class="notice-detail-title">
@@ -15,7 +15,7 @@
                         <%= notice.author %>
                     </span>
                     <span class="notice-date">
-                        <%= notice.created_at %>
+                        <%= notice.formattedCreatedAt %>
                     </span>
                     <span class="notice-views">조회수 <%= notice.views %></span>
                 </div>
@@ -41,21 +41,38 @@
     </div>
 
     <!-- 이전/다음 글 네비게이션 -->
-    <nav class="notice-navigation">
-        <a href="/notice/<%= notice.prevId %>" class="btn--nav btn--prev" <%=!notice.prevId ? 'style="display: none;"'
-            : '' %>>
-            <i class="fas fa-chevron-left"></i>
-        </a>
+    <div class="notice-navigation">
+        <div class="nav-group">
+            <% if (notice.prevId) { %>
+                <span class="nav-title">
+                    <a href="/notice/<%= notice.prevId %>">
+                        <%= notice.prevTitle %>
+                    </a>
+                </span>
+                <a href="/notice/<%= notice.prevId %>" class="btn--nav">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <% } %>
+        </div>
+
         <a href="/notice" class="btn--list">
             <i class="fas fa-list"></i>
             <span>목록으로</span>
         </a>
-        <a href="/notice/<%= notice.nextId %>" class="btn--nav btn--next" <%=!notice.nextId ? 'style="display: none;"'
-            : '' %>>
-            <i class="fas fa-chevron-right"></i>
-        </a>
-    </nav>
-</div>
 
-<!-- 외부 스크립트 파일 로드 -->
-<script src="/js/page/notice/NoticeDetail.js"></script>
+        <div class="nav-group">
+            <% if (notice.nextId) { %>
+                <a href="/notice/<%= notice.nextId %>" class="btn--nav">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <span class="nav-title">
+                    <a href="/notice/<%= notice.nextId %>">
+                        <%= notice.nextTitle %>
+                    </a>
+                </span>
+                <% } %>
+        </div>
+    </div>
+
+    <!-- 외부 스크립트 파일 로드 -->
+    <script src="/js/page/notice/NoticeDetail.js"></script>

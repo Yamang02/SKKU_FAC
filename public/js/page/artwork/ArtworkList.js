@@ -2,46 +2,11 @@
  * 작품 목록 페이지
  * 작품 목록의 모든 기능을 처리합니다.
  */
+import ArtworkAPI from '../../api/ArtworkAPI';
+
 // API 함수 - 서버에서 가져오기
-function fetchArtworkList(params = {}) {
-    return new Promise((resolve, reject) => {
-        try {
-            showLoading(true);
-
-            // URL 파라미터 생성
-            const queryParams = new URLSearchParams();
-            Object.entries(params).forEach(([key, value]) => {
-                if (value !== undefined && value !== null && value !== '') {
-                    queryParams.append(key, value);
-                }
-            });
-
-            // API 요청
-            fetch(`/artwork/api/list?${queryParams.toString()}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`API 오류: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    resolve(data);
-                })
-                .catch(error => {
-                    console.error('작품 목록을 가져오는 중 오류 발생:', error);
-                    showErrorMessage('작품 목록을 불러오는데 실패했습니다.');
-                    reject(error);
-                })
-                .finally(() => {
-                    showLoading(false);
-                });
-        } catch (error) {
-            console.error('작품 목록을 가져오는 중 오류 발생:', error);
-            showErrorMessage('작품 목록을 불러오는데 실패했습니다.');
-            showLoading(false);
-            reject(error);
-        }
-    });
+async function fetchArtworkList(params = {}) {
+    return await ArtworkAPI.getList(params);
 }
 
 // 유틸리티 함수

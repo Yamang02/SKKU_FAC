@@ -3,33 +3,60 @@
  * 재사용 가능한 알림 관련 유틸리티 함수들을 제공합니다.
  */
 
+const NOTIFICATION_DURATION = 3000; // 알림이 표시되는 시간 (ms)
+const FADE_DURATION = 500;         // 페이드 아웃 시간 (ms)
+
+/**
+ * 알림 메시지 표시를 위한 컨테이너 생성
+ * @returns {HTMLElement} 알림 컨테이너 요소
+ */
+function getNotificationContainer() {
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.className = 'notification-container';
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+/**
+ * 알림 메시지 표시
+ * @param {string} message - 표시할 메시지
+ * @param {string} type - 알림 타입 ('error' | 'success')
+ */
+function showNotification(message, type) {
+    const container = getNotificationContainer();
+    const notification = document.createElement('div');
+    notification.className = `notification notification--${type}`;
+    notification.textContent = message;
+
+    container.appendChild(notification);
+
+    // 애니메이션을 위한 강제 리플로우
+    notification.offsetHeight;
+
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            if (notification.parentNode === container) {
+                container.removeChild(notification);
+            }
+            // 컨테이너가 비어있으면 제거
+            if (!container.hasChildNodes()) {
+                document.body.removeChild(container);
+            }
+        }, FADE_DURATION);
+    }, NOTIFICATION_DURATION);
+}
+
 /**
  * 오류 메시지 표시
  * @param {string} message - 오류 메시지
  */
 export function showErrorMessage(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.textContent = message;
-    errorDiv.style.position = 'fixed';
-    errorDiv.style.top = '20px';
-    errorDiv.style.left = '50%';
-    errorDiv.style.transform = 'translateX(-50%)';
-    errorDiv.style.backgroundColor = 'rgba(220, 53, 69, 0.9)';
-    errorDiv.style.color = 'white';
-    errorDiv.style.padding = '10px 20px';
-    errorDiv.style.borderRadius = '4px';
-    errorDiv.style.zIndex = '2000';
-
-    document.body.appendChild(errorDiv);
-
-    setTimeout(() => {
-        errorDiv.style.opacity = '0';
-        errorDiv.style.transition = 'opacity 0.5s ease';
-        setTimeout(() => {
-            document.body.removeChild(errorDiv);
-        }, 500);
-    }, 3000);
+    showNotification(message, 'error');
 }
 
 /**
@@ -37,26 +64,28 @@ export function showErrorMessage(message) {
  * @param {string} message - 성공 메시지
  */
 export function showSuccessMessage(message) {
-    const successDiv = document.createElement('div');
-    successDiv.className = 'success-message';
-    successDiv.textContent = message;
-    successDiv.style.position = 'fixed';
-    successDiv.style.top = '20px';
-    successDiv.style.left = '50%';
-    successDiv.style.transform = 'translateX(-50%)';
-    successDiv.style.backgroundColor = 'rgba(40, 167, 69, 0.9)';
-    successDiv.style.color = 'white';
-    successDiv.style.padding = '10px 20px';
-    successDiv.style.borderRadius = '4px';
-    successDiv.style.zIndex = '2000';
+    showNotification(message, 'success');
+}
 
-    document.body.appendChild(successDiv);
+/**
+ * 로딩 상태 표시
+ * @param {boolean} isLoading - 로딩 상태
+ */
+export function showLoading(isLoading) {
+    const loadingId = 'global-loading';
+    let loadingElement = document.getElementById(loadingId);
 
-    setTimeout(() => {
-        successDiv.style.opacity = '0';
-        successDiv.style.transition = 'opacity 0.5s ease';
-        setTimeout(() => {
-            document.body.removeChild(successDiv);
-        }, 500);
-    }, 3000);
+    if (isLoading && !loadingElement) {
+        loadingElement = document.createElement('div');
+        loadingElement.id = loadingId;
+        loadingElement.className = 'loading-spinner';
+        document.body.appendChild(loadingElement);
+    } else if (!isLoading && loadingElement) {
+        loadingElement.addEventListener('transitionend', () => {
+            if (loadingElement.parentNode) {
+                document.body.removeChild(loadingElement);
+            }
+        });
+        loadingElement.style.opacity = '0';
+    }
 }

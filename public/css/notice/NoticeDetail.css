@@ -148,6 +148,11 @@
     gap: 0.5rem;
 }
 
+.nav-title {
+    margin-right: 2rem;
+    margin-left: 2rem;
+}
+
 /* 이전/다음 버튼 스타일 */
 .btn--nav {
     display: inline-flex;

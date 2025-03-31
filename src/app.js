@@ -60,9 +60,23 @@ const getReturnUrl = (req) => {
 // 미들웨어 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../public'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'text/javascript; charset=UTF-8');
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+        }
+    }
+}));
 app.use('/css', express.static(path.join(__dirname, '../public/css')));
-app.use('/js', express.static(path.join(__dirname, '../public/js')));
+app.use('/js', express.static(path.join(__dirname, '../public/js'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'text/javascript; charset=UTF-8');
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+        }
+    }
+}));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
 // 세션 설정

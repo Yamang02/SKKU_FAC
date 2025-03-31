@@ -56,38 +56,34 @@
                                         <% } %>
                             </div>
                             <div class="notice-content">
-                                <% if (notice.is_important) { %>
-                                    <span class="notice-badge important">중요</span>
-                                    <% } %>
-                                        <h3 class="notice-title">
+                                <h3 class="notice-title">
+                                    <% if (notice.isImportant) { %>
+                                        <span class="notice-badge important">중요</span>
+                                        <% } %>
                                             <%= notice.title %>
-                                        </h3>
-                                        <p class="notice-excerpt">
-                                            <%= notice.content %>
-                                        </p>
-                                        <div class="notice-meta">
-                                            <span class="notice-date">
-                                                <%= notice.created_at %>
-                                            </span>
-                                            <span class="notice-author">
-                                                <%= notice.author %>
-                                            </span>
-                                            <span class="notice-views">조회 <%= notice.views %></span>
-                                        </div>
+                                </h3>
+                                <div class="notice-meta">
+                                    <span class="notice-author">
+                                        <%= notice.author %>
+                                    </span>
+                                    <span class="notice-date">
+                                        <%= notice.formattedCreatedAt %>
+                                    </span>
+                                    <span class="notice-views">조회수 <%= notice.views %></span>
+                                </div>
                             </div>
                         </a>
                     </article>
                     <% }); %>
                         <% } else { %>
-                            <div class="no-results">
+                            <div class="notice-empty">
                                 <p>등록된 공지사항이 없습니다.</p>
                             </div>
                             <% } %>
         </div>
 
-        <!-- 페이지네이션 -->
-        <% if (typeof page !=='undefined' && page) { %>
-            <%- include('../common/pagination', { page }) %>
+        <% if (page) { %>
+            <%- include('../../common/pagination', { page }) %>
                 <% } %>
     </section>
 </div>

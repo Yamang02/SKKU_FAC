@@ -6,6 +6,7 @@ import {
     deleteNotice,
     findImportantNotices
 } from '../config/data/notice.js';
+import { NoticeNotFoundError } from '../models/common/error/NoticeError.js';
 
 export default class NoticeRepository {
     /**
@@ -59,6 +60,87 @@ export default class NoticeRepository {
      */
     async findImportantNotices() {
         return findImportantNotices();
+    }
+
+    /**
+     * 공지사항의 조회수를 증가시킵니다.
+     * @param {string} id - 공지사항 ID
+     * @returns {Promise<boolean>} 성공 여부
+     */
+    async incrementViews(id) {
+        try {
+            const notice = await this.findNoticeById(id);
+            if (!notice) {
+                throw new NoticeNotFoundError();
+            }
+
+            notice.views = (notice.views || 0) + 1;
+            await this.updateNotice(id, notice);
+            return true;
+        } catch (error) {
+            console.error('Error incrementing notice views:', error);
+            return false;
+        }
+    }
+
+    /**
+     * 특정 공지사항의 이전 글을 조회합니다.
+     * @param {string} id - 현재 공지사항 ID
+     * @param {Object} options - 조회 옵션
+     * @param {string} options.status - 공지사항 상태 (active/inactive)
+     * @returns {Promise<Object|null>} 이전 글 정보 또는 null
+     */
+    async findPreviousNotice(id, { status = 'active' } = {}) {
+        try {
+            const currentNotice = await this.findNoticeById(id);
+            if (!currentNotice) {
+                throw new NoticeNotFoundError();
+            }
+
+            // 현재 글보다 이전에 작성된 글 중 가장 최근 글 조회
+            const notices = await this.findNotices({
+                createdAtLt: currentNotice.createdAt,
+                status,
+                sortField: 'createdAt',
+                sortOrder: 'desc',
+                limit: 1
+            });
+
+            return notices.items[0] || null;
+        } catch (error) {
+            console.error('Error finding previous notice:', error);
+            return null;
+        }
+    }
+
+    /**
+     * 특정 공지사항의 다음 글을 조회합니다.
+     * @param {string} id - 현재 공지사항 ID
+     * @param {Object} options - 조회 옵션
+     * @param {string} options.status - 공지사항 상태 (active/inactive)
+     * @returns {Promise<Object|null>} 다음 글 정보 또는 null
+     */
+    async findNextNotice(id, { status = 'active' } = {}) {
+        try {
+            const currentNotice = await this.findNoticeById(id);
+            if (!currentNotice) {
+                throw new NoticeNotFoundError();
+            }
+
+            // 현재 글보다 나중에 작성된 글 중 가장 오래된 글 조회
+            const notices = await this.findNotices({
+                createdAtGt: currentNotice.createdAt,
+                status,
+                sortField: 'createdAt',
+                sortOrder: 'asc',
+                limit: 1
+            });
+
+            return notices.items[0] || null;
+        } catch (error) {
+            console.error('Error finding next notice:', error);
+            return null;
+        }
     }
 
     // /**

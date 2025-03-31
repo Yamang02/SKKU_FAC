@@ -1,7 +1,14 @@
+/**
+ * 로그인 페이지 JavaScript
+ */
+import userApi from '../../api/user';
+
 document.addEventListener('DOMContentLoaded', function () {
     const togglePassword = document.querySelector('.toggle-password');
     const passwordInput = document.getElementById('password');
+    const loginForm = document.querySelector('form');
 
+    // 비밀번호 토글 기능
     if (togglePassword && passwordInput) {
         togglePassword.addEventListener('click', function (e) {
             e.preventDefault();
@@ -17,9 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 폼 제출 전 유효성 검사
-    const loginForm = document.querySelector('form');
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             const username = document.querySelector('#username').value;
             const password = passwordInput.value;
 
@@ -27,6 +33,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.preventDefault();
                 showError('아이디와 비밀번호를 모두 입력해주세요.');
                 return;
+            }
+
+            try {
+                await userApi.login({ username, password });
+                window.location.href = '/';
+            } catch (error) {
+                e.preventDefault();
+                showError(error.message || '로그인 중 오류가 발생했습니다.');
             }
         });
     }
@@ -38,7 +52,7 @@ function showError(message) {
 
     if (!alert) {
         alert = document.createElement('div');
-        alert.classList.add('alert', 'alert-error');
+        alert.classList.add('alert', 'alert-danger');
         const form = document.querySelector('form');
         form.insertBefore(alert, form.firstChild);
     }
