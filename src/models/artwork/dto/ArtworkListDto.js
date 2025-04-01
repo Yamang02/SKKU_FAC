@@ -1,4 +1,5 @@
 import ArtworkSimpleDTO from './ArtworkSimpleDTO.js';
+import ArtworkRelations from './relations/ArtworkRelations.js';
 
 /**
  * 작품 목록을 위한 DTO
@@ -6,7 +7,10 @@ import ArtworkSimpleDTO from './ArtworkSimpleDTO.js';
  */
 export default class ArtworkListDTO {
     constructor(data = {}) {
-        this.items = (data.items || []).map(artwork => new ArtworkSimpleDTO(artwork));
+        const relations = new ArtworkRelations();
+        this.items = (data.items || []).map(artwork =>
+            new ArtworkSimpleDTO(artwork, relations)
+        );
         this.total = data.total || 0;
         this.page = data.page;
     }

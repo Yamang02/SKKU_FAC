@@ -8,6 +8,7 @@ const artwork = [
         'artistId': 2,
         'exhibitionId': 1,
         'department': '미술학과 23',
+        'year': '',
         'medium': '',
         'size': '',
         'description': 'test',

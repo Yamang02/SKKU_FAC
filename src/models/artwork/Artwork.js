@@ -15,15 +15,11 @@ export default class Artwork {
         exhibitionId = 0,
         isFeatured = false,
         createdAt = '',
-        updatedAt = '',
-        // DTO시 분리될 정보
-        exhibitionTitle = '',
-        artistName = ''
+        updatedAt = ''
     }) {
         this.id = id;
         this.title = title;
         this.artistId = artistId;
-        this.artistName = artistName;
         this.department = department;
         this.year = year;
         this.medium = medium;
@@ -31,7 +27,6 @@ export default class Artwork {
         this.description = description;
         this.imageId = imageId;
         this.exhibitionId = exhibitionId;
-        this.exhibitionTitle = exhibitionTitle;
         this.isFeatured = isFeatured;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -46,7 +41,6 @@ export default class Artwork {
             id: this.id,
             title: this.title,
             artistId: this.artistId,
-            artistName: this.artistName,
             department: this.department,
             year: this.year,
             medium: this.medium,
@@ -54,7 +48,6 @@ export default class Artwork {
             description: this.description,
             imageId: this.imageId,
             exhibitionId: this.exhibitionId,
-            exhibitionTitle: this.exhibitionTitle,
             isFeatured: this.isFeatured,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt
