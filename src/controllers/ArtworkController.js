@@ -8,6 +8,9 @@ import {
     ArtworkValidationError
 } from '../models/common/error/ArtworkError.js';
 import { ImageError } from '../errors/ImageError.js';
+import { ApiResponse } from '../models/common/response/ApiResponse.js';
+import { Message } from '../constants/Message.js';
+import { logger } from '../config/logger.js';
 
 /**
  * 작품 관련 컨트롤러
@@ -24,31 +27,18 @@ export default class ArtworkController {
      */
     async getArtworkList(req, res) {
         try {
-            const { page = 1, limit = 12, sortField = 'createdAt', sortOrder = 'desc', searchType, keyword } = req.query;
-            const artworkList = await this.artworkService.getArtworkList({
-                page,
-                limit,
-                sortField,
-                sortOrder,
-                searchType,
-                keyword,
-                baseUrl: '/artwork'
-            });
-
-            ViewResolver.render(res, ViewPath.MAIN.ARTWORK.LIST, {
-                title: '작품 목록',
-                artworks: artworkList.items,
-                page: artworkList.page,
-                searchType: searchType || '',
-                keyword: keyword || '',
-                total: artworkList.total
-            });
+            const { page = 1, size = 10 } = req.query;
+            const result = await this.artworkService.getArtworkList(Number(page), Number(size));
+            return res.json(ApiResponse.success(result).toJSON());
         } catch (error) {
-            if (error instanceof ArtworkNotFoundError) {
-                ViewResolver.renderError(res, error, 404);
-            } else {
-                ViewResolver.renderError(res, error, 500);
-            }
+            logger.error({
+                operation: 'getArtworkList',
+                error: error.message,
+                stack: error.stack,
+                page: req.query.page,
+                size: req.query.size
+            });
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.LIST_ERROR).toJSON());
         }
     }
 
@@ -85,15 +75,25 @@ export default class ArtworkController {
     async getArtworkDetail(req, res) {
         try {
             const { id } = req.params;
-            const artworkDetail = await this.artworkService.getArtworkDetail(id);
-
-            ViewResolver.render(res, ViewPath.MAIN.ARTWORK.DETAIL, {
-                title: artworkDetail.title,
-                artwork: artworkDetail,
-                relatedArtworks: artworkDetail.relatedArtworks
-            });
+            const artwork = await this.artworkService.getArtworkDetail(id);
+            return res.json(ApiResponse.success(artwork).toJSON());
         } catch (error) {
-            ViewResolver.renderError(res, error);
+            if (error instanceof ArtworkNotFoundError) {
+                logger.error({
+                    operation: 'getArtworkDetail',
+                    error: error.message,
+                    stack: error.stack,
+                    id: req.params.id
+                });
+                return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND).toJSON());
+            }
+            logger.error({
+                operation: 'getArtworkDetail',
+                error: error.message,
+                stack: error.stack,
+                id: req.params.id
+            });
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.DETAIL_ERROR).toJSON());
         }
     }
 
@@ -130,85 +130,42 @@ export default class ArtworkController {
      */
     async createArtwork(req, res) {
         try {
-            // 1. 세션 유효성 검사
-            if (!req.session.user) {
-                return res.status(401).json({
-                    success: false,
-                    code: 'AUTH_REQUIRED',
-                    message: '로그인이 필요합니다.',
-                    redirectUrl: '/user/login'
-                });
-            }
-
-            // 2. 사용자 정보 가져오기
-            const user = await this.userRepository.findUserById(req.session.user.id);
-            if (!user) {
-                return res.status(401).json({
-                    success: false,
-                    code: 'USER_NOT_FOUND',
-                    message: '사용자 정보를 찾을 수 없습니다.',
-                    redirectUrl: '/user/login'
-                });
-            }
-
-            // 디버깅: 요청 데이터 확인
-            console.log('요청 데이터:', {
-                body: req.body,
-                file: req.file ? {
-                    originalname: req.file.originalname,
-                    size: req.file.size,
-                    mimetype: req.file.mimetype
-                } : null,
-                user: {
-                    id: user.id,
-                    name: user.name,
-                    role: user.role
-                }
+            const artworkData = req.body;
+            const file = req.file;
+            logger.info({
+                operation: 'createArtwork',
+                title: artworkData.title,
+                artistId: artworkData.artistId,
+                hasImage: !!file
             });
 
-            // 3. 요청 데이터 준비
-            const artworkData = {
-                ...req.body,
-                artistId: user.id,
-                artistName: user.name
-            };
-
-            // 4. 작품 생성
-            console.log('작품 생성 시작');
-            const artwork = await this.artworkService.createArtwork(artworkData, req.file);
-            console.log('작품 생성 완료:', artwork);
-
-            // 5. 응답 전송
-            return res.json({
-                success: true,
-                code: 'ARTWORK_CREATED',
-                message: '작품이 성공적으로 등록되었습니다.',
-                artwork: artwork.toJSON()
-            });
+            const artwork = await this.artworkService.createArtwork(artworkData, file);
+            return res.status(201).json(ApiResponse.success(artwork, Message.ARTWORK.CREATE_SUCCESS).toJSON());
         } catch (error) {
-            // 디버깅: 에러 상세 정보 출력
-            console.error('작품 생성 중 오류 발생:', error);
-            console.error('에러 스택:', error.stack);
-            console.error('에러 타입:', error.constructor.name);
-            console.error('에러 코드:', error.code);
-            console.error('에러 메시지:', error.message);
-
             if (error instanceof ArtworkValidationError) {
-                return res.status(400).json({
-                    success: false,
-                    code: error.code,
-                    message: error.message
+                logger.error({
+                    operation: 'createArtwork',
+                    error: error.message,
+                    stack: error.stack,
+                    data: req.body
                 });
+                return res.status(400).json(ApiResponse.error(Message.ARTWORK.VALIDATION_ERROR).toJSON());
             } else if (error instanceof ImageError) {
-                return res.status(400).json({
-                    success: false,
-                    code: error.code,
-                    message: error.message
+                logger.error({
+                    operation: 'createArtwork',
+                    error: error.message,
+                    stack: error.stack,
+                    file: req.file
                 });
-            } else {
-                console.error('Error creating artwork:', error);
-                return res.status(500).json({ error: '작품 생성 중 오류가 발생했습니다.' });
+                return res.status(400).json(ApiResponse.error(Message.IMAGE.UPLOAD_ERROR).toJSON());
             }
+            logger.error({
+                operation: 'createArtwork',
+                error: error.message,
+                stack: error.stack,
+                data: req.body
+            });
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.CREATE_ERROR).toJSON());
         }
     }
 
@@ -235,55 +192,21 @@ export default class ArtworkController {
      */
     async updateArtwork(req, res) {
         try {
-            // 1. 세션 유효성 검사
-            if (!req.session.user) {
-                return res.status(401).json({
-                    success: false,
-                    code: 'AUTH_REQUIRED',
-                    message: '로그인이 필요합니다.',
-                    redirectUrl: '/user/login'
-                });
-            }
-
-            // 2. 사용자 정보 가져오기
-            const user = await this.userRepository.findUserById(req.session.user.id);
-            if (!user) {
-                return res.status(401).json({
-                    success: false,
-                    code: 'USER_NOT_FOUND',
-                    message: '사용자 정보를 찾을 수 없습니다.',
-                    redirectUrl: '/user/login'
-                });
-            }
-
-            // 3. 작품 수정
             const { id } = req.params;
-            const artworkData = {
-                ...req.body,
-                artistId: user.id,
-                artistName: user.name
-            };
-
-            const artwork = await this.artworkService.updateArtwork(id, artworkData, req.file);
-
-            // 4. 응답 전송
-            return res.json({
-                success: true,
-                code: 'ARTWORK_UPDATED',
-                message: '작품이 성공적으로 수정되었습니다.',
-                artwork: artwork.toJSON()
-            });
+            const artworkData = req.body;
+            const file = req.file;
+            const artwork = await this.artworkService.updateArtwork(id, artworkData, file);
+            return res.json(ApiResponse.success(artwork, Message.ARTWORK.UPDATE_SUCCESS).toJSON());
         } catch (error) {
             if (error instanceof ArtworkNotFoundError) {
-                return res.status(404).json({ error: error.message });
+                return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND).toJSON());
             } else if (error instanceof ArtworkValidationError) {
-                return res.status(400).json({ error: error.message });
+                return res.status(400).json(ApiResponse.error(Message.ARTWORK.VALIDATION_ERROR).toJSON());
             } else if (error instanceof ImageError) {
-                return res.status(400).json({ error: error.message });
-            } else {
-                console.error('Error updating artwork:', error);
-                return res.status(500).json({ error: '작품 수정 중 오류가 발생했습니다.' });
+                return res.status(400).json(ApiResponse.error(Message.IMAGE.UPLOAD_ERROR).toJSON());
             }
+            console.error('Error updating artwork:', error);
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.UPDATE_ERROR).toJSON());
         }
     }
 
@@ -293,25 +216,16 @@ export default class ArtworkController {
     async deleteArtwork(req, res) {
         try {
             const { id } = req.params;
-            const result = await this.artworkService.deleteArtwork(id);
-            if (!result) {
-                throw new Error('삭제 중 오류 발생');
-            }
-
-            res.json({
-                success: true,
-                code: 'ARTWORK_DELETED',
-                message: '작품이 삭제되었습니다.'
-            });
+            await this.artworkService.deleteArtwork(id);
+            return res.json(ApiResponse.success(null, Message.ARTWORK.DELETE_SUCCESS).toJSON());
         } catch (error) {
             if (error instanceof ArtworkNotFoundError) {
-                return res.status(404).json({ error: error.message });
+                return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND).toJSON());
             } else if (error instanceof ImageError) {
-                return res.status(400).json({ error: error.message });
-            } else {
-                console.error('Error deleting artwork:', error);
-                return res.status(500).json({ error: '작품 삭제 중 오류가 발생했습니다.' });
+                return res.status(400).json(ApiResponse.error(Message.IMAGE.DELETE_ERROR).toJSON());
             }
+            console.error('Error deleting artwork:', error);
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.DELETE_ERROR).toJSON());
         }
     }
 

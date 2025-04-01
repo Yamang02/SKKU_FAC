@@ -1,0 +1,60 @@
+import pino from 'pino';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 로그 디렉토리 설정
+const logDir = path.join(__dirname, '../../logs');
+
+// Pino 로거 설정
+export const logger = pino({
+    transport: {
+        target: 'pino-pretty',
+        options: {
+            colorize: true,
+            translateTime: 'SYS:standard',
+            ignore: 'pid,hostname'
+        }
+    },
+    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug'
+}, pino.destination({
+    dest: path.join(logDir, 'app.log'),
+    sync: false,
+    mkdir: true
+}));
+
+// 에러 로거 설정
+export const errorLogger = pino({
+    transport: {
+        target: 'pino-pretty',
+        options: {
+            colorize: true,
+            translateTime: 'SYS:standard',
+            ignore: 'pid,hostname'
+        }
+    },
+    level: 'error'
+}, pino.destination({
+    dest: path.join(logDir, 'error.log'),
+    sync: false,
+    mkdir: true
+}));
+
+// 성능 로거 설정
+export const performanceLogger = pino({
+    transport: {
+        target: 'pino-pretty',
+        options: {
+            colorize: true,
+            translateTime: 'SYS:standard',
+            ignore: 'pid,hostname'
+        }
+    },
+    level: 'info'
+}, pino.destination({
+    dest: path.join(logDir, 'performance.log'),
+    sync: false,
+    mkdir: true
+}));
