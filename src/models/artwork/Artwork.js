@@ -12,7 +12,7 @@ export default class Artwork {
         size = '',
         description = '',
         image = '',
-        imagePath = '',
+        imageId = null,
         exhibitionId = 0,
         isFeatured = false,
         createdAt = '',
@@ -31,7 +31,7 @@ export default class Artwork {
         this.size = size;
         this.description = description;
         this.image = image;
-        this.imagePath = imagePath;
+        this.imageId = imageId;
         this.exhibitionId = exhibitionId;
         this.exhibitionTitle = exhibitionTitle;
         this.isFeatured = isFeatured;
@@ -55,7 +55,7 @@ export default class Artwork {
             size: this.size,
             description: this.description,
             image: this.image,
-            imagePath: this.imagePath,
+            imageId: this.imageId,
             exhibitionId: this.exhibitionId,
             exhibitionTitle: this.exhibitionTitle,
             isFeatured: this.isFeatured,
@@ -82,5 +82,14 @@ export default class Artwork {
             throw new Error('작품 제목을 입력해주세요.');
         }
         return true;
+    }
+
+    /**
+     * 작품 모델을 생성합니다.
+     * @param {Object} data - 작품 데이터
+     * @returns {Artwork} 생성된 작품 모델
+     */
+    static create(data) {
+        return new Artwork(data);
     }
 }

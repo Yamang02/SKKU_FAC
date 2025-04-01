@@ -7,7 +7,7 @@ export default class ArtworkRequestDTO {
         this.title = data.title;
         this.description = data.description;
         this.image = data.image;
-        this.imagePath = data.imagePath;
+        this.imageId = data.imageId;
         this.artistId = data.artistId;
         this.artistName = data.artistName;
         this.department = data.department;
@@ -36,7 +36,7 @@ export default class ArtworkRequestDTO {
             title: this.title,
             description: this.description,
             image: this.image,
-            imagePath: this.imagePath,
+            imageId: this.imageId,
             artistId: this.artistId,
             artistName: this.artistName,
             department: this.department,

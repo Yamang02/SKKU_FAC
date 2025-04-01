@@ -104,7 +104,7 @@ export default class ArtworkController {
         try {
             // 로그인 체크
             if (!req.session.user) {
-                return res.redirect('/user/login?returnUrl=/artwork/registration');
+                return res.redirect('/user/login?returnUrl=/artwork/new');
             }
 
             const user = await this.userRepository.findUserById(req.session.user.id);
@@ -151,6 +151,21 @@ export default class ArtworkController {
                 });
             }
 
+            // 디버깅: 요청 데이터 확인
+            console.log('요청 데이터:', {
+                body: req.body,
+                file: req.file ? {
+                    originalname: req.file.originalname,
+                    size: req.file.size,
+                    mimetype: req.file.mimetype
+                } : null,
+                user: {
+                    id: user.id,
+                    name: user.name,
+                    role: user.role
+                }
+            });
+
             // 3. 요청 데이터 준비
             const artworkData = {
                 ...req.body,
@@ -159,7 +174,9 @@ export default class ArtworkController {
             };
 
             // 4. 작품 생성
+            console.log('작품 생성 시작');
             const artwork = await this.artworkService.createArtwork(artworkData, req.file);
+            console.log('작품 생성 완료:', artwork);
 
             // 5. 응답 전송
             return res.json({
@@ -169,6 +186,13 @@ export default class ArtworkController {
                 artwork: artwork.toJSON()
             });
         } catch (error) {
+            // 디버깅: 에러 상세 정보 출력
+            console.error('작품 생성 중 오류 발생:', error);
+            console.error('에러 스택:', error.stack);
+            console.error('에러 타입:', error.constructor.name);
+            console.error('에러 코드:', error.code);
+            console.error('에러 메시지:', error.message);
+
             if (error instanceof ArtworkValidationError) {
                 return res.status(400).json({
                     success: false,

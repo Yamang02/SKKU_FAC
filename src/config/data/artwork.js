@@ -4,17 +4,17 @@
 const artwork = [
     {
         'id': 1,
-        'title': '뱀과 소년',
+        'title': '뱀과소년',
         'artistId': 2,
         'exhibitionId': 1,
         'department': '미술학과 23',
-        'medium': 'test',
-        'size': 'test',
-        'description': 'test',
-        'image': '\\uploads\\artworks\\1-뱀과_소년-김성균-미술학과_23_2025-03-31T00-42-11-331Z.png',
+        'medium': '',
+        'size': '',
+        'description': '어린왕자',
+        'image': '',
         'isFeatured': true,
-        'createdAt': '2025-03-31T00:47:09.707Z',
-        'updatedAt': '2025-03-31T00:47:09.719Z'
+        'createdAt': '2025-04-01T00:49:47.000Z',
+        'updatedAt': '2025-04-01T00:49:47.000Z'
     }
 ];
 

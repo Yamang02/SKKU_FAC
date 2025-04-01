@@ -23,11 +23,11 @@ ArtworkRouter.get('/', artworkController.getArtworkList.bind(artworkController))
 ArtworkRouter.get('/new', artworkController.getArtworkRegistrationPage.bind(artworkController));
 ArtworkRouter.post('/', uploadMiddleware, artworkController.createArtwork.bind(artworkController));
 
-// 전시회별 작품 목록
-ArtworkRouter.get('/exhibition/:exhibitionId', artworkController.getArtworksByExhibition.bind(artworkController));
-
 // 작품 상세
 ArtworkRouter.get('/:id', artworkController.getArtworkDetail.bind(artworkController));
+
+// 전시회별 작품 목록
+ArtworkRouter.get('/exhibition/:exhibitionId', artworkController.getArtworksByExhibition.bind(artworkController));
 
 // === 작품 관리 라우트 ===
 // 작품 수정

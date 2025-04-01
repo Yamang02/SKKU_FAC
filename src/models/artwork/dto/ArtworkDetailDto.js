@@ -1,51 +1,47 @@
-import ArtworkSimpleDTO from './ArtworkSimpleDTO.js';
 
 /**
  * 작품 상세 정보를 위한 DTO
  */
-export default class ArtworkDetailDTO {
+export default class ArtworkDetailDto {
     constructor(data = {}) {
         this.id = data.id;
         this.title = data.title;
         this.description = data.description;
-        this.image = data.image;
+        this.imageId = data.imageId;
+        this.image = data.imageId ? `/uploads/artworks/${data.image}` : null;
         this.artistId = data.artistId;
         this.artistName = data.artistName;
         this.department = data.department;
+        this.year = data.year;
+        this.medium = data.medium;
+        this.size = data.size;
         this.exhibitionId = data.exhibitionId;
-        this.exhibitionName = data.exhibitionName;
+        this.exhibitionTitle = data.exhibitionTitle;
+        this.isFeatured = data.isFeatured;
         this.createdAt = data.createdAt;
         this.updatedAt = data.updatedAt;
-        this.relatedArtworks = Array.isArray(data.relatedArtworks) ? data.relatedArtworks : [];
+        this.relatedArtworks = data.relatedArtworks || [];
     }
 
     toJSON() {
-        const baseData = {
+        return {
             id: this.id,
             title: this.title,
             description: this.description,
+            imageId: this.imageId,
             image: this.image,
             artistId: this.artistId,
             artistName: this.artistName,
             department: this.department,
+            year: this.year,
+            medium: this.medium,
+            size: this.size,
             exhibitionId: this.exhibitionId,
-            exhibitionName: this.exhibitionName,
+            exhibitionTitle: this.exhibitionTitle,
+            isFeatured: this.isFeatured,
             createdAt: this.createdAt,
-            updatedAt: this.updatedAt
+            updatedAt: this.updatedAt,
+            relatedArtworks: this.relatedArtworks
         };
-
-        try {
-            baseData.relatedArtworks = this.relatedArtworks.map(item => {
-                if (item instanceof ArtworkSimpleDTO) {
-                    return item.toJSON();
-                }
-                return item;
-            });
-        } catch (error) {
-            console.error('연관 작품 변환 중 오류 발생:', error);
-            baseData.relatedArtworks = [];
-        }
-
-        return baseData;
     }
 }

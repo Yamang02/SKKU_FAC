@@ -125,6 +125,7 @@ function initSubmitButton() {
             formData.append('medium', document.getElementById('medium').value.trim());
             formData.append('size', document.getElementById('size').value.trim());
             formData.append('department', department);
+            formData.append('year', new Date().getFullYear().toString());
 
             const exhibitionSelect = document.getElementById('exhibition');
             if (exhibitionSelect && exhibitionSelect.value) {
@@ -142,12 +143,25 @@ function initSubmitButton() {
                 }
             }
 
-            const response = await fetch('/artwork/registration', {
+            console.log('서버 요청 시작');
+            const response = await fetch('/artwork', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'same-origin' // 세션 쿠키 포함
             });
+            console.log('서버 응답 상태:', response.status);
+            console.log('서버 응답 헤더:', Object.fromEntries(response.headers.entries()));
 
-            const result = await response.json();
+            let result;
+            try {
+                const responseText = await response.text();
+                console.log('서버 응답 텍스트:', responseText);
+                result = JSON.parse(responseText);
+                console.log('서버 응답 데이터:', result);
+            } catch (error) {
+                console.error('JSON 파싱 에러:', error);
+                throw new Error('서버 응답을 처리할 수 없습니다.');
+            }
 
             if (!response.ok) {
                 if (response.status === 401) {
@@ -155,6 +169,7 @@ function initSubmitButton() {
                     window.location.href = result.redirectUrl || '/user/login';
                     return;
                 }
+                // 서버에서 보낸 에러 메시지 사용
                 throw new Error(result.message || '작품 등록에 실패했습니다.');
             }
 
@@ -162,7 +177,8 @@ function initSubmitButton() {
             window.location.href = `/artwork/${result.artwork.id}`;
         } catch (error) {
             console.error('Error:', error);
-            showError('formError', error.message);
+            // 에러 메시지 표시
+            showError('formError', error.message || '작품 등록 중 오류가 발생했습니다.');
 
             // 제출 버튼 활성화
             submitButton.disabled = false;

@@ -1,6 +1,8 @@
 import Artwork from '../models/artwork/Artwork.js';
+import Image from '../models/common/image/Image.js';
 import { getRelatedArtworks } from '../config/data/relatedArtwork.js';
 import artworkData from '../config/data/artwork.js';
+import imageData from '../config/data/image.js';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -16,15 +18,18 @@ export default class ArtworkRepository {
             return new Artwork({
                 ...data,
                 artistName: data.artistName || '',
-                imagePath: data.imagePath || '',
+                imageId: data.imageId || null,
+                image: data.image || '',
                 exhibitionId: data.exhibitionId !== undefined ? data.exhibitionId : 0,
                 createdAt: data.createdAt || '',
                 updatedAt: data.updatedAt || ''
             });
         });
 
+        this.images = imageData.map(data => new Image(data));
         this.getRelatedArtworks = getRelatedArtworks;
         this.artworkFilePath = path.join(process.cwd(), 'src', 'config', 'data', 'artwork.js');
+        this.imageFilePath = path.join(process.cwd(), 'src', 'config', 'data', 'image.js');
     }
 
     /**
@@ -183,22 +188,32 @@ export default artwork;
      */
     async createArtwork(artworkData) {
         // 작품 데이터 검증
-        if (!artworkData || !artworkData.id) {
-            throw new Error('유효하지 않은 작품 데이터입니다.');
+        if (!artworkData) {
+            throw new Error('작품 데이터가 없습니다.');
         }
+
+        // 필수 필드 검증
+        if (!artworkData.title || !artworkData.artistId || !artworkData.artistName || !artworkData.department) {
+            throw new Error('필수 필드가 누락되었습니다.');
+        }
+
+        // 새로운 ID 생성
+        const newId = this.artworks.length > 0
+            ? Math.max(...this.artworks.map(a => a.id)) + 1
+            : 1;
 
         // exhibitionId 처리
         if (artworkData.exhibitionId !== undefined && artworkData.exhibitionId !== null) {
             artworkData.exhibitionId = Number(artworkData.exhibitionId);
         }
 
-        // 중복 ID 체크
-        if (this.artworks.some(a => a.id === artworkData.id)) {
-            throw new Error('이미 존재하는 작품 ID입니다.');
-        }
-
         // Artwork 인스턴스 생성 및 검증
-        const artwork = new Artwork(artworkData);
+        const artwork = new Artwork({
+            ...artworkData,
+            id: newId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        });
         artwork.validate();
 
         // 작품 추가
@@ -343,5 +358,69 @@ export default artwork;
         `;
         const [rows] = await this.db.query(query, [title, artist_name]);
         return rows[0] || null;
+    }
+
+    /**
+     * 이미지 데이터를 파일에 저장합니다.
+     * @private
+     */
+    async _saveImageToFile() {
+        const imageContent = `/**
+ * 이미지 데이터
+ */
+const image = ${JSON.stringify(this.images.map(image => ({
+        id: image.id,
+        originalName: image.originalName,
+        storedName: image.storedName,
+        filePath: image.filePath,
+        fileSize: image.fileSize,
+        mimeType: image.mimeType,
+        createdAt: image.createdAt,
+        updatedAt: image.updatedAt
+    })), null, 2)};
+
+export default image;
+`;
+        await fs.writeFile(this.imageFilePath, imageContent, 'utf8');
+    }
+
+    /**
+     * 이미지를 저장합니다.
+     * @param {Object} imageData - 이미지 데이터
+     * @returns {Promise<number>} 저장된 이미지 ID
+     */
+    async saveImage(imageData) {
+        // 임시 구현
+        const image = new Image({
+            ...imageData,
+            id: this.images.length + 1,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        });
+        this.images.push(image);
+        await this._saveImageToFile();
+        return image.id;
+    }
+
+    /**
+     * 이미지를 ID로 조회합니다.
+     * @param {number} id - 이미지 ID
+     * @returns {Promise<Image|null>} 이미지 객체
+     */
+    async findImageById(id) {
+        return this.images.find(img => img.id === id) || null;
+    }
+
+    /**
+     * 이미지를 삭제합니다.
+     * @param {number} id - 이미지 ID
+     * @returns {Promise<boolean>} 삭제 성공 여부
+     */
+    async deleteImage(id) {
+        const index = this.images.findIndex(img => img.id === id);
+        if (index === -1) return false;
+        this.images.splice(index, 1);
+        await this._saveImageToFile();
+        return true;
     }
 }

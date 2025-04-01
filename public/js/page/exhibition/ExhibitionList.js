@@ -204,7 +204,7 @@ function showExhibitionModal(data) {
     // 출품하기 버튼 이벤트
     const submitButton = modal.querySelector('#modal-submit-link');
     if (submitButton) {
-        submitButton.href = `/artwork/registration?exhibition=${data.id}`;
+        submitButton.href = `/artwork/new?exhibition=${data.id}`;
         submitButton.onclick = () => {
             closeModal(modal);
         };

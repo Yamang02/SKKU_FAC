@@ -1,17 +1,18 @@
 import ArtworkRepository from '../../repositories/ArtworkRepository.js';
-import FileUploadUtil from '../../utils/FileUploadUtil.js';
+import ImageUtil from '../../utils/ImageUtil.js';
+import Image from '../../models/common/image/Image.js';
 import ArtworkRequestDTO from '../../models/artwork/dto/ArtworkRequestDTO.js';
 import ArtworkResponseDTO from '../../models/artwork/dto/ArtworkResponseDTO.js';
 import ArtworkListDTO from '../../models/artwork/dto/ArtworkListDTO.js';
-import ArtworkDetailDTO from '../../models/artwork/dto/ArtworkDetailDTO.js';
+import ArtworkDetailDTO from '../../models/artwork/dto/ArtworkDetailDto.js';
 import ArtworkSimpleDTO from '../../models/artwork/dto/ArtworkSimpleDTO.js';
-import Artwork from '../../models/artwork/Artwork.js';
 import Page from '../../models/common/page/Page.js';
 import {
     ArtworkNotFoundError,
     ArtworkValidationError,
     ArtworkUploadError
 } from '../../models/common/error/ArtworkError.js';
+import { WebPath } from '../../constants/Path.js';
 
 /**
  * 작품 서비스
@@ -20,6 +21,7 @@ import {
 export default class ArtworkService {
     constructor() {
         this.artworkRepository = new ArtworkRepository();
+        this.uploadDir = WebPath.UPLOAD.ARTWORKS;
     }
 
     /**
@@ -149,127 +151,150 @@ export default class ArtworkService {
     /**
      * 새로운 작품을 생성합니다.
      * @param {Object} artworkData - 작품 데이터
-     * @param {File} uploadedImage - 업로드된 이미지
+     * @param {File} file - 업로드된 이미지
      * @returns {Promise<Object>} 생성된 작품 정보
      */
-    async createArtwork(artworkData, uploadedImage = null) {
-        let imageInfo = {};
-        try {
-            // 1. RequestDTO 생성 및 유효성 검사
-            const requestDTO = new ArtworkRequestDTO(artworkData);
-            try {
-                requestDTO.validate();
-            } catch (error) {
-                throw new ArtworkValidationError(error.message);
+    async createArtwork(artworkData, file) {
+        const requestDTO = new ArtworkRequestDTO(artworkData);
+        const validatedData = requestDTO.toJSON();
+
+        let imageId = null;
+        let storedName;
+
+        // 작품 데이터 초기화
+        const finalArtworkData = {
+            ...validatedData,
+            imageId,
+            year: validatedData.year || new Date().getFullYear().toString(),
+            medium: validatedData.medium || '',
+            size: validatedData.size || '',
+            isFeatured: validatedData.isFeatured || false,
+            exhibitionTitle: validatedData.exhibitionTitle || '',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        // 필수 필드 검증
+        if (!finalArtworkData.title) {
+            throw new ArtworkValidationError('작품 제목은 필수입니다.');
+        }
+        if (!finalArtworkData.artistId) {
+            throw new ArtworkValidationError('작가 ID는 필수입니다.');
+        }
+        if (!finalArtworkData.artistName) {
+            throw new ArtworkValidationError('작가 이름은 필수입니다.');
+        }
+        if (!finalArtworkData.department) {
+            throw new ArtworkValidationError('학과는 필수입니다.');
+        }
+
+        if (file) {
+            // 이미지 유효성 검사
+            if (!ImageUtil.validateImage(file)) {
+                throw new ArtworkUploadError('유효하지 않은 이미지 파일입니다.');
             }
 
-            // 2. 이미지 처리
-            if (uploadedImage) {
-                try {
-                    imageInfo = await FileUploadUtil.saveImage({
-                        file: uploadedImage,
-                        artwork_id: requestDTO.id,
-                        title: requestDTO.title,
-                        artist_name: requestDTO.artistName,
-                        department: requestDTO.department
-                    });
-                } catch (error) {
-                    throw new ArtworkUploadError('이미지 업로드 중 오류가 발생했습니다.');
-                }
-            }
+            // 이미지 저장
+            const result = await ImageUtil.saveImage(
+                file.buffer,
+                file.originalname,
+                this.uploadDir
+            );
+            storedName = result.storedName;
 
-            // 3. Artwork 모델 인스턴스 생성
-            const artwork = new Artwork({
-                ...requestDTO,
-                image: imageInfo.imageUrl,
-                imagePath: imageInfo.filePath,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+            // 이미지 메타데이터 추출
+            const metadata = await ImageUtil.getImageMetadata(file.buffer);
+
+            // 이미지 모델 생성
+            const image = new Image({
+                originalName: file.originalname,
+                storedName,
+                filePath: result.filePath,
+                fileSize: file.size,
+                mimeType: file.mimetype,
+                width: metadata.width,
+                height: metadata.height
             });
 
-            // 4. 작품 저장
-            const savedArtwork = await this.artworkRepository.createArtwork(artwork.toJSON());
-
-            // 5. ResponseDTO 생성 및 반환
-            return new ArtworkResponseDTO(savedArtwork);
-        } catch (error) {
-            // 이미지가 저장된 경우 삭제
-            if (imageInfo && imageInfo.filePath) {
-                await FileUploadUtil.deleteImage(imageInfo.filePath);
-            }
-            throw error;
+            // 이미지 저장 및 ID 가져오기
+            imageId = await this.artworkRepository.saveImage(image.toJSON());
         }
+
+        // 작품 생성
+        const artwork = await this.artworkRepository.createArtwork(finalArtworkData);
+
+        return artwork;
     }
 
     /**
      * 작품 정보를 수정합니다.
      * @param {string} id - 작품 ID
      * @param {Object} artworkData - 수정할 작품 데이터
-     * @param {File} uploadedImage - 업로드된 이미지
+     * @param {File} file - 업로드된 이미지
      * @returns {Promise<Object>} 수정된 작품 정보
      */
-    async updateArtwork(id, artworkData, uploadedImage = null) {
-        let imageInfo = {};
-        try {
-            // 1. 기존 작품 조회
-            const existingArtwork = await this.artworkRepository.findArtworkById(id);
-            if (!existingArtwork) {
-                throw new ArtworkNotFoundError();
-            }
+    async updateArtwork(id, artworkData, file) {
+        const artwork = await this.artworkRepository.findArtworkById(id);
+        if (!artwork) {
+            throw new ArtworkNotFoundError();
+        }
 
-            // 2. RequestDTO 생성 및 유효성 검사
-            const requestDTO = new ArtworkRequestDTO({
-                ...existingArtwork,
-                ...artworkData
-            });
-            try {
-                requestDTO.validate();
-            } catch (error) {
-                throw new ArtworkValidationError(error.message);
-            }
+        let storedName = artwork.image;
+        if (file) {
+            const result = await ImageUtil.saveImage(file.buffer, file.originalname, this.uploadDir);
+            storedName = result.storedName;
+        }
 
-            // 3. 이미지 처리
-            if (uploadedImage) {
-                try {
-                    // 기존 이미지 삭제
-                    if (existingArtwork.imagePath) {
-                        await FileUploadUtil.deleteImage(existingArtwork.imagePath);
-                    }
+        const requestDTO = new ArtworkRequestDTO({
+            ...artwork,
+            ...artworkData,
+            id
+        });
+        const validatedData = requestDTO.toJSON();
 
-                    // 새 이미지 저장
-                    imageInfo = await FileUploadUtil.saveImage({
-                        file: uploadedImage,
-                        artwork_id: id,
-                        title: requestDTO.title,
-                        artist_name: requestDTO.artistName,
-                        department: requestDTO.department
-                    });
-                } catch (error) {
-                    throw new ArtworkUploadError('이미지 업로드 중 오류가 발생했습니다.');
+        let imageId = artwork.imageId;
+        if (file) {
+            // 기존 이미지 삭제
+            if (artwork.imageId) {
+                const oldImage = await this.artworkRepository.findImageById(artwork.imageId);
+                if (oldImage) {
+                    await ImageUtil.deleteImage(oldImage.filePath);
+                    await this.artworkRepository.deleteImage(artwork.imageId);
                 }
             }
 
-            // 4. Artwork 모델 인스턴스 업데이트
-            const artwork = new Artwork({
-                ...requestDTO,
-                id,
-                image: imageInfo.imageUrl || existingArtwork.image,
-                imagePath: imageInfo.filePath || existingArtwork.imagePath,
-                updatedAt: new Date().toISOString()
+            // 새 이미지 저장
+            const { filePath } = await ImageUtil.saveImage(
+                file.buffer,
+                file.originalname,
+                this.uploadDir
+            );
+
+            // 이미지 메타데이터 추출
+            const metadata = await ImageUtil.getImageMetadata(file.buffer);
+
+            // 이미지 모델 생성
+            const image = new Image({
+                originalName: file.originalname,
+                storedName,
+                filePath,
+                fileSize: file.size,
+                mimeType: file.mimetype,
+                width: metadata.width,
+                height: metadata.height
             });
 
-            // 5. 작품 저장
-            const updatedArtwork = await this.artworkRepository.updateArtwork(id, artwork.toJSON());
-
-            // 6. ResponseDTO 생성 및 반환
-            return new ArtworkResponseDTO(updatedArtwork);
-        } catch (error) {
-            // 새 이미지가 저장된 경우 삭제
-            if (imageInfo && imageInfo.filePath) {
-                await FileUploadUtil.deleteImage(imageInfo.filePath);
-            }
-            throw error;
+            // 이미지 저장 및 ID 가져오기
+            imageId = await this.artworkRepository.saveImage(image.toJSON());
         }
+
+        const updatedArtwork = await this.artworkRepository.updateArtwork(id, {
+            ...validatedData,
+            imageId,
+            image: imageId ? `${WebPath.UPLOAD.ARTWORKS}/${storedName}` : null
+        });
+
+        return new ArtworkResponseDTO(updatedArtwork);
     }
 
     /**
@@ -278,23 +303,26 @@ export default class ArtworkService {
      * @returns {Promise<boolean>} 삭제 성공 여부
      */
     async deleteArtwork(id) {
-        // 1. 작품 조회
         const artwork = await this.artworkRepository.findArtworkById(id);
         if (!artwork) {
             throw new ArtworkNotFoundError();
         }
 
-        // 2. 이미지 삭제
-        if (artwork.imagePath) {
-            try {
-                await FileUploadUtil.deleteImage(artwork.imagePath);
-            } catch (error) {
-                throw new ArtworkUploadError('이미지 삭제 중 오류가 발생했습니다.');
+        // 이미지 파일 삭제
+        if (artwork.imageId) {
+            const image = await this.artworkRepository.findImageById(artwork.imageId);
+            if (image) {
+                await ImageUtil.deleteImage(image.filePath);
+                await this.artworkRepository.deleteImage(artwork.imageId);
             }
         }
 
-        // 3. 작품 삭제
-        return await this.artworkRepository.deleteArtwork(id);
+        const success = await this.artworkRepository.deleteArtwork(id);
+        if (!success) {
+            throw new Error('작품 삭제에 실패했습니다.');
+        }
+
+        return true;
     }
 
     /**
@@ -326,3 +354,4 @@ export default class ArtworkService {
         }
     }
 }
+

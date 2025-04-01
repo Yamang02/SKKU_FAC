@@ -5,32 +5,17 @@ import ArtworkSimpleDTO from './ArtworkSimpleDTO.js';
  * 페이지네이션 정보를 포함합니다.
  */
 export default class ArtworkListDTO {
-    constructor({ items = [], total = 0, page = null } = {}) {
-        this.items = items.map(item => new ArtworkSimpleDTO(item));
-        this.total = total;
-        this.page = page;
+    constructor(data = {}) {
+        this.items = (data.items || []).map(artwork => new ArtworkSimpleDTO(artwork));
+        this.total = data.total || 0;
+        this.page = data.page;
     }
 
     toJSON() {
         return {
-            items: this.items,
+            items: this.items.map(item => item.toJSON()),
             total: this.total,
-            page: this.page ? {
-                currentPage: this.page.currentPage,
-                totalPages: this.page.totalPages,
-                itemsPerPage: this.page.options.limit,
-                hasPrev: this.page.hasPrev,
-                hasNext: this.page.hasNext,
-                startPage: this.page.startPage,
-                endPage: this.page.endPage,
-                showFirstPage: this.page.showFirstPage,
-                showLastPage: this.page.showLastPage,
-                showFirstEllipsis: this.page.showFirstEllipsis,
-                showLastEllipsis: this.page.showLastEllipsis,
-                getPages: () => this.page.getPages(),
-                getPageUrl: (pageNum) => this.page.getPageUrl(pageNum),
-                getSortUrl: (field) => this.page.getSortUrl(field)
-            } : null
+            page: this.page
         };
     }
 }
