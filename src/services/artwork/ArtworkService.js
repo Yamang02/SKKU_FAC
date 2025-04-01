@@ -161,69 +161,81 @@ export default class ArtworkService {
         let imageId = null;
         let storedName;
 
-        // 작품 데이터 초기화
-        const finalArtworkData = {
-            ...validatedData,
-            imageId,
-            year: validatedData.year || new Date().getFullYear().toString(),
-            medium: validatedData.medium || '',
-            size: validatedData.size || '',
-            isFeatured: validatedData.isFeatured || false,
-            exhibitionTitle: validatedData.exhibitionTitle || '',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-
         // 필수 필드 검증
-        if (!finalArtworkData.title) {
+        if (!validatedData.title) {
             throw new ArtworkValidationError('작품 제목은 필수입니다.');
         }
-        if (!finalArtworkData.artistId) {
+        if (!validatedData.artistId) {
             throw new ArtworkValidationError('작가 ID는 필수입니다.');
         }
-        if (!finalArtworkData.artistName) {
+        if (!validatedData.artistName) {
             throw new ArtworkValidationError('작가 이름은 필수입니다.');
         }
-        if (!finalArtworkData.department) {
+        if (!validatedData.department) {
             throw new ArtworkValidationError('학과는 필수입니다.');
         }
 
-        if (file) {
-            // 이미지 유효성 검사
-            if (!ImageUtil.validateImage(file)) {
-                throw new ArtworkUploadError('유효하지 않은 이미지 파일입니다.');
+        try {
+            if (file) {
+                // 1. 이미지 유효성 검사
+                if (!ImageUtil.validateImage(file)) {
+                    throw new ArtworkUploadError('유효하지 않은 이미지 파일입니다.');
+                }
+
+                // 2. 이미지 파일 저장
+                const result = await ImageUtil.saveImage(
+                    file.buffer,
+                    file.originalname,
+                    this.uploadDir
+                );
+                storedName = result.storedName;
+
+                // 3. 이미지 메타데이터 추출
+                const metadata = await ImageUtil.getImageMetadata(file.buffer);
+
+                // 4. 이미지 모델 생성 및 저장
+                const image = new Image({
+                    originalName: file.originalname,
+                    storedName,
+                    filePath: result.filePath,
+                    fileSize: file.size,
+                    mimeType: file.mimetype,
+                    width: metadata.width,
+                    height: metadata.height
+                });
+
+                // 5. 이미지 DB 저장 및 ID 가져오기
+                imageId = await this.artworkRepository.saveImage(image.toJSON());
             }
 
-            // 이미지 저장
-            const result = await ImageUtil.saveImage(
-                file.buffer,
-                file.originalname,
-                this.uploadDir
-            );
-            storedName = result.storedName;
+            // 6. 작품 데이터 준비
+            const finalArtworkData = {
+                ...validatedData,
+                imageId,
+                year: validatedData.year || new Date().getFullYear().toString(),
+                medium: validatedData.medium || '',
+                size: validatedData.size || '',
+                isFeatured: validatedData.isFeatured || false,
+                exhibitionTitle: validatedData.exhibitionTitle || '',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
 
-            // 이미지 메타데이터 추출
-            const metadata = await ImageUtil.getImageMetadata(file.buffer);
+            // 7. 작품 DB 저장
+            const artwork = await this.artworkRepository.createArtwork(finalArtworkData);
 
-            // 이미지 모델 생성
-            const image = new Image({
-                originalName: file.originalname,
-                storedName,
-                filePath: result.filePath,
-                fileSize: file.size,
-                mimeType: file.mimetype,
-                width: metadata.width,
-                height: metadata.height
-            });
-
-            // 이미지 저장 및 ID 가져오기
-            imageId = await this.artworkRepository.saveImage(image.toJSON());
+            return artwork;
+        } catch (error) {
+            // 에러 발생 시 이미지 파일 삭제
+            if (storedName) {
+                try {
+                    await ImageUtil.deleteImage(`${this.uploadDir}/${storedName}`);
+                } catch (deleteError) {
+                    console.error('이미지 파일 삭제 실패:', deleteError);
+                }
+            }
+            throw error;
         }
-
-        // 작품 생성
-        const artwork = await this.artworkRepository.createArtwork(finalArtworkData);
-
-        return artwork;
     }
 
     /**
@@ -345,13 +357,25 @@ export default class ArtworkService {
      * @returns {Promise<Object>} 추천 작품 목록
      */
     async getFeaturedArtworks(limit = 6) {
-        try {
-            const artworks = await this.artworkRepository.findFeaturedArtworks(limit);
-            return artworks.map(artwork => new ArtworkSimpleDTO(artwork, 'card'));
-        } catch (error) {
-            console.error('추천 작품 조회 중 오류 발생:', error);
-            throw new Error('작품 데이터를 불러올 수 없습니다.');
-        }
+        // 추천 작품 조회
+        const artworks = await this.artworkRepository.findFeaturedArtworks(limit);
+
+        // 이미지 정보 조회 및 포함
+        const artworksWithImages = await Promise.all(artworks.map(async artwork => {
+            if (artwork.imageId) {
+                const image = await this.artworkRepository.findImageById(artwork.imageId);
+                if (image) {
+                    return {
+                        ...artwork,
+                        image: WebPath.UPLOAD.ARTWORKS + '/' + image.storedName
+                    };
+                }
+            }
+            return artwork;
+        }));
+
+        // DTO 변환
+        return artworksWithImages.map(artwork => new ArtworkSimpleDTO(artwork));
     }
 }
 

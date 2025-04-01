@@ -170,7 +170,7 @@ const artwork = ${JSON.stringify(this.artworks.map(artwork => ({
         medium: artwork.medium || '',
         size: artwork.size || '',
         description: artwork.description || '',
-        image: artwork.image,
+        imageId: artwork.imageId,
         isFeatured: artwork.isFeatured || false,
         createdAt: artwork.createdAt,
         updatedAt: artwork.updatedAt

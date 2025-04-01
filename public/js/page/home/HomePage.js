@@ -179,16 +179,28 @@ async function createArtworkCard(artwork) {
         card.className = 'card card--home';
         card.dataset.artworkId = artwork.id;
 
+        // 이미지 경로 처리
+        let imagePath = '/images/artwork-placeholder.svg';
+        let imageAlt = artwork.title || '';
+
+        // 이미지가 있는 경우에만 이미지 경로 설정
+        if (artwork.image) {
+            imagePath = artwork.image;
+        }
+
         // 카드 내용 생성
         card.innerHTML = `
             <div class="card__link">
                 <div class="card__image-container">
-                    <img src="${cardData.image.path}" alt="${cardData.image.alt}" class="card__image">
+                    <img src="${imagePath}"
+                         alt="${imageAlt}"
+                         class="card__image"
+                         onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
                 </div>
                 <div class="card__info">
-                    <h3 class="card__title">${cardData.title}</h3>
-                    <p class="card__subtitle">${cardData.artist.name || '작가 미상'}</p>
-                    <div class="card__meta">${cardData.artist.department || ''}</div>
+                    <h3 class="card__title">${artwork.title || '제목 없음'}</h3>
+                    <p class="card__subtitle">${artwork.artistName || '작가 미상'}</p>
+                    <div class="card__meta">${artwork.department || ''}</div>
                 </div>
             </div>
         `;

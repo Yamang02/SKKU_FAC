@@ -1,5 +1,3 @@
-import { WebPath } from '../../../constants/Path.js';
-
 /**
  * 간단한 작품 정보를 위한 DTO
  */
@@ -8,7 +6,7 @@ export default class ArtworkSimpleDTO {
         this.id = artwork.id;
         this.title = artwork.title;
         this.imageId = artwork.imageId;
-        this.image = artwork.imageId ? `${WebPath.UPLOAD.ARTWORKS}/${artwork.image}` : null;
+        this.image = artwork.imageId && artwork.image ? artwork.image : null;
         this.artistName = artwork.artistName;
         this.department = artwork.department;
         this.exhibitionId = artwork.exhibitionId;

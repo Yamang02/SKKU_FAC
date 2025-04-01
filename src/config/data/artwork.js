@@ -4,17 +4,17 @@
 const artwork = [
     {
         'id': 1,
-        'title': '뱀과소년',
+        'title': '양과 장미',
         'artistId': 2,
         'exhibitionId': 1,
         'department': '미술학과 23',
         'medium': '',
         'size': '',
-        'description': '어린왕자',
-        'image': '',
+        'description': 'test',
+        'imageId': 1,
         'isFeatured': true,
-        'createdAt': '2025-04-01T00:49:47.000Z',
-        'updatedAt': '2025-04-01T00:49:47.000Z'
+        'createdAt': '2025-04-01T02:23:31.923Z',
+        'updatedAt': '2025-04-01T02:23:31.923Z'
     }
 ];
 

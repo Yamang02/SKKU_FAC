@@ -4,13 +4,13 @@
 const image = [
     {
         'id': 1,
-        'originalName': 'DALLÂ·E 2023-03-08 18.41.15 - A beautiful and poignant AI-generated image of the beloved character, The Little Prince, cradled in the arms of a serpent in a Pieta pose. The scene i.png',
-        'storedName': '1743468586966-2216d59e3b5c84f7.png',
-        'filePath': 'public\\uploads\\artworks\\1743468586966-2216d59e3b5c84f7.png',
-        'fileSize': 2175067,
+        'originalName': 'DALLÂ·E 2022-10-03 23.21.27 - lamb\'s face chewing vine, surrounded by many many roses, holy, high contrast, rococo, Acrylic on canvas, digital art.png',
+        'storedName': '1743474211889-c3c92a783a46224c.png',
+        'filePath': 'public\\uploads\\artworks\\1743474211889-c3c92a783a46224c.png',
+        'fileSize': 2119149,
         'mimeType': 'image/png',
-        'createdAt': '2025-04-01T00:49:46.998Z',
-        'updatedAt': '2025-04-01T00:49:46.998Z'
+        'createdAt': '2025-04-01T02:23:31.921Z',
+        'updatedAt': '2025-04-01T02:23:31.921Z'
     }
 ];
 

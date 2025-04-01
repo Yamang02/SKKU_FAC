@@ -11,7 +11,6 @@ export default class Artwork {
         medium = '',
         size = '',
         description = '',
-        image = '',
         imageId = null,
         exhibitionId = 0,
         isFeatured = false,
@@ -30,7 +29,6 @@ export default class Artwork {
         this.medium = medium;
         this.size = size;
         this.description = description;
-        this.image = image;
         this.imageId = imageId;
         this.exhibitionId = exhibitionId;
         this.exhibitionTitle = exhibitionTitle;
@@ -54,7 +52,6 @@ export default class Artwork {
             medium: this.medium,
             size: this.size,
             description: this.description,
-            image: this.image,
             imageId: this.imageId,
             exhibitionId: this.exhibitionId,
             exhibitionTitle: this.exhibitionTitle,

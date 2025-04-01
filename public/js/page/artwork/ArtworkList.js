@@ -392,7 +392,7 @@ function createArtworkCard(artwork) {
     if (artwork.image) {
         if (typeof artwork.image === 'string') {
             imagePath = artwork.image;
-        } else if (artwork.image.path) {
+        } else if (artwork.image && typeof artwork.image === 'object' && artwork.image.path) {
             imagePath = artwork.image.path;
             imageAlt = artwork.image.alt || artwork.title || '';
         }
@@ -448,7 +448,7 @@ function createArtworkTableRow(artwork) {
     if (artwork.image) {
         if (typeof artwork.image === 'string') {
             imagePath = artwork.image;
-        } else if (artwork.image.path) {
+        } else if (artwork.image && typeof artwork.image === 'object' && artwork.image.path) {
             imagePath = artwork.image.path;
             imageAlt = artwork.image.alt || artwork.title || '';
         }
