@@ -5,9 +5,9 @@ import ExhibitionRepository from '../repositories/ExhibitionRepository.js';
 import ArtworkService from '../services/artwork/ArtworkService.js';
 import {
     ArtworkNotFoundError,
-    ArtworkValidationError,
-    ArtworkUploadError
+    ArtworkValidationError
 } from '../models/common/error/ArtworkError.js';
+import { ImageError } from '../errors/ImageError.js';
 
 /**
  * 작품 관련 컨트롤러
@@ -199,18 +199,15 @@ export default class ArtworkController {
                     code: error.code,
                     message: error.message
                 });
-            } else if (error instanceof ArtworkUploadError) {
-                return res.status(500).json({
+            } else if (error instanceof ImageError) {
+                return res.status(400).json({
                     success: false,
                     code: error.code,
                     message: error.message
                 });
             } else {
-                return res.status(500).json({
-                    success: false,
-                    code: 'INTERNAL_SERVER_ERROR',
-                    message: '작품 등록 중 오류가 발생했습니다.'
-                });
+                console.error('Error creating artwork:', error);
+                return res.status(500).json({ error: '작품 생성 중 오류가 발생했습니다.' });
             }
         }
     }
@@ -278,29 +275,14 @@ export default class ArtworkController {
             });
         } catch (error) {
             if (error instanceof ArtworkNotFoundError) {
-                return res.status(404).json({
-                    success: false,
-                    code: error.code,
-                    message: error.message
-                });
+                return res.status(404).json({ error: error.message });
             } else if (error instanceof ArtworkValidationError) {
-                return res.status(400).json({
-                    success: false,
-                    code: error.code,
-                    message: error.message
-                });
-            } else if (error instanceof ArtworkUploadError) {
-                return res.status(500).json({
-                    success: false,
-                    code: error.code,
-                    message: error.message
-                });
+                return res.status(400).json({ error: error.message });
+            } else if (error instanceof ImageError) {
+                return res.status(400).json({ error: error.message });
             } else {
-                return res.status(500).json({
-                    success: false,
-                    code: 'INTERNAL_SERVER_ERROR',
-                    message: '작품 수정 중 오류가 발생했습니다.'
-                });
+                console.error('Error updating artwork:', error);
+                return res.status(500).json({ error: '작품 수정 중 오류가 발생했습니다.' });
             }
         }
     }
@@ -323,23 +305,12 @@ export default class ArtworkController {
             });
         } catch (error) {
             if (error instanceof ArtworkNotFoundError) {
-                return res.status(404).json({
-                    success: false,
-                    code: error.code,
-                    message: error.message
-                });
-            } else if (error instanceof ArtworkUploadError) {
-                return res.status(500).json({
-                    success: false,
-                    code: error.code,
-                    message: error.message
-                });
+                return res.status(404).json({ error: error.message });
+            } else if (error instanceof ImageError) {
+                return res.status(400).json({ error: error.message });
             } else {
-                return res.status(500).json({
-                    success: false,
-                    code: 'INTERNAL_SERVER_ERROR',
-                    message: '작품 삭제 중 오류가 발생했습니다.'
-                });
+                console.error('Error deleting artwork:', error);
+                return res.status(500).json({ error: '작품 삭제 중 오류가 발생했습니다.' });
             }
         }
     }

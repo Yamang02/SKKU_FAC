@@ -1,8 +1,6 @@
 import Artwork from '../models/artwork/Artwork.js';
-import Image from '../models/common/image/Image.js';
 import { getRelatedArtworks } from '../config/data/relatedArtwork.js';
 import artworkData from '../config/data/artwork.js';
-import imageData from '../config/data/image.js';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -19,17 +17,14 @@ export default class ArtworkRepository {
                 ...data,
                 artistName: data.artistName || '',
                 imageId: data.imageId || null,
-                image: data.image || '',
                 exhibitionId: data.exhibitionId !== undefined ? data.exhibitionId : 0,
                 createdAt: data.createdAt || '',
                 updatedAt: data.updatedAt || ''
             });
         });
 
-        this.images = imageData.map(data => new Image(data));
         this.getRelatedArtworks = getRelatedArtworks;
         this.artworkFilePath = path.join(process.cwd(), 'src', 'config', 'data', 'artwork.js');
-        this.imageFilePath = path.join(process.cwd(), 'src', 'config', 'data', 'image.js');
     }
 
     /**
@@ -165,6 +160,7 @@ const artwork = ${JSON.stringify(this.artworks.map(artwork => ({
         id: artwork.id,
         title: artwork.title,
         artistId: artwork.artistId,
+        artistName: artwork.artistName,
         exhibitionId: artwork.exhibitionId,
         department: artwork.department || '',
         medium: artwork.medium || '',
@@ -358,69 +354,5 @@ export default artwork;
         `;
         const [rows] = await this.db.query(query, [title, artist_name]);
         return rows[0] || null;
-    }
-
-    /**
-     * 이미지 데이터를 파일에 저장합니다.
-     * @private
-     */
-    async _saveImageToFile() {
-        const imageContent = `/**
- * 이미지 데이터
- */
-const image = ${JSON.stringify(this.images.map(image => ({
-        id: image.id,
-        originalName: image.originalName,
-        storedName: image.storedName,
-        filePath: image.filePath,
-        fileSize: image.fileSize,
-        mimeType: image.mimeType,
-        createdAt: image.createdAt,
-        updatedAt: image.updatedAt
-    })), null, 2)};
-
-export default image;
-`;
-        await fs.writeFile(this.imageFilePath, imageContent, 'utf8');
-    }
-
-    /**
-     * 이미지를 저장합니다.
-     * @param {Object} imageData - 이미지 데이터
-     * @returns {Promise<number>} 저장된 이미지 ID
-     */
-    async saveImage(imageData) {
-        // 임시 구현
-        const image = new Image({
-            ...imageData,
-            id: this.images.length + 1,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        });
-        this.images.push(image);
-        await this._saveImageToFile();
-        return image.id;
-    }
-
-    /**
-     * 이미지를 ID로 조회합니다.
-     * @param {number} id - 이미지 ID
-     * @returns {Promise<Image|null>} 이미지 객체
-     */
-    async findImageById(id) {
-        return this.images.find(img => img.id === id) || null;
-    }
-
-    /**
-     * 이미지를 삭제합니다.
-     * @param {number} id - 이미지 ID
-     * @returns {Promise<boolean>} 삭제 성공 여부
-     */
-    async deleteImage(id) {
-        const index = this.images.findIndex(img => img.id === id);
-        if (index === -1) return false;
-        this.images.splice(index, 1);
-        await this._saveImageToFile();
-        return true;
     }
 }

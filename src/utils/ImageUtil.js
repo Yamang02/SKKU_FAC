@@ -7,7 +7,7 @@ import sharp from 'sharp';
  * 이미지 처리 유틸리티
  * 이미지 업로드, 삭제, 변환 등의 공통 기능을 제공합니다.
  */
-export default class ImageUtil {
+class ImageUtil {
     /**
      * 이미지 파일을 저장합니다.
      * @param {Buffer} fileBuffer - 이미지 파일 버퍼
@@ -149,3 +149,5 @@ export default class ImageUtil {
         };
     }
 }
+
+export default ImageUtil;

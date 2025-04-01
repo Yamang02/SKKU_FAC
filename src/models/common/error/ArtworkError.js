@@ -30,10 +30,3 @@ export class ArtworkPermissionError extends ArtworkError {
         this.name = 'ArtworkPermissionError';
     }
 }
-
-export class ArtworkUploadError extends ArtworkError {
-    constructor(message = '작품 업로드 중 오류가 발생했습니다.') {
-        super(message, 'ARTWORK_UPLOAD_ERROR', 500);
-        this.name = 'ArtworkUploadError';
-    }
-}
