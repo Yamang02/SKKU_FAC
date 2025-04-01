@@ -69,14 +69,14 @@ export default class ArtworkRepository {
         if (searchType && keyword) {
             filteredArtworks = filteredArtworks.filter(artwork => {
                 switch (searchType) {
-                case 'title':
-                    return artwork.title.toLowerCase().includes(keyword.toLowerCase());
-                case 'artist':
-                    return artwork.artistName.toLowerCase().includes(keyword.toLowerCase());
-                case 'department':
-                    return artwork.department.toLowerCase().includes(keyword.toLowerCase());
-                default:
-                    return true;
+                    case 'title':
+                        return artwork.title.toLowerCase().includes(keyword.toLowerCase());
+                    case 'artist':
+                        return artwork.artistName.toLowerCase().includes(keyword.toLowerCase());
+                    case 'department':
+                        return artwork.department.toLowerCase().includes(keyword.toLowerCase());
+                    default:
+                        return true;
                 }
             });
         }
@@ -157,20 +157,20 @@ export default class ArtworkRepository {
  * 작품 데이터
  */
 const artwork = ${JSON.stringify(this.artworks.map(artwork => ({
-        id: artwork.id,
-        title: artwork.title,
-        artistId: artwork.artistId,
-        artistName: artwork.artistName,
-        exhibitionId: artwork.exhibitionId,
-        department: artwork.department || '',
-        medium: artwork.medium || '',
-        size: artwork.size || '',
-        description: artwork.description || '',
-        imageId: artwork.imageId,
-        isFeatured: artwork.isFeatured || false,
-        createdAt: artwork.createdAt,
-        updatedAt: artwork.updatedAt
-    })), null, 2)};
+            id: artwork.id,
+            title: artwork.title,
+            artistId: artwork.artistId,
+            artistName: artwork.artistName,
+            exhibitionId: artwork.exhibitionId,
+            department: artwork.department || '',
+            medium: artwork.medium || '',
+            size: artwork.size || '',
+            description: artwork.description || '',
+            imageId: artwork.imageId,
+            isFeatured: artwork.isFeatured || false,
+            createdAt: artwork.createdAt,
+            updatedAt: artwork.updatedAt
+        })), null, 2)};
 
 export default artwork;
 `;

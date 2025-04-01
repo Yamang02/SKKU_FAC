@@ -83,7 +83,7 @@
                                 <td>
                                     <div class="admin-button-group">
                                         <button class="admin-button admin-button--danger"
-                                            onclick="deleteArtwork(<%= artwork.id %>)">
+                                            onclick="artworkManagement.deleteArtwork('<%= artwork.id %>')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -104,11 +104,12 @@
         <!-- 페이지네이션 섹션 -->
         <div class="admin-pagination">
             <% if (typeof page !=='undefined' && page) { %>
-                <button class="admin-pagination__button" onclick="goToPage(1)">
+                <button class="admin-pagination__button" onclick="artworkManagement.goToPage(1)">
                     <i class="fas fa-angle-double-left"></i>
                 </button>
-                <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage - 1 %>)"
-                    <%=!page.hasPreviousPage ? 'disabled' : '' %>>
+                <button class="admin-pagination__button"
+                    onclick="artworkManagement.goToPage(<%= page.currentPage - 1 %>)" <%=!page.hasPreviousPage
+                    ? 'disabled' : '' %>>
                     <i class="fas fa-angle-left"></i>
                 </button>
 
@@ -116,16 +117,18 @@
                     i++) { %>
                     <button
                         class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>"
-                        onclick="goToPage(<%= i %>)">
+                        onclick="artworkManagement.goToPage(<%= i %>)">
                         <%= i %>
                     </button>
                     <% } %>
 
-                        <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage + 1 %>)"
-                            <%=!page.hasNextPage ? 'disabled' : '' %>>
+                        <button class="admin-pagination__button"
+                            onclick="artworkManagement.goToPage(<%= page.currentPage + 1 %>)" <%=!page.hasNextPage
+                            ? 'disabled' : '' %>>
                             <i class="fas fa-angle-right"></i>
                         </button>
-                        <button class="admin-pagination__button" onclick="goToPage(<%= page.totalPages %>)">
+                        <button class="admin-pagination__button"
+                            onclick="artworkManagement.goToPage(<%= page.totalPages %>)">
                             <i class="fas fa-angle-double-right"></i>
                         </button>
                         <% } %>
@@ -191,3 +194,6 @@
         window.location.href = currentUrl.toString();
     });
 </script>
+
+<!-- 외부 스크립트 추가 -->
+<script type="module" src="/js/page/admin/artwork/ArtworkManagementList.js"></script>

@@ -3,18 +3,20 @@
  */
 import api from './index';
 import { showErrorMessage } from '../common/util.js';
+import Pagination from '../common/pagination.js';
+import { createFilterParams } from '../common/filters.js';
 
 class ArtworkAPI {
     // 작품 목록 조회
-    static async getList(params = {}) {
+    static async getList(pagination, filters = {}) {
         try {
-            const queryParams = new URLSearchParams();
-            Object.entries(params).forEach(([key, value]) => {
-                if (value !== undefined && value !== null && value !== '') {
-                    queryParams.append(key, value);
-                }
-            });
-            return await api.get(`/artwork/api/list?${queryParams.toString()}`);
+            const pageParams = pagination.toQueryParams();
+            const filterParams = createFilterParams(filters);
+            const queryString = [pageParams, filterParams]
+                .filter(Boolean)
+                .join('&');
+
+            return await api.get(`/artwork/api/list?${queryString}`);
         } catch (error) {
             console.error('작품 목록을 가져오는 중 오류 발생:', error);
             showErrorMessage('작품 목록을 불러오는데 실패했습니다.');
@@ -42,6 +44,23 @@ class ArtworkAPI {
         } catch (error) {
             console.error(`작품 데이터(ID: ${artworkId}, 타입: ${type})를 가져오는 중 오류 발생:`, error);
             showErrorMessage('작품 정보를 불러오는데 실패했습니다.');
+            throw error;
+        }
+    }
+
+    // 관리자용 작품 목록 조회
+    static async getManagementList(pagination, filters = {}) {
+        try {
+            const pageParams = pagination.toQueryParams();
+            const filterParams = createFilterParams(filters);
+            const queryString = [pageParams, filterParams]
+                .filter(Boolean)
+                .join('&');
+
+            return await api.get(`/admin/management/artwork/list?${queryString}`);
+        } catch (error) {
+            console.error('관리자용 작품 목록을 가져오는 중 오류 발생:', error);
+            showErrorMessage('작품 목록을 불러오는데 실패했습니다.');
             throw error;
         }
     }
