@@ -1,8 +1,10 @@
-import { ArtworkRepository } from '../../repositories/ArtworkRepository.js';
-import { ImageService } from '../image/ImageService.js';
+import ArtworkRepository from '../../repositories/ArtworkRepository.js';
+import ImageService from '../image/ImageService.js';
 import { ArtworkNotFoundError, ArtworkValidationError } from '../../models/common/error/ArtworkError.js';
-import { ArtworkListDTO, ArtworkDetailDTO, ArtworkSimpleDTO } from '../../models/common/artwork/dto/ArtworkResponseDto.js';
-import { ArtworkCreateDTO, ArtworkUpdateDTO } from '../../models/common/artwork/dto/ArtworkRequestDto.js';
+import ArtworkRequestDTO from '../../models/artwork/dto/ArtworkRequestDTO.js';
+import ArtworkListDTO from '../../models/artwork/dto/ArtworkListDTO.js';
+import ArtworkDetailDTO from '../../models/artwork/dto/ArtworkDetailDTO.js';
+import ArtworkSimpleDTO from '../../models/artwork/dto/ArtworkSimpleDTO.js';
 import Page from '../../models/common/page/Page.js';
 
 /**
@@ -189,8 +191,8 @@ export class ArtworkService {
      * @returns {Promise<Object>} 생성된 작품 정보
      */
     async createArtwork(artworkData, file) {
-        const requestDTO = new ArtworkCreateDTO(artworkData);
-        const validatedData = requestDTO.toJSON();
+        const requestDto = new ArtworkRequestDTO(artworkData);
+        const validatedData = requestDto.toJSON();
 
         let imageId = null;
 
@@ -262,12 +264,12 @@ export class ArtworkService {
             throw new ArtworkNotFoundError();
         }
 
-        const requestDTO = new ArtworkUpdateDTO({
+        const requestDto = new ArtworkRequestDTO({
             ...artwork,
             ...artworkData,
             id
         });
-        const validatedData = requestDTO.toJSON();
+        const validatedData = requestDto.toJSON();
 
         let imageId = artwork.imageId;
         if (file) {

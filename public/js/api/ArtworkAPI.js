@@ -25,7 +25,7 @@ class ArtworkAPI {
     // 작품 상세 정보 조회
     static async getDetail(artworkId) {
         try {
-            return await api.get(`/api/artworks/${artworkId}`);
+            return await api.get(`/artwork/api/detail/${artworkId}`);
         } catch (error) {
             console.error(`작품 상세 정보(ID: ${artworkId})를 가져오는 중 오류 발생:`, error);
             showErrorMessage('작품 정보를 불러오는데 실패했습니다.');

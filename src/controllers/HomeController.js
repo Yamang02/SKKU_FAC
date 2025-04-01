@@ -1,7 +1,7 @@
 import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
 import NoticeRepository from '../repositories/NoticeRepository.js';
-import ArtworkService from '../services/artwork/ArtworkService.js';
+import { ArtworkService } from '../services/artwork/ArtworkService.js';
 
 export default class HomeController {
     constructor() {

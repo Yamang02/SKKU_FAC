@@ -1,4 +1,4 @@
-import { ImageRepository } from '../../repositories/ImageRepository.js';
+import ImageRepository from '../../repositories/ImageRepository.js';
 import FileServerService from './FileServerService.js';
 import ImageUtil from '../../utils/ImageUtil.js';
 import {
