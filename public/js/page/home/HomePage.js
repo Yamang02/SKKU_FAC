@@ -5,6 +5,8 @@
  * - 작품 모달 기능
  * - 주요 작품 데이터 로딩 및 표시
  */
+import ArtworkAPI from '../../api/ArtworkAPI.js';
+import Pagination from '../../common/pagination.js';
 
 // 모듈 스코프에서 실행
 document.addEventListener('DOMContentLoaded', () => {
@@ -26,22 +28,22 @@ async function loadFeaturedArtworks() {
         // 로딩 표시
         container.innerHTML = '<div class="loading-spinner">작품을 불러오는 중입니다...</div>';
 
-        // API 요청 - /api/featured 엔드포인트 호출
-        const response = await fetch('/artwork/api/featured');
+        // 페이지네이션 객체 생성
+        const pagination = new Pagination({
+            page: 1,
+            size: 6
+        });
 
-        if (!response.ok) {
-            throw new Error('작품 데이터를 불러올 수 없습니다.');
-        }
-
-        const result = await response.json();
+        // API 요청 - ArtworkAPI 사용
+        const result = await ArtworkAPI.getList(pagination, { isFeatured: true });
 
         // 불러온 데이터로 작품 카드 생성
-        if (result.success && Array.isArray(result.data)) {
+        if (result.success && result.data && Array.isArray(result.data.items)) {
             // 컨테이너 비우기
             container.innerHTML = '';
 
             // 각 작품에 대한 카드 생성
-            for (const artwork of result.data) {
+            for (const artwork of result.data.items) {
                 // 카드 생성
                 const card = await createArtworkCard(artwork);
 
@@ -50,7 +52,7 @@ async function loadFeaturedArtworks() {
             }
 
             // 카드가 없는 경우
-            if (result.data.length === 0) {
+            if (result.data.items.length === 0) {
                 container.innerHTML = `
                     <div class="empty-artwork-container">
                         <div class="empty-artwork-message">
@@ -249,9 +251,13 @@ async function createArtworkCard(artwork) {
  * @returns {Promise<Object>} - 카드 데이터
  */
 async function fetchArtworkCardData(artworkId) {
-    const response = await fetch(`/artwork/api/data/${artworkId}?type=card`);
-    if (!response.ok) throw new Error('작품 카드 데이터를 불러올 수 없습니다.');
-    return await response.json();
+    try {
+        const result = await ArtworkAPI.getData(artworkId, 'card');
+        return result.data;
+    } catch (error) {
+        console.error(`작품 카드 데이터(ID: ${artworkId}) 로딩 중 오류:`, error);
+        throw error;
+    }
 }
 
 /**
@@ -260,9 +266,13 @@ async function fetchArtworkCardData(artworkId) {
  * @returns {Promise<Object>} - 모달 데이터
  */
 async function fetchArtworkModalData(artworkId) {
-    const response = await fetch(`/artwork/api/data/${artworkId}?type=modal`);
-    if (!response.ok) throw new Error('작품 모달 데이터를 불러올 수 없습니다.');
-    return await response.json();
+    try {
+        const result = await ArtworkAPI.getData(artworkId, 'modal');
+        return result.data;
+    } catch (error) {
+        console.error(`작품 모달 데이터(ID: ${artworkId}) 로딩 중 오류:`, error);
+        throw error;
+    }
 }
 
 /**

@@ -1,8 +1,8 @@
 /**
  * 작품 관련 API
  */
-import api from './index';
-import { showErrorMessage } from '../common/util.js';
+import api from './index.js';
+import { showErrorMessage } from '../common/util/notification.js';
 import Pagination from '../common/pagination.js';
 import { createFilterParams } from '../common/filters.js';
 
