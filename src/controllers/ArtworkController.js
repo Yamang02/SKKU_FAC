@@ -55,24 +55,11 @@ export default class ArtworkController {
     async getArtworkDetailPage(req, res) {
         try {
             const { id } = req.params;
-            const artwork = await this.artworkService.getArtworkDetail(id);
-
             return ViewResolver.render(res, ViewPath.MAIN.ARTWORK.DETAIL, {
-                title: artwork.title,
-                artwork: artwork
+                title: '작품 상세',
+                artworkId: id
             });
         } catch (error) {
-            if (error instanceof ArtworkNotFoundError) {
-                logger.error({
-                    operation: 'getArtworkDetailPage',
-                    error: error.message,
-                    stack: error.stack,
-                    id: req.params.id
-                });
-                return res.status(404).render('error', {
-                    message: Message.ARTWORK.NOT_FOUND
-                });
-            }
             logger.error({
                 operation: 'getArtworkDetailPage',
                 error: error.message,
@@ -311,20 +298,6 @@ export default class ArtworkController {
     }
 
     /**
-     * 작품 데이터를 조회합니다.
-     */
-    async getArtworkData(req, res) {
-        try {
-            const { id } = req.params;
-            const { type = 'default' } = req.query;
-            const artworkData = await this.artworkService.getArtworkSimple(id, type);
-            res.json(artworkData);
-        } catch (error) {
-            res.status(500).json({ success: false, message: '작품 데이터를 불러오는데 실패했습니다.' });
-        }
-    }
-
-    /**
      * 추천 작품 목록을 반환합니다.
      */
     async getFeaturedArtworks(req, res) {
@@ -401,26 +374,23 @@ export default class ArtworkController {
      */
     async getArtworkDetail(req, res) {
         try {
-            const { id } = req.params;
-            const artwork = await this.artworkService.getArtworkDetail(id);
-            return res.json(ApiResponse.success(artwork).toJSON());
-        } catch (error) {
-            if (error instanceof ArtworkNotFoundError) {
-                logger.error({
-                    operation: 'getArtworkDetail',
-                    error: error.message,
-                    stack: error.stack,
-                    id: req.params.id
-                });
-                return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND).toJSON());
+            const id = parseInt(req.params.id);
+            const type = req.query.type || 'default';
+
+            const artwork = await this.artworkService.getArtworkDetail(id, type);
+
+            // artist와 exhibition이 없는 경우 기본값 설정
+            if (!artwork.artist) {
+                artwork.artist = { id: null, name: '작가 미상' };
             }
-            logger.error({
-                operation: 'getArtworkDetail',
-                error: error.message,
-                stack: error.stack,
-                id: req.params.id
-            });
-            return res.status(500).json(ApiResponse.error(Message.ARTWORK.DETAIL_ERROR).toJSON());
+            if (!artwork.exhibition) {
+                artwork.exhibition = { title: '없음' };
+            }
+
+            res.json(artwork);
+        } catch (error) {
+            console.error('작품 상세 정보 조회 중 오류:', error);
+            res.status(404).json({ error: error.message });
         }
     }
 
@@ -507,6 +477,22 @@ export default class ArtworkController {
             }
             console.error('Error deleting artwork:', error);
             return res.status(500).json(ApiResponse.error(Message.ARTWORK.DELETE_ERROR).toJSON());
+        }
+    }
+
+    /**
+     * 작품 간단 정보를 조회합니다.
+     */
+    async getArtworkSimple(req, res) {
+        try {
+            const id = parseInt(req.params.id);
+            const type = req.query.type || 'default';
+
+            const artwork = await this.artworkService.getArtworkSimple(id, type);
+            res.json(artwork);
+        } catch (error) {
+            console.error('작품 간단 정보 조회 중 오류:', error);
+            res.status(404).json({ error: error.message });
         }
     }
 }

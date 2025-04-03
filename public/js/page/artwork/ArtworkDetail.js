@@ -3,7 +3,10 @@
  * 작품 상세 페이지의 모든 기능을 처리합니다.
  */
 
-import { showErrorMessage } from '/js/common/util/index.js';
+import ArtworkAPI from '../../api/ArtworkAPI.js';
+import { showErrorMessage } from '../../common/util/notification.js';
+import { createArtworkCard } from '../../common/util/card.js';
+import { getArtworkId } from '../../common/util/url.js';
 
 // 애니메이션 관련 함수
 function fadeIn(element, callback) {
@@ -89,7 +92,7 @@ function initStickyImageSection() {
 }
 
 function initImageZoom() {
-    const artworkImage = document.querySelector('.artwork-image');
+    const artworkImage = document.querySelector('.artwork-main-image');
     const imageWrapper = document.querySelector('.artwork-image-wrapper');
 
     if (!artworkImage || !imageWrapper) return;
@@ -123,9 +126,9 @@ function initImageZoom() {
 
 // 관련 작품 관련 함수
 function initRelatedArtworks() {
-    const scrollContainer = document.querySelector('.related_artworks_list');
-    const prevBtn = document.querySelector('.prev_btn');
-    const nextBtn = document.querySelector('.next_btn');
+    const scrollContainer = document.querySelector('.related-artworks-list');
+    const prevBtn = document.querySelector('.btn--scroll[aria-label="이전 작품"]');
+    const nextBtn = document.querySelector('.btn--scroll[aria-label="다음 작품"]');
 
     if (!scrollContainer || !prevBtn || !nextBtn) return;
 
@@ -146,7 +149,6 @@ function initRelatedArtworks() {
     });
 
     updateScrollButtons();
-    initRelatedArtworkItems();
 
     function updateScrollButtons() {
         const isAtStart = scrollContainer.scrollLeft <= 10;
@@ -159,165 +161,118 @@ function initRelatedArtworks() {
     }
 }
 
-function initRelatedArtworkItems() {
-    const relatedArtworks = document.querySelectorAll('.related_artwork_item');
+// 페이지 초기화 - DOMContentLoaded 제거하고 즉시 실행
+initPage();
 
-    if (!relatedArtworks.length) return;
-
-    relatedArtworks.forEach(item => {
-        item.addEventListener('click', () => {
-            const artworkId = item.dataset.artworkId;
-            if (artworkId) {
-                window.location.href = `/artwork/${artworkId}`;
-            }
-        });
-    });
-}
-
-// 댓글 관련 함수
-function initComment() {
-    const commentForm = document.querySelector('.comment_form');
-    const clearBtn = document.querySelector('.clear_comment');
-    const commentInput = document.querySelector('.comment_input');
-    const commentList = document.querySelector('.comment_list');
-
-    if (!commentForm || !commentInput) return;
-
-    commentForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const commentText = commentInput.value.trim();
-        if (!commentText) return;
-
-        addComment(commentText);
-        commentInput.value = '';
-    });
-
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function () {
-            commentInput.value = '';
-            commentInput.focus();
-        });
-    }
-
-    if (commentList) {
-        const deleteButtons = commentList.querySelectorAll('.delete_comment');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const commentItem = this.closest('.comment_item');
-                if (commentItem) {
-                    deleteComment(commentItem);
-                }
-            });
-        });
+async function initPage() {
+    try {
+        await loadArtworkDetail();
+        initImageViewer();
+        initRelatedArtworks();
+    } catch (error) {
+        console.error('페이지 초기화 중 오류:', error);
+        showErrorMessage('작품 정보를 불러오는데 실패했습니다.');
     }
 }
 
-function addComment(commentText) {
-    const commentList = document.querySelector('.comment_list');
-    if (!commentList) return;
+// 작품 상세 정보 로드
+async function loadArtworkDetail() {
+    try {
+        const artworkId = getArtworkId();
+        console.log('작품 ID:', artworkId);
 
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+        if (!artworkId) {
+            throw new Error('작품 ID를 찾을 수 없습니다.');
+        }
 
-    const newComment = document.createElement('div');
-    newComment.className = 'comment_item';
-    newComment.innerHTML = `
-        <div class="comment_header">
-            <span class="comment_author">사용자</span>
-            <span class="comment_date">${formattedDate}</span>
-            <button class="delete_comment" aria-label="댓글 삭제">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="comment_content">${commentText}</div>
-    `;
+        const response = await ArtworkAPI.getDetail(artworkId);
+        console.log('API 응답:', response);
 
-    const deleteButton = newComment.querySelector('.delete_comment');
-    deleteButton.addEventListener('click', function () {
-        deleteComment(newComment);
-    });
+        if (!response || !response.success || !response.data) {
+            throw new Error('작품 정보를 불러오는데 실패했습니다.');
+        }
 
-    commentList.prepend(newComment);
-    fadeIn(newComment);
-    updateCommentCount(1);
-    saveComment(commentText);
+        const artwork = response.data;
+        updateArtworkDetail(artwork);
+        await loadRelatedArtworks(artwork);
+    } catch (error) {
+        console.error('작품 정보 로드 중 오류:', error);
+        showErrorMessage('작품 정보를 불러오는데 실패했습니다.');
+        throw error;
+    }
 }
 
-function deleteComment(commentItem) {
-    if (!commentItem) return;
+// 작품 상세 정보 업데이트
+function updateArtworkDetail(artwork) {
+    // 이미지 업데이트
+    const artworkImage = document.querySelector('.artwork-main-image');
+    if (artworkImage) {
+        artworkImage.src = artwork.image || '/images/artwork-placeholder.svg';
+        artworkImage.alt = artwork.title;
+    }
 
-    fadeOut(commentItem, () => {
-        commentItem.remove();
-        updateCommentCount(-1);
+    // 제목 및 기본 정보 업데이트
+    document.querySelector('.artwork-detail-title').textContent = artwork.title || '제목 없음';
+    document.querySelector('.artwork-detail-artist').textContent = artwork.artist || '작가 미상';
+    document.querySelector('.artwork-detail-department').textContent = artwork.department || '';
 
-        const commentId = commentItem.dataset.commentId;
-        if (commentId) {
-            deleteCommentFromServer(commentId);
+    // 상세 정보 업데이트
+    document.querySelector('.value.year').textContent = artwork.year || '미표기';
+    document.querySelector('.value.medium').textContent = artwork.medium || '미표기';
+    document.querySelector('.value.size').textContent = artwork.size || '미표기';
+    document.querySelector('.artwork-description').textContent = artwork.description || '작품에 대한 설명이 없습니다.';
+    document.querySelector('.exhibition-info').textContent = artwork.exhibition || '없음';
+
+    // 페이지 타이틀 업데이트
+    document.title = `${artwork.title} - 성미회`;
+}
+
+// 관련 작품 로드
+async function loadRelatedArtworks(artwork) {
+    try {
+        const response = await ArtworkAPI.getList({
+            page: 1,
+            size: 6,
+            excludeId: artwork.id,
+            department: artwork.department
+        });
+
+        if (!response.success || !response.data) {
+            throw new Error('관련 작품을 불러오는데 실패했습니다.');
+        }
+
+        const relatedArtworks = response.data.items;
+        updateRelatedArtworks(relatedArtworks);
+    } catch (error) {
+        console.error('관련 작품 로드 중 오류:', error);
+        showErrorMessage('관련 작품을 불러오는데 실패했습니다.');
+    }
+}
+
+// 관련 작품 목록 업데이트
+function updateRelatedArtworks(artworks) {
+    const container = document.querySelector('.related-artworks-list');
+    if (!container) return;
+
+    if (!artworks || artworks.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-image"></i>
+                <p>관련된 다른 작품이 없습니다.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    artworks.forEach(artwork => {
+        const card = createArtworkCard(artwork, { type: 'list' });
+        if (card) {
+            card.classList.add('card--related');
+            fragment.appendChild(card);
         }
     });
+
+    container.innerHTML = '';
+    container.appendChild(fragment);
 }
-
-function updateCommentCount(change) {
-    const commentCount = document.querySelector('.comment_count');
-    if (!commentCount) return;
-
-    const currentCount = parseInt(commentCount.textContent) || 0;
-    commentCount.textContent = currentCount + change;
-}
-
-/**
- * 댓글을 서버에 저장합니다.
- * @param {string} commentText - 저장할 댓글 내용
- * @returns {Promise<void>}
- */
-async function saveComment(commentText) {
-    try {
-        // TODO: 서버에 댓글 저장 로직 구현
-        await fetch('/api/comments', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                content: commentText,
-                timestamp: new Date().toISOString()
-            })
-        });
-    } catch (error) {
-        showErrorMessage('댓글 저장에 실패했습니다.');
-    }
-}
-
-/**
- * 댓글을 서버에서 삭제합니다.
- * @param {string} commentId - 삭제할 댓글 ID
- * @returns {Promise<void>}
- */
-async function deleteCommentFromServer(commentId) {
-    try {
-        // TODO: 서버에 댓글 삭제 로직 구현
-        await fetch(`/api/comments/${commentId}`, {
-            method: 'DELETE'
-        });
-    } catch (error) {
-        showErrorMessage('댓글 삭제에 실패했습니다.');
-    }
-}
-
-// 페이지 초기화
-document.addEventListener('DOMContentLoaded', function () {
-    initImageViewer();
-    initRelatedArtworks();
-    initComment();
-
-    const mainContent = document.querySelector('.artwork-detail-container');
-    if (mainContent) {
-        fadeIn(mainContent);
-    }
-});

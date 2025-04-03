@@ -1,27 +1,21 @@
 <style ref="stylesheet">
-    @import url('../../../public/css/artwork/ArtworkDetail.css');
+    @import url('/css/artwork/ArtworkDetail.css');
 </style>
 <div class="artwork-detail-container">
     <!-- 작품 이미지 섹션 -->
     <section class="artwork-image-section">
         <div class="artwork-image-wrapper">
-            <img src="<%= artwork.image || '/images/artwork-placeholder.svg' %>" alt="<%= artwork.title %>"
-                class="artwork-main-image" onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
+            <img src="/images/artwork-placeholder.svg" alt="작품 이미지" class="artwork-main-image"
+                onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
         </div>
     </section>
 
     <!-- 작품 정보 섹션 -->
     <section class="artwork-info-section">
         <div class="artwork-detail-header">
-            <h1 class="artwork-detail-title">
-                <%= artwork.title %>
-            </h1>
-            <p class="artwork-detail-artist">
-                <%= artwork.artist || '작가 미상' %>
-            </p>
-            <p class="artwork-detail-department">
-                <%= artwork.department || '' %>
-            </p>
+            <h1 class="artwork-detail-title">로딩중...</h1>
+            <p class="artwork-detail-artist"></p>
+            <p class="artwork-detail-department"></p>
         </div>
 
         <div class="artwork-details">
@@ -29,36 +23,26 @@
                 <h2><i class="fas fa-info-circle icon-margin"></i>작품 정보</h2>
                 <div class="detail-item">
                     <span class="label">제작 연도</span>
-                    <span class="value">
-                        <%= artwork.year || '미표기' %>
-                    </span>
+                    <span class="value year"></span>
                 </div>
                 <div class="detail-item">
                     <span class="label">매체</span>
-                    <span class="value">
-                        <%= artwork.medium || '미표기' %>
-                    </span>
+                    <span class="value medium"></span>
                 </div>
                 <div class="detail-item">
                     <span class="label">크기</span>
-                    <span class="value">
-                        <%= artwork.size || '미표기' %>
-                    </span>
+                    <span class="value size"></span>
                 </div>
             </div>
 
             <div class="detail-group">
                 <h2><i class="fas fa-align-left icon-margin"></i>작품 설명</h2>
-                <p class="artwork-description">
-                    <%= artwork.description || '작품에 대한 설명이 없습니다.' %>
-                </p>
+                <p class="artwork-description"></p>
             </div>
 
             <div class="detail-group">
                 <h2><i class="fas fa-calendar-alt icon-margin"></i>전시 정보</h2>
-                <p class="exhibition-info">
-                    <%= artwork.exhibition || '없음' %>
-                </p>
+                <p class="exhibition-info"></p>
             </div>
         </div>
     </section>
@@ -72,42 +56,7 @@
                 <h2 class="related-artworks-title">다른 작품</h2>
             </div>
             <div class="related-artworks-list">
-                <% if (relatedArtworks && relatedArtworks.length> 0) { %>
-                    <% relatedArtworks.forEach(relatedArtwork=> { %>
-                        <div class="card card--related">
-                            <a href="/artwork/<%= relatedArtwork.id %>" class="card__link">
-                                <% if (relatedArtwork.image) { %>
-                                    <div class="card__image-container">
-                                        <img src="<%= relatedArtwork.image %>"
-                                            alt="<%= relatedArtwork.title || '작품 이미지' %>" class="card__image"
-                                            onerror="this.onerror=null; this.src='/images/default-artwork.svg'">
-                                    </div>
-                                    <% } else { %>
-                                        <div class="card__image-placeholder">
-                                            <img src="/images/default-artwork.svg"
-                                                alt="<%= relatedArtwork.title || '작품 이미지' %>" class="card__image">
-                                        </div>
-                                        <% } %>
-                                            <div class="card__info">
-                                                <h3 class="card__title">
-                                                    <%= relatedArtwork.title || '제목 없음' %>
-                                                </h3>
-                                                <p class="card__subtitle">
-                                                    <%= relatedArtwork.artist || '작가 미상' %>
-                                                </p>
-                                                <div class="card__meta">
-                                                    <%= relatedArtwork.department || '' %>
-                                                </div>
-                                            </div>
-                            </a>
-                        </div>
-                        <% }); %>
-                            <% } else { %>
-                                <div class="empty-state">
-                                    <i class="fas fa-image"></i>
-                                    <p>관련된 다른 작품이 없습니다.</p>
-                                </div>
-                                <% } %>
+                <!-- 관련 작품이 JavaScript로 로드됩니다 -->
             </div>
             <div class="list-action">
                 <div class="action-group">
@@ -127,4 +76,4 @@
     </div>
 </div>
 
-<script src="/js/page/artwork/ArtworkDetail.js"></script>
+<script type="module" src="/js/page/artwork/ArtworkDetail.js"></script>

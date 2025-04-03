@@ -6,16 +6,15 @@ export default class ArtworkResponseDTO {
         this.id = artwork.id;
         this.title = artwork.title;
         this.description = artwork.description;
+        this.image = artwork.image || null;
         this.imageId = artwork.imageId;
-        this.image = artwork.imageId ? `/uploads/artworks/${artwork.image}` : null;
-        this.artistId = artwork.artistId;
-        this.artistName = artwork.artistName;
+        this.artist = artwork.artist;
         this.department = artwork.department;
         this.year = artwork.year;
         this.medium = artwork.medium;
         this.size = artwork.size;
         this.exhibitionId = artwork.exhibitionId;
-        this.exhibitionTitle = artwork.exhibitionTitle;
+        this.exhibition = artwork.exhibition;
         this.isFeatured = artwork.isFeatured;
         this.createdAt = artwork.createdAt;
         this.updatedAt = artwork.updatedAt;
@@ -28,14 +27,14 @@ export default class ArtworkResponseDTO {
             description: this.description,
             imageId: this.imageId,
             image: this.image,
-            artistId: this.artistId,
-            artistName: this.artistName,
+            artistId: this.artist.id,
+            artistName: this.artist.name,
             department: this.department,
             year: this.year,
             medium: this.medium,
             size: this.size,
             exhibitionId: this.exhibitionId,
-            exhibitionTitle: this.exhibitionTitle,
+            exhibitionTitle: this.exhibition.title,
             isFeatured: this.isFeatured,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt

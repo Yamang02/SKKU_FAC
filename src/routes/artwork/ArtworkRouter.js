@@ -12,8 +12,8 @@ ArtworkRouter.get('/api/list', artworkController.getArtworkList.bind(artworkCont
 // 작품 상세 조회 API
 ArtworkRouter.get('/api/detail/:id', artworkController.getArtworkDetail.bind(artworkController));
 
-// 작품 데이터 조회 API
-ArtworkRouter.get('/api/data/:id', artworkController.getArtworkData.bind(artworkController));
+// 작품 간단 정보 조회 API
+ArtworkRouter.get('/api/simple/:id', artworkController.getArtworkSimple.bind(artworkController));
 
 // === 페이지 라우트 ===
 // 작품 목록 페이지

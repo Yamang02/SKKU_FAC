@@ -2,11 +2,16 @@
  * 작품 목록 페이지
  * 작품 목록의 모든 기능을 처리합니다.
  */
-import ArtworkAPI from '../../api/ArtworkAPI';
+import ArtworkAPI from '../../api/ArtworkAPI.js';
+import { emptyArtworkTemplate, errorMessageTemplate, loadingSpinnerTemplate } from '../../templates/emptyArtworkTemplate.js';
+import { modalTemplate, artworkModalContent } from '../../templates/modalTemplate.js';
+import { initModal, showModal, closeModal, updateModalContent } from '../../common/modal.js';
+import Pagination from '../../common/pagination.js';
+import { createArtworkCard } from '../../common/util/card.js';
 
 // API 함수 - 서버에서 가져오기
-async function fetchArtworkList(params = {}) {
-    return await ArtworkAPI.getList(params);
+async function fetchArtworkList(pagination, filters = {}) {
+    return await ArtworkAPI.getList(pagination, filters);
 }
 
 // 유틸리티 함수
@@ -295,178 +300,128 @@ async function loadArtworkList() {
     const resultCount = document.getElementById('resultCount');
 
     try {
-        // 현재 URL에서 쿼리 파라미터 가져오기
+        showLoading(true);
+
         const urlParams = new URLSearchParams(window.location.search);
-        const params = {
-            page: urlParams.get('page') || 1,
-            limit: urlParams.get('limit') || 12,
+        const pagination = new Pagination({
+            page: parseInt(urlParams.get('page')) || 1,
+            limit: parseInt(urlParams.get('limit')) || 12,
             sortField: urlParams.get('sortField') || 'createdAt',
-            sortOrder: urlParams.get('sortOrder') || 'desc',
+            sortOrder: urlParams.get('sortOrder') || 'desc'
+        });
+
+        const filters = {
             searchType: urlParams.get('searchType') || '',
             keyword: urlParams.get('keyword') || '',
             exhibition: urlParams.get('exhibition') || ''
         };
 
-        // API 호출
-        const data = await fetchArtworkList(params);
+        const response = await fetchArtworkList(pagination, filters);
 
-        // 카드 뷰 업데이트
-        if (cardView) {
-            cardView.innerHTML = ''; // 기존 내용 비우기
-
-            if (data.items && data.items.length > 0) {
-                // 각 작품에 대한 카드 생성
-                data.items.forEach(artwork => {
-                    const card = createArtworkCard(artwork);
-                    cardView.appendChild(card);
-                });
-            } else {
-                // 결과가 없는 경우
-                cardView.innerHTML = '<div class="no-results"><p>검색 결과가 없습니다.</p></div>';
-            }
+        if (!response || !response.success) {
+            throw new Error(response?.error || '작품 목록을 불러오는데 실패했습니다.');
         }
 
-        // 테이블 뷰 업데이트
-        if (tableViewBody) {
-            tableViewBody.innerHTML = ''; // 기존 내용 비우기
+        const data = response.data;
 
-            if (data.items && data.items.length > 0) {
-                // 각 작품에 대한 테이블 행 생성
-                data.items.forEach(artwork => {
-                    const row = createArtworkTableRow(artwork);
-                    tableViewBody.appendChild(row);
-                });
-            } else {
-                // 결과가 없는 경우
+        if (!data || !data.items || data.items.length === 0) {
+            if (cardView) {
+                cardView.innerHTML = emptyArtworkTemplate;
+            }
+            if (tableViewBody) {
                 const emptyRow = document.createElement('tr');
                 emptyRow.innerHTML = '<td colspan="6" class="no-results">검색 결과가 없습니다.</td>';
+                tableViewBody.innerHTML = '';
                 tableViewBody.appendChild(emptyRow);
             }
+            if (resultCount) {
+                resultCount.innerHTML = '총 <strong>0</strong>개의 작품이 검색되었습니다.';
+            }
+            return;
         }
 
-        // 결과 개수 표시 업데이트
-        if (resultCount) {
-            resultCount.innerHTML = `총 <strong>${data.total}</strong>개의 작품이 검색되었습니다.`;
+        const cardFragment = document.createDocumentFragment();
+        const tableFragment = document.createDocumentFragment();
+
+        data.items.forEach(artwork => {
+            if (cardView) {
+                const card = createArtworkCard(artwork, { type: 'list' });
+                cardFragment.appendChild(card);
+            }
+            if (tableViewBody) {
+                tableFragment.appendChild(createArtworkTableRow(artwork));
+            }
+        });
+
+        if (cardView) {
+            cardView.innerHTML = '';
+            cardView.appendChild(cardFragment);
         }
+        if (tableViewBody) {
+            tableViewBody.innerHTML = '';
+            tableViewBody.appendChild(tableFragment);
+        }
+        if (resultCount) {
+            resultCount.innerHTML = `총 <strong>${data.total || 0}</strong>개의 작품이 검색되었습니다.`;
+        }
+
     } catch (error) {
         console.error('작품 목록을 로드하는 중 오류 발생:', error);
+        showErrorMessage(error.message || '작품 목록을 불러오는 중 오류가 발생했습니다.');
 
-        // 오류 메시지 표시
         if (cardView) {
-            cardView.innerHTML = `
-                <div class="error-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>작품 목록을 불러오는 중 오류가 발생했습니다.</p>
-                </div>
-            `;
+            cardView.innerHTML = errorMessageTemplate;
         }
+    } finally {
+        showLoading(false);
     }
 }
 
-/**
- * 작품 데이터로 카드 요소를 생성합니다.
- * @param {Object} artwork - 작품 데이터
- * @returns {HTMLElement} 생성된 카드 요소
- */
-function createArtworkCard(artwork) {
-    const card = document.createElement('div');
-    card.className = 'card card--list';
-    card.dataset.exhibition = artwork.exhibitionId || '';
-
-    let artistName = '작가 미상';
-    let artistDept = '';
-
-    if (artwork.artist) {
-        if (typeof artwork.artist === 'string') {
-            artistName = artwork.artist;
-        } else if (artwork.artist.name) {
-            artistName = artwork.artist.name;
-            artistDept = artwork.artist.department || '';
-        }
-    }
-
-    // 이미지 경로 처리
-    let imagePath = '/images/artwork-placeholder.svg';
-    let imageAlt = artwork.title || '';
-
-    if (artwork.image) {
-        if (typeof artwork.image === 'string') {
-            imagePath = artwork.image;
-        } else if (artwork.image && typeof artwork.image === 'object' && artwork.image.path) {
-            imagePath = artwork.image.path;
-            imageAlt = artwork.image.alt || artwork.title || '';
-        }
-    }
-
-    card.innerHTML = `
-        <a href="/artwork/${artwork.id}" class="card__link">
-            <div class="card__image-container">
-                <img src="${imagePath}"
-                     alt="${imageAlt}"
-                     class="card__image"
-                     onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
-            </div>
-            <div class="card__info">
-                <h3 class="card__title">${artwork.title || ''}</h3>
-                <p class="card__subtitle">${artistName}</p>
-                <div class="card__meta">${artistDept}</div>
-            </div>
-        </a>
-    `;
-
-    return card;
-}
-
-/**
- * 작품 데이터로 테이블 행 요소를 생성합니다.
- * @param {Object} artwork - 작품 데이터
- * @returns {HTMLElement} 생성된 테이블 행 요소
- */
+// 테이블 행 생성 함수
 function createArtworkTableRow(artwork) {
     const row = document.createElement('tr');
-    row.dataset.id = artwork.id || '';
-    row.onclick = function () {
-        window.location.href = `/artwork/${artwork.id}`;
+
+    // 이미지 셀
+    const imageCell = document.createElement('td');
+    const imageContainer = document.createElement('div');
+    imageContainer.className = 'table-image-container';
+
+    const image = document.createElement('img');
+    image.src = artwork.image || '/images/artwork-placeholder.svg';
+    image.alt = artwork.title || '';
+    image.className = 'table-image';
+    image.loading = 'lazy'; // 이미지 지연 로딩 추가
+    image.onerror = function () {
+        this.onerror = null;
+        this.src = '/images/artwork-placeholder.svg';
     };
 
-    let artistName = '작가 미상';
-    let artistDept = '';
+    imageContainer.appendChild(image);
+    imageCell.appendChild(imageContainer);
+    row.appendChild(imageCell);
 
-    if (artwork.artist) {
-        if (typeof artwork.artist === 'string') {
-            artistName = artwork.artist;
-        } else if (artwork.artist.name) {
-            artistName = artwork.artist.name;
-            artistDept = artwork.artist.department || '';
-        }
-    }
+    // 제목 셀
+    const titleCell = document.createElement('td');
+    const titleLink = document.createElement('a');
+    titleLink.href = `/artwork/${artwork.id}`;
+    titleLink.textContent = artwork.title || '제목 없음';
+    titleCell.appendChild(titleLink);
+    row.appendChild(titleCell);
 
-    // 이미지 경로 처리
-    let imagePath = '/images/artwork-placeholder.svg';
-    let imageAlt = artwork.title || '';
+    // 작가 셀
+    const artistCell = document.createElement('td');
+    artistCell.textContent = artwork.artistName || '작가 미상';
+    row.appendChild(artistCell);
 
-    if (artwork.image) {
-        if (typeof artwork.image === 'string') {
-            imagePath = artwork.image;
-        } else if (artwork.image && typeof artwork.image === 'object' && artwork.image.path) {
-            imagePath = artwork.image.path;
-            imageAlt = artwork.image.alt || artwork.title || '';
-        }
-    }
+    // 학과 셀
+    const departmentCell = document.createElement('td');
+    departmentCell.textContent = artwork.department || '';
+    row.appendChild(departmentCell);
 
-    row.innerHTML = `
-        <td>
-            <img src="${imagePath}"
-                 alt="${imageAlt}"
-                 class="artwork-thumbnail"
-                 onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
-        </td>
-        <td>${artwork.title || ''}</td>
-        <td>${artistName}</td>
-        <td>${artistDept}</td>
-        <td>${artwork.exhibition || ''}</td>
-        <td>${artwork.year || ''}</td>
-    `;
+    // 전시회 셀
+    const exhibitionCell = document.createElement('td');
+    exhibitionCell.textContent = artwork.exhibitionTitle || '';
+    row.appendChild(exhibitionCell);
 
     return row;
 }

@@ -64,6 +64,17 @@ class ArtworkAPI {
             throw error;
         }
     }
+
+    // 주요 작품 목록 조회
+    static async getFeatured() {
+        try {
+            return await api.get('/artwork/api/featured');
+        } catch (error) {
+            console.error('주요 작품 목록을 가져오는 중 오류 발생:', error);
+            showErrorMessage('주요 작품 목록을 불러오는데 실패했습니다.');
+            throw error;
+        }
+    }
 }
 
 export default ArtworkAPI;

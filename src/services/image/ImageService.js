@@ -114,7 +114,7 @@ class ImageService {
      */
     async getImage(imageId) {
         try {
-            const image = await this.imageRepository.findById(imageId);
+            const image = await this.imageRepository.findImageById(imageId);
             if (!image) {
                 throw new ImageNotFoundError();
             }

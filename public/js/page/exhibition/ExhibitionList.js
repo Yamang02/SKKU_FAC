@@ -2,6 +2,9 @@
  * 전시회 목록 페이지 - 통합 스크립트
  */
 
+import { modalTemplate, exhibitionModalContent } from '../../templates/modalTemplate.js';
+import { initModal, showModal, closeModal, updateModalContent } from '../../common/modal.js';
+
 // 상태 관리
 const state = {
     currentPage: 1,
@@ -36,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSearch();
     initFilters();
     initExhibitionCards();
+    initExhibitionModal();
 });
 
 // 검색 기능
@@ -125,105 +129,31 @@ function initExhibitionCards() {
     });
 }
 
-// 전시회 모달
-function showExhibitionModal(data) {
-    const modal = document.getElementById('exhibition-modal');
-    if (!modal) return;
+// 모달 초기화
+function initExhibitionModal() {
+    // 모달 HTML 추가
+    const modalHTML = modalTemplate('exhibition-modal', exhibitionModalContent);
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-    // 모달 내용 업데이트
-    const modalImage = modal.querySelector('#modal-image');
-    const modalTitle = modal.querySelector('#modal-title');
-    const modalPeriod = modal.querySelector('#modal-period');
-    const modalLocation = modal.querySelector('#modal-location');
-    const modalDescription = modal.querySelector('#modal-description');
-    const modalType = modal.querySelector('#modal-type');
-    const modalHours = modal.querySelector('#modal-hours');
-    const modalAdmission = modal.querySelector('#modal-admission');
-    const modalCategory = modal.querySelector('#modal-category');
-
-    if (modalImage) {
-        modalImage.src = data.imageUrl || '/images/exhibition-placeholder.svg';
-        modalImage.alt = data.title;
-    }
-    if (modalTitle) modalTitle.textContent = data.title;
-    if (modalPeriod) modalPeriod.textContent = `${data.startDate} - ${data.endDate}`;
-    if (modalLocation) modalLocation.textContent = data.location;
-    if (modalDescription) modalDescription.textContent = data.description;
-    if (modalType) modalType.textContent = data.exhibitionType === 'special' ? '특별 전시회' : '정기 전시회';
-    if (modalHours) modalHours.textContent = data.viewingHours;
-    if (modalAdmission) modalAdmission.textContent = data.admission;
-    if (modalCategory) modalCategory.textContent = data.category;
-
-    // 모달 표시
-    document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
-    modal.style.display = 'flex';
-    modal.style.opacity = '0';
-    setTimeout(() => {
-        modal.style.opacity = '1';
-    }, 10);
-
-    // 닫기 버튼 이벤트
-    const closeButton = modal.querySelector('#close-modal');
-    if (closeButton) {
-        closeButton.onclick = () => closeModal(modal);
-    }
-
-    // 모달 외부 클릭 시 닫기
-    modal.onclick = (event) => {
-        if (event.target === modal) {
-            closeModal(modal);
-        }
-    };
-
-    // ESC 키 누를 때 모달 닫기
-    const escHandler = (e) => {
-        if (e.key === 'Escape' && modal.style.display === 'flex') {
-            closeModal(modal);
-            document.removeEventListener('keydown', escHandler);
-        }
-    };
-    document.addEventListener('keydown', escHandler);
-
-    // 공유하기 버튼 이벤트
-    const shareButton = modal.querySelector('#modal-share');
-    if (shareButton) {
-        shareButton.onclick = async () => {
-            try {
-                await navigator.share({
-                    title: data.title,
-                    text: data.description,
-                    url: window.location.href
-                });
-            } catch (err) {
-                console.warn('공유하기가 지원되지 않는 환경입니다:', err);
-                alert('이 브라우저에서는 공유하기 기능을 지원하지 않습니다.');
-            }
-        };
-    }
-
-    // 출품하기 버튼 이벤트
-    const submitButton = modal.querySelector('#modal-submit-link');
-    if (submitButton) {
-        submitButton.href = `/artwork/new?exhibition=${data.id}`;
-        submitButton.onclick = () => {
-            closeModal(modal);
-        };
-    }
-
-    // 작품 조회 버튼 이벤트
-    const viewButton = modal.querySelector('#modal-view-link');
-    if (viewButton) {
-        viewButton.href = `/exhibition/${data.id}/artworks`;
-    }
+    // 모달 초기화
+    initModal('exhibition-modal');
 }
 
-// 모달 닫기 함수
-function closeModal(modal) {
-    modal.style.opacity = '0';
-    setTimeout(() => {
-        modal.style.display = 'none';
-        document.body.style.overflow = ''; // 배경 스크롤 복원
-    }, 200);
+// 전시회 모달 표시
+function showExhibitionModal(exhibition) {
+    // 모달 내용 업데이트
+    updateModalContent('exhibition-modal', {
+        'modal-image': exhibition.image || '/images/exhibition-placeholder.svg',
+        'modal-title': exhibition.title || '제목 없음',
+        'modal-description': exhibition.description || '',
+        'modal-date': exhibition.date || '',
+        'modal-location': exhibition.location || '',
+        'modal-artworks-link': `/exhibition/${exhibition.id}/artworks`,
+        'modal-submit-link': `/exhibition/${exhibition.id}/submit`
+    });
+
+    // 모달 표시
+    showModal('exhibition-modal');
 }
 
 // 전시회 목록 새로고침
