@@ -51,6 +51,11 @@
     position: relative;
 }
 
+.related-artworks-list .card {
+    width: 280px;
+    flex-shrink: 0;
+}
+
 .related-artworks-list::-webkit-scrollbar {
     display: none;
 }
@@ -74,40 +79,6 @@
 .related-artworks-container::after {
     right: 0;
     background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
-}
-
-.related-artworks-list::before,
-.related-artworks-list::after {
-    display: none;
-}
-
-/* 관련 작품 특화 카드 스타일 */
-.card--related {
-    /* 관련 작품 페이지에만 필요한 특화 스타일이 있다면 여기에 추가 */
-}
-
-/*
- * 레거시 클래스 지원 (기존 코드와의 호환성을 위해 유지)
- * 새로운 프로젝트에서는 .card 클래스를 직접 사용하는 것을 권장합니다.
- */
-.related-artwork-card {
-    /* .card--related 클래스의 스타일을 상속 */
-}
-
-.related-artwork-image {
-    /* .card__image 클래스의 스타일을 상속 */
-}
-
-.related-artwork-info {
-    /* .card__info 클래스의 스타일을 상속 */
-}
-
-.related-artwork-title {
-    /* .card__title 클래스의 스타일을 상속 */
-}
-
-.related-artwork-artist {
-    /* .card__subtitle 클래스의 스타일을 상속 */
 }
 
 /* 상태 표시 스타일 */
@@ -162,19 +133,11 @@
         font-size: 1.5rem;
     }
 
-    .related-artwork-card {
-        min-width: 240px;
+    .related-artworks-list {
+        gap: 20px;
     }
 
-    .related-artwork-image {
-        height: 240px;
-        min-height: 240px;
-        min-width: 240px;
-    }
-
-    .artwork-image-placeholder {
-        height: 240px;
-        min-height: 240px;
-        min-width: 240px;
+    .related-artworks-list .card {
+        width: 240px;
     }
 }

@@ -10,7 +10,6 @@ import {
 import { ImageError } from '../errors/ImageError.js';
 import { ApiResponse } from '../models/common/response/ApiResponse.js';
 import { Message } from '../constants/Message.js';
-import { logger } from '../config/logger.js';
 
 /**
  * 작품 관련 컨트롤러
@@ -38,13 +37,9 @@ export default class ArtworkController {
                 total: result.total
             });
         } catch (error) {
-            logger.error({
-                operation: 'getArtworkListPage',
-                error: error.message,
-                stack: error.stack
-            });
             return res.status(500).render('error', {
-                message: Message.ARTWORK.LIST_ERROR
+                message: Message.ARTWORK.LIST_ERROR,
+                error: error.message
             });
         }
     }
@@ -60,14 +55,9 @@ export default class ArtworkController {
                 artworkId: id
             });
         } catch (error) {
-            logger.error({
-                operation: 'getArtworkDetailPage',
-                error: error.message,
-                stack: error.stack,
-                id: req.params.id
-            });
             return res.status(500).render('error', {
-                message: Message.ARTWORK.DETAIL_ERROR
+                message: Message.ARTWORK.DETAIL_ERROR,
+                error: error.message
             });
         }
     }
@@ -81,13 +71,9 @@ export default class ArtworkController {
                 title: '작품 등록'
             });
         } catch (error) {
-            logger.error({
-                operation: 'getArtworkRegistrationPage',
-                error: error.message,
-                stack: error.stack
-            });
             return res.status(500).render('error', {
-                message: Message.ARTWORK.REGISTRATION_ERROR
+                message: Message.ARTWORK.REGISTRATION_ERROR,
+                error: error.message
             });
         }
     }
@@ -336,14 +322,9 @@ export default class ArtworkController {
                 exhibitionId
             });
         } catch (error) {
-            logger.error({
-                operation: 'getArtworksByExhibition',
-                error: error.message,
-                stack: error.stack,
-                exhibitionId: req.params.exhibitionId
-            });
             return res.status(500).render('error', {
-                message: Message.ARTWORK.LIST_ERROR
+                message: Message.ARTWORK.LIST_ERROR,
+                error: error.message
             });
         }
     }
@@ -362,13 +343,6 @@ export default class ArtworkController {
             });
             return res.json(ApiResponse.success(result).toJSON());
         } catch (error) {
-            logger.error({
-                operation: 'getArtworkList',
-                error: error.message,
-                stack: error.stack,
-                page: req.query.page,
-                size: req.query.size
-            });
             return res.status(500).json(ApiResponse.error(Message.ARTWORK.LIST_ERROR).toJSON());
         }
     }
@@ -393,8 +367,11 @@ export default class ArtworkController {
 
             res.json(artwork);
         } catch (error) {
-            console.error('작품 상세 정보 조회 중 오류:', error);
-            res.status(404).json({ error: error.message });
+            res.status(404).json({
+                success: false,
+                message: Message.ARTWORK.NOT_FOUND,
+                error: error.message
+            });
         }
     }
 
@@ -405,39 +382,15 @@ export default class ArtworkController {
         try {
             const artworkData = req.body;
             const file = req.file;
-            logger.info({
-                operation: 'createArtwork',
-                title: artworkData.title,
-                artistId: artworkData.artistId,
-                hasImage: !!file
-            });
 
             const artwork = await this.artworkService.createArtwork(artworkData, file);
             return res.status(201).json(ApiResponse.success(artwork, Message.ARTWORK.CREATE_SUCCESS).toJSON());
         } catch (error) {
             if (error instanceof ArtworkValidationError) {
-                logger.error({
-                    operation: 'createArtwork',
-                    error: error.message,
-                    stack: error.stack,
-                    data: req.body
-                });
                 return res.status(400).json(ApiResponse.error(Message.ARTWORK.VALIDATION_ERROR).toJSON());
             } else if (error instanceof ImageError) {
-                logger.error({
-                    operation: 'createArtwork',
-                    error: error.message,
-                    stack: error.stack,
-                    file: req.file
-                });
                 return res.status(400).json(ApiResponse.error(Message.IMAGE.UPLOAD_ERROR).toJSON());
             }
-            logger.error({
-                operation: 'createArtwork',
-                error: error.message,
-                stack: error.stack,
-                data: req.body
-            });
             return res.status(500).json(ApiResponse.error(Message.ARTWORK.CREATE_ERROR).toJSON());
         }
     }
@@ -495,8 +448,24 @@ export default class ArtworkController {
             const artwork = await this.artworkService.getArtworkSimple(id, type);
             res.json(artwork);
         } catch (error) {
-            console.error('작품 간단 정보 조회 중 오류:', error);
-            res.status(404).json({ error: error.message });
+            res.status(404).json({
+                success: false,
+                message: Message.ARTWORK.NOT_FOUND,
+                error: error.message
+            });
+        }
+    }
+
+    /**
+     * 관련 작품 목록을 조회합니다.
+     */
+    async getRelatedArtworks(req, res) {
+        try {
+            const { id } = req.params;
+            const relatedArtworks = await this.artworkService.getRelatedArtworks(id);
+            return res.json(ApiResponse.success(relatedArtworks).toJSON());
+        } catch (error) {
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.RELATED_ERROR).toJSON());
         }
     }
 }

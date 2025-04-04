@@ -156,17 +156,26 @@ export class ArtworkService {
             const relatedIds = new Set();
             const MAX_RELATED_ITEMS = 6;
 
-            // 1. 같은 작가의 다른 작품 ID 조회 (최대 6개)
-            if (artistId) {
-                const artistArtworks = await this.artworkRepository.findByArtistId(artistId, MAX_RELATED_ITEMS, artworkId);
-                artistArtworks.forEach(artwork => relatedIds.add(artwork.id));
+            // 1. 같은 작가의 다른 작품 ID 조회
+            if (artistId && relatedIds.size < MAX_RELATED_ITEMS) {
+                const remainingCount = MAX_RELATED_ITEMS - relatedIds.size;
+                const artistArtworks = await this.artworkRepository.findByArtistId(artistId, remainingCount, artworkId);
+                artistArtworks.forEach(artwork => {
+                    if (relatedIds.size < MAX_RELATED_ITEMS) {
+                        relatedIds.add(artwork.id);
+                    }
+                });
             }
 
-            // 2. 아직 6개가 안 되고 전시회 ID가 있는 경우, 같은 전시회의 다른 작품으로 채움
-            if (relatedIds.size < MAX_RELATED_ITEMS && exhibitionId) {
+            // 2. 같은 전시회의 다른 작품 ID 조회
+            if (exhibitionId && relatedIds.size < MAX_RELATED_ITEMS) {
                 const remainingCount = MAX_RELATED_ITEMS - relatedIds.size;
                 const exhibitionArtworks = await this.artworkRepository.findByExhibitionId(exhibitionId, remainingCount, artworkId);
-                exhibitionArtworks.forEach(artwork => relatedIds.add(artwork.id));
+                exhibitionArtworks.forEach(artwork => {
+                    if (relatedIds.size < MAX_RELATED_ITEMS) {
+                        relatedIds.add(artwork.id);
+                    }
+                });
             }
 
             return Array.from(relatedIds);
@@ -508,6 +517,86 @@ export class ArtworkService {
         } catch (error) {
             console.error(`Error fetching artwork ${id}:`, error);
             return null;
+        }
+    }
+
+    /**
+     * 관련 작품 목록을 조회합니다.
+     * @param {string|number} artworkId - 작품 ID
+     * @returns {Promise<Array<Object>>} 관련 작품 목록
+     */
+    async getRelatedArtworks(artworkId) {
+        try {
+            // 1. 작품 정보 조회
+            const artwork = await this.artworkRepository.findArtworkById(artworkId);
+            if (!artwork) {
+                throw new Error('작품을 찾을 수 없습니다.');
+            }
+
+            // 2. 관련 작품 ID 목록 조회
+            const relatedIds = await this._getRelatedArtworkIds(
+                artworkId,
+                artwork.artistId,
+                artwork.exhibitionId
+            );
+
+            if (relatedIds.length === 0) {
+                return [];
+            }
+
+            // 3. 관련 작품 정보 조회
+            const relatedArtworks = await Promise.all(
+                relatedIds.map(async id => {
+                    const artwork = await this.artworkRepository.findArtworkById(id);
+                    if (!artwork) return null;
+
+                    // 이미지 정보 조회
+                    let image = null;
+                    if (artwork.imageId) {
+                        try {
+                            image = await this.imageService.getImage(artwork.imageId);
+                            artwork.image = await this._getImageUrl(artwork.imageId);
+                        } catch (error) {
+                            console.error(`Error fetching image for artwork ${artwork.id}:`, error);
+                        }
+                    }
+
+                    // 작가 정보 조회
+                    let artist = null;
+                    if (artwork.artistId) {
+                        try {
+                            artist = await this.userRepository.findUserById(artwork.artistId);
+                        } catch (error) {
+                            console.warn(`작가 정보를 찾을 수 없습니다. (ID: ${artwork.artistId})`);
+                        }
+                    }
+
+                    // 전시회 정보 조회
+                    let exhibition = null;
+                    if (artwork.exhibitionId) {
+                        try {
+                            exhibition = await this.exhibitionRepository.findExhibitionById(artwork.exhibitionId);
+                        } catch (error) {
+                            console.warn(`전시회 정보를 찾을 수 없습니다. (ID: ${artwork.exhibitionId})`);
+                        }
+                    }
+
+                    // ArtworkRelations 객체 생성
+                    const relations = new ArtworkRelations();
+                    relations.image = image;
+                    relations.artist = artist;
+                    relations.exhibition = exhibition;
+
+                    // DTO 생성
+                    return new ArtworkSimpleDTO(artwork, relations);
+                })
+            );
+
+            // null 값 제거
+            return relatedArtworks.filter(artwork => artwork !== null);
+        } catch (error) {
+            console.error('관련 작품 조회 중 오류:', error);
+            return [];
         }
     }
 }

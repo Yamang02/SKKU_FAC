@@ -368,7 +368,7 @@ export default artwork;
     async findByArtistId(artistId, limit, excludeId) {
         try {
             return this.artworks
-                .filter(artwork => artwork.artistId === Number(artistId) && artwork.id !== Number(excludeId))
+                .filter(artwork => Number(artwork.artistId) === Number(artistId) && artwork.id !== Number(excludeId))
                 .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 .slice(0, limit);
         } catch (error) {
@@ -387,7 +387,7 @@ export default artwork;
     async findByExhibitionId(exhibitionId, limit, excludeId) {
         try {
             return this.artworks
-                .filter(artwork => artwork.exhibitionId === Number(exhibitionId) && artwork.id !== Number(excludeId))
+                .filter(artwork => Number(artwork.exhibitionId) === Number(exhibitionId) && artwork.id !== Number(excludeId))
                 .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 .slice(0, limit);
         } catch (error) {

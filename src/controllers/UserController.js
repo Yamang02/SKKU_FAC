@@ -2,7 +2,8 @@ import SessionUtil from '../utils/SessionUtil.js';
 import ViewResolver from '../utils/ViewResolver.js';
 import { ViewPath } from '../constants/ViewPath.js';
 import UserService from '../services/user/UserService.js';
-import { logger } from '../config/logger.js';
+import { ApiResponse } from '../models/common/response/ApiResponse.js';
+import { Message } from '../constants/Message.js';
 
 export default class UserController {
     constructor() {
@@ -320,8 +321,7 @@ export default class UserController {
 
             return res.json(userInfo);
         } catch (error) {
-            logger.error('사용자 프로필 정보 조회 중 오류 발생:', error);
-            return res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+            return res.status(500).json(ApiResponse.error(Message.USER.PROFILE_ERROR).toJSON());
         }
     }
 }

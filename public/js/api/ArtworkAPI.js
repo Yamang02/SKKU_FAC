@@ -62,6 +62,21 @@ class ArtworkAPI {
             throw error;
         }
     }
+
+    /**
+     * 관련 작품 목록을 조회합니다.
+     * @param {string|number} id - 작품 ID
+     * @returns {Promise<Object>} 관련 작품 목록
+     */
+    static async getRelatedArtworks(id) {
+        try {
+            const response = await fetch(`/artwork/api/related/${id}`);
+            return await response.json();
+        } catch (error) {
+            console.error('관련 작품 조회 중 오류:', error);
+            return { success: false, message: '관련 작품을 불러오는데 실패했습니다.' };
+        }
+    }
 }
 
 export default ArtworkAPI;

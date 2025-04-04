@@ -120,12 +120,6 @@
     white-space: nowrap;
 }
 
-/* 작품 상세 페이지 관련 작품 카드 */
-.card--related {
-    min-width: 280px;
-    scroll-snap-align: start;
-}
-
 /* 전시회 페이지 카드 */
 .card--exhibition {
     height: 100%;
@@ -174,10 +168,6 @@
 
     .card__meta {
         font-size: 0.85rem;
-    }
-
-    .card--related {
-        min-width: 240px;
     }
 }
 

@@ -271,18 +271,10 @@ function updateArtworkDetail(artwork) {
  */
 async function loadRelatedArtworks(artwork) {
     try {
-        // 관련 작품 ID 목록이 있으면 해당 작품들을 가져옴
-        if (artwork.relatedArtworkIds && artwork.relatedArtworkIds.length > 0) {
-            const relatedArtworks = [];
-            for (const id of artwork.relatedArtworkIds) {
-                const response = await ArtworkAPI.getArtworkDetail(id);
-                if (response && response.data) {
-                    relatedArtworks.push(response.data);
-                }
-            }
-            updateRelatedArtworks(relatedArtworks);
+        const response = await ArtworkAPI.getRelatedArtworks(artwork.id);
+        if (response.success && response.data) {
+            updateRelatedArtworks(response.data);
         } else {
-            // 관련 작품이 없는 경우 빈 상태 표시
             updateRelatedArtworks([]);
         }
     } catch (error) {
@@ -291,7 +283,11 @@ async function loadRelatedArtworks(artwork) {
     }
 }
 
-// 관련 작품 목록 업데이트
+/**
+ * 관련 작품 목록을 업데이트합니다.
+ * @param {Array<Object>} artworks - 관련 작품 목록
+ * @private
+ */
 function updateRelatedArtworks(artworks) {
     const container = document.querySelector('.related-artworks-list');
     if (!container) return;
@@ -310,7 +306,6 @@ function updateRelatedArtworks(artworks) {
     artworks.forEach(artwork => {
         const card = createArtworkCard(artwork, { type: 'list' });
         if (card) {
-            card.classList.add('card--related');
             fragment.appendChild(card);
         }
     });
