@@ -13,21 +13,9 @@ export default class ArtworkRequestDTO {
         this.department = data.department;
         this.exhibitionId = data.exhibitionId;
         this.exhibitionName = data.exhibitionName;
-    }
-
-    validate() {
-        if (!this.title) {
-            throw new Error('제목은 필수입니다.');
-        }
-        if (!this.artistId) {
-            throw new Error('작가 ID는 필수입니다.');
-        }
-        if (!this.artistName) {
-            throw new Error('작가 이름은 필수입니다.');
-        }
-        if (!this.department) {
-            throw new Error('학과는 필수입니다.');
-        }
+        this.year = data.year;
+        this.medium = data.medium;
+        this.size = data.size;
     }
 
     toJSON() {
@@ -41,7 +29,10 @@ export default class ArtworkRequestDTO {
             artistName: this.artistName,
             department: this.department,
             exhibitionId: this.exhibitionId,
-            exhibitionName: this.exhibitionName
+            exhibitionName: this.exhibitionName,
+            year: this.year,
+            medium: this.medium,
+            size: this.size
         };
     }
 }

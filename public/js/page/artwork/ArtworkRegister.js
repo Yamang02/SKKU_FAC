@@ -207,15 +207,21 @@ function initSubmitButton() {
                 console.log('전시회 ID 추가:', exhibitionSelect.value, typeof exhibitionSelect.value);
             }
 
-            // 디버깅: FormData 내용 확인
-            console.log('FormData 값:');
+            // FormData 내용 상세 확인
+            console.log('=== FormData 상세 내용 ===');
             for (let [key, value] of formData.entries()) {
-                if (key !== 'image') {
-                    console.log(`${key}: ${value}`);
+                if (key === 'image') {
+                    console.log(`${key}:`, {
+                        name: value.name,
+                        type: value.type,
+                        size: value.size,
+                        lastModified: value.lastModified
+                    });
                 } else {
-                    console.log(`${key}: [File 객체]`);
+                    console.log(`${key}:`, value);
                 }
             }
+            console.log('========================');
 
             console.log('서버 요청 시작');
             const response = await fetch('/artwork', {
@@ -247,8 +253,11 @@ function initSubmitButton() {
                 throw new Error(result.message || '작품 등록에 실패했습니다.');
             }
 
-            // 성공 시 작품 상세 페이지로 이동
-            window.location.href = `/artwork/${result.artwork.id}`;
+            if (result.success) {
+                window.location.href = `/artwork/${result.data.id}`;
+            } else {
+                showError(result.error);
+            }
         } catch (error) {
             console.error('Error:', error);
             // 에러 메시지 표시

@@ -78,3 +78,14 @@ export class ImageNotFoundError extends ImageError {
         this.name = 'ImageNotFoundError';
     }
 }
+
+/**
+ * 이미지 트랜잭션 관련 에러
+ */
+export class ImageTransactionError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'ImageTransactionError';
+        this.status = 500;
+    }
+}

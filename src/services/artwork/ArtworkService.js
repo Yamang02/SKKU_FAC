@@ -9,6 +9,7 @@ import ArtworkDetailDTO from '../../models/artwork/dto/ArtworkDetailDTO.js';
 import ArtworkSimpleDTO from '../../models/artwork/dto/ArtworkSimpleDTO.js';
 import Page from '../../models/common/page/Page.js';
 import ArtworkRelations from '../../models/artwork/dto/relations/ArtworkRelations.js';
+import { ArtworkValidator } from '../../models/artwork/validator/ArtworkValidator.js';
 
 /**
  * 작품 서비스
@@ -308,56 +309,49 @@ export class ArtworkService {
         const requestDto = new ArtworkRequestDTO(artworkData);
         const validatedData = requestDto.toJSON();
 
-        let imageId = null;
+        // 1. 데이터 구조 검증
+        ArtworkValidator.validateCreate(validatedData);
 
-        // 필수 필드 검증
-        if (!validatedData.title) {
-            throw new ArtworkValidationError('작품 제목은 필수입니다.');
-        }
-        if (!validatedData.artistId) {
-            throw new ArtworkValidationError('작가 ID는 필수입니다.');
-        }
-        if (!validatedData.department) {
-            throw new ArtworkValidationError('학과는 필수입니다.');
+        // 2. 이미지 파일 존재 여부 검증
+        if (!file) {
+            throw new ArtworkValidationError('이미지는 필수입니다.');
         }
 
         try {
-            if (file) {
-                // 이미지 업로드
-                const image = await this.imageService.uploadImage(
-                    file.buffer,
-                    file.originalname,
-                    'artworks'
-                );
-                imageId = image.id;
-            }
+            // 3. 이미지 업로드 및 저장
+            console.log('이미지 업로드 시작');
+            const uploadedImage = await this.imageService.uploadImage(
+                file.buffer,
+                file.originalname,
+                'artworks'
+            );
+            console.log('이미지 업로드 완료:', uploadedImage);
 
-            // 작품 데이터 준비
+            // 4. 작품 데이터 준비
             const finalArtworkData = {
-                ...validatedData,
-                imageId,
-                year: validatedData.year || new Date().getFullYear().toString(),
+                title: validatedData.title,
+                artistId: validatedData.artistId,
+                artistName: validatedData.artistName,
+                department: validatedData.department,
+                imageId: uploadedImage.id,
+                description: validatedData.description || '',
                 medium: validatedData.medium || '',
                 size: validatedData.size || '',
-                isFeatured: validatedData.isFeatured || false,
-                exhibitionTitle: validatedData.exhibitionTitle || '',
+                year: validatedData.year || '',
+                exhibitionId: validatedData.exhibitionId || null,
+                isFeatured: false,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
 
-            // 작품 DB 저장
+            // 5. 작품 DB 저장
+            console.log('작품 데이터 저장 시작:', finalArtworkData);
             const artwork = await this.artworkRepository.createArtwork(finalArtworkData);
+            console.log('작품 데이터 저장 완료:', artwork);
 
             return artwork;
         } catch (error) {
-            // 에러 발생 시 이미지 삭제
-            if (imageId) {
-                try {
-                    await this.imageService.deleteImage(imageId);
-                } catch (deleteError) {
-                    console.error('이미지 삭제 실패:', deleteError);
-                }
-            }
+            console.error('작품 생성 중 오류 발생:', error);
             throw error;
         }
     }

@@ -1,5 +1,7 @@
 import Image from '../models/common/image/Image.js';
 import imageData from '../config/data/image.js';
+import fs from 'fs/promises';
+import path from 'path';
 
 /**
  * 이미지 레포지토리
@@ -14,6 +16,7 @@ class ImageRepository {
 
         // 현재는 임시 데이터 사용
         this.images = imageData.map(data => new Image(data));
+        this.dataFile = path.join(process.cwd(), 'src', 'config', 'data', 'image.js');
     }
 
     /**
@@ -22,23 +25,33 @@ class ImageRepository {
      * @returns {Promise<Image>} 저장된 이미지
      */
     async saveImage(imageData) {
-        // 새로운 ID 생성
-        const newId = this.images.length > 0
-            ? Math.max(...this.images.map(i => i.id)) + 1
-            : 1;
+        try {
+            // 새로운 ID 생성
+            const newId = this.images.length > 0
+                ? Math.max(...this.images.map(i => i.id)) + 1
+                : 1;
 
-        // Image 인스턴스 생성
-        const image = new Image({
-            ...imageData,
-            id: newId,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        });
+            // Image 인스턴스 생성
+            const image = new Image({
+                ...imageData,
+                id: newId,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            });
 
-        // 이미지 추가
-        this.images.push(image);
+            // 이미지 추가
+            this.images.push(image);
 
-        return image;
+            // 파일에 저장
+            const imageDataToSave = this.images.map(img => img.toJSON());
+            const fileContent = `export default ${JSON.stringify(imageDataToSave, null, 2)};`;
+            await fs.writeFile(this.dataFile, fileContent);
+
+            return image;
+        } catch (error) {
+            console.error('이미지 저장 실패:', error);
+            throw error;
+        }
     }
 
     /**

@@ -9,7 +9,7 @@ import fs from 'fs/promises';
  */
 class FileServerService {
     constructor() {
-        this.uploadDir = path.join(process.cwd(), 'uploads');
+        this.uploadDir = path.join(process.cwd(), 'public', 'uploads');
         this._ensureUploadDir();
     }
 
@@ -28,12 +28,17 @@ class FileServerService {
     /**
      * 파일을 업로드합니다.
      * @param {Buffer} fileBuffer - 파일 버퍼
+     * @param {string} category - 파일 카테고리 (artworks, exhibitions 등)
      * @returns {Promise<{storedName: string, filePath: string}>} 저장된 파일 정보
      */
-    async uploadFile(fileBuffer) {
+    async uploadFile(fileBuffer, category) {
         try {
+            // 카테고리별 디렉토리 생성
+            const categoryDir = path.join(this.uploadDir, category);
+            await fs.mkdir(categoryDir, { recursive: true });
+
             const storedName = `${uuidv4()}.jpg`;
-            const filePath = path.join(this.uploadDir, storedName);
+            const filePath = path.join(categoryDir, storedName);
 
             await fs.writeFile(filePath, fileBuffer);
 
@@ -48,11 +53,13 @@ class FileServerService {
 
     /**
      * 파일을 삭제합니다.
-     * @param {string} filePath - 파일 경로
+     * @param {string} storedName - 저장된 파일명
+     * @param {string} category - 파일 카테고리
      * @returns {Promise<boolean>} 삭제 성공 여부
      */
-    async deleteFile(filePath) {
+    async deleteFile(storedName, category) {
         try {
+            const filePath = path.join(this.uploadDir, category, storedName);
             await fs.unlink(filePath);
             return true;
         } catch (error) {
@@ -62,12 +69,12 @@ class FileServerService {
 
     /**
      * 파일의 URL을 생성합니다.
-     * @param {string} filePath - 파일 경로
+     * @param {string} storedName - 저장된 파일명
+     * @param {string} category - 파일 카테고리
      * @returns {string} 파일 URL
      */
-    getUrl(filePath) {
-        const storedName = path.basename(filePath);
-        return `/uploads/${storedName}`;
+    getUrl(storedName, category) {
+        return `/uploads/${category}/${storedName}`;
     }
 }
 
