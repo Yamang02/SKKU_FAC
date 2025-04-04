@@ -354,8 +354,12 @@ export default class ArtworkController {
      */
     async getArtworkList(req, res) {
         try {
-            const { page = 1, size = 10 } = req.query;
-            const result = await this.artworkService.getArtworkList(Number(page), Number(size));
+            const { page = 1, size = 10, isFeatured } = req.query;
+            const result = await this.artworkService.getArtworkList({
+                page: Number(page),
+                size: Number(size),
+                isFeatured
+            });
             return res.json(ApiResponse.success(result).toJSON());
         } catch (error) {
             logger.error({

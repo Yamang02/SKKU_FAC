@@ -28,5 +28,15 @@ export default [
     "mimeType": "image/png",
     "createdAt": "2025-04-04T09:38:56.424Z",
     "updatedAt": "2025-04-04T09:38:56.424Z"
+  },
+  {
+    "id": 4,
+    "originalName": "DALLÂ·E 2022-10-06 14.22.04 - Flim still, A Big shining Street light vertically dividing background, one side in midnight and the other side in bright morning, shot from below, a f.png",
+    "storedName": "4e722f34-cd88-4755-952a-990694407ad6.jpg",
+    "filePath": "C:\\Users\\ljj02\\Desktop\\dev\\portfolio\\SKKU_FAC_GALLERY\\public\\uploads\\artworks\\4e722f34-cd88-4755-952a-990694407ad6.jpg",
+    "fileSize": 2141636,
+    "mimeType": "image/png",
+    "createdAt": "2025-04-04T09:41:21.397Z",
+    "updatedAt": "2025-04-04T09:41:21.397Z"
   }
 ];

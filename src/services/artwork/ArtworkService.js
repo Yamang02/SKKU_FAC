@@ -80,7 +80,12 @@ export class ArtworkService {
         const pageOptions = this._createPageOptions(options);
 
         // 2. 작품 목록 조회
-        const artworks = await this.artworkRepository.findArtworks(pageOptions);
+        const queryOptions = { ...pageOptions };
+        if (options.isFeatured !== undefined) {
+            queryOptions.isFeatured = options.isFeatured === 'true';
+        }
+
+        const artworks = await this.artworkRepository.findArtworks(queryOptions);
 
         // 3. 이미지, 작가, 전시회 정보 조회
         const artworksWithDetails = await Promise.all(artworks.items.map(async artwork => {

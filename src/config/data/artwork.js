@@ -43,6 +43,20 @@ const artwork = [
     "isFeatured": false,
     "createdAt": "2025-04-04T09:38:56.430Z",
     "updatedAt": "2025-04-04T09:38:56.430Z"
+  },
+  {
+    "id": 4,
+    "title": "시간행성에서",
+    "artistId": "4",
+    "exhibitionId": 1,
+    "department": "한국예술협회",
+    "medium": "디지털 아트",
+    "size": "100x100cm",
+    "description": "외부 작가 작품 test",
+    "imageId": 4,
+    "isFeatured": false,
+    "createdAt": "2025-04-04T09:41:21.402Z",
+    "updatedAt": "2025-04-04T09:41:21.402Z"
   }
 ];
 
