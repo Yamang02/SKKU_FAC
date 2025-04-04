@@ -1,4 +1,4 @@
-import ExhibitionSimpleDTO from './ExhibitionSimpleDto.js';
+import ExhibitionSimpleDTO from './ExhibitionSimpleDTO.js';
 
 /**
  * 단순 전시회 목록을 위한 DTO

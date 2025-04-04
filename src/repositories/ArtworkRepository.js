@@ -187,7 +187,7 @@ export default artwork;
         }
 
         // 필수 필드 검증
-        if (!artworkData.title || !artworkData.artistId || !artworkData.department) {
+        if (!artworkData.title || !artworkData.artistId || !artworkData.artistName || !artworkData.department) {
             throw new Error('필수 필드가 누락되었습니다.');
         }
 

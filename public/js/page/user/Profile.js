@@ -2,7 +2,7 @@
  * 프로필 페이지
  * 프로필 관련 기능을 처리합니다.
  */
-import UserAPI from '/js/api/UserAPI.js';
+import UserAPI from '../../../api/UserAPI.js';
 import { showLoading, showErrorMessage, showSuccessMessage } from '/js/common/util/notification.js';
 
 document.addEventListener('DOMContentLoaded', () => {

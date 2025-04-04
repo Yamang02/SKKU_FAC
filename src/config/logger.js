@@ -17,16 +17,32 @@ export const logger = pino({
             translateTime: 'SYS:standard',
             ignore: 'pid,hostname',
             levelFirst: true,
-            messageFormat: '{msg}'
+            messageFormat: false,
+            singleLine: true
         }
+    },
+    serializers: {
+        req: (req) => ({
+            method: req.method,
+            url: req.url,
+            query: req.query,
+            body: req.body
+        }),
+        res: (res) => ({
+            statusCode: res.statusCode
+        }),
+        err: (err) => ({
+            type: err.type,
+            message: err.message,
+            stack: err.stack
+        })
     },
     level: process.env.NODE_ENV === 'production' ? 'info' : 'debug'
 }, pino.destination({
     dest: path.join(logDir, 'app.log'),
     sync: false,
     mkdir: true,
-    mode: 0o644,
-    encoding: 'utf8'
+    mode: 0o644
 }));
 
 // 에러 로거 설정

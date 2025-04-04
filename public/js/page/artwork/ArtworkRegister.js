@@ -1,8 +1,81 @@
-document.addEventListener('DOMContentLoaded', () => {
-    initImageUpload();
-    initSubmitButton();
-    handleExhibitionParam();
-});
+import UserAPI from '/js/api/userAPI.js';
+import ExhibitionAPI from '/js/api/exhibitionAPI.js';
+
+// 전역 변수로 user 선언
+let user;
+
+(async () => {
+    try {
+        // 1. 사용자 정보 가져오기
+        user = await UserAPI.getProfile();
+        console.log('사용자 정보:', user);
+
+        // 작가 정보 필드 찾기
+        const artistNameSpan = document.getElementById('artist-name');
+        const artistAffiliationSpan = document.getElementById('artist-affiliation');
+        const departmentInput = document.getElementById('department-input');
+
+        // 작가 이름 설정
+        if (artistNameSpan) {
+            artistNameSpan.textContent = user.name;
+        }
+
+        // 소속 정보 설정
+        let affiliation = '';
+        if (user.role === 'ADMIN' || user.role === 'SKKU_MEMBER') {
+            // 학교 구성원인 경우 학과와 학년 조합
+            affiliation = user.department && user.studentYear ?
+                `${user.department} ${user.studentYear}` :
+                (user.department || '');
+        } else {
+            // 외부 구성원인 경우 소속 정보
+            affiliation = user.affiliation || '';
+        }
+
+        if (artistAffiliationSpan) {
+            artistAffiliationSpan.textContent = affiliation;
+        }
+
+        if (departmentInput) {
+            departmentInput.value = affiliation;
+        }
+
+        // 2. 출품 가능한 전시회 목록 가져오기
+        const response = await ExhibitionAPI.getSubmittableList();
+        console.log('출품 가능한 전시회 목록 응답:', response);
+        const exhibitions = response.data;
+        const exhibitionSelect = document.getElementById('exhibition');
+
+        if (exhibitionSelect && exhibitions && Array.isArray(exhibitions)) {
+            // 기존 옵션 제거
+            exhibitionSelect.innerHTML = '';
+
+            // 기본 옵션 추가
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '전시회를 선택해주세요';
+            exhibitionSelect.appendChild(defaultOption);
+
+            // 전시회 옵션 추가
+            exhibitions.forEach(exhibition => {
+                const option = document.createElement('option');
+                option.value = exhibition.id;
+                option.textContent = exhibition.title;
+                exhibitionSelect.appendChild(option);
+            });
+        } else {
+            console.error('전시회 목록이 배열이 아니거나 없습니다:', exhibitions);
+        }
+
+        // 3. 기존 초기화 함수들 호출
+        initImageUpload();
+        initSubmitButton();
+        handleExhibitionParam();
+    } catch (error) {
+        console.error('Error:', error);
+        alert('페이지 로딩 중 오류가 발생했습니다.');
+    }
+})();
 
 /**
  * 이미지 업로드 기능 초기화
@@ -126,6 +199,7 @@ function initSubmitButton() {
             formData.append('size', document.getElementById('size').value.trim());
             formData.append('department', department);
             formData.append('year', new Date().getFullYear().toString());
+            formData.append('artistId', user.id);  // user 객체에서 직접 id 가져오기
 
             const exhibitionSelect = document.getElementById('exhibition');
             if (exhibitionSelect && exhibitionSelect.value) {
