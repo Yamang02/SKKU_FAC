@@ -1,5 +1,4 @@
 import Artwork from '../models/artwork/Artwork.js';
-import { getRelatedArtworks } from '../config/data/relatedArtwork.js';
 import artworkData from '../config/data/artwork.js';
 import path from 'path';
 import fs from 'fs/promises';
@@ -23,7 +22,6 @@ export default class ArtworkRepository {
             });
         });
 
-        this.getRelatedArtworks = getRelatedArtworks;
         this.artworkFilePath = path.join(process.cwd(), 'src', 'config', 'data', 'artwork.js');
     }
 
@@ -189,7 +187,7 @@ export default artwork;
         }
 
         // 필수 필드 검증
-        if (!artworkData.title || !artworkData.artistId || !artworkData.artistName || !artworkData.department) {
+        if (!artworkData.title || !artworkData.artistId || !artworkData.department) {
             throw new Error('필수 필드가 누락되었습니다.');
         }
 

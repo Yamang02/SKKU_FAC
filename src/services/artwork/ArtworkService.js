@@ -66,7 +66,6 @@ export class ArtworkService {
             const image = await this.imageService.getImage(imageId);
             return image ? `/uploads/artworks/${image.storedName}` : null;
         } catch (error) {
-            console.error('이미지 조회 실패:', error);
             return null;
         }
     }
@@ -87,11 +86,7 @@ export class ArtworkService {
                 // 이미지 정보 조회
                 let image = null;
                 if (artwork.imageId) {
-                    try {
-                        image = await this.imageService.getImage(artwork.imageId);
-                    } catch (error) {
-                        console.error(`Error fetching image for artwork ${artwork.id}:`, error);
-                    }
+                    image = await this.imageService.getImage(artwork.imageId);
                 }
 
                 // 작가 정보 조회
@@ -113,15 +108,8 @@ export class ArtworkService {
                 relations.exhibition = exhibition;
 
                 // DTO 생성
-                const dto = new ArtworkSimpleDTO(artwork, relations);
-                console.log(`DTO created for artwork ${artwork.id}:`, {
-                    image: dto.image,
-                    artistName: dto.artistName,
-                    exhibitionTitle: dto.exhibitionTitle
-                });
-                return dto;
+                return new ArtworkSimpleDTO(artwork, relations);
             } catch (error) {
-                console.error(`Error processing artwork ${artwork.id}:`, error);
                 return new ArtworkSimpleDTO(artwork);
             }
         }));
@@ -150,13 +138,11 @@ export class ArtworkService {
             const relatedIds = new Set();
             const MAX_RELATED_ITEMS = 6;
 
-            // 1. 같은 작가의 다른 작품 ID 조회 (최대 6개)
             if (artistId) {
                 const artistArtworks = await this.artworkRepository.findByArtistId(artistId, MAX_RELATED_ITEMS, artworkId);
                 artistArtworks.forEach(artwork => relatedIds.add(artwork.id));
             }
 
-            // 2. 아직 6개가 안 되고 전시회 ID가 있는 경우, 같은 전시회의 다른 작품으로 채움
             if (relatedIds.size < MAX_RELATED_ITEMS && exhibitionId) {
                 const remainingCount = MAX_RELATED_ITEMS - relatedIds.size;
                 const exhibitionArtworks = await this.artworkRepository.findByExhibitionId(exhibitionId, remainingCount, artworkId);
@@ -165,7 +151,6 @@ export class ArtworkService {
 
             return Array.from(relatedIds);
         } catch (error) {
-            console.error('관련 작품 ID 조회 중 오류 발생:', error);
             return [];
         }
     }
@@ -189,7 +174,6 @@ export class ArtworkService {
             try {
                 artist = await this.userRepository.findUserById(artwork.artistId);
             } catch (error) {
-                console.warn(`작가 정보를 찾을 수 없습니다. (ID: ${artwork.artistId})`);
             }
         }
 
@@ -199,7 +183,6 @@ export class ArtworkService {
             try {
                 exhibition = await this.exhibitionRepository.findExhibitionById(artwork.exhibitionId);
             } catch (error) {
-                console.warn(`전시회 정보를 찾을 수 없습니다. (ID: ${artwork.exhibitionId})`);
             }
         }
 
@@ -210,7 +193,6 @@ export class ArtworkService {
                 image = await this.imageService.getImage(artwork.imageId);
                 artwork.image = await this._getImageUrl(artwork.imageId);
             } catch (error) {
-                console.error(`Error fetching image for artwork ${artwork.id}:`, error);
             }
         }
 
@@ -273,7 +255,6 @@ export class ArtworkService {
             // DTO 생성 및 반환
             return new ArtworkSimpleDTO(artwork, relations, type);
         } catch (error) {
-            console.error('작품 간단 정보 조회 중 오류:', error);
             throw error;
         }
     }
@@ -310,32 +291,37 @@ export class ArtworkService {
 
         let imageId = null;
 
-        // 필수 필드 검증
         if (!validatedData.title) {
             throw new ArtworkValidationError('작품 제목은 필수입니다.');
         }
         if (!validatedData.artistId) {
             throw new ArtworkValidationError('작가 ID는 필수입니다.');
         }
-        if (!validatedData.artistName) {
-            throw new ArtworkValidationError('작가 이름은 필수입니다.');
-        }
         if (!validatedData.department) {
             throw new ArtworkValidationError('학과는 필수입니다.');
         }
 
         try {
-            if (file) {
-                // 이미지 업로드
-                const image = await this.imageService.uploadImage(
-                    file.buffer,
-                    file.originalname,
-                    'artworks'
-                );
-                imageId = image.id;
+            // 이미지는 필수이므로 파일이 없으면 에러
+            if (!file) {
+                throw new ArtworkValidationError('작품 이미지는 필수입니다.');
             }
 
-            // 작품 데이터 준비
+            // 1. 먼저 이미지 업로드
+            const uploadedImage = await this.imageService.uploadImage(
+                file.buffer,
+                file.originalname,
+                'artworks'
+            );
+
+            // 이미지 업로드 결과 검증
+            if (!uploadedImage || !uploadedImage.id) {
+                throw new Error('이미지 업로드에 실패했습니다.');
+            }
+
+            imageId = uploadedImage.id;
+
+            // 2. 이미지 업로드 성공 시에만 작품 데이터 저장
             const finalArtworkData = {
                 ...validatedData,
                 imageId,
@@ -348,17 +334,15 @@ export class ArtworkService {
                 updatedAt: new Date().toISOString()
             };
 
-            // 작품 DB 저장
             const artwork = await this.artworkRepository.createArtwork(finalArtworkData);
-
             return artwork;
+
         } catch (error) {
-            // 에러 발생 시 이미지 삭제
+            // 에러 발생 시 업로드된 이미지가 있다면 삭제
             if (imageId) {
                 try {
                     await this.imageService.deleteImage(imageId);
                 } catch (deleteError) {
-                    console.error('이미지 삭제 실패:', deleteError);
                 }
             }
             throw error;
@@ -442,7 +426,6 @@ export class ArtworkService {
             const artists = await this.artworkRepository.findArtists();
             return Array.isArray(artists) ? artists : [];
         } catch (error) {
-            console.error('작가 목록 조회 중 오류 발생:', error);
             return [];
         }
     }
@@ -475,19 +458,16 @@ export class ArtworkService {
      */
     async getArtworkById(id) {
         try {
-            // 1. 작품 조회
             const artwork = await this.artworkRepository.findArtworkById(id);
             if (!artwork) {
                 return null;
             }
 
-            // 2. 이미지, 작가, 전시회 정보 조회
             let image = null;
             if (artwork.imageId) {
                 try {
                     image = await this.imageService.getImage(artwork.imageId);
                 } catch (error) {
-                    console.error(`Error fetching image for artwork ${artwork.id}:`, error);
                 }
             }
 
@@ -501,16 +481,13 @@ export class ArtworkService {
                 exhibition = await this.exhibitionRepository.findExhibitionById(artwork.exhibitionId);
             }
 
-            // 3. ArtworkRelations 객체 생성
             const relations = new ArtworkRelations();
             relations.image = image;
             relations.artist = artist;
             relations.exhibition = exhibition;
 
-            // 4. DTO 생성 및 반환
             return new ArtworkSimpleDTO(artwork, relations);
         } catch (error) {
-            console.error(`Error fetching artwork ${id}:`, error);
             return null;
         }
     }

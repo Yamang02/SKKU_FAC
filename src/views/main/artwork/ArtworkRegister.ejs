@@ -25,42 +25,36 @@
         <div class="basic-info-section">
             <div class="form-group">
                 <label for="title" class="form-label">작품 제목 <span class="required">*</span></label>
-                <input type="text" id="title" name="title" class="form-input" required
-                    value="<%= formData?.title || '' %>" maxlength="100">
+                <input type="text" id="title" name="title" class="form-input" required maxlength="100">
                 <div class="form-error" id="titleError"></div>
             </div>
 
             <div class="form-group">
                 <label class="form-label">작가 정보</label>
-                <div class="artist-info">
-                    <p><strong>이름:</strong>
-                        <%= user?.name || '' %>
-                    </p>
-                    <p><strong>소속:</strong>
-                        <% if (user?.role==='ADMIN' || user?.role==='SKKU_MEMBER' ) { %>
-                            <%= user?.department %>
-                                <%= user?.studentYear %>
-                                    <input type="hidden" id="department-input" name="department"
-                                        value="<%= user?.department %> <%= user?.studentYear %>">
-                                    <% } else { %>
-                                        <%= user?.affiliation %>
-                                            <input type="hidden" id="department-input" name="department"
-                                                value="<%= user?.affiliation %>">
-                                            <% } %>
-                    </p>
+                <div class="artist-info" id="artist-info">
+                    <p><strong>이름:</strong> <span id="artist-name"></span></p>
+                    <p><strong>소속:</strong> <span id="artist-affiliation"></span></p>
+                    <input type="hidden" id="department-input" name="department">
+                    <input type="hidden" id="artist-id" name="artistId">
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="medium" class="form-label">매체</label>
-                <input type="text" id="medium" name="medium" class="form-input" value="<%= formData?.medium || '' %>"
-                    placeholder="예: 캔버스에 유화, 디지털 프린트 등">
+                <input type="text" id="medium" name="medium" class="form-input" placeholder="예: 캔버스에 유화, 디지털 프린트 등">
             </div>
 
             <div class="form-group">
-                <label for="size" class="form-label">크기</label>
-                <input type="text" id="size" name="size" class="form-input" value="<%= formData?.size || '' %>"
-                    placeholder="예: 100x100cm">
+                <label for="size" class="form-label">작품 크기</label>
+                <input type="text" id="size" name="size" class="form-input" maxlength="100">
+                <div class="form-error" id="sizeError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="year" class="form-label">제작 연도</label>
+                <input type="number" id="year" name="year" class="form-input" min="1900"
+                    max="<%= new Date().getFullYear() %>" value="<%= new Date().getFullYear() %>">
+                <div class="form-error" id="yearError"></div>
             </div>
         </div>
     </div>
@@ -80,12 +74,7 @@
                 <label for="exhibition" class="form-label">전시회 선택</label>
                 <select id="exhibition" name="exhibitionId" class="form-select">
                     <option value="">전시회 선택 (선택사항)</option>
-                    <% exhibitions?.forEach(exhibition=> { %>
-                        <option value="<%= exhibition.id %>" <%=(formData?.exhibitionId===exhibition.id ||
-                            selectedExhibitionId===exhibition.id) ? 'selected' : '' %>>
-                            <%= exhibition.title %>
-                        </option>
-                        <% }); %>
+                    <!-- 전시회 목록은 JavaScript에서 동적으로 추가됩니다 -->
                 </select>
             </div>
         </div>
@@ -99,4 +88,4 @@
     <div>
     </div>
 
-    <script src="/js/page/artwork/ArtworkRegister.js"></script>
+    <script type="module" src="/js/page/artwork/ArtworkRegister.js"></script>

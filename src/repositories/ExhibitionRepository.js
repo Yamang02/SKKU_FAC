@@ -120,4 +120,11 @@ export default class ExhibitionRepository {
             return startDate <= now && now <= endDate;
         });
     }
+
+    /**
+     * 출품 가능한 전시회 목록을 조회합니다.
+     */
+    async findSubmittableExhibitions() {
+        return this.exhibitions.filter(exhibition => exhibition.isSubmissionOpen === true);
+    }
 }

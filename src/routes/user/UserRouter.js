@@ -6,6 +6,12 @@ const UserRouter = express.Router();
 const userController = new UserController();
 
 // === API 엔드포인트 ===
+// 현재 사용자 정보 조회 API
+UserRouter.get('/api/current', isAuthenticated, (req, res) => userController.getCurrentUser(req, res));
+
+// 현재 사용자 프로필 정보 조회 API
+UserRouter.get('/api/profile', isAuthenticated, (req, res) => userController.getUserProfile(req, res));
+
 // 사용자 데이터 조회 API
 UserRouter.get('/api/data/:id', isAuthenticated, (req, res) => userController.getUserData(req, res));
 

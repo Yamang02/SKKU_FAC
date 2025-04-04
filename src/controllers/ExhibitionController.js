@@ -2,6 +2,7 @@ import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
 import ExhibitionRepository from '../repositories/ExhibitionRepository.js';
 import Page from '../models/common/page/Page.js';
+import ExhibitionSimpleListDTO from '../models/exhibition/dto/ExhibitionSimpleListDTO.js';
 
 /**
  * 전시회 컨트롤러
@@ -10,6 +11,28 @@ import Page from '../models/common/page/Page.js';
 export default class ExhibitionController {
     constructor() {
         this.exhibitionRepository = new ExhibitionRepository();
+    }
+
+    // ===== API 메서드 =====
+    /**
+     * 출품 가능한 전시회 목록을 반환합니다.
+     */
+    async getSubmittableExhibitions(req, res) {
+        try {
+            const exhibitions = await this.exhibitionRepository.findSubmittableExhibitions();
+            const exhibitionListDto = new ExhibitionSimpleListDTO(exhibitions);
+
+            res.json({
+                success: true,
+                data: exhibitionListDto.toJSON()
+            });
+        } catch (error) {
+            console.error('Error getting submittable exhibitions:', error);
+            res.status(500).json({
+                success: false,
+                message: '출품 가능한 전시회 목록을 가져오는 중 오류가 발생했습니다.'
+            });
+        }
     }
 
     // ===== 사용자용 메서드 =====
@@ -43,27 +66,6 @@ export default class ExhibitionController {
                 sortField: sortField || 'createdAt',
                 sortOrder: sortOrder || 'desc',
                 total: exhibitions && exhibitions.total ? exhibitions.total : 0
-            });
-        } catch (error) {
-            ViewResolver.renderError(res, error);
-        }
-    }
-
-    /**
-     * 전시회 상세 페이지를 렌더링합니다.
-     */
-    async getExhibitionDetail(req, res) {
-        try {
-            const { id } = req.params;
-            const exhibition = await this.exhibitionRepository.findExhibitionById(id);
-
-            if (!exhibition) {
-                throw new Error('전시회를 찾을 수 없습니다.');
-            }
-
-            ViewResolver.render(res, ViewPath.MAIN.EXHIBITION.DETAIL, {
-                title: exhibition.title,
-                exhibition
             });
         } catch (error) {
             ViewResolver.renderError(res, error);

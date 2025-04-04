@@ -2,6 +2,7 @@ import SessionUtil from '../utils/SessionUtil.js';
 import ViewResolver from '../utils/ViewResolver.js';
 import { ViewPath } from '../constants/ViewPath.js';
 import UserService from '../services/user/UserService.js';
+import { logger } from '../config/logger.js';
 
 export default class UserController {
     constructor() {
@@ -32,7 +33,10 @@ export default class UserController {
                 name: user.name,
                 role: user.role,
                 isAdmin: user.role === 'ADMIN',
-                isClubMember: user.isClubMember
+                isClubMember: user.isClubMember,
+                department: user.department,
+                studentYear: user.studentYear,
+                affiliation: user.affiliation
             };
 
             // 세션에 사용자 정보 저장
@@ -86,7 +90,10 @@ export default class UserController {
                 name: user.name,
                 role: user.role,
                 isAdmin: user.role === 'ADMIN',
-                isClubMember: user.isClubMember
+                isClubMember: user.isClubMember,
+                department: user.department,
+                studentYear: user.studentYear,
+                affiliation: user.affiliation
             };
 
             // 세션에 사용자 정보 저장
@@ -286,6 +293,35 @@ export default class UserController {
                 success: false,
                 message: error.message || '계정 삭제 중 오류가 발생했습니다.'
             });
+        }
+    }
+
+    /**
+     * 현재 로그인한 사용자의 프로필 정보를 반환합니다.
+     * @param {Request} req Express Request 객체
+     * @param {Response} res Express Response 객체
+     */
+    async getUserProfile(req, res) {
+        try {
+            const userId = req.session.user.id;
+            const user = await this.userService.getUserDetail(userId);
+
+            // 민감한 정보 제외하고 필요한 정보만 반환
+            const userInfo = {
+                id: user.id,
+                username: user.username,
+                name: user.name,
+                role: user.role,
+                department: user.department,
+                studentYear: user.studentYear,
+                affiliation: user.affiliation,
+                isClubMember: user.isClubMember
+            };
+
+            return res.json(userInfo);
+        } catch (error) {
+            logger.error('사용자 프로필 정보 조회 중 오류 발생:', error);
+            return res.status(500).json({ error: '서버 오류가 발생했습니다.' });
         }
     }
 }
