@@ -16,7 +16,7 @@ UserRouter.get('/api/list', isAuthenticated, (req, res) => userController.getUse
 // 로그인/로그아웃
 UserRouter.get('/login', isNotAuthenticated, (req, res) => userController.getUserLoginPage(req, res));
 UserRouter.post('/login', isNotAuthenticated, (req, res) => userController.loginUser(req, res));
-UserRouter.post('/logout', isAuthenticated, (req, res) => userController.logoutUser(req, res));
+UserRouter.get('/logout', (req, res) => userController.logoutUser(req, res));
 
 // 회원가입
 UserRouter.get('/new', isNotAuthenticated, (req, res) => userController.getUserRegistrationPage(req, res));

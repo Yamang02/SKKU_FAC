@@ -63,7 +63,11 @@ class UserAPI {
     // 로그아웃
     static async logout() {
         try {
-            return await api.post('/user/logout');
+            return await api.get('/user/logout', {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
         } catch (error) {
             console.error('로그아웃 중 오류 발생:', error);
             showErrorMessage('로그아웃에 실패했습니다.');

@@ -15,14 +15,18 @@ export const logger = pino({
         options: {
             colorize: true,
             translateTime: 'SYS:standard',
-            ignore: 'pid,hostname'
+            ignore: 'pid,hostname',
+            levelFirst: true,
+            messageFormat: '{msg}'
         }
     },
     level: process.env.NODE_ENV === 'production' ? 'info' : 'debug'
 }, pino.destination({
     dest: path.join(logDir, 'app.log'),
     sync: false,
-    mkdir: true
+    mkdir: true,
+    mode: 0o644,
+    encoding: 'utf8'
 }));
 
 // 에러 로거 설정
@@ -32,14 +36,18 @@ export const errorLogger = pino({
         options: {
             colorize: true,
             translateTime: 'SYS:standard',
-            ignore: 'pid,hostname'
+            ignore: 'pid,hostname',
+            levelFirst: true,
+            messageFormat: '{msg}'
         }
     },
     level: 'error'
 }, pino.destination({
     dest: path.join(logDir, 'error.log'),
     sync: false,
-    mkdir: true
+    mkdir: true,
+    mode: 0o644,
+    encoding: 'utf8'
 }));
 
 // 성능 로거 설정
@@ -49,12 +57,16 @@ export const performanceLogger = pino({
         options: {
             colorize: true,
             translateTime: 'SYS:standard',
-            ignore: 'pid,hostname'
+            ignore: 'pid,hostname',
+            levelFirst: true,
+            messageFormat: '{msg}'
         }
     },
     level: 'info'
 }, pino.destination({
     dest: path.join(logDir, 'performance.log'),
     sync: false,
-    mkdir: true
+    mkdir: true,
+    mode: 0o644,
+    encoding: 'utf8'
 }));

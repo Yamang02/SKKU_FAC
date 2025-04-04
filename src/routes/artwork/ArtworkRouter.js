@@ -1,6 +1,7 @@
 import express from 'express';
 import ArtworkController from '../../controllers/ArtworkController.js';
 import uploadMiddleware from '../../middleware/uploadMiddleware.js';
+import { isAuthenticated } from '../../middleware/auth.js';
 
 const ArtworkRouter = express.Router();
 const artworkController = new ArtworkController();
@@ -20,8 +21,8 @@ ArtworkRouter.get('/api/simple/:id', artworkController.getArtworkSimple.bind(art
 ArtworkRouter.get('/', artworkController.getArtworkListPage.bind(artworkController));
 
 // 작품 생성
-ArtworkRouter.get('/new', artworkController.getArtworkRegistrationPage.bind(artworkController));
-ArtworkRouter.post('/', uploadMiddleware, artworkController.createArtwork.bind(artworkController));
+ArtworkRouter.get('/new', isAuthenticated, artworkController.getArtworkRegistrationPage.bind(artworkController));
+ArtworkRouter.post('/', isAuthenticated, uploadMiddleware, artworkController.createArtwork.bind(artworkController));
 
 // 작품 상세 페이지
 ArtworkRouter.get('/:id', artworkController.getArtworkDetailPage.bind(artworkController));

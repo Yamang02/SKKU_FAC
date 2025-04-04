@@ -149,7 +149,7 @@ function showExhibitionModal(exhibition) {
         'modal-date': exhibition.date || '',
         'modal-location': exhibition.location || '',
         'modal-artworks-link': `/exhibition/${exhibition.id}/artworks`,
-        'modal-submit-link': `/exhibition/${exhibition.id}/submit`
+        'modal-submit-link': `/artwork/new?exhibition=${exhibition.id}`
     });
 
     // 모달 표시
