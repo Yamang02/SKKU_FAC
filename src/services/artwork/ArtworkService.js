@@ -138,6 +138,39 @@ export class ArtworkService {
     }
 
     /**
+     * 관련 작품 ID를 조회합니다.
+     * @private
+     * @param {number} artworkId - 기준 작품 ID
+     * @param {number} artistId - 작가 ID
+     * @param {number} exhibitionId - 전시회 ID
+     * @returns {Promise<Array<number>>} 관련 작품 ID 목록
+     */
+    async _getRelatedArtworkIds(artworkId, artistId, exhibitionId) {
+        try {
+            const relatedIds = new Set();
+            const MAX_RELATED_ITEMS = 6;
+
+            // 1. 같은 작가의 다른 작품 ID 조회 (최대 6개)
+            if (artistId) {
+                const artistArtworks = await this.artworkRepository.findByArtistId(artistId, MAX_RELATED_ITEMS, artworkId);
+                artistArtworks.forEach(artwork => relatedIds.add(artwork.id));
+            }
+
+            // 2. 아직 6개가 안 되고 전시회 ID가 있는 경우, 같은 전시회의 다른 작품으로 채움
+            if (relatedIds.size < MAX_RELATED_ITEMS && exhibitionId) {
+                const remainingCount = MAX_RELATED_ITEMS - relatedIds.size;
+                const exhibitionArtworks = await this.artworkRepository.findByExhibitionId(exhibitionId, remainingCount, artworkId);
+                exhibitionArtworks.forEach(artwork => relatedIds.add(artwork.id));
+            }
+
+            return Array.from(relatedIds);
+        } catch (error) {
+            console.error('관련 작품 ID 조회 중 오류 발생:', error);
+            return [];
+        }
+    }
+
+    /**
      * 작품 상세 정보를 조회합니다.
      * @param {string} id - 작품 ID
      * @param {string} type - 조회 타입 (card/modal)
@@ -181,35 +214,24 @@ export class ArtworkService {
             }
         }
 
-        // 5. 연관 작품 조회
-        let relatedArtworks = [];
-        try {
-            const relatedData = await this.artworkRepository.findRelatedArtworks(id);
-            relatedArtworks = relatedData.items || [];
-        } catch (error) {
-            console.error('연관 작품 조회 중 오류 발생:', error);
-            relatedArtworks = [];
-        }
+        // 5. 관련 작품 ID 조회
+        const relatedArtworkIds = await this._getRelatedArtworkIds(
+            id,
+            artwork.artistId,
+            artwork.exhibitionId
+        );
 
-        // 6. 연관 작품의 이미지 정보 조회
-        const relatedArtworksWithImages = await Promise.all(relatedArtworks.map(async item => {
-            if (item.imageId) {
-                item.image = await this._getImageUrl(item.imageId);
-            }
-            return item;
-        }));
-
-        // 7. ArtworkRelations 객체 생성
+        // 6. ArtworkRelations 객체 생성
         const relations = new ArtworkRelations();
         relations.image = image;
         relations.artist = artist;
         relations.exhibition = exhibition;
 
-        // 8. DTO 생성 및 반환
+        // 7. DTO 생성 및 반환
         return new ArtworkDetailDTO({
             ...artwork,
             relations,
-            relatedArtworks: relatedArtworksWithImages.map(item => new ArtworkSimpleDTO(item))
+            relatedArtworkIds
         });
     }
 

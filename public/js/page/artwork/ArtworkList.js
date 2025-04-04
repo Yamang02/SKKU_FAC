@@ -11,7 +11,7 @@ import { createArtworkCard } from '../../common/util/card.js';
 
 // API 함수 - 서버에서 가져오기
 async function fetchArtworkList(pagination, filters = {}) {
-    return await ArtworkAPI.getList(pagination, filters);
+    return await ArtworkAPI.getArtworkList(pagination, filters);
 }
 
 // 유틸리티 함수

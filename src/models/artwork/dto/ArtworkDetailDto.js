@@ -20,7 +20,7 @@ export default class ArtworkDetailDto {
         this.isFeatured = data.isFeatured || false;
         this.createdAt = data.createdAt || new Date().toISOString();
         this.updatedAt = data.updatedAt || new Date().toISOString();
-        this.relatedArtworks = data.relatedArtworks || [];
+        this.relatedArtworkIds = data.relatedArtworkIds || [];
     }
 
     toJSON() {
@@ -41,7 +41,7 @@ export default class ArtworkDetailDto {
             isFeatured: this.isFeatured,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt,
-            relatedArtworks: this.relatedArtworks
+            relatedArtworkIds: this.relatedArtworkIds
         };
     }
 }

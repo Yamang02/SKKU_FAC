@@ -175,74 +175,116 @@ async function initPage() {
     }
 }
 
-// 작품 상세 정보 로드
+/**
+ * 작품 상세 정보를 로드합니다.
+ * @private
+ */
 async function loadArtworkDetail() {
     try {
         const artworkId = getArtworkId();
-        console.log('작품 ID:', artworkId);
-
         if (!artworkId) {
             throw new Error('작품 ID를 찾을 수 없습니다.');
         }
 
-        const response = await ArtworkAPI.getDetail(artworkId);
-        console.log('API 응답:', response);
+        const artwork = await ArtworkAPI.getArtworkDetail(artworkId);
+        console.log('API 응답:', artwork); // API 응답 구조 확인
 
-        if (!response || !response.success || !response.data) {
-            throw new Error('작품 정보를 불러오는데 실패했습니다.');
+        if (!artwork) {
+            throw new Error('작품 데이터가 없습니다.');
         }
 
-        const artwork = response.data;
         updateArtworkDetail(artwork);
         await loadRelatedArtworks(artwork);
     } catch (error) {
         console.error('작품 정보 로드 중 오류:', error);
-        showErrorMessage('작품 정보를 불러오는데 실패했습니다.');
-        throw error;
+        showErrorMessage(error.message || '작품 정보를 불러오는데 실패했습니다.');
     }
 }
 
-// 작품 상세 정보 업데이트
+/**
+ * 작품 상세 정보를 화면에 업데이트합니다.
+ * @param {Object} artwork - 작품 정보 객체
+ * @private
+ */
 function updateArtworkDetail(artwork) {
-    // 이미지 업데이트
+    // 작품 이미지 업데이트
     const artworkImage = document.querySelector('.artwork-main-image');
     if (artworkImage) {
         artworkImage.src = artwork.image || '/images/artwork-placeholder.svg';
-        artworkImage.alt = artwork.title;
+        artworkImage.alt = artwork.title || '작품 이미지';
     }
 
-    // 제목 및 기본 정보 업데이트
-    document.querySelector('.artwork-detail-title').textContent = artwork.title || '제목 없음';
-    document.querySelector('.artwork-detail-artist').textContent = artwork.artist || '작가 미상';
-    document.querySelector('.artwork-detail-department').textContent = artwork.department || '';
+    // 작품 제목 업데이트
+    const titleElement = document.querySelector('.artwork-detail-title');
+    if (titleElement) {
+        titleElement.textContent = artwork.title || '미표기';
+    }
 
-    // 상세 정보 업데이트
-    document.querySelector('.value.year').textContent = artwork.year || '미표기';
-    document.querySelector('.value.medium').textContent = artwork.medium || '미표기';
-    document.querySelector('.value.size').textContent = artwork.size || '미표기';
-    document.querySelector('.artwork-description').textContent = artwork.description || '작품에 대한 설명이 없습니다.';
-    document.querySelector('.exhibition-info').textContent = artwork.exhibition || '없음';
+    // 작가 정보 업데이트
+    const artistElement = document.querySelector('.artwork-detail-artist');
+    if (artistElement) {
+        artistElement.textContent = artwork.artistName || '미표기';
+    }
+
+    // 학과 정보 업데이트
+    const departmentElement = document.querySelector('.artwork-detail-department');
+    if (departmentElement) {
+        departmentElement.textContent = artwork.department || '미표기';
+    }
+
+    // 작품 정보 업데이트
+    const yearElement = document.querySelector('.value.year');
+    if (yearElement) {
+        yearElement.textContent = artwork.year || '미표기';
+    }
+
+    const mediumElement = document.querySelector('.value.medium');
+    if (mediumElement) {
+        mediumElement.textContent = artwork.medium || '미표기';
+    }
+
+    const sizeElement = document.querySelector('.value.size');
+    if (sizeElement) {
+        sizeElement.textContent = artwork.size || '미표기';
+    }
+
+    // 작품 설명 업데이트
+    const descriptionElement = document.querySelector('.artwork-description');
+    if (descriptionElement) {
+        descriptionElement.textContent = artwork.description || '미표기';
+    }
+
+    // 전시 정보 업데이트
+    const exhibitionElement = document.querySelector('.exhibition-info');
+    if (exhibitionElement) {
+        exhibitionElement.textContent = artwork.exhibitionTitle || '미표기';
+    }
 
     // 페이지 타이틀 업데이트
-    document.title = `${artwork.title} - 성미회`;
+    document.title = `${artwork.title || '작품 상세'} - 성미회`;
 }
 
-// 관련 작품 로드
+/**
+ * 관련 작품을 로드합니다.
+ * @param {Object} artwork - 현재 작품 정보
+ * @private
+ */
 async function loadRelatedArtworks(artwork) {
     try {
-        const response = await ArtworkAPI.getList({
-            page: 1,
-            size: 6,
-            excludeId: artwork.id,
-            department: artwork.department
-        });
-
-        if (!response.success || !response.data) {
-            throw new Error('관련 작품을 불러오는데 실패했습니다.');
+        // 관련 작품 ID 목록이 있으면 해당 작품들을 가져옴
+        if (artwork.relatedArtworkIds && artwork.relatedArtworkIds.length > 0) {
+            const relatedArtworks = [];
+            for (const id of artwork.relatedArtworkIds) {
+                const response = await ArtworkAPI.getArtworkDetail(id);
+                if (response && response.data) {
+                    relatedArtworks.push(response.data);
+                }
+            }
+            updateRelatedArtworks(relatedArtworks);
+        } else {
+            // 관련 작품이 없는 경우 빈 상태 표시
+            updateRelatedArtworks([]);
         }
-
-        const relatedArtworks = response.data.items;
-        updateRelatedArtworks(relatedArtworks);
     } catch (error) {
         console.error('관련 작품 로드 중 오류:', error);
         showErrorMessage('관련 작품을 불러오는데 실패했습니다.');

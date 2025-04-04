@@ -64,7 +64,7 @@ async function loadFeaturedArtworks() {
         });
 
         // API 요청 - ArtworkAPI 사용
-        const result = await ArtworkAPI.getList(pagination, { isFeatured: true });
+        const result = await ArtworkAPI.getArtworkList(pagination, { isFeatured: true });
 
         // 불러온 데이터로 작품 카드 생성
         if (result.success && result.data && Array.isArray(result.data.items)) {

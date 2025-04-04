@@ -69,14 +69,14 @@ export default class ArtworkRepository {
         if (searchType && keyword) {
             filteredArtworks = filteredArtworks.filter(artwork => {
                 switch (searchType) {
-                case 'title':
-                    return artwork.title.toLowerCase().includes(keyword.toLowerCase());
-                case 'artist':
-                    return artwork.artistName.toLowerCase().includes(keyword.toLowerCase());
-                case 'department':
-                    return artwork.department.toLowerCase().includes(keyword.toLowerCase());
-                default:
-                    return true;
+                    case 'title':
+                        return artwork.title.toLowerCase().includes(keyword.toLowerCase());
+                    case 'artist':
+                        return artwork.artistName.toLowerCase().includes(keyword.toLowerCase());
+                    case 'department':
+                        return artwork.department.toLowerCase().includes(keyword.toLowerCase());
+                    default:
+                        return true;
                 }
             });
         }
@@ -157,20 +157,20 @@ export default class ArtworkRepository {
  * 작품 데이터
  */
 const artwork = ${JSON.stringify(this.artworks.map(artwork => ({
-        id: artwork.id,
-        title: artwork.title,
-        artistId: artwork.artistId,
-        artistName: artwork.artistName,
-        exhibitionId: artwork.exhibitionId,
-        department: artwork.department || '',
-        medium: artwork.medium || '',
-        size: artwork.size || '',
-        description: artwork.description || '',
-        imageId: artwork.imageId,
-        isFeatured: artwork.isFeatured || false,
-        createdAt: artwork.createdAt,
-        updatedAt: artwork.updatedAt
-    })), null, 2)};
+            id: artwork.id,
+            title: artwork.title,
+            artistId: artwork.artistId,
+            artistName: artwork.artistName,
+            exhibitionId: artwork.exhibitionId,
+            department: artwork.department || '',
+            medium: artwork.medium || '',
+            size: artwork.size || '',
+            description: artwork.description || '',
+            imageId: artwork.imageId,
+            isFeatured: artwork.isFeatured || false,
+            createdAt: artwork.createdAt,
+            updatedAt: artwork.updatedAt
+        })), null, 2)};
 
 export default artwork;
 `;
@@ -354,5 +354,43 @@ export default artwork;
         `;
         const [rows] = await this.db.query(query, [title, artist_name]);
         return rows[0] || null;
+    }
+
+    /**
+     * 특정 작가의 다른 작품들을 조회합니다.
+     * @param {number} artistId - 작가 ID
+     * @param {number} limit - 조회할 최대 작품 수
+     * @param {number} excludeId - 제외할 작품 ID
+     * @returns {Promise<Array>} 작품 목록
+     */
+    async findByArtistId(artistId, limit, excludeId) {
+        try {
+            return this.artworks
+                .filter(artwork => artwork.artistId === Number(artistId) && artwork.id !== Number(excludeId))
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, limit);
+        } catch (error) {
+            console.error('작가의 작품 조회 중 오류 발생:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 같은 전시회의 다른 작품들을 조회합니다.
+     * @param {number} exhibitionId - 전시회 ID
+     * @param {number} limit - 조회할 최대 작품 수
+     * @param {number} excludeId - 제외할 작품 ID
+     * @returns {Promise<Array>} 작품 목록
+     */
+    async findByExhibitionId(exhibitionId, limit, excludeId) {
+        try {
+            return this.artworks
+                .filter(artwork => artwork.exhibitionId === Number(exhibitionId) && artwork.id !== Number(excludeId))
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, limit);
+        } catch (error) {
+            console.error('전시회의 작품 조회 중 오류 발생:', error);
+            return [];
+        }
     }
 }

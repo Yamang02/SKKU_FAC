@@ -8,7 +8,7 @@ import { createFilterParams } from '../common/filters.js';
 
 class ArtworkAPI {
     // 작품 목록 조회
-    static async getList(pagination, filters = {}) {
+    static async getArtworkList(pagination, filters = {}) {
         try {
             const pageParams = pagination.toQueryParams();
             const filterParams = createFilterParams(filters);
@@ -25,7 +25,7 @@ class ArtworkAPI {
     }
 
     // 작품 상세 정보 조회
-    static async getDetail(artworkId) {
+    static async getArtworkDetail(artworkId) {
         try {
             return await api.get(`/artwork/api/detail/${artworkId}`);
         } catch (error) {
@@ -35,21 +35,8 @@ class ArtworkAPI {
         }
     }
 
-    // 작품 데이터 조회 (통합 API)
-    static async getData(artworkId, type = 'default') {
-        try {
-            const queryParams = new URLSearchParams();
-            queryParams.append('type', type);
-            return await api.get(`/artwork/api/data/${artworkId}?${queryParams.toString()}`);
-        } catch (error) {
-            console.error(`작품 데이터(ID: ${artworkId}, 타입: ${type})를 가져오는 중 오류 발생:`, error);
-            showErrorMessage('작품 정보를 불러오는데 실패했습니다.');
-            throw error;
-        }
-    }
-
     // 관리자용 작품 목록 조회
-    static async getManagementList(pagination, filters = {}) {
+    static async getArtworkManagementList(pagination, filters = {}) {
         try {
             const pageParams = pagination.toQueryParams();
             const filterParams = createFilterParams(filters);
@@ -66,7 +53,7 @@ class ArtworkAPI {
     }
 
     // 주요 작품 목록 조회
-    static async getFeatured() {
+    static async getFeaturedArtworks() {
         try {
             return await api.get('/artwork/api/featured');
         } catch (error) {
