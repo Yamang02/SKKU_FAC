@@ -38,5 +38,45 @@ export default [
         'mimeType': 'image/png',
         'createdAt': '2025-04-04T09:41:21.397Z',
         'updatedAt': '2025-04-04T09:41:21.397Z'
+    },
+    {
+        'id': 5,
+        'originalName': 'DALLÂ·E 2024-03-29 16.29.36 - extreamly realism, withered rose, black solid color background, fullshot .png',
+        'storedName': '116b2d2a-2e59-4233-a4e3-4f360a2017b2.jpg',
+        'filePath': 'C:\\Users\\ljj02\\Desktop\\dev\\portfolio\\SKKU_FAC_GALLERY\\public\\uploads\\artwork\\116b2d2a-2e59-4233-a4e3-4f360a2017b2.jpg',
+        'fileSize': 1486041,
+        'mimeType': 'image/png',
+        'createdAt': '2025-04-05T14:36:40.775Z',
+        'updatedAt': '2025-04-05T14:36:40.775Z'
+    },
+    {
+        'id': 6,
+        'originalName': 'DALLÂ·E 2022-10-05 12.04.37 - A photo of a cute kitten doll,lavendar color fur, an indifferent look, no mouth,.png',
+        'storedName': 'a4359b2b-2c1b-4f05-8831-6a1edf278e3c.jpg',
+        'filePath': '/uploads/artworks/a4359b2b-2c1b-4f05-8831-6a1edf278e3c.jpg',
+        'fileSize': 1496529,
+        'mimeType': 'image/png',
+        'createdAt': '2025-04-05T14:45:59.175Z',
+        'updatedAt': '2025-04-05T14:45:59.175Z'
+    },
+    {
+        'id': 7,
+        'originalName': 'DALLÂ·E 2022-10-03 23.21.19 - lamb\'s face chewing vine, surrounded by many many roses, holy, high contrast, rococo, Acrylic on canvas, digital art.png',
+        'storedName': '864a9014-203d-4df0-aa2b-d4dd5a7bf16a.jpg',
+        'filePath': '/uploads/artworks/864a9014-203d-4df0-aa2b-d4dd5a7bf16a.jpg',
+        'fileSize': 2000712,
+        'mimeType': 'image/png',
+        'createdAt': '2025-04-05T15:01:49.538Z',
+        'updatedAt': '2025-04-05T15:01:49.538Z'
+    },
+    {
+        'id': 8,
+        'originalName': 'KakaoTalk_20221005_130436340.jpg',
+        'storedName': 'd378d8c0-b82f-45cd-bada-4379c49b0c84.jpg',
+        'filePath': '/uploads/artworks/d378d8c0-b82f-45cd-bada-4379c49b0c84.jpg',
+        'fileSize': 228823,
+        'mimeType': 'image/jpeg',
+        'createdAt': '2025-04-05T15:04:31.543Z',
+        'updatedAt': '2025-04-05T15:04:31.543Z'
     }
 ];

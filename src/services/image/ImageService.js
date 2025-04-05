@@ -15,41 +15,74 @@ class ImageService {
 
     /**
      * 이미지를 업로드합니다.
-     * @param {Buffer} fileBuffer - 파일 버퍼
-     * @param {string} originalName - 원본 파일명
-     * @param {string} category - 이미지 카테고리 (artworks, artists, exhibitions)
-     * @returns {Promise<Image>} 업로드된 이미지 정보
+     * @param {Object} file - 업로드된 파일 정보
+     * @param {string} category - 이미지 카테고리 (artworks, exhibitions 등)
+     * @returns {Promise<Object>} 저장된 이미지 정보
      */
-    async uploadImage(fileBuffer, originalName, category) {
+    async uploadImage(file, category) {
         try {
-            // 1. 파일 존재 여부 확인
-            if (!fileBuffer || !originalName) {
-                throw new ImageError('파일이 존재하지 않습니다.');
+            console.log('=== ImageService: 이미지 업로드 시작 ===');
+            console.log('파일 정보:', {
+                originalname: file.originalname,
+                mimetype: file.mimetype,
+                size: file.size
+            });
+            console.log('업로드 카테고리:', category);
+
+            // 파일 유효성 검사
+            if (!file) {
+                console.error('파일이 없습니다.');
+                throw new ImageError('파일이 업로드되지 않았습니다.');
             }
 
-            // 2. 트랜잭션 시작
+            if (!file.mimetype.startsWith('image/')) {
+                console.error('잘못된 파일 형식:', file.mimetype);
+                throw new ImageError('이미지 파일만 업로드 가능합니다.');
+            }
+
+            // 카테고리 유효성 검사
+            if (!category) {
+                console.error('카테고리가 지정되지 않았습니다.');
+                throw new ImageError('이미지 카테고리는 필수입니다.');
+            }
+
+            // 트랜잭션 시작
             const transaction = new ImageTransaction(this.fileServerService, this.imageRepository);
+            console.log('트랜잭션 시작');
 
-            // 3. 파일 서버에 저장
-            const storedFile = await transaction.saveToFileServer(fileBuffer, category);
+            try {
+                // 파일 서버에 저장
+                const uploadedFile = await transaction.saveToFileServer(file.buffer, category);
+                console.log('파일 저장 완료:', uploadedFile);
 
-            // 4. DB에 이미지 정보 저장
-            const imageData = {
-                originalName,
-                storedName: storedFile.storedName,
-                filePath: storedFile.filePath,
-                fileSize: fileBuffer.length,
-                mimeType: this.getMimeType(originalName)
-            };
+                // 이미지 정보를 데이터베이스에 저장
+                const imageData = {
+                    originalName: file.originalname,
+                    storedName: uploadedFile.storedName,
+                    filePath: uploadedFile.filePath,
+                    fileSize: file.size,
+                    mimeType: file.mimetype
+                };
+                console.log('데이터베이스에 저장할 이미지 정보:', imageData);
 
-            const savedImage = await transaction.saveToDatabase(imageData);
+                const savedImage = await transaction.saveToDatabase(imageData);
+                console.log('데이터베이스 저장 완료:', savedImage);
 
-            // 5. 트랜잭션 완료
-            await transaction.commit();
+                // 트랜잭션 커밋
+                await transaction.commit();
+                console.log('트랜잭션 커밋 완료');
 
-            return savedImage;
+                console.log('=== 이미지 업로드 완료 ===');
+                return savedImage;
+            } catch (error) {
+                // 트랜잭션 롤백
+                console.error('업로드 중 오류 발생, 롤백 시작');
+                await transaction.rollback();
+                console.log('롤백 완료');
+                throw error;
+            }
         } catch (error) {
-            console.error('이미지 업로드 실패:', error);
+            console.error('이미지 업로드 중 오류:', error);
             throw error;
         }
     }

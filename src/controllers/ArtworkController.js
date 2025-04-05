@@ -324,12 +324,33 @@ export default class ArtworkController {
      */
     async createArtwork(req, res) {
         try {
+            console.log('=== 작품 등록 요청 시작 ===');
+            console.log('Request Body:', req.body);
+            console.log('Request File:', req.file);
+            console.log('Request Headers:', req.headers);
+            console.log('========================');
+
             const artworkData = req.body;
             const file = req.file;
 
+            if (!file) {
+                console.error('파일이 업로드되지 않았습니다.');
+                return res.status(400).json(ApiResponse.error('이미지 파일이 필요합니다.'));
+            }
+
+            console.log('파일 정보:', {
+                filename: file.filename,
+                mimetype: file.mimetype,
+                size: file.size
+            });
+
             const artwork = await this.artworkService.createArtwork(artworkData, file);
+            console.log('생성된 작품 정보:', artwork);
+
             return res.status(201).json(ApiResponse.success(artwork, Message.ARTWORK.CREATE_SUCCESS));
         } catch (error) {
+            console.error('작품 등록 중 오류 발생:', error);
+
             if (error instanceof ArtworkValidationError) {
                 return res.status(400).json(ApiResponse.error(Message.ARTWORK.VALIDATION_ERROR));
             } else if (error instanceof ImageError) {

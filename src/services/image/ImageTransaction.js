@@ -36,7 +36,7 @@ export class ImageTransaction {
     /**
      * DB에 이미지 정보를 저장합니다.
      * @param {Object} imageData - 이미지 데이터
-     * @returns {Promise<Image>} 저장된 이미지
+     * @returns {Promise<Object>} 저장된 이미지 정보
      */
     async saveToDatabase(imageData) {
         try {
@@ -73,6 +73,7 @@ export class ImageTransaction {
     /**
      * 트랜잭션 커밋
      * 모든 작업이 성공적으로 완료되었음을 확인합니다.
+     * @returns {Promise<Object>} 저장된 이미지 정보
      */
     async commit() {
         if (!this.uploadedFile || !this.savedImage) {

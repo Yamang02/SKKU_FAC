@@ -32,7 +32,7 @@ export default class ExhibitionService {
      * @returns {Promise<Array<ExhibitionListDto>>} 활성화된 전시회 목록
      */
     async getActiveExhibitions() {
-        const exhibitions = await this.exhibitionRepository.findActive();
+        const exhibitions = await this.exhibitionRepository.findActiveExhibitions();
         return exhibitions.map(exhibition => new ExhibitionListDto(exhibition));
     }
 
@@ -40,8 +40,8 @@ export default class ExhibitionService {
      * 작품 제출이 가능한 전시회를 조회합니다.
      * @returns {Promise<Array<ExhibitionSimpleDto>>} 작품 제출 가능한 전시회 목록
      */
-    async getSubmittableExhibitions() {
-        const exhibitions = await this.exhibitionRepository.findSubmittable();
+    async findSubmittableExhibitions() {
+        const exhibitions = await this.exhibitionRepository.findSubmittableExhibitions();
         return exhibitions.map(exhibition => new ExhibitionSimpleDto(exhibition));
     }
 
@@ -51,7 +51,7 @@ export default class ExhibitionService {
      * @returns {Promise<ExhibitionResponseDto>} 전시회 상세 정보
      */
     async getExhibitionById(id) {
-        const exhibition = await this.exhibitionRepository.findById(id);
+        const exhibition = await this.exhibitionRepository.findExhibitionById(id);
         if (!exhibition) {
             throw new ExhibitionNotFoundError(`ID가 ${id}인 전시회를 찾을 수 없습니다.`);
         }

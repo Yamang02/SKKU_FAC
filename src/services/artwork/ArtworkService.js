@@ -311,29 +311,42 @@ export default class ArtworkService {
 
     /**
      * 새로운 작품을 생성합니다.
-     * @param {Object} requestDto - 작품 데이터
-     * @param {File} file - 업로드된 이미지
-     * @returns {Promise<Object>} 생성된 작품 정보
      */
-    async createArtwork(requestDto, file = null) {
-        // 유효성 검사
-        await ArtworkValidator.validateCreateArtwork(requestDto);
+    async createArtwork(artworkData, file) {
+        try {
+            console.log('=== ArtworkService: 작품 생성 시작 ===');
+            console.log('작품 데이터:', artworkData);
+            console.log('파일 정보:', file);
 
-        // 이미지 처리
-        let imageId = null;
-        if (file) {
-            const image = await this.imageService.uploadImage(file);
-            imageId = image.id;
+            // 유효성 검사
+            if (!artworkData.title) {
+                console.error('제목이 없습니다.');
+                throw new ArtworkValidationError('작품 제목은 필수입니다.');
+            }
+
+            if (!file) {
+                console.error('이미지 파일이 없습니다.');
+                throw new ArtworkValidationError('작품 이미지는 필수입니다.');
+            }
+
+            // 이미지 업로드
+            console.log('이미지 업로드 시작');
+            const uploadedImage = await this.imageService.uploadImage(file, 'artworks');
+            console.log('업로드된 이미지:', uploadedImage);
+
+            // 작품 데이터 생성
+            const artwork = await this.artworkRepository.createArtwork({
+                ...artworkData,
+                imageId: uploadedImage.id
+            });
+            console.log('생성된 작품:', artwork);
+
+            console.log('=== 작품 생성 완료 ===');
+            return artwork;
+        } catch (error) {
+            console.error('작품 생성 중 오류:', error);
+            throw error;
         }
-
-        // 작품 데이터 생성
-        const artworkData = {
-            ...requestDto,
-            imageId
-        };
-
-        // 작품 생성
-        return this.artworkRepository.createArtwork(artworkData);
     }
 
     /**

@@ -15,22 +15,6 @@ export default class Image {
     }
 
     /**
-     * 이미지 모델을 JSON 형태로 변환합니다.
-     */
-    toJSON() {
-        return {
-            id: this.id,
-            originalName: this.originalName,
-            storedName: this.storedName,
-            filePath: this.filePath,
-            fileSize: this.fileSize,
-            mimeType: this.mimeType,
-            createdAt: this.createdAt,
-            updatedAt: this.updatedAt
-        };
-    }
-
-    /**
      * 이미지 모델을 생성합니다.
      */
     static create(data) {

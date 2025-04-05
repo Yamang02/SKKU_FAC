@@ -909,7 +909,10 @@
     font-size: 0.8rem;
 }
 
-/* 로딩 관련 스타일 제거 */
+/* 로딩 관련 스타일 */
 .loading-artwork {
-    display: none;
+    display: none;  /* 기본적으로 숨김 */
+    text-align: center;
+    padding: 20px;
+    color: #666;
 }

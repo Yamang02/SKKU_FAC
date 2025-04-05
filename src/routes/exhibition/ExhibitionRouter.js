@@ -5,7 +5,7 @@ const ExhibitionRouter = express.Router();
 const exhibitionController = new ExhibitionController();
 
 // API 라우트
-ExhibitionRouter.get('/api/submittable', (req, res) => exhibitionController.getSubmittableExhibitions(req, res));
+ExhibitionRouter.get('/api/submittable', (req, res) => exhibitionController.findSubmittableExhibitions(req, res));
 ExhibitionRouter.get('/api/list', (req, res) => exhibitionController.getExhibitionList(req, res));
 
 // 일반 사용자용 전시회 라우트

@@ -43,7 +43,16 @@ class ImageRepository {
             this.images.push(image);
 
             // 파일에 저장
-            const imageDataToSave = this.images.map(img => img.toJSON());
+            const imageDataToSave = this.images.map(img => ({
+                id: img.id,
+                originalName: img.originalName,
+                storedName: img.storedName,
+                filePath: img.filePath,
+                fileSize: img.fileSize,
+                mimeType: img.mimeType,
+                createdAt: img.createdAt,
+                updatedAt: img.updatedAt
+            }));
             const fileContent = `export default ${JSON.stringify(imageDataToSave, null, 2)};`;
             await fs.writeFile(this.dataFile, fileContent);
 

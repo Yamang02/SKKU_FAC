@@ -25,3 +25,8 @@ export const errorMessageTemplate = `
         </div>
     </div>
 `;
+
+// 로딩 스피너 템플릿 (최소한의 형태로 유지)
+export const loadingSpinnerTemplate = `
+    <div class="loading-artwork">로딩 중...</div>
+`;

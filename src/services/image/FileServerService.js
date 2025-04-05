@@ -44,7 +44,7 @@ class FileServerService {
 
             return {
                 storedName,
-                filePath
+                filePath: `/uploads/${category}/${storedName}`
             };
         } catch (error) {
             throw new ImageStorageError('파일 저장에 실패했습니다.');

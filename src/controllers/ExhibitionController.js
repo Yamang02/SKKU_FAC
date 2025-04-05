@@ -19,13 +19,13 @@ export default class ExhibitionController {
     /**
      * 출품 가능한 전시회 목록을 반환합니다.
      */
-    async getSubmittableExhibitions(req, res) {
+    async findSubmittableExhibitions(req, res) {
         try {
-            const exhibitions = await this.exhibitionService.getSubmittableExhibitions();
-            return ApiResponse.success(res, exhibitions);
+            const exhibitions = await this.exhibitionService.findSubmittableExhibitions();
+            res.json(ApiResponse.success(exhibitions));
         } catch (error) {
             console.error('Error getting submittable exhibitions:', error);
-            return ApiResponse.error(res, 500, Message.EXHIBITION.SUBMITTABLE_LIST_ERROR);
+            res.status(500).json(ApiResponse.error(Message.EXHIBITION.SUBMITTABLE_LIST_ERROR));
         }
     }
 
