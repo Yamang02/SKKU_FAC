@@ -4,7 +4,7 @@
 class Pagination {
     constructor(options = {}) {
         this.page = options.page || 1;
-        this.size = options.size || 10;
+        this.limit = options.limit || 10;
         this.sort = options.sort || null;
         this.order = options.order || 'asc';
     }
@@ -15,7 +15,7 @@ class Pagination {
     toQueryParams() {
         const params = new URLSearchParams();
         params.set('page', this.page);
-        params.set('size', this.size);
+        params.set('limit', this.limit);
 
         if (this.sort) {
             params.set('sort', this.sort);
@@ -31,7 +31,7 @@ class Pagination {
     clone() {
         return new Pagination({
             page: this.page,
-            size: this.size,
+            limit: this.limit,
             sort: this.sort,
             order: this.order
         });

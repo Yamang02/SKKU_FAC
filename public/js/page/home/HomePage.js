@@ -17,9 +17,6 @@ import { showErrorMessage } from '/js/common/util/notification.js';
 let featuredArtworks = [];
 let featuredArtworksResult;
 
-// showErrorMessage 함수를 전역 범위에 노출
-window.showErrorMessage = showErrorMessage;
-
 // 모달 초기화
 function initArtworkModal() {
     // 모달 HTML 추가
@@ -61,74 +58,52 @@ async function loadFeaturedArtworks() {
         // 로딩 표시
         container.innerHTML = loadingSpinnerTemplate;
 
-        // 페이지네이션 객체 생성
-        const pagination = new Pagination({
-            page: 1,
-            size: 6
-        });
+        // API 요청
+        const response = await ArtworkAPI.getFeaturedArtworks();
 
-        // API 요청 - ArtworkAPI 사용
-        const result = await ArtworkAPI.getArtworkList(pagination, { isFeatured: true });
+        if (!response.success) {
+            throw new Error(response.error || '추천 작품을 불러오는데 실패했습니다.');
+        }
 
-        // 불러온 데이터로 작품 카드 생성
-        if (result.success && result.data && Array.isArray(result.data.items)) {
-            featuredArtworksResult = result;
-            featuredArtworks = result.data.items;
-            renderArtworkCards(featuredArtworks);
+        const artworks = response.data;
+        if (artworks && artworks.length > 0) {
+            // 전역 변수에 작품 데이터 저장 (모달에서 사용)
+            featuredArtworks = artworks;
+
+            const fragment = document.createDocumentFragment();
+            artworks.forEach(artwork => {
+                const card = createArtworkCard(artwork, { type: 'home' });
+                fragment.appendChild(card);
+            });
+
+            container.innerHTML = '';
+            container.appendChild(fragment);
             setupCardEvents();
         } else {
+            console.log('추천 작품이 없습니다');
             container.innerHTML = emptyArtworkTemplate;
         }
     } catch (error) {
-        console.error('작품 데이터 로딩 중 오류:', error);
+        console.error('추천 작품 로딩 중 오류:', error);
         const container = document.getElementById('featured-artworks-container');
         if (container) {
             container.innerHTML = errorMessageTemplate;
         }
-        showErrorMessage('작품 데이터를 불러오는 중 오류가 발생했습니다.');
+        showErrorMessage(error.message || '추천 작품을 불러오는 중 오류가 발생했습니다.');
     }
-}
-
-function renderArtworkCards(artworks) {
-    const container = document.querySelector('.artwork-grid');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    if (!artworks || artworks.length === 0) {
-        container.innerHTML = emptyArtworkTemplate;
-        return;
-    }
-
-    const fragment = document.createDocumentFragment();
-    artworks.forEach(artwork => {
-        const card = createArtworkCard(artwork, { type: 'home' });
-        fragment.appendChild(card);
-    });
-
-    container.appendChild(fragment);
 }
 
 function setupCardEvents() {
-    const container = document.querySelector('.artwork-grid');
-    if (!container) return;
-
-    container.addEventListener('click', handleCardClick);
-}
-
-function handleCardClick(e) {
-    const card = e.target.closest('.card');
-    if (!card) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const artworkId = card.dataset.artworkId;
-    if (!artworkId || !featuredArtworksResult) return;
-
-    // ID 타입을 문자열로 통일
-    const artwork = featuredArtworksResult.data.items.find(item => String(item.id) === String(artworkId));
-    if (!artwork) return;
-
-    showArtworkModal(artwork);
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            const artworkId = card.dataset.artworkId;
+            if (artworkId) {
+                const artwork = featuredArtworks.find(item => item.id === parseInt(artworkId));
+                if (artwork) {
+                    showArtworkModal(artwork);
+                }
+            }
+        });
+    });
 }

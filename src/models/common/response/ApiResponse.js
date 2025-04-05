@@ -27,16 +27,4 @@ export class ApiResponse {
         return new ApiResponse(false, null, error);
     }
 
-    /**
-     * JSON 형식으로 변환
-     * @returns {Object} JSON 객체
-     */
-    toJSON() {
-        return {
-            success: this.success,
-            data: this.data,
-            error: this.error,
-            timestamp: this.timestamp
-        };
-    }
 }

@@ -8,11 +8,9 @@ const API_BASE_URL = '';
 // API 응답 처리 함수
 const handleResponse = async (response) => {
     const data = await response.json();
-
     if (!response.ok) {
         throw new Error(data.message || '요청 처리 중 오류가 발생했습니다.');
     }
-
     return data;
 };
 

@@ -19,35 +19,9 @@
                             <i class="card__icon fas fa-images"></i>
                             <h3 class="card__title">모든 작품</h3>
                             <p class="card__subtitle">전체 작품 컬렉션</p>
-                            <div class="card__meta">총 <strong>
-                                    <%= typeof total !=='undefined' ? total : 0 %>
-                                </strong>개의 작품</div>
+                            <div class="card__meta">총 <strong>0</strong>개의 작품</div>
                         </div>
                     </div>
-                    <% if (typeof exhibitions !=='undefined' && Array.isArray(exhibitions) && exhibitions.length> 0) {
-                        %>
-                        <% exhibitions.forEach((exhibition, index)=> { %>
-                            <div class="carousel-slide" data-exhibition="<%= exhibition.code || '' %>">
-                                <div class="card card--carousel">
-                                    <div class="card__image-container">
-                                        <img src="<%= exhibition.image || '/images/exhibition-placeholder.svg' %>"
-                                            alt="<%= exhibition.title || '' %>" class="card__image"
-                                            onerror="this.onerror=null; this.src='/images/exhibition-placeholder.svg';">
-                                    </div>
-                                    <div class="card__info">
-                                        <h3 class="card__title">
-                                            <%= exhibition.title || '' %>
-                                        </h3>
-                                        <% if (exhibition.subtitle) { %>
-                                            <p class="card__subtitle">
-                                                <%= exhibition.subtitle %>
-                                            </p>
-                                            <% } %>
-                                    </div>
-                                </div>
-                            </div>
-                            <% }); %>
-                                <% } %>
                 </div>
             </div>
             <button class="carousel-arrow carousel-next">
@@ -166,5 +140,17 @@
                 <% } %>
     </section>
 </div>
+
+<!-- 초기 데이터 전달 -->
+<script>
+    window.INITIAL_DATA = {
+        total: <%= typeof total !== 'undefined' ? total : 0 %>,
+        exhibitions: <%= typeof exhibitions !== 'undefined' ? JSON.stringify(exhibitions) : '[]' %>,
+        keyword: '<%= typeof keyword !== 'undefined' ? keyword : '' %>',
+        selectedExhibition: '<%= typeof selectedExhibition !== 'undefined' ? selectedExhibition : '' %>',
+        year: '<%= typeof year !== 'undefined' ? year : '' %>',
+        page: <%= typeof page !== 'undefined' ? JSON.stringify(page) : 'null' %>
+    };
+</script>
 
 <script type="module" src="/js/page/artwork/ArtworkList.js"></script>

@@ -1,27 +1,33 @@
-import ExhibitionSimpleDTO from './ExhibitionSimpleDTO.js';
-
 /**
- * 전시회 목록을 위한 DTO
+ * 전시회 목록 DTO
+ * 전시회 목록 페이지에 필요한 정보를 포함합니다.
  */
-export default class ExhibitionListDTO {
+export default class ExhibitionListDto {
     constructor(data = {}) {
-        this.items = (data.items || []).map(exhibition => {
-            // 이미 ExhibitionSimpleDTO인 경우 그대로 사용
-            if (exhibition instanceof ExhibitionSimpleDTO) {
-                return exhibition;
-            }
-            // 아닌 경우 새로운 DTO 생성
-            return new ExhibitionSimpleDTO(exhibition);
-        });
-        this.total = data.total || 0;
-        this.page = data.page;
+        this.id = data.id || null;
+        this.title = data.title || '';
+        this.subtitle = data.subtitle || '';
+        this.image = data.image || null;
+        this.startDate = data.startDate || '';
+        this.endDate = data.endDate || '';
+        this.location = data.location || '';
+        this.artworkCount = data.artworkCount || 0;
+        this.isActive = data.isActive || false;
+        this.isSubmissionOpen = data.isSubmissionOpen || false;
     }
 
     toJSON() {
         return {
-            items: this.items.map(item => item.toJSON()),
-            total: this.total,
-            page: this.page
+            id: this.id,
+            title: this.title,
+            subtitle: this.subtitle,
+            image: this.image,
+            startDate: this.startDate,
+            endDate: this.endDate,
+            location: this.location,
+            artworkCount: this.artworkCount,
+            isActive: this.isActive,
+            isSubmissionOpen: this.isSubmissionOpen
         };
     }
 }

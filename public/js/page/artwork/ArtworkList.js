@@ -9,6 +9,9 @@ import { initModal, showModal, closeModal, updateModalContent } from '../../comm
 import Pagination from '../../common/pagination.js';
 import { createArtworkCard } from '../../common/util/card.js';
 
+// 전역 URL 파라미터
+const urlParams = new URLSearchParams(window.location.search);
+
 // API 함수 - 서버에서 가져오기
 async function fetchArtworkList(pagination, filters = {}) {
     return await ArtworkAPI.getArtworkList(pagination, filters);
@@ -179,8 +182,6 @@ function filterArtworksByExhibition(exhibition) {
     });
 
     // URL 파라미터에 전시회 필터 적용
-    const urlParams = new URLSearchParams(window.location.search);
-
     if (exhibition === 'all') {
         urlParams.delete('exhibition');
     } else {
@@ -298,11 +299,12 @@ async function loadArtworkList() {
     const cardView = document.getElementById('cardView');
     const tableViewBody = document.getElementById('tableViewBody');
     const resultCount = document.getElementById('resultCount');
+    const totalCountElement = document.querySelector('.card--all .card__meta strong');
+    const carouselTrack = document.querySelector('.carousel-track');
 
     try {
         showLoading(true);
 
-        const urlParams = new URLSearchParams(window.location.search);
         const pagination = new Pagination({
             page: parseInt(urlParams.get('page')) || 1,
             limit: parseInt(urlParams.get('limit')) || 12,
@@ -323,8 +325,40 @@ async function loadArtworkList() {
         }
 
         const data = response.data;
+        const artworks = Array.isArray(data) ? data : (data.items || []);
 
-        if (!data || !data.items || data.items.length === 0) {
+        // 총 작품 수 업데이트
+        if (totalCountElement) {
+            totalCountElement.textContent = data.total || artworks.length;
+        }
+        if (resultCount) {
+            resultCount.innerHTML = `총 <strong>${data.total || artworks.length}</strong>개의 작품이 검색되었습니다.`;
+        }
+
+        // 작품 목록 표시
+        if (artworks.length > 0) {
+            const cardFragment = document.createDocumentFragment();
+            const tableFragment = document.createDocumentFragment();
+
+            artworks.forEach(artwork => {
+                if (cardView) {
+                    const card = createArtworkCard(artwork, { type: 'list' });
+                    cardFragment.appendChild(card);
+                }
+                if (tableViewBody) {
+                    tableFragment.appendChild(createArtworkTableRow(artwork));
+                }
+            });
+
+            if (cardView) {
+                cardView.innerHTML = '';
+                cardView.appendChild(cardFragment);
+            }
+            if (tableViewBody) {
+                tableViewBody.innerHTML = '';
+                tableViewBody.appendChild(tableFragment);
+            }
+        } else {
             if (cardView) {
                 cardView.innerHTML = emptyArtworkTemplate;
             }
@@ -334,35 +368,36 @@ async function loadArtworkList() {
                 tableViewBody.innerHTML = '';
                 tableViewBody.appendChild(emptyRow);
             }
-            if (resultCount) {
-                resultCount.innerHTML = '총 <strong>0</strong>개의 작품이 검색되었습니다.';
-            }
-            return;
         }
 
-        const cardFragment = document.createDocumentFragment();
-        const tableFragment = document.createDocumentFragment();
+        // 전시회 카드 추가
+        if (carouselTrack && data.exhibitions) {
+            const exhibitionCards = data.exhibitions.map(exhibition => `
+                <div class="carousel-slide" data-exhibition="${exhibition.id || ''}">
+                    <div class="card card--carousel">
+                        <div class="card__image-container">
+                            <img src="${exhibition.image || '/images/exhibition-placeholder.svg'}"
+                                alt="${exhibition.title || ''}" class="card__image"
+                                onerror="this.onerror=null; this.src='/images/exhibition-placeholder.svg';">
+                        </div>
+                        <div class="card__info">
+                            <h3 class="card__title">${exhibition.title || ''}</h3>
+                            ${exhibition.subtitle ? `<p class="card__subtitle">${exhibition.subtitle}</p>` : ''}
+                            <div class="card__meta">
+                                <p class="card__date">
+                                    ${exhibition.startDate ? new Date(exhibition.startDate).toLocaleDateString() : ''}
+                                    ~
+                                    ${exhibition.endDate ? new Date(exhibition.endDate).toLocaleDateString() : ''}
+                                </p>
+                                <p class="card__location">${exhibition.location || ''}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
 
-        data.items.forEach(artwork => {
-            if (cardView) {
-                const card = createArtworkCard(artwork, { type: 'list' });
-                cardFragment.appendChild(card);
-            }
-            if (tableViewBody) {
-                tableFragment.appendChild(createArtworkTableRow(artwork));
-            }
-        });
-
-        if (cardView) {
-            cardView.innerHTML = '';
-            cardView.appendChild(cardFragment);
-        }
-        if (tableViewBody) {
-            tableViewBody.innerHTML = '';
-            tableViewBody.appendChild(tableFragment);
-        }
-        if (resultCount) {
-            resultCount.innerHTML = `총 <strong>${data.total || 0}</strong>개의 작품이 검색되었습니다.`;
+            carouselTrack.innerHTML += exhibitionCards;
+            initializeCarousel();
         }
 
     } catch (error) {

@@ -198,7 +198,7 @@ function initSubmitButton() {
             formData.append('medium', document.getElementById('medium').value.trim());
             formData.append('size', document.getElementById('size').value.trim());
             formData.append('department', department);
-            formData.append('year', new Date().getFullYear().toString());
+            formData.append('year', document.getElementById('year').value);
             formData.append('artistId', user.id);  // user 객체에서 직접 id 가져오기
 
             const exhibitionSelect = document.getElementById('exhibition');

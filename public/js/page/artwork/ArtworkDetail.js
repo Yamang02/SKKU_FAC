@@ -186,9 +186,14 @@ async function loadArtworkDetail() {
             throw new Error('작품 ID를 찾을 수 없습니다.');
         }
 
-        const artwork = await ArtworkAPI.getArtworkDetail(artworkId);
-        console.log('API 응답:', artwork); // API 응답 구조 확인
+        const response = await ArtworkAPI.getArtworkDetail(artworkId);
+        console.log('API 응답:', response);
 
+        if (!response.success) {
+            throw new Error(response.error || '작품 데이터를 불러오는데 실패했습니다.');
+        }
+
+        const artwork = response.data;
         if (!artwork) {
             throw new Error('작품 데이터가 없습니다.');
         }

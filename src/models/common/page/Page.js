@@ -1,141 +1,60 @@
-import PageOptions from './PageOptions.js';
-
 /**
- * 페이지 처리를 위한 값 객체
+ * 페이지네이션을 위한 클래스
  */
-class Page {
+export default class Page {
     constructor(totalItems, options = {}) {
-        this.options = new PageOptions(options);
-        this.totalItems = Math.max(0, parseInt(totalItems));
-        this.initialize();
-    }
+        const {
+            page = 1,
+            limit = 12
+        } = options;
 
-    initialize() {
-        // 기본 페이지네이션 계산
-        this.totalPages = Math.ceil(this.totalItems / this.options.limit);
-        this.currentPage = this.options.page;
-        this.startPage = this.calculateStartPage();
-        this.endPage = this.calculateEndPage();
-
-        // 페이지 상태
+        this.currentPage = Number(page);
+        this.itemsPerPage = Number(limit);
+        this.totalItems = Number(totalItems);
+        this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
         this.hasPrev = this.currentPage > 1;
         this.hasNext = this.currentPage < this.totalPages;
-        this.showFirstPage = this.startPage > 1;
-        this.showLastPage = this.endPage < this.totalPages;
-        this.showFirstEllipsis = this.startPage > 2;
-        this.showLastEllipsis = this.endPage < this.totalPages - 1;
-
-        // 정렬 및 필터링 상태
-        this.sortField = this.options.sortField;
-        this.sortOrder = this.options.sortOrder;
-        this.filters = this.options.filters;
-
-        // URL 관련
-        this.baseUrl = this.options.baseUrl;
-        this.previousUrl = this.options.previousUrl;
-        this.currentUrl = this.options.currentUrl;
     }
 
-    calculateStartPage() {
-        const half = Math.floor(this.options.displayPageCount / 2);
-        const start = this.currentPage - half;
-        return Math.max(1, Math.min(start, this.totalPages - this.options.displayPageCount + 1));
+    /**
+     * 현재 페이지 번호를 반환합니다.
+     */
+    getCurrentPage() {
+        return this.currentPage;
     }
 
-    calculateEndPage() {
-        return Math.min(
-            this.startPage + this.options.displayPageCount - 1,
-            this.totalPages
-        );
+    /**
+     * 페이지당 아이템 수를 반환합니다.
+     */
+    getItemsPerPage() {
+        return this.itemsPerPage;
     }
 
-    getPages() {
-        return Array.from(
-            { length: this.endPage - this.startPage + 1 },
-            (_, i) => this.startPage + i
-        );
+    /**
+     * 전체 아이템 수를 반환합니다.
+     */
+    getTotalItems() {
+        return this.totalItems;
     }
 
-    buildQueryParams(overrides = {}) {
-        const params = new URLSearchParams();
-
-        // 기본 페이지네이션 파라미터
-        if (overrides.page) {
-            params.set('page', overrides.page);
-        }
-
-        // 정렬 파라미터
-        if (this.sortField && !overrides.skipSort) {
-            params.set('sort', this.sortField);
-            params.set('order', this.sortOrder);
-        }
-
-        // 필터 파라미터
-        if (this.filters && !overrides.skipFilters) {
-            Object.entries(this.filters).forEach(([key, value]) => {
-                if (value) params.set(key, value);
-            });
-        }
-
-        return params;
+    /**
+     * 전체 페이지 수를 반환합니다.
+     */
+    getTotalPages() {
+        return this.totalPages;
     }
 
-    getPageUrl(pageNum) {
-        const params = this.buildQueryParams({ page: pageNum });
-        return `${this.baseUrl}?${params.toString()}`;
+    /**
+     * 이전 페이지 존재 여부를 반환합니다.
+     */
+    getHasPrev() {
+        return this.hasPrev;
     }
 
-    getSortUrl(field) {
-        const newOrder = field === this.sortField && this.sortOrder === 'asc' ? 'desc' : 'asc';
-        const params = this.buildQueryParams({
-            sort: field,
-            order: newOrder
-        });
-        return `${this.baseUrl}?${params.toString()}`;
-    }
-
-    getSafeReturnUrl() {
-        if (this.previousUrl && !this.previousUrl.includes('/error')) {
-            return this.previousUrl;
-        }
-        if (this.currentUrl && this.currentUrl.includes('/admin')) {
-            return '/admin';
-        }
-        return '/';
-    }
-
-    static getCurrentPageUrl(req) {
-        return `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-    }
-
-    static getPreviousPageUrl(req) {
-        return req.headers.referer || '/';
-    }
-
-    toJSON() {
-        return {
-            currentPage: this.currentPage,
-            totalItems: this.totalItems,
-            totalPages: this.totalPages,
-            itemsPerPage: this.options.limit,
-            hasPrev: this.hasPrev,
-            hasNext: this.hasNext,
-            showFirstPage: this.showFirstPage,
-            showLastPage: this.showLastPage,
-            showFirstEllipsis: this.showFirstEllipsis,
-            showLastEllipsis: this.showLastEllipsis,
-            pages: this.getPages(),
-            sortField: this.sortField,
-            sortOrder: this.sortOrder,
-            filters: this.filters,
-            baseUrl: this.baseUrl,
-            previousUrl: this.previousUrl,
-            currentUrl: this.currentUrl,
-            getPageUrl: this.getPageUrl.bind(this),
-            getSortUrl: this.getSortUrl.bind(this),
-            getSafeReturnUrl: this.getSafeReturnUrl.bind(this)
-        };
+    /**
+     * 다음 페이지 존재 여부를 반환합니다.
+     */
+    getHasNext() {
+        return this.hasNext;
     }
 }
-
-export default Page;

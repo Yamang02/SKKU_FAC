@@ -26,7 +26,7 @@ export function createArtworkCard(artwork, options = { type: 'home' }) {
 
     const image = document.createElement('img');
     image.className = 'card__image';
-    image.src = artwork.imageUrl || artwork.image || '/images/artwork-placeholder.svg';
+    image.src = artwork.image || '/images/artwork-placeholder.svg';
     image.alt = artwork.title || '';
     image.onerror = function () {
         this.onerror = null;
@@ -42,7 +42,7 @@ export function createArtworkCard(artwork, options = { type: 'home' }) {
 
     const subtitle = document.createElement('p');
     subtitle.className = 'card__subtitle';
-    subtitle.textContent = artwork.artist || artwork.artistName || '작가 미상';
+    subtitle.textContent = artwork.artistName || '작가 미상';
 
     const meta = document.createElement('p');
     meta.className = 'card__meta';

@@ -2,7 +2,8 @@ import { ViewPath } from '../constants/ViewPath.js';
 import ViewResolver from '../utils/ViewResolver.js';
 import UserRepository from '../repositories/UserRepository.js';
 import ExhibitionRepository from '../repositories/ExhibitionRepository.js';
-import { ArtworkService } from '../services/artwork/ArtworkService.js';
+import ArtworkService from '../services/artwork/ArtworkService.js';
+import ExhibitionService from '../services/exhibition/ExhibitionService.js';
 import {
     ArtworkNotFoundError,
     ArtworkValidationError
@@ -19,6 +20,7 @@ export default class ArtworkController {
         this.userRepository = new UserRepository();
         this.exhibitionRepository = new ExhibitionRepository();
         this.artworkService = new ArtworkService();
+        this.exhibitionService = new ExhibitionService();
     }
 
     // === 페이지 렌더링 ===
@@ -27,14 +29,8 @@ export default class ArtworkController {
      */
     async getArtworkListPage(req, res) {
         try {
-            const { page = 1, size = 10 } = req.query;
-            const result = await this.artworkService.getArtworkList(Number(page), Number(size));
-
             return ViewResolver.render(res, ViewPath.MAIN.ARTWORK.LIST, {
-                title: '작품 목록',
-                artworks: result.items,
-                page: result.page,
-                total: result.total
+                title: '작품 목록'
             });
         } catch (error) {
             return res.status(500).render('error', {
@@ -196,21 +192,12 @@ export default class ArtworkController {
             const result = await this.artworkService.deleteArtwork(id);
 
             if (result) {
-                res.json({
-                    success: true,
-                    message: '작품이 삭제되었습니다.'
-                });
+                return res.json(ApiResponse.success(null, Message.ARTWORK.DELETE_SUCCESS));
             } else {
-                res.status(404).json({
-                    success: false,
-                    message: '작품을 찾을 수 없습니다.'
-                });
+                return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND));
             }
         } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: '작품 삭제 중 오류가 발생했습니다.'
-            });
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.DELETE_ERROR));
         }
     }
 
@@ -243,22 +230,15 @@ export default class ArtworkController {
             const result = await this.artworkService.createArtwork(artworkData);
 
             if (result) {
-                res.json({
-                    success: true,
-                    message: '작품이 등록되었습니다.',
+                return res.json(ApiResponse.success({
+                    message: Message.ARTWORK.CREATE_SUCCESS,
                     redirectUrl: '/admin/management/artwork'
-                });
+                }));
             } else {
-                res.status(400).json({
-                    success: false,
-                    message: '작품 등록에 실패했습니다.'
-                });
+                return res.status(400).json(ApiResponse.error(Message.ARTWORK.CREATE_ERROR));
             }
         } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: '작품 등록 중 오류가 발생했습니다.'
-            });
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.CREATE_ERROR));
         }
     }
 
@@ -271,32 +251,26 @@ export default class ArtworkController {
     }
 
     /**
-     * 작품 목록 데이터를 API로 반환합니다.
+     * 작품 목록을 조회합니다.
      */
-    async getArtworkListData(req, res) {
+    async getArtworkList(req, res) {
         try {
-            const { page = 1, limit = 12, sortField = 'createdAt', sortOrder = 'desc', searchType, keyword } = req.query;
-            const artworkList = await this.artworkService.getArtworkList({ page, limit, sortField, sortOrder, searchType, keyword });
-            res.json(artworkList);
-        } catch (error) {
-            res.status(500).json({ success: false, message: '작품 목록을 불러오는데 실패했습니다.' });
-        }
-    }
+            const { page = 1, limit = 10, ...filters } = req.query;
 
-    /**
-     * 추천 작품 목록을 반환합니다.
-     */
-    async getFeaturedArtworks(req, res) {
-        try {
-            const { limit = 6 } = req.query;
-            const artworks = await this.artworkService.getFeaturedArtworks(Number(limit));
-            res.json({ success: true, data: artworks });
-        } catch (error) {
-            console.error('추천 작품 조회 중 오류 발생:', error);
-            res.status(500).json({
-                success: false,
-                message: '작품 데이터를 불러올 수 없습니다.'
+            const artworkList = await this.artworkService.getArtworkList({
+                page: Number(page),
+                limit: Number(limit),
+                ...filters
             });
+
+            return res.json(ApiResponse.success({
+                items: artworkList.items,
+                total: artworkList.total,
+                page: artworkList.page
+            }));
+        } catch (error) {
+            console.error('작품 목록 조회 중 오류:', error);
+            return res.status(500).json(ApiResponse.error(error.message));
         }
     }
 
@@ -331,23 +305,6 @@ export default class ArtworkController {
 
     // === API 엔드포인트 ===
     /**
-     * 작품 목록을 조회합니다.
-     */
-    async getArtworkList(req, res) {
-        try {
-            const { page = 1, size = 10, isFeatured } = req.query;
-            const result = await this.artworkService.getArtworkList({
-                page: Number(page),
-                size: Number(size),
-                isFeatured
-            });
-            return res.json(ApiResponse.success(result).toJSON());
-        } catch (error) {
-            return res.status(500).json(ApiResponse.error(Message.ARTWORK.LIST_ERROR).toJSON());
-        }
-    }
-
-    /**
      * 작품 상세 정보를 조회합니다.
      */
     async getArtworkDetail(req, res) {
@@ -356,22 +313,9 @@ export default class ArtworkController {
             const type = req.query.type || 'default';
 
             const artwork = await this.artworkService.getArtworkDetail(id, type);
-
-            // artist와 exhibition이 없는 경우 기본값 설정
-            if (!artwork.artist) {
-                artwork.artist = { id: null, name: '작가 미상' };
-            }
-            if (!artwork.exhibition) {
-                artwork.exhibition = { title: '없음' };
-            }
-
-            res.json(artwork);
+            return res.json(ApiResponse.success(artwork));
         } catch (error) {
-            res.status(404).json({
-                success: false,
-                message: Message.ARTWORK.NOT_FOUND,
-                error: error.message
-            });
+            return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND));
         }
     }
 
@@ -384,14 +328,14 @@ export default class ArtworkController {
             const file = req.file;
 
             const artwork = await this.artworkService.createArtwork(artworkData, file);
-            return res.status(201).json(ApiResponse.success(artwork, Message.ARTWORK.CREATE_SUCCESS).toJSON());
+            return res.status(201).json(ApiResponse.success(artwork, Message.ARTWORK.CREATE_SUCCESS));
         } catch (error) {
             if (error instanceof ArtworkValidationError) {
-                return res.status(400).json(ApiResponse.error(Message.ARTWORK.VALIDATION_ERROR).toJSON());
+                return res.status(400).json(ApiResponse.error(Message.ARTWORK.VALIDATION_ERROR));
             } else if (error instanceof ImageError) {
-                return res.status(400).json(ApiResponse.error(Message.IMAGE.UPLOAD_ERROR).toJSON());
+                return res.status(400).json(ApiResponse.error(Message.IMAGE.UPLOAD_ERROR));
             }
-            return res.status(500).json(ApiResponse.error(Message.ARTWORK.CREATE_ERROR).toJSON());
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.CREATE_ERROR));
         }
     }
 
@@ -404,17 +348,17 @@ export default class ArtworkController {
             const artworkData = req.body;
             const file = req.file;
             const artwork = await this.artworkService.updateArtwork(id, artworkData, file);
-            return res.json(ApiResponse.success(artwork, Message.ARTWORK.UPDATE_SUCCESS).toJSON());
+            return res.json(ApiResponse.success(artwork, Message.ARTWORK.UPDATE_SUCCESS));
         } catch (error) {
             if (error instanceof ArtworkNotFoundError) {
-                return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND).toJSON());
+                return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND));
             } else if (error instanceof ArtworkValidationError) {
-                return res.status(400).json(ApiResponse.error(Message.ARTWORK.VALIDATION_ERROR).toJSON());
+                return res.status(400).json(ApiResponse.error(Message.ARTWORK.VALIDATION_ERROR));
             } else if (error instanceof ImageError) {
-                return res.status(400).json(ApiResponse.error(Message.IMAGE.UPLOAD_ERROR).toJSON());
+                return res.status(400).json(ApiResponse.error(Message.IMAGE.UPLOAD_ERROR));
             }
             console.error('Error updating artwork:', error);
-            return res.status(500).json(ApiResponse.error(Message.ARTWORK.UPDATE_ERROR).toJSON());
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.UPDATE_ERROR));
         }
     }
 
@@ -425,15 +369,15 @@ export default class ArtworkController {
         try {
             const { id } = req.params;
             await this.artworkService.deleteArtwork(id);
-            return res.json(ApiResponse.success(null, Message.ARTWORK.DELETE_SUCCESS).toJSON());
+            return res.json(ApiResponse.success(null, Message.ARTWORK.DELETE_SUCCESS));
         } catch (error) {
             if (error instanceof ArtworkNotFoundError) {
-                return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND).toJSON());
+                return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND));
             } else if (error instanceof ImageError) {
-                return res.status(400).json(ApiResponse.error(Message.IMAGE.DELETE_ERROR).toJSON());
+                return res.status(400).json(ApiResponse.error(Message.IMAGE.DELETE_ERROR));
             }
             console.error('Error deleting artwork:', error);
-            return res.status(500).json(ApiResponse.error(Message.ARTWORK.DELETE_ERROR).toJSON());
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.DELETE_ERROR));
         }
     }
 
@@ -446,13 +390,9 @@ export default class ArtworkController {
             const type = req.query.type || 'default';
 
             const artwork = await this.artworkService.getArtworkSimple(id, type);
-            res.json(artwork);
+            return res.json(ApiResponse.success(artwork));
         } catch (error) {
-            res.status(404).json({
-                success: false,
-                message: Message.ARTWORK.NOT_FOUND,
-                error: error.message
-            });
+            return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND));
         }
     }
 
@@ -463,9 +403,21 @@ export default class ArtworkController {
         try {
             const { id } = req.params;
             const relatedArtworks = await this.artworkService.getRelatedArtworks(id);
-            return res.json(ApiResponse.success(relatedArtworks).toJSON());
+            return res.json(ApiResponse.success(relatedArtworks));
         } catch (error) {
-            return res.status(500).json(ApiResponse.error(Message.ARTWORK.RELATED_ERROR).toJSON());
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.RELATED_ERROR));
+        }
+    }
+    /**
+     * 추천 작품 목록을 조회합니다.
+     */
+    async getFeaturedArtworks(req, res) {
+        try {
+            const artworks = await this.artworkService.getFeaturedArtworks();
+            return res.json(ApiResponse.success(artworks));
+        } catch (error) {
+            console.error('추천 작품 목록 조회 중 오류:', error);
+            return res.status(500).json(ApiResponse.error(error.message));
         }
     }
 }

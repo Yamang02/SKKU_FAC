@@ -1,13 +1,8 @@
 import NoticeRepository from '../../repositories/NoticeRepository.js';
-import NoticeRequestDTO from '../../models/notice/dto/NoticeRequestDto.js';
+import { NoticeNotFoundError, NoticeValidationError, NoticePermissionError } from '../../models/common/error/NoticeError.js';
 import NoticeResponseDTO from '../../models/notice/dto/NoticeResponseDto.js';
 import NoticeSearchDTO from '../../models/notice/dto/NoticeSearchDto.js';
 import Page from '../../models/common/page/Page.js';
-import {
-    NoticeNotFoundError,
-    NoticeValidationError,
-    NoticePermissionError
-} from '../../models/common/error/NoticeError.js';
 
 /**
  * 공지사항 서비스
@@ -56,7 +51,7 @@ export default class NoticeService {
             searchDto.validate();
 
             // 2. 공지사항 목록 조회
-            const notices = await this.noticeRepository.findNotices(searchDto.toJSON());
+            const notices = await this.noticeRepository.findNotices(searchDto);
 
             // 3. 페이지네이션 옵션 생성
             const pageOptions = this._createPageOptions({
@@ -170,93 +165,44 @@ export default class NoticeService {
     /**
      * 공지사항을 생성합니다.
      */
-    async createNotice(data, userId, userName) {
-        try {
-            const noticeDto = new NoticeRequestDTO({
-                ...data,
-                author: userId,
-                authorName: userName
-            });
-            noticeDto.validate();
-
-            const result = await this.noticeRepository.createNotice(noticeDto.toJSON());
-            if (!result) {
-                throw new Error('공지사항 생성에 실패했습니다.');
-            }
-
-            return result;
-        } catch (error) {
-            if (error instanceof NoticeValidationError) {
-                throw error;
-            }
-            throw new Error('공지사항 생성 중 오류가 발생했습니다.');
-        }
+    async createNotice(noticeDto) {
+        return this.noticeRepository.createNotice(noticeDto);
     }
 
     /**
      * 공지사항을 수정합니다.
      */
-    async updateNotice(id, data, userId, userName) {
-        try {
-            const notice = await this.noticeRepository.findNoticeById(id);
-            if (!notice) {
-                throw new NoticeNotFoundError();
-            }
-
-            if (notice.author !== userId) {
-                throw new NoticePermissionError();
-            }
-
-            const noticeDto = new NoticeRequestDTO({
-                ...data,
-                id,
-                author: userId,
-                authorName: userName
-            });
-            noticeDto.validate();
-
-            const result = await this.noticeRepository.updateNotice(id, noticeDto.toJSON());
-            if (!result) {
-                throw new Error('공지사항 수정에 실패했습니다.');
-            }
-
-            return result;
-        } catch (error) {
-            if (error instanceof NoticeNotFoundError ||
-                error instanceof NoticePermissionError ||
-                error instanceof NoticeValidationError) {
-                throw error;
-            }
-            throw new Error('공지사항 수정 중 오류가 발생했습니다.');
+    async updateNotice(id, noticeDto) {
+        const existingNotice = await this.noticeRepository.findById(id);
+        if (!existingNotice) {
+            throw new NoticeNotFoundError();
         }
+
+        return this.noticeRepository.updateNotice(id, noticeDto);
     }
 
     /**
      * 공지사항을 삭제합니다.
      */
     async deleteNotice(id, userId) {
-        try {
-            const notice = await this.noticeRepository.findNoticeById(id);
-            if (!notice) {
-                throw new NoticeNotFoundError();
-            }
-
-            if (notice.author !== userId) {
-                throw new NoticePermissionError();
-            }
-
-            const result = await this.noticeRepository.deleteNotice(id);
-            if (!result) {
-                throw new Error('공지사항 삭제에 실패했습니다.');
-            }
-
-            return result;
-        } catch (error) {
-            if (error instanceof NoticeNotFoundError ||
-                error instanceof NoticePermissionError) {
-                throw error;
-            }
-            throw new Error('공지사항 삭제 중 오류가 발생했습니다.');
+        const notice = await this.noticeRepository.findNoticeById(id);
+        if (!notice) {
+            throw new NoticeNotFoundError();
         }
+
+        if (notice.author !== userId) {
+            throw new NoticePermissionError();
+        }
+
+        const result = await this.noticeRepository.deleteNotice(id);
+        if (!result) {
+            throw new Error('공지사항 삭제에 실패했습니다.');
+        }
+
+        return result;
+    }
+
+    async findNotices(searchDto) {
+        return this.noticeRepository.findNotices(searchDto);
     }
 }

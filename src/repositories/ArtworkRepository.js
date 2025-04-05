@@ -2,6 +2,7 @@ import Artwork from '../models/artwork/Artwork.js';
 import artworkData from '../config/data/artwork.js';
 import path from 'path';
 import fs from 'fs/promises';
+import Page from '../models/common/page/Page.js';
 
 export default class ArtworkRepository {
     constructor() {
@@ -57,68 +58,69 @@ export default class ArtworkRepository {
     }
 
     /**
-     * 모든 작품을 반환합니다.
-     * @returns {Promise<Array<Artwork>>} 작품 목록
+     * 작품 목록을 조회합니다.
      */
-    async findArtworks({ page = 1, limit = 10, sortField = 'createdAt', sortOrder = 'desc', searchType, keyword, artistId, exhibitionId, isFeatured } = {}) {
-        let filteredArtworks = [...this.artworks];
+    async findArtworks(options = {}) {
+        try {
+            // 1. 기본값 설정
+            const page = options.page || 1;
+            const limit = options.limit || 12;
+            const sortField = options.sortField || 'createdAt';
+            const sortOrder = options.sortOrder || 'desc';
 
-        // 검색 조건 적용
-        if (searchType && keyword) {
-            filteredArtworks = filteredArtworks.filter(artwork => {
-                switch (searchType) {
+            // 2. 필터링
+            let filteredArtworks = [...this.artworks];
+
+            if (options.isFeatured !== undefined) {
+                filteredArtworks = filteredArtworks.filter(artwork => artwork.isFeatured === options.isFeatured);
+            }
+            if (options.exhibitionId) {
+                filteredArtworks = filteredArtworks.filter(artwork => artwork.exhibitionId === Number(options.exhibitionId));
+            }
+            if (options.searchType && options.keyword) {
+                const keyword = options.keyword.toLowerCase();
+                filteredArtworks = filteredArtworks.filter(artwork => {
+                    switch (options.searchType) {
                     case 'title':
-                        return artwork.title.toLowerCase().includes(keyword.toLowerCase());
+                        return artwork.title.toLowerCase().includes(keyword);
                     case 'artist':
-                        return artwork.artistName.toLowerCase().includes(keyword.toLowerCase());
+                        return artwork.artistName.toLowerCase().includes(keyword);
                     case 'department':
-                        return artwork.department.toLowerCase().includes(keyword.toLowerCase());
+                        return artwork.department.toLowerCase().includes(keyword);
                     default:
                         return true;
-                }
+                    }
+                });
+            }
+
+            // 3. 정렬
+            filteredArtworks.sort((a, b) => {
+                const aValue = a[sortField];
+                const bValue = b[sortField];
+                return sortOrder === 'asc' ?
+                    (aValue > bValue ? 1 : -1) :
+                    (aValue < bValue ? 1 : -1);
             });
+
+            // 4. 페이지네이션
+            const startIndex = (page - 1) * limit;
+            const endIndex = startIndex + limit;
+            const paginatedArtworks = filteredArtworks.slice(startIndex, endIndex);
+
+            // 5. Page 객체 생성
+            const total = filteredArtworks.length;
+            const pageInfo = new Page(total, { page, limit });
+
+            // 6. 결과 반환
+            return {
+                items: paginatedArtworks,
+                total,
+                page: pageInfo
+            };
+        } catch (error) {
+            console.error('작품 목록 조회 중 오류:', error);
+            throw error;
         }
-
-        // 작가 ID로 필터링
-        if (artistId) {
-            filteredArtworks = filteredArtworks.filter(artwork => artwork.artistId === Number(artistId));
-        }
-
-        // 전시회 ID로 필터링
-        if (exhibitionId) {
-            filteredArtworks = filteredArtworks.filter(artwork => artwork.exhibitionId === Number(exhibitionId));
-        }
-
-        // 추천 작품 필터링
-        if (isFeatured !== undefined) {
-            filteredArtworks = filteredArtworks.filter(artwork => {
-                // isFeatured가 undefined인 경우 false로 처리
-                const artworkIsFeatured = artwork.isFeatured === undefined ? false : artwork.isFeatured;
-                return artworkIsFeatured === isFeatured;
-            });
-        }
-
-        // 정렬 적용
-        filteredArtworks.sort((a, b) => {
-            const aValue = a[sortField];
-            const bValue = b[sortField];
-            return sortOrder === 'asc' ?
-                (aValue > bValue ? 1 : -1) :
-                (aValue < bValue ? 1 : -1);
-        });
-
-        // 페이지네이션 적용
-        const startIndex = (page - 1) * limit;
-        const endIndex = startIndex + limit;
-        const paginatedArtworks = filteredArtworks.slice(startIndex, endIndex);
-
-        return {
-            items: paginatedArtworks,
-            total: filteredArtworks.length,
-            page: Number(page),
-            limit: Number(limit),
-            totalPages: Math.ceil(filteredArtworks.length / limit)
-        };
     }
 
     /**
@@ -159,20 +161,20 @@ export default class ArtworkRepository {
  * 작품 데이터
  */
 const artwork = ${JSON.stringify(this.artworks.map(artwork => ({
-            id: artwork.id,
-            title: artwork.title,
-            artistId: artwork.artistId,
-            artistName: artwork.artistName,
-            exhibitionId: artwork.exhibitionId,
-            department: artwork.department || '',
-            medium: artwork.medium || '',
-            size: artwork.size || '',
-            description: artwork.description || '',
-            imageId: artwork.imageId,
-            isFeatured: artwork.isFeatured || false,
-            createdAt: artwork.createdAt,
-            updatedAt: artwork.updatedAt
-        })), null, 2)};
+        id: artwork.id,
+        title: artwork.title,
+        artistId: artwork.artistId,
+        artistName: artwork.artistName,
+        exhibitionId: artwork.exhibitionId,
+        department: artwork.department || '',
+        medium: artwork.medium || '',
+        size: artwork.size || '',
+        description: artwork.description || '',
+        imageId: artwork.imageId,
+        isFeatured: artwork.isFeatured || false,
+        createdAt: artwork.createdAt,
+        updatedAt: artwork.updatedAt
+    })), null, 2)};
 
 export default artwork;
 `;
@@ -310,24 +312,25 @@ export default artwork;
      * @param {number} limit - 반환할 작품 수
      * @returns {Promise<Array<Artwork>>} 추천 작품 목록
      */
-    async findFeaturedArtworks(limit = 6) {
-        // TODO: DB 연동 시 아래 쿼리로 변경
-        /*
+    async findFeaturedArtworks(limit) {
+        if (!this.db) {
+            // 메모리 모드
+            return this.artworks
+                .filter(artwork => artwork.isFeatured)
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, limit);
+        }
+
+        // DB 모드
         const query = `
             SELECT * FROM artworks
             WHERE is_featured = true
             ORDER BY created_at DESC
             LIMIT ?
         `;
+
         const [rows] = await this.db.query(query, [limit]);
         return rows.map(row => new Artwork(row));
-        */
-
-        // 현재는 메모리에서 필터링
-        return this.artworks
-            .filter(artwork => artwork.isFeatured)
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .slice(0, limit);
     }
 
     /**

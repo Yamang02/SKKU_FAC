@@ -24,6 +24,17 @@ class ArtworkAPI {
         }
     }
 
+    // 추천 작품 목록 조회
+    static async getFeaturedArtworks() {
+        try {
+            return await api.get('/artwork/api/featured');
+        } catch (error) {
+            console.error('추천 작품 목록을 가져오는 중 오류 발생:', error);
+            showErrorMessage('추천 작품 목록을 불러오는데 실패했습니다.');
+            throw error;
+        }
+    }
+
     // 작품 상세 정보 조회
     static async getArtworkDetail(artworkId) {
         try {
@@ -52,17 +63,6 @@ class ArtworkAPI {
         }
     }
 
-    // 주요 작품 목록 조회
-    static async getFeaturedArtworks() {
-        try {
-            return await api.get('/artwork/api/featured');
-        } catch (error) {
-            console.error('주요 작품 목록을 가져오는 중 오류 발생:', error);
-            showErrorMessage('주요 작품 목록을 불러오는데 실패했습니다.');
-            throw error;
-        }
-    }
-
     /**
      * 관련 작품 목록을 조회합니다.
      * @param {string|number} id - 작품 ID
@@ -70,11 +70,11 @@ class ArtworkAPI {
      */
     static async getRelatedArtworks(id) {
         try {
-            const response = await fetch(`/artwork/api/related/${id}`);
-            return await response.json();
+            return await api.get(`/artwork/api/related/${id}`);
         } catch (error) {
             console.error('관련 작품 조회 중 오류:', error);
-            return { success: false, message: '관련 작품을 불러오는데 실패했습니다.' };
+            showErrorMessage('관련 작품을 불러오는데 실패했습니다.');
+            throw error;
         }
     }
 }

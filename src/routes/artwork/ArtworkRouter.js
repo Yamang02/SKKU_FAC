@@ -10,6 +10,9 @@ const artworkController = new ArtworkController();
 // 작품 목록 조회 API
 ArtworkRouter.get('/api/list', artworkController.getArtworkList.bind(artworkController));
 
+// 추천 작품 목록 조회 API
+ArtworkRouter.get('/api/featured', artworkController.getFeaturedArtworks.bind(artworkController));
+
 // 작품 상세 조회 API
 ArtworkRouter.get('/api/detail/:id', artworkController.getArtworkDetail.bind(artworkController));
 
@@ -20,8 +23,9 @@ ArtworkRouter.get('/api/simple/:id', artworkController.getArtworkSimple.bind(art
 ArtworkRouter.get('/api/related/:id', artworkController.getRelatedArtworks.bind(artworkController));
 
 // === 페이지 라우트 ===
-// 작품 목록 페이지
+// 작품 목록 페이지 (기본 경로)
 ArtworkRouter.get('/', artworkController.getArtworkListPage.bind(artworkController));
+ArtworkRouter.get('/list', artworkController.getArtworkListPage.bind(artworkController));
 
 // 작품 생성
 ArtworkRouter.get('/new', isAuthenticated, artworkController.getArtworkRegistrationPage.bind(artworkController));

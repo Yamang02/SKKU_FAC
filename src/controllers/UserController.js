@@ -321,7 +321,17 @@ export default class UserController {
 
             return res.json(userInfo);
         } catch (error) {
-            return res.status(500).json(ApiResponse.error(Message.USER.PROFILE_ERROR).toJSON());
+            return res.status(500).json(ApiResponse.error(Message.USER.PROFILE_ERROR));
+        }
+    }
+
+    async getProfile(req, res) {
+        try {
+            const userId = req.user.id;
+            const profile = await this.userService.getUserProfile(userId);
+            return res.json(ApiResponse.success(profile));
+        } catch (error) {
+            return res.status(500).json(ApiResponse.error(Message.USER.PROFILE_ERROR));
         }
     }
 }
