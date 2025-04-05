@@ -57,12 +57,11 @@ export default class AdminController {
             ];
 
             // ArtworkListDTO를 사용하여 작품 데이터 변환
-            const artworkListDTO = new ArtworkListDTO(
-                artworks.items,
-                artworks.total,
-                1,
-                artworks.items.length
-            );
+            const artworkListDTO = new ArtworkListDTO({
+                items: artworks.items,
+                total: artworks.total,
+                page: 1
+            });
 
             ViewResolver.render(res, ViewPath.ADMIN.DASHBOARD, {
                 title: '관리자 대시보드',
@@ -80,7 +79,7 @@ export default class AdminController {
                         artworkDistribution: [30, 25, 20, 15, 10]
                     }
                 },
-                recentArtworks: artworkListDTO.toJSON(),
+                recentArtworks: artworkListDTO,
                 recentActivities,
                 recentNotices
             });

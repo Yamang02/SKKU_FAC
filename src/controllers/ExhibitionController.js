@@ -63,15 +63,30 @@ export default class ExhibitionController {
 
             const pageData = new Page(exhibitions.length, pageOptions);
 
-            return res.json(ApiResponse.success({
-                exhibitions: exhibitions,
-                page: pageData,
-                searchType: searchType || '',
-                keyword: keyword || '',
-                sortField: sortField || 'createdAt',
-                sortOrder: sortOrder || 'desc',
-                total: exhibitions.length
+            // 작품 목록 페이지에서 사용할 수 있도록 필요한 정보만 포함
+            const processedExhibitions = exhibitions.map(exhibition => ({
+                id: exhibition.id,
+                title: exhibition.title,
+                image: exhibition.image || '/images/exhibition-placeholder.svg',
+                artworkCount: exhibition.artworkCount || 0,
+                startDate: exhibition.startDate,
+                endDate: exhibition.endDate,
+                description: exhibition.description,
+                type: exhibition.type
             }));
+
+            const responseData = {
+                exhibitions: processedExhibitions,
+                page: pageData,
+                total: exhibitions.length
+            };
+
+            console.log('=== Exhibition API Response ===');
+            console.log('Query Parameters:', req.query);
+            console.log('Response Data:', JSON.stringify(responseData, null, 2));
+            console.log('============================');
+
+            return res.json(ApiResponse.success(responseData));
         } catch (error) {
             console.error('전시회 목록 조회 중 오류:', error);
             return res.status(500).json(ApiResponse.error(error.message));

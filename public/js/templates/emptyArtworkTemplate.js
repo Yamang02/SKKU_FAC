@@ -25,8 +25,3 @@ export const errorMessageTemplate = `
         </div>
     </div>
 `;
-
-// 로딩 스피너 템플릿
-export const loadingSpinnerTemplate = `
-    <div class="loading-spinner">작품을 불러오는 중입니다...</div>
-`;

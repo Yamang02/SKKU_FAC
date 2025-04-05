@@ -24,10 +24,10 @@ AdminRouter.put('/management/user/:id([0-9]+)', isAdmin, (req, res) => userContr
 AdminRouter.delete('/management/user/:id([0-9]+)', isAdmin, (req, res) => userController.deleteManagementUser(req, res));
 
 // 전시회 관리
-AdminRouter.get('/management/exhibition', isAdmin, (req, res) => exhibitionController.getManagementExhibitionList(req, res));
-AdminRouter.get('/management/exhibition/registration', isAdmin, (req, res) => exhibitionController.getManagementExhibitionRegistrationPage(req, res));
+AdminRouter.get('/management/exhibition', isAdmin, (req, res) => exhibitionController.getManagementExhibitionListPage(req, res));
+AdminRouter.get('/management/exhibition/registration', isAdmin, (req, res) => exhibitionController.getManagementExhibitionCreatePage(req, res));
 AdminRouter.post('/management/exhibition/registration', isAdmin, (req, res) => exhibitionController.createManagementExhibition(req, res));
-AdminRouter.get('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.getManagementExhibitionDetail(req, res));
+AdminRouter.get('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.getManagementExhibitionDetailPage(req, res));
 AdminRouter.put('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.updateManagementExhibition(req, res));
 AdminRouter.delete('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.deleteManagementExhibition(req, res));
 

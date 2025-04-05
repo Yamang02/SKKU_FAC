@@ -3,7 +3,8 @@
  * 작품 목록의 모든 기능을 처리합니다.
  */
 import ArtworkAPI from '../../api/ArtworkAPI.js';
-import { emptyArtworkTemplate, errorMessageTemplate, loadingSpinnerTemplate } from '../../templates/emptyArtworkTemplate.js';
+import ExhibitionAPI from '../../api/ExhibitionAPI.js';
+import { emptyArtworkTemplate, errorMessageTemplate } from '../../templates/emptyArtworkTemplate.js';
 import { modalTemplate, artworkModalContent } from '../../templates/modalTemplate.js';
 import { initModal, showModal, closeModal, updateModalContent } from '../../common/modal.js';
 import Pagination from '../../common/pagination.js';
@@ -17,18 +18,77 @@ async function fetchArtworkList(pagination, filters = {}) {
     return await ArtworkAPI.getArtworkList(pagination, filters);
 }
 
-// 유틸리티 함수
-function showLoading(isShow) {
-    // 로딩 표시 로직 구현
-    const loadingEl = document.querySelector('.loading-artwork');
-    if (loadingEl) {
-        loadingEl.style.display = isShow ? 'flex' : 'none';
+async function fetchExhibitionList() {
+    try {
+        const response = await ExhibitionAPI.getExhibitionList();
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching exhibition list:', error);
+        showErrorMessage('전시회 목록을 불러오는데 실패했습니다.');
+        return null;
     }
+}
+
+// 전시회 캐러셀 업데이트
+async function updateExhibitionCarousel() {
+    const carouselTrack = document.querySelector('.carousel-track');
+    if (!carouselTrack) return;
+
+    try {
+        const exhibitionData = await fetchExhibitionList();
+        if (!exhibitionData || !exhibitionData.exhibitions) return;
+
+        const { exhibitions } = exhibitionData;
+
+        // 전시회 카드 생성
+        const exhibitionCards = exhibitions.map(exhibition => `
+            <div class="carousel-slide" data-exhibition="${exhibition.id}">
+                <div class="card card--carousel">
+                    <div class="card__image-container">
+                        <img src="${exhibition.image}" alt="${exhibition.title}" class="card__image">
+                    </div>
+                    <div class="card__info">
+                        <h3 class="card__title">${exhibition.title}</h3>
+                        <div class="card__meta">총 <strong>${exhibition.artworkCount}</strong>개의 작품</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // 모든 작품 카드 다음에 전시회 카드들 추가
+        const allArtworksCard = carouselTrack.querySelector('[data-exhibition="all"]');
+        if (allArtworksCard) {
+            allArtworksCard.insertAdjacentHTML('afterend', exhibitionCards);
+        }
+
+        // 전시회 옵션 업데이트
+        updateExhibitionOptions(exhibitions);
+
+        // 캐러셀 초기화
+        initCarousel();
+    } catch (error) {
+        console.error('Error updating exhibition carousel:', error);
+        showErrorMessage('전시회 정보를 불러오는데 실패했습니다.');
+    }
+}
+
+// 전시회 선택 옵션 업데이트
+function updateExhibitionOptions(exhibitions) {
+    const exhibitionSelect = document.getElementById('exhibition');
+    if (!exhibitionSelect) return;
+
+    const options = exhibitions.map(exhibition => `
+        <option value="${exhibition.id}">${exhibition.title}</option>
+    `).join('');
+
+    exhibitionSelect.innerHTML = `
+        <option value="">모든 전시회</option>
+        ${options}
+    `;
 }
 
 function showErrorMessage(message) {
     console.error(message);
-    // 오류 메시지 표시 로직 구현
 }
 
 // 애니메이션 관련 함수
@@ -202,21 +262,8 @@ function filterArtworksByExhibition(exhibition) {
     window.history.pushState({ path: newUrl }, '', newUrl);
 }
 
-// 페이지 초기화
-document.addEventListener('DOMContentLoaded', () => {
-    initCarousel();
-    initViewToggle();
-    loadArtworkList(); // 작품 목록 로딩
-    initFilters();
-    initPagination();
-
-    // 페이지 로딩 애니메이션
-    const mainContent = document.querySelector('.main-content');
-    if (mainContent) {
-        fadeIn(mainContent);
-    }
-
-    // 상세 검색 토글 초기화
+// 상세 검색 패널 초기화
+function initAdvancedSearch() {
     const advancedSearchToggle = document.getElementById('advancedSearchToggle');
     const advancedSearchPanel = document.getElementById('advancedSearchPanel');
 
@@ -249,6 +296,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
             animateButtonClick(advancedSearchToggle);
         });
+    }
+}
+
+// 페이지 초기화
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // 전시회 캐러셀 업데이트
+        await updateExhibitionCarousel();
+
+        // 기존 초기화 함수들 호출
+        initViewToggle();
+        initArtworkGrid();
+        initFilters();
+        initPagination();
+        initModal();
+        initAdvancedSearch();
+
+        // 초기 작품 목록 로드
+        await loadArtworkList();
+    } catch (error) {
+        console.error('Error initializing page:', error);
+        showErrorMessage('페이지 초기화 중 오류가 발생했습니다.');
     }
 });
 
@@ -303,8 +372,6 @@ async function loadArtworkList() {
     const carouselTrack = document.querySelector('.carousel-track');
 
     try {
-        showLoading(true);
-
         const pagination = new Pagination({
             page: parseInt(urlParams.get('page')) || 1,
             limit: parseInt(urlParams.get('limit')) || 12,
@@ -407,8 +474,6 @@ async function loadArtworkList() {
         if (cardView) {
             cardView.innerHTML = errorMessageTemplate;
         }
-    } finally {
-        showLoading(false);
     }
 }
 

@@ -32,7 +32,7 @@
 
     <!-- 상세 검색 토글 버튼 -->
     <div class="search-toggle-container">
-        <button id="advancedSearchToggle">
+        <button id="advancedSearchToggle" class="search-toggle-button">
             <i class="fas fa-sliders-h"></i> 상세 검색 필터
             <i class="fas fa-chevron-down toggle-icon"></i>
         </button>
@@ -56,17 +56,6 @@
                         <label for="exhibition" class="form-label">전시회</label>
                         <select id="exhibition" name="exhibition" class="form-select">
                             <option value="">모든 전시회</option>
-                            <% if (typeof exhibitions !=='undefined' && Array.isArray(exhibitions) &&
-                                exhibitions.length> 0) { %>
-                                <% exhibitions.forEach(ex=> { %>
-                                    <% if (ex.code !=='all' ) { %>
-                                        <option value="<%= ex.code || '' %>" <%=(typeof selectedExhibition
-                                            !=='undefined' && selectedExhibition===ex.code) ? 'selected' : '' %>>
-                                            <%= ex.title || '' %>
-                                        </option>
-                                        <% } %>
-                                            <% }); %>
-                                                <% } %>
                         </select>
                     </div>
 
@@ -89,9 +78,7 @@
     <section class="results-control">
         <!-- 결과 수 표시 -->
         <div class="results-info">
-            <p id="resultCount">총 <strong>
-                    <%= typeof total !=='undefined' ? total : 0 %>
-                </strong>개의 작품이 검색되었습니다.</p>
+            <p id="resultCount">총 <strong>0</strong>개의 작품이 검색되었습니다.</p>
         </div>
 
         <!-- 뷰 전환 버튼 -->
@@ -112,7 +99,6 @@
             <div class="loading-artwork">
                 <div class="loading-spinner">
                     <i class="fas fa-spinner fa-spin"></i>
-                    <p>작품을 불러오는 중입니다...</p>
                 </div>
             </div>
         </div>
@@ -135,22 +121,10 @@
         </table>
 
         <!-- 페이지네이션 -->
-        <% if (typeof page !=='undefined' && page) { %>
-            <%- include('../../common/pagination', { page }) %>
-                <% } %>
+        <div id="pagination" class="pagination">
+            <!-- 페이지네이션이 여기에 동적으로 로드됩니다 -->
+        </div>
     </section>
 </div>
-
-<!-- 초기 데이터 전달 -->
-<script>
-    window.INITIAL_DATA = {
-        total: <%= typeof total !== 'undefined' ? total : 0 %>,
-        exhibitions: <%= typeof exhibitions !== 'undefined' ? JSON.stringify(exhibitions) : '[]' %>,
-        keyword: '<%= typeof keyword !== 'undefined' ? keyword : '' %>',
-        selectedExhibition: '<%= typeof selectedExhibition !== 'undefined' ? selectedExhibition : '' %>',
-        year: '<%= typeof year !== 'undefined' ? year : '' %>',
-        page: <%= typeof page !== 'undefined' ? JSON.stringify(page) : 'null' %>
-    };
-</script>
 
 <script type="module" src="/js/page/artwork/ArtworkList.js"></script>

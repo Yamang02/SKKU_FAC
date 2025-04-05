@@ -12,6 +12,61 @@ const exhibition = [
         image: '/image/exhibition/placeholder-exhibition.svg',
         exhibitionType: 'regular',
         isSubmissionOpen: true
+    },
+    {
+        id: 2,
+        title: '2025년 샘플 전시회2',
+        description: '전시회 추가용',
+        startDate: '2024-03-01',
+        endDate: '2024-03-31',
+        location: '성균관대학교 인문관 1층 전시실',
+        image: '/image/exhibition/placeholder-exhibition.svg',
+        exhibitionType: 'regular',
+        isSubmissionOpen: false
+    },
+    {
+        id: 3,
+        title: '2025년 샘플 전시회3',
+        description: '전시회 추가용',
+        startDate: '2024-03-01',
+        endDate: '2024-03-31',
+        location: '성균관대학교 인문관 1층 전시실',
+        image: '/image/exhibition/placeholder-exhibition.svg',
+        exhibitionType: 'regular',
+        isSubmissionOpen: false
+    },
+    {
+        id: 4,
+        title: '2025년 샘플 전시회4',
+        description: '전시회 추가용',
+        startDate: '2024-03-01',
+        endDate: '2024-03-31',
+        location: '성균관대학교 인문관 1층 전시실',
+        image: '/image/exhibition/placeholder-exhibition.svg',
+        exhibitionType: 'regular',
+        isSubmissionOpen: true
+    },
+    {
+        id: 5,
+        title: '2025년 샘플 전시회5',
+        description: '전시회 추가용',
+        startDate: '2024-03-01',
+        endDate: '2024-03-31',
+        location: '성균관대학교 인문관 1층 전시실',
+        image: '/image/exhibition/placeholder-exhibition.svg',
+        exhibitionType: 'regular',
+        isSubmissionOpen: true
+    },
+    {
+        id: 6,
+        title: '2025년 샘플 전시회6',
+        description: '전시회 추가용',
+        startDate: '2024-03-01',
+        endDate: '2024-03-31',
+        location: '성균관대학교 인문관 1층 전시실',
+        image: '/image/exhibition/placeholder-exhibition.svg',
+        exhibitionType: 'regular',
+        isSubmissionOpen: true
     }
 ];
 
