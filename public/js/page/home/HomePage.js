@@ -11,10 +11,14 @@ import { emptyArtworkTemplate, errorMessageTemplate, loadingSpinnerTemplate } fr
 import { modalTemplate, artworkModalContent } from '../../templates/modalTemplate.js';
 import { initModal, showModal, closeModal, updateModalContent } from '../../common/modal.js';
 import { createArtworkCard } from '../../common/util/card.js';
+import { showErrorMessage } from '/js/common/util/notification.js';
 
 // 전역 변수 선언
 let featuredArtworks = [];
 let featuredArtworksResult;
+
+// showErrorMessage 함수를 전역 범위에 노출
+window.showErrorMessage = showErrorMessage;
 
 // 모달 초기화
 function initArtworkModal() {
@@ -81,6 +85,7 @@ async function loadFeaturedArtworks() {
         if (container) {
             container.innerHTML = errorMessageTemplate;
         }
+        showErrorMessage('작품 데이터를 불러오는 중 오류가 발생했습니다.');
     }
 }
 
@@ -126,17 +131,4 @@ function handleCardClick(e) {
     if (!artwork) return;
 
     showArtworkModal(artwork);
-}
-
-function showToast(message, type = 'info') {
-    // 간단한 토스트 메시지 표시
-    const toast = document.createElement('div');
-    toast.className = `toast toast--${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-
-    // 3초 후 토스트 제거
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
 }

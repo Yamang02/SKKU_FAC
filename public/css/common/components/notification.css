@@ -1,7 +1,7 @@
 /* 알림 컨테이너 */
 .notification-container {
     position: fixed;
-    top: 20px;
+    top: 80px; /* 헤더 높이를 고려한 값으로 수정 */
     left: 50%;
     transform: translateX(-50%);
     z-index: 2000;
@@ -9,17 +9,25 @@
     flex-direction: column;
     gap: 10px;
     pointer-events: none;
+    max-width: 1200px; /* 콘텐츠 영역과 동일한 최대 너비로 설정 */
+    width: 100%;
+    padding: 0 20px; /* 모바일에서 화면 가장자리와의 여백 */
 }
 
 /* 알림 메시지 공통 스타일 */
 .notification {
-    padding: 10px 20px;
+    padding: 12px 20px;
     border-radius: 4px;
     color: white;
     opacity: 1;
     transition: opacity 0.5s ease;
     pointer-events: auto;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 16px;
+    line-height: 1.5;
 }
 
 .notification--error {
@@ -50,5 +58,29 @@
 @keyframes spin {
     to {
         transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .notification-container {
+        top: 70px; /* 모바일에서 헤더 높이가 다를 수 있음 */
+        padding: 0 10px;
+    }
+
+    .notification {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .notification-container {
+        top: 60px;
+    }
+
+    .notification {
+        padding: 8px 12px;
+        font-size: 13px;
     }
 }

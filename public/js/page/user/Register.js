@@ -3,6 +3,7 @@
  * 회원가입 관련 기능을 처리합니다.
  */
 import UserAPI from '../../api/UserAPI';
+import { showError, showSuccess } from '../../common/util/notification.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('registerForm');
@@ -12,8 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordToggle = document.getElementById('passwordToggle');
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirmPassword');
-    const errorMessage = document.getElementById('errorMessage');
-    const successMessage = document.getElementById('successMessage');
 
     // 역할 선택에 따른 필드 표시/숨김
     roleSelect.addEventListener('change', () => {
@@ -53,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await UserAPI.register(userData);
 
             // 성공 메시지 표시
-            showMessage('success', '회원가입이 완료되었습니다. 3초 후 로그인 페이지로 이동합니다.');
+            showSuccess('회원가입이 완료되었습니다. 3초 후 로그인 페이지로 이동합니다.');
 
             // 3초 후 로그인 페이지로 리다이렉트
             setTimeout(() => {
@@ -61,22 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 3000);
         } catch (error) {
             // 에러 메시지 표시
-            showMessage('error', error.message || '회원가입에 실패했습니다.');
+            showError(error.message || '회원가입에 실패했습니다.');
         }
     });
-
-    // 메시지 표시 함수
-    function showMessage(type, message) {
-        if (type === 'error') {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-            successMessage.style.display = 'none';
-        } else {
-            successMessage.textContent = message;
-            successMessage.style.display = 'block';
-            errorMessage.style.display = 'none';
-        }
-    }
 
     // 초기 상태 설정
     roleSelect.dispatchEvent(new Event('change'));

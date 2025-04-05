@@ -2,6 +2,7 @@
  * 로그인 페이지 JavaScript
  */
 import userApi from '../../api/user';
+import { showError } from '../../common/util/notification.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     const togglePassword = document.querySelector('.toggle-password');
@@ -45,23 +46,3 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
-
-// 에러 메시지 표시 함수
-function showError(message) {
-    let alert = document.querySelector('.alert');
-
-    if (!alert) {
-        alert = document.createElement('div');
-        alert.classList.add('alert', 'alert-danger');
-        const form = document.querySelector('form');
-        form.insertBefore(alert, form.firstChild);
-    }
-
-    alert.textContent = message;
-    alert.style.display = 'block';
-
-    // 3초 후 에러 메시지 숨김
-    setTimeout(() => {
-        alert.style.display = 'none';
-    }, 3000);
-}
