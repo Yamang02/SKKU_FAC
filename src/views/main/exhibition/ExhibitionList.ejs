@@ -84,58 +84,60 @@
     <div class="result-header">
         <div class="result-count">
             <p id="exhibition-count">총 <strong>
-                    <%= exhibitions.length %>
+                    <%= exhibitions ? exhibitions.length : 0 %>
                 </strong>개의 전시회가 검색되었습니다.</p>
         </div>
     </div>
 
     <!-- 전시회 그리드 -->
     <div class="exhibition-grid" id="exhibitions-container">
-        <% exhibitions.forEach(exhibition=> { %>
-            <div class="exhibition-card" data-exhibition-id="<%= exhibition.id %>"
-                data-start-date="<%= exhibition.startDate %>" data-end-date="<%= exhibition.endDate %>"
-                data-location="<%= exhibition.location %>" data-description="<%= exhibition.description %>"
-                data-artists="<%= exhibition.artists ? exhibition.artists.join(',') : '' %>"
-                data-viewing-hours="<%= exhibition.viewingHours || '10:00 - 18:00' %>"
-                data-admission="<%= exhibition.admission || '무료' %>"
-                data-category="<%= exhibition.category || 'uncategorized' %>"
-                data-exhibition-type="<%= exhibition.exhibitionType || 'regular' %>">
+        <% if (exhibitions && exhibitions.length> 0) { %>
+            <% exhibitions.forEach(exhibition=> { %>
+                <div class="exhibition-card" data-exhibition-id="<%= exhibition.id %>"
+                    data-start-date="<%= exhibition.startDate %>" data-end-date="<%= exhibition.endDate %>"
+                    data-location="<%= exhibition.location %>" data-description="<%= exhibition.description %>"
+                    data-artists="<%= exhibition.artists ? exhibition.artists.join(',') : '' %>"
+                    data-viewing-hours="<%= exhibition.viewingHours || '10:00 - 18:00' %>"
+                    data-admission="<%= exhibition.admission || '무료' %>"
+                    data-category="<%= exhibition.category || 'uncategorized' %>"
+                    data-exhibition-type="<%= exhibition.exhibitionType || 'regular' %>">
 
-                <div class="card-image-container">
-                    <img src="<%= exhibition.image || '/images/exhibition-placeholder.svg' %>"
-                        alt="<%= exhibition.title %>" class="exhibition-image"
-                        onerror="this.onerror=null; this.src='/images/exhibition-placeholder.svg';">
-                    <!-- 전시 유형 표시 (정기/특별) -->
-                    <span class="exhibition-type <%= exhibition.exhibitionType || 'regular' %>">
-                        <%= exhibition.exhibitionType==='special' ? '특별' : '정기' %>
-                    </span>
-                </div>
+                    <div class="card-image-container">
+                        <img src="<%= exhibition.image || '/images/exhibition-placeholder.svg' %>"
+                            alt="<%= exhibition.title %>" class="exhibition-image"
+                            onerror="this.onerror=null; this.src='/images/exhibition-placeholder.svg';">
+                        <!-- 전시 유형 표시 (정기/특별) -->
+                        <span class="exhibition-type <%= exhibition.exhibitionType || 'regular' %>">
+                            <%= exhibition.exhibitionType==='special' ? '특별' : '정기' %>
+                        </span>
+                    </div>
 
-                <div class="exhibition-info">
-                    <h2 class="exhibition-title">
-                        <%= exhibition.title %>
-                    </h2>
-                    <% if (exhibition.subtitle) { %>
-                        <p class="exhibition-subtitle">
-                            <%= exhibition.subtitle %>
-                        </p>
-                        <% } %>
-                            <p class="exhibition-date">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                    viewBox="0 0 16 16">
-                                    <path
-                                        d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z" />
-                                </svg>
-                                <%= exhibition.startDate %> ~ <%= exhibition.endDate %>
+                    <div class="exhibition-info">
+                        <h2 class="exhibition-title">
+                            <%= exhibition.title %>
+                        </h2>
+                        <% if (exhibition.subtitle) { %>
+                            <p class="exhibition-subtitle">
+                                <%= exhibition.subtitle %>
                             </p>
-                            <% if (exhibition.category) { %>
-                                <span class="exhibition-category">
-                                    <%= exhibition.category %>
-                                </span>
-                                <% } %>
+                            <% } %>
+                                <p class="exhibition-date">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        viewBox="0 0 16 16">
+                                        <path
+                                            d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z" />
+                                    </svg>
+                                    <%= exhibition.startDate %> ~ <%= exhibition.endDate %>
+                                </p>
+                                <% if (exhibition.category) { %>
+                                    <span class="exhibition-category">
+                                        <%= exhibition.category %>
+                                    </span>
+                                    <% } %>
+                    </div>
                 </div>
-            </div>
-            <% }); %>
+                <% }); %>
+                    <% } %>
     </div>
 
     <!-- 로딩 인디케이터 -->

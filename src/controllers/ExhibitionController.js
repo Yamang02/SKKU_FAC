@@ -35,6 +35,20 @@ export default class ExhibitionController {
      */
     async getExhibitionListPage(req, res) {
         try {
+            return ViewResolver.render(res, ViewPath.MAIN.EXHIBITION.LIST, {
+                title: '전시회 목록',
+                exhibitions: []
+            });
+        } catch (error) {
+            return ViewResolver.renderError(res, error);
+        }
+    }
+
+    /**
+     * 전시회 목록 데이터를 조회합니다.
+     */
+    async getExhibitionList(req, res) {
+        try {
             const { page = 1, limit = 12, sortField = 'createdAt', sortOrder = 'desc', searchType, keyword } = req.query;
             const exhibitions = await this.exhibitionService.getAllExhibitions();
 
@@ -44,15 +58,12 @@ export default class ExhibitionController {
                 baseUrl: '/exhibition',
                 sortField,
                 sortOrder,
-                filters: { searchType, keyword },
-                previousUrl: Page.getPreviousPageUrl(req),
-                currentUrl: Page.getCurrentPageUrl(req)
+                filters: { searchType, keyword }
             };
 
             const pageData = new Page(exhibitions.length, pageOptions);
 
-            return ViewResolver.render(res, ViewPath.MAIN.EXHIBITION.LIST, {
-                title: '전시회 목록',
+            return res.json(ApiResponse.success({
                 exhibitions: exhibitions,
                 page: pageData,
                 searchType: searchType || '',
@@ -60,9 +71,10 @@ export default class ExhibitionController {
                 sortField: sortField || 'createdAt',
                 sortOrder: sortOrder || 'desc',
                 total: exhibitions.length
-            });
+            }));
         } catch (error) {
-            return ViewResolver.renderError(res, error);
+            console.error('전시회 목록 조회 중 오류:', error);
+            return res.status(500).json(ApiResponse.error(error.message));
         }
     }
 
@@ -81,9 +93,7 @@ export default class ExhibitionController {
                 page: parseInt(page),
                 limit: parseInt(limit),
                 baseUrl: '/admin/management/exhibition',
-                filters,
-                previousUrl: Page.getPreviousPageUrl(req),
-                currentUrl: Page.getCurrentPageUrl(req)
+                filters
             };
 
             const pageData = new Page(exhibitions.length, pageOptions);
@@ -214,26 +224,6 @@ export default class ExhibitionController {
             return res.json(ApiResponse.success(exhibitions));
         } catch (error) {
             return res.status(500).json(ApiResponse.error(Message.EXHIBITION.LIST_ERROR));
-        }
-    }
-
-    /**
-     * 전시회 목록을 조회합니다.
-     */
-    async getExhibitionList(req, res) {
-        try {
-            const { page = 1, limit = 10, keyword } = req.query;
-
-            const exhibitions = await this.exhibitionService.getExhibitionList({
-                page: Number(page),
-                limit: Number(limit),
-                keyword
-            });
-
-            return res.json(ApiResponse.success(exhibitions));
-        } catch (error) {
-            console.error('전시회 목록 조회 중 오류:', error);
-            return res.status(500).json(ApiResponse.error(error.message));
         }
     }
 }

@@ -23,8 +23,8 @@ export default class ExhibitionService {
      * @returns {Promise<Array<ExhibitionListDto>>} 전시회 목록
      */
     async getAllExhibitions() {
-        const exhibitions = await this.exhibitionRepository.findAll();
-        return exhibitions.map(exhibition => new ExhibitionListDto(exhibition));
+        const result = await this.exhibitionRepository.findExhibitions();
+        return result.items.map(exhibition => new ExhibitionListDto(exhibition));
     }
 
     /**
