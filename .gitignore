@@ -169,3 +169,7 @@ restart-server.ps1
 
 # Upload directories
 public/uploads/artworks/
+
+# Environment files
+.env.local
+.env.remote

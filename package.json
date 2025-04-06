@@ -16,15 +16,15 @@
         "@presentation": "src/presentation"
     },
     "scripts": {
-        "start": "node server.js",
-        "dev": "nodemon server.js",
-        "lint": "npx eslint --config ./config/.eslintrc.json src/",
-        "lint:fix": "npx eslint --config ./config/.eslintrc.json src/ --fix",
-        "lint:css": "npx stylelint --config ./config/.stylelintrc.json \"public/css/**/*.css\" --quiet",
-        "lint:css:fix": "npx stylelint --config ./config/.stylelintrc.json \"public/css/**/*.css\" --fix --quiet",
-        "analyze": "npm run lint && npm run lint:css && echo '코드 분석이 완료되었습니다.'",
-        "test:db": "node src/test/db.test.js",
-        "test:orm": "node src/test/orm.test.js"
+        "start": "NODE_ENV=local node server.js",
+        "start:local": "NODE_ENV=local node server.js",
+        "start:remote": "NODE_ENV=remote node server.js",
+        "dev": "NODE_ENV=local nodemon server.js",
+        "lint": "npx eslint --config .eslintrc.json src/",
+        "lint:fix": "npx eslint --config .eslintrc.json src/ --fix",
+        "lint:css": "npx stylelint --config .stylelintrc.json \"public/css/**/*.css\" --quiet",
+        "lint:css:fix": "npx stylelint --config .stylelintrc.json \"public/css/**/*.css\" --fix --quiet",
+        "analyze": "npm run lint && npm run lint:css && echo '코드 분석이 완료되었습니다.'"
     },
     "dependencies": {
         "all": "^0.0.0",

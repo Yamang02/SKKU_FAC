@@ -3,6 +3,8 @@ import session from 'express-session';
 import flash from 'connect-flash';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { pageTracker } from './middleware/PageTracker.js';
 import { createUploadDirs } from './utils/createUploadDirs.js';
 import basicAuth from 'express-basic-auth';
@@ -15,6 +17,14 @@ import artworkRouter from './routes/artwork/ArtworkRouter.js';
 import userRouter from './routes/user/UserRouter.js';
 import adminRouter from './routes/admin/AdminRouter.js';
 
+// 환경 변수 검증
+const requiredEnvVars = ['SESSION_SECRET', 'ADMIN_USER', 'ADMIN_PASSWORD'];
+for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+        throw new Error(`필수 환경 변수가 없습니다: ${envVar}`);
+    }
+}
+
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,16 +32,35 @@ const __dirname = path.dirname(__filename);
 // 업로드 디렉토리 생성
 createUploadDirs();
 
+// 보안 미들웨어
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ['\'self\''],
+            scriptSrc: ['\'self\'', '\'unsafe-inline\''],
+            styleSrc: ['\'self\'', '\'unsafe-inline\''],
+            imgSrc: ['\'self\'', 'data:', 'blob:']
+        }
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+// Rate Limiter 설정
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15분
+    max: 100 // IP당 최대 요청 수
+});
+app.use(limiter);
+
 // 헬스체크 엔드포인트 추가 (인증 이전에 설정)
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
 });
 
-// 환경 변수에서 인증 정보 가져오기
-const ADMIN_USER = process.env.ADMIN_USER || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'skku2024';
+// 기본 인증 설정
+const ADMIN_USER = process.env.ADMIN_USER;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-// 개발 환경 또는 명시적으로 활성화된 경우에만 기본 인증 적용
 if (process.env.NODE_ENV === 'production' || process.env.ENABLE_AUTH === 'true') {
     app.use(basicAuth({
         users: { [ADMIN_USER]: ADMIN_PASSWORD },
@@ -58,41 +87,48 @@ const getReturnUrl = (req) => {
 };
 
 // 미들웨어 설정
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../public'), {
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// 정적 파일 제공 설정
+const staticOptions = {
     setHeaders: (res, path) => {
         if (path.endsWith('.js')) {
             res.setHeader('Content-Type', 'text/javascript; charset=UTF-8');
             res.setHeader('X-Content-Type-Options', 'nosniff');
         }
+        // 캐시 설정
+        res.setHeader('Cache-Control', 'public, max-age=86400'); // 24시간
     }
-}));
-app.use('/css', express.static(path.join(__dirname, '../public/css')));
-app.use('/js', express.static(path.join(__dirname, '../public/js'), {
-    setHeaders: (res, path) => {
-        if (path.endsWith('.js')) {
-            res.setHeader('Content-Type', 'text/javascript; charset=UTF-8');
-            res.setHeader('X-Content-Type-Options', 'nosniff');
-        }
-    }
-}));
-app.use('/images', express.static(path.join(__dirname, '../public/images')));
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+};
+
+app.use(express.static(path.join(__dirname, '../public'), staticOptions));
+app.use('/css', express.static(path.join(__dirname, '../public/css'), staticOptions));
+app.use('/js', express.static(path.join(__dirname, '../public/js'), staticOptions));
+app.use('/images', express.static(path.join(__dirname, '../public/images'), staticOptions));
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads'), staticOptions));
 
 // 세션 설정
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
+const sessionConfig = {
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24시간
+        maxAge: 24 * 60 * 60 * 1000, // 24시간
+        sameSite: 'strict'
     },
     name: 'sessionId',
     rolling: true
-}));
+};
+
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1); // nginx 등의 프록시 사용 시 필요
+    sessionConfig.cookie.secure = true;
+}
+
+app.use(session(sessionConfig));
 
 // Flash 메시지 미들웨어 등록
 app.use(flash());
@@ -107,12 +143,18 @@ app.set('views', path.join(__dirname, 'views'));
 // 전역 미들웨어 - 사용자 정보를 모든 뷰에서 사용 가능하게 설정
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
+    // XSS 방지를 위한 헤더 설정
+    res.setHeader('X-XSS-Protection', '1; mode=block');
     next();
 });
 
-// 요청에 대한 로그 추가
+// 요청 로깅 미들웨어
 app.use((req, res, next) => {
-    console.log(`Request URL: ${req.originalUrl}, Method: ${req.method}`);
+    const start = Date.now();
+    res.on('finish', () => {
+        const duration = Date.now() - start;
+        console.log(`${req.method} ${req.originalUrl} - ${res.statusCode} (${duration}ms)`);
+    });
     next();
 });
 
@@ -124,7 +166,7 @@ app.use('/artwork', artworkRouter);
 app.use('/user', userRouter);
 app.use('/admin', adminRouter);
 
-console.log('라우터 설정 완료');
+console.log('✅ 라우터 설정 완료');
 
 // 404 에러 처리
 app.use((req, res) => {
