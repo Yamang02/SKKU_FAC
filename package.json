@@ -22,7 +22,9 @@
         "lint:fix": "npx eslint --config ./config/.eslintrc.json src/ --fix",
         "lint:css": "npx stylelint --config ./config/.stylelintrc.json \"public/css/**/*.css\" --quiet",
         "lint:css:fix": "npx stylelint --config ./config/.stylelintrc.json \"public/css/**/*.css\" --fix --quiet",
-        "analyze": "npm run lint && npm run lint:css && echo '코드 분석이 완료되었습니다.'"
+        "analyze": "npm run lint && npm run lint:css && echo '코드 분석이 완료되었습니다.'",
+        "test:db": "node src/test/db.test.js",
+        "test:orm": "node src/test/orm.test.js"
     },
     "dependencies": {
         "all": "^0.0.0",
@@ -38,9 +40,10 @@
         "module-alias": "^2.2.3",
         "morgan": "^1.10.0",
         "multer": "^1.4.5-lts.2",
-        "mysql2": "^3.6.0",
+        "mysql2": "^3.14.0",
         "pino": "^9.6.0",
         "pino-pretty": "^13.0.0",
+        "sequelize": "^6.37.7",
         "sharp": "^0.33.5",
         "uuid": "^11.1.0"
     },
