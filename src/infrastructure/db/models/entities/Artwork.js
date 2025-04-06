@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../../../MySQLDatabase.js';
+import { sequelize } from '../../connection/MySQLDatabase.js';
 
 const Artwork = sequelize.define('Artwork', {
     id: {
@@ -53,7 +53,7 @@ const Artwork = sequelize.define('Artwork', {
 }, {
     timestamps: true,
     tableName: 'artworks',
-    underscored: true, // snake_case로 컬럼명 생성
+    underscored: true,
     indexes: [
         {
             name: 'idx_artwork_user',

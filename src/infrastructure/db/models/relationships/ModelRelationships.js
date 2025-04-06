@@ -1,4 +1,4 @@
-import { sequelize } from '../../../mysql/MySQLDatabase.js';
+import { sequelize } from '../../connection/MySQLDatabase.js';
 import { Artwork, Exhibition, Notice, UserAccount, SkkuUserProfile, ExternalUserProfile } from '../entities/EntitityIndex.js';
 import ArtworkExhibitionRelationship from './ArtworkExhibitionRelationship.js';
 

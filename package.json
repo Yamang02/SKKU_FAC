@@ -7,14 +7,6 @@
     "engines": {
         "node": ">=14.0.0"
     },
-    "_moduleAliases": {
-        "@root": ".",
-        "@src": "src",
-        "@domain": "src/domain",
-        "@interface": "src/interface",
-        "@infrastructure": "src/infrastructure",
-        "@presentation": "src/presentation"
-    },
     "scripts": {
         "start": "cross-env NODE_ENV=local node server.js",
         "start:local": "cross-env NODE_ENV=local node server.js",

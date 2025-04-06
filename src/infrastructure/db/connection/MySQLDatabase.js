@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import { infrastructureConfig } from '../../config/infrastructure.js';
+import { infrastructureConfig } from '../../../config/infrastructure.js';
 
 // 데이터베이스 설정 가져오기
 const dbConfig = infrastructureConfig.database.config;

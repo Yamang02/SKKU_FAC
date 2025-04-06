@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../../../MySQLDatabase.js';
+import { sequelize } from '../../connection/MySQLDatabase.js';
 
 const ExternalUserProfile = sequelize.define('ExternalUserProfile', {
     id: {
