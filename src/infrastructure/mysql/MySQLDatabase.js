@@ -31,7 +31,7 @@ const testConnection = async () => {
 };
 
 // 연결 테스트 실행
-// testConnection();
+testConnection();
 
 // sequelize 인스턴스 내보내기
 export { sequelize };

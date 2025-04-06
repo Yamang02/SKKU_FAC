@@ -17,13 +17,6 @@ import artworkRouter from './routes/artwork/ArtworkRouter.js';
 import userRouter from './routes/user/UserRouter.js';
 import adminRouter from './routes/admin/AdminRouter.js';
 
-// 환경 변수 검증
-const requiredEnvVars = ['SESSION_SECRET', 'ADMIN_USER', 'ADMIN_PASSWORD'];
-for (const envVar of requiredEnvVars) {
-    if (!process.env[envVar]) {
-        throw new Error(`필수 환경 변수가 없습니다: ${envVar}`);
-    }
-}
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -38,7 +31,8 @@ app.use(helmet({
         directives: {
             defaultSrc: ['\'self\''],
             scriptSrc: ['\'self\'', '\'unsafe-inline\''],
-            styleSrc: ['\'self\'', '\'unsafe-inline\''],
+            styleSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com', '\'unsafe-inline\''],
+            fontSrc: ['\'self\'', 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com', 'https://fonts.gstatic.com', '\'unsafe-inline\''],
             imgSrc: ['\'self\'', 'data:', 'blob:']
         }
     },
@@ -107,6 +101,8 @@ app.use('/css', express.static(path.join(__dirname, '../public/css'), staticOpti
 app.use('/js', express.static(path.join(__dirname, '../public/js'), staticOptions));
 app.use('/images', express.static(path.join(__dirname, '../public/images'), staticOptions));
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads'), staticOptions));
+
+console.log('SESSION_SECRET:', process.env.SESSION_SECRET);
 
 // 세션 설정
 const sessionConfig = {

@@ -1,9 +1,19 @@
 import * as dotenv from 'dotenv';
-import app from './src/app.js';
 
 // 환경 변수 로드
 const envFile = process.env.NODE_ENV === 'production' ? '.env.remote' : '.env.local';
 dotenv.config({ path: envFile });
+
+// 환경 변수 검증
+const requiredEnvVars = ['SESSION_SECRET', 'ADMIN_USER', 'ADMIN_PASSWORD'];
+for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+        throw new Error(`필수 환경 변수가 없습니다: ${envVar}`);
+    }
+}
+
+// 동적으로 app 모듈 import
+const { default: app } = await import('./src/app.js');
 
 const PORT = process.env.PORT || 3000;
 

@@ -1,10 +1,5 @@
-import { sequelize } from '@mysql/MySQLDatabase.js';
-import Artwork from '@entities/Artwork.js';
-import Exhibition from '@entities/Exhibition.js';
-import Notice from '@entities/Notice.js';
-import UserAccount from '@entities/UserAccount.js';
-import SkkuUserProfile from '@entities/SkkuUserProfile.js';
-import ExternalUserProfile from '@entities/ExternalUserProfile.js';
+import { sequelize } from '../../../mysql/MySQLDatabase.js';
+import { Artwork, Exhibition, Notice, UserAccount, SkkuUserProfile, ExternalUserProfile } from '../entities/EntitityIndex.js';
 import ArtworkExhibitionRelationship from './ArtworkExhibitionRelationship.js';
 
 // 로그 추가
