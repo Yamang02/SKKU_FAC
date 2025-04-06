@@ -1,11 +1,21 @@
-import { sequelize } from '../../mysql/MySQLDatabase.js';
-import Artwork from '../entities/Artwork.js';
-import Exhibition from '../entities/Exhibition.js';
-import Notice from '../entities/Notice.js';
-import UserAccount from '../entities/UserAccount.js';
-import SkkuUserProfile from '../entities/SkkuUserProfile.js';
-import ExternalUserProfile from '../entities/ExternalUserProfile.js';
+import { sequelize } from '@mysql/MySQLDatabase.js';
+import Artwork from '@entities/Artwork.js';
+import Exhibition from '@entities/Exhibition.js';
+import Notice from '@entities/Notice.js';
+import UserAccount from '@entities/UserAccount.js';
+import SkkuUserProfile from '@entities/SkkuUserProfile.js';
+import ExternalUserProfile from '@entities/ExternalUserProfile.js';
 import ArtworkExhibitionRelationship from './ArtworkExhibitionRelationship.js';
+
+// 로그 추가
+console.log('sequelize:', sequelize);
+console.log('Artwork:', Artwork);
+console.log('Exhibition:', Exhibition);
+console.log('Notice:', Notice);
+console.log('UserAccount:', UserAccount);
+console.log('SkkuUserProfile:', SkkuUserProfile);
+console.log('ExternalUserProfile:', ExternalUserProfile);
+console.log('ArtworkExhibitionRelationship:', ArtworkExhibitionRelationship);
 
 /**
  * 모델 간의 관계를 정의하고 설정합니다.
@@ -100,6 +110,9 @@ const syncModels = async () => {
         throw error;
     }
 };
+
+// 동기화 함수 실행
+syncModels();
 
 export {
     Artwork,

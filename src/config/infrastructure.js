@@ -14,7 +14,7 @@ export const infrastructureConfig = {
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME,
             port: process.env.DB_PORT,
-            connectionLimit: process.env.DB_POOL_MAX || 10,
+            connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 10,
             queueLimit: process.env.DB_POOL_QUEUE || 0
         } : {
             host: process.env.REMOTE_DB_HOST,
@@ -22,7 +22,7 @@ export const infrastructureConfig = {
             password: process.env.REMOTE_DB_PASSWORD,
             database: process.env.REMOTE_DB_NAME,
             port: process.env.REMOTE_DB_PORT,
-            connectionLimit: process.env.DB_POOL_MAX || 10,
+            connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 10,
             queueLimit: process.env.DB_POOL_QUEUE || 0
         }
     },

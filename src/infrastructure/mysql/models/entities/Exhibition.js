@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../../mysql/MySQLDatabase.js';
+import { sequelize } from '../../../MySQLDatabase.js';
 
 const Exhibition = sequelize.define('Exhibition', {
     id: {
@@ -46,12 +46,6 @@ const Exhibition = sequelize.define('Exhibition', {
         allowNull: false,
         defaultValue: 'regular',
         comment: '전시회 유형 (정기/특별)'
-    },
-    status: {
-        type: DataTypes.ENUM('draft', 'open', 'closed'),
-        allowNull: false,
-        defaultValue: 'draft',
-        comment: '전시회 상태'
     },
     isSubmissionOpen: {
         type: DataTypes.BOOLEAN,

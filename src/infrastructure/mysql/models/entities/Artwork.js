@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../../mysql/MySQLDatabase.js';
+import { sequelize } from '../../../MySQLDatabase.js';
 
 const Artwork = sequelize.define('Artwork', {
     id: {
