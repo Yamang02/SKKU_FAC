@@ -1,0 +1,115 @@
+/* 알림 컨테이너 */
+.notification-container {
+    position: fixed;
+    top: 80px; /* 헤더 높이를 고려한 값으로 수정 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+    max-width: 1200px; /* 콘텐츠 영역과 동일한 최대 너비로 설정 */
+    width: 100%;
+    padding: 0 20px; /* 모바일에서 화면 가장자리와의 여백 */
+}
+
+/* 알림 메시지 공통 스타일 */
+.notification {
+    padding: 12px 20px;
+    border-radius: 4px;
+    color: white;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+    pointer-events: auto;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.notification--error {
+    background-color: rgba(220, 53, 69, 0.9);
+}
+
+.notification--success {
+    background-color: rgba(40, 167, 69, 0.9);
+}
+
+/* 확인 메시지 스타일 */
+.notification--confirm {
+    background-color: rgba(255, 193, 7, 0.9); /* 경고 색상 */
+}
+
+/* 버튼 컨테이너 스타일 */
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+/* 버튼 스타일 */
+.button-container button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.button-container button:hover {
+    opacity: 0.8; /* 호버 시 투명도 변경 */
+}
+
+.button-container button:focus {
+    outline: none; /* 포커스 시 아웃라인 제거 */
+}
+
+/* 로딩 스피너 */
+.loading-spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #3498db;
+    animation: spin 1s ease-in-out infinite;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .notification-container {
+        top: 70px; /* 모바일에서 헤더 높이가 다를 수 있음 */
+        padding: 0 10px;
+    }
+
+    .notification {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .notification-container {
+        top: 60px;
+    }
+
+    .notification {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}

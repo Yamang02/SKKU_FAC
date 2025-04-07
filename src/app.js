@@ -5,18 +5,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { pageTracker } from './middleware/PageTracker.js';
-import { createUploadDirs } from './utils/createUploadDirs.js';
+import { pageTracker } from './common/middleware/PageTracker.js';
+import { createUploadDirs } from './common/utils/createUploadDirs.js';
 import basicAuth from 'express-basic-auth';
 
 // 라우터 import
-import homeRouter from './routes/home/HomeRouter.js';
-import noticeRouter from './routes/notice/NoticeRouter.js';
-import exhibitionRouter from './routes/exhibition/ExhibitionRouter.js';
-import artworkRouter from './routes/artwork/ArtworkRouter.js';
-import userRouter from './routes/user/UserRouter.js';
-import adminRouter from './routes/admin/AdminRouter.js';
-
+import { HomeRouter, NoticeRouter, ExhibitionRouter, ArtworkRouter, UserRouter, AdminRouter } from './routeIndex.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -96,13 +90,12 @@ const staticOptions = {
     }
 };
 
-app.use(express.static(path.join(__dirname, '../public'), staticOptions));
-app.use('/css', express.static(path.join(__dirname, '../public/css'), staticOptions));
-app.use('/js', express.static(path.join(__dirname, '../public/js'), staticOptions));
-app.use('/images', express.static(path.join(__dirname, '../public/images'), staticOptions));
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads'), staticOptions));
+app.use(express.static(path.join(__dirname, './public'), staticOptions));
+app.use('/css', express.static(path.join(__dirname, './public/css'), staticOptions));
+app.use('/js', express.static(path.join(__dirname, './public/js'), staticOptions));
+app.use('/images', express.static(path.join(__dirname, './public/images'), staticOptions));
+app.use('/uploads', express.static(path.join(__dirname, './public/uploads'), staticOptions));
 
-console.log('SESSION_SECRET:', process.env.SESSION_SECRET);
 
 // 세션 설정
 const sessionConfig = {
@@ -155,12 +148,12 @@ app.use((req, res, next) => {
 });
 
 // 라우터 설정
-app.use('/', homeRouter);
-app.use('/notice', noticeRouter);
-app.use('/exhibition', exhibitionRouter);
-app.use('/artwork', artworkRouter);
-app.use('/user', userRouter);
-app.use('/admin', adminRouter);
+app.use('/', HomeRouter);
+app.use('/notice', NoticeRouter);
+app.use('/exhibition', ExhibitionRouter);
+app.use('/artwork', ArtworkRouter);
+app.use('/user', UserRouter);
+app.use('/admin', AdminRouter);
 
 console.log('✅ 라우터 설정 완료');
 

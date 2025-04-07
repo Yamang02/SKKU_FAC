@@ -8,7 +8,7 @@ const dbConfig = infrastructureConfig.database.config;
 const connectionLimit = (dbConfig.connectionLimit && dbConfig.connectionLimit > 0) ? dbConfig.connectionLimit : 10;
 
 // Sequelize 인스턴스 생성
-const sequelize = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
+const db = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
     host: dbConfig.host,
     dialect: 'mysql',
     port: dbConfig.port,
@@ -23,7 +23,7 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.passw
 // 연결 테스트 함수
 const testConnection = async () => {
     try {
-        await sequelize.authenticate();
+        await db.authenticate();
         console.log('데이터베이스 연결 성공!');
     } catch (error) {
         console.error('데이터베이스 연결 실패:', error);
@@ -34,4 +34,4 @@ const testConnection = async () => {
 testConnection();
 
 // sequelize 인스턴스 내보내기
-export { sequelize };
+export { db };

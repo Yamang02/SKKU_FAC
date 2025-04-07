@@ -24,8 +24,8 @@
     ],
     "rules": {
         "filenames/match-regex": [
-            "error",
-            "^([a-z][a-zA-Z0-9]*|[A-Z][a-zA-Z0-9]*)$",
+            "warn",
+            "^([a-z][a-zA-Z0-9]*|[A-Z][a-zA-Z0-9]*|.*(test|spec)\\.[jt]s)$", // test 또는 spec 파일 허용
             true
         ],
         "filenames/match-exported": [
