@@ -47,7 +47,7 @@ const UserAccount = db.define('UserAccount', {
         allowNull: false,
         defaultValue: 'ACTIVE'
     },
-    last_login_at: {
+    lastLoginAt: {
         type: DataTypes.DATE,
         allowNull: true
     }

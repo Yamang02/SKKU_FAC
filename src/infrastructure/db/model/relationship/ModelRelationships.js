@@ -68,7 +68,9 @@ const setupModelRelationships = () => {
         foreignKey: 'userId'
     });
 
-    // UserAccount와 SkkuUserProfile의 관계 설정 (1:1)
+    // UserAccount와 SkkuUserProfile, ExternalUserProfile의 관계는
+    // 이미 EntitityIndex.js에서 설정되어 있으므로 여기서는 주석 처리합니다.
+    /*
     UserAccount.hasOne(SkkuUserProfile, {
         foreignKey: 'userId',
         onDelete: 'CASCADE'
@@ -77,7 +79,6 @@ const setupModelRelationships = () => {
         foreignKey: 'userId'
     });
 
-    // UserAccount와 ExternalUserProfile의 관계 설정 (1:1)
     UserAccount.hasOne(ExternalUserProfile, {
         foreignKey: 'userId',
         onDelete: 'CASCADE'
@@ -85,7 +86,11 @@ const setupModelRelationships = () => {
     ExternalUserProfile.belongsTo(UserAccount, {
         foreignKey: 'userId'
     });
+    */
 };
+
+// 모델 관계 즉시 설정
+setupModelRelationships();
 
 /**
  * 모든 모델을 데이터베이스에 동기화합니다.
@@ -94,8 +99,8 @@ const setupModelRelationships = () => {
  */
 const syncModels = async () => {
     try {
-        // 관계 설정
-        setupModelRelationships();
+        // 관계 설정은 이미 위에서 수행했으므로 여기서는 주석 처리합니다.
+        // setupModelRelationships();
 
         // 모델 동기화 (테스트/개발 환경에서만 사용)
         await db.sync({ alter: true });

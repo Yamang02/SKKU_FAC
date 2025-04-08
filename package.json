@@ -10,6 +10,7 @@
     "scripts": {
         "dev": "cross-env NODE_ENV=development nodemon ./src/server.js",
         "start": "cross-env NODE_ENV=production node dist/server.js",
+        "dbModelsync": "cross-env NODE_ENV=development nodemon modelsync.js",
         "lint": "npx eslint --config .eslintrc.json src/",
         "lint:fix": "npx eslint --config .eslintrc.json src/ --fix",
         "lint:css": "npx stylelint --config .stylelintrc.json \"./src/public/css/**/*.css\" --quiet",

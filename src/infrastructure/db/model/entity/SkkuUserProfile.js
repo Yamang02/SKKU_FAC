@@ -11,7 +11,7 @@ const SkkuUserProfile = db.define('SkkuUserProfile', {
         },
         comment: '성균관대 사용자 프로필 고유 ID (SKKU_PROFILE_uuid 형식)'
     },
-    user_id: {
+    userId: {
         type: DataTypes.STRING(50),
         allowNull: false,
         unique: true,
@@ -23,18 +23,14 @@ const SkkuUserProfile = db.define('SkkuUserProfile', {
     department: {
         type: DataTypes.STRING(50),
         allowNull: true,
-        comment: '학과 ID'
+        comment: '학과'
     },
-    member_type: {
-        type: DataTypes.ENUM('STUDENT', 'GRADUATE', 'PROFESSOR'),
-        allowNull: false
-    },
-    student_year: {
+    studentYear: {
         type: DataTypes.STRING(4),
         allowNull: true,
         comment: '학번 앞 2자리 (입학년도)'
     },
-    is_club_member: {
+    isClubMember: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
         comment: '동아리 회원 여부'

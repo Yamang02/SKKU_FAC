@@ -1,32 +1,36 @@
 import express from 'express';
 import UserController from './UserController.js';
+import UserApiController from './api/UserApiController.js';
 import { isAuthenticated, isNotAuthenticated } from '../../../common/middleware/auth.js';
 
 const UserRouter = express.Router();
 const userController = new UserController();
-
+const userApiController = new UserApiController();
 // === API 엔드포인트 ===
 // 현재 사용자 정보 조회 API
-UserRouter.get('/api/current', isAuthenticated, (req, res) => userController.getCurrentUser(req, res));
+UserRouter.get('/api/current', isAuthenticated, (req, res) => userApiController.getCurrentUser(req, res));
 
 // 현재 사용자 프로필 정보 조회 API
-UserRouter.get('/api/profile', isAuthenticated, (req, res) => userController.getUserProfile(req, res));
+UserRouter.get('/api/profile', isAuthenticated, (req, res) => userApiController.getUserProfile(req, res));
 
 // 사용자 데이터 조회 API
-UserRouter.get('/api/data/:id', isAuthenticated, (req, res) => userController.getUserData(req, res));
+UserRouter.get('/api/data/:id', isAuthenticated, (req, res) => userApiController.getUserData(req, res));
 
 // 사용자 목록 조회 API
-UserRouter.get('/api/list', isAuthenticated, (req, res) => userController.getUserListData(req, res));
+UserRouter.get('/api/list', isAuthenticated, (req, res) => userApiController.getUserListData(req, res));
 
+// 회원가입 API
+UserRouter.post('/', isNotAuthenticated, (req, res) => userApiController.registerUser(req, res));
+
+
+UserRouter.post('/login', isNotAuthenticated, (req, res) => userApiController.loginUser(req, res));
 // === 페이지 라우트 ===
 // 로그인/로그아웃
 UserRouter.get('/login', isNotAuthenticated, (req, res) => userController.getUserLoginPage(req, res));
-UserRouter.post('/login', isNotAuthenticated, (req, res) => userController.loginUser(req, res));
 UserRouter.get('/logout', (req, res) => userController.logoutUser(req, res));
 
 // 회원가입
 UserRouter.get('/new', isNotAuthenticated, (req, res) => userController.getUserRegistrationPage(req, res));
-UserRouter.post('/', isNotAuthenticated, (req, res) => userController.registerUser(req, res));
 
 // 프로필
 UserRouter.get('/me', isAuthenticated, (req, res) => userController.getUserProfilePage(req, res));

@@ -2,15 +2,16 @@
  * 회원가입 페이지
  * 회원가입 관련 기능을 처리합니다.
  */
-import UserAPI from '../../api/UserAPI';
-import { showError, showSuccess } from '../../common/util/notification.js';
+import UserApi from '/js/api/UserApi.js';
+import { showErrorMessage, showSuccessMessage } from '/js/common/util/notification.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('registerForm');
+    console.log('form:', form);
     const roleSelect = document.getElementById('role');
     const skkuFields = document.getElementById('skkuFields');
     const externalFields = document.getElementById('externalFields');
-    const passwordToggle = document.getElementById('passwordToggle');
+    const passwordToggle = document.querySelectorAll('.toggle-password-user');
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirmPassword');
 
@@ -32,27 +33,64 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 비밀번호 표시/숨김 토글
-    passwordToggle.addEventListener('click', () => {
-        const type = passwordInput.type === 'password' ? 'text' : 'password';
-        passwordInput.type = type;
-        confirmPasswordInput.type = type;
-        passwordToggle.classList.toggle('show-password');
+    passwordToggle.forEach(toggle => {
+        toggle.addEventListener('click', function () {
+            const inputField = this.previousElementSibling;
+            const type = inputField.type === 'password' ? 'text' : 'password';
+            inputField.type = type;
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
     });
 
     // 폼 제출 처리
     form.addEventListener('submit', async (e) => {
+        console.log('회원가입 버튼 클릭됨');
         e.preventDefault();
+
+        // 비밀번호 확인
+        if (passwordInput.value !== confirmPasswordInput.value) {
+            showErrorMessage('비밀번호가 일치하지 않습니다.');
+            return;
+        }
 
         // 폼 데이터 수집
         const formData = new FormData(form);
         const userData = Object.fromEntries(formData.entries());
 
+        // 불필요한 필드 제거
+        const { confirmPassword, ...userDataToSend } = userData;
+
+        // 체크박스 값 변환
+        userDataToSend.isClubMember = userDataToSend.isClubMember === 'on';
+
+        // 빈 문자열 처리
+        if (userDataToSend.affiliation === '') {
+            userDataToSend.affiliation = null;
+        }
+
+        // DTO 생성
+        const userDto = {
+            username: userDataToSend.username,
+            name: userDataToSend.name,
+            email: userDataToSend.email,
+            password: userDataToSend.password,
+            department: userDataToSend.department,
+            role: userDataToSend.role,
+            isClubMember: userDataToSend.isClubMember,
+            studentYear: userDataToSend.studentYear,
+            affiliation: userDataToSend.affiliation
+        };
+
+
+        console.log('userDto:', userDto);
         try {
             // API 호출
-            await UserAPI.register(userData);
+            console.log('UserApi 호출:', userDto);
+            await UserApi.register(userDto);
 
             // 성공 메시지 표시
-            showSuccess('회원가입이 완료되었습니다. 3초 후 로그인 페이지로 이동합니다.');
+            showSuccessMessage('회원가입이 완료되었습니다. 3초 후 로그인 페이지로 이동합니다.');
 
             // 3초 후 로그인 페이지로 리다이렉트
             setTimeout(() => {
@@ -60,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 3000);
         } catch (error) {
             // 에러 메시지 표시
-            showError(error.message || '회원가입에 실패했습니다.');
+            showErrorMessage(error.message || '회원가입에 실패했습니다.');
         }
     });
 

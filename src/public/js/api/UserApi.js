@@ -1,13 +1,14 @@
 /**
  * 사용자 관련 API
  */
-import api from '/js/api/index.js';
+import api from './index.js';
 import { showErrorMessage } from '/js/common/util/notification.js';
 
-class _UserApi {
+export default class UserApi {
     // 회원가입
     static async register(userData) {
         try {
+            console.log('전송할 데이터:', userData);
             return await api.post('/user', userData);
         } catch (error) {
             console.error('회원가입 중 오류 발생:', error);
@@ -15,6 +16,7 @@ class _UserApi {
             throw error;
         }
     }
+
 
     // 프로필 조회
     static async getProfile() {

@@ -11,7 +11,7 @@ const ExternalUserProfile = db.define('ExternalUserProfile', {
         },
         comment: '외부 사용자 프로필 고유 ID (EXTERNAL_PROFILE_uuid 형식)'
     },
-    user_id: {
+    userId: {
         type: DataTypes.STRING(50),
         allowNull: false,
         unique: true,

@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 // .env.local 파일 로드
 dotenv.config({ path: '.env.local' });
 
-const isLocal = process.env.NODE_ENV === 'local';
+const isLocal = process.env.NODE_ENV === 'local' || process.env.NODE_ENV === 'development';
 
 export const infrastructureConfig = {
     database: {
@@ -38,3 +38,4 @@ export const infrastructureConfig = {
         }
     }
 };
+

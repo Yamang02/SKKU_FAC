@@ -1,5 +1,6 @@
 import { UserAccount, SkkuUserProfile, ExternalUserProfile } from '../model/entity/EntitityIndex.js';
 import { Op } from 'sequelize';
+import { db } from '../connection/MySQLDatabase.js';
 
 export default class UserAccountRepository {
     constructor() {
@@ -92,12 +93,44 @@ export default class UserAccountRepository {
      * 새로운 사용자를 생성합니다.
      */
     async createUser(userData) {
-        const user = await UserAccount.create({
-            ...userData,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
-        return user;
+        const transaction = await db.transaction();
+
+        try {
+            // UserAccount 생성
+            const user = await UserAccount.create({
+                ...userData,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            }, { transaction });
+
+            // 프로필 정보 생성
+            if (userData.role === 'SKKU_MEMBER') {
+                await SkkuUserProfile.create({
+                    id: userData.skkuUserId,
+                    userId: user.id,
+                    department: userData.department,
+                    studentYear: userData.studentYear,
+                    isClubMember: userData.isClubMember,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }, { transaction });
+            } else if (userData.role === 'EXTERNAL_MEMBER') {
+                await ExternalUserProfile.create({
+                    id: userData.externalUserId,
+                    userId: user.id,
+                    affiliation: userData.affiliation,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }, { transaction });
+            }
+
+            await transaction.commit();
+            return user;
+        } catch (error) {
+            await transaction.rollback();
+            console.error('사용자 생성 중 오류 발생:', error);
+            throw error;
+        }
     }
 
     /**

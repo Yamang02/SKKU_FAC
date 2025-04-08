@@ -7,10 +7,7 @@ class SessionUtil {
                 username: user.username,
                 name: user.name,
                 role: user.role,
-                isAdmin: user.role === 'ADMIN',
-                department: user.department || '',
-                studentYear: user.studentYear || '',
-                affiliation: user.affiliation || ''
+                isAdmin: user.role === 'ADMIN'
             };
 
             // 세션 저장

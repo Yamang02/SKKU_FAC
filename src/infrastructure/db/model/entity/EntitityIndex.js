@@ -5,4 +5,36 @@ import UserAccount from './UserAccount.js';
 import SkkuUserProfile from './SkkuUserProfile.js';
 import ExternalUserProfile from './ExternalUserProfile.js';
 
-export { Artwork, Exhibition, Notice, UserAccount, SkkuUserProfile, ExternalUserProfile };
+// 모델 간의 관계 설정
+UserAccount.hasOne(SkkuUserProfile, {
+    foreignKey: 'userId',
+    onDelete: 'CASCADE'
+});
+SkkuUserProfile.belongsTo(UserAccount, {
+    foreignKey: 'userId'
+});
+
+UserAccount.hasOne(ExternalUserProfile, {
+    foreignKey: 'userId',
+    onDelete: 'CASCADE'
+});
+ExternalUserProfile.belongsTo(UserAccount, {
+    foreignKey: 'userId'
+});
+
+// 로그 추가
+console.log('Artwork:', Artwork);
+console.log('Exhibition:', Exhibition);
+console.log('Notice:', Notice);
+console.log('UserAccount:', UserAccount);
+console.log('SkkuUserProfile:', SkkuUserProfile);
+console.log('ExternalUserProfile:', ExternalUserProfile);
+
+export {
+    Artwork,
+    Exhibition,
+    Notice,
+    UserAccount,
+    SkkuUserProfile,
+    ExternalUserProfile
+};

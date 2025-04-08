@@ -12,9 +12,11 @@ export function generateDomainUUID(domain) {
 
 // 도메인 상수
 export const DOMAINS = {
-    ARTWORK: 'artwork',
-    EXHIBITION: 'exhibition',
-    ARTIST: 'artist',
-    IMAGE: 'image',
-    USER: 'user'
+    ARTWORK: 'ARTWORK',
+    EXHIBITION: 'EXHIBITION',
+    ARTIST: 'ARTIST',
+    IMAGE: 'IMAGE',
+    USER: 'USER',
+    SKKU_USER: 'SKKU_PROFILE',
+    EXTERNAL_USER: 'EXTERNAL_PROFILE'
 };

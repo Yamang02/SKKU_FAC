@@ -1,7 +1,7 @@
 import express from 'express';
 import { isAdmin } from '../../../common/middleware/auth.js';
 import AdminController from './AdminController.js';
-import UserController from '../../userAccount/controller/UserController.js';
+import UserController from '../../user/controller/UserController.js';
 import ExhibitionController from '../../exhibition/controller/ExhibitionController.js';
 import ArtworkController from '../../artwork/controller/ArtworkController.js';
 import NoticeController from '../../notice/controller/NoticeController.js';

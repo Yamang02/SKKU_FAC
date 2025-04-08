@@ -1,7 +1,6 @@
 import { ViewPath } from '../../../common/constants/ViewPath.js';
 import ViewResolver from '../../../common/utils/ViewResolver.js';
 import ArtworkService from '../service/ArtworkService.js';
-import { Message } from '../../../common/constants/Message.js';
 
 /**
  * 작품 관련 컨트롤러
@@ -21,10 +20,7 @@ export default class ArtworkController {
                 title: '작품 목록'
             });
         } catch (error) {
-            return res.status(500).render('error', {
-                message: Message.ARTWORK.LIST_ERROR,
-                error: error.message
-            });
+            return ViewResolver.renderError(res, error);
         }
     }
 
@@ -39,10 +35,7 @@ export default class ArtworkController {
                 artworkId: id
             });
         } catch (error) {
-            return res.status(500).render('error', {
-                message: Message.ARTWORK.DETAIL_ERROR,
-                error: error.message
-            });
+            return ViewResolver.renderError(res, error);
         }
     }
 
@@ -55,10 +48,7 @@ export default class ArtworkController {
                 title: '작품 등록'
             });
         } catch (error) {
-            return res.status(500).render('error', {
-                message: Message.ARTWORK.REGISTRATION_ERROR,
-                error: error.message
-            });
+            return ViewResolver.renderError(res, error);
         }
     }
 
@@ -213,10 +203,7 @@ export default class ArtworkController {
                 exhibitionId
             });
         } catch (error) {
-            return res.status(500).render('error', {
-                message: Message.ARTWORK.LIST_ERROR,
-                error: error.message
-            });
+            return ViewResolver.renderError(res, error);
         }
     }
 
