@@ -2,15 +2,6 @@ import { db } from '../../connection/MySQLDatabase.js';
 import { Artwork, Exhibition, Notice, UserAccount, SkkuUserProfile, ExternalUserProfile } from '../entity/EntitityIndex.js';
 import ArtworkExhibitionRelationship from './ArtworkExhibitionRelationship.js';
 
-// 로그 추가
-console.log('sequelize:', db);
-console.log('Artwork:', Artwork);
-console.log('Exhibition:', Exhibition);
-console.log('Notice:', Notice);
-console.log('UserAccount:', UserAccount);
-console.log('SkkuUserProfile:', SkkuUserProfile);
-console.log('ExternalUserProfile:', ExternalUserProfile);
-console.log('ArtworkExhibitionRelationship:', ArtworkExhibitionRelationship);
 
 /**
  * 모델 간의 관계를 정의하고 설정합니다.

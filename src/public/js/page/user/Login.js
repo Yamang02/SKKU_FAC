@@ -1,8 +1,8 @@
 /**
  * 로그인 페이지 JavaScript
  */
-import userApi from '../../api/user';
-import { showError } from '../../common/util/notification.js';
+import userApi from '/js/api/UserAPI.js';
+import { showErrorMessage } from '../../common/util/notification.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     const togglePassword = document.querySelector('.toggle-password');
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (!username || !password) {
                 e.preventDefault();
-                showError('아이디와 비밀번호를 모두 입력해주세요.');
+                showErrorMessage('아이디와 비밀번호를 모두 입력해주세요.');
                 return;
             }
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.location.href = '/';
             } catch (error) {
                 e.preventDefault();
-                showError(error.message || '로그인 중 오류가 발생했습니다.');
+                showErrorMessage(error.message || '로그인 중 오류가 발생했습니다.');
             }
         });
     }

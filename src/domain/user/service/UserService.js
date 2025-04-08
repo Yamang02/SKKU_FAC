@@ -170,7 +170,7 @@ export default class UserService {
             throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
         }
 
-        return null;
+        return user;
     }
 
     /**

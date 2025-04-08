@@ -22,14 +22,6 @@ ExternalUserProfile.belongsTo(UserAccount, {
     foreignKey: 'userId'
 });
 
-// 로그 추가
-console.log('Artwork:', Artwork);
-console.log('Exhibition:', Exhibition);
-console.log('Notice:', Notice);
-console.log('UserAccount:', UserAccount);
-console.log('SkkuUserProfile:', SkkuUserProfile);
-console.log('ExternalUserProfile:', ExternalUserProfile);
-
 export {
     Artwork,
     Exhibition,

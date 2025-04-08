@@ -51,8 +51,10 @@ export default class UserApiController {
      */
     async loginUser(req, res) {
         try {
-            const { email, password } = req.body;
-            const user = await this.userService.loginUser({ email, password });
+            const { username, password } = req.body;
+            console.log('username:', username);
+            console.log('password:', password);
+            const user = await this.userService.authenticate(username, password);
 
             // 세션에 저장
             await SessionUtil.saveUserToSession(req, user);
