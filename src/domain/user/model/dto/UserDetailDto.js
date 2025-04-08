@@ -5,15 +5,17 @@
 export default class UserDetailDTO {
     constructor(data) {
         this.id = data.id || null;
-        this.username = data.username;
-        this.email = data.email;
-        this.password = data.password;
-        this.name = data.name;
-        this.role = data.role || 'USER';
+        this.username = data.username || '';
+        this.email = data.email || '';
+        this.password = data.password || '';
+        this.name = data.name || '';
+        this.role = data.role || '';
+        this.status = data.status || '';
         this.department = data.department || '';
         this.isClubMember = data.isClubMember || false;
         this.studentYear = data.studentYear || '';
         this.skkuUserId = data.skkuUserId || '';
         this.externalUserId = data.externalUserId || '';
+        this.affiliation = data.affiliation || '';
     }
 }

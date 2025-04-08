@@ -37,12 +37,7 @@ export default class UserController {
      */
     async getUserProfilePage(req, res) {
         try {
-            const userId = req.session.user.id;
-            const user = await this.userService.getUserDetail(userId);
-
-            ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE, {
-                user
-            });
+            ViewResolver.render(res, ViewPath.MAIN.USER.PROFILE);
         } catch (error) {
             ViewResolver.renderError(res, error);
         }

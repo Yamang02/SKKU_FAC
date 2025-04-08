@@ -21,7 +21,7 @@ export default class UserApi {
     // 프로필 조회
     static async getProfile() {
         try {
-            return await api.get('/user/api/profile');
+            return await api.get('/user/api/me');
         } catch (error) {
             console.error('프로필 조회 중 오류 발생:', error);
             showErrorMessage('프로필 정보를 불러오는데 실패했습니다.');

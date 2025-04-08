@@ -2,11 +2,12 @@
  * 프로필 페이지
  * 프로필 관련 기능을 처리합니다.
  */
-import UserAPI from '../../../api/UserAPI.js';
+import UserAPI from '/js/api/UserAPI.js';
 import { showLoading, showErrorMessage, showSuccessMessage, showConfirm } from '/js/common/util/notification.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // 버튼 요소들
+    fetchUserProfile();
     const editProfileBtn = document.getElementById('edit-profile-btn');
     const saveProfileBtn = document.getElementById('save-profile-btn');
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
@@ -76,5 +77,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 showLoading(false);
             }
         });
+    }
+
+
+    async function fetchUserProfile() {
+        const response = await UserAPI.getProfile();
+        const user = response.data;
+        console.log('user:', user);
+
+        // 사용자 정보를 DOM에 삽입
+        document.getElementById('username').innerText = user.username;
+        document.getElementById('email').innerText = user.email;
+        document.getElementById('name-text').innerText = user.name;
+        document.getElementById('department-text').innerText = user.department || '학과 정보 없음';
+        document.getElementById('studentYear-text').innerText = user.studentYear ? user.studentYear + '학번' : '미입력';
+        document.getElementById('isClubMember-text').innerText = user.isClubMember ? '동아리 회원' : '일반 회원';
+        document.getElementById('role').innerText = user.role === 'SKKU_MEMBER' ? '성균관대 재학/졸업생' : '외부 인원';
+        document.getElementById('createdAt').innerText = new Date(user.createdAt).toLocaleDateString();
+
+        // 역할에 따라 추가 정보 표시
+        if (user.role === 'SKKU_MEMBER') {
+            document.getElementById('school-info').style.display = 'block';
+        } else if (user.role === 'EXTERNAL_MEMBER') {
+            document.getElementById('external-info').style.display = 'block';
+        }
     }
 });

@@ -1,6 +1,7 @@
 import UserRepository from '../../../infrastructure/db/repository/UserAccountRepository.js';
 import UserRequestDTO from '../model/dto/UserRequestDTO.js';
 import UserSimpleDto from '../model/dto/UserSimpleDto.js';
+import UserDetailDto from '../model/dto/UserDetailDto.js';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -111,7 +112,9 @@ export default class UserService {
         if (!user) {
             throw new Error('사용자를 찾을 수 없습니다.');
         }
-        return null;
+        const userDetailDto = this.mapUserToDto(user);
+
+        return userDetailDto;
     }
 
     /**
@@ -190,5 +193,33 @@ export default class UserService {
         await this.userRepository.updateUser(user.id, { password: hashedPassword });
 
         return tempPassword;
+    }
+
+    /**
+     * 사용자 프로필 정보를 조회합니다.
+     */
+    mapUserToDto(user) {
+
+        const { id, username, email, name, status, role } = user;
+
+        const department = user.SkkuUserProfile ? user.SkkuUserProfile.department : '';
+        const studentYear = user.SkkuUserProfile ? user.SkkuUserProfile.studentYear : '';
+        const isClubMember = user.SkkuUserProfile ? user.SkkuUserProfile.isClubMember : '';
+        const affiliation = user.ExternalUserProfile ? user.ExternalUserProfile.affiliation : '';
+
+        const dtoData = {
+            id,
+            username,
+            email,
+            name,
+            role,
+            status,
+            department,
+            studentYear,
+            isClubMember,
+            affiliation
+        };
+
+        return new UserDetailDto(dtoData);
     }
 }

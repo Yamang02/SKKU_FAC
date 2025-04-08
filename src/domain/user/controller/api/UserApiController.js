@@ -87,8 +87,11 @@ export default class UserApiController {
      * 사용자 프로필을 조회합니다.
      */
     async getUserProfile(req, res) {
+        const userId = req.session.user.id;
+        console.log('userId:', userId);
+
         try {
-            const user = await this.userService.getUserProfile();
+            const user = await this.userService.getUserDetail(userId);
             return res.json(ApiResponse.success(user));
         } catch (error) {
             if (error instanceof UserNotFoundError) {

@@ -11,7 +11,7 @@ const userApiController = new UserApiController();
 UserRouter.get('/api/current', isAuthenticated, (req, res) => userApiController.getCurrentUser(req, res));
 
 // 현재 사용자 프로필 정보 조회 API
-UserRouter.get('/api/profile', isAuthenticated, (req, res) => userApiController.getUserProfile(req, res));
+UserRouter.get('/api/me', isAuthenticated, (req, res) => userApiController.getUserProfile(req, res));
 
 // 사용자 데이터 조회 API
 UserRouter.get('/api/data/:id', isAuthenticated, (req, res) => userApiController.getUserData(req, res));
@@ -24,6 +24,9 @@ UserRouter.post('/', isNotAuthenticated, (req, res) => userApiController.registe
 
 
 UserRouter.post('/login', isNotAuthenticated, (req, res) => userApiController.loginUser(req, res));
+UserRouter.put('/me', isAuthenticated, (req, res) => userApiController.updateUserProfile(req, res));
+UserRouter.delete('/me', isAuthenticated, (req, res) => userApiController.deleteUserAccount(req, res));
+
 // === 페이지 라우트 ===
 // 로그인/로그아웃
 UserRouter.get('/login', isNotAuthenticated, (req, res) => userController.getUserLoginPage(req, res));
@@ -34,8 +37,6 @@ UserRouter.get('/new', isNotAuthenticated, (req, res) => userController.getUserR
 
 // 프로필
 UserRouter.get('/me', isAuthenticated, (req, res) => userController.getUserProfilePage(req, res));
-UserRouter.put('/me', isAuthenticated, (req, res) => userController.updateUserProfile(req, res));
-UserRouter.delete('/me', isAuthenticated, (req, res) => userController.deleteUserAccount(req, res));
 
 // 비밀번호 재설정
 UserRouter.get('/password/reset', isNotAuthenticated, (req, res) => userController.getUserPasswordResetPage(req, res));
