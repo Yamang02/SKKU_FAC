@@ -7,7 +7,9 @@ import UserResponseDto from '../../model/dto/UserResponseDto.js';
 import UserService from '../../service/UserService.js';
 import {
     UserNotFoundError,
-    UserValidationError
+    UserValidationError,
+    UserEmailDuplicateError,
+    UserUsernameDuplicateError
 } from '../../../../common/error/UserError.js';
 export default class UserApiController {
     constructor() {
@@ -21,6 +23,7 @@ export default class UserApiController {
     async registerUser(req, res) {
         try {
             const { username, name, email, password, role, department, affiliation, studentYear, isClubMember } = req.body;
+
             // DTO 생성 시 role에 따라 추가 필드 설정
             const userDto = new UserRequestDto({
                 username,
@@ -38,11 +41,15 @@ export default class UserApiController {
             const userResponseDto = new UserResponseDto(createdUser);
             return res.status(201).json(ApiResponse.success(userResponseDto, Message.USER.REGISTER_SUCCESS));
         } catch (error) {
-            if (error instanceof UserValidationError) {
-                return res.status(400).json(ApiResponse.error(Message.USER.VALIDATION_ERROR));
+            console.error('회원가입 처리 중 오류:', error.message);
+            if (error instanceof UserEmailDuplicateError) {
+                return res.status(400).json(ApiResponse.error(error.message));
+            } else if (error instanceof UserUsernameDuplicateError) {
+                return res.status(400).json(ApiResponse.error(error.message));
+            } else if (error instanceof UserValidationError) {
+                return res.status(400).json(ApiResponse.error(error.message));
             }
-            console.error('Error registering user:', error);
-            return res.status(500).json(ApiResponse.error(Message.USER.REGISTER_ERROR));
+            return res.status(500).json(ApiResponse.error(error.message));
         }
     }
 

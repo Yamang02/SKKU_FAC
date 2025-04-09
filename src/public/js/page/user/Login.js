@@ -5,7 +5,7 @@ import userApi from '/js/api/UserAPI.js';
 import { showErrorMessage } from '../../common/util/notification.js';
 
 document.addEventListener('DOMContentLoaded', function () {
-    const togglePassword = document.querySelector('.toggle-password');
+    const togglePassword = document.querySelector('.toggle-password-user');
     const passwordInput = document.getElementById('password');
     const loginForm = document.querySelector('form');
 

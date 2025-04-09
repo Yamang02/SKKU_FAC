@@ -2,10 +2,10 @@ import UserRepository from '../../../infrastructure/db/repository/UserAccountRep
 import UserRequestDTO from '../model/dto/UserRequestDTO.js';
 import UserSimpleDto from '../model/dto/UserSimpleDto.js';
 import UserDetailDto from '../model/dto/UserDetailDto.js';
+import { UserNotFoundError, UserEmailDuplicateError, UserUsernameDuplicateError } from '../../../common/error/UserError.js';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import { UserNotFoundError } from '../../../common/error/UserError.js';
 
 /**
  * 사용자 서비스
@@ -24,13 +24,13 @@ export default class UserService {
         // 이메일 중복 확인
         const existingEmail = await this.userRepository.findUserByEmail(userRequestDTO.email);
         if (existingEmail) {
-            throw new Error('이미 사용 중인 이메일입니다.');
+            throw new UserEmailDuplicateError();
         }
 
         // 사용자명 중복 확인
         const existingUsername = await this.userRepository.findUserByUsername(userRequestDTO.username);
         if (existingUsername) {
-            throw new Error('이미 사용 중인 아이디입니다.');
+            throw new UserUsernameDuplicateError();
         }
 
         // 비밀번호 해싱

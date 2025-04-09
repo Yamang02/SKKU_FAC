@@ -9,10 +9,10 @@ export default class UserApi {
     static async register(userData) {
         try {
             console.log('전송할 데이터:', userData);
-            return await api.post('/user', userData);
+            const response = await api.post('/user', userData);
+            return response.data;
         } catch (error) {
             console.error('회원가입 중 오류 발생:', error);
-            showErrorMessage('회원가입에 실패했습니다.');
             throw error;
         }
     }

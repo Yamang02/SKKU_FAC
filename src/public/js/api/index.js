@@ -17,16 +17,32 @@ const handleResponse = async (response) => {
 
     try {
         const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.error || data.message || '요청 처리 중 오류가 발생했습니다.');
+
+        // ApiResponse에서 성공 여부 확인
+        if (!data.success) {
+            // 서버에서 반환된 에러 메시지 사용
+            const errorMessage = data.error || '요청 처리 중 오류가 발생했습니다.';
+            const error = new Error(errorMessage);
+            error.isApiError = true;
+            error.statusCode = response.status;
+            error.apiResponse = data;
+            throw error;
         }
+
         return data;
     } catch (error) {
-        if (error instanceof SyntaxError) {
+        if (error.isApiError) {
+            // 이미 처리된 API 에러는 그대로 전달
+            throw error;
+        } else if (error instanceof SyntaxError) {
+            // JSON 파싱 오류
             console.error('JSON 파싱 오류:', error);
             throw new Error('서버 응답을 처리할 수 없습니다. 관리자에게 문의하세요.');
+        } else {
+            // 기타 오류
+            console.error('응답 처리 중 오류:', error);
+            throw error;
         }
-        throw error;
     }
 };
 
