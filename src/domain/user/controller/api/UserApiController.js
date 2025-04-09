@@ -52,8 +52,6 @@ export default class UserApiController {
     async loginUser(req, res) {
         try {
             const { username, password } = req.body;
-            console.log('username:', username);
-            console.log('password:', password);
             const user = await this.userService.authenticate(username, password);
 
             // 세션에 저장
@@ -124,7 +122,9 @@ export default class UserApiController {
      */
     async deleteUserAccount(req, res) {
         try {
-            await this.userService.deleteUserAccount();
+            const userId = req.session.user.id;
+            await this.userService.deleteUserAccount(userId);
+            await SessionUtil.destroySession(req);
             return res.json(ApiResponse.success(null, Message.USER.DELETE_SUCCESS));
         } catch (error) {
             console.error('Error deleting user account:', error);

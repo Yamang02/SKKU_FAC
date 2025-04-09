@@ -143,7 +143,6 @@ export default class UserService {
         // 이름 & 비밀번호
         user.name = userData.name;
         if (userData.newPassword !== '' && userData.newPassword == userData.confirmPassword) {
-            console.log('비밀번호 변경');
             const hashedPassword = await bcrypt.hash(userData.newPassword, 10);
             user.password = hashedPassword;
         }
@@ -169,7 +168,7 @@ export default class UserService {
     /**
      * 사용자를 삭제합니다.
      */
-    async deleteUser(userId) {
+    async deleteUserAccount(userId) {
         const user = await this.userRepository.findUserById(userId);
         if (!user) {
             throw new Error('사용자를 찾을 수 없습니다.');

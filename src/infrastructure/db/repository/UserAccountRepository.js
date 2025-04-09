@@ -1,4 +1,4 @@
-import { UserAccount, SkkuUserProfile, ExternalUserProfile } from '../model/entity/EntitityIndex.js';
+import { UserAccount, SkkuUserProfile, ExternalUserProfile, Artwork } from '../model/entity/EntitityIndex.js';
 import { Op } from 'sequelize';
 import { db } from '../connection/MySQLDatabase.js';
 
@@ -160,12 +160,38 @@ export default class UserAccountRepository {
      * 사용자를 삭제합니다.
      */
     async deleteUser(id) {
-        const user = await UserAccount.findByPk(id);
+        const user = await UserAccount.findByPk(id, {
+            include: [{ model: SkkuUserProfile, required: false },
+            { model: ExternalUserProfile, required: false },
+            { model: Artwork, required: false }]
+        });
         if (!user) {
             return false;
         }
 
-        await user.destroy();
-        return true;
+        const transaction = await db.transaction();
+        try {
+            // DB FK 미설정 , 삭제 처리 필요
+            // 관련된 Artwork 삭제
+            if (user.Artworks && user.Artworks.length > 0) {
+                for (const artwork of user.Artworks) {
+                    await artwork.destroy({ transaction });
+                }
+            }
+            if (user.SkkuUserProfile !== null) {
+                await user.SkkuUserProfile.destroy({ transaction });
+            }
+            if (user.ExternalUserProfile !== null) {
+                await user.ExternalUserProfile.destroy({ transaction });
+            }
+
+            await user.destroy({ transaction });
+            await transaction.commit();
+            return true;
+        } catch (error) {
+            await transaction.rollback();
+            console.error('사용자 삭제 중 오류 발생:', error);
+            throw error;
+        }
     }
 }
