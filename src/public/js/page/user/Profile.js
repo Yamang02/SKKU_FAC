@@ -6,6 +6,9 @@ import UserAPI from '/js/api/UserAPI.js';
 import { showLoading, showErrorMessage, showSuccessMessage, showConfirm } from '/js/common/util/notification.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 사용자 정보를 저장할 전역 변수
+    let userData = null;
+
     // 사용자 프로필 정보 가져오기
     fetchUserProfile();
 
@@ -43,13 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 모달 외부 클릭 시 닫기
-    window.addEventListener('click', (e) => {
-        if (e.target === editProfileModal) {
-            closeModal(editProfileModal);
-        }
-    });
-
     // 로그아웃 처리
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
@@ -67,29 +63,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 프로필 수정 모달 열기
     if (editProfileBtn) {
-        editProfileBtn.addEventListener('click', async () => {
+        editProfileBtn.addEventListener('click', () => {
             try {
-                // 현재 사용자 정보 가져오기
-                const response = await UserAPI.getProfile();
-                const user = response.data;
+                // userData가 없으면 오류 메시지 표시
+                if (!userData) {
+                    showErrorMessage('사용자 정보를 불러오는데 실패했습니다.');
+                    return;
+                }
 
                 // 모달 내 폼 필드에 현재 사용자 정보 채우기
-                document.querySelector('#edit-profile-form [name="name"]').value = user.name || '';
+                document.querySelector('#edit-profile-form [name="name"]').value = userData.name || '';
 
                 // 사용자 유형에 따라 필드 표시 여부 결정 및 값 채우기
-                if (user.role === 'SKKU_MEMBER') {
+                if (userData.role === 'SKKU_MEMBER') {
                     document.getElementById('department-group').style.display = 'block';
                     document.getElementById('studentYear-group').style.display = 'block';
                     document.getElementById('affiliation-group').style.display = 'none';
 
-                    document.querySelector('#edit-profile-form [name="department"]').value = user.department || '';
-                    document.querySelector('#edit-profile-form [name="studentYear"]').value = user.studentYear || '';
-                } else if (user.role === 'EXTERNAL_MEMBER') {
+                    document.querySelector('#edit-profile-form [name="department"]').value = userData.department || '';
+                    document.querySelector('#edit-profile-form [name="studentYear"]').value = userData.studentYear || '';
+                } else if (userData.role === 'EXTERNAL_MEMBER') {
                     document.getElementById('department-group').style.display = 'none';
                     document.getElementById('studentYear-group').style.display = 'none';
                     document.getElementById('affiliation-group').style.display = 'block';
 
-                    document.querySelector('#edit-profile-form [name="affiliation"]').value = user.affiliation || '';
+                    document.querySelector('#edit-profile-form [name="affiliation"]').value = userData.affiliation || '';
                 }
 
                 // 비밀번호 필드 초기화
@@ -167,32 +165,32 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchUserProfile() {
         try {
             const response = await UserAPI.getProfile();
-            const user = response.data;
-            console.log('user:', user);
+            userData = response.data; // 전역 변수에 사용자 데이터 저장
+            console.log('user:', userData);
 
             // 사용자 정보를 DOM에 삽입
-            document.getElementById('username').innerText = user.username;
-            document.getElementById('email').innerText = user.email;
-            document.getElementById('name-text').innerText = user.name;
-            document.getElementById('department-text').innerText = user.department || '학과 정보 없음';
-            document.getElementById('studentYear-text').innerText = user.studentYear ? user.studentYear + '학번' : '미입력';
-            document.getElementById('isClubMember-text').innerText = user.isClubMember ? '동아리 회원' : '일반 회원';
-            document.getElementById('role').innerText = user.role === 'SKKU_MEMBER' ? '성균관대 재학/졸업생' : '외부 인원';
+            document.getElementById('username').innerText = userData.username;
+            document.getElementById('email').innerText = userData.email;
+            document.getElementById('name-text').innerText = userData.name;
+            document.getElementById('department-text').innerText = userData.department || '학과 정보 없음';
+            document.getElementById('studentYear-text').innerText = userData.studentYear ? userData.studentYear + '학번' : '미입력';
+            document.getElementById('isClubMember-text').innerText = userData.isClubMember ? '동아리 회원' : '일반 회원';
+            document.getElementById('role').innerText = userData.role === 'SKKU_MEMBER' ? '성균관대 재학/졸업생' : '외부 인원';
 
             // 가입일 처리
-            const createdAt = user.createdAt; // 가입일
+            const createdAt = userData.createdAt; // 가입일
             const formattedDate = createdAt.replace(' ', 'T'); // 'YYYY-MM-DD HH:mm:ss' -> 'YYYY-MM-DDTHH:mm:ss' 형식으로 변환
             const date = new Date(formattedDate); // Date 객체로 변환
             document.getElementById('createdAt').innerText = date.toLocaleDateString(); // 'YYYY-MM-DD' 형식으로 변환하여 표시
 
             // 역할에 따라 추가 정보 표시
-            if (user.role === 'SKKU_MEMBER') {
+            if (userData.role === 'SKKU_MEMBER') {
                 document.getElementById('school-info').style.display = 'block';
                 document.getElementById('external-info').style.display = 'none';
-            } else if (user.role === 'EXTERNAL_MEMBER') {
+            } else if (userData.role === 'EXTERNAL_MEMBER') {
                 document.getElementById('school-info').style.display = 'none';
                 document.getElementById('external-info').style.display = 'block';
-                document.getElementById('affiliation-text').innerText = user.affiliation || '소속 정보 없음';
+                document.getElementById('affiliation-text').innerText = userData.affiliation || '소속 정보 없음';
             }
         } catch (error) {
             showErrorMessage(error.message || '프로필 정보를 불러오는데 실패했습니다.');

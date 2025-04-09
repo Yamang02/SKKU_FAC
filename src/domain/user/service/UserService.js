@@ -132,15 +132,40 @@ export default class UserService {
     /**
      * 사용자 정보를 수정합니다.
      */
-    async updateUser(userId) {
+    async updateUserProfile(userId, userData) {
         const user = await this.userRepository.findUserById(userId);
         if (!user) {
             throw new Error('사용자를 찾을 수 없습니다.');
         }
 
-        return null;
-    }
+        console.log('userData:', userData);
 
+        // 이름 & 비밀번호
+        user.name = userData.name;
+        if (userData.newPassword !== '' && userData.newPassword == userData.confirmPassword) {
+            console.log('비밀번호 변경');
+            const hashedPassword = await bcrypt.hash(userData.newPassword, 10);
+            user.password = hashedPassword;
+        }
+
+        // 역할에 따른 프로필 정보 수정
+        if (user.role === 'SKKU_MEMBER' && user.SkkuUserProfile !== null) {
+            console.log('user.SkkuUserProfile:', user.SkkuUserProfile);
+            user.SkkuUserProfile.department = userData.department;
+            user.SkkuUserProfile.studentYear = userData.studentYear;
+        } else if (user.role === 'EXTERNAL_MEMBER' && user.ExternalUserProfile !== null) {
+            user.ExternalUserProfile.affiliation = userData.affiliation;
+        }
+
+        try {
+            // 사용자 정보 업데이트
+            const updatedUser = await this.userRepository.updateUserProfile(user);
+            return updatedUser;
+        } catch (error) {
+            console.error('사용자 정보 업데이트 실패:', error);
+            throw new Error('사용자 정보 업데이트 실패');
+        }
+    }
     /**
      * 사용자를 삭제합니다.
      */

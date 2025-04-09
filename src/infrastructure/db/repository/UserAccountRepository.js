@@ -136,18 +136,24 @@ export default class UserAccountRepository {
     /**
      * 사용자 정보를 수정합니다.
      */
-    async updateUser(id, userData) {
-        const user = await UserAccount.findByPk(id);
-        if (!user) {
-            return null;
+    async updateUserProfile(userData) {
+        const transaction = await db.transaction();
+        try {
+            userData.updatedAt = new Date();
+            await userData.save({ transaction });
+            if (userData.SkkuUserProfile !== null) {
+                await userData.SkkuUserProfile.save({ transaction });
+            }
+            if (userData.ExternalUserProfile !== null) {
+                await userData.ExternalUserProfile.save({ transaction });
+            }
+            await transaction.commit();
+            return userData;
+        } catch (error) {
+            await transaction.rollback();
+            console.error('사용자 정보 수정 중 오류 발생:', error);
+            throw error;
         }
-
-        await user.update({
-            ...userData,
-            updatedAt: new Date()
-        });
-
-        return user;
     }
 
     /**

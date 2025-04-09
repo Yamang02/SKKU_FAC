@@ -107,8 +107,9 @@ export default class UserApiController {
     async updateUserProfile(req, res) {
         try {
             const profileData = req.body;
-            const user = await this.userService.updateUserProfile(profileData);
-            return res.json(ApiResponse.success(user, Message.USER.UPDATE_SUCCESS));
+            const userId = req.session.user.id;
+            const updatedUser = await this.userService.updateUserProfile(userId, profileData);
+            return res.json(ApiResponse.success(updatedUser, Message.USER.UPDATE_SUCCESS));
         } catch (error) {
             if (error instanceof UserValidationError) {
                 return res.status(400).json(ApiResponse.error(Message.USER.VALIDATION_ERROR));
