@@ -27,14 +27,16 @@ export const infrastructureConfig = {
         }
     },
     storage: {
-        type: isLocal ? 'local' : 'cloudinary',
         config: isLocal ? {
-            uploadDir: process.env.UPLOAD_DIR || 'public/uploads',
-            maxFileSize: process.env.MAX_FILE_SIZE || 5242880
+            cloudName: process.env.CLOUD_NAME,
+            apiKey: process.env.CLOUD_API_KEY,
+            apiSecret: process.env.CLOUD_API_SECRET,
+            uploadDir: process.env.UPLOAD_DIR || 'local-test-folder'
         } : {
             cloudName: process.env.CLOUD_NAME,
             apiKey: process.env.CLOUD_API_KEY,
-            apiSecret: process.env.CLOUD_API_SECRET
+            apiSecret: process.env.CLOUD_API_SECRET,
+            uploadDir: process.env.UPLOAD_DIR || 'railway-test-folder'
         }
     }
 };

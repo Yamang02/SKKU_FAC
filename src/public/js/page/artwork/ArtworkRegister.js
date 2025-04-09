@@ -1,6 +1,6 @@
 import UserAPI from '../../api/userAPI.js';
 import ExhibitionAPI from '../../api/ExhibitionAPI.js';
-import { showErrorMessage } from '../../common/util/notification.js';
+import { showErrorMessage, showSuccessMessage } from '../../common/util/notification.js';
 
 // 전역 변수로 user 선언
 let user;
@@ -74,11 +74,7 @@ async function initializePage() {
                 exhibitionSelect.disabled = true;
             }
             // 에러 메시지를 화면에 표시
-            const errorElement = document.getElementById('formError');
-            if (errorElement) {
-                errorElement.textContent = '전시회 목록을 불러오는데 실패했습니다. 나중에 다시 시도해주세요.';
-                errorElement.style.display = 'block';
-            }
+            showErrorMessage('전시회 목록을 불러오는데 실패했습니다. 나중에 다시 시도해주세요.');
         }
 
         // 3. 기존 초기화 함수들 호출
@@ -221,6 +217,7 @@ function initSubmitButton() {
             // 서버 응답 처리
             const result = await response.json();
             if (result.success) {
+                showSuccessMessage('작품 등록이 완료되었습니다.');
                 // 생성된 작품의 상세 페이지로 이동
                 window.location.href = `/artwork/${result.data.id}`;
             } else {

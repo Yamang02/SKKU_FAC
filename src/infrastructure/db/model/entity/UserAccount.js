@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { db } from '../../connection/MySQLDatabase.js';
+import { db } from '../../adapter/MySQLDatabase.js';
 
 /**
  * 사용자 계정 모델

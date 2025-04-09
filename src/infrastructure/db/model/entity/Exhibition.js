@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { db } from '../../connection/MySQLDatabase.js';
+import { db } from '../../adapter/MySQLDatabase.js';
 
 const Exhibition = db.define('Exhibition', {
     id: {

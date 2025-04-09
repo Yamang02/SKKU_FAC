@@ -1,8 +1,27 @@
 import multer from 'multer';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
+import { infrastructureConfig } from '../../config/infrastructure.js';
 
-// 파일 업로드 설정
-const storage = multer.memoryStorage();
+// Cloudinary 설정
+const cloudConfig = infrastructureConfig.storage.config;
+cloudinary.config({
+    cloud_name: cloudConfig.cloudName,
+    api_key: cloudConfig.apiKey,
+    api_secret: cloudConfig.apiSecret
+});
 
+// CloudinaryStorage 설정
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: 'uploads', // 원하는 Cloudinary 폴더명
+        allowed_formats: ['jpg', 'png', 'jpeg', 'gif'],
+        transformation: [{ width: 1000, height: 1000, crop: 'limit' }]
+    }
+});
+
+// 업로드 미들웨어 생성
 const uploadMiddlewareInstance = multer({
     storage: storage,
     limits: {
@@ -20,7 +39,6 @@ const uploadMiddlewareInstance = multer({
 
 // 세션 유지를 위한 래퍼 함수
 const uploadMiddleware = (req, res, next) => {
-    // 세션 정보 저장
     const sessionData = req.session;
 
     uploadMiddlewareInstance(req, res, (err) => {
@@ -28,7 +46,6 @@ const uploadMiddleware = (req, res, next) => {
             return next(err);
         }
 
-        // 세션 정보 복원
         req.session = sessionData;
         next();
     });

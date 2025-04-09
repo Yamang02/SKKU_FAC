@@ -1,6 +1,6 @@
 import { UserAccount, SkkuUserProfile, ExternalUserProfile, Artwork } from '../model/entity/EntitityIndex.js';
 import { Op } from 'sequelize';
-import { db } from '../connection/MySQLDatabase.js';
+import { db } from '../adapter/MySQLDatabase.js';
 
 export default class UserAccountRepository {
     constructor() {
