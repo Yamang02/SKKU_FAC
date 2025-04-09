@@ -1,15 +1,15 @@
-import UserAPI from '../../api/userAPI.js';
-import ExhibitionAPI from '../../api/ExhibitionAPI.js';
+import UserApi from '../../api/UserApi.js';
+import ArtworkApi from '../../api/ArtworkApi.js';
+// import ExhibitionAPI from '../../api/ExhibitionAPI.js';
 import { showErrorMessage, showSuccessMessage } from '../../common/util/notification.js';
 
-// 전역 변수로 user 선언
-let user;
 
 // 페이지 초기화 함수
 async function initializePage() {
     try {
-        // 1. 사용자 정보 가져오기
-        user = await UserAPI.getProfile();
+        const response = await UserApi.getProfile();
+        const user = response.data;
+        console.log('user', user);
 
         // 작가 정보 필드 찾기
         const artistNameSpan = document.getElementById('artist-name');
@@ -24,12 +24,10 @@ async function initializePage() {
         // 소속 정보 설정
         let affiliation = '';
         if (user.role === 'ADMIN' || user.role === 'SKKU_MEMBER') {
-            // 학교 구성원인 경우 학과와 학년 조합
             affiliation = user.department && user.studentYear ?
                 `${user.department} ${user.studentYear}` :
                 (user.department || '');
         } else {
-            // 외부 구성원인 경우 소속 정보
             affiliation = user.affiliation || '';
         }
 
@@ -41,41 +39,41 @@ async function initializePage() {
             departmentInput.value = affiliation;
         }
 
-        // 2. 출품 가능한 전시회 목록 가져오기
-        try {
-            const response = await ExhibitionAPI.getSubmittableList();
-            const exhibitions = response.data || response;
-            const exhibitionSelect = document.getElementById('exhibition');
+        // // 2. 출품 가능한 전시회 목록 가져오기
+        // try {
+        //     const response = await ExhibitionAPI.getSubmittableList();
+        //     const exhibitions = response.data || response;
+        //     const exhibitionSelect = document.getElementById('exhibition');
 
-            if (exhibitionSelect && exhibitions && Array.isArray(exhibitions)) {
-                // 기존 옵션 제거
-                exhibitionSelect.innerHTML = '';
+        //     if (exhibitionSelect && exhibitions && Array.isArray(exhibitions)) {
+        //         // 기존 옵션 제거
+        //         exhibitionSelect.innerHTML = '';
 
-                // 기본 옵션 추가
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.textContent = '전시회를 선택해주세요';
-                exhibitionSelect.appendChild(defaultOption);
+        //         // 기본 옵션 추가
+        //         const defaultOption = document.createElement('option');
+        //         defaultOption.value = '';
+        //         defaultOption.textContent = '전시회를 선택해주세요';
+        //         exhibitionSelect.appendChild(defaultOption);
 
-                // 전시회 옵션 추가
-                exhibitions.forEach(exhibition => {
-                    const option = document.createElement('option');
-                    option.value = exhibition.id;
-                    option.textContent = exhibition.title;
-                    exhibitionSelect.appendChild(option);
-                });
-            } else {
-                throw new Error('전시회 목록을 불러오는데 실패했습니다.');
-            }
-        } catch (error) {
-            const exhibitionSelect = document.getElementById('exhibition');
-            if (exhibitionSelect) {
-                exhibitionSelect.innerHTML = '<option value="">전시회 목록을 불러올 수 없습니다</option>';
-                exhibitionSelect.disabled = true;
-            }
-            // 에러 메시지를 화면에 표시
-            showErrorMessage('전시회 목록을 불러오는데 실패했습니다. 나중에 다시 시도해주세요.');
-        }
+        //         // 전시회 옵션 추가
+        //         exhibitions.forEach(exhibition => {
+        //             const option = document.createElement('option');
+        //             option.value = exhibition.id;
+        //             option.textContent = exhibition.title;
+        //             exhibitionSelect.appendChild(option);
+        //         });
+        //     } else {
+        //         throw new Error('전시회 목록을 불러오는데 실패했습니다.');
+        //     }
+        // } catch (error) {
+        //     const exhibitionSelect = document.getElementById('exhibition');
+        //     if (exhibitionSelect) {
+        //         exhibitionSelect.innerHTML = '<option value="">전시회 목록을 불러올 수 없습니다</option>';
+        //         exhibitionSelect.disabled = true;
+        //     }
+        //     // 에러 메시지를 화면에 표시
+        //     showErrorMessage('전시회 목록을 불러오는데 실패했습니다. 나중에 다시 시도해주세요.');
+        // }
 
         // 3. 기존 초기화 함수들 호출
         initImageUpload();
@@ -161,12 +159,13 @@ function initImageUpload() {
  */
 function initSubmitButton() {
     const submitButton = document.querySelector('.btn.btn-primary');
-
     if (!submitButton) {
         return;
     }
 
-    submitButton.addEventListener('click', async () => {
+
+    submitButton.addEventListener('click', async (event) => {
+        event.preventDefault();
         // 입력값 가져오기
         const title = document.getElementById('title').value.trim();
         const image = document.getElementById('imageInput').files[0];
@@ -191,6 +190,7 @@ function initSubmitButton() {
         try {
             // 제출 버튼 비활성화
             submitButton.disabled = true;
+            submitButton.textContent = '등록 중...';
 
             // FormData 생성
             const formData = new FormData();
@@ -198,36 +198,31 @@ function initSubmitButton() {
             formData.append('image', image);
             formData.append('department', department);
             formData.append('exhibitionId', exhibitionId);
-            formData.append('artistId', user.id);
             formData.append('year', year);
             formData.append('medium', medium);
             formData.append('size', size);
             formData.append('description', description);
 
-            // API 호출
-            const response = await fetch('/artwork', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error('작품 등록에 실패했습니다.');
+            try {
+                const response = await ArtworkApi.createArtwork(formData);
+                if (response.success) {
+                    showSuccessMessage('작품 등록이 완료되었습니다.');
+                    window.location.href = `/artwork/${response.data.artwork.id}`;
+                } else {
+                    throw new Error(response.error || '작품 등록에 실패했습니다.');
+                }
+            } catch (apiError) {
+                console.error('API 오류:', apiError);
+                showErrorMessage(apiError.message || '작품 등록 중 오류가 발생했습니다.');
             }
 
-            // 서버 응답 처리
-            const result = await response.json();
-            if (result.success) {
-                showSuccessMessage('작품 등록이 완료되었습니다.');
-                // 생성된 작품의 상세 페이지로 이동
-                window.location.href = `/artwork/${result.data.id}`;
-            } else {
-                throw new Error(result.error || '작품 등록에 실패했습니다.');
-            }
         } catch (error) {
-            showErrorMessage('작품 등록 중 오류가 발생했습니다.');
+            console.error('작품 등록 처리 중 오류:', error);
+            showErrorMessage('작품 등록 처리 중 오류가 발생했습니다: ' + error.message);
         } finally {
             // 제출 버튼 활성화
             submitButton.disabled = false;
+            submitButton.textContent = '작품 등록';
         }
     });
 }

@@ -76,6 +76,15 @@ export default class UserApi {
             throw error;
         }
     }
-}
 
+    static async getSessionUser() {
+        try {
+            return await api.get('/user/api/session');
+        } catch (error) {
+            console.error('세션 사용자 조회 중 오류 발생:', error);
+            showErrorMessage('세션 사용자 조회에 실패했습니다.');
+            throw error;
+        }
+    }
+}
 

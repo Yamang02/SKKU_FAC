@@ -147,29 +147,54 @@ export default class ArtworkApiController {
             console.log('=== 작품 등록 요청 시작 ===');
             console.log('Request Body:', req.body);
             console.log('Request File:', req.file);
+            console.log('Request Session:', req.session ? '있음' : '없음');
+            console.log('Request User:', req.session?.user ? JSON.stringify(req.session.user, null, 2) : '없음');
             console.log('Request Headers:', req.headers);
             console.log('========================');
 
-            const artworkData = req.body;
             const file = req.file;
+            const artworkData = req.body;
 
+            // 세션 검사
+            if (!req.session) {
+                console.error('세션이 없습니다.');
+                return res.status(401).json(ApiResponse.error('세션이 유효하지 않습니다. 다시 로그인해주세요.'));
+            }
+
+            // 사용자 정보 검사
+            if (!req.session.user || !req.session.user.id) {
+                console.error('사용자 정보가 없습니다:', req.session);
+                return res.status(401).json(ApiResponse.error('로그인이 필요합니다.'));
+            }
+
+            const userId = req.session.user.id;
+            artworkData.userId = userId;
+
+            // 파일 검사
             if (!file) {
                 console.error('파일이 업로드되지 않았습니다.');
                 return res.status(400).json(ApiResponse.error('이미지 파일이 필요합니다.'));
             }
 
-            console.log('파일 정보:', {
-                filename: file.filename,
-                mimetype: file.mimetype,
-                size: file.size
-            });
-
-            const artwork = await this.artworkService.createArtwork(artworkData, file);
-            console.log('생성된 작품 정보:', artwork);
-
-            return res.status(201).json(ApiResponse.success(artwork, Message.ARTWORK.CREATE_SUCCESS));
+            console.log('ArtworkService.createArtwork 호출 전');
+            try {
+                const artwork = await this.artworkService.createArtwork(artworkData, file);
+                console.log('생성된 작품 정보:', artwork);
+                return res.status(201).json(ApiResponse.success(artwork, Message.ARTWORK.CREATE_SUCCESS));
+            } catch (serviceError) {
+                console.error('작품 서비스 처리 중 오류:', serviceError);
+                // 서비스 오류 세부 정보 출력
+                if (serviceError.stack) {
+                    console.error('오류 스택:', serviceError.stack);
+                }
+                throw serviceError;
+            }
         } catch (error) {
             console.error('작품 등록 중 오류 발생:', error);
+            // 오류 스택 출력
+            if (error.stack) {
+                console.error('오류 스택:', error.stack);
+            }
 
             if (error instanceof ArtworkValidationError) {
                 return res.status(400).json(ApiResponse.error(Message.ARTWORK.VALIDATION_ERROR));

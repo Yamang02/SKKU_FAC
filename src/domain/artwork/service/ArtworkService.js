@@ -3,6 +3,7 @@ import ImageService from '../../image/service/ImageService.js';
 import { ArtworkNotFoundError, ArtworkValidationError } from '../../../common/error/ArtworkError.js';
 import ArtworkDetailDTO from '../model/dto/ArtworkDetailDTO.js';
 import ArtworkSimpleDTO from '../model/dto/ArtworkSimpleDTO.js';
+import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
 
 /**
  * 작품 서비스
@@ -42,12 +43,12 @@ export default class ArtworkService {
         if (!artworkData.title) {
             throw new ArtworkValidationError('작품 제목은 필수입니다.');
         }
+        file;
 
-        const uploadedImage = await this.imageService.uploadImage(file, 'artworks');
-        const artwork = await this.artworkRepository.createArtwork({
-            ...artworkData,
-            imageId: uploadedImage.id
-        });
+        artworkData.id = generateDomainUUID(DOMAINS.ARTWORK);
+
+        // const uploadedImage = await this.imageService.uploadImage(file, 'artworks');
+        const artwork = await this.artworkRepository.createArtwork(artworkData);
         return new ArtworkSimpleDTO(artwork);
     }
 

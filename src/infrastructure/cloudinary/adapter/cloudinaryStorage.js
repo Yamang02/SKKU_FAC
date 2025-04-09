@@ -5,6 +5,7 @@ import { infrastructureConfig } from '../../../config/infrastructure.js';
 // Cloudinary 설정
 const cloudConfig = infrastructureConfig.storage.config;
 
+
 cloudinary.config({
     cloud_name: cloudConfig.cloudName,
     api_key: cloudConfig.apiKey,

@@ -11,22 +11,21 @@ const artworkApiController = new ArtworkApiController();
 // === API 엔드포인트 ===
 
 // CUD
-ArtworkRouter.post('/', isAuthenticated, uploadMiddleware, artworkApiController.createArtwork.bind(artworkController));
-ArtworkRouter.put('/:id', uploadMiddleware, artworkApiController.updateArtwork.bind(artworkController));
-ArtworkRouter.delete('/:id', artworkApiController.deleteArtwork.bind(artworkController));
+ArtworkRouter.post('/api/new', isAuthenticated, uploadMiddleware, artworkApiController.createArtwork.bind(artworkApiController));
+ArtworkRouter.delete('/api/:id', artworkApiController.deleteArtwork.bind(artworkApiController));
 
 // 작품 목록 조회 API
-ArtworkRouter.get('/api/list', artworkApiController.getArtworkList.bind(artworkController));
+ArtworkRouter.get('/api/list', artworkApiController.getArtworkList.bind(artworkApiController));
 
 // 추천 작품 목록 조회 API
-ArtworkRouter.get('/api/featured', artworkApiController.getFeaturedArtworks.bind(artworkController));
+ArtworkRouter.get('/api/featured', artworkApiController.getFeaturedArtworks.bind(artworkApiController));
 
 // 작품 개별 조회 API
-ArtworkRouter.get('/api/detail/:id', artworkApiController.getArtworkDetail.bind(artworkController));
-ArtworkRouter.get('/api/simple/:id', artworkApiController.getArtworkSimple.bind(artworkController));
+ArtworkRouter.get('/api/detail/:id', artworkApiController.getArtworkDetail.bind(artworkApiController));
+ArtworkRouter.get('/api/simple/:id', artworkApiController.getArtworkSimple.bind(artworkApiController));
 
 // 관련 작품 목록 조회 API
-ArtworkRouter.get('/api/related/:id', artworkApiController.getRelatedArtworks.bind(artworkController));
+ArtworkRouter.get('/api/related/:id', artworkApiController.getRelatedArtworks.bind(artworkApiController));
 
 
 // === 페이지 라우트 ===

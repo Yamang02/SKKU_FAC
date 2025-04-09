@@ -28,14 +28,14 @@ export const infrastructureConfig = {
     },
     storage: {
         config: isLocal ? {
-            cloudName: process.env.CLOUD_NAME,
-            apiKey: process.env.CLOUD_API_KEY,
-            apiSecret: process.env.CLOUD_API_SECRET,
+            cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+            apiKey: process.env.CLOUDINARY_API_KEY,
+            apiSecret: process.env.CLOUDINARY_API_SECRET,
             uploadDir: process.env.UPLOAD_DIR || 'local-test-folder'
         } : {
-            cloudName: process.env.CLOUD_NAME,
-            apiKey: process.env.CLOUD_API_KEY,
-            apiSecret: process.env.CLOUD_API_SECRET,
+            cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+            apiKey: process.env.CLOUDINARY_API_KEY,
+            apiSecret: process.env.CLOUDINARY_API_SECRET,
             uploadDir: process.env.UPLOAD_DIR || 'railway-test-folder'
         }
     }

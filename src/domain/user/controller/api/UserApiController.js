@@ -67,6 +67,11 @@ export default class UserApiController {
         }
     }
 
+    async getSessionUser(req, res) {
+        const user = req.session.user;
+        return res.json(ApiResponse.success(user));
+    }
+
     /**
      * 사용자 로그아웃을 처리합니다.
      */

@@ -76,6 +76,31 @@ class ArtworkApi {
             throw error;
         }
     }
+
+    // 작품 등록
+    static async createArtwork(formData) {
+        try {
+            console.log('작품 등록 API 호출 시작');
+
+            // FormData 내용 로깅 (개발 목적으로만 사용)
+            console.log('FormData 내용:');
+            for (const [key, value] of formData.entries()) {
+                if (key === 'image') {
+                    console.log('이미지 파일:', value.name, value.type, value.size + 'bytes');
+                } else {
+                    console.log(key + ':', value);
+                }
+            }
+
+            const response = await api.post('/artwork/api/new', formData);
+            console.log('작품 등록 API 응답:', response);
+            return response;
+        } catch (error) {
+            console.error('작품 등록 중 오류:', error);
+            showErrorMessage('작품 등록에 실패했습니다: ' + error.message);
+            throw error;
+        }
+    }
 }
 
 export default ArtworkApi;
