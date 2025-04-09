@@ -51,6 +51,7 @@ export const Message = {
     // 사용자 관련 메시지
     USER: {
         LOGIN_SUCCESS: '로그인이 성공적으로 완료되었습니다.',
+        LOGIN_ERROR: '아이디와 비밀번호를 확인해주세요.',
         LOGOUT_SUCCESS: '로그아웃이 성공적으로 완료되었습니다.',
         REGISTER_SUCCESS: '회원가입이 성공적으로 완료되었습니다.',
         NOT_FOUND: '사용자를 찾을 수 없습니다.',

@@ -9,7 +9,7 @@ const API_BASE_URL = '';
 const handleResponse = async (response) => {
     const data = await response.json();
     if (!response.ok) {
-        throw new Error(data.message || '요청 처리 중 오류가 발생했습니다.');
+        throw new Error(data.error || data.message || '요청 처리 중 오류가 발생했습니다.');
     }
     return data;
 };

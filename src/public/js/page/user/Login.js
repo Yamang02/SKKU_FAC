@@ -27,20 +27,25 @@ document.addEventListener('DOMContentLoaded', function () {
     // 폼 제출 전 유효성 검사
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // 폼 제출의 기본 동작을 먼저 막습니다
+
             const username = document.querySelector('#username').value;
             const password = passwordInput.value;
 
             if (!username || !password) {
-                e.preventDefault();
                 showErrorMessage('아이디와 비밀번호를 모두 입력해주세요.');
                 return;
             }
 
             try {
-                await userApi.login({ username, password });
-                window.location.href = '/';
+                const response = await userApi.login({ username, password });
+                if (response.success) {
+                    window.location.href = '/';
+                } else {
+                    const errorMessage = response.error || '아이디와 비밀번호를 확인해주세요.';
+                    showErrorMessage(errorMessage);
+                }
             } catch (error) {
-                e.preventDefault();
                 showErrorMessage(error.message || '로그인 중 오류가 발생했습니다.');
             }
         });
