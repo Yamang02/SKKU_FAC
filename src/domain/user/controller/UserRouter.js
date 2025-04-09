@@ -24,13 +24,13 @@ UserRouter.post('/', isNotAuthenticated, (req, res) => userApiController.registe
 
 
 UserRouter.post('/login', isNotAuthenticated, (req, res) => userApiController.loginUser(req, res));
+UserRouter.get('/logout', (req, res) => userApiController.logoutUser(req, res));
 UserRouter.put('/me', isAuthenticated, (req, res) => userApiController.updateUserProfile(req, res));
 UserRouter.delete('/me', isAuthenticated, (req, res) => userApiController.deleteUserAccount(req, res));
 
 // === 페이지 라우트 ===
 // 로그인/로그아웃
 UserRouter.get('/login', isNotAuthenticated, (req, res) => userController.getUserLoginPage(req, res));
-UserRouter.get('/logout', (req, res) => userController.logoutUser(req, res));
 
 // 회원가입
 UserRouter.get('/new', isNotAuthenticated, (req, res) => userController.getUserRegistrationPage(req, res));

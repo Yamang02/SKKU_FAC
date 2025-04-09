@@ -74,7 +74,6 @@ export default class UserApiController {
      */
     async logoutUser(req, res) {
         try {
-            await this.userService.logoutUser();
             await SessionUtil.destroySession(req);
             return res.json(ApiResponse.success(null, Message.USER.LOGOUT_SUCCESS));
         } catch (error) {

@@ -17,5 +17,6 @@ export default class UserDetailDTO {
         this.skkuUserId = data.skkuUserId || '';
         this.externalUserId = data.externalUserId || '';
         this.affiliation = data.affiliation || '';
+        this.createdAt = data.createdAt || '';
     }
 }

@@ -40,30 +40,53 @@
 
 /* 확인 메시지 스타일 */
 .notification--confirm {
-    background-color: rgba(255, 193, 7, 0.9); /* 경고 색상 */
+    background-color: rgba(255, 193, 7, 0.5);
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 20px;
+    margin: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* 버튼 컨테이너 스타일 */
-.button-container {
-    display: flex;
-    justify-content: space-between;
+.button-container--notification {
+    display: flex; /* 플렉스 박스 사용 */
+    justify-content: flex-end; /* 오른쪽 정렬 */
     margin-top: 10px;
 }
 
-/* 버튼 스타일 */
-.button-container button {
+/* 확인 버튼 스타일 */
+.button-container--notification .confirm-button {
     padding: 8px 12px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+    width: 120px; /* 버튼 너비 증가 */
+    background-color: #d32f2f; /* 딥 레드 */
+    color: #ffffff; /* 화이트 */
+    margin-left: 10px; /* 버튼 간격 추가 */
 }
 
-.button-container button:hover {
+/* 취소 버튼 스타일 */
+.button-container--notification .cancel-button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 120px; /* 버튼 너비 증가 */
+    background-color: #e0e0e0; /* 라이트 그레이 */
+    color: #333333; /* 다크 그레이 */
+    margin-left: 10px; /* 버튼 간격 추가 */
+}
+
+.button-container--notification button:hover {
     opacity: 0.8; /* 호버 시 투명도 변경 */
 }
 
-.button-container button:focus {
+.button-container--notification button:focus {
     outline: none; /* 포커스 시 아웃라인 제거 */
 }
 

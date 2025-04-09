@@ -37,10 +37,11 @@ export function showConfirm(message) {
         confirmBox.appendChild(messageElement);
 
         const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'button-container';
+        buttonContainer.className = 'button-container--notification';
 
         const confirmButton = document.createElement('button');
         confirmButton.textContent = '확인';
+        confirmButton.className = 'confirm-button';
         confirmButton.onclick = () => {
             resolve(true);
             container.removeChild(confirmBox);
@@ -51,6 +52,7 @@ export function showConfirm(message) {
 
         const cancelButton = document.createElement('button');
         cancelButton.textContent = '취소';
+        cancelButton.className = 'cancel-button';
         cancelButton.onclick = () => {
             resolve(false);
             container.removeChild(confirmBox);

@@ -35,7 +35,6 @@ export default class UserService {
 
         // 비밀번호 해싱
         const hashedPassword = await bcrypt.hash(userRequestDTO.password, 10);
-        console.log('hashedPassword:', hashedPassword);
 
         // Id 생성
         const userId = generateDomainUUID(DOMAINS.USER);
@@ -200,7 +199,7 @@ export default class UserService {
      */
     mapUserToDto(user) {
 
-        const { id, username, email, name, status, role } = user;
+        const { id, username, email, name, status, role, createdAt } = user;
 
         const department = user.SkkuUserProfile ? user.SkkuUserProfile.department : '';
         const studentYear = user.SkkuUserProfile ? user.SkkuUserProfile.studentYear : '';
@@ -217,7 +216,8 @@ export default class UserService {
             department,
             studentYear,
             isClubMember,
-            affiliation
+            affiliation,
+            createdAt
         };
 
         return new UserDetailDto(dtoData);

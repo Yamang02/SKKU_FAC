@@ -1,7 +1,6 @@
 <style ref="stylesheet">
     @import url('/css/common/components/usercommon.css');
-    @import url('/css/user/profile/Profile.css');
-    @import url('/css/common/components/notification.css');
+    @import url('/css/user/Profile.css');
 </style>
 
 <div class="profile-container">
@@ -27,27 +26,6 @@
                 <div class="profile-info__value">
                     <span class="profile-info__text" id="name-text"></span>
                     <input type="text" class="profile-info__input" id="name-input" style="display: none;">
-                </div>
-            </div>
-            <div class="profile-info" style="display: none;" id="password-fields">
-                <div class="profile-info__label">현재 비밀번호</div>
-                <div class="profile-info__value">
-                    <input type="password" class="profile-info__input" id="current-password-input"
-                        placeholder="현재 비밀번호를 입력하세요">
-                </div>
-            </div>
-            <div class="profile-info" style="display: none;" id="new-password-fields">
-                <div class="profile-info__label">새 비밀번호</div>
-                <div class="profile-info__value">
-                    <input type="password" class="profile-info__input" id="new-password-input"
-                        placeholder="새 비밀번호를 입력하세요">
-                </div>
-            </div>
-            <div class="profile-info" style="display: none;" id="confirm-password-fields">
-                <div class="profile-info__label">새 비밀번호 확인</div>
-                <div class="profile-info__value">
-                    <input type="password" class="profile-info__input" id="confirm-password-input"
-                        placeholder="새 비밀번호를 다시 입력하세요">
                 </div>
             </div>
         </div>
@@ -109,16 +87,6 @@
                 <i class="fas fa-edit"></i>
                 프로필 수정
             </button>
-            <button type="button" id="save-profile-btn" class="profile-button profile-button--primary"
-                style="display: none;">
-                <i class="fas fa-save"></i>
-                저장
-            </button>
-            <button type="button" id="cancel-edit-btn" class="profile-button profile-button--secondary"
-                style="display: none;">
-                <i class="fas fa-times"></i>
-                취소
-            </button>
             <button type="button" id="logout-btn" class="profile-button profile-button--logout">
                 <i class="fas fa-sign-out-alt"></i>
                 로그아웃
@@ -132,11 +100,10 @@
 </div>
 
 <!-- 프로필 수정 모달 -->
-<div class="modal" id="editProfileModal">
+<div class="profile-modal" id="editProfileModal">
     <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title">프로필 수정</h5>
-            <button type="button" class="modal-close">&times;</button>
         </div>
         <div class="modal-body">
             <form id="edit-profile-form">
@@ -169,57 +136,8 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button type="button" class="profile-button profile-button--secondary modal-close">취소</button>
+            <button type="button" class="profile-button modal-close">취소</button>
             <button type="button" class="profile-button profile-button--primary" id="save-profile-btn">저장</button>
-        </div>
-    </div>
-</div>
-
-<!-- 계정 삭제 모달 -->
-<div class="modal" id="deleteAccountModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">계정 삭제 확인</h5>
-            <button type="button" class="modal-close">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle"></i>
-                주의: 이 작업은 되돌릴 수 없습니다.
-            </div>
-            <p>정말로 계정을 삭제하시겠습니까? 모든 데이터가 영구적으로 삭제됩니다.</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="profile-button profile-button--secondary modal-close">취소</button>
-            <button type="button" class="profile-button profile-button--danger" id="confirmDeleteAccount">
-                <i class="fas fa-trash-alt"></i>
-                삭제
-            </button>
-        </div>
-    </div>
-</div>
-
-
-<!-- 계정 삭제 모달 -->
-<div class="modal" id="deleteAccountModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">계정 삭제 확인</h5>
-            <button type="button" class="modal-close">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle"></i>
-                주의: 이 작업은 되돌릴 수 없습니다.
-            </div>
-            <p>정말로 계정을 삭제하시겠습니까? 모든 데이터가 영구적으로 삭제됩니다.</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="profile-button profile-button--secondary modal-close">취소</button>
-            <button type="button" class="profile-button profile-button--danger" id="confirmDeleteAccount">
-                <i class="fas fa-trash-alt"></i>
-                삭제
-            </button>
         </div>
     </div>
 </div>

@@ -36,7 +36,7 @@ app.use(helmet({
 // Rate Limiter 설정
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15분
-    max: 100 // IP당 최대 요청 수
+    max: 300 // IP당 최대 요청 수
 });
 app.use(limiter);
 
