@@ -47,7 +47,9 @@ export default class ArtworkService {
 
         artworkData.id = generateDomainUUID(DOMAINS.ARTWORK);
 
-        // const uploadedImage = await this.imageService.uploadImage(file, 'artworks');
+        const uploadedImage = await this.imageService.uploadImage(file, 'artworks');
+        artworkData.imagePublicId = uploadedImage.publicId;
+        artworkData.imageUrl = uploadedImage.imageUrl;
         const artwork = await this.artworkRepository.createArtwork(artworkData);
         return new ArtworkSimpleDTO(artwork);
     }

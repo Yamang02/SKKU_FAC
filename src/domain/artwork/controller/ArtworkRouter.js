@@ -1,7 +1,7 @@
 import express from 'express';
 import ArtworkController from './ArtworkController.js';
 import ArtworkApiController from './api/ArtworkApiController.js';
-import uploadMiddleware from '../../../common/middleware/uploadMiddleware.js';
+import { imageUploadMiddleware } from '../../../common/middleware/imageUploadMiddleware.js';
 import { isAuthenticated } from '../../../common/middleware/auth.js';
 
 const ArtworkRouter = express.Router();
@@ -11,7 +11,7 @@ const artworkApiController = new ArtworkApiController();
 // === API 엔드포인트 ===
 
 // CUD
-ArtworkRouter.post('/api/new', isAuthenticated, uploadMiddleware, artworkApiController.createArtwork.bind(artworkApiController));
+ArtworkRouter.post('/api/new', isAuthenticated, imageUploadMiddleware('artwork'), artworkApiController.createArtwork.bind(artworkApiController));
 ArtworkRouter.delete('/api/:id', artworkApiController.deleteArtwork.bind(artworkApiController));
 
 // 작품 목록 조회 API

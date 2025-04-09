@@ -1,4 +1,4 @@
-import { db } from '../../connection/MySQLDatabase.js';
+import { db } from '../../adapter/MySQLDatabase.js';
 import { Artwork, Exhibition, Notice, UserAccount, SkkuUserProfile, ExternalUserProfile } from '../entity/EntitityIndex.js';
 import ArtworkExhibitionRelationship from './ArtworkExhibitionRelationship.js';
 

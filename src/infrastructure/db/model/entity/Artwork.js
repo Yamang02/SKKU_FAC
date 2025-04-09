@@ -36,6 +36,11 @@ const Artwork = db.define('Artwork', {
         allowNull: true,
         comment: '이미지 URL'
     },
+    imagePublicId: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        comment: 'Cloudinary Public ID'
+    },
     isFeatured: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
