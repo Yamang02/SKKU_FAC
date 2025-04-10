@@ -158,14 +158,18 @@ function initImageUpload() {
  * 제출 버튼 기능 초기화
  */
 function initSubmitButton() {
-    const submitButton = document.querySelector('.btn.btn-primary');
+    // ID로 버튼 선택 (더 정확함)
+    const submitButton = document.getElementById('submit-button') || document.querySelector('.btn.btn-primary');
+
     if (!submitButton) {
+        console.error('제출 버튼을 찾을 수 없습니다');
         return;
     }
 
-
     submitButton.addEventListener('click', async (event) => {
         event.preventDefault();
+
+
         // 입력값 가져오기
         const title = document.getElementById('title').value.trim();
         const image = document.getElementById('imageInput').files[0];
@@ -186,11 +190,14 @@ function initSubmitButton() {
             showErrorMessage('작품 이미지를 업로드해주세요.');
             return;
         }
-        showLoading(true);
-        try {
-            // 제출 버튼 비활성화
-            submitButton.disabled = true;
 
+        // 버튼 상태 및 로딩 표시 업데이트 (시각적 피드백 추가)
+        submitButton.disabled = true;
+        submitButton.textContent = '처리 중...';
+        submitButton.classList.add('processing'); // 처리 중 클래스 추가
+        showLoading(true);
+
+        try {
             // FormData 생성
             const formData = new FormData();
             formData.append('title', title);
@@ -201,29 +208,30 @@ function initSubmitButton() {
             formData.append('medium', medium);
             formData.append('size', size);
             formData.append('description', description);
+            // API 호출
+            const response = await ArtworkApi.createArtwork(formData);
 
-            try {
-                const response = await ArtworkApi.createArtwork(formData);
-                if (response.success) {
-                    showSuccessMessage('작품 등록이 완료되었습니다.');
-                    window.location.href = `/artwork/${response.data.artwork.id}`;
-                } else {
-                    throw new Error(response.error || '작품 등록에 실패했습니다.');
-                }
-            } catch (apiError) {
-                console.error('API 오류:', apiError);
-                showErrorMessage(apiError.message || '작품 등록 중 오류가 발생했습니다.');
+            if (response.success) {
+                showLoading(false);
+                showSuccessMessage('작품 등록에 성공하였습니다.');
+                showSuccessMessage('잠시 뒤 메인 페이지로 이동합니다.');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 3000);
+                return;
+            } else {
+                showLoading(false);
+                throw new Error('작품 등록에 실패했습니다.');
             }
-
         } catch (error) {
-            console.error('작품 등록 처리 중 오류:', error);
-            showErrorMessage('작품 등록 처리 중 오류가 발생했습니다: ' + error.message);
+            showErrorMessage('다음 이유로 작품 등록에 실패했습니다 : ' + error.message);
         } finally {
-            // 제출 버튼 활성화
-            submitButton.disabled = false;
-            submitButton.textContent = '작품 등록';
             showLoading(false);
+            submitButton.disabled = false;
+            submitButton.textContent = '등록하기';
+            submitButton.classList.remove('processing');
         }
+
     });
 }
 

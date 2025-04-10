@@ -178,3 +178,4 @@ public/uploads/artworks/
 # Environment files
 .env.local
 .env.remote
+src/public/js/mockData.js

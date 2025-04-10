@@ -94,13 +94,19 @@ class ArtworkApi {
 
             const response = await api.post('/artwork/api/new', formData);
             console.log('작품 등록 API 응답:', response);
+
+            // 응답이 없는 경우 에러 처리
+            if (!response) {
+                throw new Error('유효하지 않은 서버 응답입니다.');
+            }
+
             return response;
         } catch (error) {
             console.error('작품 등록 중 오류:', error);
-            showErrorMessage('작품 등록에 실패했습니다: ' + error.message);
             throw error;
         }
     }
+
 }
 
 export default ArtworkApi;

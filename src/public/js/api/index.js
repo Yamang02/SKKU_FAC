@@ -17,7 +17,6 @@ const handleResponse = async (response) => {
 
     try {
         const data = await response.json();
-
         // ApiResponse에서 성공 여부 확인
         if (!data.success) {
             // 서버에서 반환된 에러 메시지 사용
