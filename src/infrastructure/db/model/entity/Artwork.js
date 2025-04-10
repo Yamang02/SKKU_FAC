@@ -16,6 +16,12 @@ const Artwork = db.define('Artwork', {
         allowNull: false,
         comment: '작품명'
     },
+    slug: {
+        type: DataTypes.STRING(150),
+        allowNull: false,
+        unique: true,
+        comment: '작품 상세 페이지 URL용 slug (uuid 일부 조합)'
+    },
     medium: {
         type: DataTypes.STRING(50),
         allowNull: true,

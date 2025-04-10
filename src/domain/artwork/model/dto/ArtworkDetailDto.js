@@ -5,6 +5,7 @@ export default class ArtworkDetailDto {
     constructor(data = {}) {
         this.id = data.id || null; // 작품 고유 ID
         this.title = data.title || ''; // 작품명
+        this.slug = data.slug || ''; // 작품 슬러그
         this.medium = data.medium || ''; // 재료
         this.size = data.size || ''; // 크기
         this.description = data.description || ''; // 작품 설명

@@ -109,23 +109,3 @@
         text-align: center;
     }
 }
-
-.card {
-    border: none;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-}
-
-.card-title {
-    font-size: 1.8rem;
-    font-weight: 600;
-}
-
-.card-text {
-    font-size: 1.1rem;
-    color: #666;
-}
-
-.btn-primary {
-    padding: 10px 25px;
-    font-size: 1.1rem;
-}

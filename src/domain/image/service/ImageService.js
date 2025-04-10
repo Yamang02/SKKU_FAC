@@ -1,6 +1,6 @@
 import FileServerService from './FileServerService.js';
 import { ImageError } from '../../../common/error/ImageError.js';
-
+import cloudinary from 'cloudinary';
 /**
  * 이미지 서비스
  * 이미지 업로드, 삭제, 조회 등의 비즈니스 로직을 담당합니다.
@@ -11,11 +11,11 @@ class ImageService {
     }
 
     /**
-     * 이미지를 업로드합니다.
+     * 업로드된 파일 정보를 추출합니다.
      * @param {Object} file - 업로드된 파일 정보
      * @returns {Promise<Object>} 저장된 이미지 정보
      */
-    async uploadImage(file) {
+    async getUploadedImageInfo(file) {
         if (!file || !file.path || !file.filename) {
             throw new Error('유효하지 않은 파일 업로드 정보입니다.');
         }
@@ -27,42 +27,19 @@ class ImageService {
     }
 
     /**
-     * 파일 확장자로부터 MIME 타입을 반환합니다.
-     * @param {string} filename - 파일명
-     * @returns {string} MIME 타입
+     * Cloudinary 이미지 삭제
+     * @param {string} publicId - Cloudinary에 저장된 이미지의 public_id
+     * @returns {Promise<void>}
      */
-    getMimeType(filename) {
-        const ext = filename.split('.').pop().toLowerCase();
-        const mimeTypes = {
-            'jpg': 'image/jpeg',
-            'jpeg': 'image/jpeg',
-            'png': 'image/png',
-            'gif': 'image/gif'
-        };
-        return mimeTypes[ext] || 'application/octet-stream';
-    }
-
-    /**
-     * 이미지를 삭제합니다.
-     * @param {string|number} imageId - 이미지 ID
-     * @returns {Promise<boolean>} 삭제 성공 여부
-     */
-    async deleteImage(imageId) {
-        const image = await this.imageRepository.findById(imageId);
-        if (!image) {
-            throw new ImageError('이미지를 찾을 수 없습니다.');
-        }
-
-        // 1. 파일 서버에서 삭제
-        const deleteResult = await this.fileServerService.deleteFile(image.filePath);
-        if (!deleteResult) {
-            throw new ImageError('파일 서버에서 이미지 삭제에 실패했습니다.');
-        }
-
-        // 2. 메타데이터 삭제
-        const deleteMetadataResult = await this.imageRepository.delete(imageId);
-        if (!deleteMetadataResult) {
-            throw new ImageError('이미지 메타데이터 삭제에 실패했습니다.');
+    async deleteImage(publicId) {
+        try {
+            const result = await cloudinary.uploader.destroy(publicId);
+            if (result.result !== 'ok') {
+                console.warn(`Cloudinary 이미지 삭제 실패: ${result.result}`);
+            }
+        } catch (error) {
+            console.error('Cloudinary 이미지 삭제 중 에러:', error);
+            // 실패하더라도 전체 트랜잭션에 영향 주지 않도록 처리
         }
 
         return true;

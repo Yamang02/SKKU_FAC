@@ -1,7 +1,9 @@
 import { Message } from '../../../../common/constants/Message.js';
 import { ApiResponse } from '../../../common/model/ApiResponse.js';
 import { ImageError } from '../../../../common/error/ImageError.js';
+import ArtworkRequestDTO from '../../model/dto/ArtworkRequestDto.js';
 import ArtworkService from '../../service/ArtworkService.js';
+import ImageService from '../../../image/service/ImageService.js';
 import {
     ArtworkNotFoundError,
     ArtworkValidationError
@@ -11,6 +13,7 @@ import {
 export default class ArtworkApiController {
     constructor() {
         this.artworkService = new ArtworkService();
+        this.imageService = new ImageService();
     }
 
     // === API 엔드포인트 ===
@@ -143,6 +146,9 @@ export default class ArtworkApiController {
      * 작품을 등록합니다.
      */
     async createArtwork(req, res) {
+        const file = req.file;
+        const artworkData = req.body;
+
         try {
             console.log('=== 작품 등록 요청 시작 ===');
             console.log('Request Body:', req.body);
@@ -152,8 +158,6 @@ export default class ArtworkApiController {
             console.log('Request Headers:', req.headers);
             console.log('========================');
 
-            const file = req.file;
-            const artworkData = req.body;
 
             // 세션 검사
             if (!req.session) {
@@ -167,8 +171,6 @@ export default class ArtworkApiController {
                 return res.status(401).json(ApiResponse.error('로그인이 필요합니다.'));
             }
 
-            const userId = req.session.user.id;
-            artworkData.userId = userId;
 
             // 파일 검사
             if (!file) {
@@ -176,11 +178,21 @@ export default class ArtworkApiController {
                 return res.status(400).json(ApiResponse.error('이미지 파일이 필요합니다.'));
             }
 
-            console.log('ArtworkService.createArtwork 호출 전');
+            const artworkRequestDTO = new ArtworkRequestDTO();
+
             try {
-                const artwork = await this.artworkService.createArtwork(artworkData, file);
-                console.log('생성된 작품 정보:', artwork);
-                return res.status(201).json(ApiResponse.success(artwork, Message.ARTWORK.CREATE_SUCCESS));
+
+                artworkRequestDTO.title = artworkData.title;
+                artworkRequestDTO.userId = req.session.user.id;
+                artworkRequestDTO.medium = artworkData.medium;
+                artworkRequestDTO.size = artworkData.size;
+                artworkRequestDTO.year = artworkData.year;
+                artworkRequestDTO.description = artworkData.description;
+                artworkRequestDTO.exhibitionId = artworkData.exhibitionId;
+
+                const createdartwork = await this.artworkService.createArtwork(artworkRequestDTO, file);
+                console.log('생성된 작품 정보:', createdartwork);
+                return res.status(201).json(ApiResponse.success(createdartwork, Message.ARTWORK.CREATE_SUCCESS));
             } catch (serviceError) {
                 console.error('작품 서비스 처리 중 오류:', serviceError);
                 // 서비스 오류 세부 정보 출력
@@ -194,6 +206,10 @@ export default class ArtworkApiController {
             // 오류 스택 출력
             if (error.stack) {
                 console.error('오류 스택:', error.stack);
+            }
+            // 업로드 이미지 삭제
+            if (file) {
+                await this.imageService.deleteImage(file.filename);
             }
 
             if (error instanceof ArtworkValidationError) {

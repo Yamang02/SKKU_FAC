@@ -80,7 +80,6 @@ async function loadFeaturedArtworks() {
             container.appendChild(fragment);
             setupCardEvents();
         } else {
-            console.log('추천 작품이 없습니다');
             container.innerHTML = emptyArtworkTemplate;
         }
     } catch (error) {

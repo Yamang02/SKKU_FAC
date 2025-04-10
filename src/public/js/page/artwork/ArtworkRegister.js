@@ -1,7 +1,7 @@
 import UserApi from '../../api/UserApi.js';
 import ArtworkApi from '../../api/ArtworkApi.js';
 // import ExhibitionAPI from '../../api/ExhibitionAPI.js';
-import { showErrorMessage, showSuccessMessage } from '../../common/util/notification.js';
+import { showErrorMessage, showSuccessMessage, showLoading } from '../../common/util/notification.js';
 
 
 // 페이지 초기화 함수
@@ -186,11 +186,10 @@ function initSubmitButton() {
             showErrorMessage('작품 이미지를 업로드해주세요.');
             return;
         }
-
+        showLoading(true);
         try {
             // 제출 버튼 비활성화
             submitButton.disabled = true;
-            submitButton.textContent = '등록 중...';
 
             // FormData 생성
             const formData = new FormData();
@@ -223,6 +222,7 @@ function initSubmitButton() {
             // 제출 버튼 활성화
             submitButton.disabled = false;
             submitButton.textContent = '작품 등록';
+            showLoading(false);
         }
     });
 }

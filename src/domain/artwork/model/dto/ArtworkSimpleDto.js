@@ -7,6 +7,7 @@ export default class ArtworkSimpleDTO {
     constructor(artworkWithRelations, type = 'card') {
         this.id = artworkWithRelations.id; // 작품 ID
         this.title = artworkWithRelations.title; // 작품명
+        this.slug = artworkWithRelations.slug; // 작품 슬러그
         this.image = artworkWithRelations.imageUrl ? `${WebPath.UPLOAD.ARTWORKS}/${artworkWithRelations.imageUrl}` : null; // 이미지 URL
         this.userId = artworkWithRelations.userId; // 작가 ID
         this.artistName = artworkWithRelations.userAccount?.name || ''; // 작가 이름 (UserAccount에서 가져옴)

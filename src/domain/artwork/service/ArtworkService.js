@@ -3,6 +3,7 @@ import ImageService from '../../image/service/ImageService.js';
 import { ArtworkNotFoundError, ArtworkValidationError } from '../../../common/error/ArtworkError.js';
 import ArtworkDetailDTO from '../model/dto/ArtworkDetailDTO.js';
 import ArtworkSimpleDTO from '../model/dto/ArtworkSimpleDTO.js';
+import { v4 as uuidv4 } from 'uuid';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
 
 /**
@@ -43,11 +44,11 @@ export default class ArtworkService {
         if (!artworkData.title) {
             throw new ArtworkValidationError('작품 제목은 필수입니다.');
         }
-        file;
 
         artworkData.id = generateDomainUUID(DOMAINS.ARTWORK);
-
-        const uploadedImage = await this.imageService.uploadImage(file, 'artworks');
+        artworkData.slug = artworkData.title.replace(/ /g, '-') + uuidv4().slice(0, 8);
+        console.log(artworkData.slug);
+        const uploadedImage = await this.imageService.getUploadedImageInfo(file);
         artworkData.imagePublicId = uploadedImage.publicId;
         artworkData.imageUrl = uploadedImage.imageUrl;
         const artwork = await this.artworkRepository.createArtwork(artworkData);
@@ -72,7 +73,7 @@ export default class ArtworkService {
             if (imageId) {
                 await this.imageService.deleteImage(imageId);
             }
-            const image = await this.imageService.uploadImage(file);
+            const image = await this.imageService.getUploadedImageInfo(file);
             imageId = image.id;
         }
 
@@ -109,7 +110,7 @@ export default class ArtworkService {
      * @returns {Promise<Object>} 업로드된 이미지 정보
      */
     async uploadArtworkImage(file) {
-        return this.imageService.uploadImage(file);
+        return this.imageService.getUploadedImageInfo(file);
     }
 
     /**
@@ -165,4 +166,5 @@ export default class ArtworkService {
 
         return relatedArtworks.filter(artwork => artwork !== null);
     }
+
 }

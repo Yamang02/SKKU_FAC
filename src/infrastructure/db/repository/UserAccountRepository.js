@@ -162,8 +162,8 @@ export default class UserAccountRepository {
     async deleteUser(id) {
         const user = await UserAccount.findByPk(id, {
             include: [{ model: SkkuUserProfile, required: false },
-            { model: ExternalUserProfile, required: false },
-            { model: Artwork, required: false }]
+                { model: ExternalUserProfile, required: false },
+                { model: Artwork, required: false }]
         });
         if (!user) {
             return false;

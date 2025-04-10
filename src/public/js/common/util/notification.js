@@ -119,20 +119,35 @@ export function showSuccessMessage(message) {
  * @param {boolean} isLoading - 로딩 상태
  */
 export function showLoading(isLoading) {
-    const loadingId = 'global-loading';
-    let loadingElement = document.getElementById(loadingId);
+    const container = getNotificationContainer();
+    const loadingClassName = 'notification--loading';
 
-    if (isLoading && !loadingElement) {
-        loadingElement = document.createElement('div');
-        loadingElement.id = loadingId;
-        loadingElement.className = 'loading-spinner';
-        document.body.appendChild(loadingElement);
-    } else if (!isLoading && loadingElement) {
-        loadingElement.addEventListener('transitionend', () => {
-            if (loadingElement.parentNode) {
-                document.body.removeChild(loadingElement);
-            }
-        });
-        loadingElement.style.opacity = '0';
+    // 현재 컨테이너 안에서 로딩 요소 있는지 확인
+    let loadingElement = container.querySelector(`.notification.${loadingClassName}`);
+
+    if (isLoading) {
+        if (!loadingElement) {
+            // 없으면 새로 생성
+            loadingElement = document.createElement('div');
+            loadingElement.className = `notification ${loadingClassName}`;
+
+            // 로딩 아이콘
+            const icon = document.createElement('span');
+            icon.className = 'loading-icon';
+            loadingElement.appendChild(icon);
+
+            // 텍스트
+            const text = document.createElement('span');
+            text.textContent = '처리 중입니다...';
+            loadingElement.appendChild(text);
+
+            container.appendChild(loadingElement);
+        }
+    } else {
+        // 있으면 제거
+        if (loadingElement) {
+            container.removeChild(loadingElement);
+        }
     }
 }
+
