@@ -1,5 +1,6 @@
 import ArtworkRepository from '../../../infrastructure/db/repository/ArtworkRepository.js';
 import ImageService from '../../image/service/ImageService.js';
+import UserService from '../../user/service/UserService.js';
 import { ArtworkNotFoundError, ArtworkValidationError } from '../../../common/error/ArtworkError.js';
 import ArtworkDetailDTO from '../model/dto/ArtworkDetailDTO.js';
 import ArtworkSimpleDTO from '../model/dto/ArtworkSimpleDTO.js';
@@ -14,6 +15,7 @@ export default class ArtworkService {
     constructor() {
         this.artworkRepository = new ArtworkRepository();
         this.imageService = new ImageService();
+        this.userService = new UserService();
     }
 
     /**
@@ -129,7 +131,29 @@ export default class ArtworkService {
     async getFeaturedArtworks() {
         const FEATURED_LIMIT = 6;  // 상수로 정의
         const artworks = await this.artworkRepository.findFeaturedArtworks(FEATURED_LIMIT);
-        return artworks.map(artwork => new ArtworkSimpleDTO(artwork));
+        const artworkSimpleList = [];
+
+        for (const artwork of artworks) {
+            const artworkSimple = new ArtworkSimpleDTO(artwork);
+            const user = await this.userService.getUserDetail(artworkSimple.userId);
+            console.log('user : ', user);
+            if (user) {
+                artworkSimple.artistName = user.name;
+                if (user.role === 'SKKU_MEMBER') {
+                    artworkSimple.department = user.department + ' ' + user.studentYear;
+                } else if (user.role === 'EXTERNAL_MEMBER') {
+                    artworkSimple.department = user.affiliation;
+                }
+            }
+
+            if (artwork.exhibition) {
+                artworkSimple.exhibitionName = artwork.exhibition.name;
+            }
+
+            artworkSimpleList.push(artworkSimple);
+        }
+
+        return artworkSimpleList;
     }
 
     /**

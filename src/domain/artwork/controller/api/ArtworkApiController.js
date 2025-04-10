@@ -67,6 +67,7 @@ export default class ArtworkApiController {
     async getFeaturedArtworks(req, res) {
         try {
             const artworks = await this.artworkService.getFeaturedArtworks();
+            console.log('controller artworks : ', artworks);
             return res.json(ApiResponse.success(artworks));
         } catch (error) {
             console.error('추천 작품 목록 조회 중 오류:', error);
@@ -150,15 +151,6 @@ export default class ArtworkApiController {
         const artworkData = req.body;
 
         try {
-            console.log('=== 작품 등록 요청 시작 ===');
-            console.log('Request Body:', req.body);
-            console.log('Request File:', req.file);
-            console.log('Request Session:', req.session ? '있음' : '없음');
-            console.log('Request User:', req.session?.user ? JSON.stringify(req.session.user, null, 2) : '없음');
-            console.log('Request Headers:', req.headers);
-            console.log('========================');
-
-
             // 세션 검사
             if (!req.session) {
                 console.error('세션이 없습니다.');
