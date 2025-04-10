@@ -7,13 +7,7 @@ export const imageUploadMiddleware = (type = 'default') => {
     try {
         storage = createCloudinaryStorage(type);
     } catch (error) {
-        console.error('CloudinaryStorage 생성 실패, 로컬 fallback 사용:', error);
-        storage = multer.diskStorage({
-            destination: './uploads/',
-            filename: (req, file, cb) => {
-                cb(null, Date.now() + '-' + file.originalname);
-            }
-        });
+        throw new Error('CloudinaryStorage 생성 실패', error);
     }
 
     return multer({
