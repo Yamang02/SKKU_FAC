@@ -15,7 +15,11 @@ class ArtworkApi {
                 .filter(Boolean)
                 .join('&');
 
-            return await api.get(`/artwork/api/list?${queryString}`);
+            console.log('작품 목록 API 호출:', `/artwork/api/list?${queryString}`);
+            const response = await api.get(`/artwork/api/list?${queryString}`);
+            console.log('작품 목록 API 응답:', response);
+
+            return response;
         } catch (error) {
             console.error('작품 목록을 가져오는 중 오류 발생:', error);
             showErrorMessage('작품 목록을 불러오는데 실패했습니다.');

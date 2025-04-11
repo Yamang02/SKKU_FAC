@@ -51,10 +51,8 @@ export default class UserService {
             password: hashedPassword
         });
 
-        console.log('userDto:', userDto);
         const Createduser = await this.userRepository.createUser(userDto);
         const userSimpleDto = new UserSimpleDto(Createduser);
-        console.log('Service : ' + userSimpleDto);
         return userSimpleDto;
     }
 

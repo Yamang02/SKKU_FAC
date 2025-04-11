@@ -41,19 +41,19 @@ export default class ArtworkApiController {
         */
     async getArtworkList(req, res) {
         try {
-            const { page = 1, limit = 10, ...filters } = req.query;
+            const { page = 1, limit = 10, sortField = 'createdAt', sortOrder = 'desc', ...filters } = req.query;
 
-            const artworkList = await this.artworkService.getArtworkList({
+            // 작품 목록과 관련 정보를 함께 조회
+            const result = await this.artworkService.getArtworkListWithDetails({
                 page: Number(page),
                 limit: Number(limit),
+                sortField,
+                sortOrder,
                 ...filters
             });
 
-            return res.json(ApiResponse.success({
-                items: artworkList.items,
-                total: artworkList.total,
-                page: artworkList.page
-            }));
+            // 서비스에서 반환한 결과를 그대로 응답
+            return res.json(ApiResponse.success(result));
         } catch (error) {
             console.error('작품 목록 조회 중 오류:', error);
             return res.status(500).json(ApiResponse.error(error.message));
@@ -88,44 +88,6 @@ export default class ArtworkApiController {
         }
     }
 
-
-    /**
-      * 작품 간단 정보를 조회합니다.
-      */
-
-    async getArtworkSimple(req, res) {
-        try {
-            const id = parseInt(req.params.id);
-            const type = req.query.type || 'default';
-
-            const artwork = await this.artworkService.getArtworkSimple(id, type);
-            return res.json(ApiResponse.success(artwork));
-        } catch (error) {
-            return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND));
-        }
-    }
-
-
-    /**
-     * 관리자용 작품을 등록합니다.
-     */
-    async createManagementArtwork(req, res) {
-        try {
-            const artworkData = req.body;
-            const result = await this.artworkService.createArtwork(artworkData);
-
-            if (result) {
-                return res.json(ApiResponse.success({
-                    message: Message.ARTWORK.CREATE_SUCCESS,
-                    redirectUrl: '/admin/management/artwork'
-                }));
-            } else {
-                return res.status(400).json(ApiResponse.error(Message.ARTWORK.CREATE_ERROR));
-            }
-        } catch (error) {
-            return res.status(500).json(ApiResponse.error(Message.ARTWORK.CREATE_ERROR));
-        }
-    }
 
     /**
      * 작품을 등록합니다.
@@ -167,7 +129,6 @@ export default class ArtworkApiController {
                 artworkRequestDTO.exhibitionId = artworkData.exhibitionId;
 
                 const createdartwork = await this.artworkService.createArtwork(artworkRequestDTO, file);
-                console.log('생성된 작품 정보:', createdartwork);
                 return res.status(201).json(ApiResponse.success(createdartwork, Message.ARTWORK.CREATE_SUCCESS));
             } catch (serviceError) {
                 console.error('작품 서비스 처리 중 오류:', serviceError);

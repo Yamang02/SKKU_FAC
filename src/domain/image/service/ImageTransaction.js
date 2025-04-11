@@ -20,15 +20,10 @@ export class ImageTransaction {
      */
     async saveToFileServer(fileBuffer, category) {
         try {
-            console.log('파일 서버 저장 시작');
+
             this.uploadedFile = await this.fileServerService.uploadFile(fileBuffer, category);
-            console.log('파일 서버 저장 성공:', {
-                storedName: this.uploadedFile.storedName,
-                filePath: this.uploadedFile.filePath
-            });
             return this.uploadedFile;
         } catch (error) {
-            console.error('파일 서버 저장 실패:', error.message);
             throw new ImageTransactionError('파일 서버 저장 실패: ' + error.message);
         }
     }
@@ -40,9 +35,7 @@ export class ImageTransaction {
      */
     async saveToDatabase(imageData) {
         try {
-            console.log('DB 저장 시작:', imageData);
             this.savedImage = await this.imageRepository.saveImage(imageData);
-            console.log('DB 저장 성공:', { imageId: this.savedImage.id });
             return this.savedImage;
         } catch (error) {
             console.error('DB 저장 실패:', error.message);

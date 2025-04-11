@@ -59,3 +59,70 @@ export function createArtworkCard(artwork, options = { type: 'home' }) {
 
     return card;
 }
+
+/**
+ * 전시회 카드를 생성하는 유틸리티 함수
+ * @param {Object} exhibition - 전시회 데이터 객체
+ * @returns {HTMLElement} 생성된 전시회 카드 엘리먼트
+ */
+export function createExhibitionCarouselCard(exhibition) {
+    const slide = document.createElement('div');
+    slide.className = 'carousel-slide';
+    slide.dataset.exhibition = exhibition.id || '';
+
+    const card = document.createElement('div');
+    card.className = 'card card--carousel';
+
+    const imageContainer = document.createElement('div');
+    imageContainer.className = 'card__image-container';
+
+    const image = document.createElement('img');
+    image.className = 'card__image';
+    image.src = exhibition.image || '/images/exhibition-placeholder.svg';
+    image.alt = exhibition.title || '';
+    image.onerror = function () {
+        this.onerror = null;
+        this.src = '/images/exhibition-placeholder.svg';
+    };
+
+    const info = document.createElement('div');
+    info.className = 'card__info';
+
+    const title = document.createElement('h3');
+    title.className = 'card__title';
+    title.textContent = exhibition.title || '';
+
+    if (exhibition.subtitle) {
+        const subtitle = document.createElement('p');
+        subtitle.className = 'card__subtitle';
+        subtitle.textContent = exhibition.subtitle;
+        info.appendChild(subtitle);
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'card__meta';
+
+    if (exhibition.startDate || exhibition.endDate) {
+        const date = document.createElement('p');
+        date.className = 'card__date';
+        date.textContent = `${exhibition.startDate ? new Date(exhibition.startDate).toLocaleDateString() : ''} ~ ${exhibition.endDate ? new Date(exhibition.endDate).toLocaleDateString() : ''}`;
+        meta.appendChild(date);
+    }
+
+    if (exhibition.location) {
+        const location = document.createElement('p');
+        location.className = 'card__location';
+        location.textContent = exhibition.location;
+        meta.appendChild(location);
+    }
+
+    imageContainer.appendChild(image);
+    info.appendChild(title);
+    info.appendChild(meta);
+
+    card.appendChild(imageContainer);
+    card.appendChild(info);
+    slide.appendChild(card);
+
+    return slide;
+}

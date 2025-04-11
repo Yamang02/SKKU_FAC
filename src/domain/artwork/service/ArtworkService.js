@@ -2,10 +2,11 @@ import ArtworkRepository from '../../../infrastructure/db/repository/ArtworkRepo
 import ImageService from '../../image/service/ImageService.js';
 import UserService from '../../user/service/UserService.js';
 import { ArtworkNotFoundError, ArtworkValidationError } from '../../../common/error/ArtworkError.js';
-import ArtworkDetailDTO from '../model/dto/ArtworkDetailDTO.js';
-import ArtworkSimpleDTO from '../model/dto/ArtworkSimpleDTO.js';
+import ArtworkDetailDto from '../model/dto/ArtworkDetailDto.js';
+import ArtworkSimpleDto from '../model/dto/ArtworkSimpleDto.js';
 import { v4 as uuidv4 } from 'uuid';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
+import Page from '../../common/model/Page.js';
 
 /**
  * 작품 서비스
@@ -23,12 +24,88 @@ export default class ArtworkService {
      */
     async getArtworkList(options = {}) {
         const artworks = await this.artworkRepository.findArtworks(options);
-        return artworks.items.map(artwork => new ArtworkSimpleDTO(artwork));
+        return artworks.items.map(artwork => new ArtworkSimpleDto(artwork));
     }
 
+    /**
+     * 작품 목록과 관련 정보를 함께 조회합니다.
+     * @param {Object} options - 조회 옵션 (페이지, 한 페이지당 항목 수, 정렬 등)
+     * @returns {Promise<Object>} 작품 목록 및 페이지네이션 정보
+     */
+    async getArtworkListWithDetails(options = {}) {
+        // 1. 기본 작품 목록 조회
+        const artworksResult = await this.artworkRepository.findArtworks(options);
+        const artworks = artworksResult.items || [];
+
+        // 2. 각 작품에 대한 추가 정보 수집 및 DTO 생성
+        const artworkItems = [];
+
+        for (const artwork of artworks) {
+            try {
+                // 기본 작품 정보 준비
+                const artworkDetail = {
+                    id: artwork.id,
+                    title: artwork.title,
+                    slug: artwork.slug,
+                    year: artwork.year,
+                    description: artwork.description,
+                    imageUrl: artwork.imageUrl,
+                    userId: artwork.userId,
+                    createdAt: artwork.createdAt,
+                    updatedAt: artwork.updatedAt
+                };
+
+                // 작가 정보 조회 및 추가
+                if (artwork.userId) {
+                    try {
+                        const user = await this.userService.getUserSimple(artwork.userId);
+                        if (user) {
+                            artworkDetail.artistName = user.name;
+                            artworkDetail.artistAffiliation = user.affiliation;
+                        } else {
+                            artworkDetail.artistName = '작가 미상';
+                            artworkDetail.artistAffiliation = '';
+                        }
+                    } catch (error) {
+                        console.error(`작가 정보 조회 중 오류(ID: ${artwork.userId}):`, error);
+                        artworkDetail.artistName = '작가 정보 없음';
+                        artworkDetail.artistAffiliation = '';
+                    }
+                } else {
+                    artworkDetail.artistName = '작가 미상';
+                    artworkDetail.artistAffiliation = '';
+                }
+
+                // 전시회 정보 추가 (향후 구현)
+                artworkDetail.exhibitions = [];
+
+                // DTO 변환 및 추가
+                const artworkDetailDto = new ArtworkDetailDto(artworkDetail);
+                artworkItems.push(artworkDetailDto);
+            } catch (error) {
+                console.error(`작품 정보 처리 중 오류(ID: ${artwork.id}):`, error);
+            }
+        }
+
+        // 3. 페이지네이션 정보 생성
+        const totalItems = artworksResult.total || 0;
+        const pageOptions = {
+            page: options.page || 1,
+            limit: options.limit || 10
+        };
+
+        // Page 객체 생성
+        const pageInfo = new Page(totalItems, pageOptions);
+
+        // 4. 결과 반환
+        return {
+            items: artworkItems,
+            total: totalItems,
+            pageInfo
+        };
+    }
 
     async getArtworkDetailbySlug(slug) {
-        console.log('slug : ', slug);
         const artwork = await this.artworkRepository.findArtworkBySlug(slug);
         if (!artwork) {
             throw new ArtworkNotFoundError();
@@ -42,8 +119,7 @@ export default class ArtworkService {
 
         const relatedArtworks = await this.findRelatedArtworks(artwork);
         artwork.relatedArtworks = relatedArtworks;
-        const artworkDetail = new ArtworkDetailDTO(artwork);
-        console.log('artworkDetail : ', artworkDetail);
+        const artworkDetail = new ArtworkDetailDto(artwork);
         return artworkDetail;
     }
 
@@ -51,14 +127,13 @@ export default class ArtworkService {
      * 관련 작품 목록을 조회합니다.
      */
     async findRelatedArtworks(artwork) {
-        console.log('findRelatedArtworks 실행');
         const relatedArtworks = [];
 
         // 1. 동일 작가의 다른 작품 조회
         try {
             const sameArtistArtworks = await this.artworkRepository.findByArtistId(artwork.userId, 8, artwork.id);
             for (const relatedArtwork of sameArtistArtworks) {
-                const relatedArtworkSimple = new ArtworkSimpleDTO(relatedArtwork);
+                const relatedArtworkSimple = new ArtworkSimpleDto(relatedArtwork);
                 relatedArtworkSimple.artistName = artwork.artistName;
                 relatedArtworkSimple.artistAffiliation = artwork.artistAffiliation;
                 relatedArtworks.push(relatedArtworkSimple);
@@ -82,12 +157,11 @@ export default class ArtworkService {
 
         artworkData.id = generateDomainUUID(DOMAINS.ARTWORK);
         artworkData.slug = artworkData.title.replace(/ /g, '_') + '_' + uuidv4().slice(0, 8);
-        console.log(artworkData.slug);
         const uploadedImage = await this.imageService.getUploadedImageInfo(file);
         artworkData.imagePublicId = uploadedImage.publicId;
         artworkData.imageUrl = uploadedImage.imageUrl;
         const artwork = await this.artworkRepository.createArtwork(artworkData);
-        return new ArtworkSimpleDTO(artwork);
+        return new ArtworkSimpleDto(artwork);
     }
 
     /**
@@ -118,7 +192,7 @@ export default class ArtworkService {
         };
 
         const updatedArtwork = await this.artworkRepository.updateArtwork(id, artworkData);
-        return new ArtworkSimpleDTO(updatedArtwork);
+        return new ArtworkSimpleDto(updatedArtwork);
     }
 
     /**
@@ -167,7 +241,7 @@ export default class ArtworkService {
         const artworkSimpleList = [];
 
         for (const artwork of artworks) {
-            const artworkSimple = new ArtworkSimpleDTO(artwork);
+            const artworkSimple = new ArtworkSimpleDto(artwork);
             const user = await this.userService.getUserSimple(artworkSimple.userId);
 
             if (user) {
@@ -195,7 +269,7 @@ export default class ArtworkService {
         if (!artworkWithRelations) {
             throw new ArtworkNotFoundError();
         }
-        return new ArtworkSimpleDTO(artworkWithRelations);
+        return new ArtworkSimpleDto(artworkWithRelations);
     }
 
 }

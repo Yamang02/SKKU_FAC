@@ -56,17 +56,33 @@ class ArtworkRepository {
         const page = options.page || 1; // 기본값: 1
         const limit = options.limit || 12; // 기본값: 12
         const offset = (page - 1) * limit; // 시작 위치 계산
+        const sortField = options.sortField || 'createdAt'; // 기본 정렬 필드
+        const sortOrder = options.sortOrder || 'DESC'; // 기본 정렬 순서
 
         try {
+            // 검색 조건 구성
+            const where = {};
+
+            // 키워드 검색 조건 추가
+            if (options.keyword) {
+                where[Op.or] = [
+                    { title: { [Op.like]: `%${options.keyword}%` } },
+                    { description: { [Op.like]: `%${options.keyword}%` } }
+                ];
+            }
+
             const { count, rows } = await Artwork.findAndCountAll({
+                where,
                 limit: limit,
                 offset: offset,
-                order: [['createdAt', 'DESC']] // 정렬 기준
+                order: [[sortField, sortOrder.toUpperCase()]]
             });
 
             return {
                 items: rows,
-                total: count
+                total: count,
+                page,  // 현재 페이지 정보 추가
+                limit  // 페이지당 항목 수 추가
             };
         } catch (error) {
             console.error('작품 목록 조회 중 오류:', error);

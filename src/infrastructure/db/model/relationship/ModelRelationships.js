@@ -95,7 +95,6 @@ const syncModels = async () => {
 
         // 모델 동기화 (테스트/개발 환경에서만 사용)
         await db.sync({ alter: true });
-        console.log('✅ 모든 모델이 성공적으로 동기화되었습니다.');
     } catch (error) {
         console.error('❌ 모델 동기화 중 오류 발생:', error);
         throw error;

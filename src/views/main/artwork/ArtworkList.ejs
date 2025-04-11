@@ -5,6 +5,7 @@
     <h1 class="text-center" style="margin: 60px 0 40px 0;">작품 검색</h1>
 
     <!-- 전시회 캐러셀 섹션 -->
+    <!--
     <section class="exhibition-carousel">
         <h2 class="section-title">전시회별 작품</h2>
         <div class="carousel-container">
@@ -14,117 +15,119 @@
             <div class="carousel-track-container">
                 <div class="carousel-track">
                     <!-- 모든 작품 카드 -->
-                    <div class="carousel-slide" data-exhibition="all">
-                        <div class="card card--carousel card--all">
-                            <i class="card__icon fas fa-images"></i>
-                            <h3 class="card__title">모든 작품</h3>
-                            <p class="card__subtitle">전체 작품 컬렉션</p>
-                            <div class="card__meta">총 <strong>0</strong>개의 작품</div>
-                        </div>
+    <div class="carousel-slide" data-exhibition="all">
+        <div class="card card--carousel card--all">
+            <i class="card__icon fas fa-images"></i>
+            <h3 class="card__title">모든 작품</h3>
+            <p class="card__subtitle">전체 작품 컬렉션</p>
+            <div class="card__meta">총 <strong>0</strong>개의 작품</div>
+        </div>
+    </div>
+</div>
+</div>
+<button class="carousel-arrow carousel-next">
+    <i class="fas fa-chevron-right"></i>
+</button>
+</div>
+</section>
+
+<!-- 상세 검색 토글 버튼 -->
+<div class="search-toggle-container">
+    <button id="advancedSearchToggle" class="search-toggle-button">
+        <i class="fas fa-sliders-h"></i> 상세 검색 필터
+        <i class="fas fa-chevron-down toggle-icon"></i>
+    </button>
+</div>
+
+<!-- 상세 검색 패널 (기본적으로 숨겨짐) -->
+<section id="advancedSearchPanel" class="advanced-search-panel">
+    <div class="panel-content">
+        <form class="search-form" id="searchForm" method="get" action="">
+            <!-- 페이지네이션 정보를 유지하기 위한 숨겨진 입력 필드 -->
+            <input type="hidden" name="page" value="1">
+
+            <div class="search-simple-layout">
+                <div class="search-column keyword-column">
+                    <label for="keyword" class="form-label">작품 검색</label>
+                    <div class="search-input-wrapper">
+                        <input type="text" id="keyword" name="keyword" class="search-input"
+                            placeholder="작품명, 작가명을 입력하세요" value="<%= typeof keyword !== 'undefined' ? keyword : '' %>">
                     </div>
                 </div>
-            </div>
-            <button class="carousel-arrow carousel-next">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-    </section>
 
-    <!-- 상세 검색 토글 버튼 -->
-    <div class="search-toggle-container">
-        <button id="advancedSearchToggle" class="search-toggle-button">
-            <i class="fas fa-sliders-h"></i> 상세 검색 필터
-            <i class="fas fa-chevron-down toggle-icon"></i>
-        </button>
+                <div class="search-column">
+                    <label for="exhibition" class="form-label">전시회</label>
+                    <select id="exhibition" name="exhibition" class="form-select">
+                        <option value="">모든 전시회</option>
+                    </select>
+                </div>
+
+                <div class="search-column">
+                    <label for="year" class="form-label">제작 연도</label>
+                    <input type="text" id="year" name="year" class="form-input" placeholder="예: 2023"
+                        value="<%= typeof year !== 'undefined' ? year : '' %>">
+                </div>
+
+                <div class="search-column search-buttons">
+                    <button type="submit" class="btn btn-search--artworklist">검색</button>
+                    <button type="reset" class="btn btn-reset">초기화</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- 결과 컨트롤 섹션 -->
+<section class="results-control">
+    <!-- 결과 수 표시 -->
+    <div class="results-info">
+        <p id="resultCount">총 <strong>0</strong>개의 작품이 검색되었습니다.</p>
     </div>
 
-    <!-- 상세 검색 패널 (기본적으로 숨겨짐) -->
-    <section id="advancedSearchPanel" class="advanced-search-panel">
-        <div class="panel-content">
-            <form class="search-form" id="searchForm" method="get" action="">
-                <div class="search-simple-layout">
-                    <div class="search-column keyword-column">
-                        <label for="keyword" class="form-label">작품 검색</label>
-                        <div class="search-input-wrapper">
-                            <input type="text" id="keyword" name="keyword" class="search-input"
-                                placeholder="작품명, 작가명, 키워드 등을 입력하세요"
-                                value="<%= typeof keyword !== 'undefined' ? keyword : '' %>">
-                        </div>
-                    </div>
+    <!-- 뷰 전환 버튼 -->
+    <div class="view-toggle">
+        <button id="cardViewBtn" class="btn btn--toggle active" title="카드 뷰">
+            <i class="fas fa-th"></i>
+        </button>
+        <button id="tableViewBtn" class="btn btn--toggle" title="테이블 뷰">
+            <i class="fas fa-list"></i>
+        </button>
+    </div>
+</section>
 
-                    <div class="search-column">
-                        <label for="exhibition" class="form-label">전시회</label>
-                        <select id="exhibition" name="exhibition" class="form-select">
-                            <option value="">모든 전시회</option>
-                        </select>
-                    </div>
-
-                    <div class="search-column">
-                        <label for="year" class="form-label">제작 연도</label>
-                        <input type="text" id="year" name="year" class="form-input" placeholder="예: 2023"
-                            value="<%= typeof year !== 'undefined' ? year : '' %>">
-                    </div>
-
-                    <div class="search-column search-buttons">
-                        <button type="submit" class="btn btn-search--artworklist">검색</button>
-                        <button type="reset" class="btn btn-reset">초기화</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </section>
-
-    <!-- 결과 컨트롤 섹션 -->
-    <section class="results-control">
-        <!-- 결과 수 표시 -->
-        <div class="results-info">
-            <p id="resultCount">총 <strong>0</strong>개의 작품이 검색되었습니다.</p>
-        </div>
-
-        <!-- 뷰 전환 버튼 -->
-        <div class="view-toggle">
-            <button id="cardViewBtn" class="btn btn--toggle active" title="카드 뷰">
-                <i class="fas fa-th"></i>
-            </button>
-            <button id="tableViewBtn" class="btn btn--toggle" title="테이블 뷰">
-                <i class="fas fa-list"></i>
-            </button>
-        </div>
-    </section>
-
-    <!-- 작품 목록 섹션 (카드 뷰) -->
-    <section class="artwork-list-section">
-        <div id="cardView" class="artwork-grid">
-            <!-- 작품 카드가 여기에 동적으로 로드됩니다 -->
-            <div class="loading-artwork">
-                <div class="loading-spinner">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
+<!-- 작품 목록 섹션 (카드 뷰) -->
+<section class="artwork-list-section">
+    <div id="cardView" class="artwork-grid">
+        <!-- 작품 카드가 여기에 동적으로 로드됩니다 -->
+        <div class="loading-artwork">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
             </div>
         </div>
+    </div>
 
-        <!-- 테이블 뷰 (기본적으로 숨겨짐) -->
-        <table id="tableView" class="table-view" style="display: none;">
-            <thead>
-                <tr>
-                    <th>이미지</th>
-                    <th>작품명</th>
-                    <th>작가</th>
-                    <th>학과</th>
-                    <th>전시회</th>
-                    <th>제작 연도</th>
-                </tr>
-            </thead>
-            <tbody id="tableViewBody">
-                <!-- 테이블 내용이 여기에 동적으로 로드됩니다 -->
-            </tbody>
-        </table>
+    <!-- 테이블 뷰 (기본적으로 숨겨짐) -->
+    <table id="tableView" class="table-view" style="display: none;">
+        <thead>
+            <tr>
+                <th>이미지</th>
+                <th>작품명</th>
+                <th>작가</th>
+                <th>학과</th>
+                <th>전시회</th>
+                <th>제작 연도</th>
+            </tr>
+        </thead>
+        <tbody id="tableViewBody">
+            <!-- 테이블 내용이 여기에 동적으로 로드됩니다 -->
+        </tbody>
+    </table>
 
-        <!-- 페이지네이션 -->
-        <div id="pagination" class="pagination">
-            <!-- 페이지네이션이 여기에 동적으로 로드됩니다 -->
-        </div>
-    </section>
+    <!-- 페이지네이션 -->
+    <div id="pagination" class="pagination">
+        <!-- 페이지네이션이 여기에 동적으로 로드됩니다 -->
+    </div>
+</section>
 </div>
 
 <script type="module" src="/js/page/artwork/ArtworkList.js"></script>

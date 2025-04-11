@@ -97,7 +97,6 @@ export default class UserApiController {
      */
     async getUserProfile(req, res) {
         const userId = req.session.user.id;
-        console.log('userId:', userId);
 
         try {
             const user = await this.userService.getUserDetail(userId);

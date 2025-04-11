@@ -8,7 +8,6 @@ export default class UserApi {
     // 회원가입
     static async register(userData) {
         try {
-            console.log('전송할 데이터:', userData);
             const response = await api.post('/user', userData);
             return response.data;
         } catch (error) {
