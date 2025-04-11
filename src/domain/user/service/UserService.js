@@ -60,10 +60,10 @@ export default class UserService {
             emailVerificationTokenExpiry: tokenExpiry
         });
 
-        console.log('userDto:', userDto);
+        ('userDto:', userDto);
 
         const Createduser = await this.userRepository.createUser(userDto);
-        console.log('Createduser:', Createduser);
+        ('Createduser:', Createduser);
         // 이메일 전송
         try {
             await sendVerificationEmail(userDto.email, token);
@@ -157,7 +157,7 @@ export default class UserService {
             throw new Error('사용자를 찾을 수 없습니다.');
         }
 
-        console.log('userData:', userData);
+        ('userData:', userData);
 
         // 이름 & 비밀번호
         user.name = userData.name;

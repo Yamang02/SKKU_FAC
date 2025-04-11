@@ -23,6 +23,9 @@ UserRouter.get('/api/list', isAuthenticated, (req, res) => userApiController.get
 // 회원가입 API
 UserRouter.post('/', isNotAuthenticated, (req, res) => userApiController.registerUser(req, res));
 
+// 플래시 메시지 API
+UserRouter.get('/api/flash-message', (req, res) => userApiController.getFlashMessage(req, res));
+
 
 UserRouter.post('/login', isNotAuthenticated, (req, res) => userApiController.loginUser(req, res));
 UserRouter.get('/logout', (req, res) => userApiController.logoutUser(req, res));
@@ -52,5 +55,6 @@ UserRouter.delete('/admin/:id', isAuthenticated, (req, res) => userController.de
 
 // 이메일 인증
 UserRouter.get('/verify-email', (req, res) => userController.verifyEmail(req, res));
+
 
 export default UserRouter;

@@ -99,7 +99,6 @@ export default class UserAccountRepository {
             // UserAccount 생성
             const user = await UserAccount.create({
                 ...userData,
-
                 createdAt: new Date(),
                 updatedAt: new Date()
             }, { transaction });

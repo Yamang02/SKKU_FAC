@@ -12,6 +12,7 @@ export default class UserApi {
             return response.data;
         } catch (error) {
             console.error('회원가입 중 오류 발생:', error);
+            ('회원가입 오류 : ', error);
             throw error;
         }
     }
@@ -97,6 +98,21 @@ export default class UserApi {
         } catch (error) {
             console.error('세션 사용자 조회 중 오류 발생:', error);
             throw error;
+        }
+    }
+
+    // 플래시 메시지 조회
+    static async getFlashMessage() {
+        try {
+            return await api.get('/user/api/flash-message');
+        } catch (error) {
+            console.error('플래시 메시지 조회 중 오류 발생:', error);
+            // 에러가 발생해도 UI에 표시하지 않고 조용히 실패 처리
+            return {
+                success: false,
+                error: '플래시 메시지를 조회하는 중 오류가 발생했습니다.',
+                data: null
+            };
         }
     }
 }

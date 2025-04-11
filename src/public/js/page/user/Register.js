@@ -3,7 +3,7 @@
  * 회원가입 관련 기능을 처리합니다.
  */
 import UserApi from '/js/api/UserApi.js';
-import { showErrorMessage, showSuccessMessage } from '/js/common/util/notification.js';
+import { showErrorMessage, showSuccessMessage, showLoading } from '/js/common/util/notification.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('registerForm');
@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+
         // 비밀번호 확인
         if (passwordInput.value !== confirmPasswordInput.value) {
             showErrorMessage('비밀번호가 일치하지 않습니다.');
@@ -80,11 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
             affiliation: userDataToSend.affiliation
         };
 
-
+        showLoading(true);
         try {
             // API 호출
             await UserApi.register(userDto);
 
+            showLoading(false);
             // 성공 메시지 표시
             showSuccessMessage('입력하신 메일로 이메일 인증이 발송되었습니다. 메일을 확인해주세요.');
 
@@ -93,12 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = '/user/login';
             }, 3000);
         } catch (error) {
+            showLoading(false);
             console.error('회원가입 처리 중 오류:', error);
             if (error.isApiError) {
                 showErrorMessage(error.message);
             } else {
                 showErrorMessage('회원가입 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
             }
+        } finally {
+            showLoading(false);
         }
     });
 

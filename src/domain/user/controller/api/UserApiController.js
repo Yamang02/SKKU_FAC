@@ -1,4 +1,3 @@
-
 import SessionUtil from '../../../../common/utils/SessionUtil.js';
 import { Message } from '../../../../common/constants/Message.js';
 import { ApiResponse } from '../../../common/model/ApiResponse.js';
@@ -43,11 +42,11 @@ export default class UserApiController {
         } catch (error) {
             console.error('회원가입 처리 중 오류:', error.message);
             if (error instanceof UserEmailDuplicateError) {
-                return res.status(400).json(ApiResponse.error(error.message));
+                return res.status(400).json(ApiResponse.error(Message.USER.DUPLICATE_EMAIL_ERROR));
             } else if (error instanceof UserUsernameDuplicateError) {
-                return res.status(400).json(ApiResponse.error(error.message));
+                return res.status(400).json(ApiResponse.error(Message.USER.DUPLICATE_USERNAME_ERROR));
             } else if (error instanceof UserValidationError) {
-                return res.status(400).json(ApiResponse.error(error.message));
+                return res.status(400).json(ApiResponse.error(Message.USER.VALIDATION_ERROR));
             }
             return res.status(500).json(ApiResponse.error(error.message));
         }
@@ -125,6 +124,27 @@ export default class UserApiController {
             }
             console.error('Error updating user profile:', error);
             return res.status(500).json(ApiResponse.error(Message.USER.UPDATE_ERROR));
+        }
+    }
+
+    /**
+     * 플래시 메시지를 반환합니다.
+     */
+    async getFlashMessage(req, res) {
+        try {
+            const flash = req.session.flash;
+
+            ('플래시 메시지 : ', flash);
+
+            // 플래시 메시지를 세션에서 제거
+            if (flash) {
+                delete req.session.flash;
+            }
+
+            return res.json(ApiResponse.success({ flash }));
+        } catch (error) {
+            console.error('Error getting flash message:', error);
+            return res.status(500).json(ApiResponse.error('플래시 메시지를 가져오는 중 오류가 발생했습니다.'));
         }
     }
 

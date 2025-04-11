@@ -101,7 +101,7 @@ app.use('/uploads', express.static(path.join(__dirname, './public/uploads'), sta
 const sessionConfig = {
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
