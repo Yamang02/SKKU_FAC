@@ -10,12 +10,18 @@ import { UserRole } from '../constants/UserRole.js';
 export const isAuthenticated = (req, res, next) => {
     if (!req.session.user) {
         if (req.xhr || req.headers.accept?.includes('application/json')) {
-            return res.status(401).json({ error: '로그인이 필요합니다.' });
+            return res.status(401).json({
+                success: false,
+                error: '로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.'
+            });
         }
         req.session.returnTo = req.originalUrl;
         return ViewResolver.render(res, ViewPath.ERROR, {
+            title: '로그인 필요',
             error: '로그인이 필요한 서비스입니다.',
-            returnTo: req.originalUrl
+            message: '로그인 후 이용해주세요.',
+            returnTo: req.originalUrl,
+            redirectUrl: '/auth/login'
         });
     }
     next();

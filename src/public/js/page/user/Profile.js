@@ -166,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await UserAPI.getProfile();
             userData = response.data; // 전역 변수에 사용자 데이터 저장
-            console.log('user:', userData);
 
             // 사용자 정보를 DOM에 삽입
             document.getElementById('username').innerText = userData.username;

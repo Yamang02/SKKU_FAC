@@ -66,7 +66,6 @@ class ArtworkApi {
         }
     }
 
-
     // 작품 등록
     static async createArtwork(formData) {
         try {
@@ -93,6 +92,37 @@ class ArtworkApi {
             return response;
         } catch (error) {
             console.error('작품 등록 중 오류:', error);
+            throw error;
+        }
+    }
+
+    // 작품 수정
+    static async updateArtwork(artworkId, updatedData) {
+        try {
+
+            const response = await api.put(`/artwork/api/${artworkId}`, updatedData);
+            console.log('작품 수정 API 응답:', response);
+
+            return response;
+        } catch (error) {
+            console.error('작품 수정 중 오류:', error);
+            showErrorMessage('작품 정보 수정에 실패했습니다.');
+            throw error;
+        }
+    }
+
+    // 작품 삭제
+    static async deleteArtwork(artworkId) {
+        try {
+            console.log('작품 삭제 API 호출 시작');
+
+            const response = await api.delete(`/artwork/api/${artworkId}`);
+            console.log('작품 삭제 API 응답:', response);
+
+            return response;
+        } catch (error) {
+            console.error('작품 삭제 중 오류:', error);
+            showErrorMessage('작품 삭제에 실패했습니다.');
             throw error;
         }
     }

@@ -7,9 +7,15 @@ import { showErrorMessage, showSuccessMessage, showLoading } from '../../common/
 // 페이지 초기화 함수
 async function initializePage() {
     try {
+        // 사용자 정보 로드
         const response = await UserApi.getProfile();
+
+        // API 응답이 성공이 아닌 경우 처리
+        if (!response.success) {
+            throw new Error(response.error || '사용자 정보를 불러올 수 없습니다.');
+        }
+
         const user = response.data;
-        console.log('user', user);
 
         // 작가 정보 필드 찾기
         const artistNameSpan = document.getElementById('artist-name');
@@ -80,7 +86,21 @@ async function initializePage() {
         initSubmitButton();
         handleExhibitionParam();
     } catch (error) {
-        showErrorMessage('페이지 로딩 중 오류가 발생했습니다.');
+        // 오류가 401(Unauthorized) 관련인지 확인
+        if (error.message && (
+            error.message.includes('로그인') ||
+            error.message.includes('인증') ||
+            error.message.includes('권한') ||
+            error.status === 401
+        )) {
+            showErrorMessage('로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.');
+            // 3초 후 로그인 페이지로 리디렉션
+            setTimeout(() => {
+                window.location.href = '/auth/login?returnTo=' + encodeURIComponent(window.location.pathname);
+            }, 3000);
+        } else {
+            showErrorMessage('페이지 로딩 중 오류가 발생했습니다: ' + error.message);
+        }
     }
 }
 

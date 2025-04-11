@@ -168,31 +168,16 @@ export default class ArtworkService {
      * 작품 정보를 수정합니다.
      * @param {string} id - 작품 ID
      * @param {Object} requestDto - 수정할 작품 데이터
-     * @param {File} file - 업로드된 이미지
      * @returns {Promise<ArtworkSimpleDTO>} 수정된 작품 정보
      */
-    async updateArtwork(id, requestDto, file = null) {
+    async updateArtwork(id, artworkData) {
         const existingArtwork = await this.artworkRepository.findArtworkById(id);
         if (!existingArtwork) {
             throw new ArtworkNotFoundError();
         }
 
-        let imageId = existingArtwork.imageId;
-        if (file) {
-            if (imageId) {
-                await this.imageService.deleteImage(imageId);
-            }
-            const image = await this.imageService.getUploadedImageInfo(file);
-            imageId = image.id;
-        }
-
-        const artworkData = {
-            ...requestDto,
-            imageId
-        };
-
         const updatedArtwork = await this.artworkRepository.updateArtwork(id, artworkData);
-        return new ArtworkSimpleDto(updatedArtwork);
+        return new ArtworkDetailDto(updatedArtwork);
     }
 
     /**
@@ -206,8 +191,8 @@ export default class ArtworkService {
             throw new ArtworkNotFoundError();
         }
 
-        if (artwork.imageId) {
-            await this.imageService.deleteImage(artwork.imageId);
+        if (artwork.imagePublicId) {
+            await this.imageService.deleteImage(artwork.imagePublicId);
         }
 
         return this.artworkRepository.deleteArtwork(id);

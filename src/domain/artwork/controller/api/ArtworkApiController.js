@@ -165,8 +165,8 @@ export default class ArtworkApiController {
         try {
             const { id } = req.params;
             const artworkData = req.body;
-            const file = req.file;
-            const artwork = await this.artworkService.updateArtwork(id, artworkData, file);
+            const artwork = await this.artworkService.updateArtwork(id, artworkData);
+            ('작품 수정 완료:', artwork);
             return res.json(ApiResponse.success(artwork, Message.ARTWORK.UPDATE_SUCCESS));
         } catch (error) {
             if (error instanceof ArtworkNotFoundError) {

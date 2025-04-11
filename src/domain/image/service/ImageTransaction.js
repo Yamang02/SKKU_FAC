@@ -54,9 +54,9 @@ export class ImageTransaction {
     async rollback() {
         if (this.uploadedFile) {
             try {
-                console.log('롤백 시작:', { storedName: this.uploadedFile.storedName });
+                ('롤백 시작:', { storedName: this.uploadedFile.storedName });
                 await this.fileServerService.deleteFile(this.uploadedFile.storedName);
-                console.log('롤백 성공');
+                ('롤백 성공');
             } catch (error) {
                 console.error('롤백 중 파일 삭제 실패:', error.message);
             }
@@ -76,7 +76,7 @@ export class ImageTransaction {
             });
             throw new ImageTransactionError('트랜잭션이 완료되지 않았습니다.');
         }
-        console.log('트랜잭션 완료:', {
+        ('트랜잭션 완료:', {
             imageId: this.savedImage.id,
             storedName: this.uploadedFile.storedName
         });

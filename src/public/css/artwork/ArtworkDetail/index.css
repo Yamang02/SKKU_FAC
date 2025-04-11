@@ -13,3 +13,6 @@
 
 /* 관련 작품 섹션 */
 @import url('./related.css');
+
+/* 작품 관리 모달 */
+@import url('./modal.css');

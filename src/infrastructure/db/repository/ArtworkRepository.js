@@ -28,6 +28,7 @@ class ArtworkRepository {
                 throw new ArtworkError('작품을 찾을 수 없습니다.');
             }
 
+            ('작품 수정 중:', artworkData);
             await artwork.update({
                 ...artworkData,
                 updatedAt: new Date()
@@ -49,6 +50,16 @@ class ArtworkRepository {
             return true;
         } catch (error) {
             throw new ArtworkError('작품 삭제 중 오류가 발생했습니다.', error);
+        }
+    }
+
+
+    async findArtworkById(id) {
+        try {
+            const artwork = await Artwork.findByPk(id);
+            return artwork;
+        } catch (error) {
+            throw new ArtworkError('작품 조회 중 오류가 발생했습니다.', error);
         }
     }
 

@@ -14,6 +14,37 @@
     margin-bottom: 15px;
 }
 
+/* 타이틀과 관리 버튼을 위한 컨테이너 */
+.title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* 관리 버튼 스타일 */
+.manage-artwork-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: white;
+    border: 1px solid #eee;
+    color: var(--color-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.manage-artwork-btn:hover {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    transform: rotate(45deg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .artwork-detail-artist {
     font-size: 1.2rem;
     color: var(--color-secondary);

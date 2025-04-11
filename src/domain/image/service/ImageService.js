@@ -33,6 +33,8 @@ class ImageService {
      */
     async deleteImage(publicId) {
         try {
+            ('publicId', publicId);
+            ('imageService deleteImage');
             const result = await cloudinary.uploader.destroy(publicId);
             if (result.result !== 'ok') {
                 console.warn(`Cloudinary 이미지 삭제 실패: ${result.result}`);

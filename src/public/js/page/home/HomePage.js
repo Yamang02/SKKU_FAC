@@ -65,7 +65,6 @@ async function loadFeaturedArtworks() {
         }
 
         const artworks = response.data;
-        console.log(artworks);
         if (artworks && artworks.length > 0) {
             // 전역 변수에 작품 데이터 저장 (모달에서 사용)
             featuredArtworks = artworks;

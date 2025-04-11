@@ -7,7 +7,6 @@ import { showErrorMessage, showSuccessMessage } from '/js/common/util/notificati
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('registerForm');
-    console.log('form:', form);
     const roleSelect = document.getElementById('role');
     const skkuFields = document.getElementById('skkuFields');
     const externalFields = document.getElementById('externalFields');
@@ -45,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 폼 제출 처리
     form.addEventListener('submit', async (e) => {
-        console.log('회원가입 버튼 클릭됨');
         e.preventDefault();
 
         // 비밀번호 확인
@@ -83,10 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
 
-        console.log('userDto:', userDto);
         try {
             // API 호출
-            console.log('UserApi 호출:', userDto);
             await UserApi.register(userDto);
 
             // 성공 메시지 표시

@@ -3,8 +3,9 @@
  * 작품 상세 페이지의 모든 기능을 처리합니다.
  */
 
-import ArtworkAPI from '../../api/ArtworkAPI.js';
-import { showErrorMessage } from '../../common/util/notification.js';
+import ArtworkAPI from '../../api/ArtworkApi.js';
+import UserApi from '../../api/UserApi.js';
+import { showErrorMessage, showSuccessMessage, showConfirm } from '../../common/util/notification.js';
 import { createArtworkCard } from '../../common/util/card.js';
 import { getArtworkSlug } from '../../common/util/url.js';
 
@@ -135,6 +136,7 @@ async function initPage() {
         await loadArtworkDetail();
         initImageViewer();
         initRelatedArtworks();
+        initModalHandlers();
     } catch (error) {
         console.error('페이지 초기화 중 오류:', error);
         showErrorMessage('작품 정보를 불러오는데 실패했습니다.');
@@ -164,10 +166,210 @@ async function loadArtworkDetail() {
         }
 
         updateArtworkDetail(artwork);
+
+        // 현재 로그인한 사용자 정보를 가져와서 버튼 표시 여부 결정
+        await checkUserPermission(artwork);
+
         //await loadRelatedArtworks(artwork);
     } catch (error) {
         console.error('작품 정보 로드 중 오류:', error);
         showErrorMessage(error.message || '작품 정보를 불러오는데 실패했습니다.');
+    }
+}
+
+// 모달 관련 함수
+function initModalHandlers() {
+    const modal = document.getElementById('artworkManageModal');
+    if (!modal) return;
+
+    // 모달 닫기 버튼 이벤트 처리
+    const closeButton = modal.querySelector('.close');
+    const closeBtn = modal.querySelector('.close-btn');
+
+    if (closeButton) {
+        closeButton.addEventListener('click', () => {
+            closeModal();
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            closeModal();
+        });
+    }
+
+    // 모달 외부 클릭시 닫기
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // 저장 버튼 이벤트 처리
+    const saveButton = document.getElementById('saveArtworkChanges');
+    if (saveButton) {
+        saveButton.addEventListener('click', saveArtworkChanges);
+    }
+
+    // 삭제 버튼 이벤트 처리
+    const deleteButton = document.getElementById('deleteArtwork');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', confirmDeleteArtwork);
+    }
+}
+
+/**
+ * 모달 열기 함수
+ * @param {Object} artwork - 작품 정보
+ */
+function openModal(artwork) {
+    const modal = document.getElementById('artworkManageModal');
+    if (!modal) return;
+
+    // 입력 필드에 현재 작품 정보 설정
+    document.getElementById('editTitle').value = artwork.title || '';
+    document.getElementById('editYear').value = artwork.year || '';
+    document.getElementById('editMedium').value = artwork.medium || '';
+    document.getElementById('editSize').value = artwork.size || '';
+    document.getElementById('editDescription').value = artwork.description || '';
+
+    // 작품 ID를 저장 (업데이트 시 필요)
+    modal.dataset.artworkId = artwork.id;
+
+    // 모달 표시
+    modal.style.display = 'flex';
+
+    // body에 modal-open 클래스 추가하여 스크롤 방지
+    document.body.classList.add('modal-open');
+}
+
+/**
+ * 모달 닫기 함수
+ */
+function closeModal() {
+    const modal = document.getElementById('artworkManageModal');
+    if (modal) {
+        modal.style.display = 'none';
+
+        // body에서 modal-open 클래스 제거하여 스크롤 허용
+        document.body.classList.remove('modal-open');
+    }
+}
+
+/**
+ * 작품 정보 저장 함수
+ */
+async function saveArtworkChanges() {
+    try {
+        const modal = document.getElementById('artworkManageModal');
+        const artworkId = modal.dataset.artworkId;
+
+        // 입력 필드에서 데이터 가져오기
+        const updatedData = {
+
+            year: document.getElementById('editYear').value,
+            medium: document.getElementById('editMedium').value,
+            size: document.getElementById('editSize').value,
+            description: document.getElementById('editDescription').value
+        };
+
+        // 작품 정보 업데이트 API 호출
+        const response = await ArtworkAPI.updateArtwork(artworkId, updatedData);
+
+        if (response.success) {
+            showSuccessMessage('작품 정보가 성공적으로 업데이트되었습니다.');
+            closeModal();
+
+            // 페이지 새로고침하여 변경된 내용 반영
+            window.location.reload();
+        } else {
+            showErrorMessage(response.error || '작품 정보 업데이트에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('작품 정보 업데이트 중 오류:', error);
+        showErrorMessage('작품 정보 업데이트에 실패했습니다.');
+    }
+}
+
+/**
+ * 작품 삭제 확인 함수
+ */
+function confirmDeleteArtwork() {
+    // 확인 모달이 표시되기 전에 오버레이 추가
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    document.body.appendChild(overlay);
+
+    showConfirm('정말로 이 작품을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.').then(result => {
+        // 확인 모달 응답 후 오버레이 제거
+        document.body.removeChild(overlay);
+
+        if (result) {
+            deleteArtwork();
+        }
+    });
+}
+
+/**
+ * ESC 키를 눌렀을 때 모달 닫기
+ */
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+
+/**
+ * 작품 삭제 함수
+ */
+async function deleteArtwork() {
+    try {
+        const modal = document.getElementById('artworkManageModal');
+        const artworkId = modal.dataset.artworkId;
+
+        // 작품 삭제 API 호출
+        const response = await ArtworkAPI.deleteArtwork(artworkId);
+
+        if (response.success) {
+            showSuccessMessage('작품이 성공적으로 삭제되었습니다.');
+            closeModal();
+
+            // 작품 목록 페이지로 이동
+            window.location.href = '/artwork';
+        } else {
+            showErrorMessage(response.error || '작품 삭제에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('작품 삭제 중 오류:', error);
+        showErrorMessage('작품 삭제에 실패했습니다.');
+    }
+}
+
+/**
+ * 사용자가 작품 소유자인지 확인하고 관리 버튼을 처리합니다.
+ * @param {Object} artwork - 작품 정보 객체
+ */
+async function checkUserPermission(artwork) {
+    try {
+        // 현재 로그인한 사용자 정보 가져오기
+        const response = await UserApi.getSessionUser();
+
+        if (response.success && response.data) {
+            const currentUser = response.data;
+            const manageButton = document.getElementById('manageArtworkBtn');
+
+            // 현재 사용자가 작품 작가인 경우 관리 버튼 표시
+            if (currentUser.id === artwork.userId) {
+                manageButton.style.display = 'flex';
+
+                // 관리 버튼 클릭 시 모달 열기
+                manageButton.addEventListener('click', () => {
+                    openModal(artwork);
+                });
+            }
+        }
+    } catch (error) {
+        console.error('사용자 권한 확인 중 오류:', error);
     }
 }
 

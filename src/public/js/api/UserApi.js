@@ -20,11 +20,26 @@ export default class UserApi {
     // 프로필 조회
     static async getProfile() {
         try {
-            return await api.get('/user/api/me');
+            const response = await api.get('/user/api/me');
+            return response;
         } catch (error) {
             console.error('프로필 조회 중 오류 발생:', error);
-            showErrorMessage('프로필 정보를 불러오는데 실패했습니다.');
-            throw error;
+
+            // 401 오류인 경우 로그인 필요 메시지 반환
+            if (error.response && error.response.status === 401) {
+                return {
+                    success: false,
+                    error: '로그인이 필요합니다.',
+                    status: 401
+                };
+            }
+
+            // 기타 오류
+            return {
+                success: false,
+                error: '사용자 정보를 불러오는 중 오류가 발생했습니다.',
+                originalError: error.message
+            };
         }
     }
 
@@ -81,7 +96,6 @@ export default class UserApi {
             return await api.get('/user/api/session');
         } catch (error) {
             console.error('세션 사용자 조회 중 오류 발생:', error);
-            showErrorMessage('세션 사용자 조회에 실패했습니다.');
             throw error;
         }
     }

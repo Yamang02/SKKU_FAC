@@ -10,8 +10,9 @@ const artworkApiController = new ArtworkApiController();
 
 // === API 엔드포인트 ===
 
-// CUD
+// 작품등록 , 수정, 삭제
 ArtworkRouter.post('/api/new', isAuthenticated, imageUploadMiddleware('artwork'), artworkApiController.createArtwork.bind(artworkApiController));
+ArtworkRouter.put('/api/:id', isAuthenticated, artworkApiController.updateArtwork.bind(artworkApiController));
 ArtworkRouter.delete('/api/:id', artworkApiController.deleteArtwork.bind(artworkApiController));
 
 // 작품 목록 조회 API
@@ -22,7 +23,6 @@ ArtworkRouter.get('/api/featured', artworkApiController.getFeaturedArtworks.bind
 
 // 작품 개별 조회 API
 ArtworkRouter.get('/api/detail/:slug', artworkApiController.getArtworkDetail.bind(artworkApiController));
-ArtworkRouter.get('/api/simple/:id', artworkApiController.getArtworkSimple.bind(artworkApiController));
 
 
 // === 페이지 라우트 ===
@@ -34,9 +34,6 @@ ArtworkRouter.get('/new', isAuthenticated, artworkController.getArtworkRegistrat
 
 // 작품 상세 페이지
 ArtworkRouter.get('/:slug', artworkController.getArtworkDetailPage.bind(artworkController));
-
-// 전시회별 작품 목록
-ArtworkRouter.get('/exhibition/:exhibitionId', artworkController.getArtworksByExhibition.bind(artworkController));
 
 // === 관리자용 작품 관리 페이지 라우트 ===
 ArtworkRouter.get('/management', artworkController.getManagementArtworkListPage.bind(artworkController));
