@@ -5,8 +5,8 @@
 
 import ArtworkAPI from '../../api/ArtworkAPI.js';
 import { showErrorMessage } from '../../common/util/notification.js';
-import { createArtworkCard } from '../../common/util/card.js';
-import { getArtworkId } from '../../common/util/url.js';
+// import { createArtworkCard } from '../../common/util/card.js';
+import { getArtworkSlug } from '../../common/util/url.js';
 
 function animateButtonClick(button) {
     if (!button) return;
@@ -127,7 +127,7 @@ function initRelatedArtworks() {
     }
 }
 
-// 페이지 초기화 - DOMContentLoaded 제거하고 즉시 실행
+// 페이지 초기화
 initPage();
 
 async function initPage() {
@@ -147,12 +147,12 @@ async function initPage() {
  */
 async function loadArtworkDetail() {
     try {
-        const artworkId = getArtworkId();
-        if (!artworkId) {
-            throw new Error('작품 ID를 찾을 수 없습니다.');
+        const artworkSlug = getArtworkSlug();
+        if (!artworkSlug) {
+            throw new Error('작품을 찾을 수 없습니다.');
         }
 
-        const response = await ArtworkAPI.getArtworkDetail(artworkId);
+        const response = await ArtworkAPI.getArtworkDetailForPage(artworkSlug);
         console.log('API 응답:', response);
 
         if (!response.success) {
@@ -165,7 +165,7 @@ async function loadArtworkDetail() {
         }
 
         updateArtworkDetail(artwork);
-        await loadRelatedArtworks(artwork);
+        //await loadRelatedArtworks(artwork);
     } catch (error) {
         console.error('작품 정보 로드 중 오류:', error);
         showErrorMessage(error.message || '작품 정보를 불러오는데 실패했습니다.');
@@ -235,52 +235,34 @@ function updateArtworkDetail(artwork) {
     document.title = `${artwork.title || '작품 상세'} - 성미회`;
 }
 
-/**
- * 관련 작품을 로드합니다.
- * @param {Object} artwork - 현재 작품 정보
- * @private
- */
-async function loadRelatedArtworks(artwork) {
-    try {
-        const response = await ArtworkAPI.getRelatedArtworks(artwork.id);
-        if (response.success && response.data) {
-            updateRelatedArtworks(response.data);
-        } else {
-            updateRelatedArtworks([]);
-        }
-    } catch (error) {
-        console.error('관련 작품 로드 중 오류:', error);
-        showErrorMessage('관련 작품을 불러오는데 실패했습니다.');
-    }
-}
 
 /**
  * 관련 작품 목록을 업데이트합니다.
  * @param {Array<Object>} artworks - 관련 작품 목록
  * @private
  */
-function updateRelatedArtworks(artworks) {
-    const container = document.querySelector('.related-artworks-list');
-    if (!container) return;
+// function updateRelatedArtworks(artworks) {
+//     const container = document.querySelector('.related-artworks-list');
+//     if (!container) return;
 
-    if (!artworks || artworks.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-image"></i>
-                <p>관련된 다른 작품이 없습니다.</p>
-            </div>
-        `;
-        return;
-    }
+//     if (!artworks || artworks.length === 0) {
+//         container.innerHTML = `
+//             <div class="empty-state">
+//                 <i class="fas fa-image"></i>
+//                 <p>관련된 다른 작품이 없습니다.</p>
+//             </div>
+//         `;
+//         return;
+//     }
 
-    const fragment = document.createDocumentFragment();
-    artworks.forEach(artwork => {
-        const card = createArtworkCard(artwork, { type: 'list' });
-        if (card) {
-            fragment.appendChild(card);
-        }
-    });
+//     const fragment = document.createDocumentFragment();
+//     artworks.forEach(artwork => {
+//         const card = createArtworkCard(artwork, { type: 'list' });
+//         if (card) {
+//             fragment.appendChild(card);
+//         }
+//     });
 
-    container.innerHTML = '';
-    container.appendChild(fragment);
-}
+//     container.innerHTML = '';
+//     container.appendChild(fragment);
+// }

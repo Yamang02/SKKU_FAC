@@ -121,7 +121,7 @@
     margin-bottom: 5px;
 }
 
-.modal-department {
+.modal-affiliation {
     font-size: 1rem;
     color: var(--color-secondary);
     opacity: 0.8;
@@ -233,7 +233,7 @@
         margin-bottom: var(--spacing-sm);
     }
 
-    .modal-department {
+    .modal-affiliation {
         font-size: 1rem;
         margin-bottom: var(--spacing-sm);
         padding-bottom: var(--spacing-sm);

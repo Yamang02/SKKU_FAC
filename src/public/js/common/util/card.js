@@ -46,7 +46,7 @@ export function createArtworkCard(artwork, options = { type: 'home' }) {
 
     const meta = document.createElement('p');
     meta.className = 'card__meta';
-    meta.textContent = artwork.department;
+    meta.textContent = artwork.artistAffiliation;
 
     imageContainer.appendChild(image);
     info.appendChild(title);

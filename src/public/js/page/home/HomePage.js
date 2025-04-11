@@ -33,9 +33,9 @@ function showArtworkModal(artwork) {
         'modal-image': artwork.image || '/images/artwork-placeholder.svg',
         'modal-title': artwork.title || '제목 없음',
         'modal-artist': artwork.artistName || '작가 미상',
-        'modal-department': artwork.department || '',
+        'modal-affiliation': artwork.artistAffiliation || '',
         'modal-exhibition': artwork.exhibitionTitle || '',
-        'modal-link': `/artwork/${artwork.id}`
+        'modal-link': `/artwork/${artwork.slug}`
     });
 
     // 모달 표시

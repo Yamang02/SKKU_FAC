@@ -119,13 +119,17 @@ export default class UserService {
     /**
      * 사용자의 간단한 정보를 조회합니다.
      */
-    async getUserSimple(id) {
-        const user = await this.userRepository.findUserById(id);
+    async getUserSimple(userId) {
+        const user = await this.userRepository.findUserById(userId);
         if (!user) {
             throw new UserNotFoundError();
         }
+        const userSimpleDto = new UserSimpleDto(user);
+        userSimpleDto.affiliation = user.SkkuUserProfile ? user.SkkuUserProfile.department + ' ' + user.SkkuUserProfile.studentYear : user.ExternalUserProfile.affiliation;
 
-        return new UserSimpleDto(user);
+        console.log('userSimpleDto : ', userSimpleDto);
+
+        return userSimpleDto;
     }
 
 
@@ -149,7 +153,6 @@ export default class UserService {
 
         // 역할에 따른 프로필 정보 수정
         if (user.role === 'SKKU_MEMBER' && user.SkkuUserProfile !== null) {
-            console.log('user.SkkuUserProfile:', user.SkkuUserProfile);
             user.SkkuUserProfile.department = userData.department;
             user.SkkuUserProfile.studentYear = userData.studentYear;
         } else if (user.role === 'EXTERNAL_MEMBER' && user.ExternalUserProfile !== null) {

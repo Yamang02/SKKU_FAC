@@ -12,5 +12,10 @@ export default class ArtworkDetailDto {
         this.imageUrl = data.imageUrl || ''; // 이미지 URL
         this.isFeatured = data.isFeatured || false; // 주요 작품 여부
         this.userId = data.userId || null; // 작품 작성자 ID
+        this.artistName = data.artistName || ''; // 작가 이름
+        this.artistAffiliation = data.artistAffiliation || ''; // 작가 소속
+        this.RepresentativeExhibitionexhibitionId = data.RepresentativeExhibitionexhibitionId || null;
+        this.exhibitions = data.exhibitions || []; // 전시회 정보
+        this.relatedArtworks = data.relatedArtworks || []; // 관련 작품 정보
     }
 }

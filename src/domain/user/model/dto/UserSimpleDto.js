@@ -8,5 +8,6 @@ export default class UserSimpleDTO {
         this.username = data.username;
         this.name = data.name;
         this.role = data.role;
+        this.affiliation = data.affiliation;
     }
 }

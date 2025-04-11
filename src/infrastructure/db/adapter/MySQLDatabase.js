@@ -11,7 +11,6 @@ const connectionLimit = (dbConfig.connectionLimit && dbConfig.connectionLimit > 
 const db = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
     host: dbConfig.host,
     dialect: 'mysql',
-    logging: false,
     port: dbConfig.port,
     pool: {
         max: connectionLimit,

@@ -80,11 +80,12 @@ export default class ArtworkApiController {
      * 작품 상세 정보를 조회합니다.
      */
     async getArtworkDetail(req, res) {
+        console.log('req.params.slug : ', req.params.slug);
         try {
-            const id = parseInt(req.params.id);
+            const slug = req.params.slug;
             const type = req.query.type || 'default';
 
-            const artwork = await this.artworkService.getArtworkDetail(id, type);
+            const artwork = await this.artworkService.getArtworkDetailbySlug(slug, type);
             return res.json(ApiResponse.success(artwork));
         } catch (error) {
             return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND));
@@ -108,19 +109,6 @@ export default class ArtworkApiController {
         }
     }
 
-
-    /**
-     * 관련 작품 목록을 조회합니다.
-     */
-    async getRelatedArtworks(req, res) {
-        try {
-            const { id } = req.params;
-            const relatedArtworks = await this.artworkService.getRelatedArtworks(id);
-            return res.json(ApiResponse.success(relatedArtworks));
-        } catch (error) {
-            return res.status(500).json(ApiResponse.error(Message.ARTWORK.RELATED_ERROR));
-        }
-    }
 
     /**
      * 관리자용 작품을 등록합니다.

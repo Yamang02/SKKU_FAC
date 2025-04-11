@@ -21,11 +21,8 @@ ArtworkRouter.get('/api/list', artworkApiController.getArtworkList.bind(artworkA
 ArtworkRouter.get('/api/featured', artworkApiController.getFeaturedArtworks.bind(artworkApiController));
 
 // 작품 개별 조회 API
-ArtworkRouter.get('/api/detail/:id', artworkApiController.getArtworkDetail.bind(artworkApiController));
+ArtworkRouter.get('/api/detail/:slug', artworkApiController.getArtworkDetail.bind(artworkApiController));
 ArtworkRouter.get('/api/simple/:id', artworkApiController.getArtworkSimple.bind(artworkApiController));
-
-// 관련 작품 목록 조회 API
-ArtworkRouter.get('/api/related/:id', artworkApiController.getRelatedArtworks.bind(artworkApiController));
 
 
 // === 페이지 라우트 ===
@@ -36,7 +33,7 @@ ArtworkRouter.get(['/', '/list'], artworkController.getArtworkListPage.bind(artw
 ArtworkRouter.get('/new', isAuthenticated, artworkController.getArtworkRegistrationPage.bind(artworkController));
 
 // 작품 상세 페이지
-ArtworkRouter.get('/:id', artworkController.getArtworkDetailPage.bind(artworkController));
+ArtworkRouter.get('/:slug', artworkController.getArtworkDetailPage.bind(artworkController));
 
 // 전시회별 작품 목록
 ArtworkRouter.get('/exhibition/:exhibitionId', artworkController.getArtworksByExhibition.bind(artworkController));

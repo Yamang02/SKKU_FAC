@@ -1,4 +1,4 @@
-import { UserAccount, Exhibition, Artwork } from '../model/entity/EntitityIndex.js';
+import { Artwork } from '../model/entity/EntitityIndex.js';
 import { ArtworkError } from '../../../common/error/ArtworkError.js';
 import { Op } from 'sequelize';
 import ArtworkExhibitionRelationship from '../model/relationship/ArtworkExhibitionRelationship.js';
@@ -89,28 +89,6 @@ class ArtworkRepository {
         }
     }
 
-    async findRelatedArtworks(artworkId) {
-        try {
-            const relatedIds = this.getRelatedArtworks ? this.getRelatedArtworks(artworkId) : [];
-            if (!relatedIds || !Array.isArray(relatedIds) || relatedIds.length === 0) {
-                return { items: [], total: 0 };
-            }
-
-            const relatedArtworks = await Artwork.findAll({
-                where: {
-                    id: { [Op.in]: relatedIds }
-                }
-            });
-
-            return {
-                items: relatedArtworks,
-                total: relatedArtworks.length
-            };
-        } catch (error) {
-            return { items: [], total: 0 };
-        }
-    }
-
     async findFeaturedArtworks(limit) {
         try {
             const featuredArtworks = await Artwork.findAll({
@@ -175,29 +153,31 @@ class ArtworkRepository {
         }
     }
 
-    /**
- * 작품과 관련된 사용자 및 전시회 정보를 조회합니다.
- * @param {string} artworkId - 작품 ID
- * @returns {Promise<Artwork|null>} 작품 정보와 관련된 데이터
- */
-    async findArtworkWithRelations(artworkId) {
-        const artwork = await Artwork.findOne({
-            where: { id: artworkId },
-            include: [
-                {
-                    model: UserAccount,
-                    required: false // UserAccount가 없어도 결과에 포함
-                },
-                {
-                    model: Exhibition,
-                    required: false // Exhibition이 없어도 결과에 포함
-                }
-            ]
-        });
+    async findArtworkBySlug(slug) {
+        try {
+            const artwork = await Artwork.findOne({
+                where: { slug: slug }
+            });
 
-        return artwork;
+            if (!artwork) {
+                return null;
+            }
+
+            try {
+                const exhibitions = await artwork.getExhibitions();
+                if (exhibitions && exhibitions.length > 0) {
+                    artwork.dataValues.exhibitions = exhibitions;
+                }
+            } catch (relationError) {
+                console.error('전시회 관계 조회 오류:', relationError);
+            }
+
+            return artwork;
+        } catch (error) {
+            console.error('작품 조회 오류:', error);
+            throw error;
+        }
     }
 }
-
 
 export default ArtworkRepository;
