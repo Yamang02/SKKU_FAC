@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await UserApi.register(userDto);
 
             // 성공 메시지 표시
-            showSuccessMessage('회원가입이 완료되었습니다. 3초 후 로그인 페이지로 이동합니다.');
+            showSuccessMessage('입력하신 메일로 이메일 인증이 발송되었습니다. 메일을 확인해주세요.');
 
             // 3초 후 로그인 페이지로 리다이렉트
             setTimeout(() => {

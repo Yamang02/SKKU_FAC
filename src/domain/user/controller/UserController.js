@@ -136,4 +136,22 @@ export default class UserController {
             });
         }
     }
+
+    /**
+     * 이메일 인증을 처리합니다.
+     */
+    async verifyEmail(req, res) {
+        try {
+            const { token } = req.query;
+            if (!token) {
+                throw new Error('잘못된 요청입니다.');
+            }
+
+            await this.userService.verifyEmail(token);
+            res.redirect('/user/login');
+        } catch (error) {
+            ViewResolver.renderError(res, error);
+        }
+    }
+
 }

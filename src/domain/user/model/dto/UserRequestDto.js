@@ -16,5 +16,8 @@ export default class UserRequestDto {
         this.affiliation = data.affiliation;
         this.skkuUserId = data.skkuUserId || null;
         this.externalUserId = data.externalUserId || null;
+        this.emailVerified = data.emailVerified || false;
+        this.emailVerificationToken = data.emailVerificationToken || null;
+        this.emailVerificationTokenExpiry = data.emailVerificationTokenExpiry || null;
     }
 }

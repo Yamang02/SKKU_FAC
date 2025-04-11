@@ -50,4 +50,7 @@ UserRouter.get('/admin/:id', isAuthenticated, (req, res) => userController.getMa
 UserRouter.put('/admin/:id', isAuthenticated, (req, res) => userController.updateManagementUser(req, res));
 UserRouter.delete('/admin/:id', isAuthenticated, (req, res) => userController.deleteManagementUser(req, res));
 
+// 이메일 인증
+UserRouter.get('/verify-email', (req, res) => userController.verifyEmail(req, res));
+
 export default UserRouter;

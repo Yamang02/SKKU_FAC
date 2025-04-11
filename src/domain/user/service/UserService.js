@@ -4,6 +4,8 @@ import UserSimpleDto from '../model/dto/UserSimpleDto.js';
 import UserDetailDto from '../model/dto/UserDetailDto.js';
 import { UserNotFoundError, UserEmailDuplicateError, UserUsernameDuplicateError } from '../../../common/error/UserError.js';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
+import { sendVerificationEmail } from '../../../common/utils/emailSender.js';
+import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
@@ -41,6 +43,11 @@ export default class UserService {
         const skkuUserId = generateDomainUUID(DOMAINS.SKKU_USER);
         const externalUserId = generateDomainUUID(DOMAINS.EXTERNAL_USER);
 
+        // 이메일 인증 토큰 생성
+        const token = uuidv4();
+        const tokenExpiry = new Date();
+        tokenExpiry.setHours(tokenExpiry.getHours() + 1); // 1시간 후 만료
+
 
         // 사용자 데이터 구성
         const userDto = new UserRequestDTO({
@@ -48,10 +55,22 @@ export default class UserService {
             id: userId,
             skkuUserId,
             externalUserId,
-            password: hashedPassword
+            password: hashedPassword,
+            emailVerificationToken: token,
+            emailVerificationTokenExpiry: tokenExpiry
         });
 
+        console.log('userDto:', userDto);
+
         const Createduser = await this.userRepository.createUser(userDto);
+        console.log('Createduser:', Createduser);
+        // 이메일 전송
+        try {
+            await sendVerificationEmail(userDto.email, token);
+        } catch (emailError) {
+            console.error('❌ 이메일 전송 실패:', emailError);
+            throw new Error('사용자 생성은 완료되었지만, 이메일 전송에 실패했습니다.');
+        }
         const userSimpleDto = new UserSimpleDto(Createduser);
         return userSimpleDto;
     }
@@ -244,5 +263,24 @@ export default class UserService {
         };
 
         return new UserDetailDto(dtoData);
+    }
+
+    /**
+     * 이메일 인증을 처리합니다.
+     */
+    async verifyEmail(token) {
+        const user = await this.userRepository.findUserByEmailVerificationToken(token);
+        if (!user) {
+            throw new Error('잘못된 요청입니다.');
+        }
+
+        // 이메일 인증 토큰 만료 시간 확인
+        if (user.emailVerificationTokenExpiry < new Date()) {
+            throw new Error('이메일 인증 토큰이 만료되었습니다.');
+        }
+
+        const verifieddUser = await this.userRepository.updateUser(user.id, { emailVerified: true, emailVerificationToken: null, emailVerificationTokenExpiry: null, status: 'ACTIVE' });
+
+        return verifieddUser;
     }
 }

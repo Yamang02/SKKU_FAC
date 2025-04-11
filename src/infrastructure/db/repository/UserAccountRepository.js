@@ -81,7 +81,7 @@ export default class UserAccountRepository {
      */
     async findUserByUsername(username) {
         return await UserAccount.findOne({
-            where: { username },
+            where: { username, status: 'ACTIVE' },
             include: [
                 { model: SkkuUserProfile, required: false },
                 { model: ExternalUserProfile, required: false }
@@ -99,6 +99,7 @@ export default class UserAccountRepository {
             // UserAccount 생성
             const user = await UserAccount.create({
                 ...userData,
+
                 createdAt: new Date(),
                 updatedAt: new Date()
             }, { transaction });
@@ -156,14 +157,22 @@ export default class UserAccountRepository {
         }
     }
 
+
+    /**
+     * 사용자 정보를 업데이트합니다.
+     */
+    async updateUser(id, userData) {
+        return await UserAccount.update(userData, { where: { id } });
+    }
+
     /**
      * 사용자를 삭제합니다.
      */
     async deleteUser(id) {
         const user = await UserAccount.findByPk(id, {
             include: [{ model: SkkuUserProfile, required: false },
-                { model: ExternalUserProfile, required: false },
-                { model: Artwork, required: false }]
+            { model: ExternalUserProfile, required: false },
+            { model: Artwork, required: false }]
         });
         if (!user) {
             return false;
@@ -193,5 +202,12 @@ export default class UserAccountRepository {
             console.error('사용자 삭제 중 오류 발생:', error);
             throw error;
         }
+    }
+
+    /**
+     * 이메일 인증 토큰으로 사용자를 조회합니다.
+     */
+    async findUserByEmailVerificationToken(token) {
+        return await UserAccount.findOne({ where: { emailVerificationToken: token } });
     }
 }

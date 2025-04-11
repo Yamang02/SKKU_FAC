@@ -15,9 +15,9 @@ class ArtworkApi {
                 .filter(Boolean)
                 .join('&');
 
-            console.log('작품 목록 API 호출:', `/artwork/api/list?${queryString}`);
+            ('작품 목록 API 호출:', `/artwork/api/list?${queryString}`);
             const response = await api.get(`/artwork/api/list?${queryString}`);
-            console.log('작품 목록 API 응답:', response);
+            ('작품 목록 API 응답:', response);
 
             return response;
         } catch (error) {
@@ -69,20 +69,20 @@ class ArtworkApi {
     // 작품 등록
     static async createArtwork(formData) {
         try {
-            console.log('작품 등록 API 호출 시작');
+            ('작품 등록 API 호출 시작');
 
             // FormData 내용 로깅 (개발 목적으로만 사용)
-            console.log('FormData 내용:');
+            ('FormData 내용:');
             for (const [key, value] of formData.entries()) {
                 if (key === 'image') {
-                    console.log('이미지 파일:', value.name, value.type, value.size + 'bytes');
+                    ('이미지 파일:', value.name, value.type, value.size + 'bytes');
                 } else {
-                    console.log(key + ':', value);
+                    (key + ':', value);
                 }
             }
 
             const response = await api.post('/artwork/api/new', formData);
-            console.log('작품 등록 API 응답:', response);
+            ('작품 등록 API 응답:', response);
 
             // 응답이 없는 경우 에러 처리
             if (!response) {
@@ -101,7 +101,7 @@ class ArtworkApi {
         try {
 
             const response = await api.put(`/artwork/api/${artworkId}`, updatedData);
-            console.log('작품 수정 API 응답:', response);
+            ('작품 수정 API 응답:', response);
 
             return response;
         } catch (error) {
@@ -114,10 +114,10 @@ class ArtworkApi {
     // 작품 삭제
     static async deleteArtwork(artworkId) {
         try {
-            console.log('작품 삭제 API 호출 시작');
+            ('작품 삭제 API 호출 시작');
 
             const response = await api.delete(`/artwork/api/${artworkId}`);
-            console.log('작품 삭제 API 응답:', response);
+            ('작품 삭제 API 응답:', response);
 
             return response;
         } catch (error) {
