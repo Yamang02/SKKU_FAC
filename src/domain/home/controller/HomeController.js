@@ -15,15 +15,12 @@ export default class HomeController {
     async getHomePage(req, res) {
         try {
             // 최근 공지사항을 가져옵니다
-            const notices = await this.noticeRepository.findNotices({ page: 1, limit: 5 });
 
             ViewResolver.render(res, ViewPath.MAIN.HOME, {
                 title: '성미회 홈',
-                currentPage: req.path,
-                recentNotices: notices.items
+                currentPage: req.path
             });
         } catch (error) {
-            console.error('홈 페이지 데이터 조회 중 오류:', error);
             ViewResolver.renderError(res, error);
         }
     }
