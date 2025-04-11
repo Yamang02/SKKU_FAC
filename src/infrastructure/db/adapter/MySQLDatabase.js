@@ -12,6 +12,7 @@ const db = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
     host: dbConfig.host,
     dialect: 'mysql',
     port: dbConfig.port,
+    logging: false,
     pool: {
         max: connectionLimit,
         min: 0,

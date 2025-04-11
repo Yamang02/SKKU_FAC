@@ -15,7 +15,7 @@ export function createArtworkCard(artwork, options = { type: 'home' }) {
 
     // 목록 페이지에서만 실제 링크 사용
     if (options.type === 'list') {
-        link.href = `/artwork/${artwork.id}`;
+        link.href = `/artwork/${artwork.slug}`;
     } else {
         link.role = 'button';
         link.style.cursor = 'pointer';
@@ -26,7 +26,7 @@ export function createArtworkCard(artwork, options = { type: 'home' }) {
 
     const image = document.createElement('img');
     image.className = 'card__image';
-    image.src = artwork.image || '/images/artwork-placeholder.svg';
+    image.src = artwork.imageUrl || '/images/artwork-placeholder.svg';
     image.alt = artwork.title || '';
     image.onerror = function () {
         this.onerror = null;

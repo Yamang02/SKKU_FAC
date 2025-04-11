@@ -7,7 +7,7 @@ export default class ArtworkSimpleDTO {
         this.id = artworkWithRelations.id; // 작품 ID
         this.title = artworkWithRelations.title; // 작품명
         this.slug = artworkWithRelations.slug; // 작품 슬러그
-        this.image = artworkWithRelations.imageUrl ? artworkWithRelations.imageUrl : null; // 이미지 URL
+        this.imageUrl = artworkWithRelations.imageUrl ? artworkWithRelations.imageUrl : null; // 이미지 URL
         this.userId = artworkWithRelations.userId; // 작가 ID
         this.artistName = artworkWithRelations.userAccount?.name || ''; // 작가 이름 (UserAccount에서 가져옴)
         this.exhibitionId = artworkWithRelations.exhibitionId; // 전시회 ID

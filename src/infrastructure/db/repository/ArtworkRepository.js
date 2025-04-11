@@ -120,7 +120,7 @@ class ArtworkRepository {
         try {
             const artworks = await Artwork.findAll({
                 where: {
-                    artistId: artistId,
+                    userId: artistId,
                     id: { [Op.ne]: excludeId } // 제외할 작품 ID
                 },
                 limit: limit,
@@ -161,15 +161,6 @@ class ArtworkRepository {
 
             if (!artwork) {
                 return null;
-            }
-
-            try {
-                const exhibitions = await artwork.getExhibitions();
-                if (exhibitions && exhibitions.length > 0) {
-                    artwork.dataValues.exhibitions = exhibitions;
-                }
-            } catch (relationError) {
-                console.error('전시회 관계 조회 오류:', relationError);
             }
 
             return artwork;

@@ -67,7 +67,6 @@ export default class ArtworkApiController {
     async getFeaturedArtworks(req, res) {
         try {
             const artworks = await this.artworkService.getFeaturedArtworks();
-            console.log('controller artworks : ', artworks);
             return res.json(ApiResponse.success(artworks));
         } catch (error) {
             console.error('추천 작품 목록 조회 중 오류:', error);
@@ -80,12 +79,9 @@ export default class ArtworkApiController {
      * 작품 상세 정보를 조회합니다.
      */
     async getArtworkDetail(req, res) {
-        console.log('req.params.slug : ', req.params.slug);
         try {
             const slug = req.params.slug;
-            const type = req.query.type || 'default';
-
-            const artwork = await this.artworkService.getArtworkDetailbySlug(slug, type);
+            const artwork = await this.artworkService.getArtworkDetailbySlug(slug);
             return res.json(ApiResponse.success(artwork));
         } catch (error) {
             return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND));

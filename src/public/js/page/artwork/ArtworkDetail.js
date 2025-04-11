@@ -5,7 +5,7 @@
 
 import ArtworkAPI from '../../api/ArtworkAPI.js';
 import { showErrorMessage } from '../../common/util/notification.js';
-// import { createArtworkCard } from '../../common/util/card.js';
+import { createArtworkCard } from '../../common/util/card.js';
 import { getArtworkSlug } from '../../common/util/url.js';
 
 function animateButtonClick(button) {
@@ -181,7 +181,7 @@ function updateArtworkDetail(artwork) {
     // 작품 이미지 업데이트
     const artworkImage = document.querySelector('.artwork-main-image');
     if (artworkImage) {
-        artworkImage.src = artwork.image || '/images/artwork-placeholder.svg';
+        artworkImage.src = artwork.imageUrl || '/images/artwork-placeholder.svg';
         artworkImage.alt = artwork.title || '작품 이미지';
     }
 
@@ -198,9 +198,9 @@ function updateArtworkDetail(artwork) {
     }
 
     // 학과 정보 업데이트
-    const departmentElement = document.querySelector('.artwork-detail-department');
-    if (departmentElement) {
-        departmentElement.textContent = artwork.department || '미표기';
+    const affiliationElement = document.querySelector('.artwork-detail-affiliation');
+    if (affiliationElement) {
+        affiliationElement.textContent = artwork.artistAffiliation || '미표기';
     }
 
     // 작품 정보 업데이트
@@ -233,6 +233,9 @@ function updateArtworkDetail(artwork) {
 
     // 페이지 타이틀 업데이트
     document.title = `${artwork.title || '작품 상세'} - 성미회`;
+
+    // 관련 작품 업데이트
+    updateRelatedArtworks(artwork.relatedArtworks);
 }
 
 
@@ -241,28 +244,28 @@ function updateArtworkDetail(artwork) {
  * @param {Array<Object>} artworks - 관련 작품 목록
  * @private
  */
-// function updateRelatedArtworks(artworks) {
-//     const container = document.querySelector('.related-artworks-list');
-//     if (!container) return;
+function updateRelatedArtworks(artworks) {
+    const container = document.querySelector('.related-artworks-list');
+    if (!container) return;
 
-//     if (!artworks || artworks.length === 0) {
-//         container.innerHTML = `
-//             <div class="empty-state">
-//                 <i class="fas fa-image"></i>
-//                 <p>관련된 다른 작품이 없습니다.</p>
-//             </div>
-//         `;
-//         return;
-//     }
+    if (!artworks || artworks.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-image"></i>
+                <p>관련된 다른 작품이 없습니다.</p>
+            </div>
+        `;
+        return;
+    }
 
-//     const fragment = document.createDocumentFragment();
-//     artworks.forEach(artwork => {
-//         const card = createArtworkCard(artwork, { type: 'list' });
-//         if (card) {
-//             fragment.appendChild(card);
-//         }
-//     });
+    const fragment = document.createDocumentFragment();
+    artworks.forEach(artwork => {
+        const card = createArtworkCard(artwork, { type: 'list' });
+        if (card) {
+            fragment.appendChild(card);
+        }
+    });
 
-//     container.innerHTML = '';
-//     container.appendChild(fragment);
-// }
+    container.innerHTML = '';
+    container.appendChild(fragment);
+}

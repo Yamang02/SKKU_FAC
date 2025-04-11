@@ -94,20 +94,22 @@
 .card__title {
     font-size: 1.5rem;
     font-weight: 600;
+    max-width: 200px;
+    max-height: 30px;
     color: var(--color-primary);
     margin-bottom: 10px;
     line-height: 1.4;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    white-space: nowrap;
 }
 
 /* 카드 부제목 (작가명 등) */
 .card__subtitle {
     font-size: 1.1rem;
     font-weight: 600;
+    max-width: 200px;
+    max-height: 30px;
     color: var(--color-secondary);
     margin-bottom: 4px;
     overflow: hidden;
@@ -119,6 +121,8 @@
 .card__meta {
     font-size: 0.9rem;
     color: #666;
+    max-width: 200px;
+    max-height: 30px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

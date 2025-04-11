@@ -127,8 +127,6 @@ export default class UserService {
         const userSimpleDto = new UserSimpleDto(user);
         userSimpleDto.affiliation = user.SkkuUserProfile ? user.SkkuUserProfile.department + ' ' + user.SkkuUserProfile.studentYear : user.ExternalUserProfile.affiliation;
 
-        console.log('userSimpleDto : ', userSimpleDto);
-
         return userSimpleDto;
     }
 

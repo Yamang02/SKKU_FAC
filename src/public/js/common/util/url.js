@@ -9,7 +9,7 @@
  * @returns {string|null} - 추출된 ID 또는 null
  */
 export function extractIdFromPath(path, prefix) {
-    const regex = new RegExp(`\\/${prefix}\\/([%a-zA-Z0-9가-힣]+)`);
+    const regex = new RegExp(`\\/${prefix}\\/([%a-zA-Z0-9가-힣_]+)`);
     const matches = path.match(regex);
     return matches ? matches[1] : null;
 }

@@ -30,7 +30,7 @@ function initArtworkModal() {
 function showArtworkModal(artwork) {
     // 모달 내용 업데이트
     updateModalContent('artwork-modal', {
-        'modal-image': artwork.image || '/images/artwork-placeholder.svg',
+        'modal-image': artwork.imageUrl || '/images/artwork-placeholder.svg',
         'modal-title': artwork.title || '제목 없음',
         'modal-artist': artwork.artistName || '작가 미상',
         'modal-affiliation': artwork.artistAffiliation || '',

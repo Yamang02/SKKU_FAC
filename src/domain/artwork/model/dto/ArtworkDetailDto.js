@@ -8,6 +8,7 @@ export default class ArtworkDetailDto {
         this.slug = data.slug || ''; // 작품 슬러그
         this.medium = data.medium || ''; // 재료
         this.size = data.size || ''; // 크기
+        this.year = data.year || ''; // 작품 연도
         this.description = data.description || ''; // 작품 설명
         this.imageUrl = data.imageUrl || ''; // 이미지 URL
         this.isFeatured = data.isFeatured || false; // 주요 작품 여부

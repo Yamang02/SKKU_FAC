@@ -32,6 +32,11 @@ const Artwork = db.define('Artwork', {
         allowNull: true,
         comment: '크기'
     },
+    year: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
+        comment: '작품 연도'
+    },
     description: {
         type: DataTypes.TEXT,
         allowNull: true,

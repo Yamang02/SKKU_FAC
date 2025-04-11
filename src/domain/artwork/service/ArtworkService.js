@@ -28,6 +28,7 @@ export default class ArtworkService {
 
 
     async getArtworkDetailbySlug(slug) {
+        console.log('slug : ', slug);
         const artwork = await this.artworkRepository.findArtworkBySlug(slug);
         if (!artwork) {
             throw new ArtworkNotFoundError();
@@ -40,18 +41,9 @@ export default class ArtworkService {
         artwork.artistAffiliation = user.affiliation;
 
         const relatedArtworks = await this.findRelatedArtworks(artwork);
-        for (const relatedArtwork of relatedArtworks) {
-            const user = await this.userService.getUserSimple(relatedArtwork.userId);
-            if (!user) {
-                throw new Error('작가 정보를 찾을 수 없습니다.');
-            }
-            relatedArtwork.artistName = user.name;
-            relatedArtwork.artistAffiliation = user.affiliation;
-        }
-
+        artwork.relatedArtworks = relatedArtworks;
         const artworkDetail = new ArtworkDetailDTO(artwork);
         console.log('artworkDetail : ', artworkDetail);
-
         return artworkDetail;
     }
 
@@ -59,19 +51,20 @@ export default class ArtworkService {
      * 관련 작품 목록을 조회합니다.
      */
     async findRelatedArtworks(artwork) {
+        console.log('findRelatedArtworks 실행');
         const relatedArtworks = [];
 
         // 1. 동일 작가의 다른 작품 조회
-        const sameArtistArtworks = await this.artworkRepository.findByArtistId(artwork.userId, 8, artwork.id);
-        relatedArtworks.push(...sameArtistArtworks);
-
-        // 3. 동일 작가의 작품이 8개 미만일 경우, 해당 작품의 전시회에서 출품된 다른 작품 조회
-        if (relatedArtworks.length < 8) {
-            const exhibitionId = artwork.representativeExhibitionId; // 해당 작품의 전시회 ID
-            const remainingCount = 8 - relatedArtworks.length;
-
-            const exhibitionArtworks = await this.artworkRepository.findByExhibitionId(exhibitionId, remainingCount, artwork.id);
-            relatedArtworks.push(...exhibitionArtworks);
+        try {
+            const sameArtistArtworks = await this.artworkRepository.findByArtistId(artwork.userId, 8, artwork.id);
+            for (const relatedArtwork of sameArtistArtworks) {
+                const relatedArtworkSimple = new ArtworkSimpleDTO(relatedArtwork);
+                relatedArtworkSimple.artistName = artwork.artistName;
+                relatedArtworkSimple.artistAffiliation = artwork.artistAffiliation;
+                relatedArtworks.push(relatedArtworkSimple);
+            }
+        } catch (error) {
+            console.error(error);
         }
 
         // 4. 최종적으로 8개 이하의 관련 작품 반환
@@ -88,7 +81,7 @@ export default class ArtworkService {
         }
 
         artworkData.id = generateDomainUUID(DOMAINS.ARTWORK);
-        artworkData.slug = artworkData.title.replace(/ /g, '-') + uuidv4().slice(0, 8);
+        artworkData.slug = artworkData.title.replace(/ /g, '_') + '_' + uuidv4().slice(0, 8);
         console.log(artworkData.slug);
         const uploadedImage = await this.imageService.getUploadedImageInfo(file);
         artworkData.imagePublicId = uploadedImage.publicId;

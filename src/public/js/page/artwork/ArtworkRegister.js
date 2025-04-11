@@ -217,7 +217,7 @@ function initSubmitButton() {
                 showSuccessMessage('잠시 뒤 메인 페이지로 이동합니다.');
                 setTimeout(() => {
                     window.location.href = '/';
-                }, 3000);
+                }, 2000);
                 return;
             } else {
                 showLoading(false);
