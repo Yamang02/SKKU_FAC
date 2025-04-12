@@ -49,10 +49,12 @@
 
 .view-toggle {
     display: flex;
+    align-items: center;
     gap: 10px;
 }
 
 .view-toggle .btn--toggle {
+    height: 40px;
     background-color: transparent;
     border: 1px solid #ddd;
     padding: 8px 12px;
@@ -215,7 +217,7 @@
 }
 
 .section-title {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 600;
     margin-bottom: 20px;
     position: relative;
@@ -230,7 +232,7 @@
     top: 50%;
     transform: translateY(-50%);
     width: 5px;
-    height: 20px;
+    height: 30px;
     background-color: var(--color-primary);
     border-radius: 2px;
 }
@@ -915,4 +917,55 @@
     text-align: center;
     padding: 20px;
     color: #666;
+}
+
+/* 작품 추가 버튼 스타일 */
+.add-artwork {
+    margin-left: auto; /* 결과 수 표시와 버튼 사이의 간격을 조정 */
+}
+
+.add-artwork .artwork-add_link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: white;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+    border: 1px solid #ddd;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    width: 40px;
+    height: 40px; /* view toggle 버튼과 같은 높이 설정 */
+}
+
+.add-artwork .artwork-add_link .link-text {
+    display: none;
+    width: auto;
+    white-space: nowrap;
+}
+
+.add-artwork .artwork-add_link:hover .link-text {
+    margin-left: 5px;
+    display: flex; /* hover 시 텍스트 표시 */
+}
+
+.add-artwork .artwork-add_link:hover {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    width : auto;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 76, 63, 0.2);
+}
+
+.separator {
+    width: 1px;
+    background-color: #ddd;
+    height: 25px;
+    margin: 0 15px;
+    display: inline-block;
 }

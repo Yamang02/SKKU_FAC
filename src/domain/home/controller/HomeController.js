@@ -41,4 +41,13 @@ export default class HomeController {
             ViewResolver.renderError(res, error);
         }
     }
+
+    async getSuccessPage(req, res) {
+        const message = req.query.message;
+        ViewResolver.render(res, ViewPath.SUCCESS, {
+            title: '작업 성공',
+            currentPage: req.path,
+            message: message
+        });
+    }
 }

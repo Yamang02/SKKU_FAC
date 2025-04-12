@@ -278,10 +278,10 @@ async function saveArtworkChanges() {
 
         if (response.success) {
             showSuccessMessage('작품 정보가 성공적으로 업데이트되었습니다.');
-            closeModal();
 
-            // 페이지 새로고침하여 변경된 내용 반영
-            window.location.reload();
+            setTimeout(() => {
+                window.location.href = '/success?message=작품 정보가 성공적으로 업데이트되었습니다.';
+            }, 2000);
         } else {
             showErrorMessage(response.error || '작품 정보 업데이트에 실패했습니다.');
         }
@@ -332,10 +332,11 @@ async function deleteArtwork() {
 
         if (response.success) {
             showSuccessMessage('작품이 성공적으로 삭제되었습니다.');
-            closeModal();
 
-            // 작품 목록 페이지로 이동
-            window.location.href = '/artwork';
+
+            setTimeout(() => {
+                window.location.href = '/success?message=작품이 성공적으로 삭제되었습니다.';
+            }, 2000);
         } else {
             showErrorMessage(response.error || '작품 삭제에 실패했습니다.');
         }

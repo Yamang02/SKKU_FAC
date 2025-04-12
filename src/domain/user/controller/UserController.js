@@ -149,13 +149,14 @@ export default class UserController {
 
             await this.userService.verifyEmail(token);
 
-            // 성공 메시지와 함께 로그인 페이지로 리다이렉트
             req.session.flash = {
                 type: 'success',
                 message: '이메일 인증이 성공적으로 완료되었습니다. 로그인해주세요.'
             };
 
-            res.redirect('/user/login');
+            ViewResolver.render(res, ViewPath.SUCCESS, {
+                message: '이메일 인증이 성공적으로 완료되었습니다. 로그인해주세요.'
+            });
         } catch (error) {
             // 실패 메시지와 함께 에러 페이지 렌더링
             req.session.flash = {

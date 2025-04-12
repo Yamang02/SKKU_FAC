@@ -48,6 +48,7 @@ export const ViewPath = {
             DETAIL: 'main/notice/NoticeDetail.ejs'
         }
     },
+    SUCCESS: 'common/success.ejs',
     ERROR: 'common/error.ejs',
     COMMON: {
         PAGINATION: 'common/pagination.ejs'

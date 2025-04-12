@@ -88,9 +88,6 @@ async function initializePage() {
     } catch (error) {
         // 오류가 401(Unauthorized) 관련인지 확인
         if (error.message && (
-            error.message.includes('로그인') ||
-            error.message.includes('인증') ||
-            error.message.includes('권한') ||
             error.status === 401
         )) {
             showErrorMessage('로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.');
@@ -234,9 +231,8 @@ function initSubmitButton() {
             if (response.success) {
                 showLoading(false);
                 showSuccessMessage('작품 등록에 성공하였습니다.');
-                showSuccessMessage('잠시 뒤 메인 페이지로 이동합니다.');
                 setTimeout(() => {
-                    window.location.href = '/';
+                    window.location.href = '/success?message=작품 등록에 성공하였습니다.';
                 }, 2000);
                 return;
             } else {

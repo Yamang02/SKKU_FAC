@@ -17,9 +17,10 @@
                 <pre class="error-stack"><%= error.stack %></pre>
                 <% } %>
                     <div class="button-container">
-                        <% const finalReturnUrl=typeof returnUrl !=='undefined' ? returnUrl : '/' ; %>
-                            <a href="<%= finalReturnUrl %>" class="back-button">
-                                <%= finalReturnUrl==='/admin' ? '대시보드로' : '이전 페이지로' %> 돌아가기
-                            </a>
+                        <a href="/" class="back-button">
+                            홈으로 돌아가기
+                        </a>
                     </div>
 </div>
+
+<script type="module" src="/js/common/error.js"></script>
