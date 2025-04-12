@@ -6,24 +6,38 @@
     --exhibition-primary-light: rgba(7, 43, 97, 0.1);
 }
 
-/* 전시회 컨테이너 */
-.exhibition-container {
-    max-width: var(--container-width);
-    margin: 0 auto;
-    padding: var(--spacing-lg) var(--spacing-md);
-}
-
 /* 전시회 헤더 */
 .exhibition-header {
     margin-bottom: 30px;
     text-align: center;
 }
 
-.exhibition-header .exhibition-title {
+.exhibition-title {
     font-size: 2.5rem;
-    color: var(--color-text-primary);
-    margin-bottom: 10px;
+    color: var(--exhibition-primary-dark);
 }
+
+.section-title--exhibition {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    position: relative;
+    padding-left: 15px;
+    color: #333;
+}
+
+.section-title--exhibition::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 30px;
+    background-color: var(--exhibition-primary);
+    border-radius: 2px;
+}
+
 
 /* 검색 컨테이너 */
 .search-container {
@@ -31,6 +45,7 @@
     background-color: white;
     border-radius: var(--border-radius-lg);
     padding: 30px;
+    margin-top: 40px;
     margin-bottom: 40px;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--color-border);
@@ -331,14 +346,6 @@
 
 .exhibition-info {
     padding: 20px;
-}
-
-.exhibition-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--color-text-primary);
-    line-height: 1.4;
 }
 
 .exhibition-subtitle {

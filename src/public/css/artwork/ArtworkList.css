@@ -424,20 +424,6 @@
     padding: 15px;
 }
 
-.exhibition-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: #333;
-}
-
-.exhibition-subtitle {
-    font-size: 0.85rem;
-    color: #666;
-    margin-bottom: 10px;
-    line-height: 1.4;
-}
-
 /* 상세 검색 패널 */
 .advanced-search-panel {
     max-height: 0;
