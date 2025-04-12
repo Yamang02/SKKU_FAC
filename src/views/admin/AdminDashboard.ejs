@@ -26,35 +26,86 @@
             </p>
         </div>
     </div>
-    <div class="admin-dashboard__recent adminCard">
-        <h2 class="admin-title">최근 활동</h2>
-        <div class="admin-dashboard__activities">
-            <% recentActivities.forEach(function(activity) { %>
-                <div class="admin-dashboard__activity">
-                    <i class="<%= activity.icon %>"></i>
-                    <span>
-                        <%= activity.text %>
-                    </span>
-                    <small>
-                        <%= activity.time %>
-                    </small>
-                </div>
-                <% }); %>
+
+    <div class="admin-dashboard__row">
+        <div class="admin-dashboard__recent adminCard">
+            <h2 class="admin-title">최근 활동</h2>
+            <div class="admin-dashboard__activities">
+                <% if(recentActivities && recentActivities.length> 0) { %>
+                    <% recentActivities.forEach(function(activity) { %>
+                        <div class="admin-dashboard__activity">
+                            <i class="<%= activity.icon %>"></i>
+                            <span>
+                                <%= activity.text %>
+                            </span>
+                            <small>
+                                <%= activity.time %>
+                            </small>
+                        </div>
+                        <% }); %>
+                            <% } else { %>
+                                <div class="admin-dashboard__no-data">
+                                    <p>최근 활동 내역이 없습니다.</p>
+                                </div>
+                                <% } %>
+            </div>
+        </div>
+
+        <div class="admin-dashboard__notices adminCard">
+            <h2 class="admin-title">최근 공지사항</h2>
+            <div class="admin-dashboard__notices-list">
+                <% if(recentNotices && recentNotices.length> 0) { %>
+                    <% recentNotices.forEach(function(notice) { %>
+                        <div class="admin-dashboard__notice <%= notice.isImportant ? 'adminStatusInactive' : '' %>">
+                            <h3>
+                                <%= notice.title %>
+                            </h3>
+                            <span>
+                                <%= notice.date %>
+                            </span>
+                        </div>
+                        <% }); %>
+                            <% } else { %>
+                                <div class="admin-dashboard__no-data">
+                                    <p>최근 공지사항이 없습니다.</p>
+                                </div>
+                                <% } %>
+            </div>
         </div>
     </div>
-    <div class="admin-dashboard__notices adminCard">
-        <h2 class="admin-title">최근 공지사항</h2>
-        <div class="admin-dashboard__notices-list">
-            <% recentNotices.forEach(function(notice) { %>
-                <div class="admin-dashboard__notice <%= notice.isImportant ? 'adminStatusInactive' : '' %>">
-                    <h3>
-                        <%= notice.title %>
-                    </h3>
-                    <span>
-                        <%= notice.date %>
-                    </span>
-                </div>
-                <% }); %>
+
+    <div class="admin-dashboard__recent-artworks adminCard">
+        <h2 class="admin-title">최근 작품 목록</h2>
+        <div class="admin-dashboard__artworks-grid">
+            <% if(recentArtworks && recentArtworks.items && recentArtworks.items.length> 0) { %>
+                <% recentArtworks.items.forEach(function(artwork) { %>
+                    <div class="admin-dashboard__artwork-item">
+                        <div class="admin-dashboard__artwork-img">
+                            <img src="<%= artwork.imageUrl %>" alt="<%= artwork.title %>">
+                        </div>
+                        <div class="admin-dashboard__artwork-info">
+                            <h3>
+                                <%= artwork.title %>
+                            </h3>
+                            <p class="admin-dashboard__artwork-artist">
+                                <i class="fas fa-user"></i>
+                                <%= artwork.artistName || '작가 미상' %>
+                            </p>
+                            <p class="admin-dashboard__artwork-year">
+                                <i class="fas fa-calendar-alt"></i>
+                                <%= artwork.year || '연도 미상' %>
+                            </p>
+                            <a href="/admin/artworks/edit/<%= artwork.id %>" class="admin-btn admin-btn-sm">
+                                <i class="fas fa-edit"></i> 수정
+                            </a>
+                        </div>
+                    </div>
+                    <% }); %>
+                        <% } else { %>
+                            <div class="admin-dashboard__no-data">
+                                <p>등록된 작품이 없습니다.</p>
+                            </div>
+                            <% } %>
         </div>
     </div>
 </div>
