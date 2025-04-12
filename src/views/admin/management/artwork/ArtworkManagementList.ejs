@@ -69,7 +69,6 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>제목</th>
                                 <th>작가</th>
                                 <th>상태</th>
@@ -83,9 +82,6 @@
                             <% if (artworks && artworks.length> 0) { %>
                                 <% artworks.forEach(artwork=> { %>
                                     <tr>
-                                        <td>
-                                            <%= artwork.id %>
-                                        </td>
                                         <td>
                                             <a href="/admin/management/artwork/<%= artwork.id %>" class="admin-link">
                                                 <%= artwork.title %>
@@ -144,7 +140,7 @@
                                     <% }); %>
                                         <% } else { %>
                                             <tr>
-                                                <td colspan="8" class="admin-table__empty">
+                                                <td colspan="7" class="admin-table__empty">
                                                     등록된 작품이 없습니다.
                                                 </td>
                                             </tr>

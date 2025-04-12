@@ -45,6 +45,7 @@ export default class ArtworkManagementService {
 
             const result = await this.artworkRepository.findArtworks(filterOptions);
             const artworks = result.items || [];
+            console.log(artworks);
             const total = result.total || 0;
 
             // 작품 목록 DTO 변환
@@ -52,18 +53,18 @@ export default class ArtworkManagementService {
             for (const artwork of artworks) {
                 // 작가 정보 가져오기
                 const artist = artwork.userId ? await this.userAccountRepository.findUserById(artwork.userId) : null;
+
                 // 전시회 정보 가져오기
                 const exhibition = artwork.exhibitionId ?
                     await this.exhibitionRepository.findById(artwork.exhibitionId) : null;
 
-                const artworkData = {
-                    ...artwork,
-                    artistName: artist?.name || '작가 미상',
-                    exhibitionTitle: exhibition?.title || ''
-                };
+                const artworkData = new ArtworkListManagementDto(artwork);
 
-                const artworkDto = new ArtworkListManagementDto(artworkData);
-                artworkDtos.push(artworkDto);
+                artworkData.artistName = artist?.name || '작가 미상';
+                artworkData.exhibitionTitle = exhibition?.title || '';
+
+
+                artworkDtos.push(artworkData);
             }
 
             // 작가 목록 조회 (필터용)
@@ -71,6 +72,8 @@ export default class ArtworkManagementService {
 
             // 페이지네이션 정보 생성
             const pageInfo = new Page(total, { page, limit });
+
+            console.log(artworkDtos);
 
             return {
                 artworks: artworkDtos,

@@ -99,7 +99,6 @@ export default class UserApiController {
 
         try {
             const user = await this.userService.getUserDetail(userId);
-            console.log('user', user);
             return res.json(ApiResponse.success(user));
         } catch (error) {
             if (error instanceof UserNotFoundError) {
