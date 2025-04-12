@@ -8,7 +8,6 @@ export default class UserController {
         this.userService = new UserService();
     }
 
-
     // === 사용자 페이지 렌더링 ===
     /**
      * 로그인 페이지를 렌더링합니다.
@@ -51,89 +50,6 @@ export default class UserController {
             return ViewResolver.render(res, ViewPath.MAIN.USER.FORGOT_PASSWORD);
         } catch (error) {
             return ViewResolver.renderError(res, error);
-        }
-    }
-
-
-    // === 관리자용 사용자 관리 ===
-    /**
-     * 관리자용 사용자 목록을 조회합니다.
-     */
-    async getManagementUserList(req, res) {
-        try {
-            const { page = 1, limit = 10, keyword } = req.query;
-            const userList = await this.userService.getUserList({
-                page: parseInt(page),
-                limit: parseInt(limit),
-                keyword
-            });
-
-            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.LIST, {
-                title: '회원 관리',
-                users: userList.items || [],
-                page: userList.page,
-                filters: { keyword }
-            });
-        } catch (error) {
-            ViewResolver.renderError(res, error);
-        }
-    }
-
-    /**
-     * 관리자용 사용자 상세를 조회합니다.
-     */
-    async getManagementUserDetail(req, res) {
-        try {
-            const { id } = req.params;
-            const user = await this.userService.getUserDetail(id);
-
-            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.DETAIL, {
-                title: '회원 상세',
-                user
-            });
-        } catch (error) {
-            ViewResolver.renderError(res, error);
-        }
-    }
-
-    /**
-     * 관리자용 사용자 정보를 수정합니다.
-     */
-    async updateManagementUser(req, res) {
-        try {
-            const userId = req.params.id;
-            const updateData = req.body;
-
-            await this.userService.updateUser(userId, updateData);
-            res.json({
-                success: true,
-                message: '회원 정보가 저장되었습니다.'
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: error.message || '회원 정보 저장 중 오류가 발생했습니다.'
-            });
-        }
-    }
-
-    /**
-     * 관리자용 사용자를 삭제합니다.
-     */
-    async deleteManagementUser(req, res) {
-        try {
-            const userId = req.params.id;
-            await this.userService.deleteUser(userId);
-
-            res.json({
-                success: true,
-                message: '회원이 삭제되었습니다.'
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: error.message || '회원 삭제 중 오류가 발생했습니다.'
-            });
         }
     }
 

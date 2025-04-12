@@ -8,6 +8,8 @@ import rateLimit from 'express-rate-limit';
 import { pageTracker } from './common/middleware/PageTracker.js';
 import { createUploadDirs } from './common/utils/createUploadDirs.js';
 import basicAuth from 'express-basic-auth';
+import methodOverride from 'method-override';
+import { isAdmin } from './common/middleware/auth.js';
 
 // 라우터 import
 import { HomeRouter, NoticeRouter, ExhibitionRouter, ArtworkRouter, UserRouter, AdminRouter } from './routeIndex.js';
@@ -78,6 +80,9 @@ const getReturnUrl = (req) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// HTTP 메서드 재정의 미들웨어 등록
+app.use(methodOverride('_method'));
+
 // 정적 파일 제공 설정
 const staticOptions = {
     setHeaders: (res, path) => {
@@ -122,6 +127,17 @@ app.use(session(sessionConfig));
 // Flash 메시지 미들웨어 등록
 app.use(flash());
 
+// 플래시 메시지를 res.locals에 추가
+app.use((req, res, next) => {
+    res.locals.messages = {
+        success: req.flash('success'),
+        error: req.flash('error'),
+        info: req.flash('info'),
+        warning: req.flash('warning')
+    };
+    next();
+});
+
 // 페이지 추적 미들웨어 등록
 app.use(pageTracker);
 
@@ -153,7 +169,7 @@ app.use('/notice', NoticeRouter);
 app.use('/exhibition', ExhibitionRouter);
 app.use('/artwork', ArtworkRouter);
 app.use('/user', UserRouter);
-app.use('/admin', AdminRouter);
+app.use('/admin', isAdmin, AdminRouter);
 
 console.log('✅ 라우터 설정 완료');
 

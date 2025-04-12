@@ -6,208 +6,162 @@
 <div class="admin-user-detail">
     <div class="content-section">
         <h2 class="admin-title">회원상세</h2>
-        <div class="section-content">
-            <!-- 기본 정보 -->
-            <div class="form-grid">
-                <h3 class="section-subtitle">기본 정보</h3>
-                <div class="form-group">
-                    <label>ID</label>
-                    <input type="text" value="<%= user.username %>" readonly>
-                </div>
-                <div class="form-group">
-                    <label>이름</label>
-                    <input type="text" value="<%= user.name %>" readonly>
-                </div>
-                <div class="form-group">
-                    <label>이메일</label>
-                    <input type="email" value="<%= user.email %>" readonly>
-                </div>
-                <div class="form-group">
-                    <label>역할</label>
-                    <select name="role" required>
-                        <option value="ADMIN" <%=user.role==='ADMIN' ? 'selected' : '' %>>관리자</option>
-                        <option value="SKKU_MEMBER" <%=user.role==='SKKU_MEMBER' ? 'selected' : '' %>>성균관대 구성원</option>
-                        <option value="EXTERNAL_MEMBER" <%=user.role==='EXTERNAL_MEMBER' ? 'selected' : '' %>>외부인
-                        </option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>상태</label>
-                    <select name="status" required>
-                        <option value="ACTIVE" <%=user.status==='ACTIVE' ? 'selected' : '' %>>활성</option>
-                        <option value="INACTIVE" <%=user.status==='INACTIVE' ? 'selected' : '' %>>비활성</option>
-                        <option value="BLOCKED" <%=user.status==='BLOCKED' ? 'selected' : '' %>>차단</option>
-                    </select>
-                </div>
-            </div>
 
-            <!-- 상세 정보 -->
-            <div class="form-grid">
-                <h3 class="section-subtitle">상세 정보</h3>
-                <% if (user.role==='SKKU_MEMBER' || (user.role==='ADMIN' && user.department)) { %>
-                    <div class="form-group">
-                        <label>학과</label>
-                        <input type="text" value="<%= user.department || '-' %>" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>학번</label>
-                        <input type="text" value="<%= user.studentYear || '-' %>" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>동아리 회원</label>
-                        <input type="text" value="<%= user.artistInfo?.isClubMember ? '예' : '아니오' %>" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>회원 유형</label>
-                        <input type="text" value="<%= user.artistInfo?.memberType === 'STUDENT' ? '학생' : '졸업생' %>"
-                            readonly>
-                    </div>
-                    <% } else if (user.role==='EXTERNAL_MEMBER' ) { %>
-                        <div class="form-group">
-                            <label>소속</label>
-                            <input type="text" value="<%= user.artistInfo?.affiliation || '-' %>" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>소속 유형</label>
-                            <input type="text"
-                                value="<%= user.artistInfo?.affiliationType === 'INDIVIDUAL' ? '개인' : '단체' %>" readonly>
-                        </div>
-                        <% } %>
+        <% if (messages && messages.success && messages.success.length> 0) { %>
+            <div class="alert alert-success">
+                <%= messages.success %>
             </div>
+            <% } %>
+                <% if (messages && messages.error && messages.error.length> 0) { %>
+                    <div class="alert alert-danger">
+                        <%= messages.error %>
+                    </div>
+                    <% } %>
 
-            <!-- 시스템 정보 -->
-            <div class="form-grid">
-                <h3 class="section-subtitle">시스템 정보</h3>
-                <div class="form-group">
-                    <label>가입일</label>
-                    <input type="text" value="<%= new Date(user.createdAt).toLocaleDateString() %>" readonly>
-                </div>
-                <div class="form-group">
-                    <label>수정일</label>
-                    <input type="text" value="<%= new Date(user.updatedAt).toLocaleDateString() %>" readonly>
-                </div>
-            </div>
-        </div>
-        <div class="section-footer">
-            <div class="admin-button-group">
-                <button class="admin-button admin-button--primary" onclick="handleSave()">
-                    <i class="fas fa-save"></i>
-                    저장
-                </button>
-                <button class="admin-button admin-button--danger" onclick="handleDelete()">
-                    <i class="fas fa-trash"></i>
-                    삭제
-                </button>
-            </div>
-        </div>
+                        <div class="section-content">
+                            <form method="POST" action="/admin/management/user/<%= user.id %>?_method=PUT">
+                                <!-- 기본 정보 -->
+                                <div class="form-grid">
+                                    <h3 class="section-subtitle">기본 정보</h3>
+                                    <div class="form-group">
+                                        <label>ID</label>
+                                        <input type="text" value="<%= user.username %>" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>이름</label>
+                                        <input type="text" value="<%= user.name %>" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>이메일</label>
+                                        <input type="email" value="<%= user.email %>" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>역할</label>
+                                        <select name="role" required>
+                                            <option value="ADMIN" <%=user.role==='ADMIN' ? 'selected' : '' %>>
+                                                관리자
+                                            </option>
+                                            <option value="SKKU_MEMBER" <%=user.role==='SKKU_MEMBER' ? 'selected' : ''
+                                                %>>성균관대 구성원</option>
+                                            <option value="EXTERNAL_MEMBER" <%=user.role==='EXTERNAL_MEMBER'
+                                                ? 'selected' : '' %>>외부인
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>상태</label>
+                                        <select name="status" required>
+                                            <option value="ACTIVE" <%=user.status==='ACTIVE' ? 'selected' : '' %>>활성
+                                            </option>
+                                            <option value="INACTIVE" <%=user.status==='INACTIVE' ? 'selected' : '' %>
+                                                >비활성</option>
+                                            <option value="BLOCKED" <%=user.status==='BLOCKED' ? 'selected' : '' %>>차단
+                                            </option>
+                                            <option value="UNVERIFIED" <%=user.status==='UNVERIFIED' ? 'selected' : ''
+                                                %>>미인증</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>이메일 인증 여부</label>
+                                        <input type="text" value="<%= user.emailVerifiedText %>" readonly>
+                                    </div>
+                                </div>
+
+                                <!-- 상세 정보 -->
+                                <div class="form-grid">
+                                    <h3 class="section-subtitle">상세 정보</h3>
+                                    <% if (user.role==='SKKU_MEMBER' ) { %>
+                                        <div class="form-group">
+                                            <label>학과</label>
+                                            <input type="text" value="<%= user.profileInfo.department || '-' %>"
+                                                readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>학번</label>
+                                            <input type="text" value="<%= user.profileInfo.studentYear || '-' %>"
+                                                readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>동아리 회원</label>
+                                            <input type="text"
+                                                value="<%= user.profileInfo.isClubMember ? '예' : '아니오' %>" readonly>
+                                        </div>
+                                        <% } else if (user.role==='EXTERNAL_MEMBER' ) { %>
+                                            <div class="form-group">
+                                                <label>소속</label>
+                                                <input type="text" value="<%= user.profileInfo.affiliation || '-' %>"
+                                                    readonly>
+                                            </div>
+                                            <% } else { %>
+                                                <div class="form-group span-2">
+                                                    <p>역할에 따른 추가 정보가 없습니다.</p>
+                                                </div>
+                                                <% } %>
+                                </div>
+
+                                <!-- 시스템 정보 -->
+                                <div class="form-grid">
+                                    <h3 class="section-subtitle">시스템 정보</h3>
+                                    <div class="form-group">
+                                        <label>가입일</label>
+                                        <input type="text" value="<%= user.createdAtFormatted %>" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>수정일</label>
+                                        <input type="text" value="<%= user.updatedAtFormatted %>" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>마지막 로그인</label>
+                                        <input type="text" value="<%= user.lastLoginFormatted %>" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>계정 ID</label>
+                                        <input type="text" value="<%= user.id %>" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="section-footer">
+                                    <div class="admin-button-group">
+                                        <button type="submit" class="admin-button admin-button--primary">
+                                            <i class="fas fa-save"></i>
+                                            저장
+                                        </button>
+                            </form>
+
+                            <form method="POST" action="/admin/management/user/<%= user.id %>/reset-password"
+                                class="inline-form">
+                                <button type="submit" class="admin-button admin-button--warning"
+                                    onclick="return confirm('해당 사용자의 비밀번호를 초기화하시겠습니까?')">
+                                    <i class="fas fa-key"></i>
+                                    비밀번호 초기화
+                                </button>
+                            </form>
+
+                            <form method="POST" action="/admin/management/user/<%= user.id %>?_method=DELETE"
+                                class="inline-form" onsubmit="return confirm('정말로 이 회원을 삭제하시겠습니까?\n\n' +
+                    '⚠️ 경고: 이 작업은 되돌릴 수 없습니다.\n' +
+                    '• 해당 회원의 모든 정보가 영구적으로 삭제됩니다.\n' +
+                    '• 회원과 관련된 모든 데이터가 함께 삭제됩니다.\n' +
+                    '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.')">
+                                <button type="submit" class="admin-button admin-button--danger">
+                                    <i class="fas fa-trash"></i>
+                                    삭제
+                                </button>
+                            </form>
+                        </div>
     </div>
+</div>
 </div>
 
 <div class="admin-back-button-container">
-    <a onclick="history.back()" class="admin-button admin-button--backtolist">
+    <a href="/admin/management/user" class="admin-button admin-button--backtolist">
         <i class="fas fa-list"></i>
         목록으로
     </a>
 </div>
 
-<script>
-    async function handleSave() {
-        const role = document.querySelector('select[name="role"]').value;
-        const status = document.querySelector('select[name="status"]').value;
-
-        try {
-            const response = await fetch(`/admin/management/user/<%= user.id %>`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    role,
-                    status
-                })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert(result.message);
-                window.location.href = '/admin/management/user';
-            } else {
-                alert(result.message || '회원 정보 저장 중 오류가 발생했습니다.');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('회원 정보 저장 중 오류가 발생했습니다.');
-        }
+<style>
+    .inline-form {
+        display: inline;
     }
-
-    async function handleDelete() {
-        if (confirm('정말로 이 회원을 삭제하시겠습니까?\n\n' +
-            '⚠️ 경고: 이 작업은 되돌릴 수 없습니다.\n' +
-            '• 해당 회원의 모든 정보가 영구적으로 삭제됩니다.\n' +
-            '• 회원과 관련된 모든 데이터가 함께 삭제됩니다.\n' +
-            '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.')) {
-
-            try {
-                const response = await fetch(`/admin/management/user/<%= user.id %>`, {
-                    method: 'DELETE'
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    alert(result.message);
-                    window.location.href = '/admin/management/user';
-                } else {
-                    alert(result.message || '회원 삭제 중 오류가 발생했습니다.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('회원 삭제 중 오류가 발생했습니다.');
-            }
-        }
-    }
-
-    function handleEdit() {
-        const form = document.getElementById('userForm');
-        const inputs = form.querySelectorAll('input, select');
-        inputs.forEach(input => {
-            if (input.type !== 'text' || input.value !== user.username) {
-                input.readOnly = false;
-                input.disabled = false;
-            }
-        });
-
-        const actionButtons = `
-        <button type="button" class="btn btn-success" onclick="handleSave()">
-            저장
-        </button>
-        <button type="button" class="btn btn-secondary" onclick="handleCancel()">
-            취소
-        </button>
-    `;
-        document.querySelector('.action-buttons').innerHTML = actionButtons;
-    }
-
-    function handleCancel() {
-        location.reload();
-    }
-
-    function handleResetPassword() {
-        if (confirm('해당 사용자의 비밀번호를 초기화하시겠습니까?')) {
-            // TODO: 비밀번호 초기화 로직 구현
-        }
-    }
-
-    function handleBlockUser() {
-        if (confirm('해당 사용자의 계정을 차단하시겠습니까?')) {
-            // TODO: 계정 차단 로직 구현
-        }
-    }
-
-    function handleUnblockUser() {
-        if (confirm('해당 사용자의 계정 차단을 해제하시겠습니까?')) {
-            // TODO: 차단 해제 로직 구현
-        }
-    }
-</script>
+</style>

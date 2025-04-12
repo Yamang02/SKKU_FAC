@@ -1,10 +1,10 @@
-import { ViewPath } from '../../../common/constants/ViewPath.js';
-import ViewResolver from '../../../common/utils/ViewResolver.js';
-import AdminService from '../service/AdminService.js';
+import { ViewPath } from '../../../../common/constants/ViewPath.js';
+import ViewResolver from '../../../../common/utils/ViewResolver.js';
+import SystemManagementService from '../../service/system/SystemManagementService.js';
 
-export default class AdminController {
+export default class SystemManagementController {
     constructor() {
-        this.adminService = new AdminService();
+        this.adminService = new SystemManagementService();
     }
 
     /**
@@ -29,6 +29,7 @@ export default class AdminController {
             ViewResolver.renderError(res, error);
         }
     }
+
 }
 
 

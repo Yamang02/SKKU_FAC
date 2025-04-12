@@ -1,13 +1,14 @@
-import UserService from '../../user/service/UserService.js';
-import ArtworkService from '../../artwork/service/ArtworkService.js';
-import TimeFormatter from '../../../common/utils/TimeFormatter.js';
-import Page from '../../common/model/Page.js';
+import UserService from '../../../user/service/UserService.js';
+import ArtworkService from '../../../artwork/service/ArtworkService.js';
+import TimeFormatter from '../../../../common/utils/TimeFormatter.js';
+import Page from '../../../common/model/Page.js';
+
 
 /**
  * 관리자 서비스
  * 관리자 기능에 대한 비즈니스 로직을 처리합니다.
  */
-export default class AdminService {
+export default class SystemManagementService {
     constructor() {
         this.userService = new UserService();
         this.artworkService = new ArtworkService();

@@ -35,8 +35,6 @@ ArtworkRouter.get('/new', isAuthenticated, artworkController.getArtworkRegistrat
 // 작품 상세 페이지
 ArtworkRouter.get('/:slug', artworkController.getArtworkDetailPage.bind(artworkController));
 
-// === 관리자용 작품 관리 페이지 라우트 ===
-ArtworkRouter.get('/management', artworkController.getManagementArtworkListPage.bind(artworkController));
-
+// 관리자용 작품 관리 페이지는 AdminRouter에서 처리합니다.
 
 export default ArtworkRouter;

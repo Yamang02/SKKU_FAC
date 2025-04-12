@@ -1,46 +1,42 @@
 import express from 'express';
-import { isAdmin } from '../../../common/middleware/auth.js';
-import AdminController from './AdminController.js';
-import UserController from '../../user/controller/UserController.js';
-import ExhibitionController from '../../exhibition/controller/ExhibitionController.js';
-import ArtworkController from '../../artwork/controller/ArtworkController.js';
-import NoticeController from '../../notice/controller/NoticeController.js';
+import { SystemManagementController, UserManagementController, ExhibitionManagementController, ArtworkManagementController, NoticeManagementController } from './AdminControllerIndex.js';
 
 const AdminRouter = express.Router();
-const adminController = new AdminController();
-const userController = new UserController();
-const exhibitionController = new ExhibitionController();
-const artworkController = new ArtworkController();
-const noticeController = new NoticeController();
+const adminController = new SystemManagementController();
+const userManagementController = new UserManagementController();
+const exhibitionManagementController = new ExhibitionManagementController();
+const artworkManagementController = new ArtworkManagementController();
+const noticeManagementController = new NoticeManagementController();
 
 
 // 관리자 대시보드
-AdminRouter.get(['/', '/dashboard'], isAdmin, (req, res) => adminController.getDashboard(req, res));
+AdminRouter.get(['/', '/dashboard'], (req, res) => adminController.getDashboard(req, res));
 
 // 사용자 관리
-AdminRouter.get(['/management/user', '/management/user/list'], isAdmin, (req, res) => userController.getManagementUserList(req, res));
-AdminRouter.get('/management/user/:id([0-9]+)', isAdmin, (req, res) => userController.getManagementUserDetail(req, res));
-AdminRouter.put('/management/user/:id([0-9]+)', isAdmin, (req, res) => userController.updateManagementUser(req, res));
-AdminRouter.delete('/management/user/:id([0-9]+)', isAdmin, (req, res) => userController.deleteManagementUser(req, res));
+AdminRouter.get('/management/user', (req, res) => userManagementController.getManagementUserList(req, res));
+AdminRouter.get('/management/user/:id', (req, res) => userManagementController.getManagementUserDetail(req, res));
+AdminRouter.put('/management/user/:id', (req, res) => userManagementController.updateManagementUser(req, res));
+AdminRouter.delete('/management/user/:id', (req, res) => userManagementController.deleteManagementUser(req, res));
+AdminRouter.post('/management/user/:id/reset-password', (req, res) => userManagementController.resetManagementUserPassword(req, res));
 
 // 전시회 관리
-AdminRouter.get('/management/exhibition', isAdmin, (req, res) => exhibitionController.getManagementExhibitionListPage(req, res));
-AdminRouter.get('/management/exhibition/registration', isAdmin, (req, res) => exhibitionController.getManagementExhibitionCreatePage(req, res));
-AdminRouter.post('/management/exhibition/registration', isAdmin, (req, res) => exhibitionController.createManagementExhibition(req, res));
-AdminRouter.get('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.getManagementExhibitionDetailPage(req, res));
-AdminRouter.put('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.updateManagementExhibition(req, res));
-AdminRouter.delete('/management/exhibition/:id([0-9]+)', isAdmin, (req, res) => exhibitionController.deleteManagementExhibition(req, res));
+AdminRouter.get('/management/exhibition', (req, res) => exhibitionManagementController.getManagementExhibitionListPage(req, res));
+AdminRouter.get('/management/exhibition/registration', (req, res) => exhibitionManagementController.getManagementExhibitionCreatePage(req, res));
+AdminRouter.post('/management/exhibition/registration', (req, res) => exhibitionManagementController.createManagementExhibition(req, res));
+AdminRouter.get('/management/exhibition/:id([0-9]+)', (req, res) => exhibitionManagementController.getManagementExhibitionDetailPage(req, res));
+AdminRouter.put('/management/exhibition/:id([0-9]+)', (req, res) => exhibitionManagementController.updateManagementExhibition(req, res));
+AdminRouter.delete('/management/exhibition/:id([0-9]+)', (req, res) => exhibitionManagementController.deleteManagementExhibition(req, res));
 
 // 작품 관리
-AdminRouter.get('/management/artwork', isAdmin, (req, res) => artworkController.getManagementArtworkListPage(req, res));
-AdminRouter.delete('/management/artwork/:id([0-9]+)', isAdmin, (req, res) => artworkController.deleteManagementArtwork(req, res));
+AdminRouter.get('/management/artwork', (req, res) => artworkManagementController.getManagementArtworkListPage(req, res));
+AdminRouter.delete('/management/artwork/:id([0-9]+)', (req, res) => artworkManagementController.deleteManagementArtwork(req, res));
 
 // 공지사항 관리
-AdminRouter.get('/management/notice', isAdmin, (req, res) => noticeController.getManagementNoticeList(req, res));
-AdminRouter.get('/management/notice/registration', isAdmin, (req, res) => noticeController.getManagementNoticeRegistrationPage(req, res));
-AdminRouter.post('/management/notice/registration', isAdmin, (req, res) => noticeController.createManagementNotice(req, res));
-AdminRouter.get('/management/notice/:id([0-9]+)', isAdmin, (req, res) => noticeController.getManagementNoticeDetail(req, res));
-AdminRouter.put('/management/notice/:id([0-9]+)', isAdmin, (req, res) => noticeController.updateManagementNotice(req, res));
-AdminRouter.delete('/management/notice/:id([0-9]+)', isAdmin, (req, res) => noticeController.deleteManagementNotice(req, res));
+AdminRouter.get('/management/notice', (req, res) => noticeManagementController.getManagementNoticeList(req, res));
+AdminRouter.get('/management/notice/registration', (req, res) => noticeManagementController.getManagementNoticeRegistrationPage(req, res));
+AdminRouter.post('/management/notice/registration', (req, res) => noticeManagementController.createManagementNotice(req, res));
+AdminRouter.get('/management/notice/:id([0-9]+)', (req, res) => noticeManagementController.getManagementNoticeDetail(req, res));
+AdminRouter.put('/management/notice/:id([0-9]+)', (req, res) => noticeManagementController.updateManagementNotice(req, res));
+AdminRouter.delete('/management/notice/:id([0-9]+)', (req, res) => noticeManagementController.deleteManagementNotice(req, res));
 
 export default AdminRouter;

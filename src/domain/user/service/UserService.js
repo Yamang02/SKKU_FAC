@@ -8,6 +8,9 @@ import { sendVerificationEmail } from '../../../common/utils/emailSender.js';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import Page from '../../common/model/Page.js';
+import UserListManagementDto from '../../admin/model/dto/user/UserListManagementDto.js';
+import UserManagementDto from '../../admin/model/dto/user/UserManagementDto.js';
 
 /**
  * 사용자 서비스
@@ -107,17 +110,46 @@ export default class UserService {
     /**
      * 사용자 목록을 조회합니다.
      */
-    async getUserList({ page = 1, limit = 10, keyword }) {
-        const filters = { keyword };
-        const users = await this.userRepository.findUsers({
-            page: parseInt(page),
-            limit: parseInt(limit),
-            ...filters
-        });
+    async getUserList(options = {}) {
+        const { page = 1, limit = 10, filters = {} } = options;
 
-        users;
+        try {
+            // 필터 설정
+            const queryOptions = {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                keyword: filters.keyword,
+                status: filters.status,
+                role: filters.role
+            };
 
-        return null;
+            // 사용자 목록 조회
+            const users = await this.userRepository.findUsers(queryOptions);
+
+            if (!users) {
+                return {
+                    items: [],
+                    total: 0,
+                    page: new Page(0, { page, limit })
+                };
+            }
+
+            // 페이지 객체 생성
+            const pageData = new Page(users.total, {
+                page,
+                limit,
+                baseUrl: '/admin/management/user'
+            });
+
+            return {
+                items: users.items || [],
+                total: users.total || 0,
+                page: pageData
+            };
+        } catch (error) {
+            console.error('사용자 목록 조회 중 오류:', error);
+            throw new Error('사용자 목록을 조회하는데 실패했습니다.');
+        }
     }
 
     /**
@@ -183,6 +215,26 @@ export default class UserService {
             throw new Error('사용자 정보 업데이트 실패');
         }
     }
+
+    /**
+     * 사용자 정보를 수정합니다.
+     */
+    async updateUserByAdmin(userId, userData) {
+        const user = await this.userRepository.findUserById(userId);
+        if (!user) {
+            throw new Error('사용자를 찾을 수 없습니다.');
+        }
+
+        user.role = userData.role;
+        user.status = userData.status;
+
+        console.log(user);
+
+        // 사용자 정보 업데이트
+        const updatedUser = await this.userRepository.updateUser(user.id, userData);
+        return updatedUser;
+    }
+
     /**
      * 사용자를 삭제합니다.
      */
@@ -240,14 +292,20 @@ export default class UserService {
      * 사용자 프로필 정보를 조회합니다.
      */
     mapUserToDto(user) {
+        const {
+            id,
+            username,
+            email,
+            name,
+            status,
+            role,
+            createdAt,
+            updatedAt,
+            lastLoginAt,
+            emailVerified
+        } = user;
 
-        const { id, username, email, name, status, role, createdAt } = user;
-
-        const department = user.SkkuUserProfile ? user.SkkuUserProfile.department : '';
-        const studentYear = user.SkkuUserProfile ? user.SkkuUserProfile.studentYear : '';
-        const isClubMember = user.SkkuUserProfile ? user.SkkuUserProfile.isClubMember : '';
-        const affiliation = user.ExternalUserProfile ? user.ExternalUserProfile.affiliation : '';
-
+        // 관련 프로필 정보 직접 전달
         const dtoData = {
             id,
             username,
@@ -255,11 +313,12 @@ export default class UserService {
             name,
             role,
             status,
-            department,
-            studentYear,
-            isClubMember,
-            affiliation,
-            createdAt
+            createdAt,
+            updatedAt,
+            lastLoginAt,
+            emailVerified,
+            SkkuUserProfile: user.SkkuUserProfile,
+            ExternalUserProfile: user.ExternalUserProfile
         };
 
         return new UserDetailDto(dtoData);
@@ -282,5 +341,91 @@ export default class UserService {
         const verifieddUser = await this.userRepository.updateUser(user.id, { emailVerified: true, emailVerificationToken: null, emailVerificationTokenExpiry: null, status: 'ACTIVE' });
 
         return verifieddUser;
+    }
+
+
+    /**
+     * 관리자용 사용자 목록을 조회합니다.
+     * @param {Object} options - 조회 옵션
+     * @returns {Promise<UserListManagementDto>} 사용자 목록 DTO
+     */
+    async getManagementUserList(options = {}) {
+        try {
+            const userListData = await this.userService.getUserList(options);
+            return new UserListManagementDto({
+                items: userListData.items || [],
+                total: userListData.total || 0,
+                page: userListData.page,
+                filters: options.filters || {}
+            });
+        } catch (error) {
+            console.error('사용자 목록 조회 중 오류:', error);
+            throw new Error('사용자 목록을 조회하는데 실패했습니다.');
+        }
+    }
+
+    /**
+     * 관리자용 사용자 상세 정보를 조회합니다.
+     * @param {string} userId - 사용자 ID
+     * @returns {Promise<UserManagementDto>} 사용자 DTO
+     */
+    async getManagementUserDetail(userId) {
+        try {
+            const userDetail = await this.userService.getUserDetail(userId);
+            return new UserManagementDto(userDetail);
+        } catch (error) {
+            console.error('사용자 상세 정보 조회 중 오류:', error);
+            throw new Error('사용자 상세 정보를 조회하는데 실패했습니다.');
+        }
+    }
+
+    /**
+     * 관리자용 사용자 정보를 수정합니다.
+     * @param {string} userId - 사용자 ID
+     * @param {Object} userData - 수정할 사용자 정보
+     * @returns {Promise<Object>} 수정 결과
+     */
+    async updateManagementUser(userId, userData) {
+        try {
+            await this.userService.updateUser(userId, userData);
+            return { success: true, message: '회원 정보가 저장되었습니다.' };
+        } catch (error) {
+            console.error('사용자 정보 수정 중 오류:', error);
+            throw new Error('사용자 정보를 수정하는데 실패했습니다.');
+        }
+    }
+
+    /**
+     * 관리자용 사용자를 삭제합니다.
+     * @param {string} userId - 사용자 ID
+     * @returns {Promise<Object>} 삭제 결과
+     */
+    async deleteManagementUser(userId) {
+        try {
+            await this.userService.deleteUserAccount(userId);
+            return { success: true, message: '회원이 삭제되었습니다.' };
+        } catch (error) {
+            console.error('사용자 삭제 중 오류:', error);
+            throw new Error('사용자를 삭제하는데 실패했습니다.');
+        }
+    }
+
+    /**
+     * 관리자용 사용자 비밀번호를 재설정합니다.
+     * @param {string} userId - 사용자 ID
+     * @returns {Promise<Object>} 재설정 결과
+     */
+    async resetUserPassword(userId) {
+        try {
+            const tempPassword = await this.userService.resetPassword(userId);
+            return {
+                success: true,
+                message: '비밀번호가 초기화되었습니다.',
+                tempPassword
+            };
+        } catch (error) {
+            console.error('비밀번호 재설정 중 오류:', error);
+            throw new Error('비밀번호를 재설정하는데 실패했습니다.');
+        }
     }
 }

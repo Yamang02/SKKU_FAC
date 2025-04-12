@@ -46,13 +46,6 @@ UserRouter.get('/me', isAuthenticated, (req, res) => userController.getUserProfi
 UserRouter.get('/password/reset', isNotAuthenticated, (req, res) => userController.getUserPasswordResetPage(req, res));
 UserRouter.post('/password/reset', isNotAuthenticated, (req, res) => userController.handleUserPasswordReset(req, res));
 
-// === 관리자 라우트 ===
-// 사용자 관리
-UserRouter.get('/admin/list', isAuthenticated, (req, res) => userController.getManagementUserList(req, res));
-UserRouter.get('/admin/:id', isAuthenticated, (req, res) => userController.getManagementUserDetail(req, res));
-UserRouter.put('/admin/:id', isAuthenticated, (req, res) => userController.updateManagementUser(req, res));
-UserRouter.delete('/admin/:id', isAuthenticated, (req, res) => userController.deleteManagementUser(req, res));
-
 // 이메일 인증
 UserRouter.get('/verify-email', (req, res) => userController.verifyEmail(req, res));
 

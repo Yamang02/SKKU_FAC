@@ -18,5 +18,10 @@ export default class UserDetailDTO {
         this.externalUserId = data.externalUserId || '';
         this.affiliation = data.affiliation || '';
         this.createdAt = data.createdAt || '';
+        this.updatedAt = data.updatedAt || '';
+        this.lastLoginAt = data.lastLoginAt || null;
+        this.emailVerified = data.emailVerified || false;
+        this.SkkuUserProfile = data.SkkuUserProfile || null;
+        this.ExternalUserProfile = data.ExternalUserProfile || null;
     }
 }

@@ -65,6 +65,12 @@ const Artwork = db.define('Artwork', {
             key: 'id'
         },
         comment: '작품 작성자 ID (USER_uuid 형식)'
+    },
+    status: {
+        type: DataTypes.ENUM('PENDING', 'APPROVED', 'BLOCKED', 'DELETED'),
+        allowNull: false,
+        defaultValue: 'APPROVED',
+        comment: '작품 상태'
     }
 }, {
     timestamps: true,

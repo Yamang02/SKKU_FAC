@@ -9,7 +9,7 @@
     align-items: center;
     justify-content: center;
     min-width: 28px;
-    height: 28px;
+    height: fit-content;
 }
 
 .admin-button--primary {

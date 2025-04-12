@@ -9,21 +9,24 @@ export default class UserAccountRepository {
     /**
      * 모든 사용자를 조회합니다.
      */
-    async findUsers({ page = 1, limit = 10, keyword, role } = {}) {
+    async findUsers({ page = 1, limit = 10, keyword, role, status } = {}) {
         const offset = (page - 1) * limit; // 페이지네이션을 위한 오프셋 계산
 
         const where = {};
         if (keyword) {
             where[Op.or] = [
-                { name: { [Op.iLike]: `%${keyword}%` } },
-                { email: { [Op.iLike]: `%${keyword}%` } },
-                { department: { [Op.iLike]: `%${keyword}%` } },
-                { username: { [Op.iLike]: `%${keyword}%` } }
+                { name: { [Op.like]: `%${keyword}%` } },
+                { email: { [Op.like]: `%${keyword}%` } },
+                { username: { [Op.like]: `%${keyword}%` } }
             ];
         }
 
         if (role) {
             where.role = role; // 역할 필터링
+        }
+
+        if (status) {
+            where.status = status; // 상태 필터링
         }
 
         const { count, rows } = await UserAccount.findAndCountAll({
