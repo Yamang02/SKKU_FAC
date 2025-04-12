@@ -1,199 +1,187 @@
 <div class="admin-management">
     <h2 class="admin-title">작품목록</h2>
 
-    <!-- 컨트롤 섹션 -->
-    <div class="admin-control">
-        <div class="admin-control__group">
-        </div>
-    </div>
-
-    <!-- 필터 섹션 -->
-    <div class="admin-filter">
-        <div class="admin-filter__group">
-            <select class="admin-filter__select" name="artistId">
-                <option value="">작가</option>
-                <% artists.forEach(artist=> { %>
-                    <option value="<%= artist.id %>" <%=filters?.artistId==artist.id ? 'selected' : '' %>>
-                        <%= artist.name %>
-                    </option>
-                    <% }); %>
-            </select>
-            <input type="text" class="admin-filter__input" name="keyword" placeholder="검색어"
-                value="<%= filters?.keyword || '' %>">
-            <button class="admin-button admin-button--primary" id="btnApplyFilter">
-                <i class="fas fa-filter"></i>
-                필터 적용
-            </button>
-        </div>
-    </div>
-
-    <div class="admin-management__content">
-        <!-- 테이블 섹션 -->
-        <div class="admin-table-container">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>
-                            <input type="checkbox" class="admin-checkbox">
-                        </th>
-                        <th>ID</th>
-                        <th>제목</th>
-                        <th>작가</th>
-                        <th>생성일</th>
-                        <th>수정일</th>
-                        <th>관리</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (artworks && artworks.length> 0) { %>
-                        <% artworks.forEach(artwork=> { %>
-                            <tr>
-                                <td>
-                                    <input type="checkbox" class="admin-checkbox">
-                                </td>
-                                <td>
-                                    <%= artwork.id %>
-                                </td>
-                                <td>
-                                    <%= artwork.title %>
-                                </td>
-                                <td>
-                                    <% if (artwork.artist && artwork.artist.name) { %>
-                                        <%= artwork.artist.name %>
-                                            <% } else if (artwork.artistName) { %>
-                                                <%= artwork.artistName %>
-                                                    <% } else { %>
-                                                        작가 미상
-                                                        <% } %>
-                                </td>
-                                <td>
-                                    <% if (artwork.createdAt) { %>
-                                        <%= new Date(artwork.createdAt).toLocaleDateString() %>
-                                            <% } else { %>
-                                                정보 없음
-                                                <% } %>
-                                </td>
-                                <td>
-                                    <% if (artwork.updatedAt) { %>
-                                        <%= new Date(artwork.updatedAt).toLocaleDateString() %>
-                                            <% } else { %>
-                                                정보 없음
-                                                <% } %>
-                                </td>
-                                <td>
-                                    <div class="admin-button-group">
-                                        <button class="admin-button admin-button--danger"
-                                            onclick="artworkManagement.deleteArtwork('<%= artwork.id %>')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <% }); %>
-                                <% } else { %>
-                                    <tr>
-                                        <td colspan="7" class="admin-table__empty">
-                                            등록된 작품이 없습니다.
-                                        </td>
-                                    </tr>
-                                    <% } %>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- 페이지네이션 섹션 -->
-        <div class="admin-pagination">
-            <% if (typeof page !=='undefined' && page) { %>
-                <button class="admin-pagination__button" onclick="artworkManagement.goToPage(1)">
-                    <i class="fas fa-angle-double-left"></i>
-                </button>
-                <button class="admin-pagination__button"
-                    onclick="artworkManagement.goToPage(<%= page.currentPage - 1 %>)" <%=!page.hasPreviousPage
-                    ? 'disabled' : '' %>>
-                    <i class="fas fa-angle-left"></i>
-                </button>
-
-                <% for (let i=Math.max(1, page.currentPage - 2); i <=Math.min(page.totalPages, page.currentPage + 2);
-                    i++) { %>
-                    <button
-                        class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>"
-                        onclick="artworkManagement.goToPage(<%= i %>)">
-                        <%= i %>
-                    </button>
-                    <% } %>
-
-                        <button class="admin-pagination__button"
-                            onclick="artworkManagement.goToPage(<%= page.currentPage + 1 %>)" <%=!page.hasNextPage
-                            ? 'disabled' : '' %>>
-                            <i class="fas fa-angle-right"></i>
-                        </button>
-                        <button class="admin-pagination__button"
-                            onclick="artworkManagement.goToPage(<%= page.totalPages %>)">
-                            <i class="fas fa-angle-double-right"></i>
-                        </button>
+    <!-- 알림 메시지 표시 -->
+    <% if (messages && (messages.success.length> 0 || messages.error.length > 0)) { %>
+        <div class="admin-messages">
+            <% if (messages.success.length> 0) { %>
+                <div class="admin-message admin-message--success">
+                    <i class="fas fa-check-circle"></i>
+                    <%= messages.success[0] %>
+                </div>
+                <% } %>
+                    <% if (messages.error.length> 0) { %>
+                        <div class="admin-message admin-message--error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <%= messages.error[0] %>
+                        </div>
                         <% } %>
         </div>
-    </div>
+        <% } %>
+
+            <!-- 컨트롤 섹션 -->
+            <div class="admin-control">
+                <div class="admin-control__group">
+                    <a href="/admin/management/artwork/create" class="admin-button admin-button--primary">
+                        <i class="fas fa-plus"></i>
+                        작품 추가
+                    </a>
+                </div>
+            </div>
+
+            <!-- 필터 섹션 -->
+            <div class="admin-filter">
+                <form action="/admin/management/artwork" method="GET" class="admin-filter__form">
+                    <div class="admin-filter__group">
+                        <select class="admin-filter__select" name="artistId">
+                            <option value="">작가</option>
+                            <% artists.forEach(artist=> { %>
+                                <option value="<%= artist.id %>" <%=filters?.artistId==artist.id ? 'selected' : '' %>>
+                                    <%= artist.name %>
+                                </option>
+                                <% }); %>
+                        </select>
+                        <select class="admin-filter__select" name="status">
+                            <option value="">상태</option>
+                            <option value="PENDING" <%=filters?.status==='PENDING' ? 'selected' : '' %>>대기 중</option>
+                            <option value="APPROVED" <%=filters?.status==='APPROVED' ? 'selected' : '' %>>승인됨</option>
+                            <option value="BLOCKED" <%=filters?.status==='BLOCKED' ? 'selected' : '' %>>차단됨</option>
+                            <option value="DELETED" <%=filters?.status==='DELETED' ? 'selected' : '' %>>삭제됨</option>
+                        </select>
+                        <select class="admin-filter__select" name="isFeatured">
+                            <option value="">주요 작품 여부</option>
+                            <option value="true" <%=filters?.isFeatured==='true' ? 'selected' : '' %>>주요 작품</option>
+                            <option value="false" <%=filters?.isFeatured==='false' ? 'selected' : '' %>>일반 작품</option>
+                        </select>
+                        <input type="text" class="admin-filter__input" name="keyword" placeholder="검색어"
+                            value="<%= filters?.keyword || '' %>">
+                        <button type="submit" class="admin-button admin-button--primary">
+                            <i class="fas fa-filter"></i>
+                            필터 적용
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="admin-management__content">
+                <!-- 테이블 섹션 -->
+                <div class="admin-table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>제목</th>
+                                <th>작가</th>
+                                <th>상태</th>
+                                <th>주요 작품</th>
+                                <th>생성일</th>
+                                <th>수정일</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (artworks && artworks.length> 0) { %>
+                                <% artworks.forEach(artwork=> { %>
+                                    <tr>
+                                        <td>
+                                            <%= artwork.id %>
+                                        </td>
+                                        <td>
+                                            <a href="/admin/management/artwork/<%= artwork.id %>" class="admin-link">
+                                                <%= artwork.title %>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <%= artwork.artistName || '작가 미상' %>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge <%= artwork.statusClass %>">
+                                                <%= artwork.statusDisplayName %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <% if (artwork.isFeatured) { %>
+                                                <span class="featured-badge">
+                                                    <i class="fas fa-star"></i> 주요 작품
+                                                </span>
+                                                <% } else { %>
+                                                    <span class="unfeatured-badge">
+                                                        <i class="fas fa-star"></i> 일반 작품
+                                                    </span>
+                                                    <% } %>
+                                        </td>
+                                        <td>
+                                            <%= artwork.createdAtFormatted %>
+                                        </td>
+                                        <td>
+                                            <%= artwork.updatedAtFormatted %>
+                                        </td>
+                                        <td>
+                                            <div class="admin-button-group">
+                                                <a href="/admin/management/artwork/<%= artwork.id %>"
+                                                    class="admin-button admin-button--info" title="상세보기">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <form action="/admin/management/artwork/<%= artwork.id %>/featured"
+                                                    method="POST" style="display:inline;">
+                                                    <button type="submit"
+                                                        class="admin-button admin-button--feature <%= artwork.isFeatured ? 'admin-button--featured' : '' %>"
+                                                        title="<%= artwork.isFeatured ? '주요 작품 해제' : '주요 작품 설정' %>">
+                                                        <i class="fas fa-star"></i>
+                                                    </button>
+                                                </form>
+                                                <form
+                                                    action="/admin/management/artwork/<%= artwork.id %>?_method=DELETE"
+                                                    method="POST" style="display:inline;">
+                                                    <button type="submit" class="admin-button admin-button--danger"
+                                                        title="삭제" onclick="return confirm('정말로 이 작품을 삭제하시겠습니까?');">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="8" class="admin-table__empty">
+                                                    등록된 작품이 없습니다.
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 페이지네이션 섹션 -->
+                <% if (typeof page !=='undefined' && page) { %>
+                    <div class="admin-pagination">
+                        <a href="/admin/management/artwork?page=1<%= filters?.artistId ? '&artistId=' + filters.artistId : '' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                            class="admin-pagination__button">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="/admin/management/artwork?page=<%= Math.max(1, page.currentPage - 1) %><%= filters?.artistId ? '&artistId=' + filters.artistId : '' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                            class="admin-pagination__button <%= !page.hasPreviousPage ? 'admin-pagination__button--disabled' : '' %>">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+
+                        <% for (let i=Math.max(1, page.currentPage - 2); i <=Math.min(page.totalPages, page.currentPage
+                            + 2); i++) { %>
+                            <a href="/admin/management/artwork?page=<%= i %><%= filters?.artistId ? '&artistId=' + filters.artistId : '' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                                class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>">
+                                <%= i %>
+                            </a>
+                            <% } %>
+
+                                <a href="/admin/management/artwork?page=<%= Math.min(page.totalPages, page.currentPage + 1) %><%= filters?.artistId ? '&artistId=' + filters.artistId : '' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                                    class="admin-pagination__button <%= !page.hasNextPage ? 'admin-pagination__button--disabled' : '' %>">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                                <a href="/admin/management/artwork?page=<%= page.totalPages %><%= filters?.artistId ? '&artistId=' + filters.artistId : '' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                                    class="admin-pagination__button">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                    </div>
+                    <% } %>
+            </div>
 </div>
-
-<script>
-    async function deleteArtwork(id) {
-        if (confirm('정말로 이 작품을 삭제하시겠습니까?\n\n' +
-            '⚠️ 경고: 이 작업은 되돌릴 수 없습니다.\n' +
-            '• 해당 작품의 모든 정보가 영구적으로 삭제됩니다.\n' +
-            '• 작품과 관련된 모든 데이터(이미지, 설명, 댓글 등)가 함께 삭제됩니다.\n' +
-            '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.')) {
-            fetch(`/admin/management/artwork/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        alert(result.message);
-                        window.location.href = '/admin/management/artwork';
-                    } else {
-                        alert(result.message || '작품 삭제에 실패했습니다.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('작품 삭제 중 오류가 발생했습니다.');
-                });
-        }
-    }
-
-    function goToPage(page) {
-        const currentUrl = new URL(window.location.href);
-        const searchParams = currentUrl.searchParams;
-        searchParams.set('page', page);
-        window.location.href = currentUrl.toString();
-    }
-
-    document.getElementById('btnApplyFilter').addEventListener('click', function () {
-        const artistId = document.querySelector('select[name="artistId"]').value;
-        const keyword = document.querySelector('input[name="keyword"]').value;
-
-        const currentUrl = new URL(window.location.href);
-        const searchParams = currentUrl.searchParams;
-
-        if (artistId) {
-            searchParams.set('artistId', artistId);
-        } else {
-            searchParams.delete('artistId');
-        }
-
-        if (keyword) {
-            searchParams.set('keyword', keyword);
-        } else {
-            searchParams.delete('keyword');
-        }
-
-        window.location.href = currentUrl.toString();
-    });
-</script>
-
-<!-- 외부 스크립트 추가 -->
-<script type="module" src="/js/page/admin/artwork/ArtworkManagementList.js"></script>
