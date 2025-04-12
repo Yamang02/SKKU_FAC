@@ -56,7 +56,7 @@ export default class SystemManagementService {
                 stats: statsData,
                 recentActivities: activities,
                 recentNotices: notices,
-                recentArtworks: {
+                featuredArtworks: {
                     items: featuredArtworks || [],
                     total: featuredArtworks?.length || 0
                 }

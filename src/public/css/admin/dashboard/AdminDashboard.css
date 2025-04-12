@@ -191,7 +191,7 @@
 }
 
 .admin-dashboard__artwork-artist,
-.admin-dashboard__artwork-year {
+.admin-dashboard__artwork-affiliation {
     font-size: 13px;
     color: #64748b;
     margin: 4px 0;
@@ -201,7 +201,7 @@
 }
 
 .admin-dashboard__artwork-artist i,
-.admin-dashboard__artwork-year i {
+.admin-dashboard__artwork-affiliation i {
     font-size: 12px;
     color: #3b82f6;
 }

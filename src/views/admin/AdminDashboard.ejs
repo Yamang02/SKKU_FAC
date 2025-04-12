@@ -20,7 +20,7 @@
             </p>
         </div>
         <div class="admin-dashboard__stat adminCard">
-            <h3 class="admin-dashboard__stat-title adminCardTitle">월간 방문자</h3>
+            <h3 class="admin-dashboard__stat-title adminCardTitle">월간 방문자(준비중)</h3>
             <p class="admin-dashboard__stat-value">
                 <%= stats.monthlyVisitors %>
             </p>
@@ -52,7 +52,7 @@
         </div>
 
         <div class="admin-dashboard__notices adminCard">
-            <h2 class="admin-title">최근 공지사항</h2>
+            <h2 class="admin-title">최근 공지사항(준비중)</h2>
             <div class="admin-dashboard__notices-list">
                 <% if(recentNotices && recentNotices.length> 0) { %>
                     <% recentNotices.forEach(function(notice) { %>
@@ -75,10 +75,10 @@
     </div>
 
     <div class="admin-dashboard__recent-artworks adminCard">
-        <h2 class="admin-title">최근 작품 목록</h2>
+        <h2 class="admin-title">주요 작품 목록</h2>
         <div class="admin-dashboard__artworks-grid">
-            <% if(recentArtworks && recentArtworks.items && recentArtworks.items.length> 0) { %>
-                <% recentArtworks.items.forEach(function(artwork) { %>
+            <% if(featuredArtworks && featuredArtworks.items && featuredArtworks.items.length> 0) { %>
+                <% featuredArtworks.items.forEach(function(artwork) { %>
                     <div class="admin-dashboard__artwork-item">
                         <div class="admin-dashboard__artwork-img">
                             <img src="<%= artwork.imageUrl %>" alt="<%= artwork.title %>">
@@ -91,11 +91,11 @@
                                 <i class="fas fa-user"></i>
                                 <%= artwork.artistName || '작가 미상' %>
                             </p>
-                            <p class="admin-dashboard__artwork-year">
+                            <p class="admin-dashboard__artwork-affiliation">
                                 <i class="fas fa-calendar-alt"></i>
-                                <%= artwork.year || '연도 미상' %>
+                                <%= artwork.artistAffiliation || '소속 미상' %>
                             </p>
-                            <a href="/admin/artworks/edit/<%= artwork.id %>" class="admin-btn admin-btn-sm">
+                            <a href="/admin/management/artwork/<%= artwork.id %>" class="admin-btn admin-btn-sm">
                                 <i class="fas fa-edit"></i> 수정
                             </a>
                         </div>

@@ -153,11 +153,6 @@ export default class ArtworkManagementService {
                 throw new ArtworkNotFoundError();
             }
 
-            // 체크박스의 경우 체크 해제시 undefined가 옴
-            if (artworkData.isFeatured === undefined) {
-                artworkData.isFeatured = false;
-            }
-
             const updatedArtwork = await this.artworkRepository.updateArtwork(id, artworkData);
             return new ArtworkManagementDto(updatedArtwork);
         } catch (error) {

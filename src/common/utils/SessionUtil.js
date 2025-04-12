@@ -17,7 +17,6 @@ class SessionUtil {
                     console.error('세션 저장 중 오류:', err);
                     reject(err);
                 } else {
-                    console.log('세션 저장 완료:', req.session.user);
                     resolve();
                 }
             });
@@ -30,9 +29,6 @@ class SessionUtil {
             req.session.save((err) => {
                 if (err) {
                     console.error('세션 저장 중 오류:', err);
-                } else {
-                    console.log('세션 저장 완료');
-                    console.log('세션 최종 상태:', req.session);
                 }
                 resolve();
             });
