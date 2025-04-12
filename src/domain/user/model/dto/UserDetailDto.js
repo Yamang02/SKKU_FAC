@@ -21,7 +21,5 @@ export default class UserDetailDTO {
         this.updatedAt = data.updatedAt || '';
         this.lastLoginAt = data.lastLoginAt || null;
         this.emailVerified = data.emailVerified || false;
-        this.SkkuUserProfile = data.SkkuUserProfile || null;
-        this.ExternalUserProfile = data.ExternalUserProfile || null;
     }
 }

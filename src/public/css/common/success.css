@@ -2,15 +2,17 @@
     text-align: center;
     background-color: #ffffff;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 40px;
     max-width: 600px;
 }
 
 .success-container {
-    display: flex; /* Flexbox 사용 */
-    flex-direction: column; /* 세로 방향으로 정렬 */
-    justify-content: center; /* 수직 중앙 정렬 */
+    display: flex;
+    /* Flexbox 사용 */
+    flex-direction: column;
+    /* 세로 방향으로 정렬 */
+    justify-content: center;
+    /* 수직 중앙 정렬 */
     max-width: 800px;
     width: 100%;
     padding: 3rem;

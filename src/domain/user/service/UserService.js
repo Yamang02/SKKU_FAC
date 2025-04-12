@@ -289,39 +289,20 @@ export default class UserService {
     }
 
     /**
-     * 사용자 프로필 정보를 조회합니다.
+     * 사용자 프로필 정보를 매핑핑합니다.
      */
     mapUserToDto(user) {
-        const {
-            id,
-            username,
-            email,
-            name,
-            status,
-            role,
-            createdAt,
-            updatedAt,
-            lastLoginAt,
-            emailVerified
-        } = user;
+        const dtoData = new UserDetailDto(user)
 
-        // 관련 프로필 정보 직접 전달
-        const dtoData = {
-            id,
-            username,
-            email,
-            name,
-            role,
-            status,
-            createdAt,
-            updatedAt,
-            lastLoginAt,
-            emailVerified,
-            SkkuUserProfile: user.SkkuUserProfile,
-            ExternalUserProfile: user.ExternalUserProfile
-        };
+        if (user.role === 'SKKU_MEMBER') {
+            dtoData.department = user.SkkuUserProfile.department;
+            dtoData.studentYear = user.SkkuUserProfile.studentYear;
+            dtoData.isClubMember = user.SkkuUserProfile.isClubMember;
+        } else if (user.role === 'EXTERNAL_MEMBER') {
+            dtoData.affiliation = user.ExternalUserProfile.affiliation;
+        }
 
-        return new UserDetailDto(dtoData);
+        return dtoData;
     }
 
     /**
