@@ -45,7 +45,7 @@ export default class UserManagementService {
      */
     async updateUser(userId, userData) {
         try {
-            console.log(userData);
+            (userData);
             return await this.userService.updateUserByAdmin(userId, userData);
         } catch (error) {
             console.error('사용자 정보 수정 서비스 오류:', error);

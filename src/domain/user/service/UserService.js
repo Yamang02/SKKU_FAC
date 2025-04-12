@@ -228,7 +228,7 @@ export default class UserService {
         user.role = userData.role;
         user.status = userData.status;
 
-        console.log(user);
+        (user);
 
         // 사용자 정보 업데이트
         const updatedUser = await this.userRepository.updateUser(user.id, userData);
@@ -292,7 +292,7 @@ export default class UserService {
      * 사용자 프로필 정보를 매핑핑합니다.
      */
     mapUserToDto(user) {
-        const dtoData = new UserDetailDto(user)
+        const dtoData = new UserDetailDto(user);
 
         if (user.role === 'SKKU_MEMBER') {
             dtoData.department = user.SkkuUserProfile.department;

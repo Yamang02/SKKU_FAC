@@ -98,11 +98,11 @@
                                         <td>
                                             <% if (artwork.isFeatured) { %>
                                                 <span class="featured-badge">
-                                                    <i class="fas fa-star"></i> 주요 작품
+                                                    주요 작품
                                                 </span>
                                                 <% } else { %>
                                                     <span class="unfeatured-badge">
-                                                        <i class="fas fa-star"></i> 일반 작품
+                                                        일반 작품
                                                     </span>
                                                     <% } %>
                                         </td>
@@ -116,7 +116,7 @@
                                             <div class="admin-button-group">
                                                 <a href="/admin/management/artwork/<%= artwork.id %>"
                                                     class="admin-button admin-button--info" title="상세보기">
-                                                    <i class="fas fa-eye"></i>
+                                                    <i class="fas fa-edit"></i>
                                                 </a>
                                                 <form action="/admin/management/artwork/<%= artwork.id %>/featured"
                                                     method="POST" style="display:inline;">

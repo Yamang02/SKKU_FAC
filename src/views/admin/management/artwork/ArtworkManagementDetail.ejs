@@ -1,6 +1,7 @@
 <style>
     @import url('/css/admin/management/artwork/ArtworkManagementDetail.css');
 </style>
+
 <!-- 페이지 헤더 -->
 <div class="admin-management">
     <div class="content-section">
@@ -24,7 +25,12 @@
             </div>
             <% } %>
 
+                <!-- 상단 섹션: 그림 정보 -->
                 <div class="section-content">
+                    <h3 class="section-subtitle">그림정보</h3>
+                    <div class="image-preview">
+                        <img src="<%= artwork.imageUrl %>" alt="<%= artwork.title %>" class="artwork-image">
+                    </div>
                     <form id="artworkForm" method="POST"
                         action="/admin/management/artwork/<%= artwork.id %>?_method=PUT">
                         <div class="form-grid">
@@ -34,122 +40,85 @@
                             </div>
                             <div class="form-group">
                                 <label>제목</label>
-                                <input type="text" name="title" value="<%= artwork.title %>" required>
+                                <input type="text" name="title" value="<%= artwork.title %>" readonly>
                             </div>
                             <div class="form-group">
                                 <label>작가</label>
-                                <select name="userId" required>
-                                    <% artists.forEach(artist=> { %>
-                                        <option value="<%= artist.id %>" <%=artwork.userId===artist.id ? 'selected' : ''
-                                            %>>
-                                            <%= artist.name %>
-                                        </option>
-                                        <% }); %>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>전시회</label>
-                                <select name="exhibitionId">
-                                    <option value="">전시회 없음</option>
-                                    <% exhibitions.forEach(exhibition=> { %>
-                                        <option value="<%= exhibition.id %>" <%=artwork.exhibitionId===exhibition.id
-                                            ? 'selected' : '' %>>
-                                            <%= exhibition.title %>
-                                        </option>
-                                        <% }); %>
-                                </select>
+                                <input type="text" value="<%= artwork.artistName %>" readonly>
                             </div>
                             <div class="form-group">
                                 <label>재료</label>
-                                <input type="text" name="medium" value="<%= artwork.medium %>">
+                                <input type="text" name="medium" value="<%= artwork.medium %>" readonly>
                             </div>
                             <div class="form-group">
                                 <label>크기</label>
-                                <input type="text" name="size" value="<%= artwork.size %>">
+                                <input type="text" name="size" value="<%= artwork.size %>" readonly>
                             </div>
                             <div class="form-group">
                                 <label>제작년도</label>
-                                <input type="text" name="year" value="<%= artwork.year %>">
+                                <input type="text" name="year" value="<%= artwork.year %>" readonly>
                             </div>
                             <div class="form-group">
-                                <label>상태</label>
-                                <select name="status" required>
-                                    <option value="PENDING" <%=artwork.status==='PENDING' ? 'selected' : '' %>>대기 중
-                                    </option>
-                                    <option value="APPROVED" <%=artwork.status==='APPROVED' ? 'selected' : '' %>>승인됨
-                                    </option>
-                                    <option value="BLOCKED" <%=artwork.status==='BLOCKED' ? 'selected' : '' %>>차단됨
-                                    </option>
-                                    <option value="DELETED" <%=artwork.status==='DELETED' ? 'selected' : '' %>>삭제됨
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>주요 작품</label>
-                                <div class="toggle-switch">
-                                    <input type="checkbox" id="isFeatured" name="isFeatured" <%=artwork.isFeatured
-                                        ? 'checked' : '' %>>
-                                    <label for="isFeatured"></label>
-                                    <span class="toggle-label">
-                                        <%= artwork.isFeatured ? '예' : '아니오' %>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="form-group form-group--wide">
                                 <label>설명</label>
-                                <textarea name="description"><%= artwork.description %></textarea>
+                                <textarea name="description" readonly><%= artwork.description %></textarea>
                             </div>
-                            <div class="form-group form-group--wide">
-                                <label>이미지</label>
-                                <div class="image-preview">
-                                    <img src="<%= artwork.imageUrl %>" alt="<%= artwork.title %>">
-                                </div>
-                                <div class="image-info">
-                                    <small>이미지 ID: <%= artwork.imagePublicId || '없음' %></small>
-                                    <p>이미지를 변경하려면 작품 삭제 후 다시 등록해야 합니다.</p>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>생성일</label>
-                                <input type="text" value="<%= artwork.createdAtFormatted %>" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>수정일</label>
-                                <input type="text" value="<%= artwork.updatedAtFormatted %>" readonly>
-                            </div>
-                        </div>
-                        <div class="admin-button-group">
-                            <button type="submit" class="admin-button admin-button--primary">
-                                <i class="fas fa-save"></i>
-                                저장
-                            </button>
-                            <a href="/admin/management/artwork" class="admin-button admin-button--secondary">
-                                <i class="fas fa-times"></i>
-                                취소
-                            </a>
                         </div>
                     </form>
                 </div>
-    </div>
-    <div class="section-footer">
-        <div class="admin-button-group">
-            <form action="/admin/management/artwork/<%= artwork.id %>/featured" method="POST" style="display: inline;">
-                <button type="submit"
-                    class="admin-button admin-button--feature <%= artwork.isFeatured ? 'admin-button--featured' : '' %>">
-                    <i class="fas fa-star"></i>
-                    <%= artwork.isFeatured ? '주요 작품 해제' : '주요 작품 설정' %>
-                </button>
-            </form>
-            <form action="/admin/management/artwork/<%= artwork.id %>?_method=DELETE" method="POST" id="deleteForm"
-                style="display: inline;">
-                <button type="button" class="admin-button admin-button--danger" onclick="confirmDelete()">
-                    <i class="fas fa-trash"></i>
-                    삭제
-                </button>
-            </form>
-        </div>
+
+                <!-- 중간 섹션: 주요작품 설정 및 상태 -->
+                <div class="section-content">
+                    <h3 class="section-subtitle">작품 설정</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>주요 작품 여부</label>
+                            <select name="isFeatured">
+                                <option value="FEATURED" <%=artwork.isFeatured ? 'selected' : '' %>>주요작품</option>
+                                <option value="NORMAL" <%=!artwork.isFeatured ? 'selected' : '' %>>일반작품</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>상태</label>
+                            <select name="status" required>
+                                <option value="PENDING" <%=artwork.status==='PENDING' ? 'selected' : '' %>>대기 중</option>
+                                <option value="APPROVED" <%=artwork.status==='APPROVED' ? 'selected' : '' %>>승인됨
+                                </option>
+                                <option value="BLOCKED" <%=artwork.status==='BLOCKED' ? 'selected' : '' %>>차단됨</option>
+                                <option value="DELETED" <%=artwork.status==='DELETED' ? 'selected' : '' %>>삭제됨</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 하단 섹션: 시스템 정보 -->
+                <div class="section-content">
+                    <h3 class="section-subtitle">시스템 정보</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>생성일</label>
+                            <input type="text" value="<%= artwork.createdAt.toISOString().split('T')[0] %>" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>수정일</label>
+                            <input type="text" value="<%= artwork.updatedAt.toISOString().split('T')[0] %>" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-button-group">
+                    <button type="submit" class="admin-button admin-button--primary">
+                        <i class="fas fa-save"></i>
+                        저장
+                    </button>
+                    <a href="/admin/management/artwork" class="admin-button admin-button--secondary">
+                        <i class="fas fa-times"></i>
+                        취소
+                    </a>
+                </div>
     </div>
 </div>
+
 <div class="admin-back-button-container">
     <a href="/admin/management/artwork" class="admin-button admin-button--backtolist">
         <i class="fas fa-list"></i>

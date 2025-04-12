@@ -20,8 +20,7 @@ export default class ArtworkManagementDto {
 
         // 관계 데이터
         this.artistName = data.artistName || data.userAccount?.name || '';
-        this.exhibitionId = data.exhibitionId || null;
-        this.exhibitionTitle = data.exhibitionTitle || data.exhibition?.title || '';
+        this.exhibitions = data.exhibitions || data.exhibitions || [];
     }
 
     /**

@@ -48,11 +48,12 @@ export default class ArtworkManagementController {
             const artworkId = req.params.id;
             const artworkData = await this.artworkManagementService.getArtworkDetail(artworkId);
 
+
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.DETAIL, {
                 title: '작품 상세',
                 breadcrumb: '작품 상세',
                 currentPage: 'artwork',
-                ...artworkData
+                artwork: artworkData
             });
         } catch (error) {
             console.error('작품 상세 조회 중 오류:', error);
