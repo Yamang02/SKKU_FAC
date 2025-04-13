@@ -4,8 +4,7 @@
     <!-- 컨트롤 섹션 -->
     <div class="admin-control">
         <div class="admin-control__group">
-            <button class="admin-button admin-button--primary"
-                onclick="location.href='/admin/management/exhibition/registration'">
+            <button class="admin-button admin-button--primary" id="addExhibitionBtn">
                 <i class="fas fa-plus"></i>
                 전시회 등록
             </button>
@@ -19,6 +18,11 @@
                 <option value="">전시 유형</option>
                 <option value="regular" <%=filters?.exhibitionType==='regular' ? 'selected' : '' %>>정기</option>
                 <option value="special" <%=filters?.exhibitionType==='special' ? 'selected' : '' %>>특별</option>
+            </select>
+            <select class="admin-filter__select" name="featured">
+                <option value="">주요 전시 여부</option>
+                <option value="true" <%=filters?.featured==='true' ? 'selected' : '' %>>주요 전시</option>
+                <option value="false" <%=filters?.featured==='false' ? 'selected' : '' %>>일반 전시</option>
             </select>
             <input type="text" class="admin-filter__input" name="keyword" placeholder="검색어"
                 value="<%= filters?.keyword || '' %>">
@@ -38,12 +42,13 @@
                         <th>
                             <input type="checkbox" class="admin-checkbox">
                         </th>
-                        <th>ID</th>
+                        <th>썸네일</th>
                         <th>제목</th>
                         <th>전시 기간</th>
                         <th>장소</th>
                         <th>출품가능</th>
                         <th>전시 유형</th>
+                        <th>주요 전시</th>
                         <th>관리</th>
                     </tr>
                 </thead>
@@ -55,7 +60,12 @@
                                     <input type="checkbox" class="admin-checkbox">
                                 </td>
                                 <td>
-                                    <%= exhibition.id %>
+                                    <% if (exhibition.thumbnailUrl) { %>
+                                        <img src="<%= exhibition.thumbnailUrl %>" alt="<%= exhibition.title %>"
+                                            class="admin-table-thumbnail">
+                                        <% } else { %>
+                                            <div class="no-thumbnail">미등록</div>
+                                            <% } %>
                                 </td>
                                 <td>
                                     <%= exhibition.title %>
@@ -69,12 +79,18 @@
                                 <td>
                                     <span
                                         class="admin-badge admin-badge--<%= exhibition.isSubmissionOpen ? 'success' : 'danger' %>">
-                                        <%= exhibition.isSubmissionOpen ? '가능' : '불가능' %>
+                                        <%= exhibition.submissionStatusDisplayName %>
                                     </span>
                                 </td>
                                 <td>
                                     <span class="admin-badge admin-badge--<%= exhibition.exhibitionType %>">
-                                        <%= exhibition.exhibitionType==='regular' ? '정기' : '특별' %>
+                                        <%= exhibition.exhibitionTypeDisplayName %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span
+                                        class="admin-badge admin-badge--<%= exhibition.isFeatured ? 'featured' : 'normal' %>">
+                                        <%= exhibition.featuredDisplayName %>
                                     </span>
                                 </td>
                                 <td>
@@ -83,8 +99,8 @@
                                             class="admin-button admin-button--secondary">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button class="admin-button admin-button--danger"
-                                            onclick="deleteExhibition(<%= exhibition.id %>)">
+                                        <button class="admin-button admin-button--danger delete-exhibition-btn"
+                                            data-id="<%= exhibition.id %>">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -93,7 +109,7 @@
                             <% }); %>
                                 <% } else { %>
                                     <tr>
-                                        <td colspan="8" class="admin-table__empty">
+                                        <td colspan="9" class="admin-table__empty">
                                             등록된 전시회가 없습니다.
                                         </td>
                                     </tr>
@@ -105,34 +121,65 @@
         <!-- 페이지네이션 섹션 -->
         <div class="admin-pagination">
             <% if (typeof page !=='undefined' && page) { %>
-                <button class="admin-pagination__button" onclick="goToPage(1)">
+                <button class="admin-pagination__button" id="firstPageBtn" <%=page.currentPage===1 ? 'disabled' : '' %>>
                     <i class="fas fa-angle-double-left"></i>
                 </button>
-                <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage - 1 %>)"
-                    <%=!page.hasPreviousPage ? 'disabled' : '' %>>
+                <button class="admin-pagination__button" id="prevPageBtn" <%=page.currentPage===1 ? 'disabled' : '' %>>
                     <i class="fas fa-angle-left"></i>
                 </button>
 
-                <% for (let i=Math.max(1, page.currentPage - 2); i <=Math.min(page.totalPages, page.currentPage + 2);
-                    i++) { %>
-                    <button
-                        class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>"
-                        onclick="goToPage(<%= i %>)">
-                        <%= i %>
-                    </button>
-                    <% } %>
+                <% const startPage=Math.max(1, page.currentPage - 2); %>
+                    <% const endPage=Math.min(page.totalPages, page.currentPage + 2); %>
+                        <% for (let i=startPage; i <=endPage; i++) { %>
+                            <button
+                                class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>"
+                                id="pageBtn<%= i %>">
+                                <%= i %>
+                            </button>
+                            <% } %>
 
-                        <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage + 1 %>)"
-                            <%=!page.hasNextPage ? 'disabled' : '' %>>
-                            <i class="fas fa-angle-right"></i>
-                        </button>
-                        <button class="admin-pagination__button" onclick="goToPage(<%= page.totalPages %>)">
-                            <i class="fas fa-angle-double-right"></i>
-                        </button>
-                        <% } %>
+                                <button class="admin-pagination__button" id="nextPageBtn"
+                                    <%=page.currentPage===page.totalPages ? 'disabled' : '' %>>
+                                    <i class="fas fa-angle-right"></i>
+                                </button>
+                                <button class="admin-pagination__button" id="lastPageBtn"
+                                    <%=page.currentPage===page.totalPages ? 'disabled' : '' %>>
+                                    <i class="fas fa-angle-double-right"></i>
+                                </button>
+                                <% } %>
         </div>
     </div>
 </div>
+</div>
+
+<style>
+    .admin-table-thumbnail {
+        width: 60px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    .no-thumbnail {
+        width: 60px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f5f5f5;
+        color: #999;
+        font-size: 0.8rem;
+        border-radius: 4px;
+    }
+
+    .admin-badge--featured {
+        background-color: #9c27b0;
+    }
+
+    .admin-badge--normal {
+        background-color: #78909c;
+    }
+</style>
 
 <script>
     function deleteExhibition(id) {
@@ -167,6 +214,7 @@
 
     document.getElementById('btnApplyFilter').addEventListener('click', function () {
         const exhibitionType = document.querySelector('select[name="exhibitionType"]').value;
+        const featured = document.querySelector('select[name="featured"]').value;
         const keyword = document.querySelector('input[name="keyword"]').value;
 
         const currentUrl = new URL(window.location.href);
@@ -178,6 +226,12 @@
             searchParams.delete('exhibitionType');
         }
 
+        if (featured) {
+            searchParams.set('featured', featured);
+        } else {
+            searchParams.delete('featured');
+        }
+
         if (keyword) {
             searchParams.set('keyword', keyword);
         } else {
@@ -186,5 +240,24 @@
 
         searchParams.set('page', 1);
         window.location.href = currentUrl.toString();
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 등록 버튼
+        const addExhibitionBtn = document.getElementById('addExhibitionBtn');
+        if (addExhibitionBtn) {
+            addExhibitionBtn.addEventListener('click', function () {
+                window.location.href = '/admin/management/exhibition/new';
+            });
+        }
+
+    });
+
+    // 삭제 버튼 이벤트 처리
+    document.querySelectorAll('.delete-exhibition-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const id = this.getAttribute('data-id');
+            deleteExhibition(id);
+        });
     });
 </script>

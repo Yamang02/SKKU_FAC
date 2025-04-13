@@ -14,17 +14,30 @@ export default class ExhibitionManagementController {
         try {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
+            const filters = {
+                exhibitionType: req.query.exhibitionType,
+                featured: req.query.featured,
+                keyword: req.query.keyword
+            };
 
-            const exhibitionListData = await this.exhibitionManagementService.getExhibitionList({ page, limit });
+            const exhibitionListData = await this.exhibitionManagementService.getExhibitionList({
+                page,
+                limit,
+                ...filters
+            });
 
-            ViewResolver.render(res, ViewPath.ADMIN.EXHIBITION.LIST, {
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.LIST, {
                 title: '전시회 관리',
                 breadcrumb: '전시회 관리',
                 currentPage: 'exhibition',
-                ...exhibitionListData
+                exhibitions: exhibitionListData.exhibitions,
+                page: exhibitionListData.page,
+                total: exhibitionListData.total,
+                filters: exhibitionListData.filters
             });
         } catch (error) {
             console.error('전시회 목록 조회 중 오류:', error);
+            req.flash('error', error.message || '전시회 목록 조회 중 오류가 발생했습니다.');
             ViewResolver.renderError(res, error);
         }
     }
@@ -34,13 +47,16 @@ export default class ExhibitionManagementController {
      */
     async getManagementExhibitionCreatePage(req, res) {
         try {
-            ViewResolver.render(res, ViewPath.ADMIN.EXHIBITION.CREATE, {
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
                 title: '전시회 등록',
                 breadcrumb: '전시회 등록',
-                currentPage: 'exhibition'
+                currentPage: 'exhibition',
+                mode: 'create',
+                exhibition: null
             });
         } catch (error) {
             console.error('전시회 등록 페이지 렌더링 중 오류:', error);
+            req.flash('error', error.message || '전시회 등록 페이지 렌더링 중 오류가 발생했습니다.');
             ViewResolver.renderError(res, error);
         }
     }
@@ -52,12 +68,19 @@ export default class ExhibitionManagementController {
         try {
             const exhibitionData = req.body;
 
-            await this.exhibitionManagementService.createExhibition(exhibitionData);
+            const exhibitionId = await this.exhibitionManagementService.createExhibition(exhibitionData);
 
-            res.redirect('/admin/management/exhibition');
+            res.status(200).json({
+                success: true,
+                message: '전시회가 성공적으로 등록되었습니다.',
+                exhibitionId
+            });
         } catch (error) {
             console.error('전시회 등록 중 오류:', error);
-            ViewResolver.renderError(res, error);
+            res.status(500).json({
+                success: false,
+                message: error.message || '전시회 등록 중 오류가 발생했습니다.'
+            });
         }
     }
 
@@ -68,17 +91,19 @@ export default class ExhibitionManagementController {
         try {
             const exhibitionId = req.params.id;
 
-            const exhibitionData = await this.exhibitionManagementService.getExhibitionDetail(exhibitionId);
+            const exhibition = await this.exhibitionManagementService.getExhibitionDetail(exhibitionId);
 
-            ViewResolver.render(res, ViewPath.ADMIN.EXHIBITION.DETAIL, {
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
                 title: '전시회 상세',
                 breadcrumb: '전시회 상세',
                 currentPage: 'exhibition',
-                exhibition: exhibitionData
+                exhibition: exhibition,
+                mode: 'edit'
             });
         } catch (error) {
             console.error('전시회 상세 조회 중 오류:', error);
-            ViewResolver.renderError(res, error);
+            req.flash('error', error.message || '전시회를 찾을 수 없습니다.');
+            res.redirect('/admin/management/exhibition');
         }
     }
 
@@ -90,12 +115,25 @@ export default class ExhibitionManagementController {
             const exhibitionId = req.params.id;
             const exhibitionData = req.body;
 
-            await this.exhibitionManagementService.updateExhibition(exhibitionId, exhibitionData);
+            const result = await this.exhibitionManagementService.updateExhibition(exhibitionId, exhibitionData);
 
-            res.redirect(`/admin/management/exhibition/${exhibitionId}`);
+            if (result) {
+                res.status(200).json({
+                    success: true,
+                    message: '전시회가 성공적으로 수정되었습니다.'
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: '전시회를 찾을 수 없습니다.'
+                });
+            }
         } catch (error) {
             console.error('전시회 수정 중 오류:', error);
-            ViewResolver.renderError(res, error);
+            res.status(500).json({
+                success: false,
+                message: error.message || '전시회 수정 중 오류가 발생했습니다.'
+            });
         }
     }
 
@@ -106,12 +144,25 @@ export default class ExhibitionManagementController {
         try {
             const exhibitionId = req.params.id;
 
-            await this.exhibitionManagementService.deleteExhibition(exhibitionId);
+            const result = await this.exhibitionManagementService.deleteExhibition(exhibitionId);
 
-            res.redirect('/admin/management/exhibition');
+            if (result) {
+                res.status(200).json({
+                    success: true,
+                    message: '전시회가 성공적으로 삭제되었습니다.'
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: '전시회를 찾을 수 없습니다.'
+                });
+            }
         } catch (error) {
             console.error('전시회 삭제 중 오류:', error);
-            ViewResolver.renderError(res, error);
+            res.status(500).json({
+                success: false,
+                message: error.message || '전시회 삭제 중 오류가 발생했습니다.'
+            });
         }
     }
 }

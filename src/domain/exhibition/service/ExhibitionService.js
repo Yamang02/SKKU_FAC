@@ -29,6 +29,86 @@ export default class ExhibitionService {
     }
 
     /**
+     * 관리자용: 필터링 옵션이 포함된 전시회 목록을 조회합니다.
+     * @param {Object} options - 페이지네이션 및 필터링 옵션
+     * @returns {Promise<Object>} 전시회 목록 데이터
+     */
+    async getManagementExhibitions(options) {
+        try {
+            const { page = 1, limit = 10, exhibitionType, isFeatured, search } = options;
+            const filterOptions = { page, limit };
+
+            // 필터 적용
+            if (exhibitionType) {
+                filterOptions.exhibitionType = exhibitionType;
+            }
+
+            if (isFeatured === true || isFeatured === 'true') {
+                filterOptions.isFeatured = true;
+            } else if (isFeatured === false || isFeatured === 'false') {
+                filterOptions.isFeatured = false;
+            }
+
+            if (search) {
+                filterOptions.search = search;
+            }
+
+            // 전시회 목록 조회
+            return await this.exhibitionRepository.findExhibitions(filterOptions);
+        } catch (error) {
+            console.error('전시회 목록 조회 중 오류:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 관리자용: 새 전시회를 생성합니다. (ID 생성 포함)
+     * @param {Object} exhibitionData - 전시회 데이터
+     * @param {string} id - 생성할 전시회 ID
+     * @returns {Promise<Object>} 생성된 전시회 객체
+     */
+    async createManagementExhibition(exhibitionData, id) {
+        try {
+            return await this.exhibitionRepository.createExhibition({
+                id,
+                ...exhibitionData
+            });
+        } catch (error) {
+            console.error('전시회 생성 중 오류:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 관리자용: 전시회를 수정합니다.
+     * @param {string} id - 전시회 ID
+     * @param {Object} exhibitionData - 수정할 전시회 데이터
+     * @returns {Promise<Object>} 수정된 전시회 객체
+     */
+    async updateManagementExhibition(id, exhibitionData) {
+        try {
+            return await this.exhibitionRepository.updateExhibition(id, exhibitionData);
+        } catch (error) {
+            console.error('전시회 수정 중 오류:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 관리자용: 전시회를 삭제합니다.
+     * @param {string} id - 전시회 ID
+     * @returns {Promise<boolean>} 삭제 성공 여부
+     */
+    async deleteManagementExhibition(id) {
+        try {
+            return await this.exhibitionRepository.deleteExhibition(id);
+        } catch (error) {
+            console.error('전시회 삭제 중 오류:', error);
+            throw error;
+        }
+    }
+
+    /**
      * 전시회 정보를 수정합니다.
      * @param {number} id - 전시회 ID
      * @param {ExhibitionRequestDto} exhibitionDto - 전시회 수정 데이터
@@ -92,6 +172,4 @@ export default class ExhibitionService {
         }
         return new ExhibitionResponseDto(exhibition);
     }
-
-
 }
