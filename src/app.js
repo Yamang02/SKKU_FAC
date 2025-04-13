@@ -96,6 +96,7 @@ const staticOptions = {
 };
 
 app.use(express.static(path.join(__dirname, './public'), staticOptions));
+app.use('/assets', express.static(path.join(__dirname, './public/assets'), staticOptions));
 app.use('/css', express.static(path.join(__dirname, './public/css'), staticOptions));
 app.use('/js', express.static(path.join(__dirname, './public/js'), staticOptions));
 app.use('/images', express.static(path.join(__dirname, './public/images'), staticOptions));

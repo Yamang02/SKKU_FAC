@@ -1,5 +1,6 @@
 import express from 'express';
 import { SystemManagementController, UserManagementController, ExhibitionManagementController, ArtworkManagementController, NoticeManagementController } from './AdminControllerIndex.js';
+import { imageUploadMiddleware } from '../../../common/middleware/imageUploadMiddleware.js';
 
 const AdminRouter = express.Router();
 const adminController = new SystemManagementController();
@@ -22,7 +23,7 @@ AdminRouter.post('/management/user/:id/reset-password', (req, res) => userManage
 // 전시회 관리
 AdminRouter.get('/management/exhibition', (req, res) => exhibitionManagementController.getManagementExhibitionListPage(req, res));
 AdminRouter.get('/management/exhibition/new', (req, res) => exhibitionManagementController.getManagementExhibitionCreatePage(req, res));
-AdminRouter.post('/management/exhibition/new', (req, res) => exhibitionManagementController.createManagementExhibition(req, res));
+AdminRouter.post('/management/exhibition/new', imageUploadMiddleware('exhibition'), (req, res) => exhibitionManagementController.createManagementExhibition(req, res));
 AdminRouter.get('/management/exhibition/:id', (req, res) => exhibitionManagementController.getManagementExhibitionDetailPage(req, res));
 AdminRouter.put('/management/exhibition/:id', (req, res) => exhibitionManagementController.updateManagementExhibition(req, res));
 AdminRouter.delete('/management/exhibition/:id', (req, res) => exhibitionManagementController.deleteManagementExhibition(req, res));

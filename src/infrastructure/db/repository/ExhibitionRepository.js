@@ -47,7 +47,6 @@ export default class ExhibitionRepository {
     async createExhibition(exhibitionData) {
         const newExhibition = await Exhibition.create({
             ...exhibitionData,
-            isSubmissionOpen: exhibitionData.isSubmissionOpen === 'true' || exhibitionData.isSubmissionOpen === true,
             createdAt: new Date(),
             updatedAt: new Date()
         });

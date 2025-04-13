@@ -36,10 +36,15 @@ const Exhibition = db.define('Exhibition', {
         allowNull: false,
         comment: '전시 장소'
     },
-    thumbnailUrl: {
+    imageUrl: {
         type: DataTypes.STRING(255),
         allowNull: true,
-        comment: '전시회 썸네일 이미지 URL'
+        comment: '전시회 이미지 URL'
+    },
+    imagePublicId: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        comment: '전시회 이미지 Public ID'
     },
     exhibitionType: {
         type: DataTypes.ENUM('regular', 'special'),

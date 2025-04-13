@@ -11,7 +11,7 @@
         <div class="section-content">
             <h3 class="section-subtitle">전시회 정보</h3>
             <div class="thumbnail-cancel"></div>
-            <form id="exhibitionForm" class="form-grid">
+            <form id="exhibitionForm" class="form-grid" enctype="multipart/form-data">
                 <!-- 이미지 영역 -->
                 <div id="exhibition-thumbnail-preview" class="exhibition-thumbnail-preview">
                     <% if (exhibition && exhibition.thumbnailUrl) { %>
@@ -287,7 +287,7 @@
         }
 
         const method = isEdit ? 'PUT' : 'POST';
-        const url = isEdit ? `/admin/management/exhibition/${formData.get('id')}` : '/admin/management/exhibition/registration';
+        const url = isEdit ? `/admin/management/exhibition/${formData.get('id')}` : '/admin/management/exhibition/new';
 
         try {
             const response = await fetch(url, {

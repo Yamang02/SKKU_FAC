@@ -62,15 +62,13 @@ export default class ExhibitionService {
     }
 
     /**
-     * 관리자용: 새 전시회를 생성합니다. (ID 생성 포함)
+     * 관리자용: 새 전시회를 생성합니다.
      * @param {Object} exhibitionData - 전시회 데이터
-     * @param {string} id - 생성할 전시회 ID
      * @returns {Promise<Object>} 생성된 전시회 객체
      */
-    async createManagementExhibition(exhibitionData, id) {
+    async createManagementExhibition(exhibitionData) {
         try {
             return await this.exhibitionRepository.createExhibition({
-                id,
                 ...exhibitionData
             });
         } catch (error) {

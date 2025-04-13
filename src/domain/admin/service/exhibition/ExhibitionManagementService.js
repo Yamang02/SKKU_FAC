@@ -78,15 +78,18 @@ export default class ExhibitionManagementService {
      * @param {Object} exhibitionData - 전시회 데이터
      * @returns {Promise<string>} 생성된 전시회 ID
      */
-    async createExhibition(exhibitionData) {
+    async createExhibition(exhibitionData, exhibitionImage) {
         try {
             // ID 생성
             const exhibitionId = generateDomainUUID(DOMAINS.EXHIBITION);
+            const exhibitionDto = new ExhibitionManagementDto(exhibitionData);
 
+            exhibitionDto.id = exhibitionId;
+            exhibitionDto.imageUrl = exhibitionImage.url;
+            exhibitionDto.imagePublicId = exhibitionImage.publicId;
             // 도메인 서비스를 통해 전시회 생성
             const newExhibition = await this.exhibitionService.createManagementExhibition(
-                exhibitionData,
-                exhibitionId
+                exhibitionDto
             );
 
             return newExhibition.id;

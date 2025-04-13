@@ -11,7 +11,8 @@ export default class ExhibitionListManagementDto {
         this.exhibitionType = data.exhibitionType || 'regular';
         this.isSubmissionOpen = data.isSubmissionOpen || false;
         this.isFeatured = data.isFeatured || false;
-        this.thumbnailUrl = data.thumbnailUrl || '';
+        this.imageUrl = data.imageUrl || '';
+        this.imagePublicId = data.imagePublicId || '';
         this.createdAt = data.createdAt || null;
         this.updatedAt = data.updatedAt || null;
     }

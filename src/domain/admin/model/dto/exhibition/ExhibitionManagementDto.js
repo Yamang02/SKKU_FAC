@@ -9,7 +9,8 @@ export default class ExhibitionManagementDto {
         this.startDate = data.startDate || '';
         this.endDate = data.endDate || '';
         this.location = data.location || '';
-        this.thumbnailUrl = data.thumbnailUrl || '';
+        this.imageUrl = data.imageUrl || '';
+        this.imagePublicId = data.imagePublicId || '';
         this.exhibitionType = data.exhibitionType || 'regular';
         this.isSubmissionOpen = data.isSubmissionOpen || false;
         this.isFeatured = data.isFeatured || false;
