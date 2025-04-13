@@ -277,9 +277,11 @@
             startDate: formData.get('startDate'),
             endDate: formData.get('endDate'),
             description: formData.get('description'),
-            thumbnailUrl: formData.get('thumbnailUrl') || null,
+            image: formData.get('thumbnailUrl') || null,
             updatedAt: now
         };
+
+        console.log("exhibitionData view", exhibitionData);
 
         // 생성 시에만 createdAt 추가
         if (!isEdit) {
