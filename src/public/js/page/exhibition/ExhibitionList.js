@@ -173,7 +173,7 @@ async function refreshExhibitions() {
             search: state.searchQuery
         });
 
-        const response = await fetch(`/api/exhibitions?${queryParams}`);
+        const response = await fetch(`/exhibition/api/list?${queryParams}`);
         const data = await response.json();
 
         if (data.exhibitions.length === 0) {

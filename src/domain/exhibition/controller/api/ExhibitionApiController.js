@@ -3,7 +3,7 @@ import { ApiResponse } from '../../../common/model/ApiResponse.js';
 import Page from '../../../common/model/Page.js';
 import { ExhibitionError, ExhibitionNotFoundError } from '../../../../common/error/ExhibitionError.js';
 import { Message } from '../../../../common/constants/Message.js';
-
+import ExhibitionListDto from '../../model/dto/ExhibitionListDto.js';
 // ===== API 메서드 =====
 export default class ExhibitionApiController {
     constructor() {
@@ -73,7 +73,6 @@ export default class ExhibitionApiController {
         }
     }
 
-
     /**
      * 출품 가능한 전시회 목록을 반환합니다.
      */
@@ -107,16 +106,12 @@ export default class ExhibitionApiController {
             const pageData = new Page(exhibitions.length, pageOptions);
 
             // 작품 목록 페이지에서 사용할 수 있도록 필요한 정보만 포함
-            const processedExhibitions = exhibitions.map(exhibition => ({
-                id: exhibition.id,
-                title: exhibition.title,
-                image: exhibition.image || '/images/exhibition-placeholder.svg',
-                artworkCount: exhibition.artworkCount || 0,
-                startDate: exhibition.startDate,
-                endDate: exhibition.endDate,
-                description: exhibition.description,
-                type: exhibition.type
-            }));
+            const processedExhibitions = [];
+            for (const exhibition of exhibitions) {
+                const exhibitionDto = new ExhibitionListDto(exhibition);
+                processedExhibitions.push(exhibitionDto);
+            }
+            console.log(processedExhibitions);
 
             const responseData = {
                 exhibitions: processedExhibitions,
@@ -131,19 +126,5 @@ export default class ExhibitionApiController {
         }
     }
 
-
-    async getExhibitionListData(req, res) {
-        try {
-            const { page = 1, limit = 10, keyword } = req.query;
-            const exhibitions = await this.exhibitionService.getExhibitionList({
-                page,
-                limit,
-                keyword
-            });
-            return res.json(ApiResponse.success(exhibitions));
-        } catch (error) {
-            return res.status(500).json(ApiResponse.error(Message.EXHIBITION.LIST_ERROR));
-        }
-    }
 }
 

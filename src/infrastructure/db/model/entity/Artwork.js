@@ -3,7 +3,7 @@ import { db } from '../../adapter/MySQLDatabase.js';
 
 const Artwork = db.define('Artwork', {
     id: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(100),
         primaryKey: true,
         allowNull: false,
         validate: {

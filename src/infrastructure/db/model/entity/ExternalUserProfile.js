@@ -3,7 +3,7 @@ import { db } from '../../adapter/MySQLDatabase.js';
 
 const ExternalUserProfile = db.define('ExternalUserProfile', {
     id: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(100),
         primaryKey: true,
         allowNull: false,
         validate: {
@@ -12,7 +12,7 @@ const ExternalUserProfile = db.define('ExternalUserProfile', {
         comment: '외부 사용자 프로필 고유 ID (EXTERNAL_PROFILE_uuid 형식)'
     },
     userId: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(100),
         allowNull: false,
         unique: true,
         references: {

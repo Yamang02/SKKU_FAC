@@ -8,7 +8,7 @@ import { db } from '../../adapter/MySQLDatabase.js';
  */
 const UserAccount = db.define('UserAccount', {
     id: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(100),
         primaryKey: true,
         allowNull: false,
         validate: {

@@ -7,13 +7,17 @@ export default class ExhibitionListDto {
         this.id = data.id || null;
         this.title = data.title || '';
         this.subtitle = data.subtitle || '';
-        this.image = data.image || null;
+        this.description = data.description || '';
         this.startDate = data.startDate || '';
         this.endDate = data.endDate || '';
         this.location = data.location || '';
+        this.imageUrl = data.imageUrl || null;
+        this.imagePublicId = data.imagePublicId || null;
+        this.exhibitionType = data.exhibitionType || 'regular';
         this.artworkCount = data.artworkCount || 0;
         this.isActive = data.isActive || false;
         this.isSubmissionOpen = data.isSubmissionOpen || false;
+        this.isFeatured = data.isFeatured || false;
     }
 
     toJSON() {
@@ -21,13 +25,17 @@ export default class ExhibitionListDto {
             id: this.id,
             title: this.title,
             subtitle: this.subtitle,
-            image: this.image,
+            description: this.description,
             startDate: this.startDate,
             endDate: this.endDate,
             location: this.location,
+            imageUrl: this.imageUrl,
+            imagePublicId: this.imagePublicId,
+            exhibitionType: this.exhibitionType,
             artworkCount: this.artworkCount,
             isActive: this.isActive,
-            isSubmissionOpen: this.isSubmissionOpen
+            isSubmissionOpen: this.isSubmissionOpen,
+            isFeatured: this.isFeatured
         };
     }
 }
