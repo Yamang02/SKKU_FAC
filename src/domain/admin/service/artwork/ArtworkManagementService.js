@@ -43,7 +43,7 @@ export default class ArtworkManagementService {
                 filterOptions.isFeatured = false;
             }
 
-            const result = await this.artworkRepository.findArtworks(filterOptions);
+            const result = await this.artworkRepository.findArtworksForAdmin(filterOptions);
             const artworks = result.items || [];
             (artworks);
             const total = result.total || 0;

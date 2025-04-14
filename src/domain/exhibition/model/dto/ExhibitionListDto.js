@@ -20,22 +20,4 @@ export default class ExhibitionListDto {
         this.isFeatured = data.isFeatured || false;
     }
 
-    toJSON() {
-        return {
-            id: this.id,
-            title: this.title,
-            subtitle: this.subtitle,
-            description: this.description,
-            startDate: this.startDate,
-            endDate: this.endDate,
-            location: this.location,
-            imageUrl: this.imageUrl,
-            imagePublicId: this.imagePublicId,
-            exhibitionType: this.exhibitionType,
-            artworkCount: this.artworkCount,
-            isActive: this.isActive,
-            isSubmissionOpen: this.isSubmissionOpen,
-            isFeatured: this.isFeatured
-        };
-    }
 }

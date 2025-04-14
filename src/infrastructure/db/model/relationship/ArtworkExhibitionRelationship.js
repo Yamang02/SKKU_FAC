@@ -9,6 +9,7 @@ const ArtworkExhibitionRelationship = db.define('ArtworkExhibition', {
             model: 'artworks',
             key: 'id'
         },
+        primaryKey: true,
         comment: '작품 ID (ARTWORK_uuid 형식)'
     },
     exhibitionId: {
@@ -18,6 +19,7 @@ const ArtworkExhibitionRelationship = db.define('ArtworkExhibition', {
             model: 'exhibitions',
             key: 'id'
         },
+        primaryKey: true,
         comment: '전시회 ID (EXHIBITION_uuid 형식)'
     },
     displayOrder: {
@@ -29,6 +31,7 @@ const ArtworkExhibitionRelationship = db.define('ArtworkExhibition', {
     timestamps: true,
     tableName: 'artwork_exhibition_relationships',
     underscored: true,
+    id: false,
     indexes: [
         {
             name: 'idx_artwork_exhibition_artwork',
@@ -37,11 +40,6 @@ const ArtworkExhibitionRelationship = db.define('ArtworkExhibition', {
         {
             name: 'idx_artwork_exhibition_exhibition',
             fields: ['exhibitionId']
-        },
-        {
-            name: 'idx_artwork_exhibition_unique',
-            fields: ['artworkId', 'exhibitionId'],
-            unique: true
         }
     ]
 });

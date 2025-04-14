@@ -168,10 +168,10 @@ export default class ArtworkService {
         artworkData.imageUrl = uploadedImage.imageUrl;
 
         try {
-            const artwork = await this.artworkRepository.createArtwork(artworkData);
+            const artwork = await this.artworkRepository.createArtwork(artworkData, { transaction });
             if (artworkData.exhibitionId !== '') {
                 console.log('작품 등록 완료:', artwork.id, artworkData.exhibitionId);
-                await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(artwork.id, artworkData.exhibitionId);
+                await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(artwork.id, artworkData.exhibitionId, { transaction });
             }
             console.log('작품 등록 완료:', artwork);
             await transaction.commit();

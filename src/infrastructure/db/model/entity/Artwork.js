@@ -81,7 +81,17 @@ const Artwork = db.define('Artwork', {
             name: 'idx_artwork_user',
             fields: ['userId']
         }
-    ]
+    ],
+    defaultScope: {
+        where: {
+            status: 'APPROVED'
+        }
+    },
+    scopes: {
+        admin: {
+            where: {}
+        }
+    }
 });
 
 export default Artwork;

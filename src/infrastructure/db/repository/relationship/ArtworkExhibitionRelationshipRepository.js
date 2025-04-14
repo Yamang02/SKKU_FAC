@@ -1,16 +1,17 @@
 import ArtworkExhibitionRelationship from '../../model/relationship/ArtworkExhibitionRelationship.js';
 import { ArtworkError } from '../../../../common/error/ArtworkError.js';
-
+import { db } from '../../adapter/MySQLDatabase.js';
 class ArtworkExhibitionRelationshipRepository {
     constructor() {
     }
 
-    async createArtworkExhibitionRelationship(artworkId, exhibitionId) {
+    async createArtworkExhibitionRelationship(artworkId, exhibitionId, options = {}) {
+        const transaction = options.transaction || await db.transaction();
         try {
             const relationship = await ArtworkExhibitionRelationship.create({
                 artworkId,
                 exhibitionId
-            });
+            }, { transaction });
             return relationship;
         } catch (error) {
             // PK 에러 처리
