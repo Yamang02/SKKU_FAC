@@ -92,7 +92,7 @@ export default class ExhibitionManagementService {
                 exhibitionDto
             );
 
-            return newExhibition.id;
+            return newExhibition;
         } catch (error) {
             console.error('전시회 생성 서비스 오류:', error);
             throw error;
@@ -105,6 +105,7 @@ export default class ExhibitionManagementService {
      * @param {Object} exhibitionData - 수정할 전시회 데이터
      * @returns {Promise<boolean>} 성공 여부
      */
+    // 업데이트 시 이미지는 처리하지 않음
     async updateExhibition(exhibitionId, exhibitionData) {
         try {
             // 도메인 서비스를 통해 전시회 수정

@@ -92,8 +92,6 @@ export default class ExhibitionManagementController {
             const exhibitionData = req.body;
             const file = req.file;
             let exhibitionImage = {};
-            console.log(exhibitionData);
-            console.log(req.file);
 
             if (file) {
                 exhibitionImage = {
@@ -102,31 +100,45 @@ export default class ExhibitionManagementController {
                 };
             }
 
-            console.log(exhibitionImage);
+
             const createdExhibition = await this.exhibitionManagementService.createExhibition(exhibitionData, exhibitionImage);
 
             req.flash('success', createdExhibition.title + '전시회가 성공적으로 등록되었습니다.');
-            res.redirect('/admin/management/exhibition'); // 전시회 목록 페이지로 리다이렉트
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
+                title: '전시회 상세',
+                breadcrumb: '전시회 상세',
+                currentPage: 'exhibition',
+                exhibition: createdExhibition,
+                mode: 'edit'
+            });
         } catch (error) {
             console.error('전시회 등록 중 오류:', error);
             req.flash('error', error.message || '전시회 등록 중 오류가 발생했습니다.');
-            res.redirect('/admin/management/exhibition/new');
+            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
+                title: '전시회 상세',
+                breadcrumb: '전시회 상세',
+                currentPage: 'exhibition',
+                exhibition: null,
+                mode: 'create'
+            });
         }
     }
-
     /**
      * 관리자 전시회를 수정합니다.
      */
+
     async updateManagementExhibition(req, res) {
         try {
             const exhibitionId = req.params.id;
             const exhibitionData = req.body;
+            // 업데이트 시 이미지는 처리하지 않음
 
             const result = await this.exhibitionManagementService.updateExhibition(exhibitionId, exhibitionData);
 
             if (result) {
                 req.flash('success', '전시회가 성공적으로 수정되었습니다.');
-                res.redirect('/admin/management/exhibition/' + exhibitionId); // 수정된 전시회 상세 페이지로 리다이렉트
+                // 전시회 목록 페이지로 리다이렉트
+                res.redirect('/admin/management/exhibition?page=1&limit=10'); // 초기값으로 페이지 1과 limit 10 설정
             } else {
                 req.flash('error', '전시회를 찾을 수 없습니다.');
                 res.redirect('/admin/management/exhibition'); // 전시회 목록 페이지로 리다이렉트
@@ -134,7 +146,7 @@ export default class ExhibitionManagementController {
         } catch (error) {
             console.error('전시회 수정 중 오류:', error);
             req.flash('error', error.message || '전시회 수정 중 오류가 발생했습니다.');
-            res.redirect('/admin/management/exhibition/new');
+            res.redirect('/admin/management/exhibition/' + req.params.id);
         }
     }
 

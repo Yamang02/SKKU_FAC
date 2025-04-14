@@ -173,7 +173,7 @@
     }
 
     .admin-badge--featured {
-        background-color: #9c27b0;
+        background-color: #8bfc75;
     }
 
     .admin-badge--normal {
@@ -192,15 +192,14 @@
             })
                 .then(response => {
                     if (response.ok) {
-                        alert('전시회가 성공적으로 삭제되었습니다.');
+                        console.log('전시회가 성공적으로 삭제되었습니다.');
                         location.reload();
                     } else {
-                        alert('전시회 삭제 중 오류가 발생했습니다.');
+                        console.error('Error:', result.message);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('전시회 삭제 중 오류가 발생했습니다.');
                 });
         }
     }

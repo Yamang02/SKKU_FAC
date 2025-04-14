@@ -13,7 +13,8 @@ export default class ExhibitionResponseDto {
         this.startDate = data.startDate || '';
         this.endDate = data.endDate || '';
         this.exhibitionType = data.exhibitionType || '';
-        this.image = data.image || null;
+        this.imageUrl = data.imageUrl || null;
+        this.imagePublicId = data.imagePublicId || null;
         this.subtitle = data.subtitle || '';
         this.location = data.location || '';
         this.artists = data.artists || [];
