@@ -78,7 +78,7 @@ export function createExhibitionCarouselCard(exhibition) {
 
     const image = document.createElement('img');
     image.className = 'card__image';
-    image.src = exhibition.image || '/images/exhibition-placeholder.svg';
+    image.src = exhibition.imageUrl || '/images/exhibition-placeholder.svg';
     image.alt = exhibition.title || '';
     image.onerror = function () {
         this.onerror = null;
@@ -102,19 +102,13 @@ export function createExhibitionCarouselCard(exhibition) {
     const meta = document.createElement('div');
     meta.className = 'card__meta';
 
-    if (exhibition.startDate || exhibition.endDate) {
-        const date = document.createElement('p');
-        date.className = 'card__date';
-        date.textContent = `${exhibition.startDate ? new Date(exhibition.startDate).toLocaleDateString() : ''} ~ ${exhibition.endDate ? new Date(exhibition.endDate).toLocaleDateString() : ''}`;
-        meta.appendChild(date);
+    // 작품 수 표시 (출품 작품 수가 있는 경우)
+    if (exhibition.artworkCount !== undefined) {
+        const artworkCount = document.createElement('div');
+        artworkCount.innerHTML = `총 <strong>${exhibition.artworkCount || 0}</strong>개의 작품`;
+        meta.appendChild(artworkCount);
     }
 
-    if (exhibition.location) {
-        const location = document.createElement('p');
-        location.className = 'card__location';
-        location.textContent = exhibition.location;
-        meta.appendChild(location);
-    }
 
     imageContainer.appendChild(image);
     info.appendChild(title);

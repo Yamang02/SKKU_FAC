@@ -2,7 +2,8 @@
  * 작품 목록 페이지
  * 작품 목록의 모든 기능을 처리합니다.
  */
-import ArtworkAPI from '../../api/ArtworkAPI.js';
+import ArtworkAPI from '../../api/ArtworkApi.js';
+import ExhibitionApi from '../../api/ExhibitionApi.js';
 import { emptyArtworkTemplate, errorMessageTemplate } from '../../templates/emptyArtworkTemplate.js';
 import { initModal } from '../../common/modal.js';
 import Pagination from '../../common/pagination.js';
@@ -18,112 +19,106 @@ async function fetchArtworkList(pagination, filters = {}) {
     return await ArtworkAPI.getArtworkList(pagination, filters);
 }
 
-// async function fetchExhibitionList() {
-//     try {
-//         const response = await ExhibitionAPI.getExhibitionList();
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error fetching exhibition list:', error);
-//         showErrorMessage('전시회 목록을 불러오는데 실패했습니다.');
-//         return null;
-//     }
-// }
+async function fetchExhibitionList() {
+    try {
+        const response = await ExhibitionApi.getExhibitionList();
+        return response;
+    } catch (error) {
+        console.error('Error fetching exhibition list:', error);
+        showErrorMessage('전시회 목록을 불러오는데 실패했습니다.');
+        return null;
+    }
+}
 
-// // 전시회 캐러셀 업데이트
-// async function updateExhibitionCarousel() {
-//     const carouselTrack = document.querySelector('.carousel-track');
-//     if (!carouselTrack) return;
+// 전시회 캐러셀 업데이트
+async function updateExhibitionCarousel() {
+    const carouselTrack = document.querySelector('.carousel-track');
+    if (!carouselTrack) return;
 
-//     try {
-//         const exhibitionData = await fetchExhibitionList();
-//         if (!exhibitionData || !exhibitionData.exhibitions) return;
+    try {
+        const exhibitionData = await fetchExhibitionList();
 
-//         const { exhibitions } = exhibitionData;
+        // API 응답 구조에 맞게 데이터 접근 수정
+        if (!exhibitionData || !exhibitionData.success || !exhibitionData.data || !exhibitionData.data.exhibitions) {
+            console.error('전시회 데이터가 올바른 형식이 아닙니다:', exhibitionData);
+            return;
+        }
 
-//         // 전시회 카드 생성
-//         const exhibitionCards = exhibitions.map(exhibition => `
-//             <div class="carousel-slide" data-exhibition="${exhibition.id}">
-//                 <div class="card card--carousel">
-//                     <div class="card__image-container">
-//                         <img src="${exhibition.image}" alt="${exhibition.title}" class="card__image">
-//                     </div>
-//                     <div class="card__info">
-//                         <h3 class="card__title">${exhibition.title}</h3>
-//                         <div class="card__meta">총 <strong>${exhibition.artworkCount}</strong>개의 작품</div>
-//                     </div>
-//                 </div>
-//             </div>
-//         `).join('');
+        const { exhibitions } = exhibitionData.data;
 
-//         // 모든 작품 카드 다음에 전시회 카드들 추가
-//         const allArtworksCard = carouselTrack.querySelector('[data-exhibition="all"]');
-//         if (allArtworksCard) {
-//             allArtworksCard.insertAdjacentHTML('afterend', exhibitionCards);
-//         }
+        // 기존의 "모든 작품" 슬라이드를 제외한 다른 슬라이드 제거
+        const existingSlides = carouselTrack.querySelectorAll('.carousel-slide:not([data-exhibition="all"])');
+        existingSlides.forEach(slide => slide.remove());
 
-//         // 전시회 옵션 업데이트
-//         updateExhibitionOptions(exhibitions);
+        // 전시회 카드 생성
+        const exhibitionFragment = document.createDocumentFragment();
+        exhibitions.forEach(exhibition => {
+            const exhibitionCard = createExhibitionCarouselCard(exhibition);
+            exhibitionFragment.appendChild(exhibitionCard);
+        });
 
-//         // 캐러셀 초기화
-//         initCarousel();
-//     } catch (error) {
-//         console.error('Error updating exhibition carousel:', error);
-//         showErrorMessage('전시회 정보를 불러오는데 실패했습니다.');
-//     }
-// }
+        // 모든 작품 카드 다음에 전시회 카드들 추가
+        carouselTrack.appendChild(exhibitionFragment);
 
-// // 전시회 선택 옵션 업데이트
-// function updateExhibitionOptions(exhibitions) {
-//     const exhibitionSelect = document.getElementById('exhibition');
-//     if (!exhibitionSelect) return;
+        // 전시회 옵션 업데이트
+        updateExhibitionOptions(exhibitions);
 
-//     const options = exhibitions.map(exhibition => `
-//         <option value="${exhibition.id}">${exhibition.title}</option>
-//     `).join('');
+        // 캐러셀 초기화
+        initCarousel();
+    } catch (error) {
+        console.error('Error updating exhibition carousel:', error);
+        showErrorMessage('전시회 정보를 불러오는데 실패했습니다.');
+    }
+}
 
-//     exhibitionSelect.innerHTML = `
-//         <option value="">모든 전시회</option>
-//         ${options}
-//     `;
-// }
+// 전시회 선택 옵션 업데이트
+function updateExhibitionOptions(exhibitions) {
+    const exhibitionSelect = document.getElementById('exhibition');
+    if (!exhibitionSelect) return;
 
-// function showErrorMessage(message) {
-//     console.error(message);
-// }
+    const options = exhibitions.map(exhibition => `
+        <option value="${exhibition.id}">${exhibition.title}</option>
+    `).join('');
+
+    exhibitionSelect.innerHTML = `
+        <option value="">모든 전시회</option>
+        ${options}
+    `;
+}
 
 // 애니메이션 관련 함수
-// function fadeIn(element, callback) {
-//     if (!element) return;
-//     element.style.display = '';
-//     element.classList.add('fade-in');
-//     requestAnimationFrame(() => {
-//         element.classList.add('show');
-//     });
-//     if (callback) {
-//         element.addEventListener('transitionend', function handler() {
-//             callback();
-//             element.removeEventListener('transitionend', handler);
-//         });
-//     }
-// }
+function fadeIn(element, callback) {
+    if (!element) return;
+    element.style.display = '';
+    element.classList.add('fade-in');
+    requestAnimationFrame(() => {
+        element.classList.add('show');
+    });
+    if (callback) {
+        element.addEventListener('transitionend', function handler() {
+            callback();
+            element.removeEventListener('transitionend', handler);
+        });
+    }
+}
 
-// function fadeOut(element, callback) {
-//     if (!element) return;
-//     if (element.style.display === 'none') {
-//         if (callback) callback();
-//         return;
-//     }
-//     element.classList.add('fade-out');
-//     requestAnimationFrame(() => {
-//         element.classList.add('hide');
-//     });
-//     element.addEventListener('transitionend', function handler() {
-//         element.style.display = 'none';
-//         element.classList.remove('fade-out', 'hide');
-//         if (callback) callback();
-//         element.removeEventListener('transitionend', handler);
-//     });
-// }
+function fadeOut(element, callback) {
+    if (!element) return;
+    if (element.style.display === 'none') {
+        if (callback) callback();
+        return;
+    }
+    element.classList.add('fade-out');
+    requestAnimationFrame(() => {
+        element.classList.add('hide');
+    });
+    element.addEventListener('transitionend', function handler() {
+        element.style.display = 'none';
+        element.classList.remove('fade-out', 'hide');
+        if (callback) callback();
+        element.removeEventListener('transitionend', handler);
+    });
+}
 
 function animateButtonClick(button) {
     if (!button) return;
@@ -133,77 +128,122 @@ function animateButtonClick(button) {
     }, 200);
 }
 
-// // 캐러셀 관련 함수
-// function initCarousel() {
-//     const carouselTrack = document.querySelector('.carousel-track');
-//     const prevButton = document.querySelector('.carousel-prev');
-//     const nextButton = document.querySelector('.carousel-next');
-//     const slides = document.querySelectorAll('.carousel-slide');
-//     let currentIndex = 0;
+// 캐러셀 관련 함수
+function initCarousel() {
+    const carouselTrack = document.querySelector('.carousel-track');
+    const prevButton = document.querySelector('.carousel-prev');
+    const nextButton = document.querySelector('.carousel-next');
+    const slides = document.querySelectorAll('.carousel-slide');
+    let currentIndex = 0;
 
-//     if (!carouselTrack || !prevButton || !nextButton || slides.length === 0) return;
+    if (!carouselTrack || !prevButton || !nextButton || slides.length === 0) {
+        return;
+    }
 
-//     function updateSlides() {
-//         slides.forEach((slide, index) => {
-//             slide.classList.remove('active', 'prev-1', 'prev-2', 'prev-3', 'next-1', 'next-2', 'next-3');
+    function updateSlides() {
+        slides.forEach((slide, index) => {
+            // 모든 클래스 제거 후 새로 적용
+            slide.classList.remove('active', 'prev-1', 'prev-2', 'prev-3', 'next-1', 'next-2', 'next-3');
 
-//             const position = (index - currentIndex + slides.length) % slides.length;
+            // 위치에 따라 클래스 적용
+            const position = (index - currentIndex + slides.length) % slides.length;
 
-//             if (position === 0) slide.classList.add('active');
-//             else if (position === 1) slide.classList.add('next-1');
-//             else if (position === 2) slide.classList.add('next-2');
-//             else if (position === slides.length - 1) slide.classList.add('prev-1');
-//             else if (position === slides.length - 2) slide.classList.add('prev-2');
-//             else slide.classList.add('next-3');
-//         });
-//         updateCarouselButtons();
-//     }
+            if (position === 0) {
+                slide.classList.add('active');
+            } else if (position === 1) {
+                slide.classList.add('next-1');
+            } else if (position === 2) {
+                slide.classList.add('next-2');
+            } else if (position === slides.length - 1) {
+                slide.classList.add('prev-1');
+            } else if (position === slides.length - 2) {
+                slide.classList.add('prev-2');
+            } else {
+                slide.classList.add('next-3');
+            }
+        });
 
-//     prevButton.addEventListener('click', () => {
-//         currentIndex = (currentIndex - 1 + slides.length) % slides.length;
-//         updateSlides();
-//         animateButtonClick(prevButton);
-//     });
+        // 캐러셀 버튼 상태 업데이트
+        updateCarouselButtons();
+    }
 
-//     nextButton.addEventListener('click', () => {
-//         currentIndex = (currentIndex + 1) % slides.length;
-//         updateSlides();
-//         animateButtonClick(nextButton);
-//     });
+    prevButton.addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+        updateSlides();
+        animateButtonClick(prevButton);
+    });
 
-//     carouselTrack.addEventListener('scroll', updateCarouselButtons);
+    nextButton.addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % slides.length;
+        updateSlides();
+        animateButtonClick(nextButton);
+    });
 
-//     slides.forEach((slide, index) => {
-//         slide.addEventListener('click', () => {
-//             if (index !== currentIndex) {
-//                 currentIndex = index;
-//                 updateSlides();
-//             }
-//             const exhibition = slide.dataset.exhibition;
-//             filterArtworksByExhibition(exhibition);
-//             animateButtonClick(slide);
-//         });
-//     });
+    carouselTrack.addEventListener('scroll', updateCarouselButtons);
 
-//     // 초기 상태 설정
-//     updateSlides();
-// }
+    slides.forEach((slide, index) => {
+        slide.addEventListener('click', () => {
+            if (index !== currentIndex) {
+                currentIndex = index;
+                updateSlides();
+            }
+            const exhibition = slide.dataset.exhibition;
+            filterArtworksByExhibition(exhibition);
+            animateButtonClick(slide);
+        });
+    });
 
-// function updateCarouselButtons() {
-//     const carouselTrack = document.querySelector('.carousel-track');
-//     const prevButton = document.querySelector('.carousel-prev');
-//     const nextButton = document.querySelector('.carousel-next');
+    // 초기 상태 설정
+    updateSlides();
+}
 
-//     if (!carouselTrack || !prevButton || !nextButton) return;
+function updateCarouselButtons() {
+    const carouselTrack = document.querySelector('.carousel-track');
+    const prevButton = document.querySelector('.carousel-prev');
+    const nextButton = document.querySelector('.carousel-next');
 
-//     const isAtStart = carouselTrack.scrollLeft <= 10;
-//     const isAtEnd = carouselTrack.scrollLeft + carouselTrack.offsetWidth >= carouselTrack.scrollWidth - 10;
+    if (!carouselTrack || !prevButton || !nextButton) return;
 
-//     prevButton.style.opacity = isAtStart ? '0.5' : '1';
-//     nextButton.style.opacity = isAtEnd ? '0.5' : '1';
-// }
+    const isAtStart = carouselTrack.scrollLeft <= 10;
+    const isAtEnd = carouselTrack.scrollLeft + carouselTrack.offsetWidth >= carouselTrack.scrollWidth - 10;
 
-// 뷰 전환 관련 함수
+    prevButton.style.opacity = isAtStart ? '0.5' : '1';
+    nextButton.style.opacity = isAtEnd ? '0.5' : '1';
+}
+
+// 갤러리 필터링 관련 함수
+function filterArtworksByExhibition(exhibition) {
+    const artworks = document.querySelectorAll('.card.card--list');
+    artworks.forEach(artwork => {
+        const artworkExhibition = artwork.dataset.exhibition;
+        if (exhibition === 'all' || artworkExhibition === exhibition) {
+            fadeIn(artwork);
+        } else {
+            fadeOut(artwork);
+        }
+    });
+
+    // URL 파라미터에 전시회 필터 적용
+    if (exhibition === 'all') {
+        urlParams.delete('exhibition');
+    } else {
+        urlParams.set('exhibition', exhibition);
+    }
+
+    // 검색 필드가 있다면 URL에 유지
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        const keyword = searchForm.querySelector('#keyword').value;
+        if (keyword) {
+            urlParams.set('keyword', keyword);
+        }
+    }
+
+    // URL 업데이트 (페이지 리로드 없이)
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+}
+
 function initViewToggle() {
     const cardViewBtn = document.getElementById('cardViewBtn');
     const tableViewBtn = document.getElementById('tableViewBtn');
@@ -229,40 +269,6 @@ function initViewToggle() {
     });
 }
 
-// // 갤러리 필터링 관련 함수
-// function filterArtworksByExhibition(exhibition) {
-//     const artworks = document.querySelectorAll('.card.card--list');
-//     artworks.forEach(artwork => {
-//         const artworkExhibition = artwork.dataset.exhibition;
-//         if (exhibition === 'all' || artworkExhibition === exhibition) {
-//             fadeIn(artwork);
-//         } else {
-//             fadeOut(artwork);
-//         }
-//     });
-
-//     // URL 파라미터에 전시회 필터 적용
-//     if (exhibition === 'all') {
-//         urlParams.delete('exhibition');
-//     } else {
-//         urlParams.set('exhibition', exhibition);
-//     }
-
-//     // 검색 필드가 있다면 URL에 유지
-//     const searchForm = document.getElementById('searchForm');
-//     if (searchForm) {
-//         const keyword = searchForm.querySelector('#keyword').value;
-//         if (keyword) {
-//             urlParams.set('keyword', keyword);
-//         }
-//     }
-
-//     // URL 업데이트 (페이지 리로드 없이)
-//     const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-//     window.history.pushState({ path: newUrl }, '', newUrl);
-// }
-
-// 상세 검색 패널 초기화
 function initAdvancedSearch() {
     const advancedSearchToggle = document.getElementById('advancedSearchToggle');
     const advancedSearchPanel = document.getElementById('advancedSearchPanel');
@@ -335,7 +341,7 @@ function initAdvancedSearch() {
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         // 전시회 캐러셀 업데이트
-        // await updateExhibitionCarousel();
+        await updateExhibitionCarousel();
 
         // 기존 초기화 함수들 호출
         initViewToggle();
@@ -350,7 +356,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         showErrorMessage('페이지 초기화 중 오류가 발생했습니다.');
     }
 });
-
 
 function initPagination() {
     const prevBtn = document.querySelector('.pagination-prev');
@@ -392,7 +397,6 @@ async function loadArtworkList() {
     const tableViewBody = document.getElementById('tableViewBody');
     const resultCount = document.getElementById('resultCount');
     const totalCountElement = document.querySelector('.card--all .card__meta strong');
-    const carouselTrack = document.querySelector('.carousel-track');
     const paginationContainer = document.getElementById('pagination');
 
     try {
@@ -481,19 +485,6 @@ async function loadArtworkList() {
             });
         }
 
-        // 전시회 카드 추가
-        if (carouselTrack && data.exhibitions) {
-            const exhibitionFragment = document.createDocumentFragment();
-
-            data.exhibitions.forEach(exhibition => {
-                const exhibitionCard = createExhibitionCarouselCard(exhibition);
-                exhibitionFragment.appendChild(exhibitionCard);
-            });
-
-            carouselTrack.appendChild(exhibitionFragment);
-            initializeCarousel();
-        }
-
     } catch (error) {
         console.error('작품 목록을 로드하는 중 오류 발생:', error);
         showErrorMessage(error.message || '작품 목록을 불러오는 중 오류가 발생했습니다.');
@@ -517,33 +508,4 @@ async function loadArtworkList() {
             defaultPagination.renderUI(paginationContainer);
         }
     }
-}
-
-function initializeCarousel() {
-    const carouselTrack = document.querySelector('.carousel-track');
-    const prevButton = document.querySelector('.carousel-prev');
-    const nextButton = document.querySelector('.carousel-next');
-    const slides = document.querySelectorAll('.carousel-slide');
-    let currentIndex = 0;
-
-    if (!carouselTrack || !prevButton || !nextButton || slides.length === 0) return;
-
-    function updateSlides() {
-        slides.forEach((slide, index) => {
-            slide.style.display = (index === currentIndex) ? 'block' : 'none'; // 현재 인덱스의 슬라이드만 표시
-        });
-    }
-
-    prevButton.addEventListener('click', () => {
-        currentIndex = (currentIndex - 1 + slides.length) % slides.length; // 인덱스 감소
-        updateSlides();
-    });
-
-    nextButton.addEventListener('click', () => {
-        currentIndex = (currentIndex + 1) % slides.length; // 인덱스 증가
-        updateSlides();
-    });
-
-    // 초기 상태 설정
-    updateSlides();
 }

@@ -2,8 +2,35 @@
  * 전시회 목록 페이지 - 통합 스크립트
  */
 
+import ExhibitionApi from '../../api/ExhibitionApi.js';
 import { modalTemplate, exhibitionModalContent } from '../../templates/modalTemplate.js';
 import { initModal, showModal, updateModalContent } from '../../common/modal.js';
+import Pagination from '../../common/pagination.js';
+import { showErrorMessage } from '../../common/util/notification.js';
+
+// 전역 URL 파라미터
+const urlParams = new URLSearchParams(window.location.search);
+
+// API 함수 - 서버에서 가져오기
+async function fetchExhibitionList(pagination, filters = {}) {
+    try {
+        const params = {
+            page: pagination.page,
+            limit: pagination.limit,
+            sort: filters.sort || 'date-desc',
+            type: filters.type || 'all',
+            year: filters.year || 'all',
+            category: filters.category || 'all',
+            search: filters.searchQuery || ''
+        };
+
+        return await ExhibitionApi.getExhibitionList(params);
+    } catch (error) {
+        console.error('전시회 목록을 가져오는 중 오류 발생:', error);
+        showErrorMessage('전시회 목록을 불러오는데 실패했습니다.');
+        throw error;
+    }
+}
 
 // 상태 관리
 const state = {
@@ -31,15 +58,24 @@ const elements = {
     loadingIndicator: document.getElementById('loading-indicator'),
     noResults: document.getElementById('no-results'),
     resetSearch: document.getElementById('reset-search'),
-    exhibitionCount: document.getElementById('exhibition-count')
+    exhibitionCount: document.getElementById('exhibition-count'),
+    paginationContainer: document.getElementById('pagination')
 };
 
 // 초기화
-document.addEventListener('DOMContentLoaded', () => {
-    initSearch();
-    initFilters();
-    initExhibitionCards();
-    initExhibitionModal();
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        initSearch();
+        initFilters();
+        initExhibitionModal();
+        initPagination();
+
+        // 초기 전시회 목록 로드
+        await loadExhibitionList();
+    } catch (error) {
+        console.error('페이지 초기화 중 오류가 발생했습니다.', error);
+        showErrorMessage('페이지 초기화 중 오류가 발생했습니다.');
+    }
 });
 
 // 검색 기능
@@ -47,7 +83,7 @@ function initSearch() {
     elements.searchForm?.addEventListener('submit', (e) => {
         e.preventDefault();
         state.searchQuery = elements.searchInput?.value.trim() || '';
-        refreshExhibitions();
+        loadExhibitionList();
     });
 
     elements.resetButton?.addEventListener('click', () => {
@@ -64,25 +100,25 @@ function initFilters() {
     // 전시회 유형 필터
     elements.filterType?.addEventListener('change', () => {
         state.filters.type = elements.filterType.value;
-        refreshExhibitions();
+        loadExhibitionList();
     });
 
     // 연도 필터
     elements.filterYear?.addEventListener('change', () => {
         state.filters.year = elements.filterYear.value;
-        refreshExhibitions();
+        loadExhibitionList();
     });
 
     // 카테고리 필터
     elements.filterCategory?.addEventListener('change', () => {
         state.filters.category = elements.filterCategory.value;
-        refreshExhibitions();
+        loadExhibitionList();
     });
 
     // 정렬 옵션
     elements.sortOption?.addEventListener('change', () => {
         state.filters.sort = elements.sortOption.value;
-        refreshExhibitions();
+        loadExhibitionList();
     });
 }
 
@@ -102,31 +138,7 @@ function resetFilters() {
     if (elements.filterCategory) elements.filterCategory.value = 'all';
     if (elements.sortOption) elements.sortOption.value = 'date-desc';
 
-    refreshExhibitions();
-}
-
-// 전시회 카드 이벤트
-function initExhibitionCards() {
-    document.querySelectorAll('.exhibition-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const exhibitionData = {
-                id: card.dataset.exhibitionId,
-                imageUrl: card.querySelector('.exhibition-image')?.src,
-                title: card.querySelector('.exhibition-title')?.textContent?.trim(),
-                startDate: card.dataset.startDate,
-                endDate: card.dataset.endDate,
-                location: card.dataset.location,
-                description: card.dataset.description,
-                type: card.querySelector('.exhibition-type')?.textContent?.trim(),
-                artists: (card.dataset.artists || '').split(','),
-                viewingHours: card.dataset.viewingHours || '10:00 - 18:00',
-                admission: card.dataset.admission || '무료',
-                category: card.dataset.category
-            };
-
-            showExhibitionModal(exhibitionData);
-        });
-    });
+    loadExhibitionList();
 }
 
 // 모달 초기화
@@ -156,61 +168,153 @@ function showExhibitionModal(exhibition) {
     showModal('exhibition-modal');
 }
 
-// 전시회 목록 새로고침
-async function refreshExhibitions() {
-    state.currentPage = 1;
-    state.isLoading = true;
+// 애니메이션 관련 함수
+function animateButtonClick(button) {
+    if (!button) return;
+    button.classList.add('clicked');
+    setTimeout(() => {
+        button.classList.remove('clicked');
+    }, 200);
+}
+
+// 페이지네이션 초기화
+function initPagination() {
+    const prevBtn = document.querySelector('.pagination-prev');
+    const nextBtn = document.querySelector('.pagination-next');
+    const scrollContainer = document.querySelector('.exhibition-grid');
+
+    if (!prevBtn || !nextBtn || !scrollContainer) return;
+
+    // 페이지네이션 스크롤 버튼 상태 업데이트 및 이벤트 처리
+    const updatePaginationButtons = () => {
+        const isAtStart = scrollContainer.scrollLeft <= 10;
+        const isAtEnd = scrollContainer.scrollLeft + scrollContainer.offsetWidth >= scrollContainer.scrollWidth - 10;
+
+        prevBtn.style.opacity = isAtStart ? '0.5' : '1';
+        prevBtn.disabled = isAtStart;
+        nextBtn.style.opacity = isAtEnd ? '0.5' : '1';
+        nextBtn.disabled = isAtEnd;
+    };
+
+    prevBtn.addEventListener('click', () => {
+        scrollContainer.scrollBy({ left: -340, behavior: 'smooth' });
+        updatePaginationButtons();
+        animateButtonClick(prevBtn);
+    });
+
+    nextBtn.addEventListener('click', () => {
+        scrollContainer.scrollBy({ left: 340, behavior: 'smooth' });
+        updatePaginationButtons();
+        animateButtonClick(nextBtn);
+    });
+
+    scrollContainer.addEventListener('scroll', updatePaginationButtons);
+    updatePaginationButtons();
+}
+
+/**
+ * 전시회 목록을 로드하고 표시합니다.
+ */
+async function loadExhibitionList() {
+    if (!elements.container) return;
+
     elements.loadingIndicator?.style.setProperty('display', 'flex');
     elements.noResults?.style.setProperty('display', 'none');
 
     try {
-        const queryParams = new URLSearchParams({
-            page: '1',
-            type: state.filters.type,
-            year: state.filters.year,
-            category: state.filters.category,
-            sort: state.filters.sort,
-            search: state.searchQuery
+        const pagination = new Pagination({
+            page: parseInt(urlParams.get('page')) || 1,
+            limit: parseInt(urlParams.get('limit')) || 12,
+            sortField: urlParams.get('sortField') || 'createdAt',
+            sortOrder: urlParams.get('sortOrder') || 'desc'
         });
 
-        const response = await fetch(`/exhibition/api/list?${queryParams}`);
-        const data = await response.json();
+        const filters = {
+            type: urlParams.get('type') || state.filters.type,
+            year: urlParams.get('year') || state.filters.year,
+            category: urlParams.get('category') || state.filters.category,
+            sort: urlParams.get('sort') || state.filters.sort,
+            searchQuery: urlParams.get('search') || state.searchQuery
+        };
 
-        if (data.exhibitions.length === 0) {
-            elements.noResults?.style.setProperty('display', 'flex');
-            elements.container.innerHTML = '';
-            if (elements.exhibitionCount) {
-                elements.exhibitionCount.innerHTML = '총 <strong>0</strong>개의 전시회가 검색되었습니다.';
-            }
-        } else {
-            elements.container.innerHTML = '';
-            appendExhibitions(data.exhibitions);
-            if (elements.exhibitionCount) {
-                elements.exhibitionCount.innerHTML = `총 <strong>${data.exhibitions.length}</strong>개의 전시회가 검색되었습니다.`;
-            }
+        const response = await fetchExhibitionList(pagination, filters);
+
+        if (!response) {
+            throw new Error('전시회 목록을 불러오는데 실패했습니다.');
         }
+
+        const exhibitions = response.exhibitions || [];
+        const total = response.total || exhibitions.length;
+
+        // 결과 카운트 업데이트
+        if (elements.exhibitionCount) {
+            elements.exhibitionCount.innerHTML = `총 <strong>${total}</strong>개의 전시회가 검색되었습니다.`;
+        }
+
+        // 페이지네이션 정보 설정
+        if (response.pageInfo) {
+            pagination.setPageInfo(response.pageInfo);
+        }
+
+        // 전시회 목록 표시
+        if (exhibitions.length > 0) {
+            elements.container.innerHTML = '';
+            appendExhibitions(exhibitions);
+        } else {
+            elements.noResults?.style.setProperty('display', 'flex');
+            elements.container.innerHTML = '<div class="no-exhibitions">검색 결과가 없습니다.</div>';
+        }
+
+        // 페이지네이션 UI 렌더링
+        if (elements.paginationContainer) {
+            pagination.renderUI(elements.paginationContainer);
+
+            // 페이지 변경 이벤트 리스너
+            elements.paginationContainer.addEventListener('pagination:change', async (e) => {
+                const page = e.detail.page;
+                // URL 파라미터 업데이트
+                urlParams.set('page', page);
+
+                // 전시회 목록 다시 로드
+                await loadExhibitionList();
+            });
+        }
+
     } catch (error) {
-        console.error('Failed to refresh exhibitions:', error);
+        console.error('전시회 목록을 로드하는 중 오류 발생:', error);
+        showErrorMessage(error.message || '전시회 목록을 불러오는 중 오류가 발생했습니다.');
         elements.noResults?.style.setProperty('display', 'flex');
     } finally {
-        state.isLoading = false;
         elements.loadingIndicator?.style.setProperty('display', 'none');
     }
 }
 
 // 전시회 목록 추가
 function appendExhibitions(exhibitions) {
+    if (!elements.container) return;
+
     exhibitions.forEach(exhibition => {
         const card = createExhibitionCard(exhibition);
-        elements.container?.appendChild(card);
+        elements.container.appendChild(card);
     });
-    initExhibitionCards();
+
+    // 카드에 이벤트 바인딩
+    initExhibitionCardEvents();
 }
 
 // 전시회 카드 생성
 function createExhibitionCard(exhibition) {
     const card = document.createElement('div');
     card.className = 'exhibition-card';
+    card.dataset.exhibitionId = exhibition.id;
+    card.dataset.startDate = exhibition.startDate;
+    card.dataset.endDate = exhibition.endDate;
+    card.dataset.location = exhibition.location;
+    card.dataset.description = exhibition.description;
+    card.dataset.artists = exhibition.artists ? exhibition.artists.join(',') : '';
+    card.dataset.viewingHours = exhibition.viewingHours || '10:00 - 18:00';
+    card.dataset.admission = exhibition.admission || '무료';
+    card.dataset.category = exhibition.category;
 
     const imageUrl = exhibition.image || '/images/default-exhibition.svg';
     const title = exhibition.title || '제목 없음';
@@ -220,13 +324,44 @@ function createExhibitionCard(exhibition) {
         <div class="exhibition-card__image">
             <img src="${imageUrl}"
                  alt="${title}"
+                 class="exhibition-image"
                  onerror="this.onerror=null; this.src='/images/default-exhibition.svg'">
         </div>
         <div class="exhibition-card__content">
-            <h3 class="exhibition-card__title">${title}</h3>
-            <p class="exhibition-card__description">${description}</p>
+            <h3 class="exhibition-title">${title}</h3>
+            <p class="exhibition-description">${description}</p>
+            <div class="exhibition-meta">
+                <span class="exhibition-date">${exhibition.startDate} ~ ${exhibition.endDate}</span>
+                <span class="exhibition-type">${exhibition.type || '기타'}</span>
+            </div>
         </div>
     `;
 
     return card;
+}
+
+// 전시회 카드 이벤트 바인딩
+function initExhibitionCardEvents() {
+    document.querySelectorAll('.exhibition-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const exhibitionData = {
+                id: card.dataset.exhibitionId,
+                image: card.querySelector('.exhibition-image')?.src,
+                title: card.querySelector('.exhibition-title')?.textContent?.trim(),
+                startDate: card.dataset.startDate,
+                endDate: card.dataset.endDate,
+                date: `${card.dataset.startDate} ~ ${card.dataset.endDate}`,
+                location: card.dataset.location,
+                description: card.dataset.description,
+                type: card.querySelector('.exhibition-type')?.textContent?.trim(),
+                artists: (card.dataset.artists || '').split(','),
+                viewingHours: card.dataset.viewingHours || '10:00 - 18:00',
+                admission: card.dataset.admission || '무료',
+                category: card.dataset.category
+            };
+
+            showExhibitionModal(exhibitionData);
+            animateButtonClick(card);
+        });
+    });
 }
