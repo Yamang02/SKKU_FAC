@@ -2,15 +2,6 @@ import { DataTypes } from 'sequelize';
 import { db } from '../../adapter/MySQLDatabase.js';
 
 const ArtworkExhibitionRelationship = db.define('ArtworkExhibition', {
-    id: {
-        type: DataTypes.STRING(50),
-        primaryKey: true,
-        allowNull: false,
-        validate: {
-            is: /^ARTWORK-EXHIBITION-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-        },
-        comment: '작품-전시회 관계 고유 ID (ARTWORK-EXHIBITION-uuid 형식)'
-    },
     artworkId: {
         type: DataTypes.STRING(50),
         allowNull: false,
@@ -28,10 +19,15 @@ const ArtworkExhibitionRelationship = db.define('ArtworkExhibition', {
             key: 'id'
         },
         comment: '전시회 ID (EXHIBITION_uuid 형식)'
+    },
+    displayOrder: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        comment: '디스플레이 순서'
     }
 }, {
     timestamps: true,
-    tableName: 'artwork_exhibitions',
+    tableName: 'artwork_exhibition_relationships',
     underscored: true,
     indexes: [
         {

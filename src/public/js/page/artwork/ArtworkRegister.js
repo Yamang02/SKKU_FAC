@@ -1,6 +1,6 @@
 import UserApi from '../../api/UserApi.js';
 import ArtworkApi from '../../api/ArtworkApi.js';
-// import ExhibitionAPI from '../../api/ExhibitionAPI.js';
+import ExhibitionAPI from '../../api/ExhibitionAPI.js';
 import { showErrorMessage, showSuccessMessage, showLoading } from '../../common/util/notification.js';
 
 
@@ -45,41 +45,41 @@ async function initializePage() {
             departmentInput.value = affiliation;
         }
 
-        // // 2. 출품 가능한 전시회 목록 가져오기
-        // try {
-        //     const response = await ExhibitionAPI.getSubmittableList();
-        //     const exhibitions = response.data || response;
-        //     const exhibitionSelect = document.getElementById('exhibition');
+        // 2. 출품 가능한 전시회 목록 가져오기
+        try {
+            const response = await ExhibitionAPI.getSubmittableList();
+            const exhibitions = response.data || response;
+            const exhibitionSelect = document.getElementById('exhibition');
 
-        //     if (exhibitionSelect && exhibitions && Array.isArray(exhibitions)) {
-        //         // 기존 옵션 제거
-        //         exhibitionSelect.innerHTML = '';
+            if (exhibitionSelect && exhibitions && Array.isArray(exhibitions)) {
+                // 기존 옵션 제거
+                exhibitionSelect.innerHTML = '';
 
-        //         // 기본 옵션 추가
-        //         const defaultOption = document.createElement('option');
-        //         defaultOption.value = '';
-        //         defaultOption.textContent = '전시회를 선택해주세요';
-        //         exhibitionSelect.appendChild(defaultOption);
+                // 기본 옵션 추가
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '전시회를 선택해주세요';
+                exhibitionSelect.appendChild(defaultOption);
 
-        //         // 전시회 옵션 추가
-        //         exhibitions.forEach(exhibition => {
-        //             const option = document.createElement('option');
-        //             option.value = exhibition.id;
-        //             option.textContent = exhibition.title;
-        //             exhibitionSelect.appendChild(option);
-        //         });
-        //     } else {
-        //         throw new Error('전시회 목록을 불러오는데 실패했습니다.');
-        //     }
-        // } catch (error) {
-        //     const exhibitionSelect = document.getElementById('exhibition');
-        //     if (exhibitionSelect) {
-        //         exhibitionSelect.innerHTML = '<option value="">전시회 목록을 불러올 수 없습니다</option>';
-        //         exhibitionSelect.disabled = true;
-        //     }
-        //     // 에러 메시지를 화면에 표시
-        //     showErrorMessage('전시회 목록을 불러오는데 실패했습니다. 나중에 다시 시도해주세요.');
-        // }
+                // 전시회 옵션 추가
+                exhibitions.forEach(exhibition => {
+                    const option = document.createElement('option');
+                    option.value = exhibition.id;
+                    option.textContent = exhibition.title;
+                    exhibitionSelect.appendChild(option);
+                });
+            } else {
+                throw new Error('전시회 목록을 불러오는데 실패했습니다.');
+            }
+        } catch (error) {
+            const exhibitionSelect = document.getElementById('exhibition');
+            if (exhibitionSelect) {
+                exhibitionSelect.innerHTML = '<option value="">전시회 목록을 불러올 수 없습니다</option>';
+                exhibitionSelect.disabled = true;
+            }
+            // 에러 메시지를 화면에 표시
+            showErrorMessage('전시회 목록을 불러오는데 실패했습니다. 나중에 다시 시도해주세요.');
+        }
 
         // 3. 기존 초기화 함수들 호출
         initImageUpload();
@@ -211,8 +211,7 @@ function initSubmitButton() {
         // 버튼 상태 및 로딩 표시 업데이트 (시각적 피드백 추가)
         submitButton.disabled = true;
         submitButton.textContent = '처리 중...';
-        submitButton.classList.add('processing'); // 처리 중 클래스 추가
-        showLoading(true);
+        submitButton.classList.add('processing');
 
         try {
             // FormData 생성

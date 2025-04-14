@@ -1,4 +1,5 @@
 import ArtworkRepository from '../../../infrastructure/db/repository/ArtworkRepository.js';
+import ArtworkExhibitionRelationshipRepository from '../../../infrastructure/db/repository/relationship/ArtworkExhibitionRelationshipRepository.js';
 import ImageService from '../../image/service/ImageService.js';
 import UserService from '../../user/service/UserService.js';
 import { ArtworkNotFoundError, ArtworkValidationError } from '../../../common/error/ArtworkError.js';
@@ -7,6 +8,7 @@ import ArtworkSimpleDto from '../model/dto/ArtworkSimpleDto.js';
 import { v4 as uuidv4 } from 'uuid';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
 import Page from '../../common/model/Page.js';
+import { db } from '../../../infrastructure/db/adapter/MySQLDatabase.js';
 
 /**
  * 작품 서비스
@@ -15,8 +17,10 @@ import Page from '../../common/model/Page.js';
 export default class ArtworkService {
     constructor() {
         this.artworkRepository = new ArtworkRepository();
+        this.artworkExhibitionRelationshipRepository = new ArtworkExhibitionRelationshipRepository();
         this.imageService = new ImageService();
         this.userService = new UserService();
+
     }
 
     /**
@@ -151,6 +155,8 @@ export default class ArtworkService {
      * 새로운 작품을 생성합니다.
      */
     async createArtwork(artworkData, file) {
+        const transaction = await db.transaction();
+
         if (!artworkData.title) {
             throw new ArtworkValidationError('작품 제목은 필수입니다.');
         }
@@ -160,8 +166,20 @@ export default class ArtworkService {
         const uploadedImage = await this.imageService.getUploadedImageInfo(file);
         artworkData.imagePublicId = uploadedImage.publicId;
         artworkData.imageUrl = uploadedImage.imageUrl;
-        const artwork = await this.artworkRepository.createArtwork(artworkData);
-        return new ArtworkSimpleDto(artwork);
+
+        try {
+            const artwork = await this.artworkRepository.createArtwork(artworkData);
+            if (artworkData.exhibitionId !== '') {
+                console.log('작품 등록 완료:', artwork.id, artworkData.exhibitionId);
+                await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(artwork.id, artworkData.exhibitionId);
+            }
+            console.log('작품 등록 완료:', artwork);
+            await transaction.commit();
+            return new ArtworkSimpleDto(artwork);
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
     }
 
     /**
@@ -191,11 +209,8 @@ export default class ArtworkService {
             throw new ArtworkNotFoundError();
         }
 
-        if (artwork.imagePublicId) {
-            await this.imageService.deleteImage(artwork.imagePublicId);
-        }
-
-        return this.artworkRepository.deleteArtwork(id);
+        await this.artworkExhibitionRelationshipRepository.deleteArtworkExhibitionRelationshipByArtworkId(id);
+        return this.artworkRepository.updateArtworkDeleted(id);
     }
 
     /**

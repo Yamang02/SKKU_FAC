@@ -59,25 +59,7 @@ const setupModelRelationships = () => {
         foreignKey: 'userId'
     });
 
-    // UserAccount와 SkkuUserProfile, ExternalUserProfile의 관계는
-    // 이미 EntitityIndex.js에서 설정되어 있으므로 여기서는 주석 처리합니다.
-    /*
-    UserAccount.hasOne(SkkuUserProfile, {
-        foreignKey: 'userId',
-        onDelete: 'CASCADE'
-    });
-    SkkuUserProfile.belongsTo(UserAccount, {
-        foreignKey: 'userId'
-    });
 
-    UserAccount.hasOne(ExternalUserProfile, {
-        foreignKey: 'userId',
-        onDelete: 'CASCADE'
-    });
-    ExternalUserProfile.belongsTo(UserAccount, {
-        foreignKey: 'userId'
-    });
-    */
 };
 
 // 모델 관계 즉시 설정

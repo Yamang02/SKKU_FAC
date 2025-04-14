@@ -1,4 +1,4 @@
-import { Artwork } from '../model/entity/EntitityIndex.js';
+import { Artwork, UserAccount } from '../model/entity/EntitityIndex.js';
 import { ArtworkError } from '../../../common/error/ArtworkError.js';
 import { Op } from 'sequelize';
 import ArtworkExhibitionRelationship from '../model/relationship/ArtworkExhibitionRelationship.js';
@@ -39,6 +39,10 @@ class ArtworkRepository {
         }
     }
 
+    async updateArtworkDeleted(id) {
+        await Artwork.update({ status: 'DELETED' }, { where: { id } });
+    }
+
     async deleteArtwork(id) {
         try {
             const artwork = await Artwork.findByPk(id);
@@ -69,6 +73,7 @@ class ArtworkRepository {
         const offset = (page - 1) * limit; // 시작 위치 계산
         const sortField = options.sortField || 'createdAt'; // 기본 정렬 필드
         const sortOrder = options.sortOrder || 'DESC'; // 기본 정렬 순서
+        const include = [];
 
         try {
             // 검색 조건 구성
@@ -78,12 +83,18 @@ class ArtworkRepository {
             if (options.keyword) {
                 where[Op.or] = [
                     { title: { [Op.like]: `%${options.keyword}%` } },
-                    { description: { [Op.like]: `%${options.keyword}%` } }
+                    { '$UserAccount.name$': { [Op.like]: `%${options.keyword}%` } }
                 ];
             }
 
+            include.push({
+                model: UserAccount,
+                attributes: ['name']
+            });
+
             const { count, rows } = await Artwork.findAndCountAll({
                 where,
+                include,
                 limit: limit,
                 offset: offset,
                 order: [[sortField, sortOrder.toUpperCase()]]

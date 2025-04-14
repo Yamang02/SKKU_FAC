@@ -69,10 +69,8 @@ class ArtworkApi {
     // 작품 등록
     static async createArtwork(formData) {
         try {
-            ('작품 등록 API 호출 시작');
 
             // FormData 내용 로깅 (개발 목적으로만 사용)
-            ('FormData 내용:');
             for (const [key, value] of formData.entries()) {
                 if (key === 'image') {
                     ('이미지 파일:', value.name, value.type, value.size + 'bytes');
@@ -82,7 +80,6 @@ class ArtworkApi {
             }
 
             const response = await api.post('/artwork/api/new', formData);
-            ('작품 등록 API 응답:', response);
 
             // 응답이 없는 경우 에러 처리
             if (!response) {
