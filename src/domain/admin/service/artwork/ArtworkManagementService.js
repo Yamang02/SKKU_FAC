@@ -43,7 +43,7 @@ export default class ArtworkManagementService {
                 filterOptions.isFeatured = false;
             }
 
-            const result = await this.artworkRepository.findArtworksForAdmin(filterOptions);
+            const result = await this.artworkRepository.findArtworks(filterOptions, true);
             const artworks = result.items || [];
             (artworks);
             const total = result.total || 0;
@@ -100,7 +100,7 @@ export default class ArtworkManagementService {
      */
     async getArtworkDetail(id) {
         try {
-            const artwork = await this.artworkRepository.findArtworkById(id);
+            const artwork = await this.artworkRepository.findArtworkById(id, true);
             if (!artwork) {
                 throw new ArtworkNotFoundError();
             }
@@ -148,12 +148,12 @@ export default class ArtworkManagementService {
      */
     async updateArtwork(id, artworkData) {
         try {
-            const existingArtwork = await this.artworkRepository.findArtworkById(id);
+            const existingArtwork = await this.artworkRepository.findArtworkById(id, true);
             if (!existingArtwork) {
                 throw new ArtworkNotFoundError();
             }
 
-            const updatedArtwork = await this.artworkRepository.updateArtwork(id, artworkData);
+            const updatedArtwork = await this.artworkRepository.updateArtwork(id, artworkData, true);
             return new ArtworkManagementDto(updatedArtwork);
         } catch (error) {
             console.error('작품 수정 서비스 오류:', error);

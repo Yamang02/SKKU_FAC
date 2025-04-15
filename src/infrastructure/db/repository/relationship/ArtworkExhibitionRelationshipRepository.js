@@ -23,6 +23,22 @@ class ArtworkExhibitionRelationshipRepository {
         }
     }
 
+    async findArtworkExhibitionRelationshipsByArtworkId(artworkId) {
+        return await ArtworkExhibitionRelationship.findAll({
+            where: {
+                artworkId
+            }
+        });
+    }
+
+    async countArtworksInExhibition(exhibitionId) {
+        return await ArtworkExhibitionRelationship.count({
+            where: {
+                exhibitionId
+            }
+        });
+    }
+
     async deleteArtworkExhibitionRelationship(artworkId, exhibitionId) {
         await ArtworkExhibitionRelationship.destroy({
             where: {

@@ -41,6 +41,12 @@ export default class ExhibitionRepository {
         return await Exhibition.findByPk(id) || null;
     }
 
+    async findExhibitionsByIds(ids) {
+        return await Exhibition.findAll({
+            where: { id: { [Op.in]: ids } }
+        });
+    }
+
     /**
      * 새로운 전시회를 생성합니다.
      */

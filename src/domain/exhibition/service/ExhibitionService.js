@@ -3,6 +3,7 @@
  * 전시회 관련 비즈니스 로직을 처리합니다.
  */
 import ExhibitionRepository from '../../../infrastructure/db/repository/ExhibitionRepository.js';
+import ArtworkExhibitionRelationshipRepository from '../../../infrastructure/db/repository/relationship/ArtworkExhibitionRelationshipRepository.js';
 import ImageService from '../../image/service/ImageService.js';
 import { ExhibitionNotFoundError } from '../../../common/error/ExhibitionError.js';
 import ExhibitionResponseDto from '../model/dto/ExhibitionResponseDto.js';
@@ -16,6 +17,20 @@ export default class ExhibitionService {
     constructor() {
         this.exhibitionRepository = new ExhibitionRepository();
         this.imageService = new ImageService();
+        this.artworkExhibitionRelationshipRepository = new ArtworkExhibitionRelationshipRepository();
+    }
+
+    async getExhibitionsSimple(exhibitionIds) {
+        const exhibitions = await this.exhibitionRepository.findExhibitionsByIds(exhibitionIds);
+        const exhibitionSimpleDtos = [];
+        if (exhibitions.length > 0) {
+            for (const exhibition of exhibitions) {
+                const exhibitionSimpleDto = new ExhibitionSimpleDto(exhibition);
+                exhibitionSimpleDtos.push(exhibitionSimpleDto);
+            }
+        }
+
+        return exhibitionSimpleDtos;
     }
 
     // ===== 관리자용 메서드 =====
@@ -137,7 +152,20 @@ export default class ExhibitionService {
      */
     async getAllExhibitions() {
         const result = await this.exhibitionRepository.findExhibitions();
-        return result.items.map(exhibition => new ExhibitionListDto(exhibition));
+        if (result.items.length > 0) {
+            const exhibitionListDtos = [];
+            for (const exhibition of result.items) {
+                // 전시회에 속한 작품 수 조회
+                const CountArtworksInExhibition = await this.artworkExhibitionRelationshipRepository.countArtworksInExhibition(exhibition.id);
+                const exhibitionListDto = new ExhibitionListDto(exhibition);
+                exhibitionListDto.artworkCount = CountArtworksInExhibition;
+                exhibitionListDtos.push(exhibitionListDto);
+            }
+
+            return exhibitionListDtos;
+        } else {
+            return [];
+        }
     }
 
     /**

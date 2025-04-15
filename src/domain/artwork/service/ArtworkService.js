@@ -2,6 +2,7 @@ import ArtworkRepository from '../../../infrastructure/db/repository/ArtworkRepo
 import ArtworkExhibitionRelationshipRepository from '../../../infrastructure/db/repository/relationship/ArtworkExhibitionRelationshipRepository.js';
 import ImageService from '../../image/service/ImageService.js';
 import UserService from '../../user/service/UserService.js';
+import ExhibitionService from '../../exhibition/service/ExhibitionService.js';
 import { ArtworkNotFoundError, ArtworkValidationError } from '../../../common/error/ArtworkError.js';
 import ArtworkDetailDto from '../model/dto/ArtworkDetailDto.js';
 import ArtworkSimpleDto from '../model/dto/ArtworkSimpleDto.js';
@@ -9,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
 import Page from '../../common/model/Page.js';
 import { db } from '../../../infrastructure/db/adapter/MySQLDatabase.js';
-
 /**
  * 작품 서비스
  * 작품 관련 비즈니스 로직을 처리합니다.
@@ -20,7 +20,7 @@ export default class ArtworkService {
         this.artworkExhibitionRelationshipRepository = new ArtworkExhibitionRelationshipRepository();
         this.imageService = new ImageService();
         this.userService = new UserService();
-
+        this.exhibitionService = new ExhibitionService();
     }
 
     /**
@@ -47,17 +47,7 @@ export default class ArtworkService {
         for (const artwork of artworks) {
             try {
                 // 기본 작품 정보 준비
-                const artworkDetail = {
-                    id: artwork.id,
-                    title: artwork.title,
-                    slug: artwork.slug,
-                    year: artwork.year,
-                    description: artwork.description,
-                    imageUrl: artwork.imageUrl,
-                    userId: artwork.userId,
-                    createdAt: artwork.createdAt,
-                    updatedAt: artwork.updatedAt
-                };
+                const artworkDetail = new ArtworkDetailDto(artwork);
 
                 // 작가 정보 조회 및 추가
                 if (artwork.userId) {
@@ -80,8 +70,15 @@ export default class ArtworkService {
                     artworkDetail.artistAffiliation = '';
                 }
 
-                // 전시회 정보 추가 (향후 구현)
-                artworkDetail.exhibitions = [];
+                const artworkExhibitionRelationships = await this.artworkExhibitionRelationshipRepository.findArtworkExhibitionRelationshipsByArtworkId(artwork.id);
+                if (artworkExhibitionRelationships) {
+                    const exhibitionIds = artworkExhibitionRelationships.map(relationship => relationship.exhibitionId);
+                    const exhibitions = await this.exhibitionService.getExhibitionsSimple(exhibitionIds);
+                    artworkDetail.exhibitions = exhibitions;
+                } else {
+                    artworkDetail.exhibitions = [];
+                }
+                console.log(artworkDetail.exhibitions);
 
                 // DTO 변환 및 추가
                 const artworkDetailDto = new ArtworkDetailDto(artworkDetail);
@@ -170,10 +167,8 @@ export default class ArtworkService {
         try {
             const artwork = await this.artworkRepository.createArtwork(artworkData, { transaction });
             if (artworkData.exhibitionId !== '') {
-                console.log('작품 등록 완료:', artwork.id, artworkData.exhibitionId);
                 await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(artwork.id, artworkData.exhibitionId, { transaction });
             }
-            console.log('작품 등록 완료:', artwork);
             await transaction.commit();
             return new ArtworkSimpleDto(artwork);
         } catch (error) {

@@ -50,6 +50,24 @@ const setupModelRelationships = () => {
         otherKey: 'artworkId'
     });
 
+    // ArtworkExhibitionRelationship과 Artwork의 직접적인 관계 설정
+    Artwork.hasMany(ArtworkExhibitionRelationship, {
+        foreignKey: 'artworkId',
+        as: 'ArtworkExhibitions'
+    });
+    ArtworkExhibitionRelationship.belongsTo(Artwork, {
+        foreignKey: 'artworkId'
+    });
+
+    // ArtworkExhibitionRelationship과 Exhibition의 직접적인 관계 설정
+    Exhibition.hasMany(ArtworkExhibitionRelationship, {
+        foreignKey: 'exhibitionId',
+        as: 'ExhibitionArtworks'
+    });
+    ArtworkExhibitionRelationship.belongsTo(Exhibition, {
+        foreignKey: 'exhibitionId'
+    });
+
     // UserAccount와 Notice의 관계 설정 (1:N)
     UserAccount.hasMany(Notice, {
         foreignKey: 'userId',

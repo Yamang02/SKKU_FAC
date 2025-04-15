@@ -111,7 +111,6 @@ export default class ExhibitionApiController {
                 const exhibitionDto = new ExhibitionListDto(exhibition);
                 processedExhibitions.push(exhibitionDto);
             }
-            console.log(processedExhibitions);
 
             const responseData = {
                 exhibitions: processedExhibitions,

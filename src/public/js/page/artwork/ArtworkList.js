@@ -87,39 +87,6 @@ function updateExhibitionOptions(exhibitions) {
 }
 
 // 애니메이션 관련 함수
-function fadeIn(element, callback) {
-    if (!element) return;
-    element.style.display = '';
-    element.classList.add('fade-in');
-    requestAnimationFrame(() => {
-        element.classList.add('show');
-    });
-    if (callback) {
-        element.addEventListener('transitionend', function handler() {
-            callback();
-            element.removeEventListener('transitionend', handler);
-        });
-    }
-}
-
-function fadeOut(element, callback) {
-    if (!element) return;
-    if (element.style.display === 'none') {
-        if (callback) callback();
-        return;
-    }
-    element.classList.add('fade-out');
-    requestAnimationFrame(() => {
-        element.classList.add('hide');
-    });
-    element.addEventListener('transitionend', function handler() {
-        element.style.display = 'none';
-        element.classList.remove('fade-out', 'hide');
-        if (callback) callback();
-        element.removeEventListener('transitionend', handler);
-    });
-}
-
 function animateButtonClick(button) {
     if (!button) return;
     button.classList.add('clicked');
@@ -213,16 +180,6 @@ function updateCarouselButtons() {
 
 // 갤러리 필터링 관련 함수
 function filterArtworksByExhibition(exhibition) {
-    const artworks = document.querySelectorAll('.card.card--list');
-    artworks.forEach(artwork => {
-        const artworkExhibition = artwork.dataset.exhibition;
-        if (exhibition === 'all' || artworkExhibition === exhibition) {
-            fadeIn(artwork);
-        } else {
-            fadeOut(artwork);
-        }
-    });
-
     // URL 파라미터에 전시회 필터 적용
     if (exhibition === 'all') {
         urlParams.delete('exhibition');
@@ -236,12 +193,74 @@ function filterArtworksByExhibition(exhibition) {
         const keyword = searchForm.querySelector('#keyword').value;
         if (keyword) {
             urlParams.set('keyword', keyword);
+        } else {
+            urlParams.delete('keyword');
+        }
+
+        const year = searchForm.querySelector('#year').value;
+        if (year) {
+            urlParams.set('year', year);
+        } else {
+            urlParams.delete('year');
         }
     }
+
+    // 페이지 정보 초기화
+    urlParams.set('page', '1');
 
     // URL 업데이트 (페이지 리로드 없이)
     const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
     window.history.pushState({ path: newUrl }, '', newUrl);
+
+    // 현재 active 상태인 캐러셀 슬라이드 확인
+    updateActiveSlide(exhibition);
+
+    // API로 작품 목록만 다시 로드
+    loadArtworkList();
+}
+
+function updateActiveSlide(exhibition) {
+    const slides = document.querySelectorAll('.carousel-slide');
+    if (!slides.length) return;
+
+    let activeIndex = 0;
+    slides.forEach((slide, index) => {
+        if (slide.dataset.exhibition === exhibition) {
+            activeIndex = index;
+        }
+    });
+
+    // 캐러셀 업데이트
+    const carouselTrack = document.querySelector('.carousel-track');
+    const prevButton = document.querySelector('.carousel-prev');
+    const nextButton = document.querySelector('.carousel-next');
+
+    if (carouselTrack && prevButton && nextButton) {
+        slides.forEach((slide, index) => {
+            // 모든 클래스 제거 후 새로 적용
+            slide.classList.remove('active', 'prev-1', 'prev-2', 'prev-3', 'next-1', 'next-2', 'next-3');
+
+            // 위치에 따라 클래스 적용
+            const position = (index - activeIndex + slides.length) % slides.length;
+
+            if (position === 0) {
+                slide.classList.add('active');
+            } else if (position === 1) {
+                slide.classList.add('next-1');
+            } else if (position === 2) {
+                slide.classList.add('next-2');
+            } else if (position === slides.length - 1) {
+                slide.classList.add('prev-1');
+            } else if (position === slides.length - 2) {
+                slide.classList.add('prev-2');
+            } else {
+                slide.classList.add('next-3');
+            }
+        });
+
+        // 캐러셀 버튼 상태 업데이트
+        updateCarouselButtons();
+    }
 }
 
 function initViewToggle() {
@@ -310,28 +329,56 @@ function initAdvancedSearch() {
         searchForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            // 새로운 검색 시 항상 페이지는 1로 설정
-            const pageInput = this.querySelector('input[name="page"]');
-            if (pageInput) {
-                pageInput.value = '1';
+            // 폼 데이터를 URL 파라미터로 변환
+            const formData = new FormData(this);
+            for (const [key, value] of formData.entries()) {
+                if (value) {
+                    urlParams.set(key, value);
+                } else {
+                    urlParams.delete(key);
+                }
             }
 
-            // 폼 제출
-            this.submit();
+            // 페이지 파라미터 설정 (새로운 검색 시 항상 1페이지부터)
+            urlParams.set('page', '1');
+
+            // URL 업데이트 (페이지 리로드 없이)
+            const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+            window.history.pushState({ path: newUrl }, '', newUrl);
+
+            // 전시회 필터가 있으면 캐러셀 슬라이드 업데이트
+            const exhibition = urlParams.get('exhibition');
+            if (exhibition) {
+                updateActiveSlide(exhibition);
+            } else {
+                updateActiveSlide('all');
+            }
+
+            // API로 작품 목록만 다시 로드
+            loadArtworkList();
         });
 
         // 초기화 버튼 클릭 시 처리
         const resetButton = searchForm.querySelector('button[type="reset"]');
         if (resetButton) {
             resetButton.addEventListener('click', function () {
-                // 페이지 정보 초기화
-                const pageInput = searchForm.querySelector('input[name="page"]');
-                if (pageInput) {
-                    pageInput.value = '1';
+                // 모든 URL 파라미터 초기화
+                for (const key of [...urlParams.keys()]) {
+                    urlParams.delete(key);
                 }
 
-                // URL 파라미터 초기화 후 리디렉션
-                window.location.href = window.location.pathname;
+                // 폼 필드 초기화
+                searchForm.reset();
+
+                // URL 업데이트 (페이지 리로드 없이)
+                const newUrl = window.location.pathname;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+
+                // 캐러셀 슬라이드 "모든 작품"으로 업데이트
+                updateActiveSlide('all');
+
+                // API로 작품 목록만 다시 로드
+                loadArtworkList();
             });
         }
     }
@@ -399,6 +446,19 @@ async function loadArtworkList() {
     const totalCountElement = document.querySelector('.card--all .card__meta strong');
     const paginationContainer = document.getElementById('pagination');
 
+    // 로딩 상태 표시
+    if (cardView) {
+        const loadingSpinner = document.createElement('div');
+        loadingSpinner.className = 'loading-artwork';
+        loadingSpinner.innerHTML = `
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+        `;
+        cardView.innerHTML = '';
+        cardView.appendChild(loadingSpinner);
+    }
+
     try {
         const pagination = new Pagination({
             page: parseInt(urlParams.get('page')) || 1,
@@ -408,9 +468,9 @@ async function loadArtworkList() {
         });
 
         const filters = {
-            searchType: urlParams.get('searchType') || '',
             keyword: urlParams.get('keyword') || '',
-            exhibition: urlParams.get('exhibition') || ''
+            exhibition: urlParams.get('exhibition') || '',
+            year: urlParams.get('year') || ''
         };
 
         const response = await fetchArtworkList(pagination, filters);
@@ -475,10 +535,18 @@ async function loadArtworkList() {
             pagination.renderUI(paginationContainer);
 
             // 페이지 변경 이벤트 리스너
-            paginationContainer.addEventListener('pagination:change', async (e) => {
+            // 이벤트 리스너 중복 추가 방지를 위해 이전 리스너 제거
+            const clonedPaginationContainer = paginationContainer.cloneNode(true);
+            paginationContainer.parentNode.replaceChild(clonedPaginationContainer, paginationContainer);
+
+            clonedPaginationContainer.addEventListener('pagination:change', async (e) => {
                 const page = e.detail.page;
                 // URL 파라미터 업데이트
                 urlParams.set('page', page);
+
+                // URL 업데이트 (페이지 리로드 없이)
+                const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
 
                 // 작품 목록 다시 로드
                 await loadArtworkList();
