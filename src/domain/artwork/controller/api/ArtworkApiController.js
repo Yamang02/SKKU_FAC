@@ -96,7 +96,6 @@ export default class ArtworkApiController {
         const file = req.file;
         const artworkData = req.body;
 
-        console.log('작품 등록 요청 받음:', artworkData);
         try {
             // 세션 검사
             if (!req.session) {

@@ -33,6 +33,11 @@ export default class ExhibitionService {
         return exhibitionSimpleDtos;
     }
 
+    async getExhibitionSimple(exhibitionId) {
+        const exhibition = await this.exhibitionRepository.findExhibitionById(exhibitionId);
+        return new ExhibitionSimpleDto(exhibition);
+    }
+
     // ===== 관리자용 메서드 =====
     /**
      * 새로운 전시회를 생성합니다.

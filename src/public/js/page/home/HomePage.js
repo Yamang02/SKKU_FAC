@@ -34,7 +34,7 @@ function showArtworkModal(artwork) {
         'modal-title': artwork.title || '제목 없음',
         'modal-artist': artwork.artistName || '작가 미상',
         'modal-affiliation': artwork.artistAffiliation || '',
-        'modal-exhibition': artwork.exhibitionTitle || '',
+        'modal-exhibition': artwork.RepresentativeExhibitionTitle || '출품 전시회 없음',
         'modal-link': `/artwork/${artwork.slug}`
     });
 

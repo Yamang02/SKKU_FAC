@@ -138,12 +138,20 @@ function initCarousel() {
         currentIndex = (currentIndex - 1 + slides.length) % slides.length;
         updateSlides();
         animateButtonClick(prevButton);
+
+        // 현재 활성화된 슬라이드의 전시회 정보로 필터링
+        const exhibition = slides[currentIndex].dataset.exhibition;
+        filterArtworksByExhibition(exhibition);
     });
 
     nextButton.addEventListener('click', () => {
         currentIndex = (currentIndex + 1) % slides.length;
         updateSlides();
         animateButtonClick(nextButton);
+
+        // 현재 활성화된 슬라이드의 전시회 정보로 필터링
+        const exhibition = slides[currentIndex].dataset.exhibition;
+        filterArtworksByExhibition(exhibition);
     });
 
     carouselTrack.addEventListener('scroll', updateCarouselButtons);

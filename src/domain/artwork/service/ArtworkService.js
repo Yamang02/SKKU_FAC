@@ -70,11 +70,13 @@ export default class ArtworkService {
                     artworkDetail.artistAffiliation = '';
                 }
 
+                // 작품 출품 전시회 조회
                 const artworkExhibitionRelationships = await this.artworkExhibitionRelationshipRepository.findArtworkExhibitionRelationshipsByArtworkId(artwork.id);
-                if (artworkExhibitionRelationships) {
-                    const exhibitionIds = artworkExhibitionRelationships.map(relationship => relationship.exhibitionId);
-                    const exhibitions = await this.exhibitionService.getExhibitionsSimple(exhibitionIds);
-                    artworkDetail.exhibitions = exhibitions;
+                if (artworkExhibitionRelationships.length > 0) {
+                    for (const exhibition of artworkExhibitionRelationships) {
+                        const exhibitionSimple = await this.exhibitionService.getExhibitionSimple(exhibition.exhibitionId);
+                        artworkDetail.exhibitions.push(exhibitionSimple);
+                    }
                 } else {
                     artworkDetail.exhibitions = [];
                 }
@@ -244,8 +246,12 @@ export default class ArtworkService {
                 artworkSimple.artistAffiliation = user.affiliation;
             }
 
-            if (artwork.exhibition) {
-                artworkSimple.exhibitionName = artwork.exhibition.name;
+
+            const exhibitions = await this.artworkExhibitionRelationshipRepository.findArtworkExhibitionRelationshipsByArtworkId(artwork.id);
+            if (exhibitions.length > 0) {
+                artworkSimple.RepresentativeExhibitionId = exhibitions[0].exhibitionId;
+                const exhibitionSimple = await this.exhibitionService.getExhibitionSimple(artworkSimple.RepresentativeExhibitionId);
+                artworkSimple.RepresentativeExhibitionTitle = exhibitionSimple.title;
             }
 
             artworkSimpleList.push(artworkSimple);
@@ -253,18 +259,4 @@ export default class ArtworkService {
 
         return artworkSimpleList;
     }
-
-    /**
-     * ID로 작품을 조회합니다.
-     * @param {number} id - 작품 ID
-     * @returns {Promise<ArtworkSimpleDTO>} 작품 정보
-     */
-    async getArtworkById(id) {
-        const artworkWithRelations = await this.artworkRepository.findArtworkWithRelations(id);
-        if (!artworkWithRelations) {
-            throw new ArtworkNotFoundError();
-        }
-        return new ArtworkSimpleDto(artworkWithRelations);
-    }
-
 }

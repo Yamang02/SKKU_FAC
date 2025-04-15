@@ -10,8 +10,8 @@ export default class ArtworkSimpleDTO {
         this.imageUrl = artworkWithRelations.imageUrl ? artworkWithRelations.imageUrl : null; // 이미지 URL
         this.userId = artworkWithRelations.userId; // 작가 ID
         this.artistName = artworkWithRelations.userAccount?.name || ''; // 작가 이름 (UserAccount에서 가져옴)
-        this.exhibitionId = artworkWithRelations.exhibitionId; // 전시회 ID
-        this.exhibitionTitle = artworkWithRelations.exhibition?.title || ''; // 전시회 제목 (Exhibition에서 가져옴)
+        this.RepresentativeExhibitionId = artworkWithRelations.exhibitionId; // 전시회 ID
+        this.RepresentativeExhibitionTitle = artworkWithRelations.exhibition?.title || ''; // 전시회 제목 (Exhibition에서 가져옴)
         this.createdAt = artworkWithRelations.createdAt; // 생성일
         this.type = type; // DTO 타입 (예: 'card')
     }
