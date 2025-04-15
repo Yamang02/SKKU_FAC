@@ -21,9 +21,10 @@ async function fetchExhibitionList(pagination, filters = {}) {
             type: filters.type || 'all',
             year: filters.year || 'all',
             category: filters.category || 'all',
-            search: filters.searchQuery || ''
+            search: filters.search || ''
         };
 
+        // API 호출 후 결과 바로 반환
         return await ExhibitionApi.getExhibitionList(params);
     } catch (error) {
         console.error('전시회 목록을 가져오는 중 오류 발생:', error);
@@ -165,13 +166,16 @@ function showExhibitionModal(exhibition) {
     const isSpecial = exhibition.exhibitionType === 'special';
     badges += `<span class="exhibition-badge badge-${isSpecial ? 'special' : 'regular'}">${isSpecial ? '특별 전시' : '정기 전시'}</span>`;
 
+    const imageUrl = exhibition.imageUrl || exhibition.image || '/images/exhibition-placeholder.svg';
+    const date = exhibition.date || `${exhibition.startDate} ~ ${exhibition.endDate}`;
+
     // 모달 내용 업데이트
     updateModalContent('exhibition-modal', {
-        'modal-image': exhibition.image || '/images/exhibition-placeholder.svg',
+        'modal-image': imageUrl,
         'modal-title': exhibition.title || '제목 없음',
         'modal-badges': badges,
         'modal-description': exhibition.description || '',
-        'modal-date': exhibition.date || '',
+        'modal-date': date,
         'modal-location': exhibition.location || '',
         'modal-view-link': `/exhibition/${exhibition.id}/artworks`,
         'modal-submit-link': `/artwork/new?exhibition=${exhibition.id}`
@@ -192,37 +196,19 @@ function animateButtonClick(button) {
 
 // 페이지네이션 초기화
 function initPagination() {
-    const prevBtn = document.querySelector('.pagination-prev');
-    const nextBtn = document.querySelector('.pagination-next');
-    const scrollContainer = document.querySelector('.exhibition-grid');
+    // 페이지네이션 컨테이너 요소 확인
+    elements.paginationContainer = document.getElementById('pagination');
 
-    if (!prevBtn || !nextBtn || !scrollContainer) return;
+    if (!elements.paginationContainer) {
+        console.warn('페이지네이션 컨테이너를 찾을 수 없습니다.');
+        return;
+    }
 
-    // 페이지네이션 스크롤 버튼 상태 업데이트 및 이벤트 처리
-    const updatePaginationButtons = () => {
-        const isAtStart = scrollContainer.scrollLeft <= 10;
-        const isAtEnd = scrollContainer.scrollLeft + scrollContainer.offsetWidth >= scrollContainer.scrollWidth - 10;
+    // 페이지네이션 이벤트 리스너 제거
+    elements.paginationContainer.innerHTML = '';
 
-        prevBtn.style.opacity = isAtStart ? '0.5' : '1';
-        prevBtn.disabled = isAtStart;
-        nextBtn.style.opacity = isAtEnd ? '0.5' : '1';
-        nextBtn.disabled = isAtEnd;
-    };
-
-    prevBtn.addEventListener('click', () => {
-        scrollContainer.scrollBy({ left: -340, behavior: 'smooth' });
-        updatePaginationButtons();
-        animateButtonClick(prevBtn);
-    });
-
-    nextBtn.addEventListener('click', () => {
-        scrollContainer.scrollBy({ left: 340, behavior: 'smooth' });
-        updatePaginationButtons();
-        animateButtonClick(nextBtn);
-    });
-
-    scrollContainer.addEventListener('scroll', updatePaginationButtons);
-    updatePaginationButtons();
+    // 첫 로드시에는 페이지네이션 UI를 보여주지 않음
+    // loadExhibitionList에서 데이터를 로드한 후 페이지네이션 UI를 표시합니다.
 }
 
 /**
@@ -247,7 +233,7 @@ async function loadExhibitionList() {
             year: urlParams.get('year') || state.filters.year,
             category: urlParams.get('category') || state.filters.category,
             sort: urlParams.get('sort') || state.filters.sort,
-            searchQuery: urlParams.get('search') || state.searchQuery
+            search: urlParams.get('search') || state.searchQuery
         };
 
         const response = await fetchExhibitionList(pagination, filters);
@@ -256,17 +242,12 @@ async function loadExhibitionList() {
             throw new Error('전시회 목록을 불러오는데 실패했습니다.');
         }
 
-        const exhibitions = response.exhibitions || [];
-        const total = response.total || exhibitions.length;
+        const exhibitions = response.items || [];
+        const total = response.total || 0;
 
         // 결과 카운트 업데이트
         if (elements.exhibitionCount) {
             elements.exhibitionCount.innerHTML = `총 <strong>${total}</strong>개의 전시회가 검색되었습니다.`;
-        }
-
-        // 페이지네이션 정보 설정
-        if (response.pageInfo) {
-            pagination.setPageInfo(response.pageInfo);
         }
 
         // 전시회 목록 표시
@@ -275,11 +256,19 @@ async function loadExhibitionList() {
             appendExhibitions(exhibitions);
         } else {
             elements.noResults?.style.setProperty('display', 'flex');
-            elements.container.innerHTML = '<div class="no-exhibitions">검색 결과가 없습니다.</div>';
+            elements.container.innerHTML = '';
         }
 
-        // 페이지네이션 UI 렌더링
+        // 페이지네이션 설정
         if (elements.paginationContainer) {
+            // 페이지네이션 정보 설정
+            pagination.setPageInfo({
+                currentPage: response.page || 1,
+                totalPages: Math.ceil(total / (response.limit || 12)),
+                totalItems: total
+            });
+
+            // 페이지네이션 UI 렌더링
             pagination.renderUI(elements.paginationContainer);
 
             // 페이지 변경 이벤트 리스너
@@ -287,6 +276,7 @@ async function loadExhibitionList() {
                 const page = e.detail.page;
                 // URL 파라미터 업데이트
                 urlParams.set('page', page);
+                window.history.pushState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
 
                 // 전시회 목록 다시 로드
                 await loadExhibitionList();
@@ -331,9 +321,9 @@ function createExhibitionCard(exhibition) {
     card.dataset.exhibitionType = exhibition.exhibitionType || 'regular';
     card.dataset.isSubmissionOpen = exhibition.isSubmissionOpen ? 'true' : 'false';
 
-    const imageUrl = exhibition.image || '/images/default-exhibition.svg';
+    const imageUrl = exhibition.imageUrl || exhibition.image || '/images/default-exhibition.svg';
     const title = exhibition.title || '제목 없음';
-    const description = exhibition.description || '설명 없음';
+    const description = exhibition.description || '';
 
     // 뱃지 생성
     let badges = '<div class="exhibition-badges">';
@@ -359,9 +349,14 @@ function createExhibitionCard(exhibition) {
         <div class="exhibition-card__content">
             ${badges}
             <h3 class="exhibition-title">${title}</h3>
-            <p class="exhibition-description">${description}</p>
+            ${description ? `<p class="exhibition-description">${description.length > 70 ? description.substring(0, 70) + '...' : description}</p>` : ''}
             <div class="exhibition-meta">
-                <span class="exhibition-date">${exhibition.startDate} ~ ${exhibition.endDate}</span>
+                <span class="exhibition-date">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                    </svg>
+                    ${exhibition.startDate} ~ ${exhibition.endDate}
+                </span>
             </div>
         </div>
     `;

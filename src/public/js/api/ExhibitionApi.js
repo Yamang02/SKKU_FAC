@@ -12,21 +12,56 @@ export default class ExhibitionApi {
      */
     static async getExhibitionList(params = {}) {
         try {
-            const pageParams = params.page ? `page=${params.page}&limit=${params.limit || 12}` : '';
-            const filterParams = createFilterParams({
-                type: params.type,
-                year: params.year,
-                category: params.category,
-                sort: params.sort,
-                search: params.search
-            });
+            // 페이지네이션 파라미터
+            const pageParams = [];
+            if (params.page) pageParams.push(`page=${params.page}`);
+            if (params.limit) pageParams.push(`limit=${params.limit || 12}`);
 
-            const queryString = [pageParams, filterParams]
-                .filter(Boolean)
-                .join('&');
+            // 필터 파라미터
+            const filterParams = [];
+            if (params.type && params.type !== 'all') filterParams.push(`type=${params.type}`);
+            if (params.year && params.year !== 'all') filterParams.push(`year=${params.year}`);
+            if (params.category && params.category !== 'all') filterParams.push(`category=${params.category}`);
+            if (params.sort) filterParams.push(`sort=${params.sort}`);
+            if (params.search) filterParams.push(`search=${encodeURIComponent(params.search)}`);
 
-            const response = await api.get(`/exhibition/api/list${queryString ? `?${queryString}` : ''}`);
-            return response;
+            // 쿼리스트링 조합
+            const queryParams = [...pageParams, ...filterParams].join('&');
+            const queryString = queryParams ? `?${queryParams}` : '';
+
+            const response = await api.get(`/exhibition/api/list${queryString}`);
+            console.log('ExhibitionApi 원본 응답:', response);
+
+            // 응답 데이터 포맷 표준화 - 원래 API 응답 구조 처리
+            const result = {
+                // 원래 API가 {success, data:{exhibitions}} 구조인 경우
+                items: response.success && response.data && response.data.exhibitions
+                    ? response.data.exhibitions
+                    : (response.exhibitions || []),
+
+                // 총 개수 처리
+                total: response.success && response.data && response.data.total
+                    ? response.data.total
+                    : (response.total || 0),
+
+                // 페이지 정보
+                page: params.page || 1,
+                limit: params.limit || 12,
+
+                // 페이지 관련 메타데이터
+                pageInfo: response.pageInfo || {
+                    currentPage: params.page || 1,
+                    totalPages: response.success && response.data && response.data.total
+                        ? Math.ceil(response.data.total / (params.limit || 12))
+                        : Math.ceil((response.total || 0) / (params.limit || 12)),
+                    totalItems: response.success && response.data && response.data.total
+                        ? response.data.total
+                        : (response.total || 0)
+                }
+            };
+
+            console.log('ExhibitionApi 변환 응답:', result);
+            return result;
         } catch (error) {
             console.error('전시회 목록을 가져오는 중 오류 발생:', error);
             showErrorMessage('전시회 목록을 불러오는데 실패했습니다.');

@@ -61,9 +61,9 @@ export function createArtworkCard(artwork, options = { type: 'home' }) {
 }
 
 /**
- * 전시회 카드를 생성하는 유틸리티 함수
- * @param {Object} exhibition - 전시회 데이터 객체
- * @returns {HTMLElement} 생성된 전시회 카드 엘리먼트
+ * 전시회 캐러셀 카드 생성
+ * @param {Object} exhibition - 전시회 데이터
+ * @returns {HTMLElement} - 전시회 캐러셀 슬라이드
  */
 export function createExhibitionCarouselCard(exhibition) {
     const slide = document.createElement('div');
@@ -71,14 +71,15 @@ export function createExhibitionCarouselCard(exhibition) {
     slide.dataset.exhibition = exhibition.id || '';
 
     const card = document.createElement('div');
-    card.className = 'card card--carousel';
+    card.className = 'card card--carousel card--exhibition';
 
     const imageContainer = document.createElement('div');
     imageContainer.className = 'card__image-container';
 
     const image = document.createElement('img');
     image.className = 'card__image';
-    image.src = exhibition.imageUrl || '/images/exhibition-placeholder.svg';
+    // imageUrl이 우선, 없으면 image 사용, 둘 다 없으면 기본 이미지
+    image.src = exhibition.imageUrl || exhibition.image || '/images/exhibition-placeholder.svg';
     image.alt = exhibition.title || '';
     image.onerror = function () {
         this.onerror = null;

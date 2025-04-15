@@ -21,7 +21,25 @@ async function fetchArtworkList(pagination, filters = {}) {
 
 async function fetchExhibitionList() {
     try {
-        const response = await ExhibitionApi.getExhibitionList();
+        console.log('전시회 API 호출 시작...');
+        // 캐러셀용 전시회는 제한 없이 모두 가져오기 위해 특별 파라미터 전달
+        const response = await ExhibitionApi.getExhibitionList({
+            limit: 100, // 충분히 많은 수의 전시회를 가져오기 위한 값
+            page: 1,
+            sort: 'date-desc' // 최신 전시회부터 정렬
+        });
+
+        console.log('전시회 API 응답 완료:', response);
+
+        // API 응답 구조 확인
+        if (!response || !response.items) {
+            console.error('유효하지 않은 API 응답 구조:', response);
+        } else if (response.items.length === 0) {
+            console.warn('전시회 데이터가 비어 있습니다.');
+        } else {
+            console.log(`${response.items.length}개의 전시회 데이터를 받았습니다.`);
+        }
+
         return response;
     } catch (error) {
         console.error('Error fetching exhibition list:', error);
@@ -36,29 +54,46 @@ async function updateExhibitionCarousel() {
     if (!carouselTrack) return;
 
     try {
+        console.log('전시회 데이터 요청 시작...');
         const exhibitionData = await fetchExhibitionList();
+        console.log('전시회 데이터 도착:', exhibitionData);
 
-        // API 응답 구조에 맞게 데이터 접근 수정
-        if (!exhibitionData || !exhibitionData.success || !exhibitionData.data || !exhibitionData.data.exhibitions) {
-            console.error('전시회 데이터가 올바른 형식이 아닙니다:', exhibitionData);
+        // 새로운 API 응답 구조 처리
+        if (!exhibitionData) {
+            console.error('전시회 데이터를 불러오는데 실패했습니다.');
             return;
         }
 
-        const { exhibitions } = exhibitionData.data;
+        const exhibitions = exhibitionData.items || [];
+        console.log('처리할 전시회 목록:', exhibitions);
+
+        if (exhibitions.length === 0) {
+            console.warn('표시할 전시회가 없습니다.');
+            return;
+        }
 
         // 기존의 "모든 작품" 슬라이드를 제외한 다른 슬라이드 제거
         const existingSlides = carouselTrack.querySelectorAll('.carousel-slide:not([data-exhibition="all"])');
         existingSlides.forEach(slide => slide.remove());
+        console.log('기존 슬라이드 제거 완료');
 
         // 전시회 카드 생성
         const exhibitionFragment = document.createDocumentFragment();
-        exhibitions.forEach(exhibition => {
+        console.log('전시회 카드 생성 시작...');
+
+        exhibitions.forEach((exhibition, index) => {
+            if (!exhibition || !exhibition.id) {
+                console.warn(`유효하지 않은 전시회 데이터 (인덱스: ${index}):`, exhibition);
+                return;
+            }
+            console.log(`전시회 카드 생성: ${exhibition.id} - ${exhibition.title}`);
             const exhibitionCard = createExhibitionCarouselCard(exhibition);
             exhibitionFragment.appendChild(exhibitionCard);
         });
 
         // 모든 작품 카드 다음에 전시회 카드들 추가
         carouselTrack.appendChild(exhibitionFragment);
+        console.log('전시회 카드 추가 완료');
 
         // 전시회 옵션 업데이트
         updateExhibitionOptions(exhibitions);
@@ -76,14 +111,26 @@ function updateExhibitionOptions(exhibitions) {
     const exhibitionSelect = document.getElementById('exhibition');
     if (!exhibitionSelect) return;
 
-    const options = exhibitions.map(exhibition => `
-        <option value="${exhibition.id}">${exhibition.title}</option>
-    `).join('');
+    // 기존 옵션 초기화 (첫 번째 옵션 제외)
+    while (exhibitionSelect.options.length > 1) {
+        exhibitionSelect.remove(1);
+    }
 
-    exhibitionSelect.innerHTML = `
-        <option value="">모든 전시회</option>
-        ${options}
-    `;
+    // 전시회가 없거나 배열이 아닌 경우 처리
+    if (!exhibitions || !Array.isArray(exhibitions) || exhibitions.length === 0) {
+        console.warn('유효한 전시회 데이터가 없습니다:', exhibitions);
+        return;
+    }
+
+    // 옵션 추가
+    exhibitions.forEach(exhibition => {
+        if (!exhibition || !exhibition.id || !exhibition.title) return;
+
+        const option = document.createElement('option');
+        option.value = exhibition.id;
+        option.textContent = exhibition.title;
+        exhibitionSelect.appendChild(option);
+    });
 }
 
 // 애니메이션 관련 함수
