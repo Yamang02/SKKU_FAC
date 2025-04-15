@@ -398,7 +398,7 @@
     width: 85%;
     padding: 1rem 2rem;
     background-color: var(--color-primary);
-    color: white;
+    color: white !important;
     text-align: center;
     border-radius: var(--border-radius-md);
     font-weight: 600;
@@ -406,6 +406,7 @@
     text-decoration: none;
     margin: 2rem auto 0;
 }
+
 
 #artwork-modal .close {
     position: absolute;

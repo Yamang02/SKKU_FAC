@@ -39,13 +39,11 @@
                     </div>
 
                     <div class="search-column">
-                        <label for="filter-category" class="form-label">카테고리</label>
-                        <select id="filter-category" name="category" class="form-select exhibition-form-select">
-                            <option value="all">모든 카테고리</option>
-                            <option value="painting">회화</option>
-                            <option value="sculpture">조각</option>
-                            <option value="photography">사진</option>
-                            <option value="digital">디지털 아트</option>
+                        <label for="filter-submission" class="form-label">출품 가능 여부</label>
+                        <select id="filter-submission" name="submission" class="form-select exhibition-form-select">
+                            <option value="all">모두 보기</option>
+                            <option value="open">출품 가능</option>
+                            <option value="closed">출품 불가</option>
                         </select>
                     </div>
 
@@ -122,9 +120,9 @@
             <div class="modal-info modal-info--exhibition">
                 <h2 id="modal-title" class="exhibition-modal-title"></h2>
                 <div id="modal-badges" class="exhibition-badges"></div>
-                <p id="modal-description" class="modal-description--exhibition"></p>
                 <p id="modal-date" class="modal-date--exhibition"></p>
                 <p id="modal-location" class="modal-location--exhibition"></p>
+                <p id="modal-description" class="modal-description--exhibition"></p>
                 <div class="modal-buttons--exhibition">
                     <a id="modal-view-link" href="" class="btn btn-primary exhibition-btn-primary">작품 조회</a>
                     <a id="modal-submit-link" href="" class="btn btn-secondary exhibition-btn-secondary">출품하기</a>

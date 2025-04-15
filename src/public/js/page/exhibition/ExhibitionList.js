@@ -174,10 +174,10 @@ function showExhibitionModal(exhibition) {
         'modal-image': imageUrl,
         'modal-title': exhibition.title || '제목 없음',
         'modal-badges': badges,
-        'modal-description': exhibition.description || '',
         'modal-date': date,
         'modal-location': exhibition.location || '',
-        'modal-view-link': `/exhibition/${exhibition.id}/artworks`,
+        'modal-description': exhibition.description || '',
+        'modal-view-link': `/artwork?exhibition=${exhibition.id}&page=1`,
         'modal-submit-link': `/artwork/new?exhibition=${exhibition.id}`
     });
 
@@ -188,7 +188,28 @@ function showExhibitionModal(exhibition) {
         const modalContent = modal.querySelector('.modal-content');
         if (modalContent) modalContent.classList.add('exhibition-modal-content');
         const modalImage = modal.querySelector('.modal-image');
-        if (modalImage) modalImage.classList.add('exhibition-modal-image');
+        if (modalImage) {
+            modalImage.classList.add('exhibition-modal-image');
+
+            // 이미지 오류 처리
+            modalImage.addEventListener('error', function () {
+                this.src = '/images/exhibition-placeholder.svg';
+            });
+        }
+
+        // 출품하기 버튼 활성화/비활성화
+        const submitButton = modal.querySelector('#modal-submit-link');
+        if (submitButton) {
+            if (!exhibition.isSubmissionOpen) {
+                submitButton.classList.add('disabled');
+                submitButton.setAttribute('aria-disabled', 'true');
+                submitButton.innerHTML = '출품 불가';
+            } else {
+                submitButton.classList.remove('disabled');
+                submitButton.removeAttribute('aria-disabled');
+                submitButton.innerHTML = '출품하기';
+            }
+        }
     }
 
     // 모달 표시
@@ -333,7 +354,7 @@ function createExhibitionCard(exhibition) {
 
     const imageUrl = exhibition.imageUrl || exhibition.image || '/images/default-exhibition.svg';
     const title = exhibition.title || '제목 없음';
-    const description = exhibition.description || '';
+    const location = exhibition.location || '장소 미정';
 
     // 뱃지 생성
     let badges = '<div class="exhibition-badges">';
@@ -353,23 +374,35 @@ function createExhibitionCard(exhibition) {
         <div class="exhibition-card__image-container">
             <img src="${imageUrl}"
                  alt="${title}"
-                 class="exhibition-card__image"
-                 onerror="this.onerror=null; this.src='/images/default-exhibition.svg'">
+                 class="exhibition-card__image">
         </div>
         <div class="exhibition-card__content">
             ${badges}
             <h3 class="exhibition-card__title">${title}</h3>
-            ${description ? `<p class="exhibition-card__description">${description.length > 70 ? description.substring(0, 70) + '...' : description}</p>` : ''}
             <div class="exhibition-card__meta">
                 <span class="exhibition-card__date">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 16 16">
                         <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                     </svg>
                     ${exhibition.startDate} ~ ${exhibition.endDate}
                 </span>
+                <span class="exhibition-card__location">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 16 16">
+                        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                    </svg>
+                    ${location}
+                </span>
             </div>
         </div>
     `;
+
+    // 이미지 오류 처리
+    const cardImage = card.querySelector('.exhibition-card__image');
+    if (cardImage) {
+        cardImage.addEventListener('error', function () {
+            this.src = '/images/default-exhibition.svg';
+        });
+    }
 
     return card;
 }

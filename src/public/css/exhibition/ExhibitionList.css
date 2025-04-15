@@ -1,88 +1,278 @@
-/* 전시회 페이지 커스텀 변수 */
+/*
+ * 전시회 목록 페이지 스타일
+ */
+
 :root {
     --exhibition-primary: #072B61;
     --exhibition-primary-rgb: 7, 43, 97;
-    --exhibition-primary-dark: #052048;
-    --exhibition-primary-light: rgba(7, 43, 97, 0.1);
+    --exhibition-primary-dark: #051d42;
+    --exhibition-secondary: #6c757d;
+    --exhibition-secondary-dark: #5a6268;
+    --border-radius-lg: 12px;
+    --border-radius-md: 8px;
+    --border-radius-sm: 4px;
 }
-
-/**
- * 전시회 페이지 특화 스타일
- * 다른 페이지의 스타일과 충돌을 방지하기 위해 exhibition 접두사를 가진 클래스 사용
- */
 
 .exhibition-container {
-    /* 전시회 목록 컨테이너 스타일 */
-    background-color: #f9f9f9;
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 40px;
 }
 
-/* 전시회 그리드 스타일 - 카드 충돌 방지 */
 .exhibition-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
-    padding: 20px 0;
-    margin-bottom: 30px;
+    gap: 24px;
+    margin-top: 30px;
 }
 
-/* 전시회 카드 스타일 재정의 */
+/* 전시회 카드 스타일 */
 .exhibition-card {
-    background-color: white;
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    cursor: pointer;
-    will-change: transform, box-shadow;
-    transform: translateY(0);
-    transition: transform 0.3s ease-in-out,
-                box-shadow 0.3s ease-in-out;
-    padding-bottom: 12px;
-    display: flex;
-    flex-direction: column;
     position: relative;
-    border: 1px solid #eee;
+    width: 100%;
+    height: 360px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 0;
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
 }
 
 .exhibition-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(var(--exhibition-primary-rgb), 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* 전시회 카드 이미지 컨테이너 */
+.exhibition-card__image-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
 .exhibition-card__image {
     width: 100%;
-    height: 200px;
+    height: 100%;
     object-fit: cover;
-    border-top-left-radius: var(--border-radius-lg);
-    border-top-right-radius: var(--border-radius-lg);
-    transition: transform 0.3s ease;
+    transition: transform 0.5s ease;
 }
 
 .exhibition-card:hover .exhibition-card__image {
     transform: scale(1.05);
 }
 
-/* 전시회 카드 컨텐츠 */
 .exhibition-card__content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
     padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: white;
+    text-align: left;
 }
 
-/* 전시회 헤더 */
+.exhibition-card__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: white;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.exhibition-card__description {
+    display: none;
+}
+
+.exhibition-card__meta {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.exhibition-card__date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.exhibition-card__location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+}
+
+/* 배지 및 뱃지 스타일 */
+.exhibition-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.exhibition-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 8px;
+    white-space: nowrap;
+}
+
+.badge-submission-open,
+.exhibition-badge.badge-submission-open {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.badge-regular,
+.exhibition-badge.badge-regular {
+    background-color: var(--exhibition-primary);
+    color: white;
+}
+
+.badge-special,
+.exhibition-badge.badge-special {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* 모달 내의 배지 컨테이너 추가 스타일 */
+.modal-info--exhibition .exhibition-badges {
+    margin-bottom: 20px;
+}
+
+/* 전시회 모달 스타일 */
+.exhibition-modal .modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+    width: 900px;
+    height: 600px;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+.exhibition-modal .modal-body {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 10px;
+    padding: 0;
+    height: 100%;
+}
+
+.exhibition-modal-image-container {
+    width: 100%;
+    height: 100%;
+    max-height: 600px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.exhibition-modal-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+/* 모달 정보 영역 스타일 */
+.modal-info--exhibition {
+    padding: 40px 30px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    overflow-y: auto;
+}
+
+.exhibition-modal-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #072B61;  /* 전시회 시그니처 색상 */
+}
+
+.modal-date--exhibition {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-location--exhibition {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-description--exhibition {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #666;
+    padding-top: 20px;
+    margin-bottom: 60px;
+    border-top: 1px solid #eee;
+}
+
+/* 모달 버튼 영역 */
+.modal-buttons--exhibition {
+    position: absolute;
+    bottom: 40px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    gap: 15px;
+}
+
+/* 비활성화된 버튼 스타일 */
+.modal-buttons--exhibition .btn-secondary.disabled {
+    background-color: #e9ecef;
+    color: #adb5bd;
+    cursor: not-allowed;
+    border: 1px solid #ced4da;
+    pointer-events: none;
+}
+
+/* 헤더 스타일 */
 .exhibition-header {
     margin-bottom: 30px;
-    text-align: center;
 }
 
 .exhibition-title {
     font-size: 2.5rem;
-    color: var(--exhibition-primary-dark);
+    font-weight: 600;
+    margin-bottom: 3rem;
+    position: relative;
+    padding-left: 15px;
+    justify-self: center;
+    color: var(--exhibition-primary);
 }
+
 
 .section-title--exhibition {
     font-size: 2rem;
@@ -105,39 +295,29 @@
     border-radius: 2px;
 }
 
-
-/* 검색 컨테이너 */
+/* 검색 폼 스타일 */
 .search-container {
-    width: 100%;
-    background-color: white;
-    border-radius: var(--border-radius-lg);
-    padding: 30px;
-    margin-top: 40px;
-    margin-bottom: 40px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
+    background-color: #f9f9f9;
+    padding: 25px 20px;
+    border-radius: var(--border-radius-md);
+    margin-bottom: 30px;
 }
 
-/* 검색 폼 */
 .search-form--exhibition {
     width: 100%;
-    display: block;
 }
 
-/* 검색 레이아웃 */
 .search-layout {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    width: 100%;
+    margin-bottom: 20px;
 }
 
-/* 검색 필터 그룹 */
 .search-filters {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 15px;
-    width: 100%;
 }
 
 @media (max-width: 992px) {
@@ -152,7 +332,6 @@
     }
 }
 
-/* 검색 컬럼 */
 .search-column {
     display: flex;
     flex-direction: column;
@@ -160,46 +339,46 @@
 
 .search-buttons {
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 10px;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
 }
 
-/* 검색 입력 */
 .form-label {
+    font-size: 0.9rem;
     font-weight: 500;
     margin-bottom: 8px;
-    color: var(--color-text-primary);
 }
 
 .search-input-wrapper {
     position: relative;
-    display: flex;
-    align-items: center;
+    margin-bottom: 15px;
 }
 
 .search-input {
     width: 100%;
-    padding: 12px 40px 12px 15px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-md);
-    font-size: 1rem;
-    background-color: #f9f9f9;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.95rem;
+    color: #333;
+    background-color: white;
 }
 
 .search-input:focus {
-    outline: none;
     border-color: var(--exhibition-primary);
-    box-shadow: 0 0 0 2px rgba(var(--exhibition-primary-rgb), 0.2);
-    background-color: white;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--exhibition-primary-rgb), 0.1);
 }
 
 .search-button {
     position: absolute;
-    right: 10px;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
-    color: var(--color-text-secondary);
+    color: #666;
     cursor: pointer;
 }
 
@@ -207,40 +386,41 @@
     color: var(--exhibition-primary);
 }
 
-/* 셀렉트 박스 */
 .form-select {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-md);
-    font-size: 1rem;
-    background-color: #f9f9f9;
-    cursor: pointer;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.95rem;
+    color: #333;
+    background-color: white;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
 }
 
 .form-select:focus {
-    outline: none;
     border-color: var(--exhibition-primary);
-    box-shadow: 0 0 0 2px rgba(var(--exhibition-primary-rgb), 0.2);
-    background-color: white;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--exhibition-primary-rgb), 0.1);
 }
 
-/* 검색 버튼 */
 .btn-search, .btn-reset {
-    min-width: 100px;
-    padding: 12px 24px;
-    border-radius: var(--border-radius-md);
-    cursor: pointer;
+    padding: 12px 25px;
+    border: none;
+    border-radius: var(--border-radius-sm);
     font-weight: 500;
+    cursor: pointer;
     transition: all 0.2s;
-    font-size: 1rem;
-    text-align: center;
+    font-size: 0.95rem;
+    min-width: 120px;
 }
 
 .btn-search {
     background-color: var(--exhibition-primary);
     color: white;
-    border: none;
 }
 
 .btn-search:hover {
@@ -248,17 +428,15 @@
 }
 
 .btn-reset {
-    background-color: white;
-    color: var(--color-text-secondary);
-    border: 1px solid var(--color-border);
+    background-color: #e9ecef;
+    color: #495057;
 }
 
 .btn-reset:hover {
-    background-color: #f5f5f5;
-    color: var(--color-text-primary);
+    background-color: #dee2e6;
 }
 
-/* 필터 태그 */
+/* 필터 목록 */
 .filter-list {
     display: flex;
     flex-wrap: wrap;
@@ -269,21 +447,22 @@
 .filter-tag {
     display: inline-flex;
     align-items: center;
-    background-color: var(--exhibition-primary-light);
-    color: var(--exhibition-primary);
+    gap: 5px;
     padding: 6px 12px;
-    border-radius: var(--border-radius-md);
-    font-size: 0.875rem;
+    background-color: #edf2ff;
+    color: var(--exhibition-primary);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
 }
 
 .filter-tag-remove {
-    margin-left: 8px;
     cursor: pointer;
-    font-weight: bold;
+    color: var(--exhibition-primary);
+    opacity: 0.7;
 }
 
 .filter-tag-remove:hover {
-    color: var(--exhibition-primary-dark);
+    opacity: 1;
 }
 
 /* 결과 헤더 */
@@ -294,178 +473,28 @@
     margin-bottom: 20px;
     padding-bottom: 15px;
     border-bottom: 1px solid #eee;
-    min-height: 40px;
 }
 
 .result-count {
-    margin-bottom: 0;
-    font-size: 0.9rem;
-    color: #666;
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
     display: flex;
     align-items: center;
-    height: 100%;
+    gap: 10px;
 }
 
-.result-count span {
+.result-count svg {
+    width: 20px;
+    height: 20px;
     color: var(--exhibition-primary);
-    font-weight: 700;
-    margin: 0 4px;
 }
 
-/* 전시회 그리드 */
-.exhibition-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
-    padding: 12px;
-    margin: -12px -12px 40px -12px;
-}
-
-@media (max-width: 768px) {
-    .exhibition-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 20px;
-        padding: 8px;
-        margin: -8px;
-    }
-}
-
-/* 전시회 카드 */
-.exhibition-card {
-    background-color: white;
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    cursor: pointer;
-    will-change: transform, box-shadow;
-    transform: translateY(0);
-    transition: transform 2.5s cubic-bezier(0.19, 1, 0.22, 1),
-                box-shadow 2.5s cubic-bezier(0.19, 1, 0.22, 1);
-    padding-bottom: 12px;
-    margin-bottom: -12px;
-}
-
-.exhibition-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(var(--exhibition-primary-rgb), 0.3);
-    animation: exhibitionFloating 3s ease-in-out infinite;
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes exhibitionFloating {
-    0% {
-        transform: translateY(-8px);
-    }
-    50% {
-        transform: translateY(-12px);
-    }
-    100% {
-        transform: translateY(-8px);
-    }
-}
-
-/* 전시회 카드 이미지 컨테이너 */
-.card-image-container {
-    position: relative;
-    width: 100%;
-    height: 0;
-    padding-bottom: 75%; /* 4:3 비율 유지 */
-    overflow: hidden;
-    background-color: #f5f5f5;
-}
-
-/* 전시회 이미지 */
-.exhibition-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-}
-
-.exhibition-card:hover .exhibition-image {
-    transform: scale(1.05);
-}
-
-.exhibition-type {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 4px 10px;
-    border-radius: var(--border-radius-sm);
-    font-size: 0.75rem;
+.result-count strong {
+    color: var(--exhibition-primary);
     font-weight: 600;
-    z-index: 1;
 }
 
-.exhibition-type.regular {
-    background-color: rgba(var(--exhibition-primary-rgb), 0.9);
-    color: white;
-}
-
-.exhibition-type.special {
-    background-color: var(--color-primary);
-    color: white;
-}
-
-/* 뱃지 시스템 */
-.exhibition-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 10px;
-}
-
-.exhibition-badge {
-    font-size: 0.7rem;
-    padding: 3px 8px;
-    border-radius: 4px;
-    display: inline-block;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-}
-
-.badge-submission-open {
-    background-color: #2ecc71;
-    color: white;
-}
-
-.badge-regular {
-    background-color: rgba(var(--exhibition-primary-rgb), 0.9);
-    color: white;
-}
-
-.badge-special {
-    background-color: #e74c3c;
-    color: white;
-}
-
-.exhibition-info {
-    padding: 20px;
-}
-
-.exhibition-date {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-    margin-bottom: 10px;
-}
-
-.exhibition-category {
-    display: inline-block;
-    background-color: var(--color-background-light);
-    color: var(--color-text-secondary);
-    padding: 4px 10px;
-    border-radius: var(--border-radius-sm);
-    font-size: 0.75rem;
-}
-
-/* 로딩 인디케이터 */
+/* 로딩 인디케이터와 결과 없음 스타일 */
 .loading-indicator {
     display: flex;
     flex-direction: column;
@@ -489,7 +518,6 @@
     }
 }
 
-/* 결과 없음 메시지 */
 .no-result {
     display: flex;
     flex-direction: column;
@@ -525,332 +553,32 @@
     background-color: var(--exhibition-primary-dark);
 }
 
-/* 전시회 모달 스타일 */
-.exhibition-modal .modal-content {
-    background-color: white;
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-}
-
-.exhibition-modal .modal-body {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 30px;
-    padding: 0;
-    height: 100%;
-}
-
-.exhibition-modal .modal-image-container {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: #f5f5f5;
-    position: relative;
-}
-
-.exhibition-modal .modal-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.exhibition-modal .modal-info {
-    padding: 40px 40px 40px 10px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow-y: auto;
-}
-
-.exhibition-modal .modal-info-header {
-    margin-bottom: 30px;
-}
-
-.exhibition-modal .modal-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--exhibition-primary);
-    margin-bottom: 15px;
-}
-
-.exhibition-modal .modal-period {
-    font-size: 1.1rem;
-    color: var(--color-text-secondary);
-    margin-bottom: 10px;
-}
-
-.exhibition-modal .modal-location {
-    font-size: 1rem;
-    color: var(--color-text-tertiary);
-    margin-bottom: 20px;
-}
-
-.exhibition-modal .modal-description {
-    font-size: 1rem;
-    line-height: 1.8;
-    color: var(--color-text-primary);
-    margin-bottom: 30px;
-}
-
-.exhibition-modal .modal-info-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 30px;
-}
-
-.exhibition-modal .info-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.exhibition-modal .info-label {
-    min-width: 100px;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-}
-
-.exhibition-modal .info-value {
-    color: var(--color-text-primary);
-    flex: 1;
-}
-
-.exhibition-modal .modal-actions {
-    margin-top: auto;
-    display: flex;
-    gap: 15px;
-}
-
-.exhibition-modal .action-button {
-    flex: 1;
-    padding: 14px 24px;
-    border-radius: var(--border-radius-md);
-    font-weight: 500;
-    text-align: center;
-    transition: all 0.3s;
-    cursor: pointer;
-}
-
-.exhibition-modal .primary-action {
-    background-color: var(--exhibition-primary);
-    color: white;
-    border: none;
-}
-
-.exhibition-modal .primary-action:hover {
-    background-color: var(--exhibition-primary-dark);
-    transform: translateY(-2px);
-}
-
-.exhibition-modal .secondary-action {
-    background-color: var(--exhibition-primary-light);
-    color: var(--exhibition-primary);
-    border: 1px solid var(--exhibition-primary);
-}
-
-.exhibition-modal .secondary-action:hover {
-    background-color: var(--exhibition-primary-light);
-    transform: translateY(-2px);
-}
-
-.exhibition-modal .close {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    width: 40px;
-    height: 40px;
-    background-color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 2;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s;
-    border: none;
-}
-
-.exhibition-modal .close:hover {
-    transform: rotate(90deg);
-    background-color: var(--exhibition-primary-light);
-}
-
-@media (max-width: 992px) {
-    .exhibition-modal .modal-body {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-
-    .exhibition-modal .modal-image-container {
-        height: 300px;
-    }
-
-    .exhibition-modal .modal-info {
-        padding: 30px;
-    }
-
-    .exhibition-modal .modal-title {
-        font-size: 1.8rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .exhibition-modal .modal-info {
-        padding: 20px;
-    }
-
-    .exhibition-modal .modal-title {
-        font-size: 1.5rem;
-    }
-
-    .exhibition-modal .modal-actions {
-        flex-direction: column;
-    }
-
-    .exhibition-modal .close {
-        right: 10px;
-        top: 10px;
-        width: 32px;
-        height: 32px;
-    }
-}
-
-/* 전시회 모달 스타일 */
-.modal-info--exhibition {
-    padding: 2rem;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.modal-info--exhibition .exhibition-badges {
-    margin-bottom: 1.5rem;
-}
-
-.modal-info--exhibition .exhibition-badge {
-    font-size: 0.8rem;
-    padding: 4px 10px;
-}
-
-.modal-info--exhibition h2 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 1rem;
-}
-
-.modal-description--exhibition {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: #666;
-    margin-bottom: 1.5rem;
-}
-
-.modal-date--exhibition {
-    font-size: 1rem;
-    color: #888;
-    margin-bottom: 0.5rem;
-}
-
-.modal-date--exhibition::before {
-    content: '\f073';
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-right: 0.5rem;
-}
-
-.modal-location--exhibition {
-    font-size: 1rem;
-    color: #888;
-    margin-bottom: 2rem;
-}
-
-.modal-location--exhibition::before {
-    content: '\f3c5';
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-right: 0.5rem;
-}
-
-.modal-buttons--exhibition {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-}
-
-.modal-buttons--exhibition .btn {
-    flex: 1;
-    text-align: center;
-    padding: 0.8rem 1.5rem;
-    border-radius: 4px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.modal-buttons--exhibition .btn-primary {
-    background-color: var(--color-primary);
-    color: white;
-}
-
-.modal-buttons--exhibition .btn-primary:hover {
-    background-color: var(--color-primary-dark);
-    transform: translateY(-2px);
-}
-
-.modal-buttons--exhibition .btn-secondary {
-    background-color: #f8f9fa;
-    color: #333;
-    border: 1px solid #ddd;
-}
-
-.modal-buttons--exhibition .btn-secondary:hover {
-    background-color: #e9ecef;
-    transform: translateY(-2px);
-}
-
-@media (max-width: 768px) {
-    .modal-info--exhibition {
-        padding: 1.5rem;
-    }
-
-    .modal-info--exhibition h2 {
-        font-size: 1.5rem;
-    }
-
-    .modal-buttons--exhibition {
-        flex-direction: column;
-    }
-}
-
-/* 페이지네이션 컨테이너 */
+/* 페이지네이션 */
 .pagination-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 2rem 0;
-    gap: 0.5rem;
+    gap: 8px;
+    margin-top: 40px;
 }
 
-/* 페이지네이션 버튼 */
 .pagination-button {
     min-width: 2.5rem;
     height: 2.5rem;
     display: flex;
-    justify-content: center;
     align-items: center;
-    border-radius: 4px;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1rem;
+    border: 1px solid #e9ecef;
+    background-color: white;
+    color: #495057;
     cursor: pointer;
     transition: all 0.2s;
-    color: var(--color-text-primary);
-    background-color: white;
-    border: 1px solid var(--color-border);
 }
 
 .pagination-button:hover {
-    background-color: var(--exhibition-primary-light);
-    color: var(--exhibition-primary);
+    background-color: #e9ecef;
 }
 
 .pagination-button.active {
@@ -865,18 +593,29 @@
     pointer-events: none;
 }
 
-/* 이전/다음 페이지 버튼 */
 .pagination-prev,
 .pagination-next {
     font-weight: bold;
 }
 
-/* 페이지 번호 텍스트 */
 .pagination-page {
     font-weight: 500;
 }
 
+/* 반응형 */
 @media (max-width: 768px) {
+    .exhibition-card {
+        height: 300px;
+    }
+
+    .exhibition-card__title {
+        font-size: 1.2rem;
+    }
+
+    .exhibition-modal-title {
+        font-size: 1.5rem;
+    }
+
     .pagination-container {
         overflow-x: auto;
         justify-content: flex-start;
@@ -891,106 +630,88 @@
 }
 
 @media (max-width: 576px) {
+    .exhibition-card {
+        height: 250px;
+    }
+
     .modal-buttons--exhibition {
         flex-direction: column;
     }
 }
 
-/* 전시회 카드 타이틀 */
-.exhibition-card__title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--exhibition-primary);
-    margin-bottom: 10px;
-    line-height: 1.4;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* 전시회 카드 설명 */
-.exhibition-card__description {
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
-    margin-bottom: 15px;
-    line-height: 1.5;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-
-/* 전시회 카드 메타정보 */
-.exhibition-card__meta {
-    margin-top: auto;
+/* 모달 내 버튼 스타일 조정 */
+.modal-buttons--exhibition {
+    position: absolute;
+    bottom: 40px;
+    left: 30px;
+    right: 30px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.85rem;
-    color: var(--color-text-tertiary);
+    gap: 15px;
 }
 
-.exhibition-card__date {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* 전시회 카드 이미지 컨테이너 */
-.exhibition-card__image-container {
+.modal-buttons--exhibition a.btn {
+    padding: 10px 16px;
     width: 100%;
-    height: 200px;
-    overflow: hidden;
-    position: relative;
-}
-
-/* 전시회 모달 스타일 */
-.exhibition-modal .modal-content {
-    border-radius: 12px;
-    overflow: hidden;
-    max-width: 960px;
-    width: 90%;
-    height: auto;
-    max-height: 90vh;
-}
-
-.exhibition-modal-image-container {
-    width: 100%;
-    height: 100%;
-    min-height: 300px;
-    overflow: hidden;
-    background: #f5f5f5;
-}
-
-.exhibition-modal-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* 전시회 배지 스타일 */
-.exhibition-badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 500;
+    min-width: 120px;
+    height: 40px;
     display: inline-flex;
     align-items: center;
-    margin-right: 8px;
-    white-space: nowrap;
+    justify-content: center;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.3s;
+    cursor: pointer;
+    text-decoration: none;
 }
 
-.exhibition-badge.badge-submission-open {
-    background-color: #2ecc71;
-    color: white;
-}
-
-.exhibition-badge.badge-regular {
+.exhibition-btn-primary {
     background-color: var(--exhibition-primary);
-    color: white;
+    color: white !important;
 }
 
-.exhibition-badge.badge-special {
-    background-color: #e74c3c;
-    color: white;
+#modal-submit-link {
+    color :  var(--exhibition-primary) !important ;
+}
+
+
+.exhibition-btn-primary:hover {
+    background-color: var(--exhibition-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.exhibition-btn-secondary {
+    background-color: white;
+    color: var(--exhibition-primary);
+    border: 1px solid var(--exhibition-primary);
+}
+
+.exhibition-btn-secondary:hover {
+    background-color: white;
+    transform: translateY(-2px);
+}
+
+/* 모달 내 기간과 장소에 아이콘 추가 */
+.modal-date--exhibition::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    margin-right: 8px;
+}
+
+.modal-location--exhibition::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    margin-right: 8px;
 }

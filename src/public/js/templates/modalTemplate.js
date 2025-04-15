@@ -50,18 +50,36 @@ export const artworkModalContent = `
 
 // 전시회 모달 내용 템플릿
 export const exhibitionModalContent = `
-    <div class="modal-image-container">
-        <img src="" alt="" class="modal-image" id="modal-image">
-    </div>
-    <div class="modal-info modal-info--exhibition">
-        <h2 id="modal-title"></h2>
-        <div id="modal-badges" class="exhibition-badges"></div>
-        <p id="modal-description" class="modal-description--exhibition"></p>
-        <p id="modal-date" class="modal-date--exhibition"></p>
-        <p id="modal-location" class="modal-location--exhibition"></p>
-        <div class="modal-buttons--exhibition">
-            <a id="modal-view-link" href="" class="btn btn-primary">작품 조회</a>
-            <a id="modal-submit-link" href="" class="btn btn-secondary">출품하기</a>
+    <div class="row g-0">
+      <div class="col-md-6 mb-3 mb-md-0">
+        <img src="" alt="" class="exhibition-modal-image">
+      </div>
+      <div class="col-md-6">
+        <h2 class="exhibition-modal-title"></h2>
+        <div class="exhibition-badges mb-3">
+          <!-- Badges will be dynamically added here -->
         </div>
+        <p class="mb-4"></p>
+        <div class="d-flex align-items-center mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#072B61" class="bi bi-calendar-event me-2" viewBox="0 0 16 16">
+            <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
+            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+          </svg>
+          <span></span>
+        </div>
+        <div class="d-flex align-items-center mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#072B61" class="bi bi-geo-alt me-2" viewBox="0 0 16 16">
+            <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
+            <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+          </svg>
+          <span></span>
+        </div>
+        <div class="d-flex flex-column flex-md-row gap-2">
+          <button class="btn btn-primary view-artwork-btn" data-exhibition-id="">
+            작품 보기
+          </button>
+          <!-- Submission button will be dynamically added here -->
+        </div>
+      </div>
     </div>
 `;
