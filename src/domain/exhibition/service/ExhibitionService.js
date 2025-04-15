@@ -186,8 +186,8 @@ export default class ExhibitionService {
      * 작품 제출이 가능한 전시회를 조회합니다.
      * @returns {Promise<Array<ExhibitionSimpleDto>>} 작품 제출 가능한 전시회 목록
      */
-    async findSubmittableExhibitions() {
-        const exhibitions = await this.exhibitionRepository.findSubmittableExhibitions();
+    async findSubmittableExhibitions(artworkId = null) {
+        const exhibitions = await this.exhibitionRepository.findSubmittableExhibitions(artworkId);
         return exhibitions.map(exhibition => new ExhibitionSimpleDto(exhibition));
     }
 

@@ -18,5 +18,6 @@ export default class ArtworkDetailDto {
         this.RepresentativeExhibitionexhibitionId = data.RepresentativeExhibitionexhibitionId || null;
         this.exhibitions = data.exhibitions || []; // 전시회 정보
         this.relatedArtworks = data.relatedArtworks || []; // 관련 작품 정보
+        this.submittableExhibitions = data.submittableExhibitions || []; // 출품 가능 전시회 정보
     }
 }

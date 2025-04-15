@@ -124,6 +124,25 @@ class ArtworkApi {
         }
     }
 
+    // 출품하기
+    static async submitArtworkToExhibition(artworkId, exhibitionId) {
+        try {
+            return await api.post('/artwork/api/exhibiting', { artworkId, exhibitionId });
+        } catch (error) {
+            console.error('출품 중 오류:', error);
+            throw error;
+        }
+    }
+
+    // 출품 취소하기
+    static async cancelArtworkSubmission(artworkId, exhibitionId) {
+        try {
+            return await api.delete(`/artwork/api/exhibiting/${artworkId}/${exhibitionId}`);
+        } catch (error) {
+            console.error('출품 취소 중 오류:', error);
+            throw error;
+        }
+    }
 }
 
 export default ArtworkApi;

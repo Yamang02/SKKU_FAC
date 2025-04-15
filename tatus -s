@@ -1,0 +1,136 @@
+[1mdiff --git a/src/domain/admin/service/artwork/ArtworkManagementService.js b/src/domain/admin/service/artwork/ArtworkManagementService.js[m
+[1mindex 5d88fd2..9d4727e 100644[m
+[1m--- a/src/domain/admin/service/artwork/ArtworkManagementService.js[m
+[1m+++ b/src/domain/admin/service/artwork/ArtworkManagementService.js[m
+[36m@@ -43,7 +43,7 @@[m [mexport default class ArtworkManagementService {[m
+                 filterOptions.isFeatured = false;[m
+             }[m
+ [m
+[31m-            const result = await this.artworkRepository.findArtworksForAdmin(filterOptions);[m
+[32m+[m[32m            const result = await this.artworkRepository.findArtworks(filterOptions, true);[m
+             const artworks = result.items || [];[m
+             (artworks);[m
+             const total = result.total || 0;[m
+[36m@@ -100,7 +100,7 @@[m [mexport default class ArtworkManagementService {[m
+      */[m
+     async getArtworkDetail(id) {[m
+         try {[m
+[31m-            const artwork = await this.artworkRepository.findArtworkById(id);[m
+[32m+[m[32m            const artwork = await this.artworkRepository.findArtworkById(id, true);[m
+             if (!artwork) {[m
+                 throw new ArtworkNotFoundError();[m
+             }[m
+[36m@@ -148,12 +148,12 @@[m [mexport default class ArtworkManagementService {[m
+      */[m
+     async updateArtwork(id, artworkData) {[m
+         try {[m
+[31m-            const existingArtwork = await this.artworkRepository.findArtworkById(id);[m
+[32m+[m[32m            const existingArtwork = await this.artworkRepository.findArtworkById(id, true);[m
+             if (!existingArtwork) {[m
+                 throw new ArtworkNotFoundError();[m
+             }[m
+ [m
+[31m-            const updatedArtwork = await this.artworkRepository.updateArtwork(id, artworkData);[m
+[32m+[m[32m            const updatedArtwork = await this.artworkRepository.updateArtwork(id, artworkData, true);[m
+             return new ArtworkManagementDto(updatedArtwork);[m
+         } catch (error) {[m
+             console.error('작품 수정 서비스 오류:', error);[m
+[1mdiff --git a/src/domain/artwork/service/ArtworkService.js b/src/domain/artwork/service/ArtworkService.js[m
+[1mindex a6f6df6..0ebf23c 100644[m
+[1m--- a/src/domain/artwork/service/ArtworkService.js[m
+[1m+++ b/src/domain/artwork/service/ArtworkService.js[m
+[36m@@ -2,14 +2,15 @@[m [mimport ArtworkRepository from '../../../infrastructure/db/repository/ArtworkRepo[m
+ import ArtworkExhibitionRelationshipRepository from '../../../infrastructure/db/repository/relationship/ArtworkExhibitionRelationshipRepository.js';[m
+ import ImageService from '../../image/service/ImageService.js';[m
+ import UserService from '../../user/service/UserService.js';[m
+[32m+[m[32mimport ExhibitionService from '../../exhibition/service/ExhibitionService.js';[m
+ import { ArtworkNotFoundError, ArtworkValidationError } from '../../../common/error/ArtworkError.js';[m
+ import ArtworkDetailDto from '../model/dto/ArtworkDetailDto.js';[m
+ import ArtworkSimpleDto from '../model/dto/ArtworkSimpleDto.js';[m
+[32m+[m[32mimport ExhibitionSimpleDto from '../../exhibition/model/dto/ExhibitionSimpleDto.js';[m
+ import { v4 as uuidv4 } from 'uuid';[m
+ import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';[m
+ import Page from '../../common/model/Page.js';[m
+ import { db } from '../../../infrastructure/db/adapter/MySQLDatabase.js';[m
+[31m-[m
+ /**[m
+  * 작품 서비스[m
+  * 작품 관련 비즈니스 로직을 처리합니다.[m
+[36m@@ -20,7 +21,7 @@[m [mexport default class ArtworkService {[m
+         this.artworkExhibitionRelationshipRepository = new ArtworkExhibitionRelationshipRepository();[m
+         this.imageService = new ImageService();[m
+         this.userService = new UserService();[m
+[31m-[m
+[32m+[m[32m        this.exhibitionService = new ExhibitionService();[m
+     }[m
+ [m
+     /**[m
+[36m@@ -47,17 +48,7 @@[m [mexport default class ArtworkService {[m
+         for (const artwork of artworks) {[m
+             try {[m
+                 // 기본 작품 정보 준비[m
+[31m-                const artworkDetail = {[m
+[31m-                    id: artwork.id,[m
+[31m-                    title: artwork.title,[m
+[31m-                    slug: artwork.slug,[m
+[31m-                    year: artwork.year,[m
+[31m-                    description: artwork.description,[m
+[31m-                    imageUrl: artwork.imageUrl,[m
+[31m-                    userId: artwork.userId,[m
+[31m-                    createdAt: artwork.createdAt,[m
+[31m-                    updatedAt: artwork.updatedAt[m
+[31m-                };[m
+[32m+[m[32m                const artworkDetail = new ArtworkDetailDto(artwork);[m
+ [m
+                 // 작가 정보 조회 및 추가[m
+                 if (artwork.userId) {[m
+[36m@@ -80,8 +71,15 @@[m [mexport default class ArtworkService {[m
+                     artworkDetail.artistAffiliation = '';[m
+                 }[m
+ [m
+[31m-                // 전시회 정보 추가 (향후 구현)[m
+[31m-                artworkDetail.exhibitions = [];[m
+[32m+[m[32m                const artworkExhibitionRelationships = await this.artworkExhibitionRelationshipRepository.findArtworkExhibitionRelationshipsByArtworkId(artwork.id);[m
+[32m+[m[32m                if (artworkExhibitionRelationships) {[m
+[32m+[m[32m                    const exhibitionIds = artworkExhibitionRelationships.map(relationship => relationship.exhibitionId);[m
+[32m+[m[32m                    const exhibitions = await this.exhibitionService.getExhibitionsSimple(exhibitionIds);[m
+[32m+[m[32m                    artworkDetail.exhibitions = exhibitions;[m
+[32m+[m[32m                } else {[m
+[32m+[m[32m                    artworkDetail.exhibitions = [];[m
+[32m+[m[32m                }[m
+[32m+[m[32m                console.log(artworkDetail.exhibitions);[m
+ [m
+                 // DTO 변환 및 추가[m
+                 const artworkDetailDto = new ArtworkDetailDto(artworkDetail);[m
+[36m@@ -170,10 +168,8 @@[m [mexport default class ArtworkService {[m
+         try {[m
+             const artwork = await this.artworkRepository.createArtwork(artworkData, { transaction });[m
+             if (artworkData.exhibitionId !== '') {[m
+[31m-                console.log('작품 등록 완료:', artwork.id, artworkData.exhibitionId);[m
+                 await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(artwork.id, artworkData.exhibitionId, { transaction });[m
+             }[m
+[31m-            console.log('작품 등록 완료:', artwork);[m
+             await transaction.commit();[m
+             return new ArtworkSimpleDto(artwork);[m
+         } catch (error) {[m
+[1mdiff --git a/src/domain/exhibition/controller/api/ExhibitionApiController.js b/src/domain/exhibition/controller/api/ExhibitionApiController.js[m
+[1mindex 6826774..d495e00 100644[m
+[1m--- a/src/domain/exhibition/controller/api/ExhibitionApiController.js[m
+[1m+++ b/src/domain/exhibition/controller/api/ExhibitionApiController.js[m
+[36m@@ -111,7 +111,6 @@[m [mexport default class ExhibitionApiController {[m
+                 const exhibitionDto = new ExhibitionListDto(exhibition);[m
+                 processedExhibitions.push(exhibitionDto);[m
+             }[m
+[31m-            console.log(processedExhibitions);[m
+ [m
+             const responseData = {[m
+                 exhibitions: processedExhibitions,[m
+[1mdiff --git a/src/domain/exhibition/service/ExhibitionService.js b/src/domain/exhibition/service/ExhibitionService.js[m
+[1mindex 710a5ce..82e5e10 100644[m
+[1m--- a/src/domain/exhibition/service/ExhibitionService.js[m
+[1m+++ b/src/domain/exhibition/service/ExhibitionService.js[m
+[36m@@ -3,6 +3,7 @@[m
+  * 전시회 관련 비즈니스 로직을 처리합니다.[m
+  */[m
+ import ExhibitionRepository from '../../../infrastructure/db/repository/ExhibitionRepository.js';[m
+[32m+[m[32mimport ArtworkExhibitionRelationshipRepository from '../../../infrast

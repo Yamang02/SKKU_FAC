@@ -80,7 +80,6 @@ export default class ArtworkService {
                 } else {
                     artworkDetail.exhibitions = [];
                 }
-                console.log(artworkDetail.exhibitions);
 
                 // DTO 변환 및 추가
                 const artworkDetailDto = new ArtworkDetailDto(artworkDetail);
@@ -113,6 +112,8 @@ export default class ArtworkService {
         if (!artwork) {
             throw new ArtworkNotFoundError();
         }
+
+        // 작가 정보 조회
         const user = await this.userService.getUserSimple(artwork.userId);
         if (!user) {
             throw new Error('작가 정보를 찾을 수 없습니다.');
@@ -120,8 +121,25 @@ export default class ArtworkService {
         artwork.artistName = user.name;
         artwork.artistAffiliation = user.affiliation;
 
+        // 작품 출품 전시회 조회
+        const exhibitions = [];
+        const artworkExhibitionRelationships = await this.artworkExhibitionRelationshipRepository.findArtworkExhibitionRelationshipsByArtworkId(artwork.id);
+        if (artworkExhibitionRelationships.length > 0) {
+            for (const exhibition of artworkExhibitionRelationships) {
+                const exhibitionSimple = await this.exhibitionService.getExhibitionSimple(exhibition.exhibitionId);
+                exhibitions.push(exhibitionSimple);
+            }
+        }
+        artwork.exhibitions = exhibitions;
+
+        // 관련 작품 조회
         const relatedArtworks = await this.findRelatedArtworks(artwork);
         artwork.relatedArtworks = relatedArtworks;
+
+        // 출품 가능 전시회 조회 (이미 출품된 전시회 제외)
+        const submittableExhibitions = await this.exhibitionService.findSubmittableExhibitions(artwork.id);
+        artwork.submittableExhibitions = submittableExhibitions;
+
         const artworkDetail = new ArtworkDetailDto(artwork);
         return artworkDetail;
     }
@@ -169,7 +187,10 @@ export default class ArtworkService {
         try {
             const artwork = await this.artworkRepository.createArtwork(artworkData, { transaction });
             if (artworkData.exhibitionId !== '') {
-                await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(artwork.id, artworkData.exhibitionId, { transaction });
+                const result = await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(artwork.id, artworkData.exhibitionId, { transaction });
+                if (!result) {
+                    throw new ArtworkValidationError('작품 출품 중 오류가 발생했습니다.');
+                }
             }
             await transaction.commit();
             return new ArtworkSimpleDto(artwork);
@@ -258,5 +279,13 @@ export default class ArtworkService {
         }
 
         return artworkSimpleList;
+    }
+
+    async submitArtworkToExhibition(artworkId, exhibitionId) {
+        return await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(artworkId, exhibitionId);
+    }
+
+    async cancelArtworkSubmission(artworkId, exhibitionId) {
+        return await this.artworkExhibitionRelationshipRepository.deleteArtworkExhibitionRelationship(artworkId, exhibitionId);
     }
 }

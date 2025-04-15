@@ -508,6 +508,7 @@ async function loadArtworkList() {
             const cardFragment = document.createDocumentFragment();
             const tableFragment = document.createDocumentFragment();
 
+
             artworks.forEach(artwork => {
                 if (cardView) {
                     const card = createArtworkCard(artwork, { type: 'list' });

@@ -79,10 +79,10 @@ textarea.form-control {
 }
 
 .btn {
-    padding: 10px 16px;
+    padding: 5px 10px;
     border: none;
     border-radius: 6px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.3s;
 }
@@ -119,6 +119,28 @@ textarea.form-control {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* 출품 버튼 스타일 */
+.btn-submit {
+    background-color: #28a745; /* 초록색 */
+    color: white;
+    margin-left: 10px; /* 버튼 간격 */
+}
+
+.btn-submit:hover {
+    background-color: #218838; /* 어두운 초록색 */
+}
+
+/* 출품 취소 버튼 스타일 */
+.btn-cancel {
+    background-color: #dc3545; /* 빨간색 */
+    color: white;
+    margin-left: 10px; /* 버튼 간격 */
+}
+
+.btn-cancel:hover {
+    background-color: #c82333; /* 어두운 빨간색 */
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
     .artwork-edit-modal-body {
@@ -138,4 +160,24 @@ textarea.form-control {
         padding: 8px 14px;
         font-size: 0.9rem;
     }
+}
+
+/* 리스트 아이템 간격 조정 */
+.submitted-exhibitions ul li {
+    margin-bottom: 10px;
+}
+
+/* 전시회 리스트 스타일 */
+.exhibition-list {
+    list-style-type: none; /* 기본 리스트 스타일 제거 */
+    padding: 0; /* 패딩 제거 */
+    margin: 0; /* 마진 제거 */
+    min-height: 35px;
+}
+
+.exhibition-list li {
+    display: flex; /* 버튼과 제목을 가로로 배치 */
+    align-items: center; /* 수직 정렬 */
+    margin-top: 10px;
+    margin-bottom: 10px; /* 리스트 아이템 간격 조정 */
 }

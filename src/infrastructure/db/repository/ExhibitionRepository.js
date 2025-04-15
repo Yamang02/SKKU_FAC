@@ -1,5 +1,6 @@
 import { Exhibition } from '../model/entity/EntitityIndex.js';
 import { Op } from 'sequelize';
+import { ArtworkExhibitionRelationship } from '../model/entity/EntitityIndex.js';
 
 export default class ExhibitionRepository {
     constructor() {
@@ -103,9 +104,23 @@ export default class ExhibitionRepository {
     /**
      * 출품 가능한 전시회 목록을 조회합니다.
      */
-    async findSubmittableExhibitions() {
-        return await Exhibition.findAll({
+    async findSubmittableExhibitions(artworkId = null) {
+        const exhibitions = await Exhibition.findAll({
             where: { isSubmissionOpen: true }
         });
+
+        if (artworkId) {
+            // 이미 출품된 전시회 조회
+            const submittedExhibitions = await ArtworkExhibitionRelationship.findAll({
+                where: { artworkId }
+            });
+
+            const submittedExhibitionIds = submittedExhibitions.map(exhibition => exhibition.exhibitionId);
+
+            // 출품 가능한 전시회에서 이미 출품된 전시회 제외
+            return exhibitions.filter(exhibition => !submittedExhibitionIds.includes(exhibition.id));
+        }
+
+        return exhibitions;
     }
 }

@@ -201,6 +201,44 @@ export default class ArtworkApiController {
         }
     }
 
+    /**
+     * 작품을 전시회에 출품합니다.
+     */
+    async submitArtwork(req, res) {
+        try {
+            const { artworkId, exhibitionId } = req.body;
+            const result = await this.artworkService.submitArtworkToExhibition(artworkId, exhibitionId);
+
+            if (result) {
+                return res.json(ApiResponse.success(null, Message.ARTWORK.SUBMIT_SUCCESS));
+            } else {
+                return res.status(400).json(ApiResponse.error(Message.ARTWORK.SUBMIT_ERROR));
+            }
+        } catch (error) {
+            console.error('출품 중 오류:', error);
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.SUBMIT_ERROR));
+        }
+    }
+
+    /**
+     * 작품의 전시회 출품을 취소합니다.
+     */
+    async cancelArtworkSubmission(req, res) {
+        try {
+            const { artworkId, exhibitionId } = req.params;
+            const result = await this.artworkService.cancelArtworkSubmission(artworkId, exhibitionId);
+
+            if (result) {
+                return res.json(ApiResponse.success(null, Message.ARTWORK.CANCEL_SUCCESS));
+            } else {
+                return res.status(400).json(ApiResponse.error(Message.ARTWORK.CANCEL_ERROR));
+            }
+        } catch (error) {
+            console.error('출품 취소 중 오류:', error);
+            return res.status(500).json(ApiResponse.error(Message.ARTWORK.CANCEL_ERROR));
+        }
+    }
+
 }
 
 

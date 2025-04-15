@@ -52,7 +52,19 @@ export function createArtworkTable(artwork) {
 
     // 5. 전시회 셀
     const exhibitionCell = document.createElement('td');
-    exhibitionCell.textContent = artwork.exhibitionTitle || artwork.exhibitionName || '';
+
+    // 전시회 타이틀들을 줄바꿈으로 추가
+    artwork.exhibitions.forEach(exhibition => {
+        const titleDiv = document.createElement('div'); // 각 전시회 타이틀을 감싸는 div 생성
+        titleDiv.textContent = exhibition.title; // 전시회 타이틀 설정
+        exhibitionCell.appendChild(titleDiv); // 전시회 셀에 추가
+    });
+
+    // 만약 전시회가 없다면 '미출품' 텍스트 추가
+    if (artwork.exhibitions.length === 0) {
+        exhibitionCell.textContent = '미출품';
+    }
+
     row.appendChild(exhibitionCell);
 
     // 6. 제작연도 셀

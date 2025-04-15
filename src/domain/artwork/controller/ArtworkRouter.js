@@ -24,6 +24,11 @@ ArtworkRouter.get('/api/featured', artworkApiController.getFeaturedArtworks.bind
 // 작품 개별 조회 API
 ArtworkRouter.get('/api/detail/:slug', artworkApiController.getArtworkDetail.bind(artworkApiController));
 
+// 출품하기
+ArtworkRouter.post('/api/exhibiting', artworkApiController.submitArtwork.bind(artworkApiController));
+
+// 출품 취소하기
+ArtworkRouter.delete('/api/exhibiting/:artworkId/:exhibitionId', artworkApiController.cancelArtworkSubmission.bind(artworkApiController));
 
 // === 페이지 라우트 ===
 // 작품 목록 페이지 (기본 경로)

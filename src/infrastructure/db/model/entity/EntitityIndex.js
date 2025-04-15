@@ -46,5 +46,6 @@ export {
     Notice,
     UserAccount,
     SkkuUserProfile,
-    ExternalUserProfile
+    ExternalUserProfile,
+    ArtworkExhibitionRelationship
 };

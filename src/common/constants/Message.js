@@ -21,7 +21,11 @@ export const Message = {
         VALIDATION_ERROR: '작품 정보가 유효하지 않습니다.',
         CREATE_ERROR: '작품 등록 중 오류가 발생했습니다.',
         UPDATE_ERROR: '작품 수정 중 오류가 발생했습니다.',
-        DELETE_ERROR: '작품 삭제 중 오류가 발생했습니다.'
+        DELETE_ERROR: '작품 삭제 중 오류가 발생했습니다.',
+        SUBMIT_SUCCESS: '작품이 성공적으로 출품되었습니다.',
+        SUBMIT_ERROR: '작품 출품 중 오류가 발생했습니다.',
+        CANCEL_SUCCESS: '작품 출품이 성공적으로 취소되었습니다.',
+        CANCEL_ERROR: '작품 출품 취소 중 오류가 발생했습니다.'
     },
 
     // 이미지 관련 메시지

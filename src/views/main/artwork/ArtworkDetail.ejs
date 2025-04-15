@@ -106,8 +106,25 @@
                 <label for="editDescription">작품 설명</label>
                 <textarea id="editDescription" class="form-control" rows="5"></textarea>
             </div>
+
+            <!-- 이미 출품된 전시회 섹션 -->
+            <div class="form-group">
+                <label for="submittedExhibitionList">출품된 전시회</label>
+                <ul id="submittedExhibitionList" class="exhibition-list form-control">
+                    <!-- 이미 출품된 전시회가 JavaScript로 로드됩니다 -->
+                </ul>
+            </div>
+
+            <!-- 출품 가능한 전시회 섹션 -->
+            <div class="form-group">
+                <label for="exhibitionSelect">출품 가능한 전시회</label>
+                <ul id="exhibitionList" class="exhibition-list form-control">
+                    <!-- 출품 가능한 전시회가 JavaScript로 로드됩니다 -->
+                </ul>
+            </div>
+
             <div class="modal-actions">
-                <button id="saveArtworkChanges" class="btn btn-primary">저장</button>
+                <button id="saveArtworkChanges" class="btn btn-primary">작품 정보 저장</button>
                 <button id="deleteArtwork" class="btn btn-danger">삭제</button>
                 <button class="btn btn-secondary close-btn">취소</button>
             </div>

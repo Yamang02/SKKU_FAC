@@ -167,13 +167,96 @@ async function loadArtworkDetail() {
 
         updateArtworkDetail(artwork);
 
+        // 출품 가능한 전시회 정보를 모달에 설정
+        const exhibitionList = document.getElementById('exhibitionList');
+        if (exhibitionList) {
+            exhibitionList.innerHTML = ''; // 기존 내용 초기화
+            artwork.submittableExhibitions.forEach(exhibition => {
+                const listItem = document.createElement('li');
+
+                // 출품 버튼 추가
+                const submitButton = document.createElement('button');
+                submitButton.textContent = '출품하기';
+                submitButton.className = 'btn btn-submit'; // 클래스 추가
+                submitButton.onclick = async () => {
+                    await submitArtworkToExhibition(artwork.id, exhibition.id);
+                };
+
+                // 전시회 제목 추가
+                const titleText = document.createElement('span');
+                titleText.textContent = exhibition.title;
+                titleText.style.marginLeft = '10px'; // 간격 조정
+
+                listItem.appendChild(submitButton);
+                listItem.appendChild(titleText);
+                exhibitionList.appendChild(listItem);
+            });
+        }
+
+        // 이미 출품된 전시회 목록 업데이트
+        const submittedExhibitionList = document.getElementById('submittedExhibitionList');
+        if (submittedExhibitionList) {
+            submittedExhibitionList.innerHTML = ''; // 기존 내용 초기화
+            artwork.exhibitions.forEach(exhibition => {
+                const listItem = document.createElement('li');
+
+                // 출품 취소 버튼 추가
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = '출품 취소';
+                cancelButton.className = 'btn btn-cancel'; // 클래스 추가
+                cancelButton.onclick = async () => {
+                    await cancelSubmission(artwork.id, exhibition.id);
+                };
+
+                // 전시회 제목 추가
+                const titleText = document.createElement('span');
+                titleText.textContent = exhibition.title;
+                titleText.style.marginLeft = '10px'; // 간격 조정
+
+                listItem.appendChild(cancelButton);
+                listItem.appendChild(titleText);
+                submittedExhibitionList.appendChild(listItem);
+            });
+        }
+
         // 현재 로그인한 사용자 정보를 가져와서 버튼 표시 여부 결정
         await checkUserPermission(artwork);
-
-        //await loadRelatedArtworks(artwork);
     } catch (error) {
         console.error('작품 정보 로드 중 오류:', error);
         showErrorMessage(error.message || '작품 정보를 불러오는데 실패했습니다.');
+    }
+}
+
+// 출품 취소 함수
+async function cancelSubmission(artworkId, exhibitionId) {
+    try {
+        const response = await ArtworkAPI.cancelArtworkSubmission(artworkId, exhibitionId);
+        if (response.success) {
+            showSuccessMessage('출품이 취소되었습니다.');
+            // 페이지를 새로 고침하거나 목록을 업데이트하여 변경 사항을 반영
+            loadArtworkDetail();
+        } else {
+            showErrorMessage(response.error || '출품 취소에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('출품 취소 중 오류:', error);
+        showErrorMessage('출품 취소 중 오류가 발생했습니다.');
+    }
+}
+
+// 출품 함수
+async function submitArtworkToExhibition(artworkId, exhibitionId) {
+    try {
+        const response = await ArtworkAPI.submitArtworkToExhibition(artworkId, exhibitionId);
+        if (response.success) {
+            showSuccessMessage('출품이 완료되었습니다.');
+            loadArtworkDetail(); // 변경 사항 반영
+        } else {
+            showErrorMessage(response.error || '출품에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('출품 중 오류:', error);
+        showErrorMessage('출품 중 오류가 발생했습니다.');
     }
 }
 
@@ -266,7 +349,6 @@ async function saveArtworkChanges() {
 
         // 입력 필드에서 데이터 가져오기
         const updatedData = {
-
             year: document.getElementById('editYear').value,
             medium: document.getElementById('editMedium').value,
             size: document.getElementById('editSize').value,
@@ -332,7 +414,6 @@ async function deleteArtwork() {
 
         if (response.success) {
             showSuccessMessage('작품이 성공적으로 삭제되었습니다.');
-
 
             setTimeout(() => {
                 window.location.href = '/success?message=작품이 성공적으로 삭제되었습니다.';
@@ -427,10 +508,22 @@ function updateArtworkDetail(artwork) {
         descriptionElement.textContent = artwork.description || '미표기';
     }
 
-    // 전시 정보 업데이트
+    // 출품 전시회 업데이트
     const exhibitionElement = document.querySelector('.exhibition-info');
     if (exhibitionElement) {
-        exhibitionElement.textContent = artwork.exhibitionTitle || '미표기';
+        // 기존 내용을 초기화
+        exhibitionElement.innerHTML = '';
+
+        // exhibitions 배열이 존재하고 길이가 0보다 큰 경우
+        if (artwork.exhibitions && artwork.exhibitions.length > 0) {
+            artwork.exhibitions.forEach(exhibition => {
+                const exhibitionItem = document.createElement('div');
+                exhibitionItem.textContent = exhibition.title || '전시회 제목 없음'; // 전시회 제목
+                exhibitionElement.appendChild(exhibitionItem);
+            });
+        } else {
+            exhibitionElement.textContent = '출품되지 않음'; // 전시회 정보가 없을 경우
+        }
     }
 
     // 페이지 타이틀 업데이트
@@ -439,7 +532,6 @@ function updateArtworkDetail(artwork) {
     // 관련 작품 업데이트
     updateRelatedArtworks(artwork.relatedArtworks);
 }
-
 
 /**
  * 관련 작품 목록을 업데이트합니다.
