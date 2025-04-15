@@ -153,14 +153,27 @@ function initExhibitionModal() {
 
 // 전시회 모달 표시
 function showExhibitionModal(exhibition) {
+    // 뱃지 생성
+    let badges = '';
+
+    // 출품 가능 뱃지
+    if (exhibition.isSubmissionOpen) {
+        badges += '<span class="exhibition-badge badge-submission-open">출품 가능</span>';
+    }
+
+    // 전시회 유형 뱃지
+    const isSpecial = exhibition.exhibitionType === 'special';
+    badges += `<span class="exhibition-badge badge-${isSpecial ? 'special' : 'regular'}">${isSpecial ? '특별 전시' : '정기 전시'}</span>`;
+
     // 모달 내용 업데이트
     updateModalContent('exhibition-modal', {
         'modal-image': exhibition.image || '/images/exhibition-placeholder.svg',
         'modal-title': exhibition.title || '제목 없음',
+        'modal-badges': badges,
         'modal-description': exhibition.description || '',
         'modal-date': exhibition.date || '',
         'modal-location': exhibition.location || '',
-        'modal-artworks-link': `/exhibition/${exhibition.id}/artworks`,
+        'modal-view-link': `/exhibition/${exhibition.id}/artworks`,
         'modal-submit-link': `/artwork/new?exhibition=${exhibition.id}`
     });
 
@@ -315,10 +328,26 @@ function createExhibitionCard(exhibition) {
     card.dataset.viewingHours = exhibition.viewingHours || '10:00 - 18:00';
     card.dataset.admission = exhibition.admission || '무료';
     card.dataset.category = exhibition.category;
+    card.dataset.exhibitionType = exhibition.exhibitionType || 'regular';
+    card.dataset.isSubmissionOpen = exhibition.isSubmissionOpen ? 'true' : 'false';
 
     const imageUrl = exhibition.image || '/images/default-exhibition.svg';
     const title = exhibition.title || '제목 없음';
     const description = exhibition.description || '설명 없음';
+
+    // 뱃지 생성
+    let badges = '<div class="exhibition-badges">';
+
+    // 출품 가능 뱃지
+    if (exhibition.isSubmissionOpen) {
+        badges += '<span class="exhibition-badge badge-submission-open">출품 가능</span>';
+    }
+
+    // 전시회 유형 뱃지
+    const isSpecial = exhibition.exhibitionType === 'special';
+    badges += `<span class="exhibition-badge badge-${isSpecial ? 'special' : 'regular'}">${isSpecial ? '특별 전시' : '정기 전시'}</span>`;
+
+    badges += '</div>';
 
     card.innerHTML = `
         <div class="exhibition-card__image">
@@ -328,11 +357,11 @@ function createExhibitionCard(exhibition) {
                  onerror="this.onerror=null; this.src='/images/default-exhibition.svg'">
         </div>
         <div class="exhibition-card__content">
+            ${badges}
             <h3 class="exhibition-title">${title}</h3>
             <p class="exhibition-description">${description}</p>
             <div class="exhibition-meta">
                 <span class="exhibition-date">${exhibition.startDate} ~ ${exhibition.endDate}</span>
-                <span class="exhibition-type">${exhibition.type || '기타'}</span>
             </div>
         </div>
     `;
@@ -353,7 +382,8 @@ function initExhibitionCardEvents() {
                 date: `${card.dataset.startDate} ~ ${card.dataset.endDate}`,
                 location: card.dataset.location,
                 description: card.dataset.description,
-                type: card.querySelector('.exhibition-type')?.textContent?.trim(),
+                exhibitionType: card.dataset.exhibitionType || 'regular',
+                isSubmissionOpen: card.dataset.isSubmissionOpen === 'true',
                 artists: (card.dataset.artists || '').split(','),
                 viewingHours: card.dataset.viewingHours || '10:00 - 18:00',
                 admission: card.dataset.admission || '무료',

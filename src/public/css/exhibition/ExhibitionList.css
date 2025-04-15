@@ -344,6 +344,38 @@
     color: white;
 }
 
+/* 뱃지 시스템 */
+.exhibition-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.exhibition-badge {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.badge-submission-open {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.badge-regular {
+    background-color: rgba(var(--exhibition-primary-rgb), 0.9);
+    color: white;
+}
+
+.badge-special {
+    background-color: #e74c3c;
+    color: white;
+}
+
 .exhibition-info {
     padding: 20px;
 }
@@ -624,6 +656,15 @@
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-info--exhibition .exhibition-badges {
+    margin-bottom: 1.5rem;
+}
+
+.modal-info--exhibition .exhibition-badge {
+    font-size: 0.8rem;
+    padding: 4px 10px;
 }
 
 .modal-info--exhibition h2 {

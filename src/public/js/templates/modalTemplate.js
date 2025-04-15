@@ -55,6 +55,7 @@ export const exhibitionModalContent = `
     </div>
     <div class="modal-info modal-info--exhibition">
         <h2 id="modal-title"></h2>
+        <div id="modal-badges" class="exhibition-badges"></div>
         <p id="modal-description" class="modal-description--exhibition"></p>
         <p id="modal-date" class="modal-date--exhibition"></p>
         <p id="modal-location" class="modal-location--exhibition"></p>

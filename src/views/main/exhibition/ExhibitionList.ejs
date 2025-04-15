@@ -99,13 +99,18 @@
                         <img src="<%= exhibition.image || '/images/exhibition-placeholder.svg' %>"
                             alt="<%= exhibition.title %>" class="exhibition-image"
                             onerror="this.onerror=null; this.src='/images/exhibition-placeholder.svg';">
-                        <!-- 전시 유형 표시 (정기/특별) -->
-                        <span class="exhibition-type <%= exhibition.exhibitionType || 'regular' %>">
-                            <%= exhibition.exhibitionType==='special' ? '특별' : '정기' %>
-                        </span>
                     </div>
 
                     <div class="exhibition-info">
+                        <div class="exhibition-badges">
+                            <% if (exhibition.isSubmissionOpen) { %>
+                                <span class="exhibition-badge badge-submission-open">출품 가능</span>
+                                <% } %>
+                                    <span
+                                        class="exhibition-badge badge-<%= exhibition.exhibitionType === 'special' ? 'special' : 'regular' %>">
+                                        <%= exhibition.exhibitionType==='special' ? '특별 전시' : '정기 전시' %>
+                                    </span>
+                        </div>
                         <h2 class="exhibition-title">
                             <%= exhibition.title %>
                         </h2>
