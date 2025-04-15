@@ -750,11 +750,10 @@
 /* 전시회 배지 스타일 */
 .exhibition-card__badges {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    bottom: 115px;
+    left: 20px;
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    gap: 3px;
     z-index: 10;
 }
 

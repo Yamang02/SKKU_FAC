@@ -65,8 +65,6 @@ export default class ExhibitionRepository {
             // 반드시 is_submission_open 컬럼명 사용
             where.is_submission_open = isSubmissionOpen;
 
-            // 디버깅용 로그 추가
-            console.log(`출품 가능 여부 필터링: ${isSubmissionOpen}, SQL 조건: is_submission_open = ${isSubmissionOpen ? 1 : 0}`);
         }
 
         // 키워드 검색 - MySQL에서는 ILIKE 대신 LIKE 사용
@@ -222,14 +220,14 @@ export default class ExhibitionRepository {
         const exhibitions = await Exhibition.findAll({
             where: { is_submission_open: true }
         });
-
         if (artworkId) {
             // 이미 출품된 전시회 조회
             const submittedExhibitions = await ArtworkExhibitionRelationship.findAll({
                 where: { artwork_id: artworkId }
             });
 
-            const submittedExhibitionIds = submittedExhibitions.map(exhibition => exhibition.exhibition_id);
+            const submittedExhibitionIds = submittedExhibitions.map(exhibition => exhibition.exhibitionId);
+
 
             // 출품 가능한 전시회에서 이미 출품된 전시회 제외
             return exhibitions.filter(exhibition => !submittedExhibitionIds.includes(exhibition.id));

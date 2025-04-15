@@ -13,8 +13,7 @@ export default class ExhibitionApi {
      */
     static async getExhibitionList(params = {}) {
         try {
-            // 디버깅: 요청 파라미터 로깅
-            console.log('ExhibitionApi 요청 파라미터:', params);
+
 
             // 페이지네이션 파라미터
             const pageParams = [];
@@ -37,8 +36,6 @@ export default class ExhibitionApi {
             const queryParams = [...pageParams, ...filterParams].join('&');
             const queryString = queryParams ? `?${queryParams}` : '';
 
-            // 디버깅: 최종 요청 URL 로깅
-            console.log(`API 요청 URL: /exhibition/api/list${queryString}`);
 
             const response = await api.get(`/exhibition/api/list${queryString}`);
 

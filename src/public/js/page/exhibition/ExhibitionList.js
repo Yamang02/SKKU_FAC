@@ -14,8 +14,7 @@ const urlParams = new URLSearchParams(window.location.search);
 // API 함수 - 서버에서 가져오기
 async function fetchExhibitionList(pagination, filters = {}) {
     try {
-        // 필터 옵션들 로깅
-        console.log('API 요청 전 필터 옵션:', filters);
+
 
         const params = {
             page: pagination.page,
@@ -27,9 +26,6 @@ async function fetchExhibitionList(pagination, filters = {}) {
             submission: filters.submission || 'all',
             search: filters.search || ''
         };
-
-        // API 호출 전 로깅
-        console.log('최종 API 요청 파라미터:', params);
 
         // API 호출 후 결과 바로 반환
         return await ExhibitionApi.getExhibitionList(params);
@@ -122,16 +118,6 @@ function initSearch() {
 
         // URL 히스토리 업데이트
         window.history.pushState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
-
-        // 디버깅용 로그 추가
-        console.log('검색 필터링 요청:', {
-            search: state.searchQuery,
-            type: state.filters.type,
-            year: state.filters.year,
-            category: state.filters.category,
-            submission: state.filters.submission,
-            sort: state.filters.sort
-        });
 
         // 전시회 목록 로드
         loadExhibitionList();
@@ -415,7 +401,7 @@ function createExhibitionCard(exhibition) {
     const location = exhibition.location || '장소 미정';
 
     // 전시회 유형 배지 텍스트 설정
-    const typeBadge = exhibition.exhibitionType === 'special' ? '특별전시회' : '정기전시회';
+    const typeBadge = exhibition.exhibitionType === 'special' ? '특별' : '정기';
     const typeBadgeClass = exhibition.exhibitionType === 'special' ? 'badge-special' : 'badge-regular';
 
     // 출품 가능 여부 배지

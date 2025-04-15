@@ -508,7 +508,7 @@ function updateArtworkDetail(artwork) {
         descriptionElement.textContent = artwork.description || '미표기';
     }
 
-    // 출품 전시회 업데이트
+    // 전시회 정보 업데이트
     const exhibitionElement = document.querySelector('.exhibition-info');
     if (exhibitionElement) {
         // 기존 내용을 초기화
@@ -518,7 +518,14 @@ function updateArtworkDetail(artwork) {
         if (artwork.exhibitions && artwork.exhibitions.length > 0) {
             artwork.exhibitions.forEach(exhibition => {
                 const exhibitionItem = document.createElement('div');
+                exhibitionItem.className = 'exhibition-item'; // 클래스 추가
                 exhibitionItem.textContent = exhibition.title || '전시회 제목 없음'; // 전시회 제목
+
+                // 클릭 이벤트 추가
+                exhibitionItem.onclick = () => {
+                    window.location.href = `/artwork/list?exhibition=${exhibition.id}&page=1`; // 링크 설정
+                };
+
                 exhibitionElement.appendChild(exhibitionItem);
             });
         } else {

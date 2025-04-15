@@ -90,8 +90,7 @@ export default class ExhibitionApiController {
      */
     async getExhibitionList(req, res) {
         try {
-            // 디버깅: 모든 요청 파라미터 로깅
-            console.log('컨트롤러에 전달된 요청 매개변수:', req.query);
+
 
             const {
                 page = 1,
@@ -136,9 +135,6 @@ export default class ExhibitionApiController {
                 searchType: searchType || 'title',
                 ...sortOptions
             };
-
-            // 디버깅: 필터링 옵션 로깅
-            console.log(`컨트롤러 필터 옵션 - submission=${submission}, 변환된 isSubmissionOpen=${filterOptions.isSubmissionOpen}`);
 
             // 필터링된 전시회 목록 조회 - 데이터베이스 레벨에서 필터링
             const exhibitions = await this.exhibitionService.getAllExhibitions(filterOptions);
