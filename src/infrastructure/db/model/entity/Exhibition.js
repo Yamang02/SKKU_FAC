@@ -72,10 +72,6 @@ const Exhibition = db.define('Exhibition', {
             fields: ['startDate', 'endDate']
         },
         {
-            name: 'idx_exhibition_status',
-            fields: ['status']
-        },
-        {
             name: 'idx_exhibition_type',
             fields: ['exhibitionType']
         },

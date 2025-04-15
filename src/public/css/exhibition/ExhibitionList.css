@@ -348,12 +348,6 @@
     padding: 20px;
 }
 
-.exhibition-subtitle {
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
-    margin-bottom: 12px;
-}
-
 .exhibition-date {
     display: flex;
     align-items: center;

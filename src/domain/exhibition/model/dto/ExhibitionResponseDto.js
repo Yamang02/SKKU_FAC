@@ -15,7 +15,6 @@ export default class ExhibitionResponseDto {
         this.exhibitionType = data.exhibitionType || '';
         this.imageUrl = data.imageUrl || null;
         this.imagePublicId = data.imagePublicId || null;
-        this.subtitle = data.subtitle || '';
         this.location = data.location || '';
         this.artists = data.artists || [];
         this.artworkCount = data.artworkCount || 0;
@@ -43,7 +42,6 @@ export default class ExhibitionResponseDto {
             endDate: this.endDate,
             exhibitionType: this.exhibitionType,
             image: this.image,
-            subtitle: this.subtitle,
             location: this.location,
             artists: this.artists,
             artworkCount: this.artworkCount,

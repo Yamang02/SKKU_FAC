@@ -6,7 +6,6 @@ export default class ExhibitionListDto {
     constructor(data = {}) {
         this.id = data.id || null;
         this.title = data.title || '';
-        this.subtitle = data.subtitle || '';
         this.description = data.description || '';
         this.startDate = data.startDate || '';
         this.endDate = data.endDate || '';
