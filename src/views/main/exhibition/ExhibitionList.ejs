@@ -30,12 +30,8 @@
 
                     <div class="search-column">
                         <label for="filter-year" class="form-label">개최 연도</label>
-                        <select id="filter-year" name="year" class="form-select exhibition-form-select">
-                            <option value="all">전체</option>
-                            <option value="2023">2023</option>
-                            <option value="2022">2022</option>
-                            <option value="2021">2021</option>
-                        </select>
+                        <input type="number" id="filter-year" name="year" min="1950" max="2100" step="1"
+                            placeholder="연도 입력" class="form-control exhibition-form-control">
                     </div>
 
                     <div class="search-column">
@@ -83,20 +79,6 @@
         <!-- 전시회 목록이 자바스크립트로 동적 로딩됩니다 -->
     </div>
 
-    <!-- 페이지네이션 -->
-    <div class="pagination-container exhibition-pagination-container" id="pagination">
-        <!-- 페이지네이션이 자바스크립트로 동적 로딩됩니다 -->
-    </div>
-
-    <!-- 로딩 인디케이터 -->
-    <div id="loading-indicator" class="loading-indicator exhibition-loading-indicator" style="display: none;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-            <path
-                d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.25-14.75A.75.75 0 0 1 9 2v1.25a.75.75 0 0 1-1.5 0V2a.75.75 0 0 1 .75-.75zM12.9 4.1a.75.75 0 0 1 0 1.06l-.884.883a.75.75 0 1 1-1.06-1.06l.883-.884a.75.75 0 0 1 1.06 0zm-1.06 7.07a.75.75 0 0 1 1.06 0l.884.883a.75.75 0 1 1-1.06 1.06l-.884-.883a.75.75 0 0 1 0-1.06zM2.75 8a.75.75 0 0 1 .75-.75h1.25a.75.75 0 0 1 0 1.5H3.5a.75.75 0 0 1-.75-.75zm10.5 0a.75.75 0 0 1 .75-.75h1.25a.75.75 0 0 1 0 1.5h-1.25a.75.75 0 0 1-.75-.75zM3.1 4.1a.75.75 0 0 1 1.06 0l.884.883a.75.75 0 1 1-1.06 1.06L3.1 5.16a.75.75 0 0 1 0-1.06zm7.07 7.07a.75.75 0 0 1 0 1.06l-.883.884a.75.75 0 1 1-1.06-1.06l.883-.884a.75.75 0 0 1 1.06 0zM8 13.25a.75.75 0 0 1 .75.75v1.25a.75.75 0 0 1-1.5 0V14a.75.75 0 0 1 .75-.75z" />
-        </svg>
-        <span>로딩 중...</span>
-    </div>
-
     <!-- 결과 없음 메시지 -->
     <div id="no-results" class="no-result exhibition-no-result" style="display: none;">
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
@@ -106,6 +88,16 @@
         </svg>
         <p>검색 결과가 없습니다.</p>
         <button id="reset-search" class="reset-button exhibition-reset-button">검색 초기화</button>
+    </div>
+
+    <!-- 페이지네이션 -->
+    <div class="pagination-container exhibition-pagination-container" id="pagination">
+        <!-- 페이지네이션이 자바스크립트로 동적 로딩됩니다 -->
+    </div>
+
+    <!-- 로딩 인디케이터 -->
+    <div id="loading-indicator" class="loading-indicator exhibition-loading-indicator" style="display: none;">
+        <span>로딩 중...</span>
     </div>
 </section>
 

@@ -3,7 +3,6 @@ import { ApiResponse } from '../../../common/model/ApiResponse.js';
 import Page from '../../../common/model/Page.js';
 import { ExhibitionError, ExhibitionNotFoundError } from '../../../../common/error/ExhibitionError.js';
 import { Message } from '../../../../common/constants/Message.js';
-import ExhibitionListDto from '../../model/dto/ExhibitionListDto.js';
 // ===== API 메서드 =====
 export default class ExhibitionApiController {
     constructor() {
@@ -91,29 +90,80 @@ export default class ExhibitionApiController {
      */
     async getExhibitionList(req, res) {
         try {
-            const { page = 1, limit = 12, sortField = 'createdAt', sortOrder = 'desc', searchType, keyword } = req.query;
-            const exhibitions = await this.exhibitionService.getAllExhibitions();
+            // 디버깅: 모든 요청 파라미터 로깅
+            console.log('컨트롤러에 전달된 요청 매개변수:', req.query);
 
+            const {
+                page = 1,
+                limit = 12,
+                sortField = 'createdAt',
+                sortOrder = 'desc',
+                searchType = 'title',
+                keyword = '',
+                type = 'all',
+                year = '',
+                category = 'all',
+                submission = 'all',
+                sort = 'date-desc'
+            } = req.query;
+
+            // 정렬 조건 변환
+            const sortOptions = {};
+            if (sort) {
+                const [field, order] = sort.split('-');
+                if (field === 'date') {
+                    sortOptions.sortField = 'start_date';
+                } else if (field === 'title') {
+                    sortOptions.sortField = 'title';
+                } else {
+                    sortOptions.sortField = 'created_at';
+                }
+                sortOptions.sortOrder = order === 'asc' ? 'ASC' : 'DESC';
+            } else {
+                sortOptions.sortField = sortField;
+                sortOptions.sortOrder = sortOrder.toUpperCase();
+            }
+
+            // 필터 옵션 구성
+            const filterOptions = {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                type: type !== 'all' ? type : undefined,
+                year: year && year !== 'all' ? year : undefined,
+                category: category !== 'all' ? category : undefined,
+                isSubmissionOpen: submission === 'open' ? true : (submission === 'closed' ? false : undefined),
+                keyword: keyword || undefined,
+                searchType: searchType || 'title',
+                ...sortOptions
+            };
+
+            // 디버깅: 필터링 옵션 로깅
+            console.log(`컨트롤러 필터 옵션 - submission=${submission}, 변환된 isSubmissionOpen=${filterOptions.isSubmissionOpen}`);
+
+            // 필터링된 전시회 목록 조회 - 데이터베이스 레벨에서 필터링
+            const exhibitions = await this.exhibitionService.getAllExhibitions(filterOptions);
+
+            // 페이지네이션 정보 생성
             const pageOptions = {
-                page,
-                limit,
+                page: parseInt(page),
+                limit: parseInt(limit),
                 baseUrl: '/exhibition',
-                sortField,
-                sortOrder,
-                filters: { searchType, keyword }
+                ...sortOptions,
+                filters: {
+                    type,
+                    year,
+                    category,
+                    submission,
+                    keyword,
+                    searchType
+                }
             };
 
             const pageData = new Page(exhibitions.length, pageOptions);
 
-            // 작품 목록 페이지에서 사용할 수 있도록 필요한 정보만 포함
-            const processedExhibitions = [];
-            for (const exhibition of exhibitions) {
-                const exhibitionDto = new ExhibitionListDto(exhibition);
-                processedExhibitions.push(exhibitionDto);
-            }
-
+            // 결과 데이터 구성
             const responseData = {
-                exhibitions: processedExhibitions,
+                exhibitions: exhibitions,
                 page: pageData,
                 total: exhibitions.length
             };

@@ -21,7 +21,7 @@ async function fetchArtworkList(pagination, filters = {}) {
 
 async function fetchExhibitionList() {
     try {
-        console.log('전시회 API 호출 시작...');
+
         // 캐러셀용 전시회는 제한 없이 모두 가져오기 위해 특별 파라미터 전달
         const response = await ExhibitionApi.getExhibitionList({
             limit: 100, // 충분히 많은 수의 전시회를 가져오기 위한 값
@@ -29,15 +29,12 @@ async function fetchExhibitionList() {
             sort: 'date-desc' // 최신 전시회부터 정렬
         });
 
-        console.log('전시회 API 응답 완료:', response);
 
         // API 응답 구조 확인
         if (!response || !response.items) {
             console.error('유효하지 않은 API 응답 구조:', response);
         } else if (response.items.length === 0) {
             console.warn('전시회 데이터가 비어 있습니다.');
-        } else {
-            console.log(`${response.items.length}개의 전시회 데이터를 받았습니다.`);
         }
 
         return response;
@@ -54,9 +51,7 @@ async function updateExhibitionCarousel() {
     if (!carouselTrack) return;
 
     try {
-        console.log('전시회 데이터 요청 시작...');
         const exhibitionData = await fetchExhibitionList();
-        console.log('전시회 데이터 도착:', exhibitionData);
 
         // 새로운 API 응답 구조 처리
         if (!exhibitionData) {
@@ -65,7 +60,6 @@ async function updateExhibitionCarousel() {
         }
 
         const exhibitions = exhibitionData.items || [];
-        console.log('처리할 전시회 목록:', exhibitions);
 
         if (exhibitions.length === 0) {
             console.warn('표시할 전시회가 없습니다.');
@@ -75,25 +69,21 @@ async function updateExhibitionCarousel() {
         // 기존의 "모든 작품" 슬라이드를 제외한 다른 슬라이드 제거
         const existingSlides = carouselTrack.querySelectorAll('.carousel-slide:not([data-exhibition="all"])');
         existingSlides.forEach(slide => slide.remove());
-        console.log('기존 슬라이드 제거 완료');
 
         // 전시회 카드 생성
         const exhibitionFragment = document.createDocumentFragment();
-        console.log('전시회 카드 생성 시작...');
 
         exhibitions.forEach((exhibition, index) => {
             if (!exhibition || !exhibition.id) {
                 console.warn(`유효하지 않은 전시회 데이터 (인덱스: ${index}):`, exhibition);
                 return;
             }
-            console.log(`전시회 카드 생성: ${exhibition.id} - ${exhibition.title}`);
             const exhibitionCard = createExhibitionCarouselCard(exhibition);
             exhibitionFragment.appendChild(exhibitionCard);
         });
 
         // 모든 작품 카드 다음에 전시회 카드들 추가
         carouselTrack.appendChild(exhibitionFragment);
-        console.log('전시회 카드 추가 완료');
 
         // 전시회 옵션 업데이트
         updateExhibitionOptions(exhibitions);

@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="400" height="300" version="1.1" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-    <rect width="400" height="300" fill="#072B61"/>
+  <svg width="100%" height="100%" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <!-- 배경 -->
+    <rect width="400" height="300" fill="#072B61" />
+
+    <!-- 얇은 흰색 테두리 박스 -->
+    <rect x="60" y="60" width="280" height="180" rx="12" ry="12"
+          fill="none" stroke="#ffffff" stroke-opacity="0.3" stroke-width="2"/>
+
+    <!-- 배경에 흐릿한 장식 요소 -->
     <g fill="#ffffff" opacity="0.15">
-        <rect x="70" y="70" width="260" height="160" rx="5" ry="5"/>
-        <circle cx="200" cy="130" r="40"/>
-        <rect x="120" y="190" width="160" height="10" rx="2" ry="2"/>
-        <rect x="150" y="210" width="100" height="10" rx="2" ry="2"/>
+      <!-- 내부 배경 박스 -->
+      <rect x="60" y="60" width="280" height="180" rx="12" ry="12"/>
+
+      <!-- 아이콘: 산 2개 + 해 -->
+      <polygon points="130,180 170,130 210,180" />
+      <polygon points="190,180 230,150 270,180" />
+      <circle cx="250" cy="120" r="10" />
+
+      <!-- 장식용 바 라인 -->
+      <rect x="130" y="200" width="140" height="8" rx="4" />
+      <rect x="160" y="218" width="80" height="8" rx="4" />
     </g>
-    <text x="200" y="150" text-anchor="middle" fill="#ffffff" font-family="Arial" font-size="16" font-weight="500">전시회 이미지 없음</text>
-</svg>
+
+    <!-- 텍스트 -->
+    <text x="200" y="160" text-anchor="middle" fill="#ffffff"
+          font-family="Segoe UI, Roboto, Arial, sans-serif"
+          font-size="16" font-weight="500">
+      전시회 이미지 없음
+    </text>
+  </svg>

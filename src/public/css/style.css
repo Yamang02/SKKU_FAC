@@ -51,10 +51,6 @@
   * 특정 페이지에 대한 스타일을 정의합니다.
   */
  @import url('home/HomePage.css');
- @import url('artwork/ArtworkDetail.css');
- @import url('artwork/ArtworkList.css');
- @import url('exhibition/ExhibitionList.css');
- @import url('notice/NoticeList.css');
  @import url('common/error.css');
  @import url('common/AboutPage.css');
 

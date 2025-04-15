@@ -153,23 +153,40 @@ export default class ExhibitionService {
 
     /**
      * 모든 전시회를 조회합니다.
+     * @param {Object} filterOptions - 필터링 옵션
      * @returns {Promise<Array<ExhibitionListDto>>} 전시회 목록
      */
-    async getAllExhibitions() {
-        const result = await this.exhibitionRepository.findExhibitions();
-        if (result.items.length > 0) {
+    async getAllExhibitions(filterOptions = {}) {
+        try {
+            // 레포지토리에 필터 옵션을 전달하여 DB 레벨에서 필터링
+            const result = await this.exhibitionRepository.findExhibitions({
+                ...filterOptions,
+                // 페이지네이션 기본값 설정 (컨트롤러에서 설정한 값이 있으면 해당 값 사용)
+                page: filterOptions.page || 1,
+                limit: filterOptions.limit || 12,
+                // 정렬 옵션
+                sortField: filterOptions.sortField || 'createdAt',
+                sortOrder: filterOptions.sortOrder || 'DESC'
+            });
+
+            if (result.items.length === 0) {
+                return [];
+            }
+
+            // ExhibitionListDto 배열 생성
             const exhibitionListDtos = [];
             for (const exhibition of result.items) {
                 // 전시회에 속한 작품 수 조회
-                const CountArtworksInExhibition = await this.artworkExhibitionRelationshipRepository.countArtworksInExhibition(exhibition.id);
+                const countArtworksInExhibition = await this.artworkExhibitionRelationshipRepository.countArtworksInExhibition(exhibition.id);
                 const exhibitionListDto = new ExhibitionListDto(exhibition);
-                exhibitionListDto.artworkCount = CountArtworksInExhibition;
+                exhibitionListDto.artworkCount = countArtworksInExhibition;
                 exhibitionListDtos.push(exhibitionListDto);
             }
 
             return exhibitionListDtos;
-        } else {
-            return [];
+        } catch (error) {
+            console.error('전시회 목록 조회 중 오류:', error);
+            throw error;
         }
     }
 

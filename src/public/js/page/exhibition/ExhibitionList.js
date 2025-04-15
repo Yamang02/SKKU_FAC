@@ -14,15 +14,22 @@ const urlParams = new URLSearchParams(window.location.search);
 // API 함수 - 서버에서 가져오기
 async function fetchExhibitionList(pagination, filters = {}) {
     try {
+        // 필터 옵션들 로깅
+        console.log('API 요청 전 필터 옵션:', filters);
+
         const params = {
             page: pagination.page,
             limit: pagination.limit,
             sort: filters.sort || 'date-desc',
             type: filters.type || 'all',
-            year: filters.year || 'all',
+            year: filters.year || '',
             category: filters.category || 'all',
+            submission: filters.submission || 'all',
             search: filters.search || ''
         };
+
+        // API 호출 전 로깅
+        console.log('최종 API 요청 파라미터:', params);
 
         // API 호출 후 결과 바로 반환
         return await ExhibitionApi.getExhibitionList(params);
@@ -39,8 +46,9 @@ const state = {
     isLoading: false,
     filters: {
         type: 'all',
-        year: 'all',
+        year: '',
         category: 'all',
+        submission: 'all',
         sort: 'date-desc'
     },
     searchQuery: ''
@@ -54,6 +62,7 @@ const elements = {
     filterType: document.getElementById('filter-type'),
     filterYear: document.getElementById('filter-year'),
     filterCategory: document.getElementById('filter-category'),
+    filterSubmission: document.getElementById('filter-submission'),
     sortOption: document.getElementById('sort-option'),
     resetButton: document.querySelector('.btn-reset'),
     loadingIndicator: document.getElementById('loading-indicator'),
@@ -83,7 +92,48 @@ document.addEventListener('DOMContentLoaded', async () => {
 function initSearch() {
     elements.searchForm?.addEventListener('submit', (e) => {
         e.preventDefault();
+
+        // 모든 필터 값 설정
         state.searchQuery = elements.searchInput?.value.trim() || '';
+        state.filters.type = elements.filterType?.value || 'all';
+        state.filters.year = elements.filterYear?.value || '';
+        state.filters.category = elements.filterCategory?.value || 'all';
+        state.filters.submission = elements.filterSubmission?.value || 'all';
+        state.filters.sort = elements.sortOption?.value || 'date-desc';
+
+        // URL 파라미터 업데이트
+        urlParams.set('page', 1); // 검색 시 첫 페이지로 이동
+        if (state.searchQuery) urlParams.set('search', state.searchQuery);
+        else urlParams.delete('search');
+
+        if (state.filters.type !== 'all') urlParams.set('type', state.filters.type);
+        else urlParams.delete('type');
+
+        if (state.filters.year) urlParams.set('year', state.filters.year);
+        else urlParams.delete('year');
+
+        if (state.filters.category !== 'all') urlParams.set('category', state.filters.category);
+        else urlParams.delete('category');
+
+        if (state.filters.submission !== 'all') urlParams.set('submission', state.filters.submission);
+        else urlParams.delete('submission');
+
+        urlParams.set('sort', state.filters.sort);
+
+        // URL 히스토리 업데이트
+        window.history.pushState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+
+        // 디버깅용 로그 추가
+        console.log('검색 필터링 요청:', {
+            search: state.searchQuery,
+            type: state.filters.type,
+            year: state.filters.year,
+            category: state.filters.category,
+            submission: state.filters.submission,
+            sort: state.filters.sort
+        });
+
+        // 전시회 목록 로드
         loadExhibitionList();
     });
 
@@ -98,28 +148,31 @@ function initSearch() {
 
 // 필터 기능
 function initFilters() {
+    // 필터 이벤트 리스너는 값 변경만 처리하고 API 호출은 하지 않음
+
     // 전시회 유형 필터
     elements.filterType?.addEventListener('change', () => {
         state.filters.type = elements.filterType.value;
-        loadExhibitionList();
     });
 
     // 연도 필터
     elements.filterYear?.addEventListener('change', () => {
         state.filters.year = elements.filterYear.value;
-        loadExhibitionList();
     });
 
     // 카테고리 필터
     elements.filterCategory?.addEventListener('change', () => {
         state.filters.category = elements.filterCategory.value;
-        loadExhibitionList();
+    });
+
+    // 출품 가능 여부 필터
+    elements.filterSubmission?.addEventListener('change', () => {
+        state.filters.submission = elements.filterSubmission.value;
     });
 
     // 정렬 옵션
     elements.sortOption?.addEventListener('change', () => {
         state.filters.sort = elements.sortOption.value;
-        loadExhibitionList();
     });
 }
 
@@ -128,17 +181,32 @@ function resetFilters() {
     state.searchQuery = '';
     state.filters = {
         type: 'all',
-        year: 'all',
+        year: '',
         category: 'all',
+        submission: 'all',
         sort: 'date-desc'
     };
 
     if (elements.searchInput) elements.searchInput.value = '';
     if (elements.filterType) elements.filterType.value = 'all';
-    if (elements.filterYear) elements.filterYear.value = 'all';
+    if (elements.filterYear) elements.filterYear.value = '';
     if (elements.filterCategory) elements.filterCategory.value = 'all';
+    if (elements.filterSubmission) elements.filterSubmission.value = 'all';
     if (elements.sortOption) elements.sortOption.value = 'date-desc';
 
+    // URL 파라미터 초기화
+    urlParams.delete('search');
+    urlParams.delete('type');
+    urlParams.delete('year');
+    urlParams.delete('category');
+    urlParams.delete('submission');
+    urlParams.set('sort', 'date-desc');
+    urlParams.set('page', 1);
+
+    // URL 히스토리 업데이트
+    window.history.pushState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+
+    // 전시회 목록 로드
     loadExhibitionList();
 }
 
@@ -154,17 +222,7 @@ function initExhibitionModal() {
 
 // 전시회 모달 표시
 function showExhibitionModal(exhibition) {
-    // 뱃지 생성
-    let badges = '';
 
-    // 출품 가능 뱃지
-    if (exhibition.isSubmissionOpen) {
-        badges += '<span class="exhibition-badge badge-submission-open">출품 가능</span>';
-    }
-
-    // 전시회 유형 뱃지
-    const isSpecial = exhibition.exhibitionType === 'special';
-    badges += `<span class="exhibition-badge badge-${isSpecial ? 'special' : 'regular'}">${isSpecial ? '특별 전시' : '정기 전시'}</span>`;
 
     const imageUrl = exhibition.imageUrl || exhibition.image || '/images/exhibition-placeholder.svg';
     const date = exhibition.date || `${exhibition.startDate} ~ ${exhibition.endDate}`;
@@ -173,7 +231,6 @@ function showExhibitionModal(exhibition) {
     updateModalContent('exhibition-modal', {
         'modal-image': imageUrl,
         'modal-title': exhibition.title || '제목 없음',
-        'modal-badges': badges,
         'modal-date': date,
         'modal-location': exhibition.location || '',
         'modal-description': exhibition.description || '',
@@ -263,6 +320,7 @@ async function loadExhibitionList() {
             type: urlParams.get('type') || state.filters.type,
             year: urlParams.get('year') || state.filters.year,
             category: urlParams.get('category') || state.filters.category,
+            submission: urlParams.get('submission') || state.filters.submission,
             sort: urlParams.get('sort') || state.filters.sort,
             search: urlParams.get('search') || state.searchQuery
         };
@@ -356,28 +414,25 @@ function createExhibitionCard(exhibition) {
     const title = exhibition.title || '제목 없음';
     const location = exhibition.location || '장소 미정';
 
-    // 뱃지 생성
-    let badges = '<div class="exhibition-badges">';
+    // 전시회 유형 배지 텍스트 설정
+    const typeBadge = exhibition.exhibitionType === 'special' ? '특별전시회' : '정기전시회';
+    const typeBadgeClass = exhibition.exhibitionType === 'special' ? 'badge-special' : 'badge-regular';
 
-    // 출품 가능 뱃지
-    if (exhibition.isSubmissionOpen) {
-        badges += '<span class="exhibition-badge badge-submission-open">출품 가능</span>';
-    }
-
-    // 전시회 유형 뱃지
-    const isSpecial = exhibition.exhibitionType === 'special';
-    badges += `<span class="exhibition-badge badge-${isSpecial ? 'special' : 'regular'}">${isSpecial ? '특별 전시' : '정기 전시'}</span>`;
-
-    badges += '</div>';
+    // 출품 가능 여부 배지
+    const submissionBadge = exhibition.isSubmissionOpen ?
+        '<span class="exhibition-badge badge-submission-open">출품가능</span>' : '';
 
     card.innerHTML = `
         <div class="exhibition-card__image-container">
             <img src="${imageUrl}"
                  alt="${title}"
                  class="exhibition-card__image">
+            <div class="exhibition-card__badges">
+                <span class="exhibition-badge ${typeBadgeClass}">${typeBadge}</span>
+                ${submissionBadge}
+            </div>
         </div>
         <div class="exhibition-card__content">
-            ${badges}
             <h3 class="exhibition-card__title">${title}</h3>
             <div class="exhibition-card__meta">
                 <span class="exhibition-card__date">

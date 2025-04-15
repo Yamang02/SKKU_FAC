@@ -53,13 +53,8 @@ p {
 /* 링크 스타일 */
 
 a {
-  color: var(--color-primary);
   text-decoration: none;
   transition: color var(--transition-fast);
-}
-
-a:hover {
-  color: var(--color-primary-light);
 }
 
 /* 텍스트 강조 */

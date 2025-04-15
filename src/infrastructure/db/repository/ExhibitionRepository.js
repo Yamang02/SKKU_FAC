@@ -1,6 +1,7 @@
 import { Exhibition } from '../model/entity/EntitityIndex.js';
 import { Op } from 'sequelize';
 import { ArtworkExhibitionRelationship } from '../model/entity/EntitityIndex.js';
+import { Sequelize } from 'sequelize';
 
 export default class ExhibitionRepository {
     constructor() {
@@ -8,31 +9,144 @@ export default class ExhibitionRepository {
 
     /**
      * 모든 전시회를 조회합니다.
+     * @param {Object} options - 조회 옵션
+     * @param {number} options.page - 페이지 번호
+     * @param {number} options.limit - 페이지당 항목 수
+     * @param {string} options.type - 전시회 유형 필터
+     * @param {string} options.year - 전시회 연도 필터
+     * @param {string} options.category - 전시회 카테고리 필터
+     * @param {boolean} options.isSubmissionOpen - 출품 가능 여부 필터
+     * @param {string} options.keyword - 검색 키워드
+     * @param {string} options.searchType - 검색 타입 (title, all 등)
+     * @param {string} options.sortField - 정렬 필드
+     * @param {string} options.sortOrder - 정렬 순서 (ASC, DESC)
+     * @returns {Promise<Object>} 전시회 목록 및 페이지네이션 정보
      */
-    async findExhibitions({ page = 1, limit = 10, search } = {}) {
-        const offset = (page - 1) * limit; // 페이지네이션을 위한 오프셋 계산
+    async findExhibitions(options = {}) {
+        const {
+            page = 1,
+            limit = 10,
+            type,
+            year,
+            category,
+            isSubmissionOpen,
+            keyword,
+            searchType = 'title',
+            sortField = 'createdAt',
+            sortOrder = 'DESC'
+        } = options;
 
+        const offset = (page - 1) * limit; // 페이지네이션을 위한 오프셋 계산
         const where = {};
-        if (search) {
-            where[Op.or] = [
-                { title: { [Op.iLike]: `%${search}%` } },
-                { description: { [Op.iLike]: `%${search}%` } }
-            ];
+
+        // 전시회 유형 필터링
+        if (type) {
+            where.exhibition_type = type;
         }
 
-        const { count, rows } = await Exhibition.findAndCountAll({
-            where,
-            limit,
-            offset,
-            order: [['createdAt', 'DESC']] // 정렬 기준
-        });
+        // 연도 필터링 (start_date의 연도 부분)
+        if (year) {
+            // MySQL에서 YEAR 함수 사용, 컬럼명을 start_date로 변경
+            where.start_date = Sequelize.where(
+                Sequelize.fn('YEAR', Sequelize.col('start_date')),
+                year
+            );
+        }
 
-        return {
-            items: rows,
-            total: count,
-            page: Number(page),
-            totalPages: Math.ceil(count / limit)
+        // 카테고리 필터링
+        if (category) {
+            where.category = category;
+        }
+
+        // 출품 가능 여부 필터링
+        if (isSubmissionOpen !== undefined) {
+            // MySQL에서 is_submission_open은 tinyint(1)로 저장됨
+            // true는 1, false는 0에 매핑
+            // 반드시 is_submission_open 컬럼명 사용
+            where.is_submission_open = isSubmissionOpen;
+
+            // 디버깅용 로그 추가
+            console.log(`출품 가능 여부 필터링: ${isSubmissionOpen}, SQL 조건: is_submission_open = ${isSubmissionOpen ? 1 : 0}`);
+        }
+
+        // 키워드 검색 - MySQL에서는 ILIKE 대신 LIKE 사용
+        if (keyword) {
+            const likePattern = `%${keyword}%`;
+            if (searchType === 'title') {
+                // MySQL에서는 대소문자 구분 없이 검색하려면 LOWER 함수 사용
+                where.title = Sequelize.where(
+                    Sequelize.fn('LOWER', Sequelize.col('title')),
+                    'LIKE',
+                    likePattern.toLowerCase()
+                );
+            } else if (searchType === 'all') {
+                where[Op.or] = [
+                    Sequelize.where(
+                        Sequelize.fn('LOWER', Sequelize.col('title')),
+                        'LIKE',
+                        likePattern.toLowerCase()
+                    ),
+                    Sequelize.where(
+                        Sequelize.fn('LOWER', Sequelize.col('description')),
+                        'LIKE',
+                        likePattern.toLowerCase()
+                    ),
+                    Sequelize.where(
+                        Sequelize.fn('LOWER', Sequelize.col('location')),
+                        'LIKE',
+                        likePattern.toLowerCase()
+                    )
+                ];
+            }
+        }
+
+        // 정렬 옵션 설정 - 컬럼명을 snake_case로 변환
+        const orderField = this.convertToSnakeCase(sortField);
+        const order = [[orderField, sortOrder]];
+
+        try {
+            const { count, rows } = await Exhibition.findAndCountAll({
+                where,
+                limit,
+                offset,
+                order
+            });
+
+            return {
+                items: rows,
+                total: count,
+                page: Number(page),
+                totalPages: Math.ceil(count / limit)
+            };
+        } catch (error) {
+            console.error('전시회 목록 조회 중 오류:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * camelCase를 snake_case로 변환하는 유틸리티 함수
+     * @param {string} camelCase - 변환할 camelCase 문자열
+     * @returns {string} 변환된 snake_case 문자열
+     */
+    convertToSnakeCase(camelCase) {
+        // 정렬을 위한 특수 케이스 처리
+        const specialCases = {
+            'startDate': 'start_date',
+            'endDate': 'end_date',
+            'createdAt': 'created_at',
+            'updatedAt': 'updated_at',
+            'exhibitionType': 'exhibition_type',
+            'isSubmissionOpen': 'is_submission_open',
+            'isFeatured': 'is_featured'
         };
+
+        if (specialCases[camelCase]) {
+            return specialCases[camelCase];
+        }
+
+        // 일반적인 camelCase -> snake_case 변환
+        return camelCase.replace(/([A-Z])/g, '_$1').toLowerCase();
     }
 
     /**
@@ -106,16 +220,16 @@ export default class ExhibitionRepository {
      */
     async findSubmittableExhibitions(artworkId = null) {
         const exhibitions = await Exhibition.findAll({
-            where: { isSubmissionOpen: true }
+            where: { is_submission_open: true }
         });
 
         if (artworkId) {
             // 이미 출품된 전시회 조회
             const submittedExhibitions = await ArtworkExhibitionRelationship.findAll({
-                where: { artworkId }
+                where: { artwork_id: artworkId }
             });
 
-            const submittedExhibitionIds = submittedExhibitions.map(exhibition => exhibition.exhibitionId);
+            const submittedExhibitionIds = submittedExhibitions.map(exhibition => exhibition.exhibition_id);
 
             // 출품 가능한 전시회에서 이미 출품된 전시회 제외
             return exhibitions.filter(exhibition => !submittedExhibitionIds.includes(exhibition.id));
