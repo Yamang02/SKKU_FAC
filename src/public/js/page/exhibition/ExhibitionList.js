@@ -181,6 +181,16 @@ function showExhibitionModal(exhibition) {
         'modal-submit-link': `/artwork/new?exhibition=${exhibition.id}`
     });
 
+    // 모달에 exhibition 클래스 추가
+    const modal = document.getElementById('exhibition-modal');
+    if (modal) {
+        modal.classList.add('exhibition-modal');
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent) modalContent.classList.add('exhibition-modal-content');
+        const modalImage = modal.querySelector('.modal-image');
+        if (modalImage) modalImage.classList.add('exhibition-modal-image');
+    }
+
     // 모달 표시
     showModal('exhibition-modal');
 }
@@ -340,18 +350,18 @@ function createExhibitionCard(exhibition) {
     badges += '</div>';
 
     card.innerHTML = `
-        <div class="exhibition-card__image">
+        <div class="exhibition-card__image-container">
             <img src="${imageUrl}"
                  alt="${title}"
-                 class="exhibition-image"
+                 class="exhibition-card__image"
                  onerror="this.onerror=null; this.src='/images/default-exhibition.svg'">
         </div>
         <div class="exhibition-card__content">
             ${badges}
-            <h3 class="exhibition-title">${title}</h3>
-            ${description ? `<p class="exhibition-description">${description.length > 70 ? description.substring(0, 70) + '...' : description}</p>` : ''}
-            <div class="exhibition-meta">
-                <span class="exhibition-date">
+            <h3 class="exhibition-card__title">${title}</h3>
+            ${description ? `<p class="exhibition-card__description">${description.length > 70 ? description.substring(0, 70) + '...' : description}</p>` : ''}
+            <div class="exhibition-card__meta">
+                <span class="exhibition-card__date">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                     </svg>
@@ -370,8 +380,8 @@ function initExhibitionCardEvents() {
         card.addEventListener('click', () => {
             const exhibitionData = {
                 id: card.dataset.exhibitionId,
-                image: card.querySelector('.exhibition-image')?.src,
-                title: card.querySelector('.exhibition-title')?.textContent?.trim(),
+                image: card.querySelector('.exhibition-card__image')?.src,
+                title: card.querySelector('.exhibition-card__title')?.textContent?.trim(),
                 startDate: card.dataset.startDate,
                 endDate: card.dataset.endDate,
                 date: `${card.dataset.startDate} ~ ${card.dataset.endDate}`,

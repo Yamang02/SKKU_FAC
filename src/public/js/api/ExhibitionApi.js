@@ -4,7 +4,7 @@
  */
 import api from './index.js';
 import { showErrorMessage } from '../common/util/notification.js';
-import { createFilterParams } from '../common/filters.js';
+
 
 export default class ExhibitionApi {
     /**
