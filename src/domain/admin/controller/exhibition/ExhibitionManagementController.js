@@ -180,13 +180,7 @@ export default class ExhibitionManagementController {
     async toggleFeatured(req, res) {
         try {
             const exhibitionId = req.params.id;
-            console.log(`[DEBUG] 전시회(${exhibitionId}) 주요 전시 토글 요청 시작`);
-
-            const exhibition = await this.exhibitionManagementService.getExhibitionDetail(exhibitionId);
-            console.log(`[DEBUG] 현재 isFeatured 값: ${exhibition.isFeatured}`);
-
             const updatedExhibition = await this.exhibitionManagementService.toggleFeatured(exhibitionId);
-            console.log(`[DEBUG] 토글 후 isFeatured 값: ${updatedExhibition.isFeatured}`);
 
             req.flash('success', `전시회가 ${updatedExhibition.isFeatured ? '주요 전시로 설정' : '일반 전시로 변경'}되었습니다.`);
             res.redirect('/admin/management/exhibition');

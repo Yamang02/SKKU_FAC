@@ -38,6 +38,18 @@ export default class ExhibitionService {
         return new ExhibitionSimpleDto(exhibition);
     }
 
+    async getFeaturedExhibitions(limit = 5) {
+        const exhibitions = await this.exhibitionRepository.findFeaturedExhibitions(limit);
+        const exhibitionSimpleDtos = [];
+        if (exhibitions.length > 0) {
+            for (const exhibition of exhibitions) {
+                const exhibitionSimpleDto = new ExhibitionSimpleDto(exhibition);
+                exhibitionSimpleDtos.push(exhibitionSimpleDto);
+            }
+        }
+        return exhibitionSimpleDtos;
+    }
+
     // ===== 관리자용 메서드 =====
     /**
      * 새로운 전시회를 생성합니다.
@@ -109,20 +121,7 @@ export default class ExhibitionService {
      */
     async updateManagementExhibition(id, exhibitionData) {
         try {
-            console.log(`[DEBUG] ExhibitionService.updateManagementExhibition - ID: ${id}`);
-            console.log('[DEBUG] 수정 요청 데이터:', exhibitionData);
-
-            if ('isFeatured' in exhibitionData) {
-                console.log(`[DEBUG] isFeatured 값: ${exhibitionData.isFeatured}, 타입: ${typeof exhibitionData.isFeatured}`);
-            }
-
             const updatedExhibition = await this.exhibitionRepository.updateExhibition(id, exhibitionData);
-            console.log('[DEBUG] 업데이트 후 전시회:', updatedExhibition ? {
-                id: updatedExhibition.id,
-                title: updatedExhibition.title,
-                isFeatured: updatedExhibition.isFeatured
-            } : 'null');
-
             return updatedExhibition;
         } catch (error) {
             console.error('전시회 수정 중 오류:', error);

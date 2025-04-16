@@ -199,7 +199,6 @@ export default class ExhibitionRepository {
         // isFeatured 필드가 있으면 형변환 처리
         if ('isFeatured' in updatedData) {
             updatedData.isFeatured = updatedData.isFeatured === 'true' || updatedData.isFeatured === true;
-            console.log(`[DEBUG] 전시회(${id}) isFeatured 값 업데이트: ${updatedData.isFeatured}`);
         }
 
         // 항상 업데이트 시간은 갱신
@@ -254,5 +253,12 @@ export default class ExhibitionRepository {
         }
 
         return exhibitions;
+    }
+
+    async findFeaturedExhibitions(limit = 10) {
+        return await Exhibition.findAll({
+            where: { is_featured: true },
+            limit: parseInt(limit, 10)
+        });
     }
 }

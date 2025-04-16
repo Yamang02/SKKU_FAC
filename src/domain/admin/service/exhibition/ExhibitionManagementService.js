@@ -150,9 +150,7 @@ export default class ExhibitionManagementService {
                 throw new Error(`ID가 ${exhibitionId}인 전시회를 찾을 수 없습니다.`);
             }
 
-            console.log(`[DEBUG] 토글 전 isFeatured 값: ${exhibition.isFeatured}, 타입: ${typeof exhibition.isFeatured}`);
             const newIsFeaturedValue = !exhibition.isFeatured;
-            console.log(`[DEBUG] 토글 후 변경할 isFeatured 값: ${newIsFeaturedValue}, 타입: ${typeof newIsFeaturedValue}`);
 
             // 기존 값의 반대로 설정 - 오직 isFeatured 필드만 변경하고 나머지는 유지
             const updatedExhibition = await this.exhibitionService.updateManagementExhibition(
@@ -160,7 +158,6 @@ export default class ExhibitionManagementService {
                 { isFeatured: newIsFeaturedValue }
             );
 
-            console.log(`[DEBUG] 업데이트 결과 isFeatured 값: ${updatedExhibition.isFeatured}, 타입: ${typeof updatedExhibition.isFeatured}`);
             return updatedExhibition;
         } catch (error) {
             console.error('전시회 주요 전시 설정 오류:', error);

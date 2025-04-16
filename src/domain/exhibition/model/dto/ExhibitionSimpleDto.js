@@ -5,14 +5,9 @@ export default class ExhibitionSimpleDto {
     constructor(exhibition) {
         this.id = exhibition.id;
         this.title = exhibition.title;
+        this.isFeatured = exhibition.isFeatured;
+        this.imageUrl = exhibition.imageUrl || '';
         this.isSubmissionOpen = exhibition.isSubmissionOpen === true;
     }
 
-    toJSON() {
-        return {
-            id: this.id,
-            title: this.title,
-            isSubmissionOpen: this.isSubmissionOpen
-        };
-    }
 }

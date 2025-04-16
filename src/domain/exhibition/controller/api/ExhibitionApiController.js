@@ -171,5 +171,19 @@ export default class ExhibitionApiController {
         }
     }
 
+    /**
+     * 주요 전시회 목록을 조회합니다.
+     */
+    async getFeaturedExhibitions(req, res) {
+        try {
+            const limit = req.query.limit || 5;
+            const exhibitions = await this.exhibitionService.getFeaturedExhibitions(limit);
+            return res.json(ApiResponse.success(exhibitions));
+        } catch (error) {
+            console.error('주요 전시회 목록 조회 중 오류:', error);
+            return res.status(500).json(ApiResponse.error(error.message));
+        }
+    }
+
 }
 

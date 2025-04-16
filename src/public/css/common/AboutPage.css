@@ -6,7 +6,7 @@
 
 /* 히어로 섹션 */
 .about-hero {
-    background-color: var(--color-background-light);
+    background-color: var(--color-primary);
     padding: 6rem 0;
     text-align: center;
     margin-bottom: 4rem;
@@ -15,7 +15,7 @@
 .about-hero h1 {
     font-size: 3rem;
     font-weight: 700;
-    color: var(--color-text-primary);
+    color: white;
     margin-bottom: 1rem;
 }
 

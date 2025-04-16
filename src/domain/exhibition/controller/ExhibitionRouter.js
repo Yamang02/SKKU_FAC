@@ -8,7 +8,7 @@ const exhibitionApiController = new ExhibitionApiController();
 // API 라우트
 ExhibitionRouter.get('/api/submittable', (req, res) => exhibitionApiController.findSubmittableExhibitions(req, res));
 ExhibitionRouter.get('/api/list', (req, res) => exhibitionApiController.getExhibitionList(req, res));
-
+ExhibitionRouter.get('/api/featured', (req, res) => exhibitionApiController.getFeaturedExhibitions(req, res));
 // 일반 사용자용 전시회 라우트
 ExhibitionRouter.get('/', (req, res) => exhibitionController.getExhibitionListPage(req, res));
 ExhibitionRouter.get('/:id', (req, res) => exhibitionController.getExhibitionDetail(req, res));

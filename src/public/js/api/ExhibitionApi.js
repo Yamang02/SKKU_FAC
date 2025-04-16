@@ -160,4 +160,20 @@ export default class ExhibitionApi {
             throw error;
         }
     }
+
+    /**
+     * 주요 전시회 목록을 조회합니다.
+     * @param {number} limit - 최대 표시할 전시회 수
+     * @returns {Promise<Object>} 주요 전시회 목록
+     */
+    static async getFeaturedExhibitions(limit = 5) {
+        try {
+            const response = await api.get(`/exhibition/api/featured?limit=${limit}`);
+            return response;
+        } catch (error) {
+            console.error('주요 전시회 목록을 가져오는 중 오류 발생:', error);
+            showErrorMessage('주요 전시회 목록을 불러오는데 실패했습니다.');
+            throw error;
+        }
+    }
 }
