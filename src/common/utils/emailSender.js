@@ -8,6 +8,20 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+export const sendPasswordResetEmail = async (to, tempPassword) => {
+
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to,
+        subject: '비밀번호 초기화 요청',
+        html: `<p>아래 비밀번호로 로그인하세요:</p>
+           <p>${tempPassword}</p>`
+    };
+
+    await transporter.sendMail(mailOptions);
+};
+
+
 export const sendVerificationEmail = async (to, token) => {
     const verifyUrl = `${process.env.BASE_URL}/user/verify-email?token=${token}`;
 

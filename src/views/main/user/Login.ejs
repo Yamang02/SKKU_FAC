@@ -29,8 +29,8 @@
                         </div>
                         <div class="form-check-user">
                             <div class="form-check-wrapper-user">
-                                <input type="checkbox" id="remember" name="remember" class="form-check-input-user">
-                                <label class="form-check-label-user" for="remember">로그인 상태 유지</label>
+                                <input type="hidden" id="remember" name="remember" class="form-check-input-user">
+                                <!-- <label class="form-check-label-user" for="remember">로그인 상태 유지</label> -->
                             </div>
                         </div>
                         <input type="hidden" name="redirectUrl" value="<%= locals.redirectUrl || '/' %>">
@@ -41,7 +41,7 @@
 
                         <div class="form-links-user">
                             <a href="/user/new" class="link-user">회원가입</a>
-                            <a href="/user/forgot-password" class="link-user">비밀번호 찾기</a>
+                            <a href="/user/password/reset" class="link-user">비밀번호 찾기</a>
                         </div>
                     </form>
         </div>

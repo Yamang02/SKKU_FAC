@@ -44,7 +44,7 @@ UserRouter.get('/me', isAuthenticated, (req, res) => userController.getUserProfi
 
 // 비밀번호 재설정
 UserRouter.get('/password/reset', isNotAuthenticated, (req, res) => userController.getUserPasswordResetPage(req, res));
-UserRouter.post('/password/reset', isNotAuthenticated, (req, res) => userController.handleUserPasswordReset(req, res));
+UserRouter.post('/password/reset', isNotAuthenticated, (req, res) => userApiController.resetPassword(req, res));
 
 // 이메일 인증
 UserRouter.get('/verify-email', (req, res) => userController.verifyEmail(req, res));

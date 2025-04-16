@@ -4,7 +4,7 @@ import UserSimpleDto from '../model/dto/UserSimpleDto.js';
 import UserDetailDto from '../model/dto/UserDetailDto.js';
 import { UserNotFoundError, UserEmailDuplicateError, UserUsernameDuplicateError } from '../../../common/error/UserError.js';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
-import { sendVerificationEmail } from '../../../common/utils/emailSender.js';
+import { sendVerificationEmail, sendPasswordResetEmail } from '../../../common/utils/emailSender.js';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -67,6 +67,7 @@ export default class UserService {
 
         const Createduser = await this.userRepository.createUser(userDto);
         ('Createduser:', Createduser);
+
         // 이메일 전송
         try {
             await sendVerificationEmail(userDto.email, token);
@@ -270,7 +271,7 @@ export default class UserService {
     }
 
     /**
-     * 비밀번호를 재설정합니다.
+     * 비밀번호를 초기화합니다.
      */
     async resetPassword(email) {
         const user = await this.userRepository.findUserByEmail(email);
@@ -283,13 +284,23 @@ export default class UserService {
         const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
         // 비밀번호 업데이트
-        await this.userRepository.updateUser(user.id, { password: hashedPassword });
+        const updatedUser = await this.userRepository.updateUser(user.id, { password: hashedPassword });
 
-        return tempPassword;
+        // 이메일 전송
+        try {
+            await sendPasswordResetEmail(email, tempPassword);
+        } catch (emailError) {
+            console.error('❌ 이메일 전송 실패:', emailError);
+            throw new Error('사용자 생성은 완료되었지만, 이메일 전송에 실패했습니다.');
+        }
+
+        const userSimpleDto = new UserSimpleDto(updatedUser);
+
+        return userSimpleDto;
     }
 
     /**
-     * 사용자 프로필 정보를 매핑핑합니다.
+     * 사용자 프로필 정보를 매핑합니다.
      */
     mapUserToDto(user) {
         const dtoData = new UserDetailDto(user);
