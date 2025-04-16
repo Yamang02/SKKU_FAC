@@ -12,7 +12,7 @@ import methodOverride from 'method-override';
 import { isAdmin } from './common/middleware/auth.js';
 
 // 라우터 import
-import { HomeRouter, NoticeRouter, ExhibitionRouter, ArtworkRouter, UserRouter, AdminRouter } from './routeIndex.js';
+import { HomeRouter, NoticeRouter, ExhibitionRouter, ArtworkRouter, UserRouter, AdminRouter, AuthRouter } from './routeIndex.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -171,7 +171,7 @@ app.use('/exhibition', ExhibitionRouter);
 app.use('/artwork', ArtworkRouter);
 app.use('/user', UserRouter);
 app.use('/admin', isAdmin, AdminRouter);
-
+app.use('/auth', AuthRouter);
 console.log('✅ 라우터 설정 완료');
 
 // 404 에러 처리

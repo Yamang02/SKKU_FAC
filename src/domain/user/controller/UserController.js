@@ -1,11 +1,13 @@
 import ViewResolver from '../../../common/utils/ViewResolver.js';
 import { ViewPath } from '../../../common/constants/ViewPath.js';
 import UserService from '../service/UserService.js';
+import AuthService from '../../auth/service/AuthService.js';
 
 
 export default class UserController {
     constructor() {
         this.userService = new UserService();
+        this.authService = new AuthService();
     }
 
     // === 사용자 페이지 렌더링 ===
@@ -63,7 +65,12 @@ export default class UserController {
                 throw new Error('잘못된 요청입니다.');
             }
 
-            await this.userService.verifyEmail(token);
+            const tokenData = await this.authService.verifyToken(token, 'EMAIL_VERIFICATION');
+            if (!tokenData) {
+                throw new Error('잘못된 요청입니다.');
+            }
+
+            await this.userService.activateUser(tokenData.userId);
 
             req.session.flash = {
                 type: 'success',

@@ -58,7 +58,7 @@ const Artwork = db.define('Artwork', {
         comment: '주요 작품 여부'
     },
     userId: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(100),
         allowNull: false,
         references: {
             model: 'user_accounts',

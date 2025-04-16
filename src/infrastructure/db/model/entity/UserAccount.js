@@ -55,16 +55,6 @@ const UserAccount = db.define('UserAccount', {
         allowNull: false,
         defaultValue: false,
         comment: '이메일 인증 여부'
-    },
-    emailVerificationToken: {
-        type: DataTypes.STRING(100),
-        allowNull: true,
-        comment: '이메일 인증을 위한 토큰 (uuid 등)'
-    },
-    emailVerificationTokenExpiry: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        comment: '이메일 인증 토큰 만료 시간'
     }
 }, {
     timestamps: true,
