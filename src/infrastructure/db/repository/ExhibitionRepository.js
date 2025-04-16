@@ -27,10 +27,13 @@ export default class ExhibitionRepository {
             page = 1,
             limit = 10,
             type,
+            exhibitionType,
             year,
             category,
             isSubmissionOpen,
+            isFeatured,
             keyword,
+            search,
             searchType = 'title',
             sortField = 'createdAt',
             sortOrder = 'DESC'
@@ -39,9 +42,9 @@ export default class ExhibitionRepository {
         const offset = (page - 1) * limit; // 페이지네이션을 위한 오프셋 계산
         const where = {};
 
-        // 전시회 유형 필터링
-        if (type) {
-            where.exhibition_type = type;
+        // 전시회 유형 필터링 (type 또는 exhibitionType 사용)
+        if (exhibitionType || type) {
+            where.exhibition_type = exhibitionType || type;
         }
 
         // 연도 필터링 (start_date의 연도 부분)
@@ -64,12 +67,17 @@ export default class ExhibitionRepository {
             // true는 1, false는 0에 매핑
             // 반드시 is_submission_open 컬럼명 사용
             where.is_submission_open = isSubmissionOpen;
-
         }
 
-        // 키워드 검색 - MySQL에서는 ILIKE 대신 LIKE 사용
-        if (keyword) {
-            const likePattern = `%${keyword}%`;
+        // 주요 전시 여부 필터링
+        if (isFeatured !== undefined) {
+            where.is_featured = isFeatured;
+        }
+
+        // 키워드 검색 - MySQL에서는 ILIKE 대신 LIKE 사용 (keyword 또는 search 사용)
+        const searchKeyword = search || keyword;
+        if (searchKeyword) {
+            const likePattern = `%${searchKeyword}%`;
             if (searchType === 'title') {
                 // MySQL에서는 대소문자 구분 없이 검색하려면 LOWER 함수 사용
                 where.title = Sequelize.where(
@@ -180,12 +188,18 @@ export default class ExhibitionRepository {
         const exhibition = await Exhibition.findByPk(id);
         if (!exhibition) return null;
 
-        await exhibition.update({
-            ...exhibitionData,
-            isSubmissionOpen: exhibitionData.isSubmissionOpen === 'true' || exhibitionData.isSubmissionOpen === true,
-            updatedAt: new Date()
-        });
+        // 제공된 데이터의 속성만 업데이트하고 나머지는 유지
+        const updatedData = { ...exhibitionData };
 
+        // isSubmissionOpen 필드가 있으면 형변환 처리
+        if ('isSubmissionOpen' in updatedData) {
+            updatedData.isSubmissionOpen = updatedData.isSubmissionOpen === 'true' || updatedData.isSubmissionOpen === true;
+        }
+
+        // 항상 업데이트 시간은 갱신
+        updatedData.updatedAt = new Date();
+
+        await exhibition.update(updatedData);
         return exhibition;
     }
 

@@ -17,6 +17,7 @@ export default class ExhibitionManagementController {
             const filters = {
                 exhibitionType: req.query.exhibitionType,
                 featured: req.query.featured,
+                year: req.query.year ? parseInt(req.query.year) : null,
                 keyword: req.query.keyword
             };
 
@@ -170,6 +171,23 @@ export default class ExhibitionManagementController {
             console.error('전시회 삭제 중 오류:', error);
             req.flash('error', error.message || '전시회 삭제 중 오류가 발생했습니다.');
             res.redirect('/admin/management/exhibition'); // 전시회 목록 페이지로 리다이렉트
+        }
+    }
+
+    /**
+     * 전시회의 주요 전시 여부를 토글합니다.
+     */
+    async toggleFeatured(req, res) {
+        try {
+            const exhibitionId = req.params.id;
+            const updatedExhibition = await this.exhibitionManagementService.toggleFeatured(exhibitionId);
+
+            req.flash('success', `전시회가 ${updatedExhibition.isFeatured ? '주요 전시로 설정' : '일반 전시로 변경'}되었습니다.`);
+            res.redirect('/admin/management/exhibition');
+        } catch (error) {
+            console.error('전시회 주요 전시 설정 중 오류:', error);
+            req.flash('error', '전시회 주요 전시 설정 중 오류가 발생했습니다.');
+            res.redirect('/admin/management/exhibition');
         }
     }
 }

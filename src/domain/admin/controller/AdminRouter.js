@@ -27,6 +27,7 @@ AdminRouter.post('/management/exhibition/new', imageUploadMiddleware('exhibition
 AdminRouter.get('/management/exhibition/:id', (req, res) => exhibitionManagementController.getManagementExhibitionDetailPage(req, res));
 AdminRouter.put('/management/exhibition/:id', (req, res) => exhibitionManagementController.updateManagementExhibition(req, res));
 AdminRouter.delete('/management/exhibition/:id', (req, res) => exhibitionManagementController.deleteManagementExhibition(req, res));
+AdminRouter.post('/management/exhibition/:id/featured', (req, res) => exhibitionManagementController.toggleFeatured(req, res));
 
 // 작품 관리
 AdminRouter.get('/management/artwork', (req, res) => artworkManagementController.getManagementArtworkListPage(req, res));

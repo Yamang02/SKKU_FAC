@@ -24,6 +24,15 @@
                 <option value="true" <%=filters?.featured==='true' ? 'selected' : '' %>>주요 전시</option>
                 <option value="false" <%=filters?.featured==='false' ? 'selected' : '' %>>일반 전시</option>
             </select>
+            <select class="admin-filter__select" name="year">
+                <option value="">연도 선택</option>
+                <% const currentYear=new Date().getFullYear(); for (let year=currentYear + 1; year>= currentYear - 5;
+                    year--) {
+                    %>
+                    <option value="<%= year %>" <%=filters?.year==year ? 'selected' : '' %>><%= year %>
+                    </option>
+                    <% } %>
+            </select>
             <input type="text" class="admin-filter__input" name="keyword" placeholder="검색어"
                 value="<%= filters?.keyword || '' %>">
             <button class="admin-button admin-button--primary" id="btnApplyFilter">
@@ -83,15 +92,20 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="admin-badge admin-badge--<%= exhibition.exhibitionType %>">
+                                    <span class="exhibition-badge badge-<%= exhibition.exhibitionType %>">
                                         <%= exhibition.exhibitionTypeDisplayName %>
                                     </span>
                                 </td>
                                 <td>
-                                    <span
-                                        class="admin-badge admin-badge--<%= exhibition.isFeatured ? 'featured' : 'normal' %>">
-                                        <%= exhibition.featuredDisplayName %>
-                                    </span>
+                                    <form action="/admin/management/exhibition/<%= exhibition.id %>/featured"
+                                        method="POST" style="display:inline;">
+                                        <button type="submit"
+                                            class="admin-button <%= exhibition.isFeatured ? 'admin-button--feature admin-button--featured' : 'admin-button--feature' %>"
+                                            title="<%= exhibition.isFeatured ? '주요 전시 해제' : '주요 전시 설정' %>">
+                                            <i
+                                                class="fas fa-star <%= exhibition.isFeatured ? 'featured-star' : 'unfeatured-star' %>"></i>
+                                        </button>
+                                    </form>
                                 </td>
                                 <td>
                                     <div class="admin-button-group">
@@ -121,10 +135,13 @@
         <!-- 페이지네이션 섹션 -->
         <div class="admin-pagination">
             <% if (typeof page !=='undefined' && page) { %>
-                <button class="admin-pagination__button" id="firstPageBtn" <%=page.currentPage===1 ? 'disabled' : '' %>>
+                <button class="admin-pagination__button" id="firstPageBtn" onclick="goToPage(1)" <%=page.currentPage===1
+                    ? 'disabled' : '' %>>
                     <i class="fas fa-angle-double-left"></i>
                 </button>
-                <button class="admin-pagination__button" id="prevPageBtn" <%=page.currentPage===1 ? 'disabled' : '' %>>
+                <button class="admin-pagination__button" id="prevPageBtn"
+                    onclick="goToPage(<%= Math.max(1, page.currentPage - 1) %>)" <%=page.currentPage===1 ? 'disabled'
+                    : '' %>>
                     <i class="fas fa-angle-left"></i>
                 </button>
 
@@ -133,17 +150,19 @@
                         <% for (let i=startPage; i <=endPage; i++) { %>
                             <button
                                 class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>"
-                                id="pageBtn<%= i %>">
+                                id="pageBtn<%= i %>" onclick="goToPage(<%= i %>)">
                                 <%= i %>
                             </button>
                             <% } %>
 
                                 <button class="admin-pagination__button" id="nextPageBtn"
+                                    onclick="goToPage(<%= Math.min(page.totalPages, page.currentPage + 1) %>)"
                                     <%=page.currentPage===page.totalPages ? 'disabled' : '' %>>
                                     <i class="fas fa-angle-right"></i>
                                 </button>
                                 <button class="admin-pagination__button" id="lastPageBtn"
-                                    <%=page.currentPage===page.totalPages ? 'disabled' : '' %>>
+                                    onclick="goToPage(<%= page.totalPages %>)" <%=page.currentPage===page.totalPages
+                                    ? 'disabled' : '' %>>
                                     <i class="fas fa-angle-double-right"></i>
                                 </button>
                                 <% } %>
@@ -172,12 +191,55 @@
         border-radius: 4px;
     }
 
-    .admin-badge--featured {
-        background-color: #8bfc75;
+    /* 배지 스타일 */
+    .exhibition-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: white;
+        text-align: center;
     }
 
-    .admin-badge--normal {
-        background-color: #78909c;
+    .badge-regular {
+        background-color: #4e7aad;
+    }
+
+    .badge-special {
+        background-color: #d14f4f;
+    }
+
+    .badge-submission-open {
+        background-color: #2ea44f;
+    }
+
+    /* 별 아이콘 스타일 */
+    .featured-star {
+        color: #ffc107;
+    }
+
+    .unfeatured-star {
+        color: #424242;
+    }
+
+    /* 버튼 스타일 */
+    .admin-button--feature {
+        background-color: #f5f5f5;
+        color: #424242;
+    }
+
+    .admin-button--feature:hover {
+        background-color: #e0e0e0;
+    }
+
+    .admin-button--featured {
+        background-color: #fff8e1;
+        color: #ff8f00;
+    }
+
+    .admin-button--featured:hover {
+        background-color: #ffecb3;
     }
 </style>
 
@@ -213,6 +275,7 @@
     document.getElementById('btnApplyFilter').addEventListener('click', function () {
         const exhibitionType = document.querySelector('select[name="exhibitionType"]').value;
         const featured = document.querySelector('select[name="featured"]').value;
+        const year = document.querySelector('select[name="year"]').value;
         const keyword = document.querySelector('input[name="keyword"]').value;
 
         const currentUrl = new URL(window.location.href);
@@ -228,6 +291,12 @@
             searchParams.set('featured', featured);
         } else {
             searchParams.delete('featured');
+        }
+
+        if (year) {
+            searchParams.set('year', year);
+        } else {
+            searchParams.delete('year');
         }
 
         if (keyword) {
@@ -249,13 +318,12 @@
             });
         }
 
-    });
-
-    // 삭제 버튼 이벤트 처리
-    document.querySelectorAll('.delete-exhibition-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const id = this.getAttribute('data-id');
-            deleteExhibition(id);
+        // 삭제 버튼 이벤트 처리
+        document.querySelectorAll('.delete-exhibition-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.getAttribute('data-id');
+                deleteExhibition(id);
+            });
         });
     });
 </script>

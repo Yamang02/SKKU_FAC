@@ -17,7 +17,7 @@ export default class ExhibitionManagementService {
      */
     async getExhibitionList(options) {
         try {
-            const { page = 1, limit = 10, exhibitionType, featured, keyword } = options;
+            const { page = 1, limit = 10, exhibitionType, featured, year, keyword } = options;
 
             // 옵션 변환
             const serviceOptions = {
@@ -25,6 +25,7 @@ export default class ExhibitionManagementService {
                 limit,
                 exhibitionType,
                 isFeatured: featured,
+                year,
                 search: keyword
             };
 
@@ -46,6 +47,7 @@ export default class ExhibitionManagementService {
                 filters: {
                     exhibitionType,
                     featured,
+                    year,
                     keyword
                 }
             });
@@ -132,6 +134,31 @@ export default class ExhibitionManagementService {
             return await this.exhibitionService.deleteManagementExhibition(exhibitionId);
         } catch (error) {
             console.error('전시회 삭제 서비스 오류:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 전시회의 주요 전시 여부를 토글합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @returns {Promise<Object>} 수정된 전시회 정보
+     */
+    async toggleFeatured(exhibitionId) {
+        try {
+            const exhibition = await this.exhibitionService.getExhibitionById(exhibitionId);
+            if (!exhibition) {
+                throw new Error(`ID가 ${exhibitionId}인 전시회를 찾을 수 없습니다.`);
+            }
+
+            // 기존 값의 반대로 설정 - 오직 isFeatured 필드만 변경하고 나머지는 유지
+            const updatedExhibition = await this.exhibitionService.updateManagementExhibition(
+                exhibitionId,
+                { isFeatured: !exhibition.isFeatured }
+            );
+
+            return updatedExhibition;
+        } catch (error) {
+            console.error('전시회 주요 전시 설정 오류:', error);
             throw error;
         }
     }

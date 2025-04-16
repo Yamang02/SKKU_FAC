@@ -55,7 +55,7 @@ export default class ExhibitionService {
      */
     async getManagementExhibitions(options) {
         try {
-            const { page = 1, limit = 10, exhibitionType, isFeatured, search } = options;
+            const { page = 1, limit = 10, exhibitionType, isFeatured, year, search } = options;
             const filterOptions = { page, limit };
 
             // 필터 적용
@@ -67,6 +67,10 @@ export default class ExhibitionService {
                 filterOptions.isFeatured = true;
             } else if (isFeatured === false || isFeatured === 'false') {
                 filterOptions.isFeatured = false;
+            }
+
+            if (year) {
+                filterOptions.year = year;
             }
 
             if (search) {
