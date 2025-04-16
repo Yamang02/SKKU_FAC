@@ -20,6 +20,7 @@ export default class ExhibitionResponseDto {
         this.artworkCount = data.artworkCount || 0;
         this.isActive = data.isActive || false;
         this.isSubmissionOpen = data.isSubmissionOpen || false;
+        this.isFeatured = data.isFeatured || false;
         this.createdAt = data.createdAt || new Date().toISOString();
         this.updatedAt = data.updatedAt || new Date().toISOString();
 

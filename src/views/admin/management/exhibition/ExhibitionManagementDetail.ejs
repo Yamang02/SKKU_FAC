@@ -52,10 +52,10 @@
                     <div class="form-group featured-group">
                         <label for="isFeatured">주요 전시회 여부(홈페이지 표시)</label>
                         <select id="isFeatured" name="isFeatured" class="form-control">
-                            <option value="true" <%=exhibition && exhibition.isFeatured ? 'selected' : '' %>>주요 전시회
-                            </option>
-                            <option value="false" <%=exhibition && !exhibition.isFeatured ? 'selected' : '' %>>일반 전시회
-                            </option>
+                            <option value="true" <%=exhibition && exhibition.isFeatured===true ? 'selected' : '' %>>주요
+                                전시회</option>
+                            <option value="false" <%=exhibition && (exhibition.isFeatured===false ||
+                                exhibition.isFeatured===undefined) ? 'selected' : '' %>>일반 전시회</option>
                         </select>
                     </div>
 
@@ -288,6 +288,9 @@
                 // Boolean 값 처리
                 formData.isSubmissionOpen = formData.isSubmissionOpen === 'true';
                 formData.isFeatured = formData.isFeatured === 'true';
+
+                // 디버그 로그
+                console.log(`[DEBUG] 폼 데이터 제출: isFeatured=${formData.isFeatured}, 타입: ${typeof formData.isFeatured}`);
 
                 // 업데이트 시간 추가
                 formData.updatedAt = now;

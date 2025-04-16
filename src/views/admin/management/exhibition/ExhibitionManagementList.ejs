@@ -100,10 +100,10 @@
                                     <form action="/admin/management/exhibition/<%= exhibition.id %>/featured"
                                         method="POST" style="display:inline;">
                                         <button type="submit"
-                                            class="admin-button <%= exhibition.isFeatured ? 'admin-button--feature admin-button--featured' : 'admin-button--feature' %>"
-                                            title="<%= exhibition.isFeatured ? '주요 전시 해제' : '주요 전시 설정' %>">
+                                            class="admin-button <%= exhibition.isFeatured === true ? 'admin-button--feature admin-button--featured' : 'admin-button--feature' %>"
+                                            title="<%= exhibition.isFeatured === true ? '주요 전시 해제' : '주요 전시 설정' %>">
                                             <i
-                                                class="fas fa-star <%= exhibition.isFeatured ? 'featured-star' : 'unfeatured-star' %>"></i>
+                                                class="fas fa-star <%= exhibition.isFeatured === true ? 'featured-star' : 'unfeatured-star' %>"></i>
                                         </button>
                                     </form>
                                 </td>

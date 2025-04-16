@@ -5,7 +5,7 @@ export default class ExhibitionSimpleDto {
     constructor(exhibition) {
         this.id = exhibition.id;
         this.title = exhibition.title;
-        this.isSubmissionOpen = exhibition.isSubmissionOpen || false;
+        this.isSubmissionOpen = exhibition.isSubmissionOpen === true;
     }
 
     toJSON() {

@@ -14,9 +14,9 @@ export default class ExhibitionListDto {
         this.imagePublicId = data.imagePublicId || null;
         this.exhibitionType = data.exhibitionType || 'regular';
         this.artworkCount = data.artworkCount || 0;
-        this.isActive = data.isActive || false;
-        this.isSubmissionOpen = data.isSubmissionOpen || false;
-        this.isFeatured = data.isFeatured || false;
+        this.isActive = data.isActive === true;
+        this.isSubmissionOpen = data.isSubmissionOpen === true;
+        this.isFeatured = data.isFeatured === true;
     }
 
 }
