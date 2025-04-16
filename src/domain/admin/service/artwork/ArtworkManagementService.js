@@ -22,21 +22,22 @@ export default class ArtworkManagementService {
      */
     async getArtworkList(options) {
         try {
-            const { page, limit, artistId, keyword, status, isFeatured } = options;
-            const filterOptions = { ...options };
+            const { page, limit, keyword, status, isFeatured, sortField, sortOrder } = options;
+            const filterOptions = {
+                page,
+                limit,
+                keyword,
+                status,
+                sortField: sortField || 'createdAt',
+                sortOrder: sortOrder || 'desc'
+            };
 
-            if (artistId) {
-                filterOptions.artistId = artistId;
-            }
-
-            if (keyword) {
-                filterOptions.keyword = keyword;
-            }
-
+            // 상태 필터링
             if (status) {
                 filterOptions.status = status;
             }
 
+            // 주요 작품 필터링 처리
             if (isFeatured === 'true') {
                 filterOptions.isFeatured = true;
             } else if (isFeatured === 'false') {
@@ -45,7 +46,6 @@ export default class ArtworkManagementService {
 
             const result = await this.artworkRepository.findArtworks(filterOptions, true);
             const artworks = result.items || [];
-            (artworks);
             const total = result.total || 0;
 
             // 작품 목록 DTO 변환
@@ -67,25 +67,20 @@ export default class ArtworkManagementService {
                 artworkDtos.push(artworkData);
             }
 
-            // 작가 목록 조회 (필터용)
-            const artists = [];
-
             // 페이지네이션 정보 생성
             const pageInfo = new Page(total, { page, limit });
-
-            (artworkDtos);
 
             return {
                 artworks: artworkDtos,
                 total,
                 page: pageInfo,
-                artists,
                 filters: {
-                    artistId: options.artistId,
                     keyword: options.keyword,
                     status: options.status,
                     isFeatured: options.isFeatured
-                }
+                },
+                sortField: options.sortField || 'createdAt',
+                sortOrder: options.sortOrder || 'desc'
             };
         } catch (error) {
             console.error('작품 목록 조회 서비스 오류:', error);

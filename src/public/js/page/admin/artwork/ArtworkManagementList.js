@@ -14,7 +14,8 @@ class ArtworkManagementList {
         // URL 파라미터에서 초기값 설정
         const urlParams = new URLSearchParams(window.location.search);
         this.pagination.page = parseInt(urlParams.get('page')) || 1;
-        this.filters.artistId = urlParams.get('artistId') || '';
+        this.pagination.sort = urlParams.get('sort') || 'createdAt';
+        this.pagination.order = urlParams.get('order') || 'desc';
         this.filters.keyword = urlParams.get('keyword') || '';
 
         this.initEventListeners();
@@ -23,6 +24,14 @@ class ArtworkManagementList {
     initEventListeners() {
         // 필터 적용 버튼
         document.getElementById('btnApplyFilter')?.addEventListener('click', () => this.handleFilter());
+
+        // 정렬 버튼들에 이벤트 리스너 추가
+        document.querySelectorAll('.sort-btn')?.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const field = e.currentTarget.getAttribute('data-sort');
+                this.handleSort(field);
+            });
+        });
     }
 
     async deleteArtwork(id) {
@@ -57,20 +66,29 @@ class ArtworkManagementList {
 
     goToPage(page) {
         this.pagination.page = page;
-        const pageParams = this.pagination.toQueryParams();
-        const filterParams = createFilterParams(this.filters);
-        const queryString = [pageParams, filterParams]
-            .filter(Boolean)
-            .join('&');
+        this.applyFiltersAndSort();
+    }
 
-        window.location.href = `${window.location.pathname}?${queryString}`;
+    handleSort(field) {
+        // 같은 필드로 정렬할 경우 오름차순/내림차순 토글
+        if (this.pagination.sort === field) {
+            this.pagination.order = this.pagination.order === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.pagination.sort = field;
+            this.pagination.order = 'desc'; // 기본 내림차순
+        }
+
+        this.applyFiltersAndSort();
     }
 
     handleFilter() {
-        this.filters.artistId = document.querySelector('select[name="artistId"]').value;
         this.filters.keyword = document.querySelector('input[name="keyword"]').value;
         this.pagination.page = 1; // 필터 변경시 첫 페이지로
 
+        this.applyFiltersAndSort();
+    }
+
+    applyFiltersAndSort() {
         const pageParams = this.pagination.toQueryParams();
         const filterParams = createFilterParams(this.filters);
         const queryString = [pageParams, filterParams]

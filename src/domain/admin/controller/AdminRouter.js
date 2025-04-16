@@ -33,6 +33,7 @@ AdminRouter.get('/management/artwork', (req, res) => artworkManagementController
 AdminRouter.get('/management/artwork/:id', (req, res) => artworkManagementController.getManagementArtworkDetailPage(req, res));
 AdminRouter.put('/management/artwork/:id', (req, res) => artworkManagementController.updateManagementArtwork(req, res));
 AdminRouter.delete('/management/artwork/:id', (req, res) => artworkManagementController.deleteManagementArtwork(req, res));
+AdminRouter.post('/management/artwork/:id/featured', (req, res) => artworkManagementController.toggleFeatured(req, res));
 
 // 공지사항 관리
 AdminRouter.get('/management/notice', (req, res) => noticeManagementController.getManagementNoticeList(req, res));

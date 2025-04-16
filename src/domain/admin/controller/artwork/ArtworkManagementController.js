@@ -14,25 +14,29 @@ export default class ArtworkManagementController {
         try {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
-            const artistId = req.query.artistId || null;
             const keyword = req.query.keyword || null;
             const status = req.query.status || null;
             const isFeatured = req.query.isFeatured || null;
+            const sort = req.query.sort || 'createdAt';
+            const order = req.query.order || 'desc';
 
             const artworkListData = await this.artworkManagementService.getArtworkList({
                 page,
                 limit,
-                artistId,
                 keyword,
                 status,
-                isFeatured
+                isFeatured,
+                sortField: sort,
+                sortOrder: order
             });
 
             ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.LIST, {
                 title: '작품 관리',
                 breadcrumb: '작품 관리',
                 currentPage: 'artwork',
-                ...artworkListData
+                ...artworkListData,
+                sort,
+                order
             });
         } catch (error) {
             console.error('작품 목록 조회 중 오류:', error);

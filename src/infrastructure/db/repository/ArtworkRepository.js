@@ -29,7 +29,6 @@ class ArtworkRepository {
                 throw new ArtworkError('작품을 찾을 수 없습니다.');
             }
 
-            ('작품 수정 중:', artworkData);
             await artwork.update({
                 ...artworkData,
                 updatedAt: new Date()
@@ -82,8 +81,22 @@ class ArtworkRepository {
 
         // 키워드 검색 조건이 있는 경우
         if (options.keyword) {
-            // 작품명 검색
-            where.title = { [Op.like]: `%${options.keyword}%` };
+            // 작품명 검색만 먼저 설정
+            where[Op.or] = [
+                { title: { [Op.like]: `%${options.keyword}%` } }
+            ];
+        }
+
+        // 상태 필터링
+        if (options.status) {
+            where.status = options.status;
+        }
+
+        // 주요 작품 필터링
+        if (options.isFeatured === true) {
+            where.isFeatured = true;
+        } else if (options.isFeatured === false) {
+            where.isFeatured = false;
         }
 
         // 제작 연도 필터링 추가
@@ -102,84 +115,34 @@ class ArtworkRepository {
             });
         }
 
+        // 정렬 필드와 방향 설정
+        const sortField = options.sortField || 'createdAt';
+        const sortOrder = options.sortOrder || 'DESC';
+
         // 일반 사용자는 defaultScope 사용 (승인된 작품만)
-        const result = await this.findArtworksWithOptions(where, { ...options, include }, isAdmin);
+        const queryOptions = this.buildQueryOptions(where, {
+            ...options,
+            include,
+            sortField,
+            sortOrder
+        });
 
-        // 키워드 검색이 있고 작가명으로 검색해야 하는 경우
+        // 먼저 제목으로 검색한 결과 가져오기
+        const result = await this.executeQuery(queryOptions, isAdmin);
+
+        // 키워드 검색이 있는 경우 작가명으로도 검색 (작가 이름으로 검색)
         if (options.keyword) {
-            // 작가명 검색을 위한 조건 생성
-            const artistWhere = {};
-            const artistInclude = [{
-                model: UserAccount,
-                where: { name: { [Op.like]: `%${options.keyword}%` } },
-                attributes: ['name'],
-                required: true
-            }];
-
-            // 전시회 필터링 조건이 있으면 추가
-            if (options.exhibition) {
-                artistInclude.push({
-                    model: ArtworkExhibitionRelationship,
-                    as: 'ArtworkExhibitions',
-                    where: { exhibitionId: options.exhibition },
-                    required: true
-                });
-            }
-
-            // 제작 연도 필터링 추가
-            if (options.year) {
-                artistWhere.year = options.year;
-            }
-
-            // 작가명 검색 결과 가져오기
-            const artistResult = await this.findArtworksWithOptions(artistWhere, { ...options, include: artistInclude }, isAdmin);
+            const artistQueryOptions = this.buildArtistSearchQueryOptions(options);
+            const artistResult = await this.executeQuery(artistQueryOptions, isAdmin);
 
             // 중복 제거하여 두 결과 병합
-            const combinedItems = [...result.items];
-            const existingIds = new Set(result.items.map(item => item.id));
-
-            for (const item of artistResult.items) {
-                if (!existingIds.has(item.id)) {
-                    combinedItems.push(item);
-                    existingIds.add(item.id);
-                }
-            }
-
-            // 정렬 (options.sortField, options.sortOrder 기준)
-            const sortField = options.sortField || 'createdAt';
-            const sortOrder = (options.sortOrder || 'DESC').toLowerCase();
-
-            combinedItems.sort((a, b) => {
-                const valueA = a[sortField];
-                const valueB = b[sortField];
-
-                if (sortOrder === 'desc') {
-                    return valueA < valueB ? 1 : -1;
-                } else {
-                    return valueA > valueB ? 1 : -1;
-                }
-            });
-
-            // 페이지네이션 적용
-            const page = options.page || 1;
-            const limit = options.limit || 12;
-            const offset = (page - 1) * limit;
-
-            const total = combinedItems.length;
-            const paginatedItems = combinedItems.slice(offset, offset + limit);
-
-            return {
-                items: paginatedItems,
-                total,
-                page,
-                limit
-            };
+            return this.mergeAndPaginateResults(result, artistResult, options, sortField, sortOrder);
         }
 
         return result;
     }
 
-    async findArtworksWithOptions(where = {}, options = {}, isAdmin = false) {
+    buildQueryOptions(where, options) {
         const page = options.page || 1;
         const limit = options.limit || 12;
         const offset = (page - 1) * limit;
@@ -190,15 +153,56 @@ class ArtworkRepository {
             attributes: ['name']
         }];
 
-        try {
-            const queryOptions = {
-                where,
-                include,
-                limit,
-                offset,
-                order: [[sortField, sortOrder.toUpperCase()]]
-            };
+        return {
+            where,
+            include,
+            limit,
+            offset,
+            order: [[sortField, sortOrder.toUpperCase()]]
+        };
+    }
 
+    buildArtistSearchQueryOptions(options) {
+        const artistWhere = {};
+        const artistInclude = [{
+            model: UserAccount,
+            where: { name: { [Op.like]: `%${options.keyword}%` } },
+            attributes: ['name'],
+            required: true
+        }];
+
+        // 상태 필터링
+        if (options.status) {
+            artistWhere.status = options.status;
+        }
+
+        // 주요 작품 필터링
+        if (options.isFeatured === true) {
+            artistWhere.isFeatured = true;
+        } else if (options.isFeatured === false) {
+            artistWhere.isFeatured = false;
+        }
+
+        // 전시회 필터링 조건이 있으면 추가
+        if (options.exhibition) {
+            artistInclude.push({
+                model: ArtworkExhibitionRelationship,
+                as: 'ArtworkExhibitions',
+                where: { exhibitionId: options.exhibition },
+                required: true
+            });
+        }
+
+        // 제작 연도 필터링 추가
+        if (options.year) {
+            artistWhere.year = options.year;
+        }
+
+        return this.buildQueryOptions(artistWhere, { ...options, include: artistInclude });
+    }
+
+    async executeQuery(queryOptions, isAdmin) {
+        try {
             let result;
             if (isAdmin) {
                 // 관리자는 admin scope 사용하여 모든 작품 조회
@@ -211,8 +215,8 @@ class ArtworkRepository {
             return {
                 items: result.rows,
                 total: result.count,
-                page,
-                limit
+                page: queryOptions.page || 1,
+                limit: queryOptions.limit || 12
             };
         } catch (error) {
             console.error('작품 목록 조회 중 오류:', error);
@@ -220,6 +224,51 @@ class ArtworkRepository {
         }
     }
 
+    mergeAndPaginateResults(titleResult, artistResult, options, sortField, sortOrder) {
+        // 중복 제거하여 두 결과 병합
+        const combinedItems = [...titleResult.items];
+        const existingIds = new Set(titleResult.items.map(item => item.id));
+
+        for (const item of artistResult.items) {
+            if (!existingIds.has(item.id)) {
+                combinedItems.push(item);
+                existingIds.add(item.id);
+            }
+        }
+
+        // 정렬
+        combinedItems.sort((a, b) => {
+            const valueA = a[sortField];
+            const valueB = b[sortField];
+
+            if (sortOrder.toLowerCase() === 'desc') {
+                if (valueA instanceof Date && valueB instanceof Date) {
+                    return valueB.getTime() - valueA.getTime();
+                }
+                return valueA < valueB ? 1 : -1;
+            } else {
+                if (valueA instanceof Date && valueB instanceof Date) {
+                    return valueA.getTime() - valueB.getTime();
+                }
+                return valueA > valueB ? 1 : -1;
+            }
+        });
+
+        // 페이지네이션 적용
+        const page = options.page || 1;
+        const limit = options.limit || 12;
+        const offset = (page - 1) * limit;
+
+        const total = combinedItems.length;
+        const paginatedItems = combinedItems.slice(offset, offset + limit);
+
+        return {
+            items: paginatedItems,
+            total,
+            page,
+            limit
+        };
+    }
 
     async findArtists() {
         try {

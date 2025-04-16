@@ -21,20 +21,19 @@
 
             <!-- 컨트롤 섹션 -->
             <div class="admin-control">
+                <div class="admin-control__info">
+                    <span class="admin-control__total-count">
+                        <i class="fas fa-image"></i> 총 작품 수: <strong>
+                            <%= total || 0 %>
+                        </strong>
+                    </span>
+                </div>
             </div>
 
             <!-- 필터 섹션 -->
             <div class="admin-filter">
                 <form action="/admin/management/artwork" method="GET" class="admin-filter__form">
                     <div class="admin-filter__group">
-                        <select class="admin-filter__select" name="artistId">
-                            <option value="">작가</option>
-                            <% artists.forEach(artist=> { %>
-                                <option value="<%= artist.id %>" <%=filters?.artistId==artist.id ? 'selected' : '' %>>
-                                    <%= artist.name %>
-                                </option>
-                                <% }); %>
-                        </select>
                         <select class="admin-filter__select" name="status">
                             <option value="">상태</option>
                             <option value="PENDING" <%=filters?.status==='PENDING' ? 'selected' : '' %>>대기 중</option>
@@ -47,9 +46,17 @@
                             <option value="true" <%=filters?.isFeatured==='true' ? 'selected' : '' %>>주요 작품</option>
                             <option value="false" <%=filters?.isFeatured==='false' ? 'selected' : '' %>>일반 작품</option>
                         </select>
-                        <input type="text" class="admin-filter__input" name="keyword" placeholder="검색어"
+                        <select class="admin-filter__select" name="sort">
+                            <option value="createdAt" <%=sort==='createdAt' ? 'selected' : '' %>>생성일</option>
+                            <option value="updatedAt" <%=sort==='updatedAt' ? 'selected' : '' %>>수정일</option>
+                        </select>
+                        <select class="admin-filter__select" name="order">
+                            <option value="desc" <%=order==='desc' ? 'selected' : '' %>>내림차순</option>
+                            <option value="asc" <%=order==='asc' ? 'selected' : '' %>>오름차순</option>
+                        </select>
+                        <input type="text" class="admin-filter__input" name="keyword" placeholder="작품명 또는 작가명"
                             value="<%= filters?.keyword || '' %>">
-                        <button type="submit" class="admin-button admin-button--primary">
+                        <button type="submit" class="admin-button admin-button--primary" id="btnApplyFilter">
                             <i class="fas fa-filter"></i>
                             필터 적용
                         </button>
@@ -67,8 +74,22 @@
                                 <th>작가</th>
                                 <th>상태</th>
                                 <th>주요 작품</th>
-                                <th>생성일</th>
-                                <th>수정일</th>
+                                <th>
+                                    생성일
+                                    <a href="/admin/management/artwork?sort=createdAt&order=<%= sort === 'createdAt' && order === 'desc' ? 'asc' : 'desc' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                                        class="sort-btn" data-sort="createdAt">
+                                        <i
+                                            class="fas fa-sort<%= sort === 'createdAt' ? (order === 'asc' ? '-up' : '-down') : '' %>"></i>
+                                    </a>
+                                </th>
+                                <th>
+                                    수정일
+                                    <a href="/admin/management/artwork?sort=updatedAt&order=<%= sort === 'updatedAt' && order === 'desc' ? 'asc' : 'desc' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                                        class="sort-btn" data-sort="updatedAt">
+                                        <i
+                                            class="fas fa-sort<%= sort === 'updatedAt' ? (order === 'asc' ? '-up' : '-down') : '' %>"></i>
+                                    </a>
+                                </th>
                                 <th>관리</th>
                             </tr>
                         </thead>
@@ -115,9 +136,10 @@
                                                 <form action="/admin/management/artwork/<%= artwork.id %>/featured"
                                                     method="POST" style="display:inline;">
                                                     <button type="submit"
-                                                        class="admin-button admin-button--feature <%= artwork.isFeatured ? 'admin-button--featured' : '' %>"
+                                                        class="admin-button <%= artwork.isFeatured ? 'admin-button--feature admin-button--featured' : 'admin-button--feature' %>"
                                                         title="<%= artwork.isFeatured ? '주요 작품 해제' : '주요 작품 설정' %>">
-                                                        <i class="fas fa-star"></i>
+                                                        <i
+                                                            class="fas fa-star <%= artwork.isFeatured ? 'featured-star' : 'unfeatured-star' %>"></i>
                                                     </button>
                                                 </form>
                                                 <form
@@ -146,28 +168,28 @@
                 <!-- 페이지네이션 섹션 -->
                 <% if (typeof page !=='undefined' && page) { %>
                     <div class="admin-pagination">
-                        <a href="/admin/management/artwork?page=1<%= filters?.artistId ? '&artistId=' + filters.artistId : '' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                        <a href="/admin/management/artwork?page=1<%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %><%= sort ? '&sort=' + sort : '' %><%= order ? '&order=' + order : '' %>"
                             class="admin-pagination__button">
                             <i class="fas fa-angle-double-left"></i>
                         </a>
-                        <a href="/admin/management/artwork?page=<%= Math.max(1, page.currentPage - 1) %><%= filters?.artistId ? '&artistId=' + filters.artistId : '' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                        <a href="/admin/management/artwork?page=<%= Math.max(1, page.currentPage - 1) %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %><%= sort ? '&sort=' + sort : '' %><%= order ? '&order=' + order : '' %>"
                             class="admin-pagination__button <%= !page.hasPreviousPage ? 'admin-pagination__button--disabled' : '' %>">
                             <i class="fas fa-angle-left"></i>
                         </a>
 
                         <% for (let i=Math.max(1, page.currentPage - 2); i <=Math.min(page.totalPages, page.currentPage
                             + 2); i++) { %>
-                            <a href="/admin/management/artwork?page=<%= i %><%= filters?.artistId ? '&artistId=' + filters.artistId : '' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                            <a href="/admin/management/artwork?page=<%= i %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %><%= sort ? '&sort=' + sort : '' %><%= order ? '&order=' + order : '' %>"
                                 class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>">
                                 <%= i %>
                             </a>
                             <% } %>
 
-                                <a href="/admin/management/artwork?page=<%= Math.min(page.totalPages, page.currentPage + 1) %><%= filters?.artistId ? '&artistId=' + filters.artistId : '' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                                <a href="/admin/management/artwork?page=<%= Math.min(page.totalPages, page.currentPage + 1) %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %><%= sort ? '&sort=' + sort : '' %><%= order ? '&order=' + order : '' %>"
                                     class="admin-pagination__button <%= !page.hasNextPage ? 'admin-pagination__button--disabled' : '' %>">
                                     <i class="fas fa-angle-right"></i>
                                 </a>
-                                <a href="/admin/management/artwork?page=<%= page.totalPages %><%= filters?.artistId ? '&artistId=' + filters.artistId : '' %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %>"
+                                <a href="/admin/management/artwork?page=<%= page.totalPages %><%= filters?.status ? '&status=' + filters.status : '' %><%= filters?.isFeatured ? '&isFeatured=' + filters.isFeatured : '' %><%= filters?.keyword ? '&keyword=' + filters.keyword : '' %><%= sort ? '&sort=' + sort : '' %><%= order ? '&order=' + order : '' %>"
                                     class="admin-pagination__button">
                                     <i class="fas fa-angle-double-right"></i>
                                 </a>

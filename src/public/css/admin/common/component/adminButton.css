@@ -56,3 +56,31 @@
     gap: 4px;
     justify-content: center;
 }
+
+/* 주요 작품 버튼 스타일 */
+.admin-button--feature {
+    background-color: #f5f5f5;
+    color: #424242;
+}
+
+.admin-button--feature:hover {
+    background-color: #e0e0e0;
+}
+
+.admin-button--featured {
+    background-color: #fff8e1;
+    color: #ff8f00;
+}
+
+.admin-button--featured:hover {
+    background-color: #ffecb3;
+}
+
+/* 별 아이콘 스타일 */
+.featured-star {
+    color: #ffc107;
+}
+
+.unfeatured-star {
+    color: #424242;
+}
