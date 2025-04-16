@@ -144,6 +144,19 @@ export default class ArtworkService {
         return artworkDetail;
     }
 
+    async getArtworkSimpleById(id) {
+        const artwork = await this.artworkRepository.findArtworkById(id);
+        if (!artwork) {
+            throw new ArtworkNotFoundError();
+        }
+        const artworkSimple = new ArtworkSimpleDto(artwork);
+        const artist = await this.userService.getUserSimple(artwork.userId);
+        artworkSimple.artistName = artist.name;
+        artworkSimple.artistAffiliation = artist.affiliation;
+
+        return artworkSimple;
+    }
+
     /**
      * 관련 작품 목록을 조회합니다.
      */
@@ -163,7 +176,45 @@ export default class ArtworkService {
             console.error(error);
         }
 
-        // 4. 최종적으로 8개 이하의 관련 작품 반환
+        // 2. 동일 전시회의 다른 작품 조회
+        const remainingLimit = 8 - relatedArtworks.length;
+        if (remainingLimit > 0 && artwork.exhibitions.length > 0) {
+            try {
+                // 출품된 전시회 번호 추출
+                const exhibitionIds = artwork.exhibitions.map(exhibition => exhibition.id);
+                for (const exhibitionId of exhibitionIds) {
+                    // 출품된 전시회 번호에 해당하는 작품 조회
+                    const sameExhibitionArtworkRelationships = await this.artworkRepository.findByExhibitionId(exhibitionId, remainingLimit, artwork.id);
+
+                    // 동일 작가 작품 제외
+                    for (const relatedArtwork of sameExhibitionArtworkRelationships) {
+                        // 기존 relatedArtworks에서 artworkId를 추출
+                        const existingArtworkIds = new Set(relatedArtworks.map(related => related.id));
+
+                        // 중복되지 않는 경우에만 추가
+                        if (!existingArtworkIds.has(relatedArtwork.artworkId)) {
+                            const relatedArtworkSimple = await this.getArtworkSimpleById(relatedArtwork.artworkId);
+                            const artist = await this.userService.getUserSimple(relatedArtworkSimple.userId);
+                            relatedArtworkSimple.artistName = artist.name;
+                            relatedArtworkSimple.artistAffiliation = artist.affiliation;
+                            relatedArtworks.push(relatedArtworkSimple);
+                        }
+
+                        // 남은 개수 체크
+                        if (relatedArtworks.length >= remainingLimit) {
+                            break;
+                        }
+                    }
+                    if (relatedArtworks.length >= remainingLimit) {
+                        break;
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // 3. 최종적으로 8개 이하의 관련 작품 반환
         return relatedArtworks.slice(0, 8); // 최대 8개로 제한
     }
 

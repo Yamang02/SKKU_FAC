@@ -267,10 +267,10 @@ class ArtworkRepository {
 
     async findByExhibitionId(exhibitionId, limit, excludeId) {
         try {
-            const artworks = await ArtworkExhibitionRelationship.findAll({
+            const artworkExhibitionRelationships = await ArtworkExhibitionRelationship.findAll({
                 where: {
                     exhibitionId: exhibitionId,
-                    id: { [Op.ne]: excludeId }
+                    artworkId: { [Op.ne]: excludeId }
                 },
                 include: [{
                     model: Artwork,
@@ -280,7 +280,7 @@ class ArtworkRepository {
                 order: [['createdAt', 'DESC']]
             });
 
-            return artworks.map(rel => rel.artwork); // 관계에서 작품 정보 반환
+            return artworkExhibitionRelationships; // 관계에서 작품 정보 반환
         } catch (error) {
             throw new ArtworkError('전시회의 작품 조회 중 오류가 발생했습니다.', error);
         }
