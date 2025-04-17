@@ -21,6 +21,7 @@ const __dirname = path.dirname(__filename);
 createUploadDirs();
 
 // 헬스체크 엔드포인트를 가장 먼저 등록
+// 헬스체크 엔드포인트를 가장 먼저 등록
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
 });
