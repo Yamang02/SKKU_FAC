@@ -32,7 +32,8 @@ export const ViewPath = {
             LOGIN: 'main/user/Login.ejs',
             REGISTER: 'main/user/Register.ejs',
             PROFILE: 'main/user/Profile.ejs',
-            FORGOT_PASSWORD: 'main/user/ForgotPassword.ejs'
+            FORGOT_PASSWORD: 'main/user/ForgotPassword.ejs',
+            RESET_PASSWORD: 'main/user/ResetPassword.ejs'
         },
         EXHIBITION: {
             LIST: 'main/exhibition/ExhibitionList.ejs',

@@ -39,6 +39,7 @@ export default class AuthService {
         expiryDate.setHours(expiryDate.getHours() + 1); // 1시간 유효
 
         await this.tokenRepository.saveToken({
+            id: token,
             userId,
             token,
             type: 'PASSWORD_RESET',

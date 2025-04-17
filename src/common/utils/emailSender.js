@@ -13,9 +13,9 @@ export const sendPasswordResetEmail = async (to, token) => {
     const mailOptions = {
         from: process.env.EMAIL_FROM,
         to,
-        subject: '비밀번호 초기화 요청',
-        html: `<p>아래 비밀번호로 로그인하세요:</p>
-           <p>${token}</p>`
+        subject: '비밀번호 재설정 요청',
+        html: `<p>비밀 번호 재설정을 위해 아래 주소로 접속하세요:</p>
+           <a href="${process.env.BASE_URL}/user/password/reset?token=${token}">${process.env.BASE_URL}/user/password/reset?token=${token}</a>`
     };
 
     await transporter.sendMail(mailOptions);

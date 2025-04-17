@@ -23,6 +23,9 @@ UserRouter.get('/api/list', isAuthenticated, (req, res) => userApiController.get
 // 회원가입 API
 UserRouter.post('/', isNotAuthenticated, (req, res) => userApiController.registerUser(req, res));
 
+// 비밀번호 재설정 요청 API
+UserRouter.post('/password/reset', isNotAuthenticated, (req, res) => userApiController.resetPassword(req, res));
+
 // 플래시 메시지 API
 UserRouter.get('/api/flash-message', (req, res) => userApiController.getFlashMessage(req, res));
 
@@ -43,8 +46,8 @@ UserRouter.get('/new', isNotAuthenticated, (req, res) => userController.getUserR
 UserRouter.get('/me', isAuthenticated, (req, res) => userController.getUserProfilePage(req, res));
 
 // 비밀번호 재설정
+UserRouter.get('/password/forgot', isNotAuthenticated, (req, res) => userController.getUserPasswordForgotPage(req, res));
 UserRouter.get('/password/reset', isNotAuthenticated, (req, res) => userController.getUserPasswordResetPage(req, res));
-UserRouter.post('/password/reset', isNotAuthenticated, (req, res) => userApiController.resetPassword(req, res));
 
 // 이메일 인증
 UserRouter.get('/verify-email', (req, res) => userController.verifyEmail(req, res));

@@ -64,6 +64,7 @@ export const Message = {
         DUPLICATE_ERROR: '이미 존재하는 사용자입니다.',
         DUPLICATE_USERNAME_ERROR: '이미 존재하는 아이디입니다.',
         DUPLICATE_EMAIL_ERROR: '이미 존재하는 이메일입니다.',
-        RESET_PASSWORD_ERROR: '비밀번호 재설정 중 오류가 발생했습니다.'
+        RESET_PASSWORD_ERROR: '비밀번호 재설정 중 오류가 발생했습니다.',
+        RESET_PASSWORD_REQUEST_SUCCESS: '비밀번호 재설정 이메일을 확인해주세요.'
     }
 };

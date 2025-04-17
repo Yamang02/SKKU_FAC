@@ -169,8 +169,8 @@ export default class UserApiController {
     async resetPassword(req, res) {
         try {
             const { email } = req.body;
-            await this.userService.resetPassword(email);
-            return res.json(ApiResponse.success(null, Message.USER.RESET_PASSWORD_SUCCESS));
+            await this.userService.requestResetPassword(email);
+            return res.json(ApiResponse.success(Message.USER.RESET_PASSWORD_SUCCESS));
         } catch (error) {
             console.error('Error resetting password:', error);
             return res.status(500).json(ApiResponse.error(error.message));

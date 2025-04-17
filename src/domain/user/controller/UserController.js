@@ -45,15 +45,27 @@ export default class UserController {
     }
 
     /**
-     * 비밀번호 재설정 페이지를 렌더링합니다.
+     * 비밀번호 찾기 페이지를 렌더링합니다.
      */
-    getUserPasswordResetPage(req, res) {
+    getUserPasswordForgotPage(req, res) {
         try {
             return ViewResolver.render(res, ViewPath.MAIN.USER.FORGOT_PASSWORD);
         } catch (error) {
             return ViewResolver.renderError(res, error);
         }
     }
+
+    /**
+     * 비밀번호 재설정 페이지를 렌더링합니다.
+     */
+    getUserPasswordResetPage(req, res) {
+        try {
+            return ViewResolver.render(res, ViewPath.MAIN.USER.RESET_PASSWORD);
+        } catch (error) {
+            return ViewResolver.renderError(res, error);
+        }
+    }
+
 
     /**
      * 이메일 인증을 처리합니다.

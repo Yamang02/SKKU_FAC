@@ -65,7 +65,7 @@ export default class UserService {
             await authService.createEmailVerificationToken(createdUser.id, createdUser.email);
         } catch (emailError) {
             console.error('❌ 이메일 전송 실패:', emailError);
-            throw new Error('사용자 생성은 완료되었지만, 이메일 전송에 실패했습니다.');
+            throw new Error('인증 이메일 전송에 실패했습니다. 관리자에게 문의하세요');
         }
 
         const userSimpleDto = new UserSimpleDto(createdUser);
@@ -372,13 +372,19 @@ export default class UserService {
     /**
      * 사용자 비밀번호를 재설정합니다.
      */
-    async resetPassword(email) {
+    async requestResetPassword(email) {
         const user = await this.userRepository.findUserByEmail(email);
         if (!user) {
             throw new Error('사용자를 찾을 수 없습니다.');
         }
 
-        await this.authService.createPasswordResetToken(user.id, user.email);
+        try {
+            await this.authService.createPasswordResetToken(user.id, user.email);
+        } catch (emailError) {
+            console.error('❌ 이메일 전송 실패:', emailError);
+            throw new Error('인증 이메일 전송에 실패했습니다. 관리자에게 문의하세요');
+        }
 
+        return new UserSimpleDto(user);
     }
 }

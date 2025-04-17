@@ -101,12 +101,16 @@ export default class AuthApiController {
             const tokenData = await this.authService.verifyToken(token, 'PASSWORD_RESET');
 
             // 비밀번호 변경
-            await this.userService.updatePassword(tokenData.userId, newPassword);
+            const result = await this.userService.updatePassword(tokenData.userId, newPassword);
 
-            // 토큰 삭제
-            await this.authService.deleteToken(token, 'PASSWORD_RESET');
+            if (!result) {
+                throw new Error('비밀번호 재설정에 실패했습니다.');
+            } else {
+                // 토큰 삭제
+                await this.authService.deleteToken(token, 'PASSWORD_RESET');
+                return res.json(ApiResponse.success(null, '비밀번호가 성공적으로 재설정되었습니다.'));
+            }
 
-            return res.json(ApiResponse.success(null, '비밀번호가 성공적으로 재설정되었습니다.'));
         } catch (error) {
             console.error('비밀번호 재설정 오류:', error);
             return res.status(400).json(ApiResponse.error(error.message));
