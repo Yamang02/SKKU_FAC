@@ -2,7 +2,7 @@
  * 작품 목록 페이지
  * 작품 목록의 모든 기능을 처리합니다.
  */
-import ArtworkAPI from '../../api/ArtworkApi.js';
+import ArtworkApi from '../../api/ArtworkApi.js';
 import ExhibitionApi from '../../api/ExhibitionApi.js';
 import { emptyArtworkTemplate, errorMessageTemplate } from '../../templates/emptyArtworkTemplate.js';
 import { initModal } from '../../common/modal.js';
@@ -16,7 +16,7 @@ const urlParams = new URLSearchParams(window.location.search);
 
 // API 함수 - 서버에서 가져오기
 async function fetchArtworkList(pagination, filters = {}) {
-    return await ArtworkAPI.getArtworkList(pagination, filters);
+    return await ArtworkApi.getArtworkList(pagination, filters);
 }
 
 async function fetchExhibitionList() {

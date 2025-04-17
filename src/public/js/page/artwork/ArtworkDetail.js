@@ -3,7 +3,7 @@
  * 작품 상세 페이지의 모든 기능을 처리합니다.
  */
 
-import ArtworkAPI from '../../api/ArtworkApi.js';
+import ArtworkApi from '../../api/ArtworkApi.js';
 import UserApi from '../../api/UserApi.js';
 import { showErrorMessage, showSuccessMessage, showConfirm } from '../../common/util/notification.js';
 import { createArtworkCard } from '../../common/util/card.js';
@@ -154,7 +154,7 @@ async function loadArtworkDetail() {
             throw new Error('작품을 찾을 수 없습니다.');
         }
 
-        const response = await ArtworkAPI.getArtworkDetailForPage(artworkSlug);
+        const response = await ArtworkApi.getArtworkDetailForPage(artworkSlug);
 
         if (!response.success) {
             throw new Error(response.error || '작품 데이터를 불러오는데 실패했습니다.');
@@ -230,7 +230,7 @@ async function loadArtworkDetail() {
 // 출품 취소 함수
 async function cancelSubmission(artworkId, exhibitionId) {
     try {
-        const response = await ArtworkAPI.cancelArtworkSubmission(artworkId, exhibitionId);
+        const response = await ArtworkApi.cancelArtworkSubmission(artworkId, exhibitionId);
         if (response.success) {
             showSuccessMessage('출품이 취소되었습니다.');
             // 페이지를 새로 고침하거나 목록을 업데이트하여 변경 사항을 반영
@@ -247,7 +247,7 @@ async function cancelSubmission(artworkId, exhibitionId) {
 // 출품 함수
 async function submitArtworkToExhibition(artworkId, exhibitionId) {
     try {
-        const response = await ArtworkAPI.submitArtworkToExhibition(artworkId, exhibitionId);
+        const response = await ArtworkApi.submitArtworkToExhibition(artworkId, exhibitionId);
         if (response.success) {
             showSuccessMessage('출품이 완료되었습니다.');
             loadArtworkDetail(); // 변경 사항 반영
@@ -356,7 +356,7 @@ async function saveArtworkChanges() {
         };
 
         // 작품 정보 업데이트 API 호출
-        const response = await ArtworkAPI.updateArtwork(artworkId, updatedData);
+        const response = await ArtworkApi.updateArtwork(artworkId, updatedData);
 
         if (response.success) {
             showSuccessMessage('작품 정보가 성공적으로 업데이트되었습니다.');
@@ -410,7 +410,7 @@ async function deleteArtwork() {
         const artworkId = modal.dataset.artworkId;
 
         // 작품 삭제 API 호출
-        const response = await ArtworkAPI.deleteArtwork(artworkId);
+        const response = await ArtworkApi.deleteArtwork(artworkId);
 
         if (response.success) {
             showSuccessMessage('작품이 성공적으로 삭제되었습니다.');

@@ -1,7 +1,7 @@
 /**
  * 로그인 페이지 JavaScript
  */
-import userApi from '/js/api/UserAPI.js';
+import UserApi from '../../api/UserApi.js';
 import { showErrorMessage, showSuccessMessage } from '../../common/util/notification.js';
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 플래시 메시지 처리
     const checkFlashMessage = async () => {
         try {
-            const response = await userApi.getFlashMessage();
+            const response = await UserApi.getFlashMessage();
 
             if (response.success && response.data && response.data.flash) {
                 const flash = response.data.flash;
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
-                const response = await userApi.login({ username, password });
+                const response = await UserApi.login({ username, password });
                 if (response.success) {
                     window.location.href = '/';
                 } else {

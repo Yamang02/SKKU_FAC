@@ -1,6 +1,6 @@
 import UserApi from '../../api/UserApi.js';
 import ArtworkApi from '../../api/ArtworkApi.js';
-import ExhibitionAPI from '../../api/ExhibitionAPI.js';
+import ExhibitionApi from '../../api/ExhibitionApi.js';
 import { showErrorMessage, showSuccessMessage, showLoading } from '../../common/util/notification.js';
 
 
@@ -47,7 +47,7 @@ async function initializePage() {
 
         // 2. 출품 가능한 전시회 목록 가져오기
         try {
-            const response = await ExhibitionAPI.getSubmittableList();
+            const response = await ExhibitionApi.getSubmittableList();
             const exhibitions = response.data || response;
             const exhibitionSelect = document.getElementById('exhibition');
 
