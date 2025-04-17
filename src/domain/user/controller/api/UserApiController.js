@@ -169,12 +169,35 @@ export default class UserApiController {
     async resetPassword(req, res) {
         try {
             const { email } = req.body;
-            await this.userService.requestResetPassword(email);
-            return res.json(ApiResponse.success(Message.USER.RESET_PASSWORD_SUCCESS));
+            const user = await this.userService.requestResetPassword(email);
+            return res.json(ApiResponse.success(user, Message.USER.RESET_PASSWORD_REQUEST_SUCCESS));
         } catch (error) {
             console.error('Error resetting password:', error);
             return res.status(500).json(ApiResponse.error(error.message));
         }
     }
 
+    /**
+     * 이메일로 사용자 아이디(username) 찾기
+     */
+    async findUsername(req, res) {
+        try {
+            const { email } = req.query;
+
+            if (!email) {
+                return res.status(400).json(ApiResponse.error('이메일을 입력해주세요.'));
+            }
+
+            const user = await this.userService.getUserByEmail(email);
+
+            if (!user) {
+                return res.status(404).json(ApiResponse.error('해당 이메일로 등록된 사용자가 없습니다.'));
+            }
+
+            return res.json(ApiResponse.success({ username: user.username }, '아이디를 찾았습니다.'));
+        } catch (error) {
+            console.error('아이디 찾기 중 오류:', error);
+            return res.status(500).json(ApiResponse.error('아이디 찾기 중 오류가 발생했습니다.'));
+        }
+    }
 }

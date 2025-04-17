@@ -22,4 +22,26 @@ export default class AuthApi {
             throw error;
         }
     }
+
+    // 토큰 재발행 요청
+    static async resendToken(email, type) {
+        try {
+            const response = await api.post('/auth/resend-token', { email, type });
+            return response;
+        } catch (error) {
+            console.error('토큰 재발행 요청 중 오류:', error);
+            throw error;
+        }
+    }
+
+    // 토큰 유효성 검사
+    static async validateToken(token, type) {
+        try {
+            const response = await api.get(`/auth/validate-token?token=${token}&type=${type}`);
+            return response;
+        } catch (error) {
+            console.error('토큰 유효성 검사 중 오류:', error);
+            throw error;
+        }
+    }
 }

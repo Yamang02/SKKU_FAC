@@ -20,6 +20,9 @@ UserRouter.get('/api/data/:id', isAuthenticated, (req, res) => userApiController
 // 사용자 목록 조회 API
 UserRouter.get('/api/list', isAuthenticated, (req, res) => userApiController.getUserListData(req, res));
 
+// 아이디 찾기 API
+UserRouter.get('/api/find-username', (req, res) => userApiController.findUsername(req, res));
+
 // 회원가입 API
 UserRouter.post('/', isNotAuthenticated, (req, res) => userApiController.registerUser(req, res));
 
@@ -50,7 +53,7 @@ UserRouter.get('/password/forgot', isNotAuthenticated, (req, res) => userControl
 UserRouter.get('/password/reset', isNotAuthenticated, (req, res) => userController.getUserPasswordResetPage(req, res));
 
 // 이메일 인증
-UserRouter.get('/verify-email', (req, res) => userController.verifyEmail(req, res));
+UserRouter.get('/verify-email', (req, res) => userController.verifyEmailPage(req, res));
 
 
 export default UserRouter;

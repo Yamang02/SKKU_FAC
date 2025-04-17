@@ -115,5 +115,16 @@ export default class UserApi {
             };
         }
     }
+
+    // 아이디 찾기
+    static async findUsername(email) {
+        try {
+            const response = await api.get(`/user/api/find-username?email=${encodeURIComponent(email)}`);
+            return response.data;
+        } catch (error) {
+            console.error('아이디 찾기 중 오류 발생:', error);
+            throw error;
+        }
+    }
 }
 

@@ -70,7 +70,7 @@ export default class UserController {
     /**
      * 이메일 인증을 처리합니다.
      */
-    async verifyEmail(req, res) {
+    async verifyEmailPage(req, res) {
         try {
             const { token } = req.query;
             if (!token) {
@@ -84,22 +84,50 @@ export default class UserController {
 
             await this.userService.activateUser(tokenData.userId);
 
+            // 토큰 삭제
+            await this.authService.deleteToken(token, 'EMAIL_VERIFICATION');
+
             req.session.flash = {
                 type: 'success',
                 message: '이메일 인증이 성공적으로 완료되었습니다. 로그인해주세요.'
             };
 
-            ViewResolver.render(res, ViewPath.SUCCESS, {
+            return ViewResolver.render(res, ViewPath.SUCCESS, {
                 message: '이메일 인증이 성공적으로 완료되었습니다. 로그인해주세요.'
             });
         } catch (error) {
+            console.error('이메일 인증 오류:', error);
+
+            // 만료된 토큰 처리
+            if (error.cause?.isExpired) {
+                try {
+                    // 새 토큰 발급 및 이메일 재전송
+                    await this.authService.handleExpiredToken(req.query.token, 'EMAIL_VERIFICATION');
+
+                    req.session.flash = {
+                        type: 'warning',
+                        message: '인증 토큰이 만료되어 새로운 인증 이메일을 발송했습니다. 이메일을 확인해주세요.'
+                    };
+
+                    return ViewResolver.renderError(res, {
+                        message: '인증 토큰이 만료되어 새로운 인증 이메일을 발송했습니다. 이메일을 확인해주세요.'
+                    });
+                } catch (tokenError) {
+                    console.error('토큰 재발행 오류:', tokenError);
+                    req.session.flash = {
+                        type: 'error',
+                        message: '인증 토큰 재발행에 실패했습니다. 관리자에게 문의하세요.'
+                    };
+                }
+            }
+
             // 실패 메시지와 함께 에러 페이지 렌더링
             req.session.flash = {
                 type: 'error',
                 message: error.message || '이메일 인증에 실패했습니다.'
             };
 
-            ViewResolver.renderError(res, error);
+            return ViewResolver.renderError(res, error);
         }
     }
 

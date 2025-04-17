@@ -33,7 +33,5 @@ export const sendVerificationEmail = async (to, token) => {
            <a href="${verifyUrl}">${verifyUrl}</a>`
     };
 
-    console.log('mailOptions:', mailOptions);
-
     await transporter.sendMail(mailOptions);
 };
