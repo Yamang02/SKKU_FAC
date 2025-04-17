@@ -2,8 +2,8 @@
  * 프로필 페이지
  * 프로필 관련 기능을 처리합니다.
  */
-import UserAPI from '/js/api/UserAPI.js';
-import { showLoading, showErrorMessage, showSuccessMessage, showConfirm } from '/js/common/util/notification.js';
+import UserApi from '../../api/UserApi.js';
+import { showLoading, showErrorMessage, showSuccessMessage, showConfirm } from '../../common/util/notification.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // 사용자 정보를 저장할 전역 변수
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutBtn.addEventListener('click', async () => {
             try {
                 showLoading(true);
-                await UserAPI.logout();
+                await UserApi.logout();
                 window.location.href = '/';
             } catch (error) {
                 showErrorMessage(error.message || '로그아웃에 실패했습니다.');
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // API 호출
-                await UserAPI.updateProfile(formData);
+                await UserApi.updateProfile(formData);
 
                 showSuccessMessage('프로필이 성공적으로 수정되었습니다.');
                 closeModal(editProfileModal);
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 showLoading(true);
-                await UserAPI.deleteAccount();
+                await UserApi.deleteAccount();
                 showSuccessMessage('계정이 성공적으로 삭제되었습니다. 로그인 페이지로 이동합니다.');
                 setTimeout(() => window.location.href = '/user/login', 3000);
             } catch (error) {
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 사용자 프로필 정보 가져오기
     async function fetchUserProfile() {
         try {
-            const response = await UserAPI.getProfile();
+            const response = await UserApi.getProfile();
             userData = response.data; // 전역 변수에 사용자 데이터 저장
 
             // 사용자 정보를 DOM에 삽입

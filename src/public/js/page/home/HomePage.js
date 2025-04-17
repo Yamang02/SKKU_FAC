@@ -6,13 +6,13 @@
  * - 주요 작품 데이터 로딩 및 표시
  * - 주요 전시회 슬라이드 기능
  */
-import ArtworkAPI from '../../api/ArtworkAPI.js';
+import ArtworkApi from '../../api/ArtworkApi.js';
 import ExhibitionApi from '../../api/ExhibitionApi.js';
 import { emptyArtworkTemplate, errorMessageTemplate, loadingSpinnerTemplate } from '../../templates/emptyArtworkTemplate.js';
 import { modalTemplate, artworkModalContent } from '../../templates/modalTemplate.js';
 import { initModal, showModal, updateModalContent } from '../../common/modal.js';
 import { createArtworkCard } from '../../common/util/card.js';
-import { showErrorMessage } from '/js/common/util/notification.js';
+import { showErrorMessage } from '../../common/util/notification.js';
 
 // 전역 변수 선언
 let featuredArtworks = [];
@@ -253,7 +253,7 @@ async function loadFeaturedArtworks() {
         container.innerHTML = loadingSpinnerTemplate;
 
         // API 요청
-        const response = await ArtworkAPI.getFeaturedArtworks();
+        const response = await ArtworkApi.getFeaturedArtworks();
 
         if (!response.success) {
             throw new Error(response.error || '추천 작품을 불러오는데 실패했습니다.');
