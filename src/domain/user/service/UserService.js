@@ -1,5 +1,5 @@
 import UserRepository from '../../../infrastructure/db/repository/UserAccountRepository.js';
-import UserRequestDTO from '../model/dto/UserRequestDTO.js';
+import UserRequestDto from '../model/dto/UserRequestDto.js';
 import UserSimpleDto from '../model/dto/UserSimpleDto.js';
 import UserDetailDto from '../model/dto/UserDetailDto.js';
 import { UserNotFoundError, UserEmailDuplicateError, UserUsernameDuplicateError } from '../../../common/error/UserError.js';
@@ -47,7 +47,7 @@ export default class UserService {
 
 
         // 사용자 데이터 구성
-        const userDto = new UserRequestDTO({
+        const userDto = new UserRequestDto({
             ...userRequestDTO,
             id: userId,
             skkuUserId,
