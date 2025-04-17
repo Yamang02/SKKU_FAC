@@ -17,6 +17,15 @@ try {
 // 환경 변수 설정 - 'development', 'test', 'production' 중 하나
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// Railway 환경에서는 로그 출력
+if (NODE_ENV === 'production') {
+    console.log('프로덕션 환경에서 실행 중...');
+    console.log(`DB 연결 정보 확인:
+    - 호스트: ${process.env.REMOTE_DB_HOST || process.env.DB_HOST}
+    - 데이터베이스: ${process.env.REMOTE_DB_NAME || process.env.DB_NAME}
+    - 포트: ${process.env.REMOTE_DB_PORT || process.env.DB_PORT}`);
+}
+
 // 환경에 따른 구성 설정
 export const infrastructureConfig = {
     environment: NODE_ENV,
@@ -24,47 +33,47 @@ export const infrastructureConfig = {
         type: NODE_ENV === 'production' ? 'remote' : 'local',
         config: (() => {
             switch (NODE_ENV) {
-            case 'production':
-                return {
-                    host: process.env.REMOTE_DB_HOST,
-                    user: process.env.REMOTE_DB_USER,
-                    password: process.env.REMOTE_DB_PASSWORD,
-                    database: process.env.REMOTE_DB_NAME,
-                    port: process.env.REMOTE_DB_PORT,
-                    connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 10,
-                    queueLimit: process.env.DB_POOL_QUEUE || 0
-                };
-            case 'test':
-                return {
-                    host: process.env.TEST_DB_HOST || process.env.DB_HOST,
-                    user: process.env.TEST_DB_USER || process.env.DB_USER,
-                    password: process.env.TEST_DB_PASSWORD || process.env.DB_PASSWORD,
-                    database: process.env.TEST_DB_NAME || process.env.DB_NAME,
-                    port: process.env.TEST_DB_PORT || process.env.DB_PORT,
-                    connectionLimit: parseInt(process.env.TEST_DB_POOL_MAX, 10) || 5,
-                    queueLimit: process.env.TEST_DB_POOL_QUEUE || 0
-                };
-            case 'development':
-                return {
-                    host: process.env.DEV_DB_HOST || process.env.DB_HOST,
-                    user: process.env.DEV_DB_USER || process.env.DB_USER,
-                    password: process.env.DEV_DB_PASSWORD || process.env.DB_PASSWORD,
-                    database: process.env.DEV_DB_NAME || process.env.DB_NAME,
-                    port: process.env.DEV_DB_PORT || process.env.DB_PORT,
-                    connectionLimit: parseInt(process.env.DEV_DB_POOL_MAX, 10) || 10,
-                    queueLimit: process.env.DEV_DB_POOL_QUEUE || 0
-                };
-            case 'local':
-            default:
-                return {
-                    host: process.env.DB_HOST,
-                    user: process.env.DB_USER,
-                    password: process.env.DB_PASSWORD,
-                    database: process.env.DB_NAME,
-                    port: process.env.DB_PORT,
-                    connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 10,
-                    queueLimit: process.env.DB_POOL_QUEUE || 0
-                };
+                case 'production':
+                    return {
+                        host: process.env.REMOTE_DB_HOST || process.env.DB_HOST,
+                        user: process.env.REMOTE_DB_USER || process.env.DB_USER,
+                        password: process.env.REMOTE_DB_PASSWORD || process.env.DB_PASSWORD,
+                        database: process.env.REMOTE_DB_NAME || process.env.DB_NAME,
+                        port: process.env.REMOTE_DB_PORT || process.env.DB_PORT,
+                        connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+                        queueLimit: process.env.DB_POOL_QUEUE || 0
+                    };
+                case 'test':
+                    return {
+                        host: process.env.TEST_DB_HOST || process.env.DB_HOST,
+                        user: process.env.TEST_DB_USER || process.env.DB_USER,
+                        password: process.env.TEST_DB_PASSWORD || process.env.DB_PASSWORD,
+                        database: process.env.TEST_DB_NAME || process.env.DB_NAME,
+                        port: process.env.TEST_DB_PORT || process.env.DB_PORT,
+                        connectionLimit: parseInt(process.env.TEST_DB_POOL_MAX, 10) || 5,
+                        queueLimit: process.env.TEST_DB_POOL_QUEUE || 0
+                    };
+                case 'development':
+                    return {
+                        host: process.env.DEV_DB_HOST || process.env.DB_HOST,
+                        user: process.env.DEV_DB_USER || process.env.DB_USER,
+                        password: process.env.DEV_DB_PASSWORD || process.env.DB_PASSWORD,
+                        database: process.env.DEV_DB_NAME || process.env.DB_NAME,
+                        port: process.env.DEV_DB_PORT || process.env.DB_PORT,
+                        connectionLimit: parseInt(process.env.DEV_DB_POOL_MAX, 10) || 10,
+                        queueLimit: process.env.DEV_DB_POOL_QUEUE || 0
+                    };
+                case 'local':
+                default:
+                    return {
+                        host: process.env.DB_HOST,
+                        user: process.env.DB_USER,
+                        password: process.env.DB_PASSWORD,
+                        database: process.env.DB_NAME,
+                        port: process.env.DB_PORT,
+                        connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+                        queueLimit: process.env.DB_POOL_QUEUE || 0
+                    };
             }
         })()
     },
@@ -77,31 +86,31 @@ export const infrastructureConfig = {
             };
 
             switch (NODE_ENV) {
-            case 'production':
-                return {
-                    ...baseConfig,
-                    environment: 'production',
-                    uploadDir: process.env.PROD_UPLOAD_DIR || 'production'
-                };
-            case 'test':
-                return {
-                    ...baseConfig,
-                    environment: 'test',
-                    uploadDir: process.env.TEST_UPLOAD_DIR || 'test'
-                };
-            case 'development':
-                return {
-                    ...baseConfig,
-                    environment: 'development',
-                    uploadDir: process.env.DEV_UPLOAD_DIR || 'development'
-                };
-            case 'local':
-            default:
-                return {
-                    ...baseConfig,
-                    environment: 'local',
-                    uploadDir: process.env.LOCAL_UPLOAD_DIR || 'local'
-                };
+                case 'production':
+                    return {
+                        ...baseConfig,
+                        environment: 'production',
+                        uploadDir: process.env.PROD_UPLOAD_DIR || 'production'
+                    };
+                case 'test':
+                    return {
+                        ...baseConfig,
+                        environment: 'test',
+                        uploadDir: process.env.TEST_UPLOAD_DIR || 'test'
+                    };
+                case 'development':
+                    return {
+                        ...baseConfig,
+                        environment: 'development',
+                        uploadDir: process.env.DEV_UPLOAD_DIR || 'development'
+                    };
+                case 'local':
+                default:
+                    return {
+                        ...baseConfig,
+                        environment: 'local',
+                        uploadDir: process.env.LOCAL_UPLOAD_DIR || 'local'
+                    };
             }
         })()
     }
