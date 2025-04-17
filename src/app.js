@@ -7,7 +7,6 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { pageTracker } from './common/middleware/PageTracker.js';
 import { createUploadDirs } from './common/utils/createUploadDirs.js';
-import basicAuth from 'express-basic-auth';
 import methodOverride from 'method-override';
 import { isAdmin } from './common/middleware/auth.js';
 
@@ -21,7 +20,7 @@ const __dirname = path.dirname(__filename);
 // 업로드 디렉토리 생성
 createUploadDirs();
 
-// 헬스체크 엔드포인트 추가 (모든 미들웨어 이전에 설정)
+// 헬스체크 엔드포인트를 가장 먼저 등록
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
 });
@@ -40,48 +39,13 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false
 }));
 
-// Rate Limiter 설정
+// Rate Limiter 설정 (헬스체크 엔드포인트는 제외)
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15분
-    max: 300 // IP당 최대 요청 수
+    max: 300, // IP당 최대 요청 수
+    skip: (req) => req.path === '/health' // 헬스체크 엔드포인트 제외
 });
 app.use(limiter);
-
-// 기본 인증 설정
-const ADMIN_USER = process.env.ADMIN_USER;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-
-if (process.env.NODE_ENV === 'production' || process.env.ENABLE_AUTH === 'true') {
-    // 헬스체크 경로는 인증에서 제외
-    app.use((req, res, next) => {
-        if (req.path === '/health') {
-            return next();
-        }
-
-        basicAuth({
-            users: { [ADMIN_USER]: ADMIN_PASSWORD },
-            challenge: true,
-            realm: 'SKKU Gallery Development Preview'
-        })(req, res, next);
-    });
-}
-
-/**
- * 이전 페이지 URL 결정
- */
-const getReturnUrl = (req) => {
-    const prevPage = req.session?.previousPage;
-
-    if (req.originalUrl.startsWith('/admin')) {
-        return '/admin';
-    }
-
-    if (prevPage && !prevPage.includes('/error')) {
-        return prevPage;
-    }
-
-    return '/';
-};
 
 // 미들웨어 설정
 app.use(express.json({ limit: '10mb' }));
@@ -170,6 +134,23 @@ app.use((req, res, next) => {
     });
     next();
 });
+
+/**
+ * 이전 페이지 URL 결정
+ */
+const getReturnUrl = (req) => {
+    const prevPage = req.session?.previousPage;
+
+    if (req.originalUrl.startsWith('/admin')) {
+        return '/admin';
+    }
+
+    if (prevPage && !prevPage.includes('/error')) {
+        return prevPage;
+    }
+
+    return '/';
+};
 
 // 라우터 설정
 app.use('/', HomeRouter);
