@@ -97,7 +97,7 @@ async function loadFeaturedExhibitions() {
             // 에러 발생 시 기본 슬라이드 표시
             const defaultSlideHTML = `
                 <div class="hero-slide active">
-                    <div class="hero-slide-bg" style="background-image: url('/assets/image/hero_default.jpg')"></div>
+                    <div class="hero-slide-bg" style="background-image: url('/images/hero_default.jpg')"></div>
                     <div class="idx-hero__content">
                         <h1>Welcome</h1>
                         <p>성균관대학교 미술동아리 갤러리에 오신 것을 환영합니다.</p>
@@ -125,7 +125,7 @@ function createExhibitionSlides(exhibitions) {
     if (!exhibitions || exhibitions.length === 0) {
         const defaultSlideHTML = `
             <div class="hero-slide active" data-index="0">
-                <div class="hero-slide-bg" style="background-image: url('/assets/image/hero_default.jpg')"></div>
+                <div class="hero-slide-bg" style="background-image: url('/images/hero_default.jpg')"></div>
                 <div class="idx-hero__content">
                     <h1>Welcome</h1>
                     <p>성균관대학교 미술동아리 갤러리에 오신 것을 환영합니다.</p>
@@ -140,7 +140,7 @@ function createExhibitionSlides(exhibitions) {
         // 각 전시회마다 슬라이드 생성
         const slideHTML = `
             <div class="hero-slide ${index === 0 ? 'active' : ''}" data-index="${index}" data-exhibition-id="${exhibition.id}">
-                <div class="hero-slide-bg" style="background-image: url('${exhibition.imageUrl || '/assets/image/hero_default.jpg'}')"></div>
+                <div class="hero-slide-bg" style="background-image: url('${exhibition.imageUrl || '/images/hero_default.jpg'}')"></div>
                 <div class="idx-hero__content">
                     <h1>${exhibition.title}</h1>
                     <p>${exhibition.location || ''}</p>

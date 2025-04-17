@@ -12,7 +12,7 @@ import methodOverride from 'method-override';
 import { isAdmin } from './common/middleware/auth.js';
 
 // 라우터 import
-import { HomeRouter, NoticeRouter, ExhibitionRouter, ArtworkRouter, UserRouter, AdminRouter, AuthRouter } from './routeIndex.js';
+import { HomeRouter, ExhibitionRouter, ArtworkRouter, UserRouter, AdminRouter, AuthRouter } from './routeIndex.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -166,7 +166,6 @@ app.use((req, res, next) => {
 
 // 라우터 설정
 app.use('/', HomeRouter);
-app.use('/notice', NoticeRouter);
 app.use('/exhibition', ExhibitionRouter);
 app.use('/artwork', ArtworkRouter);
 app.use('/user', UserRouter);

@@ -1,5 +1,5 @@
 import express from 'express';
-import { SystemManagementController, UserManagementController, ExhibitionManagementController, ArtworkManagementController, NoticeManagementController } from './AdminControllerIndex.js';
+import { SystemManagementController, UserManagementController, ExhibitionManagementController, ArtworkManagementController } from './AdminControllerIndex.js';
 import { imageUploadMiddleware } from '../../../common/middleware/imageUploadMiddleware.js';
 
 const AdminRouter = express.Router();
@@ -7,8 +7,6 @@ const adminController = new SystemManagementController();
 const userManagementController = new UserManagementController();
 const exhibitionManagementController = new ExhibitionManagementController();
 const artworkManagementController = new ArtworkManagementController();
-const noticeManagementController = new NoticeManagementController();
-
 
 // 관리자 대시보드
 AdminRouter.get(['/', '/dashboard'], (req, res) => adminController.getDashboard(req, res));
@@ -35,13 +33,5 @@ AdminRouter.get('/management/artwork/:id', (req, res) => artworkManagementContro
 AdminRouter.put('/management/artwork/:id', (req, res) => artworkManagementController.updateManagementArtwork(req, res));
 AdminRouter.delete('/management/artwork/:id', (req, res) => artworkManagementController.deleteManagementArtwork(req, res));
 AdminRouter.post('/management/artwork/:id/featured', (req, res) => artworkManagementController.toggleFeatured(req, res));
-
-// 공지사항 관리
-AdminRouter.get('/management/notice', (req, res) => noticeManagementController.getManagementNoticeList(req, res));
-AdminRouter.get('/management/notice/registration', (req, res) => noticeManagementController.getManagementNoticeRegistrationPage(req, res));
-AdminRouter.post('/management/notice/registration', (req, res) => noticeManagementController.createManagementNotice(req, res));
-AdminRouter.get('/management/notice/:id', (req, res) => noticeManagementController.getManagementNoticeDetail(req, res));
-AdminRouter.put('/management/notice/:id', (req, res) => noticeManagementController.updateManagementNotice(req, res));
-AdminRouter.delete('/management/notice/:id', (req, res) => noticeManagementController.deleteManagementNotice(req, res));
 
 export default AdminRouter;
