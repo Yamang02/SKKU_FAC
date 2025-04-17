@@ -1,8 +1,3 @@
-import * as dotenv from 'dotenv';
-
-// 환경 변수 로드
-const envFile = process.env.NODE_ENV === 'production' ? '.env.remote' : '.env.local';
-dotenv.config({ path: envFile });
 
 // 환경 변수 검증
 const requiredEnvVars = ['SESSION_SECRET', 'ADMIN_USER', 'ADMIN_PASSWORD'];
@@ -23,7 +18,7 @@ const startServer = () => {
         app.listen(PORT, () => {
             console.log(`✅ 서버가 포트 ${PORT}에서 실행 중입니다.`);
             console.log(`✅ 환경: ${process.env.NODE_ENV || 'development'}`);
-            console.log(`✅ 설정 파일: ${envFile}`);
+
         });
     } catch (error) {
         console.error('❌ 서버 시작 실패:', error);
