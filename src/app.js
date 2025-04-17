@@ -21,6 +21,11 @@ const __dirname = path.dirname(__filename);
 // 업로드 디렉토리 생성
 createUploadDirs();
 
+// 헬스체크 엔드포인트 추가 (모든 미들웨어 이전에 설정)
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
 // 보안 미들웨어
 app.use(helmet({
     contentSecurityPolicy: {
@@ -42,21 +47,23 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// 헬스체크 엔드포인트 추가 (인증 이전에 설정)
-app.get('/health', (req, res) => {
-    res.status(200).send('OK');
-});
-
 // 기본 인증 설정
 const ADMIN_USER = process.env.ADMIN_USER;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 if (process.env.NODE_ENV === 'production' || process.env.ENABLE_AUTH === 'true') {
-    app.use(basicAuth({
-        users: { [ADMIN_USER]: ADMIN_PASSWORD },
-        challenge: true,
-        realm: 'SKKU Gallery Development Preview'
-    }));
+    // 헬스체크 경로는 인증에서 제외
+    app.use((req, res, next) => {
+        if (req.path === '/health') {
+            return next();
+        }
+
+        basicAuth({
+            users: { [ADMIN_USER]: ADMIN_PASSWORD },
+            challenge: true,
+            realm: 'SKKU Gallery Development Preview'
+        })(req, res, next);
+    });
 }
 
 /**
