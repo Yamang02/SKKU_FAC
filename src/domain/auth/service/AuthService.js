@@ -79,8 +79,11 @@ export default class AuthService {
     // 만료된 토큰 확인 및 재발행
     async handleExpiredToken(token, type) {
         try {
+            // 디코딩된 토큰 확인
+            const decodedToken = decodeURIComponent(token);
+
             // 만료된 토큰 조회
-            const tokenData = await this.tokenRepository.findByToken(token, type);
+            const tokenData = await this.tokenRepository.findByToken(decodedToken, type);
 
             if (!tokenData) {
                 throw new Error('토큰을 찾을 수 없습니다.');
@@ -117,7 +120,8 @@ export default class AuthService {
 
     // 토큰 만료 여부 확인
     async isTokenExpired(token, type) {
-        const tokenData = await this.tokenRepository.findByToken(token, type);
+        const decodedToken = decodeURIComponent(token);
+        const tokenData = await this.tokenRepository.findByToken(decodedToken, type);
 
         if (!tokenData) {
             return { exists: false, expired: true };

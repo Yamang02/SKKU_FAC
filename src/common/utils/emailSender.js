@@ -9,13 +9,14 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendPasswordResetEmail = async (to, token) => {
+    const resetUrl = `${process.env.BASE_URL}/user/password/reset?token=${encodeURIComponent(token)}`;
 
     const mailOptions = {
         from: process.env.EMAIL_FROM,
         to,
         subject: '비밀번호 재설정 요청',
         html: `<p>비밀 번호 재설정을 위해 아래 주소로 접속하세요:</p>
-           <a href="${process.env.BASE_URL}/user/password/reset?token=${token}">${process.env.BASE_URL}/user/password/reset?token=${token}</a>`
+           <a href="${resetUrl}">${resetUrl}</a>`
     };
 
     await transporter.sendMail(mailOptions);
@@ -23,7 +24,7 @@ export const sendPasswordResetEmail = async (to, token) => {
 
 
 export const sendVerificationEmail = async (to, token) => {
-    const verifyUrl = `${process.env.BASE_URL}/user/verify-email?token=${token}`;
+    const verifyUrl = `${process.env.BASE_URL}/user/verify-email?token=${encodeURIComponent(token)}`;
 
     const mailOptions = {
         from: process.env.EMAIL_FROM,

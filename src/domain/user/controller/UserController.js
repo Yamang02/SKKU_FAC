@@ -77,7 +77,8 @@ export default class UserController {
                 throw new Error('잘못된 요청입니다.');
             }
 
-            const tokenData = await this.authService.verifyToken(token, 'EMAIL_VERIFICATION');
+            const decodedToken = decodeURIComponent(token);
+            const tokenData = await this.authService.verifyToken(decodedToken, 'EMAIL_VERIFICATION');
             if (!tokenData) {
                 throw new Error('잘못된 요청입니다.');
             }
@@ -85,7 +86,7 @@ export default class UserController {
             await this.userService.activateUser(tokenData.userId);
 
             // 토큰 삭제
-            await this.authService.deleteToken(token, 'EMAIL_VERIFICATION');
+            await this.authService.deleteToken(decodedToken, 'EMAIL_VERIFICATION');
 
             req.session.flash = {
                 type: 'success',
