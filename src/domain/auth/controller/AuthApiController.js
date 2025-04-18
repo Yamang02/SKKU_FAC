@@ -21,14 +21,13 @@ export default class AuthApiController {
             }
 
             // 토큰 검증
-            const decodedToken = decodeURIComponent(token);
-            const tokenData = await this.authService.verifyToken(decodedToken, 'EMAIL_VERIFICATION');
+            const tokenData = await this.authService.verifyToken(token, 'EMAIL_VERIFICATION');
 
             // 사용자 계정 활성화
             await this.userService.activateUser(tokenData.userId);
 
             // 토큰 삭제
-            await this.authService.deleteToken(decodedToken, 'EMAIL_VERIFICATION');
+            await this.authService.deleteToken(token, 'EMAIL_VERIFICATION');
 
             req.session.flash = {
                 type: 'success',
@@ -103,8 +102,7 @@ export default class AuthApiController {
             const { token, newPassword } = req.body;
 
             // 토큰 검증
-            const decodedToken = decodeURIComponent(token);
-            const tokenData = await this.authService.verifyToken(decodedToken, 'PASSWORD_RESET');
+            const tokenData = await this.authService.verifyToken(token, 'PASSWORD_RESET');
 
             // 비밀번호 변경
             const result = await this.userService.updatePassword(tokenData.userId, newPassword);
@@ -113,7 +111,7 @@ export default class AuthApiController {
                 throw new Error('비밀번호 재설정에 실패했습니다.');
             } else {
                 // 토큰 삭제
-                await this.authService.deleteToken(decodedToken, 'PASSWORD_RESET');
+                await this.authService.deleteToken(token, 'PASSWORD_RESET');
                 return res.json(ApiResponse.success(null, '비밀번호가 성공적으로 재설정되었습니다.'));
             }
 
@@ -158,8 +156,7 @@ export default class AuthApiController {
             }
 
             // 토큰 검증
-            const decodedToken = decodeURIComponent(token);
-            await this.authService.verifyToken(decodedToken, type);
+            await this.authService.verifyToken(token, type);
 
             return res.json(ApiResponse.success({ isValid: true }, '유효한 토큰입니다.'));
         } catch (error) {
