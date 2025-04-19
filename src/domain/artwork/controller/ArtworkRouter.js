@@ -232,7 +232,7 @@ responses:
                   type: array
                   items:
                     type: object
-                    description: ArtworkDetailDto[]
+                    description: ArtworkDetailDto
                 total:
                   type: integer
                   description: 총 작품 수
