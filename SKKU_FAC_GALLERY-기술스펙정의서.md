@@ -1,0 +1,146 @@
+# SKKU 교수 전시 갤러리 기술스펙 정의서
+
+## 1. 프로젝트 개요
+
+SKKU 성미회 갤러리는 성균관대학교 순수미술 동아리 성미회 작품들을 모아 보는 아카이브의 역할을 목표로 개발되었습니다. 이 시스템은 정기적, 비정기적으로 열리는 전시회의 관리, 동아리원과 외부인원들의 작품 업로드, 사용자 인증 등의 기능을 제공합니다.
+
+## 2. 기술 스택
+
+### 2.1 프론트엔드
+- **템플릿 엔진**: EJS
+- **CSS 프레임워크**: 자체 CSS
+- **JavaScript**: 바닐라 자바스크립트
+
+### 2.2 백엔드
+- **런타임**: Node.js (v22.13.0)
+- **프레임워크**: Express.js
+- **데이터베이스**: MySQL
+- **ORM**: Sequelize
+
+### 2.3 인프라
+- **클라우드 스토리지**: Cloudinary (이미지 저장)
+- **배포 환경**: Railway
+
+### 2.4 보안
+- **인증**: JWT, 세션 기반 인증
+- **암호화**: bcrypt
+- **보안 헤더**: helmet
+- **요청 제한**: express-rate-limit
+
+## 3. 프로젝트 구조도
+
+```
+SKKU_FAC_GALLERY/
+├── src/                              # 소스 코드 루트
+│   ├── app.js                        # Express 애플리케이션 설정
+│   ├── server.js                     # 서버 시작점
+│   ├── routeIndex.js                 # 라우터 인덱스
+│   ├── swagger.json                  # API 문서
+│   ├── domain/                       # 도메인별 구성요소
+│   │   ├── admin/                    # 관리자 도메인
+│   │   ├── artwork/                  # 작품 도메인
+│   │   ├── auth/                     # 인증 도메인
+│   │   ├── common/                   # 공통 도메인
+│   │   ├── exhibition/               # 전시회 도메인
+│   │   │   ├── controller/           # 컨트롤러 레이어
+│   │   │   ├── model/                # 모델 레이어
+│   │   │   └── service/              # 서비스 레이어
+│   │   ├── home/                     # 홈 도메인
+│   │   ├── image/                    # 이미지 도메인
+│   │   └── user/                     # 사용자 도메인
+│   ├── infrastructure/               # 인프라 계층
+│   │   ├── cloudinary/               # Cloudinary 통합
+│   │   └── db/                       # 데이터베이스 관련
+│   │       ├── adapter/              # DB 어댑터
+│   │       ├── repository/           # 레포지토리 패턴 구현
+│   │       └── model/                # DB 모델
+│   │           ├── entity/           # 엔티티 모델
+│   │           └── relationship/     # 모델 간 관계 설정
+│   ├── common/                       # 공통 유틸리티
+│   ├── config/                       # 설정 파일
+│   ├── public/                       # 정적 파일
+│   └── views/                        # EJS 뷰 템플릿
+├── public/                           # 배포용 정적 파일
+├── node_modules/                     # 패키지 종속성
+├── .env.local                        # 로컬 환경 변수
+├── .env.remote                       # 원격 환경 변수
+├── package.json                      # 프로젝트 메타데이터 및 종속성
+└── package-lock.json                 # 패키지 버전 잠금 파일
+```
+
+## 4. 주요 모듈 설명
+
+### 4.1 도메인 모듈
+
+각 도메인은 MVC 패턴을 따르며 다음 구조로 구성됩니다:
+- **Controller**: 요청 처리 및 라우팅
+- **Service**: 비즈니스 로직 처리
+- **Model**: 데이터 모델 정의
+
+#### 4.1.1 주요 도메인
+
+- **Exhibition**: 전시회 관리 및 조회
+- **Artwork**: 작품 등록, 관리, 조회
+- **User**: 사용자 관리
+- **Auth**: 인증 및 권한 관리
+- **Admin**: 관리자 기능
+
+### 4.2 인프라 모듈
+
+- **DB**: Sequelize ORM을 사용한 데이터베이스 연결 및 모델 관리
+- **Cloudinary**: 이미지 업로드 및 관리
+
+### 4.3 데이터베이스 모델
+
+주요 엔티티:
+- **UserAccount**: 사용자 계정 정보
+- **SkkuUserProfile**: 성균관대 사용자 프로필
+- **ExternalUserProfile**: 외부 사용자 프로필
+- **Exhibition**: 전시회 정보
+- **Artwork**: 작품 정보
+- **ArtworkExhibitionRelationship**: 작품과 전시회 간 관계
+
+## 5. API 문서화
+
+- Swagger UI를 통한 API 문서 제공 (`/api-docs` 경로)
+- RESTful API 구조 준수
+
+## 6. 보안 구현
+
+- **JWT 인증**: 안전한 API 액세스를 위한 토큰 기반 인증
+- **세션 관리**: 사용자 세션 추적 및 관리
+- **헬멧 미들웨어**: 보안 헤더 설정으로 일반적인 웹 취약점 방지
+- **비율 제한**: 브루트 포스 공격 방지를 위한 요청 제한
+- **입력 검증**: 모든 사용자 입력에 대한 검증
+
+## 7. 성능 최적화
+
+- **정적 자산 캐싱**: 클라이언트 측 캐싱을 통한 성능 향상
+- **요청 로깅**: 요청 처리 시간 모니터링
+- **에러 처리**: 중앙 집중식 에러 처리 및 로깅
+
+## 8. 확장성
+
+- **계층화된 아키텍처**: 관심사 분리를 통한 유지보수성 향상
+- **모듈식 설계**: 새로운 기능 추가가 용이한 구조
+- **환경 변수**: 환경별 구성으로 유연한 배포 가능
+
+## 9. 배포 환경
+
+- **개발 환경**: 로컬 개발 환경 (NODE_ENV=development)
+- **프로덕션 환경**: Railway 호스팅 (NODE_ENV=production)
+- **CI/CD**: 자동화된 배포 파이프라인
+
+## 10. 의존성
+
+주요 패키지:
+- express: 웹 서버 프레임워크
+- sequelize: ORM
+- bcrypt: 비밀번호 해싱
+- jsonwebtoken: JWT 인증
+- multer & multer-storage-cloudinary: 파일 업로드
+- helmet: 보안 미들웨어
+- express-rate-limit: 요청 제한
+- ejs: 템플릿 엔진
+- dotenv: 환경 변수 관리
+- swagger-ui-express: API 문서화

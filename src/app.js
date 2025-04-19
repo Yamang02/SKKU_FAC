@@ -9,6 +9,12 @@ import { pageTracker } from './common/middleware/PageTracker.js';
 import { createUploadDirs } from './common/utils/createUploadDirs.js';
 import methodOverride from 'method-override';
 import { isAdmin } from './common/middleware/auth.js';
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+
+// swagger.json 파일 읽기
+const swaggerFile = fs.readFileSync(path.resolve('./src/swagger.json'), 'utf8');
+const swaggerDocument = JSON.parse(swaggerFile);
 
 // 라우터 import
 import { HomeRouter, ExhibitionRouter, ArtworkRouter, UserRouter, AdminRouter, AuthRouter } from './routeIndex.js';
@@ -20,11 +26,12 @@ const __dirname = path.dirname(__filename);
 // 업로드 디렉토리 생성
 createUploadDirs();
 
-// 헬스체크 엔드포인트를 가장 먼저 등록
+
 // 헬스체크 엔드포인트를 가장 먼저 등록
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
 });
+
 
 // 보안 미들웨어
 app.use(helmet({
@@ -40,13 +47,19 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false
 }));
 
-// Rate Limiter 설정 (헬스체크 엔드포인트는 제외)
+// Rate Limiter 설정
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15분
     max: 300, // IP당 최대 요청 수
     skip: (req) => req.path === '/health' // 헬스체크 엔드포인트 제외
 });
 app.use(limiter);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+
+// Swagger UI 설정
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // 미들웨어 설정
 app.use(express.json({ limit: '10mb' }));
@@ -135,7 +148,6 @@ app.use((req, res, next) => {
     });
     next();
 });
-
 /**
  * 이전 페이지 URL 결정
  */
@@ -211,3 +223,4 @@ app.use((err, req, res, _next) => {
 });
 
 export default app;
+
