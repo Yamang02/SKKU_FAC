@@ -1,10 +1,8 @@
 import { ViewPath } from '../../../common/constants/ViewPath.js';
 import ViewResolver from '../../../common/utils/ViewResolver.js';
-import NoticeRepository from '../../../infrastructure/db/repository/NoticeRepository.js';
 
 export default class HomeController {
     constructor() {
-        this.noticeRepository = new NoticeRepository();
     }
 
     /**
