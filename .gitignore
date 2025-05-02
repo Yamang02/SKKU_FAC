@@ -179,3 +179,7 @@ public/uploads/artworks/
 .env.local
 .env.remote
 src/public/js/mockData.js
+
+# Obsidian
+.obsidian
+
