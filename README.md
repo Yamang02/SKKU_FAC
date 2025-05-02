@@ -136,7 +136,6 @@ SKKU_FAC_GALLERY/
 - express: 웹 서버 프레임워크
 - sequelize: ORM
 - bcrypt: 비밀번호 해싱
-- jsonwebtoken: JWT 인증
 - multer & multer-storage-cloudinary: 파일 업로드
 - helmet: 보안 미들웨어
 - express-rate-limit: 요청 제한
