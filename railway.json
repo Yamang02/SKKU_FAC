@@ -3,7 +3,7 @@
         "builder": "NIXPACKS"
     },
     "deploy": {
-        "startCommand": "npm start",
+        "startCommand": "npm run start:test",
         "healthcheckPath": "/health",
         "healthcheckTimeout": 60,
         "restartPolicyType": "ON_FAILURE",
