@@ -8,6 +8,8 @@ import UserApi from '../../api/UserApi.js';
 import { showErrorMessage, showSuccessMessage, showConfirm } from '../../common/util/notification.js';
 import { createArtworkCard } from '../../common/util/card.js';
 import { getArtworkSlug } from '../../common/util/url.js';
+import { initKakao, shareArtwork } from '../../kakaoshare.js';
+
 
 function animateButtonClick(button) {
     if (!button) return;
@@ -570,3 +572,16 @@ function updateRelatedArtworks(artworks) {
     container.innerHTML = '';
     container.appendChild(fragment);
 }
+
+
+function shareByKakaoTalk(artwork) {
+
+
+    initKakao();
+    shareArtwork({
+        title: artwork.title,
+        url: window.location.href,
+        imageUrl: artwork.imageUrl
+    });
+}
+
