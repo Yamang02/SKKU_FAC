@@ -38,3 +38,26 @@ export const createCloudinaryStorage = (type = 'default') => {
         }
     });
 };
+
+/**
+ * Cloudinary 이미지 삭제 함수
+ * @param {string} publicId - 삭제할 이미지의 public_id
+ * @returns {Promise<Object>} - 삭제 결과 객체
+ */
+export const deleteCloudinaryImage = async (publicId) => {
+    try {
+        const result = await cloudinary.uploader.destroy(publicId);
+        return result;
+    } catch (error) {
+        console.error('Cloudinary 이미지 삭제 중 오류 발생:', error);
+        throw error;
+    }
+};
+
+/**
+ * Cloudinary 객체 가져오기 (고급 사용 사례용)
+ * @returns {Object} - cloudinary v2 객체
+ */
+export const getCloudinary = () => {
+    return cloudinary;
+};

@@ -136,6 +136,18 @@ export default class ExhibitionService {
      */
     async deleteManagementExhibition(id) {
         try {
+
+            const exhibition = await this.exhibitionRepository.findExhibitionById(id);
+
+            // 전시회 이미지 존재 시 삭제
+            if (exhibition.imagePublicId) {
+                await this.imageService.deleteImage(exhibition.imagePublicId);
+            }
+
+            // 전시회 출품 작품 관계 삭제
+            await this.artworkExhibitionRelationshipRepository.deleteArtworkExhibitionRelationshipByExhibitionId(id);
+
+            // 전시회 삭제(hard delete)
             return await this.exhibitionRepository.deleteExhibition(id);
         } catch (error) {
             console.error('전시회 삭제 중 오류:', error);

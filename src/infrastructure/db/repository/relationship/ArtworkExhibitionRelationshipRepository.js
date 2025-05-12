@@ -70,6 +70,14 @@ class ArtworkExhibitionRelationshipRepository {
             }
         });
     }
+
+    async deleteArtworkExhibitionRelationshipByExhibitionId(exhibitionId) {
+        await ArtworkExhibitionRelationship.destroy({
+            where: {
+                exhibitionId
+            }
+        });
+    }
 }
 
 export default ArtworkExhibitionRelationshipRepository;

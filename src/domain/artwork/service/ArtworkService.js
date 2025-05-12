@@ -278,17 +278,14 @@ export default class ArtworkService {
             throw new ArtworkNotFoundError();
         }
 
-        await this.artworkExhibitionRelationshipRepository.deleteArtworkExhibitionRelationshipByArtworkId(id);
-        return this.artworkRepository.updateArtworkDeleted(id);
-    }
+        // 이미지 삭제
+        await this.imageService.deleteImage(artwork.imagePublicId);
 
-    /**
-     * 업로드된 이미지 정보를 조회합니다.
-     * @param {Object} file - 업로드된 파일 객체
-     * @returns {Promise<Object>} 업로드된 이미지 정보
-     */
-    async uploadArtworkImage(file) {
-        return this.imageService.getUploadedImageInfo(file);
+        // 출품 전시회 관계 삭제
+        await this.artworkExhibitionRelationshipRepository.deleteArtworkExhibitionRelationshipByArtworkId(id);
+
+        // 작품 삭제(soft delete)
+        return this.artworkRepository.updateArtworkDeleted(id);
     }
 
     /**
