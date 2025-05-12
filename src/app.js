@@ -80,7 +80,11 @@ app.use(
                     'https://developers.kakao.com'
                 ],
                 formAction: [
-                    '*'
+                    '\'self\'',
+                    'https://*.kakao.com'],
+                content: [
+                    '\'self\'',
+                    'https://*.kakao.com'
                 ]
             }
         },
