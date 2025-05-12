@@ -34,18 +34,60 @@ app.get('/health', (req, res) => {
 
 
 // 보안 미들웨어
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ['\'self\''],
-            scriptSrc: ['\'self\'', '\'unsafe-inline\''],
-            styleSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com', '\'unsafe-inline\''],
-            fontSrc: ['\'self\'', 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com', 'https://fonts.gstatic.com', '\'unsafe-inline\''],
-            imgSrc: ['\'self\'', 'https://res.cloudinary.com/dw57ytzhg/', 'data:', 'blob:']
-        }
-    },
-    crossOriginEmbedderPolicy: false
-}));
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ['\'self\''],
+                scriptSrc: [
+                    '\'self\'',
+                    '\'unsafe-inline\'',
+                    'https://developers.kakao.com',
+                    'https://t1.kakaocdn.net',
+                    'https://k.kakaocdn.net'
+                ],
+                styleSrc: [
+                    '\'self\'',
+                    'https://cdnjs.cloudflare.com',
+                    'https://fonts.googleapis.com',
+                    '\'unsafe-inline\''
+                ],
+                fontSrc: [
+                    '\'self\'',
+                    'https://fonts.googleapis.com',
+                    'https://cdnjs.cloudflare.com',
+                    'https://fonts.gstatic.com',
+                    '\'unsafe-inline\''
+                ],
+                imgSrc: [
+                    '\'self\'',
+                    'https://res.cloudinary.com/dw57ytzhg/',
+                    'data:',
+                    'blob:'
+                ],
+                connectSrc: [
+                    '\'self\'',
+                    'https://developers.kakao.com',
+                    'https://t1.kakaocdn.net',
+                    'https://k.kakaocdn.net'
+                ],
+                frameSrc: [
+                    '\'self\'',
+                    'https://developers.kakao.com'
+                ],
+                objectSrc: [
+                    '\'self\'',
+                    'https://developers.kakao.com'
+                ],
+                formAction: [
+                    '*'
+                ]
+            }
+        },
+        crossOriginEmbedderPolicy: false
+    })
+);
+
 
 // Rate Limiter 설정
 const limiter = rateLimit({
