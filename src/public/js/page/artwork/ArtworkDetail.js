@@ -8,7 +8,6 @@ import UserApi from '../../api/UserApi.js';
 import { showErrorMessage, showSuccessMessage, showConfirm } from '../../common/util/notification.js';
 import { createArtworkCard } from '../../common/util/card.js';
 import { getArtworkSlug } from '../../common/util/url.js';
-import { initKakao, shareArtwork } from '../../kakaoShare.js';
 
 
 function animateButtonClick(button) {
@@ -594,6 +593,31 @@ function shareByKakaoTalk(artwork) {
         showErrorMessage('웹에서는 카카오톡 공유 기능을 사용할 수 없습니다.');
         return;
     }
+
+    const jsKey = 'd559013a67d0a8e4f0358affeefdbc28';
+
+    function initKakao() {
+        if (!window.Kakao || !jsKey) return;
+        if (!Kakao.isInitialized()) {
+            Kakao.init(jsKey);
+        }
+    }
+
+    function shareArtwork({ title, url, imageUrl }) {
+        Kakao.Link.sendDefault({
+            objectType: 'feed',
+            content: {
+                title: title,
+                description: '성미회 작품 감상',
+                imageUrl: imageUrl,
+                link: {
+                    webUrl: url,
+                    mobileWebUrl: url
+                }
+            }
+        });
+    }
+
 
     // 카카오 SDK 초기화
     initKakao();
