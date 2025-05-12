@@ -8,7 +8,7 @@ import UserApi from '../../api/UserApi.js';
 import { showErrorMessage, showSuccessMessage, showConfirm } from '../../common/util/notification.js';
 import { createArtworkCard } from '../../common/util/card.js';
 import { getArtworkSlug } from '../../common/util/url.js';
-import { initKakao, shareArtwork } from '../../kakaoshare.js';
+import { initKakao, shareArtwork } from '../../kakaoShare.js';
 
 
 function animateButtonClick(button) {
@@ -573,15 +573,37 @@ function updateRelatedArtworks(artworks) {
     container.appendChild(fragment);
 }
 
-
-function shareByKakaoTalk(artwork) {
-
-
-    initKakao();
-    shareArtwork({
-        title: artwork.title,
-        url: window.location.href,
-        imageUrl: artwork.imageUrl
+// 카카오톡 공유 버튼 이벤트 리스너 등록
+const shareButton = document.getElementById('shareByKakaoTalkBtn');
+if (shareButton) {
+    shareButton.addEventListener('click', () => {
+        // 현재 작품 정보가 있을 때만 공유 기능 실행
+        const artworkTitle = document.querySelector('.artwork-detail-title').textContent;
+        const artworkImage = document.querySelector('.artwork-main-image').src;
+        shareByKakaoTalk({
+            title: artworkTitle,
+            imageUrl: artworkImage
+        });
     });
 }
+
+function shareByKakaoTalk(artwork) {
+    // window.Kakao 객체 존재 여부 확인
+    if (typeof window.Kakao === 'undefined') {
+        console.error('Kakao SDK가 로드되지 않았습니다.');
+        showErrorMessage('웹에서는 카카오톡 공유 기능을 사용할 수 없습니다.');
+        return;
+    }
+
+    // 카카오 SDK 초기화
+    initKakao();
+
+    // 작품 공유하기
+    shareArtwork({
+        title: artwork.title || '성미회 작품',
+        url: window.location.href,
+        imageUrl: artwork.imageUrl || document.querySelector('.artwork-main-image').src
+    });
+}
+
 
