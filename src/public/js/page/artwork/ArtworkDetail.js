@@ -8,7 +8,6 @@ import UserApi from '../../api/UserApi.js';
 import { showErrorMessage, showSuccessMessage, showConfirm } from '../../common/util/notification.js';
 import { createArtworkCard } from '../../common/util/card.js';
 import { getArtworkSlug } from '../../common/util/url.js';
-import { initKakao, shareArtwork } from '../../kakaoShare.js';
 
 
 function animateButtonClick(button) {
@@ -588,21 +587,30 @@ if (shareButton) {
 }
 
 function shareByKakaoTalk(artwork) {
+    const jsKey = 'd559013a67d0a8e4f0358affeefdbc28';
     // window.Kakao 객체 존재 여부 확인
     if (typeof window.Kakao === 'undefined') {
         console.error('Kakao SDK가 로드되지 않았습니다.');
-        showErrorMessage('웹에서는 카카오톡 공유 기능을 사용할 수 없습니다.');
         return;
     }
 
-    // 카카오 SDK 초기화
-    initKakao();
+    if (!window.Kakao || !jsKey) return;
+    if (!Kakao.isInitialized()) {
+        Kakao.init(jsKey);
+    }
 
-    // 작품 공유하기
-    shareArtwork({
-        title: artwork.title || '성미회 작품',
-        url: window.location.href,
-        imageUrl: artwork.imageUrl || document.querySelector('.artwork-main-image').src
+
+    Kakao.Link.sendDefault({
+        objectType: 'feed',
+        content: {
+            title: artwork.title,
+            description: '성미회 작품 감상',
+            imageUrl: artwork.imageUrl,
+            link: {
+                webUrl: window.location.href,
+                mobileWebUrl: window.location.href
+            }
+        }
     });
 }
 
