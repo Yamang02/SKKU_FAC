@@ -23,6 +23,17 @@
     margin-bottom: 15px;
 }
 
+.artwork-detail-title {
+    flex: 1;
+    margin-right: 15px;
+}
+
+.title-container .buttons-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 /* 관리 버튼 스타일 */
 .manage-artwork-btn {
     width: 40px;
@@ -44,6 +55,64 @@
     border-color: var(--color-primary);
     transform: rotate(45deg);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 카카오톡 공유 버튼 */
+.share-by-kakao-talk-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: white;
+    border: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--color-secondary);
+    margin-right: 10px;
+    position: relative;
+}
+
+.share-by-kakao-talk-btn:hover {
+    background-color: #FEE500; /* 호버 시 카카오톡 노란색 배경 */
+    color: #3C1E1E; /* 호버 시 카카오톡 아이콘 색상 */
+    border-color: #FEE500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 툴팁 스타일 */
+.share-by-kakao-talk-btn .tooltip {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    pointer-events: none;
+}
+
+.share-by-kakao-talk-btn .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.7) transparent transparent transparent;
+}
+
+.share-by-kakao-talk-btn:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
 }
 
 .artwork-detail-artist {
