@@ -21,3 +21,4 @@ export class ExhibitionValidationError extends ExhibitionError {
         this.name = 'ExhibitionValidationError';
     }
 }
+

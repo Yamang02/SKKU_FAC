@@ -1,13 +1,13 @@
-import FileServerService from './FileServerService.js';
 import { ImageError } from '../../../common/error/ImageError.js';
-import cloudinary from 'cloudinary';
+import { deleteCloudinaryImage } from '../../../infrastructure/cloudinary/provider/cloudinaryStorageFactory.js';
+
 /**
  * 이미지 서비스
  * 이미지 업로드, 삭제, 조회 등의 비즈니스 로직을 담당합니다.
  */
 class ImageService {
+
     constructor() {
-        this.fileServerService = new FileServerService();
     }
 
     /**
@@ -29,22 +29,25 @@ class ImageService {
     /**
      * Cloudinary 이미지 삭제
      * @param {string} publicId - Cloudinary에 저장된 이미지의 public_id
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>} 삭제 성공 여부
      */
     async deleteImage(publicId) {
         try {
-            ('publicId', publicId);
-            ('imageService deleteImage');
-            const result = await cloudinary.uploader.destroy(publicId);
+            console.log('이미지 삭제 시작 - publicId:', publicId);
+
+            // 인프라 레이어의 삭제 함수 사용
+            const result = await deleteCloudinaryImage(publicId);
+            console.log('이미지 삭제 결과:', result);
+
             if (result.result !== 'ok') {
                 console.warn(`Cloudinary 이미지 삭제 실패: ${result.result}`);
             }
+
+            return true;
         } catch (error) {
             console.error('Cloudinary 이미지 삭제 중 에러:', error);
-            // 실패하더라도 전체 트랜잭션에 영향 주지 않도록 처리
+            return true;
         }
-
-        return true;
     }
 
     /**

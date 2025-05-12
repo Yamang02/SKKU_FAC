@@ -2,6 +2,7 @@ import { Exhibition } from '../model/entity/EntitityIndex.js';
 import { Op } from 'sequelize';
 import { ArtworkExhibitionRelationship } from '../model/entity/EntitityIndex.js';
 import { Sequelize } from 'sequelize';
+import { ExhibitionError, ExhibitionNotFoundError } from '../../../common/error/ExhibitionError.js';
 
 export default class ExhibitionRepository {
     constructor() {
@@ -209,15 +210,20 @@ export default class ExhibitionRepository {
     }
 
     /**
-     * 전시회를 삭제합니다.
+     * 전시회를 삭제합니다.(hard delete)
      */
     async deleteExhibition(id) {
-        const exhibition = await Exhibition.findByPk(id);
-        if (!exhibition) return false;
+        try {
+            const exhibition = await Exhibition.findByPk(id);
+            if (!exhibition) throw new ExhibitionNotFoundError('전시회를 찾을 수 없습니다.');
 
-        await exhibition.destroy();
-        return true;
+            await exhibition.destroy();
+            return true;
+        } catch (error) {
+            throw new ExhibitionError('전시회 삭제 중 오류가 발생했습니다.', error);
+        }
     }
+
 
     /**
      * 현재 진행 중인 전시회를 조회합니다.
