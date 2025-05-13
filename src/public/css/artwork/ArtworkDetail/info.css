@@ -57,6 +57,30 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* QR 코드 생성 버튼 */
+.generate-qr-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: white;
+    border: 1px solid #eee;
+    color: var(--color-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+    position: relative;
+}
+
+.generate-qr-btn:hover {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* 카카오톡 공유 버튼 */
 .share-by-kakao-talk-btn {
     width: 40px;
@@ -75,13 +99,16 @@
 }
 
 .share-by-kakao-talk-btn:hover {
-    background-color: #FEE500; /* 호버 시 카카오톡 노란색 배경 */
-    color: #3C1E1E; /* 호버 시 카카오톡 아이콘 색상 */
+    background-color: #FEE500;
+    /* 호버 시 카카오톡 노란색 배경 */
+    color: #3C1E1E;
+    /* 호버 시 카카오톡 아이콘 색상 */
     border-color: #FEE500;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* 툴팁 스타일 */
+.generate-qr-btn .tooltip,
 .share-by-kakao-talk-btn .tooltip {
     position: absolute;
     top: -35px;
@@ -99,6 +126,7 @@
     pointer-events: none;
 }
 
+.generate-qr-btn .tooltip::after,
 .share-by-kakao-talk-btn .tooltip::after {
     content: '';
     position: absolute;
@@ -110,6 +138,7 @@
     border-color: rgba(0, 0, 0, 0.7) transparent transparent transparent;
 }
 
+.generate-qr-btn:hover .tooltip,
 .share-by-kakao-talk-btn:hover .tooltip {
     opacity: 1;
     visibility: visible;
@@ -362,4 +391,3 @@
     background-color: rgba(7, 43, 97, 0.7);
     color: white;
 }
-
