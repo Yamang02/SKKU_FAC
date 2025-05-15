@@ -1,3 +1,5 @@
+import CloudinaryUrlOptimizer from '../../../../common/utils/CloudinaryUrlOptimizer.js';
+
 /**
  * 작품 상세 정보를 위한 DTO
  */
@@ -10,7 +12,7 @@ export default class ArtworkDetailDto {
         this.size = data.size || ''; // 크기
         this.year = data.year || ''; // 작품 연도
         this.description = data.description || ''; // 작품 설명
-        this.imageUrl = data.imageUrl || ''; // 이미지 URL
+        this.imageUrl = CloudinaryUrlOptimizer.optimizeImageUrl(data.imageUrl) || ''; // 이미지 URL
         this.isFeatured = data.isFeatured || false; // 주요 작품 여부
         this.userId = data.userId || null; // 작품 작성자 ID
         this.artistName = data.artistName || ''; // 작가 이름
