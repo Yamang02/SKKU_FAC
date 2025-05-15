@@ -1,3 +1,5 @@
+import CloudinaryUrlOptimizer from '../../../../../common/utils/CloudinaryUrlOptimizer.js';
+
 /**
  * 관리자 페이지 전시회 상세 정보를 위한 DTO
  */
@@ -9,7 +11,7 @@ export default class ExhibitionManagementDto {
         this.startDate = data.startDate || '';
         this.endDate = data.endDate || '';
         this.location = data.location || '';
-        this.imageUrl = data.imageUrl || '';
+        this.imageUrl = CloudinaryUrlOptimizer.optimizeImageUrl(data.imageUrl) || '';
         this.imagePublicId = data.imagePublicId || '';
         this.exhibitionType = data.exhibitionType || 'regular';
         this.isSubmissionOpen = data.isSubmissionOpen === true;

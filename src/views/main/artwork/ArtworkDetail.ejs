@@ -15,9 +15,13 @@
         <div class="artwork-detail-header">
             <div class="title-container">
                 <h1 class="artwork-detail-title">로딩중...</h1>
-                <button id="shareByKakaoTalkBtn" class="share-by-kakao-talk-btn">
+                <button id="shareByKakaoTalkBtn" class="share-by-kakao-talk-btn" style="display:none;">
                     <i class="fas fa-comment"></i>
                     <span class="tooltip">카카오톡 공유하기</span>
+                </button>
+                <button id="generateQRBtn" class="generate-qr-btn" style="display:none;">
+                    <i class="fas fa-qrcode"></i>
+                    <span class="tooltip">QR 코드 생성하기</span>
                 </button>
                 <button id="manageArtworkBtn" class="manage-artwork-btn" style="display:none;">
                     <i class="fas fa-cog"></i>
@@ -136,5 +140,24 @@
     </div>
 </div>
 
+<!-- QR 코드 모달 -->
+<div id="qrCodeModal" class="modal">
+    <div class="modal-content qr-modal-content">
+        <div id="qrCodeContainer" class="qr-code-container">
+            <h2 class="qr-artwork-title"></h2>
+            <p class="qr-artist-name"></p>
+            <div class="qr-code-image-container">
+                <img id="qrCodeImage" alt="QR 코드">
+            </div>
+            <p class="qr-scan-text">QR 코드를 스캔하여 작품 정보를 확인하세요</p>
+        </div>
+        <div class="modal-actions">
+            <button id="downloadQRCode" class="btn btn-primary">이미지 다운로드</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script type="module" src="/js/page/artwork/ArtworkDetail.js"></script>

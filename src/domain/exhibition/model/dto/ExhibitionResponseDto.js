@@ -1,5 +1,5 @@
 import ExhibitionSimpleDto from './ExhibitionSimpleDto.js';
-
+import CloudinaryUrlOptimizer from '../../../../common/utils/CloudinaryUrlOptimizer.js';
 /**
  * 전시회 응답 DTO
  * 전시회 상세 정보 조회 시 사용되는 데이터 전송 객체
@@ -13,7 +13,7 @@ export default class ExhibitionResponseDto {
         this.startDate = data.startDate || '';
         this.endDate = data.endDate || '';
         this.exhibitionType = data.exhibitionType || '';
-        this.imageUrl = data.imageUrl || null;
+        this.imageUrl = data.imageUrl ? CloudinaryUrlOptimizer.optimizeImageUrl(data.imageUrl) : null;
         this.imagePublicId = data.imagePublicId || null;
         this.location = data.location || '';
         this.artists = data.artists || [];

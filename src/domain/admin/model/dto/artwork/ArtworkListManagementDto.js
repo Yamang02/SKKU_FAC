@@ -1,3 +1,5 @@
+import CloudinaryUrlOptimizer from '../../../../../common/utils/CloudinaryUrlOptimizer.js';
+
 /**
  * 관리자 페이지 작품 목록을 위한 DTO
  */
@@ -6,7 +8,7 @@ export default class ArtworkListManagementDto {
         this.id = data.id || null;
         this.title = data.title || '';
         this.slug = data.slug || '';
-        this.imageUrl = data.imageUrl || '';
+        this.imageUrl = CloudinaryUrlOptimizer.optimizeImageUrl(data.imageUrl) || '';
         this.isFeatured = data.isFeatured || false;
         this.userId = data.userId || null;
         this.status = data.status || 'APPROVED';

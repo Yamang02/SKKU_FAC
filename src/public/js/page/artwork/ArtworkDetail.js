@@ -8,6 +8,7 @@ import UserApi from '../../api/UserApi.js';
 import { showErrorMessage, showSuccessMessage, showConfirm } from '../../common/util/notification.js';
 import { createArtworkCard } from '../../common/util/card.js';
 import { getArtworkSlug } from '../../common/util/url.js';
+import QRCodeService from '../../common/service/QRCodeService.js';
 
 
 function animateButtonClick(button) {
@@ -440,10 +441,14 @@ async function checkUserPermission(artwork) {
         if (response.success && response.data) {
             const currentUser = response.data;
             const manageButton = document.getElementById('manageArtworkBtn');
+            const generateQRBtn = document.getElementById('generateQRBtn');
+            const shareByKakaoTalkBtn = document.getElementById('shareByKakaoTalkBtn');
 
             // 현재 사용자가 작품 작가인 경우 관리 버튼 표시
             if (currentUser.id === artwork.userId) {
                 manageButton.style.display = 'flex';
+                generateQRBtn.style.display = 'flex';
+                shareByKakaoTalkBtn.style.display = 'flex';
 
                 // 관리 버튼 클릭 시 모달 열기
                 manageButton.addEventListener('click', () => {
@@ -614,4 +619,16 @@ function shareByKakaoTalk(artwork) {
     });
 }
 
+const generateQRBtn = document.getElementById('generateQRBtn');
+if (generateQRBtn) {
+    generateQRBtn.addEventListener('click', () => {
+        const artworkTitle = document.querySelector('.artwork-detail-title').textContent;
+        const artistName = document.querySelector('.artwork-detail-artist').textContent;
+
+        QRCodeService.showQRCode({
+            title: artworkTitle,
+            subtitle: artistName
+        });
+    });
+}
 
