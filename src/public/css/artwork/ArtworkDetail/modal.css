@@ -75,6 +75,7 @@ textarea.form-control {
     gap: 10px;
     margin-top: 20px;
     padding-top: 20px;
+    padding-bottom: 20px;
     border-top: 1px solid #eee;
 }
 
@@ -85,6 +86,10 @@ textarea.form-control {
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.3s;
+}
+
+#downloadQRCode {
+    margin-right: 10px;
 }
 
 .btn-primary {
@@ -154,6 +159,7 @@ textarea.form-control {
     .modal-actions {
         margin-top: 15px;
         padding-top: 15px;
+        padding-bottom: 15px;
     }
 
     .btn {
@@ -180,4 +186,44 @@ textarea.form-control {
     align-items: center; /* 수직 정렬 */
     margin-top: 10px;
     margin-bottom: 10px; /* 리스트 아이템 간격 조정 */
+}
+
+/* QR 코드 모달 스타일 */
+.qr-modal-content {
+  max-width: 400px;
+}
+
+.qr-code-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: white;
+}
+
+.qr-artwork-title {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.qr-artist-name {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.qr-code-image-container {
+  margin: 20px 0;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.qr-scan-text {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
 }

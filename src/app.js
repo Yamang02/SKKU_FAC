@@ -44,7 +44,9 @@ app.use(
                     '\'unsafe-inline\'',
                     'https://developers.kakao.com',
                     'https://t1.kakaocdn.net',
-                    'https://k.kakaocdn.net'
+                    'https://k.kakaocdn.net',
+                    'https://cdn.jsdelivr.net',
+                    'blob:'
                 ],
                 styleSrc: [
                     '\'self\'',
@@ -69,7 +71,8 @@ app.use(
                     '\'self\'',
                     'https://developers.kakao.com',
                     'https://t1.kakaocdn.net',
-                    'https://k.kakaocdn.net'
+                    'https://k.kakaocdn.net',
+                    'https://cdn.jsdelivr.net'
                 ],
                 frameSrc: [
                     '\'self\'',
@@ -81,11 +84,13 @@ app.use(
                 ],
                 formAction: [
                     '\'self\'',
-                    'https://*.kakao.com'],
-                content: [
-                    '\'self\'',
                     'https://*.kakao.com'
-                ]
+                ],
+                workerSrc: [
+                    '\'self\'',
+                    'blob:'
+                ],
+                scriptSrcAttr: ['\'unsafe-inline\'']
             }
         },
         crossOriginEmbedderPolicy: false
