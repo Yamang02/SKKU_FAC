@@ -205,6 +205,9 @@
 .artwork-description {
     line-height: 1.8;
     color: var(--color-text-primary);
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 
 .exhibition-info {
