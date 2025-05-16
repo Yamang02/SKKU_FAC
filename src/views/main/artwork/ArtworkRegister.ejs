@@ -63,9 +63,11 @@
     <div class="additional-info-section">
         <div class="description-section">
             <div class="form-group">
-                <label for="description" class="form-label">작품 설명</label>
-                <textarea id="description" name="description" class="form-textarea"
-                    placeholder="작품에 대한 설명을 입력하세요"><%= '' %></textarea>
+                <label for="description" class="form-label">작품 설명 <span class="char-counter"><span id="charCount">
+                            0</span>/500자</span></label>
+                <textarea id="description" name="description" class="form-textarea" maxlength="500"
+                    placeholder="작품에 대한 설명을 입력하세요 (최대 500자)"><%= '' %></textarea>
+                <div class="form-hint">한글 500자 내외로 작성해주세요.</div>
             </div>
         </div>
 

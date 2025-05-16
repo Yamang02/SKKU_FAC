@@ -84,6 +84,7 @@ async function initializePage() {
         // 3. 기존 초기화 함수들 호출
         initImageUpload();
         initSubmitButton();
+        initCharCounter();
         handleExhibitionParam();
     } catch (error) {
         // 오류가 401(Unauthorized) 관련인지 확인
@@ -208,6 +209,12 @@ function initSubmitButton() {
             return;
         }
 
+        // 작품 설명 글자수 검사
+        if (description.length > 500) {
+            showErrorMessage('작품 설명은 500자 이내로 작성해주세요.');
+            return;
+        }
+
         // 버튼 상태 및 로딩 표시 업데이트 (시각적 피드백 추가)
         submitButton.disabled = true;
         submitButton.textContent = '처리 중...';
@@ -248,6 +255,34 @@ function initSubmitButton() {
         }
 
     });
+}
+
+/**
+ * 글자수 카운터 초기화
+ */
+function initCharCounter() {
+    const descriptionTextarea = document.getElementById('description');
+    const charCountElement = document.getElementById('charCount');
+
+    if (!descriptionTextarea || !charCountElement) return;
+
+    // 초기 글자수 업데이트
+    updateCharCount();
+
+    // 입력 이벤트에 글자수 업데이트 함수 연결
+    descriptionTextarea.addEventListener('input', updateCharCount);
+
+    function updateCharCount() {
+        const currentLength = descriptionTextarea.value.length;
+        charCountElement.textContent = currentLength;
+
+        // 글자수 제한에 가까워지면 시각적 피드백 제공
+        if (currentLength > 450) {
+            charCountElement.classList.add('char-count-warning');
+        } else {
+            charCountElement.classList.remove('char-count-warning');
+        }
+    }
 }
 
 // URL에서 전시회 ID를 가져와서 처리
