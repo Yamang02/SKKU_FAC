@@ -183,6 +183,9 @@
     margin-bottom: 15px;
     padding-bottom: 15px;
     border-bottom: 1px solid #f5f5f5;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 
 .detail-item:last-child {
@@ -205,6 +208,9 @@
 .artwork-description {
     line-height: 1.8;
     color: var(--color-text-primary);
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 
 .exhibition-info {

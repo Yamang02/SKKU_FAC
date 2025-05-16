@@ -41,12 +41,14 @@
 
             <div class="form-group">
                 <label for="medium" class="form-label">매체</label>
-                <input type="text" id="medium" name="medium" class="form-input" placeholder="예: 캔버스에 유화, 디지털 프린트 등">
+                <input type="text" id="medium" name="medium" class="form-input" maxlength="50"
+                    placeholder="예: 캔버스에 유화, 디지털 프린트 등">
+                <div class="form-error" id="mediumError"></div>
             </div>
 
             <div class="form-group">
                 <label for="size" class="form-label">작품 크기</label>
-                <input type="text" id="size" name="size" class="form-input" maxlength="100">
+                <input type="text" id="size" name="size" class="form-input" maxlength="50">
                 <div class="form-error" id="sizeError"></div>
             </div>
 
@@ -63,9 +65,11 @@
     <div class="additional-info-section">
         <div class="description-section">
             <div class="form-group">
-                <label for="description" class="form-label">작품 설명</label>
-                <textarea id="description" name="description" class="form-textarea"
-                    placeholder="작품에 대한 설명을 입력하세요"><%= '' %></textarea>
+                <label for="description" class="form-label">작품 설명<span class="char-counter"><span
+                            id="charCount">0</span>/500자</span></label>
+                <textarea id="description" name="description" class="form-textarea" maxlength="500"
+                    placeholder="작품에 대한 설명을 입력하세요 (최대 500자)"><%= '' %></textarea>
+
             </div>
         </div>
 

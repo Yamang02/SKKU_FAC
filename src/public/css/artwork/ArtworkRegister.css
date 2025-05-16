@@ -235,6 +235,18 @@
     display: none;
 }
 
+.char-counter {
+    float: right;
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: normal;
+}
+
+.char-count-warning {
+    color: #dc3545;
+    font-weight: bold;
+}
+
 .form-actions {
     margin-top: 2rem;
     text-align: center;
