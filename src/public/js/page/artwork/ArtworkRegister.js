@@ -209,6 +209,28 @@ function initSubmitButton() {
             return;
         }
 
+        // 매체(medium) 길이 검사
+        if (medium.length > 50) {
+            showErrorMessage('매체는 50자 이내로 입력해주세요.');
+            document.getElementById('mediumError').textContent = '50자 이내로 입력해주세요.';
+            document.getElementById('mediumError').style.display = 'block';
+            document.getElementById('medium').focus();
+            return;
+        } else {
+            document.getElementById('mediumError').style.display = 'none';
+        }
+
+        // 크기(size) 길이 검사
+        if (size.length > 50) {
+            showErrorMessage('작품 크기는 50자 이내로 입력해주세요.');
+            document.getElementById('sizeError').textContent = '50자 이내로 입력해주세요.';
+            document.getElementById('sizeError').style.display = 'block';
+            document.getElementById('size').focus();
+            return;
+        } else {
+            document.getElementById('sizeError').style.display = 'none';
+        }
+
         // 작품 설명 글자수 검사
         if (description.length > 500) {
             showErrorMessage('작품 설명은 500자 이내로 작성해주세요.');

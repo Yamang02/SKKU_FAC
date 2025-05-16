@@ -235,12 +235,6 @@
     display: none;
 }
 
-.form-hint {
-    color: #6c757d;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-}
-
 .char-counter {
     float: right;
     font-size: 0.875rem;
