@@ -21,9 +21,9 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 if (NODE_ENV === 'production') {
     console.log('프로덕션 환경에서 실행 중...');
     console.log(`DB 연결 정보 확인:
-    - 호스트: ${process.env.REMOTE_DB_HOST || process.env.DB_HOST}
-    - 데이터베이스: ${process.env.REMOTE_DB_NAME || process.env.DB_NAME}
-    - 포트: ${process.env.REMOTE_DB_PORT || process.env.DB_PORT}`);
+    - 호스트: ${process.env.MYSQLHOST}
+    - 데이터베이스: ${process.env.MYSQL_DATABASE}
+    - 포트: ${process.env.MYSQLPORT}`);
 }
 
 // 환경에 따른 구성 설정
@@ -35,11 +35,11 @@ export const infrastructureConfig = {
             switch (NODE_ENV) {
                 case 'production':
                     return {
-                        host: process.env.REMOTE_DB_HOST || process.env.DB_HOST,
-                        user: process.env.REMOTE_DB_USER || process.env.DB_USER,
-                        password: process.env.REMOTE_DB_PASSWORD || process.env.DB_PASSWORD,
-                        database: process.env.REMOTE_DB_NAME || process.env.DB_NAME,
-                        port: process.env.REMOTE_DB_PORT || process.env.DB_PORT,
+                        host: process.env.MYSQLHOST,
+                        user: process.env.MYSQLUSER,
+                        password: process.MYSQLPASSWORD,
+                        database: process.env.MYSQL_DATABASE || process.env.DB_NAME,
+                        port: process.env.MYSQLPORT || process.env.DB_PORT,
                         connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 10,
                         queueLimit: process.env.DB_POOL_QUEUE || 0
                     };
