@@ -199,26 +199,38 @@ async function loadArtworkDetail() {
         const submittedExhibitionList = document.getElementById('submittedExhibitionList');
         if (submittedExhibitionList) {
             submittedExhibitionList.innerHTML = ''; // 기존 내용 초기화
-            artwork.exhibitions.forEach(exhibition => {
-                const listItem = document.createElement('li');
 
-                // 출품 취소 버튼 추가
-                const cancelButton = document.createElement('button');
-                cancelButton.textContent = '출품 취소';
-                cancelButton.className = 'btn btn-cancel'; // 클래스 추가
-                cancelButton.onclick = async () => {
-                    await cancelSubmission(artwork.id, exhibition.id);
-                };
+            // 유효한 전시회만 필터링
+            const validExhibitions = artwork.exhibitions.filter(exhibition => exhibition && exhibition.id);
 
-                // 전시회 제목 추가
-                const titleText = document.createElement('span');
-                titleText.textContent = exhibition.title;
-                titleText.style.marginLeft = '10px'; // 간격 조정
+            if (validExhibitions.length > 0) {
+                validExhibitions.forEach(exhibition => {
+                    const listItem = document.createElement('li');
 
-                listItem.appendChild(cancelButton);
-                listItem.appendChild(titleText);
-                submittedExhibitionList.appendChild(listItem);
-            });
+                    // 출품 취소 버튼 추가
+                    const cancelButton = document.createElement('button');
+                    cancelButton.textContent = '출품 취소';
+                    cancelButton.className = 'btn btn-cancel';
+                    cancelButton.onclick = async () => {
+                        await cancelSubmission(artwork.id, exhibition.id);
+                    };
+
+                    // 전시회 제목 추가
+                    const titleText = document.createElement('span');
+                    titleText.textContent = exhibition.title;
+                    titleText.style.marginLeft = '10px';
+
+                    listItem.appendChild(cancelButton);
+                    listItem.appendChild(titleText);
+                    submittedExhibitionList.appendChild(listItem);
+                });
+            } else {
+                // 출품된 전시회가 없는 경우
+                const noExhibitionItem = document.createElement('li');
+                noExhibitionItem.className = 'no-exhibition-item';
+                noExhibitionItem.textContent = ' 출품된 전시회가 없습니다.';
+                submittedExhibitionList.appendChild(noExhibitionItem);
+            }
         }
 
         // 현재 로그인한 사용자 정보를 가져와서 버튼 표시 여부 결정
@@ -520,22 +532,34 @@ function updateArtworkDetail(artwork) {
         // 기존 내용을 초기화
         exhibitionElement.innerHTML = '';
 
-        // exhibitions 배열이 존재하고 길이가 0보다 큰 경우
+        // exhibitions 배열이 존재하고 유효한 전시회가 있는 경우
         if (artwork.exhibitions && artwork.exhibitions.length > 0) {
-            artwork.exhibitions.forEach(exhibition => {
-                const exhibitionItem = document.createElement('div');
-                exhibitionItem.className = 'exhibition-item'; // 클래스 추가
-                exhibitionItem.textContent = exhibition.title || '전시회 제목 없음'; // 전시회 제목
+            const validExhibitions = artwork.exhibitions.filter(exhibition => exhibition && exhibition.id);
 
-                // 클릭 이벤트 추가
-                exhibitionItem.onclick = () => {
-                    window.location.href = `/artwork/list?exhibition=${exhibition.id}&page=1`; // 링크 설정
-                };
+            if (validExhibitions.length > 0) {
+                validExhibitions.forEach(exhibition => {
+                    const exhibitionItem = document.createElement('div');
+                    exhibitionItem.className = 'exhibition-item';
+                    exhibitionItem.textContent = exhibition.title;
 
-                exhibitionElement.appendChild(exhibitionItem);
-            });
+                    // 클릭 이벤트 추가
+                    exhibitionItem.onclick = () => {
+                        window.location.href = `/artwork/list?exhibition=${exhibition.id}&page=1`;
+                    };
+
+                    exhibitionElement.appendChild(exhibitionItem);
+                });
+            } else {
+                const noExhibitionText = document.createElement('div');
+                noExhibitionText.className = 'no-exhibition';
+                noExhibitionText.textContent = '출품되지 않음';
+                exhibitionElement.appendChild(noExhibitionText);
+            }
         } else {
-            exhibitionElement.textContent = '출품되지 않음'; // 전시회 정보가 없을 경우
+            const noExhibitionText = document.createElement('div');
+            noExhibitionText.className = 'no-exhibition';
+            noExhibitionText.textContent = '출품되지 않음';
+            exhibitionElement.appendChild(noExhibitionText);
         }
     }
 

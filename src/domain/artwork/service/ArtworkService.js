@@ -71,14 +71,15 @@ export default class ArtworkService {
                 }
 
                 // 작품 출품 전시회 조회
-                const artworkExhibitionRelationships = await this.artworkExhibitionRelationshipRepository.findArtworkExhibitionRelationshipsByArtworkId(artwork.id);
-                if (artworkExhibitionRelationships.length > 0) {
-                    for (const exhibition of artworkExhibitionRelationships) {
-                        const exhibitionSimple = await this.exhibitionService.getExhibitionSimple(exhibition.exhibitionId);
-                        artworkDetail.exhibitions.push(exhibitionSimple);
+                if (artwork.exhibitionId) {
+                    const exhibition = await this.exhibitionService.getExhibitionSimple(artwork.exhibitionId);
+                    if (exhibition && exhibition.id) {
+                        artworkDetail.exhibition = exhibition;
+                    } else {
+                        artworkDetail.exhibition = null;
                     }
                 } else {
-                    artworkDetail.exhibitions = [];
+                    artworkDetail.exhibition = null;
                 }
 
                 // DTO 변환 및 추가
