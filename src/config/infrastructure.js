@@ -38,8 +38,8 @@ export const infrastructureConfig = {
                         host: process.env.MYSQLHOST,
                         user: process.env.MYSQLUSER,
                         password: process.MYSQLPASSWORD,
-                        database: process.env.MYSQL_DATABASE || process.env.DB_NAME,
-                        port: process.env.MYSQLPORT || process.env.DB_PORT,
+                        database: process.env.MYSQL_DATABASE,
+                        port: process.env.MYSQLPORT,
                         connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 10,
                         queueLimit: process.env.DB_POOL_QUEUE || 0
                     };
