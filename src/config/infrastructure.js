@@ -37,10 +37,10 @@ export const infrastructureConfig = {
                     return {
                         host: process.env.MYSQLHOST,
                         user: process.env.MYSQLUSER,
-                        password: process.MYSQLPASSWORD,
+                        password: process.MYSQLPASSWORD || process.env.DB_PASSWORD,
                         database: process.env.MYSQL_DATABASE,
                         port: process.env.MYSQLPORT,
-                        connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+                        connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 100,
                         queueLimit: process.env.DB_POOL_QUEUE || 0
                     };
                 case 'test':
