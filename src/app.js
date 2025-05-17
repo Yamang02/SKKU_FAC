@@ -64,6 +64,7 @@ app.use(
                 imgSrc: [
                     '\'self\'',
                     'https://res.cloudinary.com/dw57ytzhg/',
+                    'https://res.cloudinary.com/dvkr4k6n8/',
                     'data:',
                     'blob:'
                 ],
