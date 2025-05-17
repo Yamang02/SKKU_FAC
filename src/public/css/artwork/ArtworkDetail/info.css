@@ -218,6 +218,13 @@
     color: var(--color-text-primary);
 }
 
+.no-exhibition-item {
+    color: var(--color-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
 /* 작품 목록 버튼 */
 .back-to-list {
     display: inline-flex;

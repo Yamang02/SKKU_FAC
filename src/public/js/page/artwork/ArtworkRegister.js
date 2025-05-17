@@ -118,20 +118,75 @@ function initImageUpload() {
         return;
     }
 
+    // 파일 유효성 검사 함수
+    function validateImageFile(file) {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+        if (!file) {
+            showErrorMessage('파일을 선택해주세요.');
+            return false;
+        }
+
+        if (!allowedTypes.includes(file.type)) {
+            showErrorMessage('지원하지 않는 파일 형식입니다. (JPG, PNG, GIF, WEBP 파일만 가능)');
+            return false;
+        }
+
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+            showErrorMessage('파일 크기는 10MB 이하여야 합니다.');
+            return false;
+        }
+
+        return true;
+    }
+
+    // 이미지 미리보기 업데이트 함수
+    function updateImagePreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block';
+            imageOverlay.style.opacity = '0';
+            imageOverlay.style.pointerEvents = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // 이미지 호버 효과 설정
+    function setupHoverEffect() {
+        imagePreviewContainer.addEventListener('mouseenter', () => {
+            imageOverlay.style.opacity = '1';
+        });
+        imagePreviewContainer.addEventListener('mouseleave', () => {
+            imageOverlay.style.opacity = '0';
+        });
+    }
+
+    // 공통 파일 처리 함수
+    function handleImageFile(file) {
+        if (validateImageFile(file)) {
+            updateImagePreview(file);
+            setupHoverEffect();
+            return true;
+        }
+        return false;
+    }
+
     // 이미지 미리보기 컨테이너 클릭 시 파일 입력 트리거
     imagePreviewContainer.addEventListener('click', () => {
         fileInput.click();
     });
 
-    // 파일 선택 시 미리보기 업데이트
+    // 파일 선택 시 처리
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (file) {
-            updateImagePreview(file);
+        if (!handleImageFile(file)) {
+            fileInput.value = '';
         }
     });
 
-    // 드래그 앤 드롭 기능
+    // 드래그 앤 드롭 처리
     imagePreviewContainer.addEventListener('dragover', (e) => {
         e.preventDefault();
         imagePreviewContainer.classList.add('dragover');
@@ -145,31 +200,17 @@ function initImageUpload() {
         e.preventDefault();
         imagePreviewContainer.classList.remove('dragover');
         const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-            fileInput.files = e.dataTransfer.files;
-            updateImagePreview(file);
+        if (file) {
+            if (!handleImageFile(file)) {
+                fileInput.value = '';
+            } else {
+                // 드래그 앤 드롭의 경우 DataTransfer 객체를 통해 파일 설정
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+            }
         }
     });
-
-    // 이미지 미리보기 업데이트
-    function updateImagePreview(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            imagePreview.src = e.target.result;
-            imagePreview.style.display = 'block';
-            imageOverlay.style.opacity = '0';
-            imageOverlay.style.pointerEvents = 'none';
-
-            // 이미지 호버 시 오버레이 표시
-            imagePreviewContainer.addEventListener('mouseenter', () => {
-                imageOverlay.style.opacity = '1';
-            });
-            imagePreviewContainer.addEventListener('mouseleave', () => {
-                imageOverlay.style.opacity = '0';
-            });
-        };
-        reader.readAsDataURL(file);
-    }
 }
 
 /**
