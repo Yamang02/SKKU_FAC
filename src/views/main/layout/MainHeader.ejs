@@ -1,0 +1,25 @@
+<header class="header">
+    <nav class="nav">
+        <div class="logo"><a href="/">성균관대학교 미술동아리 성미회</a></div>
+        <div class="nav-links">
+            <a href="/artwork">작품</a>
+            <a href="/exhibition">전시회</a>
+            <!-- <a href="/notice">공지사항</a> -->
+            <a href="/about">소개</a>
+            <% if (locals.user) { %>
+                <div class="user-section">
+                    <a href="/user/me" class="user-profile">
+                        <%= user.username %>
+                    </a>
+                    <% if (user.role==='ADMIN' ) { %>
+                        <a href="/admin" class="admin-link" title="관리자 대시보드">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                        <% } %>
+                </div>
+                <% } else { %>
+                    <a href="/user/login" class="login-button">로그인</a>
+                    <% } %>
+        </div>
+    </nav>
+</header>

@@ -1,0 +1,93 @@
+<style ref="stylesheet">
+    @import url('../../css/notice/NoticeList.css');
+</style>
+<div class="container">
+    <!-- 페이지 헤더 -->
+    <header class="page-header">
+        <h1 class="page-title">공지사항</h1>
+        <p class="page-description">성균관대학교 미술학과의 소식과 공지사항을 확인하세요.</p>
+    </header>
+
+    <!-- 결과 컨트롤 섹션 -->
+    <section class="results-control">
+        <div class="results-info">
+            <p>총 <strong>
+                    <%= page.totalItems %>
+                </strong>개의 공지사항이 있습니다.</p>
+        </div>
+        <form class="search-form--notice" method="get" action="">
+            <div class="search-controls">
+                <div class="search-type">
+                    <select name="searchType" class="search-select">
+                        <option value="all" <%=searchType==='all' ? 'selected' : '' %>>제목+내용</option>
+                        <option value="title" <%=searchType==='title' ? 'selected' : '' %>>제목</option>
+                        <option value="author" <%=searchType==='author' ? 'selected' : '' %>>작성자
+                        </option>
+                    </select>
+                </div>
+                <div class="search-input-wrapper">
+                    <input type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요"
+                        value="<%= locals.keyword || '' %>">
+                    <button type="submit" class="search-button search-button--submit" title="검색">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button type="reset" class="search-button search-button--reset" title="초기화">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <!-- 공지사항 목록 -->
+    <section class="notice-list-section">
+        <div class="notice-list">
+            <% if (notices && notices.length> 0) { %>
+                <% notices.forEach(notice=> { %>
+                    <article class="notice-item">
+                        <a href="/notice/<%= notice.id %>" class="notice-link">
+                            <div class="notice-thumbnail">
+                                <% if (notice.images && notice.images.length> 0) { %>
+                                    <img src="<%= notice.images[0] %>" alt="<%= notice.title %> 이미지">
+                                    <% } else { %>
+                                        <div class="notice-thumbnail-placeholder">
+                                            <i class="fas fa-newspaper"></i>
+                                        </div>
+                                        <% } %>
+                            </div>
+                            <div class="notice-content">
+                                <h3 class="notice-title">
+                                    <% if (notice.isImportant) { %>
+                                        <span class="notice-badge important">중요</span>
+                                        <% } %>
+                                            <%= notice.title %>
+                                </h3>
+                                <div class="notice-meta">
+                                    <span class="notice-author">
+                                        <%= notice.author %>
+                                    </span>
+                                    <span class="notice-date">
+                                        <%= notice.formattedCreatedAt %>
+                                    </span>
+                                    <span class="notice-views">조회수 <%= notice.views %></span>
+                                </div>
+                            </div>
+                        </a>
+                    </article>
+                    <% }); %>
+                        <% } else { %>
+                            <div class="notice-empty">
+                                <p>등록된 공지사항이 없습니다.</p>
+                            </div>
+                            <% } %>
+        </div>
+
+        <% if (page) { %>
+            <%- include('../../common/pagination', { page }) %>
+                <% } %>
+    </section>
+</div>
+
+<script src="/js/page/notice/NoticeList.js"></script>
+
+</html>

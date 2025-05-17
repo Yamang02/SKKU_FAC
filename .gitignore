@@ -1,3 +1,8 @@
+# 테스트 관련 파일 및 디렉토리 무시
+__tests__/
+*.test.js
+*.spec.js
+
 # Logs
 logs
 *.log
@@ -128,3 +133,53 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Exclude pre-commit hooks
+!.git/hooks/pre-commit
+restart-server.ps1
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Production
+/build
+/dist
+
+# Misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Uploaded files
+/public/uploads/**/*
+!/public/uploads/**/
+!/public/uploads/**/.gitkeep
+
+# Local Netlify folder
+.netlify
+
+# Upload directories
+public/uploads/artworks/
+
+# Environment files
+.env.local
+.env.remote
+src/public/js/mockData.js
+
+# Obsidian
+.obsidian
+

@@ -1,0 +1,328 @@
+.profile-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.profile-header__title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 20px;
+}
+
+.profile-header__subtitle {
+    font-size: 16px;
+    color: var(--color-text-secondary);
+}
+
+.profile-content {
+    background-color: var(--color-white);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+}
+
+.profile-section {
+    margin-bottom: 40px;
+}
+
+.profile-section__title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 25px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--color-border);
+}
+
+.profile-info {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 25px;
+    align-items: center;
+    padding: 12px 0;
+}
+
+.profile-info__label {
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    font-size: 15px;
+}
+
+.profile-info__value {
+    color: var(--color-text-primary);
+    font-size: 15px;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--color-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profile-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-border);
+}
+
+.profile-button {
+    padding: 12px 28px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.profile-button--primary {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+}
+
+.profile-button--primary:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.profile-button--secondary {
+    background-color: white;
+    color: #6c757d;
+    border: 2px solid #6c757d;
+}
+
+.profile-button--secondary:hover {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.profile-button--logout {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+
+.profile-button--logout:hover {
+    background-color: white;
+    color: #6c757d;
+}
+
+.profile-button--danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+.profile-button--danger:hover {
+    background-color: #c82333;
+}
+
+.profile-info__text {
+    display: inline-block;
+}
+
+.profile-info__input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 15px;
+    transition: border-color 0.3s ease;
+}
+
+.profile-info__input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.profile-info__checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-info__checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+.profile-info__checkbox label {
+    font-size: 15px;
+    color: var(--color-text-primary);
+}
+
+/* 수정 모드에서 숨겨야 하는 요소들 */
+.profile-actions .profile-button--secondary:not(#cancel-edit-btn),
+.profile-actions .profile-button--danger {
+    display: inline-flex;
+}
+
+/* 수정 모드에서 보여야 하는 요소들 */
+.profile-actions #save-profile-btn {
+    display: none;
+}
+
+/* 수정 모드일 때 적용되는 스타일 */
+.profile-content.edit-mode .profile-actions .profile-button--secondary:not(#cancel-edit-btn),
+.profile-content.edit-mode .profile-actions .profile-button--danger {
+    display: none;
+}
+
+.profile-content.edit-mode .profile-actions #save-profile-btn {
+    display: inline-flex;
+}
+
+/* 프로필 모달 */
+.profile-modal {
+    display: none; /* 초기에는 모달 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.profile-modal .modal-content {
+    background-color: #ffffff;
+    width: 90%;
+    max-width: 550px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: modal-slide-down 0.3s ease-out;
+}
+
+@keyframes modal-slide-down {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.profile-modal .modal-header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--gray-200, #e5e7eb);
+}
+
+.profile-modal .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary, #111827);
+    margin: 0;
+}
+
+.profile-modal .modal-close {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+
+
+.profile-modal .modal-close:hover {
+    background-color: white;
+    color: #6c757d;
+}
+
+.profile-modal .modal-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-modal .modal-footer {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid var(--gray-200, #e5e7eb);
+}
+
+/* 프로필 모달 폼 스타일 */
+.profile-modal .form-group {
+    margin-bottom: 16px;
+}
+
+.profile-modal .form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary, #111827);
+    margin-bottom: 6px;
+}
+
+.profile-modal .form-control {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    border: 1px solid var(--gray-300, #d1d5db);
+    border-radius: 4px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.profile-modal .form-control:focus {
+    border-color: var(--primary-color, #2563eb);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.profile-modal .form-control::placeholder {
+    color: var(--gray-400, #9ca3af);
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 15px;
+        margin: 20px auto;
+    }
+
+    .profile-info {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .profile-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .profile-button {
+        width: 100%;
+    }
+
+    .profile-modal .modal-content {
+        width: 95%;
+    }
+
+    .profile-modal .modal-body {
+        padding: 16px;
+    }
+}

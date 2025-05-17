@@ -1,0 +1,119 @@
+.success-message {
+    text-align: center;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 40px;
+    max-width: 600px;
+}
+
+.success-container {
+    display: flex;
+    /* Flexbox 사용 */
+    flex-direction: column;
+    /* 세로 방향으로 정렬 */
+    justify-content: center;
+    /* 수직 중앙 정렬 */
+    max-width: 800px;
+    width: 100%;
+    padding: 3rem;
+    background-color: #fff;
+    border-radius: 12px;
+    text-align: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: auto;
+}
+
+.success-container h1 {
+    margin-bottom: 1.5rem;
+    color: var(--color-primary);
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.success-message {
+    width: 90%;
+    color: #4CAF50;
+    margin: 1.5rem 0;
+    font-size: 1.28rem;
+    line-height: 1.6;
+    white-space: nowrap;
+
+}
+
+.success-code {
+    color: #6c757d;
+    font-size: 1rem;
+    margin: 1rem 0;
+    padding: 0.5rem 1rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.success-stack {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: monospace;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: break-all;
+    border: 1px solid #e9ecef;
+}
+
+.button-container {
+    margin-top: 2.5rem;
+    text-align: center;
+}
+
+.success-button {
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+    display: inline-block;
+    padding: 1rem 2rem;
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.success-button:hover {
+    background-color: var(--color-primary-dark);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .success-page {
+        padding: 1rem;
+    }
+
+    .success-container {
+        padding: 2rem;
+        margin: 1rem;
+    }
+
+    .success-container h1 {
+        font-size: 2rem;
+    }
+
+    .success-message {
+        font-size: 1.1rem;
+    }
+
+    .success-button {
+        width: 100%;
+        text-align: center;
+    }
+}

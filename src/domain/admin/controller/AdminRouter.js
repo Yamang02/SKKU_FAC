@@ -1,0 +1,37 @@
+import express from 'express';
+import { SystemManagementController, UserManagementController, ExhibitionManagementController, ArtworkManagementController } from './AdminControllerIndex.js';
+import { imageUploadMiddleware } from '../../../common/middleware/imageUploadMiddleware.js';
+
+const AdminRouter = express.Router();
+const adminController = new SystemManagementController();
+const userManagementController = new UserManagementController();
+const exhibitionManagementController = new ExhibitionManagementController();
+const artworkManagementController = new ArtworkManagementController();
+
+// 관리자 대시보드
+AdminRouter.get(['/', '/dashboard'], (req, res) => adminController.getDashboard(req, res));
+
+// 사용자 관리
+AdminRouter.get('/management/user', (req, res) => userManagementController.getManagementUserList(req, res));
+AdminRouter.get('/management/user/:id', (req, res) => userManagementController.getManagementUserDetail(req, res));
+AdminRouter.put('/management/user/:id', (req, res) => userManagementController.updateManagementUser(req, res));
+AdminRouter.delete('/management/user/:id', (req, res) => userManagementController.deleteManagementUser(req, res));
+AdminRouter.post('/management/user/:id/reset-password', (req, res) => userManagementController.resetManagementUserPassword(req, res));
+
+// 전시회 관리
+AdminRouter.get('/management/exhibition', (req, res) => exhibitionManagementController.getManagementExhibitionListPage(req, res));
+AdminRouter.get('/management/exhibition/new', (req, res) => exhibitionManagementController.getManagementExhibitionCreatePage(req, res));
+AdminRouter.post('/management/exhibition/new', imageUploadMiddleware('exhibition'), (req, res) => exhibitionManagementController.createManagementExhibition(req, res));
+AdminRouter.get('/management/exhibition/:id', (req, res) => exhibitionManagementController.getManagementExhibitionDetailPage(req, res));
+AdminRouter.put('/management/exhibition/:id', (req, res) => exhibitionManagementController.updateManagementExhibition(req, res));
+AdminRouter.delete('/management/exhibition/:id', (req, res) => exhibitionManagementController.deleteManagementExhibition(req, res));
+AdminRouter.post('/management/exhibition/:id/featured', (req, res) => exhibitionManagementController.toggleFeatured(req, res));
+
+// 작품 관리
+AdminRouter.get('/management/artwork', (req, res) => artworkManagementController.getManagementArtworkListPage(req, res));
+AdminRouter.get('/management/artwork/:id', (req, res) => artworkManagementController.getManagementArtworkDetailPage(req, res));
+AdminRouter.put('/management/artwork/:id', (req, res) => artworkManagementController.updateManagementArtwork(req, res));
+AdminRouter.delete('/management/artwork/:id', (req, res) => artworkManagementController.deleteManagementArtwork(req, res));
+AdminRouter.post('/management/artwork/:id/featured', (req, res) => artworkManagementController.toggleFeatured(req, res));
+
+export default AdminRouter;

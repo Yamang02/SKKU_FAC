@@ -1,0 +1,175 @@
+<div class="admin-management">
+    <h2 class="admin-title">공지사항 목록</h2>
+    <!-- 컨트롤 섹션-->
+    <div class="admin-control">
+        <div class="admin-control__group">
+            <a href="/admin/management/notice/registration" class="admin-button admin-button--primary">
+                <i class="fas fa-plus"></i>
+                공지사항 등록
+            </a>
+        </div>
+    </div>
+    <!-- 필터 섹션 -->
+    <div class="admin-filter">
+        <div class="admin-filter__group">
+            <select class="admin-filter__select" name="status">
+                <option value="">상태</option>
+                <option value="active" <%=filters?.status==='active' ? 'selected' : '' %>>활성</option>
+                <option value="inactive" <%=filters?.status==='inactive' ? 'selected' : '' %>>비활성</option>
+            </select>
+            <select class="admin-filter__select" name="isImportant">
+                <option value="">중요도</option>
+                <option value="true" <%=filters?.isImportant===true ? 'selected' : '' %>>중요</option>
+                <option value="false" <%=filters?.isImportant===false ? 'selected' : '' %>>일반</option>
+            </select>
+            <input type="text" class="admin-filter__input" name="keyword" placeholder="검색어"
+                value="<%= filters?.keyword || '' %>">
+            <button class="admin-button admin-button--primary">
+                <i class="fas fa-filter"></i>
+                필터 적용
+            </button>
+        </div>
+    </div>
+
+    <div class="admin-management__content">
+        <!-- 테이블 섹션 -->
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" class="admin-checkbox">
+                        </th>
+                        <th>ID</th>
+                        <th>제목</th>
+                        <th>작성자</th>
+                        <th>상태</th>
+                        <th>중요</th>
+                        <th>조회수</th>
+                        <th>생성일</th>
+                        <th>수정일</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (notices && notices.length> 0) { %>
+                        <% notices.forEach(notice=> { %>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="admin-checkbox">
+                                </td>
+                                <td>
+                                    <%= notice.id %>
+                                </td>
+                                <td>
+                                    <%= notice.title %>
+                                </td>
+                                <td>
+                                    <%= notice.author %>
+                                </td>
+                                <td>
+                                    <span class="admin-badge admin-badge--<%= notice.status %>">
+                                        <%= notice.status==='active' ? '활성' : '비활성' %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span
+                                        class="admin-badge admin-badge--<%= notice.isImportant ? 'important' : 'normal' %>">
+                                        <%= notice.isImportant ? '중요' : '일반' %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <%= notice.views %>
+                                </td>
+                                <td>
+                                    <%= new Date(notice.createdAt).toLocaleDateString() %>
+                                </td>
+                                <td>
+                                    <%= new Date(notice.updatedAt).toLocaleDateString() %>
+                                </td>
+                                <td>
+                                    <div class="admin-button-group">
+                                        <a href="/admin/management/notice/<%= notice.id %>"
+                                            class="admin-button admin-button--secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="admin-button admin-button--danger"
+                                            onclick="deleteNotice(<%= notice.id %>)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="10" class="admin-table__empty">
+                                            등록된 공지사항이 없습니다.
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 페이지네이션 섹션 -->
+        <div class="admin-pagination">
+            <% if (typeof page !=='undefined' && page) { %>
+                <button class="admin-pagination__button" onclick="goToPage(1)">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage - 1 %>)"
+                    <%=!page.hasPreviousPage ? 'disabled' : '' %>>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+
+                <% for (let i=Math.max(1, page.currentPage - 2); i <=Math.min(page.totalPages, page.currentPage + 2);
+                    i++) { %>
+                    <button
+                        class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>"
+                        onclick="goToPage(<%= i %>)">
+                        <%= i %>
+                    </button>
+                    <% } %>
+
+                        <button class="admin-pagination__button" onclick="goToPage(<%= page.currentPage + 1 %>)"
+                            <%=!page.hasNextPage ? 'disabled' : '' %>>
+                            <i class="fas fa-angle-right"></i>
+                        </button>
+                        <button class="admin-pagination__button" onclick="goToPage(<%= page.totalPages %>)">
+                            <i class="fas fa-angle-double-right"></i>
+                        </button>
+                        <% } %>
+        </div>
+
+    </div>
+
+
+    <script>
+        function deleteNotice(id) {
+            if (confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
+                fetch(`/admin/management/notice/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('삭제에 실패했습니다.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('삭제 중 오류가 발생했습니다.');
+                });
+            }
+        }
+
+        function goToPage(page) {
+            const currentUrl = new URL(window.location.href);
+            const searchParams = currentUrl.searchParams;
+            searchParams.set('page', page);
+            window.location.href = currentUrl.toString();
+        }
+    </script>

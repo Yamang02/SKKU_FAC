@@ -1,0 +1,18 @@
+<style ref="stylesheet">
+    @import url('/css/common/success.css');
+</style>
+
+<div class="success-container">
+    <h1>작업 완료</h1>
+    <p class="success-message">
+        <% if (typeof message !=='undefined' ) { %>
+            <%= message %>
+                <% } else { %>
+                    작업이 성공적으로 완료되었습니다.
+                    <% } %>
+    </p>
+    <div class="button-container">
+        <a href="/user/login" class="btn--primary success-button">로그인 페이지로 이동</a>
+        <a href="/artwork/list" class="btn--primary success-button">작품 목록으로 이동</a>
+    </div>
+</div>

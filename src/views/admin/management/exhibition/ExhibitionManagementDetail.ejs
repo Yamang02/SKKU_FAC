@@ -1,0 +1,354 @@
+<style>
+    @import url('/css/admin/management/exhibition/ExhibitionManagementDetail.css');
+</style>
+
+<!-- 페이지 헤더 -->
+<div class="admin-management">
+    <div class="content-section">
+        <h2 class="admin-title">
+            <%= mode==='create' ? '전시회 등록' : '전시회 상세' %>
+        </h2>
+        <div class="section-content">
+            <h3 class="section-subtitle">전시회 정보</h3>
+            <div class="thumbnail-cancel"></div>
+            <form id="exhibitionForm" class="form-grid" enctype="multipart/form-data">
+                <!-- 이미지 영역 -->
+                <div id="exhibition-thumbnail-preview" class="exhibition-thumbnail-preview">
+                    <% if (exhibition && exhibition.imageUrl) { %>
+                        <img src="<%= exhibition.imageUrl %>" alt="전시회 썸네일" class="thumbnail-image">
+                        <% } else { %>
+                            <div class="placeholder">
+                                <p>이미지를 클릭하여 업로드 (선택사항)</p>
+                            </div>
+                            <% } %>
+                </div>
+                <input type="file" id="thumbnailInput" name="image" accept="image/*" style="display: none;" <% if (mode
+                    !=='create' ) { %> disabled <% } %> >
+
+
+                    <!-- 제목(70%) + 전시유형(30%) -->
+                    <div class="form-group title-group">
+                        <label for="title">제목 <span class="required">*</span></label>
+                        <input type="text" id="title" name="title" class="form-control"
+                            value="<%= exhibition ? exhibition.title : '' %>" <% if (mode !=='create' ) { %> readonly <%
+                            } %> required>
+                    </div>
+                    <div class="form-group type-group">
+                        <label for="exhibitionType">전시 유형</label>
+                        <select id="exhibitionType" name="exhibitionType" class="form-control">
+                            <option value="regular" <%=exhibition && exhibition.exhibitionType==='regular' ? 'selected'
+                                : '' %>>정기</option>
+                            <option value="special" <%=exhibition && exhibition.exhibitionType==='special' ? 'selected'
+                                : '' %>>특별</option>
+                        </select>
+                    </div>
+
+                    <!-- 장소(70%) + 주요 전시회 여부(30%) -->
+                    <div class="form-group location-group">
+                        <label for="location">장소 <span class="required">*</span></label>
+                        <input type="text" id="location" name="location" class="form-control"
+                            value="<%= exhibition ? exhibition.location : '' %>" required>
+                    </div>
+                    <div class="form-group featured-group">
+                        <label for="isFeatured">주요 전시회 여부(홈페이지 표시)</label>
+                        <select id="isFeatured" name="isFeatured" class="form-control">
+                            <option value="true" <%=exhibition && exhibition.isFeatured===true ? 'selected' : '' %>>주요
+                                전시회</option>
+                            <option value="false" <%=exhibition && (exhibition.isFeatured===false ||
+                                exhibition.isFeatured===undefined) ? 'selected' : '' %>>일반 전시회</option>
+                        </select>
+                    </div>
+
+                    <!-- 시작일(50%) + 종료일(50%) -->
+                    <div class="form-group start-date-group">
+                        <label for="startDate">시작일 <span class="required">*</span></label>
+                        <input type="date" id="startDate" name="startDate" class="form-control"
+                            value="<%= exhibition ? exhibition.startDate : '' %>" required>
+                    </div>
+                    <div class="form-group end-date-group">
+                        <label for="endDate">종료일 <span class="required">*</span></label>
+                        <input type="date" id="endDate" name="endDate" class="form-control"
+                            value="<%= exhibition ? exhibition.endDate : '' %>" required>
+                    </div>
+
+                    <!-- 설명(100%) -->
+                    <div class="form-group description-group">
+                        <label for="description">설명</label>
+                        <textarea id="description" name="description"
+                            class="form-control"><%= exhibition ? exhibition.description : '' %></textarea>
+                    </div>
+
+                    <!-- 출품가능 여부(50%) -->
+                    <div class="form-group submission-group">
+                        <label for="isSubmissionOpen">출품가능 여부</label>
+                        <select id="isSubmissionOpen" name="isSubmissionOpen" class="form-control">
+                            <option value="true" <%=exhibition && exhibition.isSubmissionOpen ? 'selected' : '' %>>출품 가능
+                            </option>
+                            <option value="false" <%=exhibition && !exhibition.isSubmissionOpen ? 'selected' : '' %>>출품
+                                불가능
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- ID(40%) + 생성일(30%) + 수정일(30%) -->
+                    <div class="form-group id-group">
+                        <label for="id">ID</label>
+                        <input type="text" id="id" name="id" class="form-control"
+                            value="<%= exhibition ? exhibition.id : '' %>" readonly>
+                    </div>
+                    <% if (exhibition) { %>
+                        <div class="form-group created-at-group">
+                            <label for="createdAt">생성일</label>
+                            <input type="text" id="createdAt" name="createdAt" class="form-control"
+                                value="<%= exhibition ? exhibition.createdAtFormatted : '' %>" readonly>
+                        </div>
+                        <div class="form-group updated-at-group">
+                            <label for="updatedAt">수정일</label>
+                            <input type="text" id="updatedAt" name="updatedAt" class="form-control"
+                                value="<%= exhibition ? exhibition.updatedAtFormatted : '' %>" readonly>
+                        </div>
+                        <% } %>
+            </form>
+        </div>
+        <div class="section-footer">
+            <div class="admin-form__actions">
+                <button type="submit" form="exhibitionForm" class="admin-button admin-button--primary">
+                    <%= exhibition ? '저장' : '작성' %>
+                </button>
+                <% if (exhibition) { %>
+                    <button type="button" id="deleteButton" class="admin-button admin-button--danger"
+                        data-id="<%= exhibition.id %>">
+                        삭제
+                    </button>
+                    <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="admin-back-button-container">
+    <button id="backButton" class="admin-button admin-button--backtolist">
+        <i class="fas fa-list"></i>
+        목록으로
+    </button>
+</div>
+
+<script>
+    // EJS에서 mode 변수를 JavaScript로 전달
+    const mode = '<%= mode %>'; // EJS 변수를 JavaScript 변수로 설정
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 폼 제출 이벤트 설정
+        document.getElementById('exhibitionForm').addEventListener('submit', handleExhibitionFormSubmit);
+
+        // 이미지 업로드 영역 클릭 이벤트 (수정 모드가 아닐 때만 활성화)
+        if (mode === 'create') {
+            document.getElementById('exhibition-thumbnail-preview').addEventListener('click', function () {
+                document.getElementById('thumbnailInput').click();
+            });
+        }
+
+        // 파일 업로드 이벤트
+        document.getElementById('thumbnailInput').addEventListener('change', function () {
+            updateThumbnailPreview(this.files[0]);
+        });
+
+        // 이미지 삭제 버튼 이벤트 (존재할 경우)
+        const cancelThumbnail = document.getElementById('cancelThumbnail');
+        if (cancelThumbnail) {
+            cancelThumbnail.addEventListener('click', cancelThumbnailUpload);
+        }
+
+        // 뒤로가기 버튼 클릭 이벤트
+        document.getElementById('backButton').addEventListener('click', function () {
+            history.back();
+        });
+
+        // 삭제 버튼 설정 (전시회 객체가 있을 경우에만)
+        const deleteButton = document.getElementById('deleteButton');
+        if (deleteButton) {
+            deleteButton.addEventListener('click', function () {
+                handleDelete(deleteButton.getAttribute('data-id'));
+            });
+        }
+
+        // 시작일과 종료일을 당일로 자동 입력
+        const today = new Date().toISOString().split('T')[0];
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+
+        if (!startDateInput.value) {
+            startDateInput.value = today;
+        }
+        if (!endDateInput.value) {
+            endDateInput.value = today;
+        }
+    });
+
+    function updateThumbnailPreview(file) {
+        const previewContainer = document.getElementById('exhibition-thumbnail-preview');
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            if (previewContainer) {
+                // 기존 내용 지우기
+                previewContainer.innerHTML = '';
+
+                const cancelDiv = document.querySelector('.thumbnail-cancel');
+                if (cancelDiv) {
+                    cancelDiv.innerHTML = '';
+                }
+
+                // 헤더 추가 (삭제 링크 포함)
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'thumbnail-header';
+
+                const cancelLink = document.createElement('a');
+                cancelLink.href = '#';
+                cancelLink.id = 'cancelThumbnail';
+                cancelLink.className = 'cancel-thumbnail';
+                cancelLink.textContent = '이미지 삭제';
+                cancelLink.addEventListener('click', cancelThumbnailUpload);
+
+                headerDiv.appendChild(cancelLink);
+
+                // 이미지 추가
+                const imageElement = document.createElement('img');
+                imageElement.src = e.target.result;
+                imageElement.alt = '전시회 썸네일';
+                imageElement.className = 'thumbnail-image';
+
+                // 요소 추가
+                cancelDiv.appendChild(headerDiv);
+                previewContainer.appendChild(imageElement);
+            }
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function cancelThumbnailUpload(event) {
+        event.preventDefault();
+
+        const previewContainer = document.getElementById('exhibition-thumbnail-preview');
+        const fileInput = document.getElementById('thumbnailInput');
+        const cancelDiv = document.querySelector('.thumbnail-cancel');
+
+        // 파일 입력 초기화
+        fileInput.value = '';
+
+        // 미리보기 초기화
+        previewContainer.innerHTML = '';
+
+        if (cancelDiv) {
+            cancelDiv.innerHTML = '';
+        }
+
+        // 플레이스홀더 추가
+        const placeholderDiv = document.createElement('div');
+        placeholderDiv.className = 'placeholder';
+
+        const placeholderText = document.createElement('p');
+        placeholderText.textContent = '이미지를 클릭하여 업로드 (선택사항)';
+
+        placeholderDiv.appendChild(placeholderText);
+        previewContainer.appendChild(placeholderDiv);
+    }
+
+    async function handleExhibitionFormSubmit(event) {
+        event.preventDefault();
+
+        if (!confirm('저장하시겠습니까?')) {
+            return;
+        }
+
+        const now = new Date().toISOString();
+        let isEdit = (mode === 'edit'); // mode를 기반으로 isEdit 설정
+
+        const method = isEdit ? 'PUT' : 'POST'; // isEdit에 따라 메소드 설정
+        const url = isEdit ? `/admin/management/exhibition/${document.getElementById('id').value}` : '/admin/management/exhibition/new';
+
+        try {
+            let response;
+
+            // 수정 모드일 때는 JSON으로 데이터 전송
+            if (isEdit) {
+                // 폼 데이터를 JSON 객체로 수집
+                const formEl = document.getElementById('exhibitionForm');
+                const formData = {};
+
+                // 폼 요소들에서 데이터 수집
+                formEl.querySelectorAll('input, select, textarea').forEach(element => {
+                    if (element.name && element.name !== 'image') { // 이미지 필드는 제외
+                        formData[element.name] = element.value;
+                    }
+                });
+
+                // Boolean 값 처리
+                formData.isSubmissionOpen = formData.isSubmissionOpen === 'true';
+                formData.isFeatured = formData.isFeatured === 'true';
+
+                // 업데이트 시간 추가
+                formData.updatedAt = now;
+
+                response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+            } else {
+                // 생성 모드일 때는 기존 FormData 사용
+                const formData = new FormData(document.getElementById('exhibitionForm'));
+
+                // 생성 시간 추가
+                formData.append('createdAt', now);
+                formData.append('updatedAt', now);
+
+                // Boolean 값 처리
+                formData.set('isSubmissionOpen', formData.get('isSubmissionOpen') === 'true');
+                formData.set('isFeatured', formData.get('isFeatured') === 'true');
+
+                response = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // 응답 처리 코드 삭제
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            window.location.href = '/admin/management/exhibition';
+        }
+    }
+
+    function handleDelete(id) {
+        if (confirm('정말로 이 전시회를 삭제하시겠습니까?')) {
+            fetch(`/admin/management/exhibition/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert(result.message);
+                        window.location.href = '/admin/management/exhibition';
+                    } else {
+                        console.error('Error:', result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    }
+</script>

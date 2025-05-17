@@ -1,0 +1,169 @@
+<div class="admin-management">
+    <h2 class="admin-title">회원목록</h2>
+
+    <% if (messages && messages.success && messages.success.length> 0) { %>
+        <div class="alert alert-success">
+            <%= messages.success %>
+        </div>
+        <% } %>
+            <% if (messages && messages.error && messages.error.length> 0) { %>
+                <div class="alert alert-danger">
+                    <%= messages.error %>
+                </div>
+                <% } %>
+
+                    <!-- 컨트롤 섹션 -->
+                    <div class="admin-control">
+                        <div class="admin-control__group">
+                            <span class="admin-control__info">총 <%= total %>명의 회원</span>
+                        </div>
+                    </div>
+
+                    <!-- 필터 섹션 -->
+                    <form method="GET" action="/admin/management/user" class="admin-filter">
+                        <div class="admin-filter__group">
+                            <select class="admin-filter__select" name="status">
+                                <option value="">회원 상태</option>
+                                <option value="ACTIVE" <%=filters?.status==='ACTIVE' ? 'selected' : '' %>>활성</option>
+                                <option value="INACTIVE" <%=filters?.status==='INACTIVE' ? 'selected' : '' %>>비활성
+                                </option>
+                                <option value="BLOCKED" <%=filters?.status==='BLOCKED' ? 'selected' : '' %>>차단</option>
+                                <option value="UNVERIFIED" <%=filters?.status==='UNVERIFIED' ? 'selected' : '' %>>미인증
+                                </option>
+                            </select>
+                            <select class="admin-filter__select" name="role">
+                                <option value="">회원 역할</option>
+                                <option value="ADMIN" <%=filters?.role==='ADMIN' ? 'selected' : '' %>>관리자</option>
+                                <option value="SKKU_MEMBER" <%=filters?.role==='SKKU_MEMBER' ? 'selected' : '' %>>성균관대
+                                    구성원</option>
+                                <option value="EXTERNAL_MEMBER" <%=filters?.role==='EXTERNAL_MEMBER' ? 'selected' : ''
+                                    %>>외부인</option>
+                            </select>
+                            <input type="text" class="admin-filter__input" name="keyword" placeholder="이름, 아이디, 이메일 검색"
+                                value="<%= filters?.keyword || '' %>">
+                            <button type="submit" class="admin-button admin-button--primary">
+                                <i class="fas fa-filter"></i>
+                                필터 적용
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="admin-management__content">
+                        <!-- 테이블 섹션 -->
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>아이디</th>
+                                        <th>역할</th>
+                                        <th>이름</th>
+                                        <th>이메일</th>
+                                        <th>소속정보</th>
+                                        <th>가입일</th>
+                                        <th>상태</th>
+                                        <th>관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (users && users.length> 0) { %>
+                                        <% users.forEach(user=> { %>
+                                            <tr>
+                                                <td>
+                                                    <%= user.username %>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="admin-badge admin-badge--<%= user.role.toLowerCase() %>">
+                                                        <%= user.roleDisplayName %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <%= user.name %>
+                                                </td>
+                                                <td>
+                                                    <%= user.email %>
+                                                </td>
+                                                <td>
+                                                    <%= user.profileSummary %>
+                                                </td>
+                                                <td>
+                                                    <%= user.createdAtFormatted %>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="admin-badge admin-badge--<%= user.status.toLowerCase() %>">
+                                                        <%= user.statusDisplayName %>
+                                                    </span>
+                                                </td>
+                                                <td class="admin-table__actions">
+                                                    <a href="/admin/management/user/<%= user.id %>"
+                                                        class="admin-button admin-button--secondary admin-button--xs">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form action="/admin/management/user/<%= user.id %>?_method=DELETE"
+                                                        method="POST" class="inline-form" onsubmit="return confirm('정말로 이 회원을 삭제하시겠습니까?\n\n' +
+                                        '⚠️ 경고: 이 작업은 되돌릴 수 없습니다.\n' +
+                                        '• 해당 회원의 모든 정보가 영구적으로 삭제됩니다.\n' +
+                                        '• 회원과 관련된 모든 데이터가 함께 삭제됩니다.\n' +
+                                        '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.')">
+                                                        <button type="submit"
+                                                            class="admin-button admin-button--danger admin-button--xs">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="8" class="admin-table__empty">
+                                                            등록된 회원이 없습니다.
+                                                        </td>
+                                                    </tr>
+                                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 페이지네이션 섹션 -->
+                        <div class="admin-pagination">
+                            <% if (page && page.totalPages> 0) { %>
+                                <a class="admin-pagination__button"
+                                    href="?page=1<%= filters?.status ? `&status=${filters.status}` : '' %><%= filters?.role ? `&role=${filters.role}` : '' %><%= filters?.keyword ? `&keyword=${filters.keyword}` : '' %>"
+                                    <%=page.currentPage===1 ? 'disabled' : '' %>>
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                                <a class="admin-pagination__button"
+                                    href="?page=<%= page.currentPage - 1 %><%= filters?.status ? `&status=${filters.status}` : '' %><%= filters?.role ? `&role=${filters.role}` : '' %><%= filters?.keyword ? `&keyword=${filters.keyword}` : '' %>"
+                                    <%=page.currentPage===1 ? 'disabled' : '' %>>
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+
+                                <% for (let i=Math.max(1, page.currentPage - 2); i <=Math.min(page.totalPages,
+                                    page.currentPage + 2); i++) { %>
+                                    <a class="admin-pagination__button <%= i === page.currentPage ? 'admin-pagination__button--active' : '' %>"
+                                        href="?page=<%= i %><%= filters?.status ? `&status=${filters.status}` : '' %><%= filters?.role ? `&role=${filters.role}` : '' %><%= filters?.keyword ? `&keyword=${filters.keyword}` : '' %>">
+                                        <%= i %>
+                                    </a>
+                                    <% } %>
+
+                                        <a class="admin-pagination__button"
+                                            href="?page=<%= page.currentPage + 1 %><%= filters?.status ? `&status=${filters.status}` : '' %><%= filters?.role ? `&role=${filters.role}` : '' %><%= filters?.keyword ? `&keyword=${filters.keyword}` : '' %>"
+                                            <%=page.currentPage===page.totalPages ? 'disabled' : '' %>>
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                        <a class="admin-pagination__button"
+                                            href="?page=<%= page.totalPages %><%= filters?.status ? `&status=${filters.status}` : '' %><%= filters?.role ? `&role=${filters.role}` : '' %><%= filters?.keyword ? `&keyword=${filters.keyword}` : '' %>"
+                                            <%=page.currentPage===page.totalPages ? 'disabled' : '' %>>
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                        <% } %>
+                        </div>
+                    </div>
+</div>
+
+<style>
+    .inline-form {
+        display: inline;
+    }
+</style>

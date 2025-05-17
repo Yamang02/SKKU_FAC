@@ -1,0 +1,171 @@
+<style>
+    @import url('/css/admin/management/notice/NoticeManagementDetail.css');
+</style>
+<div class="admin-management">
+    <h2 class="admin-title">
+        <%= notice ? '공지사항 수정' : '공지사항 작성' %>
+    </h2>
+
+    <div class="admin-management__content">
+        <form id="noticeForm" class="admin-form">
+            <input type="hidden" name="id" value="<%= notice ? notice.id : '' %>">
+            <div class="admin-form__group">
+                <label class="admin-form__label" for="title">제목</label>
+                <input type="text" id="title" name="title" class="admin-form__input"
+                    value="<%= notice ? notice.title : '' %>" required>
+            </div>
+
+            <div class="admin-form__group">
+                <label class="admin-form__label" for="content">내용</label>
+                <textarea id="content" name="content" class="admin-form__textarea" rows="10"
+                    required><%= notice ? notice.content : '' %></textarea>
+            </div>
+
+            <div class="admin-form__group">
+                <label class="admin-form__label">작성자</label>
+                <p class="admin-form__text">
+                    <%= notice ? notice.author : user.name %>
+                </p>
+            </div>
+
+            <% if (notice) { %>
+                <div class="admin-form__group">
+                    <label class="admin-form__label">조회수</label>
+                    <p class="admin-form__text">
+                        <%= notice.views %>
+                    </p>
+                </div>
+
+                <div class="admin-form__group">
+                    <label class="admin-form__label">작성일</label>
+                    <p class="admin-form__text">
+                        <%= notice.formattedCreatedAt %>
+                    </p>
+                </div>
+
+                <div class="admin-form__group">
+                    <label class="admin-form__label">수정일</label>
+                    <p class="admin-form__text">
+                        <%= notice.formattedUpdatedAt %>
+                    </p>
+                </div>
+                <% } %>
+
+                    <div class="admin-form__group">
+                        <label class="admin-form__label">중요 공지</label>
+                        <div class="admin-form__checkbox">
+                            <input type="checkbox" id="isImportant" name="isImportant" <%=notice && notice.isImportant
+                                ? 'checked' : '' %>>
+                            <label for="isImportant">중요 공지로 설정</label>
+                        </div>
+                    </div>
+
+                    <div class="admin-form__group">
+                        <label class="admin-form__label" for="status">상태</label>
+                        <select id="status" name="status" class="admin-form__select">
+                            <option value="active" <%=notice && notice.status==='active' ? 'selected' : '' %>>활성
+                            </option>
+                            <option value="inactive" <%=notice && notice.status==='inactive' ? 'selected' : '' %>>비활성
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="admin-form__actions">
+                        <button type="submit" class="admin-button admin-button--primary">
+                            <%= notice ? '저장' : '작성' %>
+                        </button>
+                        <% if (notice) { %>
+                            <button type="button" class="admin-button admin-button--danger"
+                                onclick="deleteNotice(<%= notice.id %>)">
+                                삭제
+                            </button>
+                            <% } %>
+                    </div>
+        </form>
+    </div>
+</div>
+<div class="admin-back-button-container">
+    <a onclick="history.back()" class="admin-button admin-button--backtolist">
+        <i class="fas fa-list"></i>
+        목록으로
+    </a>
+</div>
+
+<script>
+    document.getElementById('noticeForm').addEventListener('submit', handleNoticeFormSubmit);
+
+    async function handleNoticeFormSubmit(event) {
+        event.preventDefault();
+
+        if (!confirm('저장하시겠습니까?')) {
+            return;
+        }
+
+        const formData = new FormData(this);
+        const now = new Date().toISOString();
+        const isEdit = <%= notice ? true : false %>;
+
+        const noticeData = {
+            title: formData.get('title'),
+            content: formData.get('content'),
+            status: formData.get('status'),
+            isImportant: formData.get('isImportant') === 'on',
+            updatedAt: now
+        };
+
+        // 생성 시에만 작성자 정보와 createdAt 추가
+        if (!isEdit) {
+            noticeData.author = '<%= user.name %>';
+            noticeData.createdAt = now;
+        }
+
+        const method = isEdit ? 'PUT' : 'POST';
+        const url = isEdit ? `/admin/management/notice/${formData.get('id')}` : '/admin/management/notice/registration';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(noticeData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('저장되었습니다.');
+                window.location.href = '/admin/management/notice';
+            } else {
+                alert(result.message || '저장에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('저장 중 오류가 발생했습니다.');
+        }
+    }
+
+    function deleteNotice(id) {
+        if (confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
+            fetch(`/admin/management/notice/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert(result.message);
+                        window.location.href = '/admin/management/notice';
+                    } else {
+                        alert(result.message || '공지사항 삭제에 실패했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('공지사항 삭제 중 오류가 발생했습니다.');
+                });
+        }
+    }
+</script>

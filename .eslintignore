@@ -1,0 +1,10 @@
+# .eslintignore
+
+# 테스트 관련 파일 및 디렉토리 무시
+__tests__/
+*.test.js
+*.spec.js
+
+# 바벨 관련 파일 무시
+babel.config.js
+
