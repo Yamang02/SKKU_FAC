@@ -97,6 +97,14 @@ app.use(
     })
 );
 
+// HTTP → HTTPS 리디렉션 (프록시 환경 고려)
+app.use((req, res, next) => {
+    if (process.env.NODE_ENV === 'production' && req.headers['x-forwarded-proto'] !== 'https') {
+        return res.redirect('https://' + req.headers.host + req.url);
+    }
+    next();
+});
+
 
 // Rate Limiter 설정
 const limiter = rateLimit({
