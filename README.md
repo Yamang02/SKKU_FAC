@@ -1,3 +1,5 @@
+서비스 URL : [https://](https://www.skkuartclub.kr/)
+
 # SKKU 성미회 갤러리 기술스펙 정의서
 
 ## 1. 프로젝트 개요
