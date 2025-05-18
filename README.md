@@ -1,4 +1,4 @@
-서비스 URL : [https://](https://www.skkuartclub.kr/)
+서비스 URL : [성미회 갤러리 사이트](https://www.skkuartclub.kr/)
 
 # SKKU 성미회 갤러리 기술스펙 정의서
 
