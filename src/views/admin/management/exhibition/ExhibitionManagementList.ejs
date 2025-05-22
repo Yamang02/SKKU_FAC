@@ -244,24 +244,30 @@
 </style>
 
 <script>
-    function deleteExhibition(id) {
+    async function deleteExhibition(id) {
         if (confirm('정말로 이 전시회를 삭제하시겠습니까?')) {
-            fetch(`/admin/management/exhibition/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => {
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        console.error('Error:', result.message);
+            try {
+                showLoading('전시회를 삭제하는 중입니다...', '잠시만 기다려주세요');
+
+                const response = await fetch(`/admin/management/exhibition/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
                 });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    hideLoading();
+                    console.error('Error: 삭제 실패');
+                    alert('삭제에 실패했습니다.');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error:', error);
+                alert('삭제 중 오류가 발생했습니다.');
+            }
         }
     }
 
@@ -269,52 +275,60 @@
         const currentUrl = new URL(window.location.href);
         const searchParams = currentUrl.searchParams;
         searchParams.set('page', page);
-        window.location.href = currentUrl.toString();
+        navigateWithLoading(currentUrl.toString(), '페이지를 이동하는 중입니다...');
     }
 
-    document.getElementById('btnApplyFilter').addEventListener('click', function () {
-        const exhibitionType = document.querySelector('select[name="exhibitionType"]').value;
-        const featured = document.querySelector('select[name="featured"]').value;
-        const year = document.querySelector('select[name="year"]').value;
-        const keyword = document.querySelector('input[name="keyword"]').value;
-
-        const currentUrl = new URL(window.location.href);
-        const searchParams = currentUrl.searchParams;
-
-        if (exhibitionType) {
-            searchParams.set('exhibitionType', exhibitionType);
-        } else {
-            searchParams.delete('exhibitionType');
-        }
-
-        if (featured) {
-            searchParams.set('featured', featured);
-        } else {
-            searchParams.delete('featured');
-        }
-
-        if (year) {
-            searchParams.set('year', year);
-        } else {
-            searchParams.delete('year');
-        }
-
-        if (keyword) {
-            searchParams.set('keyword', keyword);
-        } else {
-            searchParams.delete('keyword');
-        }
-
-        searchParams.set('page', 1);
-        window.location.href = currentUrl.toString();
-    });
-
     document.addEventListener('DOMContentLoaded', function () {
+        // 필터 적용 버튼
+        document.getElementById('btnApplyFilter').addEventListener('click', function () {
+            showLoading('필터를 적용하는 중입니다...', '잠시만 기다려주세요');
+
+            const exhibitionType = document.querySelector('select[name="exhibitionType"]').value;
+            const featured = document.querySelector('select[name="featured"]').value;
+            const year = document.querySelector('select[name="year"]').value;
+            const keyword = document.querySelector('input[name="keyword"]').value;
+
+            const currentUrl = new URL(window.location.href);
+            const searchParams = currentUrl.searchParams;
+
+            if (exhibitionType) {
+                searchParams.set('exhibitionType', exhibitionType);
+            } else {
+                searchParams.delete('exhibitionType');
+            }
+
+            if (featured) {
+                searchParams.set('featured', featured);
+            } else {
+                searchParams.delete('featured');
+            }
+
+            if (year) {
+                searchParams.set('year', year);
+            } else {
+                searchParams.delete('year');
+            }
+
+            if (keyword) {
+                searchParams.set('keyword', keyword);
+            } else {
+                searchParams.delete('keyword');
+            }
+
+            searchParams.set('page', 1);
+
+            // 필터 적용 직전에 로딩 상태를 해제하여 beforeunload 알림 방지
+            setTimeout(() => {
+                window.loadingManager.isLoading = false;
+                window.location.href = currentUrl.toString();
+            }, 50);
+        });
+
         // 등록 버튼
         const addExhibitionBtn = document.getElementById('addExhibitionBtn');
         if (addExhibitionBtn) {
             addExhibitionBtn.addEventListener('click', function () {
-                window.location.href = '/admin/management/exhibition/new';
+                navigateWithLoading('/admin/management/exhibition/new', '등록 페이지로 이동하는 중입니다...');
             });
         }
 
@@ -323,6 +337,22 @@
             button.addEventListener('click', function () {
                 const id = this.getAttribute('data-id');
                 deleteExhibition(id);
+            });
+        });
+
+        // 수정 버튼들에 로딩 적용
+        document.querySelectorAll('a[href*="/admin/management/exhibition/"]').forEach(link => {
+            if (link.href.includes('/admin/management/exhibition/') && !link.href.includes('new')) {
+                link.addEventListener('click', function () {
+                    showLoading('상세 페이지로 이동하는 중입니다...', '잠시만 기다려주세요');
+                });
+            }
+        });
+
+        // 주요 전시 토글 폼에 로딩 적용
+        document.querySelectorAll('form[action*="/featured"]').forEach(form => {
+            form.addEventListener('submit', function () {
+                showLoading('주요 전시 설정을 변경하는 중입니다...', '잠시만 기다려주세요');
             });
         });
     });
