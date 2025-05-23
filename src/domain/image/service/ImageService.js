@@ -35,8 +35,17 @@ class ImageService {
         try {
             console.log('이미지 삭제 시작 - publicId:', publicId);
 
-            // 인프라 레이어의 삭제 함수 사용
-            const result = await deleteCloudinaryImage(publicId);
+            // 타임아웃 설정 (10초)
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Cloudinary 이미지 삭제 타임아웃')), 10000);
+            });
+
+            // 인프라 레이어의 삭제 함수 사용 (타임아웃과 경쟁)
+            const result = await Promise.race([
+                deleteCloudinaryImage(publicId),
+                timeoutPromise
+            ]);
+
             console.log('이미지 삭제 결과:', result);
 
             if (result.result !== 'ok') {
@@ -46,6 +55,7 @@ class ImageService {
             return true;
         } catch (error) {
             console.error('Cloudinary 이미지 삭제 중 에러:', error);
+            // 타임아웃이나 기타 에러가 발생해도 true 반환 (삭제 프로세스 중단 방지)
             return true;
         }
     }
