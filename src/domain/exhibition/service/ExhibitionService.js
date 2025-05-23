@@ -136,19 +136,28 @@ export default class ExhibitionService {
      */
     async deleteManagementExhibition(id) {
         try {
-
             const exhibition = await this.exhibitionRepository.findExhibitionById(id);
-
-            // 전시회 이미지 존재 시 삭제
-            if (exhibition.imagePublicId) {
-                await this.imageService.deleteImage(exhibition.imagePublicId);
-            }
 
             // 전시회 출품 작품 관계 삭제
             await this.artworkExhibitionRelationshipRepository.deleteArtworkExhibitionRelationshipByExhibitionId(id);
 
             // 전시회 삭제(hard delete)
-            return await this.exhibitionRepository.deleteExhibition(id);
+            const deleteResult = await this.exhibitionRepository.deleteExhibition(id);
+
+            // 전시회 이미지 존재 시 백그라운드에서 삭제 (비동기 처리)
+            if (exhibition.imagePublicId) {
+                // 백그라운드에서 이미지 삭제 (에러가 발생해도 전시회 삭제는 성공으로 처리)
+                this.imageService.deleteImage(exhibition.imagePublicId)
+                    .then(() => {
+                        console.log(`전시회 이미지 삭제 완료: ${exhibition.imagePublicId}`);
+                    })
+                    .catch((error) => {
+                        console.error(`전시회 이미지 삭제 실패 (전시회 ID: ${id}, publicId: ${exhibition.imagePublicId}):`, error);
+                        // 이미지 삭제 실패는 로그만 남기고 전시회 삭제는 성공으로 처리
+                    });
+            }
+
+            return deleteResult;
         } catch (error) {
             console.error('전시회 삭제 중 오류:', error);
             throw error;

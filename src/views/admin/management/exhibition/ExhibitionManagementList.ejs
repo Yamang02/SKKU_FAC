@@ -113,10 +113,12 @@
                                             class="admin-button admin-button--secondary">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button class="admin-button admin-button--danger delete-exhibition-btn"
-                                            data-id="<%= exhibition.id %>">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <form action="/admin/management/exhibition/<%= exhibition.id %>?_method=DELETE"
+                                            method="POST" style="display:inline;">
+                                            <button type="submit" class="admin-button admin-button--danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -244,33 +246,6 @@
 </style>
 
 <script>
-    async function deleteExhibition(id) {
-        if (confirm('정말로 이 전시회를 삭제하시겠습니까?')) {
-            try {
-                showLoading('전시회를 삭제하는 중입니다...', '잠시만 기다려주세요');
-
-                const response = await fetch(`/admin/management/exhibition/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    hideLoading();
-                    console.error('Error: 삭제 실패');
-                    alert('삭제에 실패했습니다.');
-                }
-            } catch (error) {
-                hideLoading();
-                console.error('Error:', error);
-                alert('삭제 중 오류가 발생했습니다.');
-            }
-        }
-    }
-
     function goToPage(page) {
         const currentUrl = new URL(window.location.href);
         const searchParams = currentUrl.searchParams;
@@ -332,11 +307,14 @@
             });
         }
 
-        // 삭제 버튼 이벤트 처리
-        document.querySelectorAll('.delete-exhibition-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const id = this.getAttribute('data-id');
-                deleteExhibition(id);
+        // 삭제 폼에 확인 대화상자만 적용 (로딩 표시 제거)
+        document.querySelectorAll('form[action*="?_method=DELETE"]').forEach(form => {
+            form.addEventListener('submit', function (e) {
+                const confirmed = confirm('정말로 이 전시회를 삭제하시겠습니까?');
+                if (!confirmed) {
+                    e.preventDefault();
+                }
+                // 로딩 표시 없이 바로 제출하여 beforeunload 방지
             });
         });
 
