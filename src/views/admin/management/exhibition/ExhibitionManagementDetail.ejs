@@ -336,31 +336,16 @@
 
     async function handleDelete(id) {
         if (confirm('정말로 이 전시회를 삭제하시겠습니까?')) {
-            try {
-                showLoading('전시회를 삭제하는 중입니다...', '잠시만 기다려주세요');
+            showLoading('전시회를 삭제하는 중입니다...', '잠시만 기다려주세요');
 
-                const response = await fetch(`/admin/management/exhibition/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+            // SSR 방식으로 폼 제출 (쿼리 파라미터 방식)
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/management/exhibition/${id}?_method=DELETE`;
+            form.style.display = 'none';
 
-                const result = await response.json();
-
-                if (result.success) {
-                    alert(result.message);
-                    navigateWithLoading('/admin/management/exhibition', '목록으로 이동하는 중입니다...');
-                } else {
-                    hideLoading();
-                    console.error('Error:', result.message);
-                    alert('삭제에 실패했습니다.');
-                }
-            } catch (error) {
-                hideLoading();
-                console.error('Error:', error);
-                alert('삭제 중 오류가 발생했습니다.');
-            }
+            document.body.appendChild(form);
+            form.submit();
         }
     }
 </script>

@@ -131,11 +131,17 @@ export default class ArtworkManagementController {
             const updatedArtwork = await this.artworkManagementService.toggleFeatured(artworkId);
 
             req.flash('success', `작품이 ${updatedArtwork.isFeatured ? '주요 작품으로 설정' : '일반 작품으로 변경'}되었습니다.`);
-            res.redirect(`/admin/management/artwork/${artworkId}`);
+
+            // 목록 페이지로 리다이렉트 (현재 페이지 유지를 위해 referer 사용)
+            const referer = req.get('Referer') || '/admin/management/artwork';
+            res.redirect(referer);
         } catch (error) {
             console.error('작품 주요 작품 설정 중 오류:', error);
             req.flash('error', '작품 주요 작품 설정 중 오류가 발생했습니다.');
-            res.redirect(`/admin/management/artwork/${req.params.id}`);
+
+            // 오류 시에도 목록 페이지로 리다이렉트
+            const referer = req.get('Referer') || '/admin/management/artwork';
+            res.redirect(referer);
         }
     }
 
