@@ -162,15 +162,15 @@ export default class ExhibitionManagementController {
 
             if (result) {
                 req.flash('success', '전시회가 성공적으로 삭제되었습니다.');
-                res.redirect('/admin/management/exhibition');
+                res.redirect('/admin/management/exhibition?page=1&limit=10');
             } else {
                 req.flash('error', '전시회를 찾을 수 없습니다.');
-                res.redirect('/admin/management/exhibition');
+                res.redirect('/admin/management/exhibition?page=1&limit=10');
             }
         } catch (error) {
             console.error('전시회 삭제 중 오류:', error);
             req.flash('error', error.message || '전시회 삭제 중 오류가 발생했습니다.');
-            res.redirect('/admin/management/exhibition');
+            res.redirect('/admin/management/exhibition?page=1&limit=10');
         }
     }
 

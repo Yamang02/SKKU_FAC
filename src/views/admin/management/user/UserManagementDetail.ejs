@@ -178,7 +178,7 @@
             });
         }
 
-        // 회원 삭제 폼에 로딩 적용
+        // 회원 삭제 폼에 확인 대화상자만 적용 (로딩 표시 제거)
         const deleteUserForm = document.getElementById('deleteUserForm');
         if (deleteUserForm) {
             deleteUserForm.addEventListener('submit', function (e) {
@@ -188,11 +188,10 @@
                     '• 회원과 관련된 모든 데이터가 함께 삭제됩니다.\n' +
                     '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.');
 
-                if (confirmed) {
-                    showLoading('회원을 삭제하는 중입니다...', '잠시만 기다려주세요');
-                } else {
+                if (!confirmed) {
                     e.preventDefault();
                 }
+                // 로딩 표시 없이 바로 제출하여 beforeunload 방지
             });
         }
 

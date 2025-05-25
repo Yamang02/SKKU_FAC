@@ -216,6 +216,21 @@ class LoadingManager {
     setupPageUnloadDetection() {
         const self = this;
 
+        // 페이지 가시성 API - 페이지가 숨겨지거나 보여질 때
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                // 페이지가 다시 보여질 때 (뒤로가기 등) 로딩 해제
+                self.isLoading = false;
+                self.hide();
+            }
+        });
+
+        // 페이지 포커스 이벤트 - 브라우저 탭이 활성화될 때
+        window.addEventListener('focus', () => {
+            self.isLoading = false;
+            self.hide();
+        });
+
         // 페이지가 실제로 언로드되기 시작할 때 로딩 해제
         window.addEventListener('pagehide', () => {
             self.isLoading = false;
@@ -235,17 +250,20 @@ class LoadingManager {
 
         history.pushState = function () {
             self.isLoading = false;
+            self.hide();
             return originalPushState.apply(history, arguments);
         };
 
         history.replaceState = function () {
             self.isLoading = false;
+            self.hide();
             return originalReplaceState.apply(history, arguments);
         };
 
         // popstate 이벤트 (뒤로가기/앞으로가기)
         window.addEventListener('popstate', () => {
             self.isLoading = false;
+            self.hide();
         });
 
         // location.href 변경 감지를 위한 MutationObserver 설정
@@ -255,8 +273,20 @@ class LoadingManager {
             if (url !== lastUrl) {
                 lastUrl = url;
                 self.isLoading = false;
+                self.hide();
             }
         }).observe(document, { subtree: true, childList: true });
+
+        // 페이지 로드 완료 시 로딩 해제
+        if (document.readyState === 'complete') {
+            self.isLoading = false;
+            self.hide();
+        } else {
+            window.addEventListener('load', () => {
+                self.isLoading = false;
+                self.hide();
+            });
+        }
     }
 
     /**
