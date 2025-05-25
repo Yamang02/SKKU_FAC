@@ -57,8 +57,8 @@
                         <th>장소</th>
                         <th>출품가능</th>
                         <th>전시 유형</th>
-                        <th>주요 전시</th>
-                        <th>관리</th>
+
+                        <th>작업</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -97,26 +97,18 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <form action="/admin/management/exhibition/<%= exhibition.id %>/featured"
-                                        method="POST" style="display:inline;">
-                                        <button type="submit"
-                                            class="admin-button <%= exhibition.isFeatured === true ? 'admin-button--feature admin-button--featured' : 'admin-button--feature' %>"
-                                            title="<%= exhibition.isFeatured === true ? '주요 전시 해제' : '주요 전시 설정' %>">
-                                            <i
-                                                class="fas fa-star <%= exhibition.isFeatured === true ? 'featured-star' : 'unfeatured-star' %>"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                                <td>
                                     <div class="admin-button-group">
                                         <a href="/admin/management/exhibition/<%= exhibition.id %>"
-                                            class="admin-button admin-button--secondary">
+                                            class="admin-button admin-button--secondary" title="상세보기">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="/admin/management/exhibition/<%= exhibition.id %>?_method=DELETE"
+                                        <form action="/admin/management/exhibition/<%= exhibition.id %>/featured"
                                             method="POST" style="display:inline;">
-                                            <button type="submit" class="admin-button admin-button--danger">
-                                                <i class="fas fa-trash"></i>
+                                            <button type="submit"
+                                                class="admin-button <%= exhibition.isFeatured === true ? 'admin-button--feature admin-button--featured' : 'admin-button--feature' %>"
+                                                title="<%= exhibition.isFeatured === true ? '주요 전시 해제' : '주요 전시 설정' %>">
+                                                <i
+                                                    class="fas fa-star <%= exhibition.isFeatured === true ? 'featured-star' : 'unfeatured-star' %>"></i>
                                             </button>
                                         </form>
                                     </div>
@@ -125,7 +117,7 @@
                             <% }); %>
                                 <% } else { %>
                                     <tr>
-                                        <td colspan="9" class="admin-table__empty">
+                                        <td colspan="8" class="admin-table__empty">
                                             등록된 전시회가 없습니다.
                                         </td>
                                     </tr>
@@ -299,39 +291,21 @@
             }, 50);
         });
 
-        // 등록 버튼
+        // 등록 버튼 (로딩 없이 직접 이동)
         const addExhibitionBtn = document.getElementById('addExhibitionBtn');
         if (addExhibitionBtn) {
             addExhibitionBtn.addEventListener('click', function () {
-                navigateWithLoading('/admin/management/exhibition/new', '등록 페이지로 이동하는 중입니다...');
+                // 로딩 없이 직접 이동하여 뒤로가기 문제 방지
+                window.location.href = '/admin/management/exhibition/new';
             });
         }
 
-        // 삭제 폼에 확인 대화상자만 적용 (로딩 표시 제거)
-        document.querySelectorAll('form[action*="?_method=DELETE"]').forEach(form => {
-            form.addEventListener('submit', function (e) {
-                const confirmed = confirm('정말로 이 전시회를 삭제하시겠습니까?');
-                if (!confirmed) {
-                    e.preventDefault();
-                }
-                // 로딩 표시 없이 바로 제출하여 beforeunload 방지
-            });
-        });
-
-        // 수정 버튼들에 로딩 적용
-        document.querySelectorAll('a[href*="/admin/management/exhibition/"]').forEach(link => {
-            if (link.href.includes('/admin/management/exhibition/') && !link.href.includes('new')) {
-                link.addEventListener('click', function () {
-                    showLoading('상세 페이지로 이동하는 중입니다...', '잠시만 기다려주세요');
-                });
+        // 상세보기 버튼들 (로딩 없이 직접 이동)
+        document.querySelectorAll('a.admin-button--secondary').forEach(link => {
+            if (link.href && link.href.includes('/admin/management/exhibition/') && !link.href.includes('new')) {
+                // 로딩 없이 직접 이동하여 beforeunload 방지
+                // 기본 동작 그대로 사용
             }
-        });
-
-        // 주요 전시 토글 폼에 로딩 적용
-        document.querySelectorAll('form[action*="/featured"]').forEach(form => {
-            form.addEventListener('submit', function () {
-                showLoading('주요 전시 설정을 변경하는 중입니다...', '잠시만 기다려주세요');
-            });
         });
     });
 </script>

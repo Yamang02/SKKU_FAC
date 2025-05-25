@@ -90,7 +90,7 @@
                                             class="fas fa-sort<%= sort === 'updatedAt' ? (order === 'asc' ? '-up' : '-down') : '' %>"></i>
                                     </a>
                                 </th>
-                                <th>관리</th>
+                                <th>작업</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -140,14 +140,6 @@
                                                         title="<%= artwork.isFeatured ? '주요 작품 해제' : '주요 작품 설정' %>">
                                                         <i
                                                             class="fas fa-star <%= artwork.isFeatured ? 'featured-star' : 'unfeatured-star' %>"></i>
-                                                    </button>
-                                                </form>
-                                                <form
-                                                    action="/admin/management/artwork/<%= artwork.id %>?_method=DELETE"
-                                                    method="POST" style="display:inline;">
-                                                    <button type="submit" class="admin-button admin-button--danger"
-                                                        title="삭제" onclick="return confirm('정말로 이 작품을 삭제하시겠습니까?');">
-                                                        <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
                                             </div>
@@ -237,20 +229,17 @@
             });
         }
 
-        // 정렬 링크들에 로딩 적용
+        // 정렬 링크들 (로딩 없이 직접 이동)
         document.querySelectorAll('.sort-btn').forEach(link => {
-            link.addEventListener('click', function () {
-                showLoading('정렬을 적용하는 중입니다...', '잠시만 기다려주세요');
-            });
+            // 로딩 없이 직접 이동하여 beforeunload 방지
+            // 기본 동작 그대로 사용
         });
 
-        // 상세보기 링크들에 로딩 적용
-        document.querySelectorAll('a[href*="/admin/management/artwork/"]').forEach(link => {
-            if (link.href.match(/\/admin\/management\/artwork\/\d+$/)) {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    navigateWithLoading(this.href, '상세 페이지로 이동하는 중입니다...');
-                });
+        // 상세보기 링크들 (로딩 없이 직접 이동)
+        document.querySelectorAll('a.admin-link, a.admin-button--info').forEach(link => {
+            if (link.href && link.href.match(/\/admin\/management\/artwork\/\d+$/)) {
+                // 로딩 없이 직접 이동하여 beforeunload 방지
+                // 기본 동작 그대로 사용
             }
         });
 
@@ -259,24 +248,6 @@
             link.addEventListener('click', function (e) {
                 e.preventDefault();
                 navigateWithLoading(this.href, '페이지를 이동하는 중입니다...');
-            });
-        });
-
-        // 주요 작품 토글 폼에 로딩 적용
-        document.querySelectorAll('form[action*="/featured"]').forEach(form => {
-            form.addEventListener('submit', function () {
-                showLoading('주요 작품 설정을 변경하는 중입니다...', '잠시만 기다려주세요');
-            });
-        });
-
-        // 삭제 폼에 로딩 적용
-        document.querySelectorAll('form[action*="?_method=DELETE"]').forEach(form => {
-            form.addEventListener('submit', function (e) {
-                if (confirm('정말로 이 작품을 삭제하시겠습니까?')) {
-                    showLoading('작품을 삭제하는 중입니다...', '잠시만 기다려주세요');
-                } else {
-                    e.preventDefault();
-                }
             });
         });
     });

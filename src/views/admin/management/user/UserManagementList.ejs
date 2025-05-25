@@ -61,7 +61,7 @@
                                         <th>소속정보</th>
                                         <th>가입일</th>
                                         <th>상태</th>
-                                        <th>관리</th>
+                                        <th>작업</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -97,20 +97,10 @@
                                                 </td>
                                                 <td class="admin-table__actions">
                                                     <a href="/admin/management/user/<%= user.id %>"
-                                                        class="admin-button admin-button--secondary admin-button--xs">
+                                                        class="admin-button admin-button--secondary admin-button--xs"
+                                                        title="상세보기">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <form action="/admin/management/user/<%= user.id %>?_method=DELETE"
-                                                        method="POST" class="inline-form" onsubmit="return confirm('정말로 이 회원을 삭제하시겠습니까?\n\n' +
-                                        '⚠️ 경고: 이 작업은 되돌릴 수 없습니다.\n' +
-                                        '• 해당 회원의 모든 정보가 영구적으로 삭제됩니다.\n' +
-                                        '• 회원과 관련된 모든 데이터가 함께 삭제됩니다.\n' +
-                                        '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.')">
-                                                        <button type="submit"
-                                                            class="admin-button admin-button--danger admin-button--xs">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
                                                 </td>
                                             </tr>
                                             <% }); %>
@@ -214,23 +204,6 @@
             link.addEventListener('click', function (e) {
                 e.preventDefault();
                 navigateWithLoading(this.href, '페이지를 이동하는 중입니다...');
-            });
-        });
-
-        // 삭제 폼에 로딩 적용
-        document.querySelectorAll('form[action*="?_method=DELETE"]').forEach(form => {
-            form.addEventListener('submit', function (e) {
-                const confirmed = confirm('정말로 이 회원을 삭제하시겠습니까?\n\n' +
-                    '⚠️ 경고: 이 작업은 되돌릴 수 없습니다.\n' +
-                    '• 해당 회원의 모든 정보가 영구적으로 삭제됩니다.\n' +
-                    '• 회원과 관련된 모든 데이터가 함께 삭제됩니다.\n' +
-                    '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.');
-
-                if (confirmed) {
-                    showLoading('회원을 삭제하는 중입니다...', '잠시만 기다려주세요');
-                } else {
-                    e.preventDefault();
-                }
             });
         });
     });
