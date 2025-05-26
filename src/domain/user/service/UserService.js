@@ -2,7 +2,7 @@ import UserRepository from '../../../infrastructure/db/repository/UserAccountRep
 import UserRequestDto from '../model/dto/UserRequestDto.js';
 import UserSimpleDto from '../model/dto/UserSimpleDto.js';
 import UserDetailDto from '../model/dto/UserDetailDto.js';
-import { UserNotFoundError, UserEmailDuplicateError, UserUsernameDuplicateError } from '../../../common/error/UserError.js';
+import { UserNotFoundError, UserEmailDuplicateError, UserUsernameDuplicateError, UserInactiveError, UserUnverifiedError, UserBlockedError, UserAuthError } from '../../../common/error/UserError.js';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
 import AuthService from '../../auth/service/AuthService.js';
 import bcrypt from 'bcrypt';
@@ -273,14 +273,38 @@ export default class UserService {
      */
     async authenticate(username, password) {
         const user = await this.userRepository.findUserByUsername(username);
+        console.log(user.username);
+
         if (!user) {
-            throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
+            throw new UserNotFoundError('아이디 또는 비밀번호가 일치하지 않습니다.');
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
+            throw new UserAuthError('아이디 또는 비밀번호가 일치하지 않습니다.');
         }
+
+        // 계정 상태 확인
+        if (user.status === 'BLOCKED') {
+            throw new UserBlockedError('계정이 차단되었습니다. 관리자에게 문의하세요.');
+        }
+
+        if (user.status === 'INACTIVE') {
+            throw new UserInactiveError('계정이 비활성화되었습니다. 관리자에게 문의하세요.');
+        }
+
+        if (user.status === 'UNVERIFIED') {
+            throw new UserUnverifiedError('이메일 인증이 완료되지 않았습니다. 이메일을 확인해주세요.');
+        }
+
+        if (user.status !== 'ACTIVE') {
+            throw new UserInactiveError('로그인할 수 없는 계정 상태입니다. 관리자에게 문의하세요.');
+        }
+
+        // 로그인 성공 시 마지막 로그인 시간 업데이트
+        await this.userRepository.updateUser(user.id, {
+            lastLoginAt: new Date()
+        });
 
         return user;
     }
