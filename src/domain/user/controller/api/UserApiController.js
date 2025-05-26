@@ -8,7 +8,10 @@ import {
     UserNotFoundError,
     UserValidationError,
     UserEmailDuplicateError,
-    UserUsernameDuplicateError
+    UserUsernameDuplicateError,
+    UserInactiveError,
+    UserUnverifiedError,
+    UserBlockedError
 } from '../../../../common/error/UserError.js';
 export default class UserApiController {
     constructor() {
@@ -65,11 +68,18 @@ export default class UserApiController {
 
             return res.json(ApiResponse.success(user, Message.USER.LOGIN_SUCCESS));
         } catch (error) {
+            console.error('Error logging in user:', error);
             if (error instanceof UserNotFoundError) {
                 return res.status(404).json(ApiResponse.error(Message.USER.NOT_FOUND));
             }
-            console.error('Error logging in user:', error);
-            return res.status(500).json(ApiResponse.error(Message.USER.LOGIN_ERROR));
+            if (error instanceof UserInactiveError) {
+                return res.status(401).json(ApiResponse.error(Message.USER.INACTIVE_ERROR));
+            } else if (error instanceof UserUnverifiedError) {
+                return res.status(401).json(ApiResponse.error(Message.USER.UNVERIFIED_ERROR));
+            } else if (error instanceof UserBlockedError) {
+                return res.status(401).json(ApiResponse.error(Message.USER.BLOCKED_ERROR));
+            }
+            return res.status(500).json(ApiResponse.error(error.message));
         }
     }
 
