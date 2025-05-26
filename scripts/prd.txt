@@ -1,0 +1,189 @@
+<context>
+# Overview
+SKKU Fine Art Club Gallery is a web platform for showcasing and managing art exhibitions from Sungkyunkwan University's fine arts club. The system provides exhibition management, artwork uploads, user authentication, and administrative features. It serves as a digital gallery space where students can display their artistic works and visitors can explore exhibitions in an organized, professional manner.
+
+# Core Features
+## Exhibition Management
+- Create, edit, and manage art exhibitions with detailed information
+- Schedule exhibitions with start/end dates
+- Feature/unfeature exhibitions for homepage prominence
+- Organize artworks within exhibitions
+
+## Artwork Management
+- Upload and manage artwork images via Cloudinary integration
+- Add detailed artwork information (title, description, artist, medium, dimensions)
+- Associate artworks with specific exhibitions
+- Image optimization and responsive display
+
+## User Authentication & Authorization
+- Session-based authentication system
+- User registration and login functionality
+- Role-based access control (admin, artist, visitor)
+- Secure password hashing with bcrypt
+
+## Administrative Interface
+- Admin dashboard for managing exhibitions and artworks
+- User management capabilities
+- Content moderation tools
+- Analytics and reporting features
+
+## Public Gallery Interface
+- Browse exhibitions and artworks
+- Search and filter functionality
+- Responsive design for mobile and desktop
+- Social sharing capabilities
+
+# User Experience
+## User Personas
+- **Art Students**: Upload and showcase their work, participate in exhibitions
+- **Gallery Visitors**: Browse and discover art, learn about artists and exhibitions
+- **Administrators**: Manage content, users, and overall gallery operations
+- **Faculty/Curators**: Organize exhibitions and provide guidance
+
+## Key User Flows
+- Visitor browsing exhibitions → viewing artworks → learning about artists
+- Artist registration → artwork upload → exhibition participation
+- Admin login → content management → publication workflow
+- Exhibition creation → artwork curation → public launch
+
+## UI/UX Considerations
+- Clean, gallery-focused design that highlights artwork
+- Intuitive navigation between exhibitions and individual pieces
+- Mobile-responsive interface for accessibility
+- Fast loading times with optimized images
+</context>
+<PRD>
+# Technical Architecture
+## System Components
+- **Backend**: Node.js 22.13.0 with Express.js framework
+- **Database**: MySQL with Sequelize ORM for data persistence
+- **Authentication**: Session-based with express-session
+- **File Storage**: Cloudinary for image management and optimization
+- **Template Engine**: EJS for server-side rendering
+- **Security**: Helmet middleware, rate limiting, CSRF protection
+
+## Data Models
+- **User**: Authentication, profile information, roles
+- **Exhibition**: Title, description, dates, featured status, curator info
+- **Artwork**: Title, description, artist, medium, dimensions, image URLs
+- **ExhibitionArtwork**: Many-to-many relationship between exhibitions and artworks
+
+## APIs and Integrations
+- RESTful API endpoints documented with Swagger
+- Cloudinary API for image upload and transformation
+- Session management for authentication state
+- Rate limiting for API protection
+
+## Infrastructure Requirements
+- Domain-driven design (DDD) architecture
+- ECMAScript modules (ESM) throughout
+- Environment-based configuration management
+- Centralized error handling and logging
+
+# Development Roadmap
+## Phase 1: Foundation & Core Infrastructure
+- Database setup and entity models
+- Basic Express server configuration
+- Authentication system implementation
+- Core domain structure establishment
+- Basic security middleware integration
+
+## Phase 2: User Management & Authentication
+- User registration and login flows
+- Session management
+- Password security implementation
+- Basic admin authentication
+- User role system foundation
+
+## Phase 3: Exhibition Management System
+- Exhibition CRUD operations
+- Exhibition model and relationships
+- Basic exhibition listing and detail views
+- Admin exhibition management interface
+- Exhibition status management (draft/published)
+
+## Phase 4: Artwork Management System
+- Artwork CRUD operations
+- Cloudinary integration for image uploads
+- Artwork-exhibition relationship management
+- Image optimization and responsive display
+- Artwork detail views and galleries
+
+## Phase 5: Public Gallery Interface
+- Homepage with featured exhibitions
+- Exhibition browsing and search
+- Artwork viewing and navigation
+- Responsive design implementation
+- Performance optimization
+
+## Phase 6: Advanced Admin Features
+- Comprehensive admin dashboard
+- User management interface
+- Content moderation tools
+- Analytics and reporting
+- Bulk operations for content management
+
+## Phase 7: Enhanced User Experience
+- Advanced search and filtering
+- Social sharing capabilities
+- Artist profile pages
+- Exhibition archives and history
+- Mobile app considerations
+
+# Logical Dependency Chain
+## Foundation First (Critical Path)
+1. Database models and relationships - must be established before any data operations
+2. Authentication system - required for any user-specific functionality
+3. Basic Express setup with security middleware - foundation for all endpoints
+
+## Quick Visible Progress
+4. Simple exhibition listing page - provides immediate visual feedback
+5. Basic artwork display - demonstrates core gallery functionality
+6. Admin login interface - enables content management workflow
+
+## Building Upon Foundation
+7. Exhibition CRUD operations - builds on models and auth
+8. Artwork upload system - requires Cloudinary integration and exhibition relationships
+9. Public gallery interface - combines all previous components
+10. Advanced admin features - enhances existing management capabilities
+
+## Iterative Improvements
+- Each phase should result in a working, demonstrable feature
+- Features should be atomic but extensible
+- Early phases focus on core functionality, later phases on enhancement
+- Continuous integration of security and performance considerations
+
+# Risks and Mitigations
+## Technical Challenges
+- **Cloudinary Integration Complexity**: Start with basic upload, iterate on optimization
+- **Session Management Security**: Implement industry-standard practices from the start
+- **Database Relationship Complexity**: Design simple, extensible schema initially
+
+## MVP Definition
+- **Core MVP**: User auth + basic exhibition listing + artwork display
+- **Extended MVP**: Add admin interface and content management
+- **Full MVP**: Include search, filtering, and responsive design
+
+## Resource Constraints
+- **Development Time**: Prioritize core functionality over advanced features
+- **Performance**: Implement caching and optimization incrementally
+- **Scalability**: Design for current needs with future expansion in mind
+
+# Appendix
+## Technical Specifications
+- Node.js 22.13.0 with Express.js framework
+- MySQL database with Sequelize ORM
+- ECMAScript modules (ESM) throughout
+- EJS templating for server-side rendering
+- Cloudinary for image management
+- Session-based authentication
+- Helmet and rate limiting for security
+- Swagger API documentation
+
+## Research Findings
+- Gallery websites prioritize visual presentation and fast loading
+- Mobile responsiveness is critical for art viewing
+- Search and filtering capabilities enhance user engagement
+- Admin interfaces need bulk operation capabilities
+- Security is paramount for user-generated content platforms
+</PRD>
