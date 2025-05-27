@@ -21,6 +21,8 @@ SKKU 미술동아리 갤러리는 성균관대학교 순수 미술 동아리 전
 
 ### 2.3 인프라
 - **클라우드 스토리지**: Cloudinary (이미지 저장)
+- **캐싱**: Redis (세션 스토어 및 캐싱)
+- **CDN**: jsDelivr, Google Fonts, Cloudflare (외부 라이브러리 및 폰트)
 - **배포 환경**: Railway
 
 ### 2.4 보안
@@ -52,6 +54,8 @@ SKKU_FAC_GALLERY/
 │   │   └── user/                     # 사용자 도메인
 │   ├── infrastructure/               # 인프라 계층
 │   │   ├── cloudinary/               # Cloudinary 통합
+│   │   ├── redis/                    # Redis 캐싱 시스템
+│   │   ├── session/                  # 세션 스토어 관리
 │   │   └── db/                       # 데이터베이스 관련
 │   │       ├── adapter/              # DB 어댑터
 │   │       ├── repository/           # 레포지토리 패턴 구현
@@ -59,15 +63,33 @@ SKKU_FAC_GALLERY/
 │   │           ├── entity/           # 엔티티 모델
 │   │           └── relationship/     # 모델 간 관계 설정
 │   ├── common/                       # 공통 유틸리티
+│   │   ├── constants/                # 상수 정의
+│   │   ├── error/                    # 에러 처리
+│   │   ├── middleware/               # 공통 미들웨어
+│   │   └── utils/                    # 유틸리티 함수
 │   ├── config/                       # 설정 파일
+│   │   ├── infrastructure.js         # 인프라 설정
+│   │   └── security.js               # 보안 설정
 │   ├── public/                       # 정적 파일
+│   │   ├── assets/                   # 에셋 파일
+│   │   ├── css/                      # 스타일시트
+│   │   ├── images/                   # 이미지 파일
+│   │   ├── js/                       # 클라이언트 JavaScript
+│   │   └── uploads/                  # 업로드 파일
 │   └── views/                        # EJS 뷰 템플릿
 ├── public/                           # 배포용 정적 파일
+├── docs/                             # 문서
+├── logs/                             # 로그 파일
+├── scripts/                          # 스크립트 파일
+├── tasks/                            # 작업 관리
+├── requirements/                     # 요구사항 문서
 ├── node_modules/                     # 패키지 종속성
-├── .env.local                        # 로컬 환경 변수
-├── .env.remote                       # 원격 환경 변수
 ├── package.json                      # 프로젝트 메타데이터 및 종속성
-└── package-lock.json                 # 패키지 버전 잠금 파일
+├── package-lock.json                 # 패키지 버전 잠금 파일
+├── .taskmasterconfig                 # Task Master 설정
+├── .eslintrc.json                    # ESLint 설정
+├── .stylelintrc.json                 # Stylelint 설정
+└── .gitignore                        # Git 무시 파일
 ```
 
 ## 4. 주요 모듈 설명
@@ -91,6 +113,8 @@ SKKU_FAC_GALLERY/
 
 - **DB**: Sequelize ORM을 사용한 데이터베이스 연결 및 모델 관리
 - **Cloudinary**: 이미지 업로드 및 관리
+- **Redis**: 세션 스토어 및 캐싱 시스템
+- **Session**: Redis 기반 세션 관리
 
 ### 4.3 데이터베이스 모델
 
@@ -116,7 +140,10 @@ SKKU_FAC_GALLERY/
 
 ## 7. 성능 최적화
 
+- **Redis 캐싱**: 세션 데이터 및 자주 사용되는 데이터 캐싱
+- **CDN 활용**: 외부 라이브러리 및 폰트를 CDN을 통해 로드
 - **정적 자산 캐싱**: 클라이언트 측 캐싱을 통한 성능 향상
+- **이미지 최적화**: Cloudinary를 통한 자동 이미지 최적화
 - **요청 로깅**: 요청 처리 시간 모니터링
 - **에러 처리**: 중앙 집중식 에러 처리 및 로깅
 
@@ -126,17 +153,44 @@ SKKU_FAC_GALLERY/
 - **모듈식 설계**: 새로운 기능 추가가 용이한 구조
 - **환경 변수**: 환경별 구성으로 유연한 배포 가능
 
-## 9. 배포 환경
+## 9. Redis 캐싱 시스템
+
+### 9.1 Redis 구성
+- **세션 스토어**: 사용자 세션 데이터를 Redis에 저장하여 확장성 확보
+- **캐싱 전략**: 자주 사용되는 데이터의 캐싱을 통한 성능 향상
+- **환경별 설정**: 개발/테스트/프로덕션 환경별 Redis 설정 분리
+
+### 9.2 세션 관리
+- **Redis 기반 세션**: connect-redis를 사용한 세션 스토어
+- **세션 만료**: TTL 설정을 통한 자동 세션 만료 (기본 24시간)
+- **폴백 메커니즘**: Redis 연결 실패 시 메모리 기반 세션으로 자동 전환
+
+## 10. CDN 및 외부 리소스
+
+### 10.1 사용 중인 CDN
+- **jsDelivr**: QR 코드 생성, html2canvas 라이브러리
+- **Google Fonts**: 웹 폰트 제공
+- **Cloudflare**: 기타 외부 리소스
+- **Kakao CDN**: 카카오 SDK 및 관련 리소스
+
+### 10.2 보안 정책
+- **CSP 설정**: Content Security Policy를 통한 허용된 CDN만 접근 가능
+- **HTTPS 강제**: 모든 외부 리소스는 HTTPS를 통해서만 로드
+- **리소스 무결성**: 중요한 외부 스크립트에 대한 무결성 검증
+
+## 11. 배포 환경
 
 - **개발 환경**: 로컬 개발 환경 (NODE_ENV=development)
 - **프로덕션 환경**: Railway 호스팅 (NODE_ENV=production)
 - **CI/CD**: 자동화된 배포 파이프라인
 
-## 10. 의존성
+## 12. 의존성
 
 주요 패키지:
 - express: 웹 서버 프레임워크
 - sequelize: ORM
+- redis: Redis 클라이언트
+- connect-redis: Redis 세션 스토어
 - bcrypt: 비밀번호 해싱
 - multer & multer-storage-cloudinary: 파일 업로드
 - helmet: 보안 미들웨어
@@ -144,6 +198,13 @@ SKKU_FAC_GALLERY/
 - ejs: 템플릿 엔진
 - dotenv: 환경 변수 관리
 - swagger-ui-express: API 문서화
+
+### 외부 CDN 라이브러리:
+- **Kakao SDK**: 카카오 소셜 로그인 및 공유 기능
+- **QR Code**: QR 코드 생성 (jsDelivr CDN)
+- **html2canvas**: 화면 캡처 기능 (jsDelivr CDN)
+- **Google Fonts**: 웹 폰트
+- **Cloudflare CDN**: 기타 외부 리소스
 
 ## 코드 품질 관리
 
@@ -172,22 +233,3 @@ npm run lint:css
 # CSS 코드 분석 및 자동 수정
 npm run lint:css:fix
 ```
-# 기타
-[예상 면접 질문 정리](docs/예상 면접 질문 정리.md)
-
-## 예상 면접 질문
-
-1. 이 프로젝트를 기획하게 된 계기와 목적은 무엇인가요?
-2. 실제 사용자(회원/비회원)의 주요 사용 흐름은 어떻게 되나요?
-3. 프로젝트 진행 과정에서 기획이나 요구사항이 변경된 부분이 있다면?
-4. 바닐라 JS와 EJS를 사용한 이유는 무엇인가요? SPA 프레임워크는 고려하지 않았나요?
-5. Express와 Sequelize를 선택한 이유는 무엇인가요?
-6. ORM 사용 중 Query 최적화나 N+1 문제를 마주친 적이 있나요?
-7. Cloudinary를 선택한 이유는 무엇인가요? S3 등의 대안은 고려했나요?
-8. Railway 배포에서 겪은 한계나 장점은 어떤 것이었나요?
-9. 세션 기반 인증을 선택한 이유는? JWT는 고려하지 않았나요?
-10. 도메인 폴더 구조를 나눈 기준은 무엇인가요?
-11. DDD 스타일 구조에서 실제 유지보수에 도움이 된 예시가 있나요?
-12. infrastructure와 domain을 명확히 나눈 이유와 장점은 무엇인가요?
-13. 도메인 구조에서 Controller, Service, Model을 어떻게 구분하고 연결했나요?
-14. `ArtworkExhibitionRelationship` 같은 관계 모델은 어떤 기준으로 설계했나요?
