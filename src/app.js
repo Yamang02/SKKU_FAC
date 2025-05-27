@@ -188,11 +188,119 @@ const initializeSession = async () => {
         await sessionStore.initialize();
         app.use(sessionStore.getSessionMiddleware());
         console.log('✅ Redis 세션 스토어 설정 완료');
+
+        // 세션 설정 완료 후 세션 의존 미들웨어 등록
+        setupSessionDependentMiddleware();
+
     } catch (error) {
         console.error('❌ Redis 세션 스토어 설정 실패:', error);
         // 폴백 처리는 SessionStore 내부에서 처리됨
         app.use(sessionStore.getSessionMiddleware());
+
+        // 폴백 세션 설정 완료 후 세션 의존 미들웨어 등록
+        setupSessionDependentMiddleware();
     }
+};
+
+// 세션 의존 미들웨어 설정 함수
+const setupSessionDependentMiddleware = () => {
+    // Flash 메시지 미들웨어 등록
+    app.use(flash());
+
+    // 플래시 메시지를 res.locals에 추가
+    app.use((req, res, next) => {
+        res.locals.messages = {
+            success: req.flash('success'),
+            error: req.flash('error'),
+            info: req.flash('info'),
+            warning: req.flash('warning')
+        };
+        next();
+    });
+
+    // 페이지 추적 미들웨어 등록 (세션 설정 완료 후)
+    app.use(pageTracker);
+
+    // 뷰 엔진 설정
+    app.set('view engine', 'ejs');
+    app.set('views', path.join(__dirname, 'views'));
+
+    // 전역 미들웨어 - 사용자 정보를 모든 뷰에서 사용 가능하게 설정
+    app.use((req, res, next) => {
+        res.locals.user = req.session?.user || null;
+        // XSS 방지를 위한 헤더 설정
+        res.setHeader('X-XSS-Protection', '1; mode=block');
+        next();
+    });
+
+    // 요청 로깅 미들웨어
+    app.use((req, res, next) => {
+        const start = Date.now();
+        res.on('finish', () => {
+            const duration = Date.now() - start;
+            console.log(`${req.method} ${req.originalUrl} - ${res.statusCode} (${duration}ms)`);
+        });
+        next();
+    });
+
+    // 라우터 설정
+    app.use('/', HomeRouter);
+    app.use('/exhibition', ExhibitionRouter);
+    app.use('/artwork', ArtworkRouter);
+    app.use('/user', UserRouter);
+    app.use('/admin', isAdmin, AdminRouter);
+    app.use('/auth', AuthRouter);
+    console.log('✅ 라우터 설정 완료');
+
+    // 404 에러 처리
+    app.use((req, res) => {
+        console.log(`404 Error - URL: ${req.originalUrl}`);
+        const returnUrl = getReturnUrl(req);
+        const isAdminPath = req.originalUrl.startsWith('/admin');
+
+        if (req.xhr || req.headers.accept?.includes('application/json')) {
+            return res.status(404).json({ error: '페이지를 찾을 수 없습니다.' });
+        }
+        res.status(404).render('common/error', {
+            title: '404 에러',
+            message: '페이지를 찾을 수 없습니다.',
+            returnUrl,
+            isAdminPath,
+            error: {
+                code: 404,
+                stack: null
+            }
+        });
+    });
+
+    // 500 에러 처리
+    app.use((err, req, res, _next) => {
+        console.error(`500 Error - URL: ${req.originalUrl}, Error: ${err.message}`);
+        const returnUrl = getReturnUrl(req);
+        const isAdminPath = req.originalUrl.startsWith('/admin');
+
+        if (req.xhr || req.headers.accept?.includes('application/json')) {
+            return res.status(500).json({
+                error: process.env.NODE_ENV === 'development'
+                    ? err.message
+                    : '서버 에러가 발생했습니다.'
+            });
+        }
+        res.status(500).render('common/error', {
+            title: '500 에러',
+            message: process.env.NODE_ENV === 'development'
+                ? err.message
+                : '서버 에러가 발생했습니다.',
+            returnUrl,
+            isAdminPath,
+            error: {
+                code: 500,
+                stack: process.env.NODE_ENV === 'development' ? err.stack : null
+            }
+        });
+    });
+
+    console.log('✅ 세션 의존 미들웨어 설정 완료');
 };
 
 // 세션 초기화 실행
@@ -203,44 +311,6 @@ if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1);
 }
 
-// Flash 메시지 미들웨어 등록
-app.use(flash());
-
-// 플래시 메시지를 res.locals에 추가
-app.use((req, res, next) => {
-    res.locals.messages = {
-        success: req.flash('success'),
-        error: req.flash('error'),
-        info: req.flash('info'),
-        warning: req.flash('warning')
-    };
-    next();
-});
-
-// 페이지 추적 미들웨어 등록
-app.use(pageTracker);
-
-// 뷰 엔진 설정
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
-// 전역 미들웨어 - 사용자 정보를 모든 뷰에서 사용 가능하게 설정
-app.use((req, res, next) => {
-    res.locals.user = req.session.user || null;
-    // XSS 방지를 위한 헤더 설정
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    next();
-});
-
-// 요청 로깅 미들웨어
-app.use((req, res, next) => {
-    const start = Date.now();
-    res.on('finish', () => {
-        const duration = Date.now() - start;
-        console.log(`${req.method} ${req.originalUrl} - ${res.statusCode} (${duration}ms)`);
-    });
-    next();
-});
 /**
  * 이전 페이지 URL 결정
  */
@@ -257,63 +327,6 @@ const getReturnUrl = (req) => {
 
     return '/';
 };
-
-// 라우터 설정
-app.use('/', HomeRouter);
-app.use('/exhibition', ExhibitionRouter);
-app.use('/artwork', ArtworkRouter);
-app.use('/user', UserRouter);
-app.use('/admin', isAdmin, AdminRouter);
-app.use('/auth', AuthRouter);
-console.log('✅ 라우터 설정 완료');
-
-// 404 에러 처리
-app.use((req, res) => {
-    console.log(`404 Error - URL: ${req.originalUrl}`);
-    const returnUrl = getReturnUrl(req);
-    const isAdminPath = req.originalUrl.startsWith('/admin');
-
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-        return res.status(404).json({ error: '페이지를 찾을 수 없습니다.' });
-    }
-    res.status(404).render('common/error', {
-        title: '404 에러',
-        message: '페이지를 찾을 수 없습니다.',
-        returnUrl,
-        isAdminPath,
-        error: {
-            code: 404,
-            stack: null
-        }
-    });
-});
-
-// 500 에러 처리
-app.use((err, req, res, _next) => {
-    console.error(`500 Error - URL: ${req.originalUrl}, Error: ${err.message}`);
-    const returnUrl = getReturnUrl(req);
-    const isAdminPath = req.originalUrl.startsWith('/admin');
-
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-        return res.status(500).json({
-            error: process.env.NODE_ENV === 'development'
-                ? err.message
-                : '서버 에러가 발생했습니다.'
-        });
-    }
-    res.status(500).render('common/error', {
-        title: '500 에러',
-        message: process.env.NODE_ENV === 'development'
-            ? err.message
-            : '서버 에러가 발생했습니다.',
-        returnUrl,
-        isAdminPath,
-        error: {
-            code: 500,
-            stack: process.env.NODE_ENV === 'development' ? err.stack : null
-        }
-    });
-});
 
 export default app;
 
