@@ -2,6 +2,7 @@ import session from 'express-session';
 import { RedisStore } from 'connect-redis';
 import redisClient from '../redis/RedisClient.js';
 import { infrastructureConfig } from '../../config/infrastructure.js';
+import logger from '../../common/utils/Logger.js';
 
 // Redis 설정 가져오기
 const redisConfig = infrastructureConfig.redis.config;
@@ -48,14 +49,14 @@ class SessionStore {
                 this.sessionConfig.proxy = true; // nginx 등의 프록시 사용 시
             }
 
-            console.log('✅ Redis 세션 스토어가 초기화되었습니다.');
+            logger.success('Redis 세션 스토어가 초기화되었습니다.');
             return this.sessionConfig;
 
         } catch (error) {
-            console.error('❌ Redis 세션 스토어 초기화 실패:', error);
+            logger.error('Redis 세션 스토어 초기화 실패', error);
 
             // Redis 연결 실패 시 메모리 스토어로 폴백
-            console.warn('⚠️ 메모리 기반 세션 스토어로 폴백합니다.');
+            logger.warn('메모리 기반 세션 스토어로 폴백합니다.');
             this.sessionConfig = {
                 secret: process.env.SESSION_SECRET || 'your-secret-key-here',
                 resave: false,
@@ -87,10 +88,10 @@ class SessionStore {
             if (this.store && redisClient.isClientConnected()) {
                 return await redisClient.testConnection();
             }
-            console.error('❌ 세션 스토어가 초기화되지 않았거나 Redis 클라이언트가 연결되지 않았습니다.');
+            logger.error('세션 스토어가 초기화되지 않았거나 Redis 클라이언트가 연결되지 않았습니다.');
             return false;
         } catch (error) {
-            console.error('❌ 세션 스토어 연결 테스트 실패:', error);
+            logger.error('세션 스토어 연결 테스트 실패', error);
             return false;
         }
     }
@@ -106,7 +107,7 @@ class SessionStore {
                 await redisClient.disconnect();
             }
         } catch (error) {
-            console.error('세션 스토어 정리 중 오류:', error);
+            logger.error('세션 스토어 정리 중 오류', error);
         }
     }
 }
