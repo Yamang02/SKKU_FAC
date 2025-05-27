@@ -1,6 +1,6 @@
 import express from 'express';
-import session from 'express-session';
 import flash from 'connect-flash';
+import sessionStore from './infrastructure/session/SessionStore.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import helmet from 'helmet';
@@ -28,8 +28,42 @@ createUploadDirs();
 
 
 // 헬스체크 엔드포인트를 가장 먼저 등록
-app.get('/health', (req, res) => {
-    res.status(200).send('OK');
+app.get('/health', async (req, res) => {
+    try {
+        const health = {
+            status: 'OK',
+            timestamp: new Date().toISOString(),
+            services: {
+                app: 'healthy',
+                session: 'unknown',
+                redis: 'unknown'
+            }
+        };
+
+        // 세션 스토어 상태 확인
+        try {
+            const sessionHealthy = await sessionStore.healthCheck();
+            health.services.session = sessionHealthy ? 'healthy' : 'degraded';
+            health.services.redis = sessionHealthy ? 'healthy' : 'disconnected';
+        } catch (error) {
+            health.services.session = 'degraded';
+            health.services.redis = 'error';
+        }
+
+        // 전체 상태 결정
+        const allHealthy = Object.values(health.services).every(status => status === 'healthy');
+        if (!allHealthy) {
+            health.status = 'DEGRADED';
+        }
+
+        res.status(200).json(health);
+    } catch (error) {
+        res.status(500).json({
+            status: 'ERROR',
+            timestamp: new Date().toISOString(),
+            error: error.message
+        });
+    }
 });
 
 
@@ -148,27 +182,26 @@ app.use('/images', express.static(path.join(__dirname, './public/images'), stati
 app.use('/uploads', express.static(path.join(__dirname, './public/uploads'), staticOptions));
 
 
-// 세션 설정
-const sessionConfig = {
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000, // 24시간
-        sameSite: 'strict'
-    },
-    name: 'sessionId',
-    rolling: true
+// Redis 세션 설정 초기화 및 적용 (비동기 처리)
+const initializeSession = async () => {
+    try {
+        await sessionStore.initialize();
+        app.use(sessionStore.getSessionMiddleware());
+        console.log('✅ Redis 세션 스토어 설정 완료');
+    } catch (error) {
+        console.error('❌ Redis 세션 스토어 설정 실패:', error);
+        // 폴백 처리는 SessionStore 내부에서 처리됨
+        app.use(sessionStore.getSessionMiddleware());
+    }
 };
 
-if (process.env.NODE_ENV === 'production') {
-    app.set('trust proxy', 1); // nginx 등의 프록시 사용 시 필요
-    sessionConfig.cookie.secure = true;
-}
+// 세션 초기화 실행
+initializeSession();
 
-app.use(session(sessionConfig));
+// 프로덕션 환경에서 프록시 신뢰 설정
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
 
 // Flash 메시지 미들웨어 등록
 app.use(flash());

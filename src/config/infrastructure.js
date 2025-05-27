@@ -33,47 +33,47 @@ export const infrastructureConfig = {
         type: NODE_ENV === 'production' ? 'remote' : 'local',
         config: (() => {
             switch (NODE_ENV) {
-            case 'production':
-                return {
-                    host: process.env.MYSQLHOST,
-                    user: process.env.MYSQLUSER,
-                    password: process.MYSQLPASSWORD || process.env.DB_PASSWORD,
-                    database: process.env.MYSQL_DATABASE,
-                    port: process.env.MYSQLPORT,
-                    connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 100,
-                    queueLimit: process.env.DB_POOL_QUEUE || 0
-                };
-            case 'test':
-                return {
-                    host: process.env.TEST_DB_HOST || process.env.DB_HOST,
-                    user: process.env.TEST_DB_USER || process.env.DB_USER,
-                    password: process.env.TEST_DB_PASSWORD || process.env.DB_PASSWORD,
-                    database: process.env.TEST_DB_NAME || process.env.DB_NAME,
-                    port: process.env.TEST_DB_PORT || process.env.DB_PORT,
-                    connectionLimit: parseInt(process.env.TEST_DB_POOL_MAX, 10) || 5,
-                    queueLimit: process.env.TEST_DB_POOL_QUEUE || 0
-                };
-            case 'development':
-                return {
-                    host: process.env.DEV_DB_HOST || process.env.DB_HOST,
-                    user: process.env.DEV_DB_USER || process.env.DB_USER,
-                    password: process.env.DEV_DB_PASSWORD || process.env.DB_PASSWORD,
-                    database: process.env.DEV_DB_NAME || process.env.DB_NAME,
-                    port: process.env.DEV_DB_PORT || process.env.DB_PORT,
-                    connectionLimit: parseInt(process.env.DEV_DB_POOL_MAX, 10) || 10,
-                    queueLimit: process.env.DEV_DB_POOL_QUEUE || 0
-                };
-            case 'local':
-            default:
-                return {
-                    host: process.env.DB_HOST,
-                    user: process.env.DB_USER,
-                    password: process.env.DB_PASSWORD,
-                    database: process.env.DB_NAME,
-                    port: process.env.DB_PORT,
-                    connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 10,
-                    queueLimit: process.env.DB_POOL_QUEUE || 0
-                };
+                case 'production':
+                    return {
+                        host: process.env.MYSQLHOST,
+                        user: process.env.MYSQLUSER,
+                        password: process.MYSQLPASSWORD || process.env.DB_PASSWORD,
+                        database: process.env.MYSQL_DATABASE,
+                        port: process.env.MYSQLPORT,
+                        connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 100,
+                        queueLimit: process.env.DB_POOL_QUEUE || 0
+                    };
+                case 'test':
+                    return {
+                        host: process.env.TEST_DB_HOST || process.env.DB_HOST,
+                        user: process.env.TEST_DB_USER || process.env.DB_USER,
+                        password: process.env.TEST_DB_PASSWORD || process.env.DB_PASSWORD,
+                        database: process.env.TEST_DB_NAME || process.env.DB_NAME,
+                        port: process.env.TEST_DB_PORT || process.env.DB_PORT,
+                        connectionLimit: parseInt(process.env.TEST_DB_POOL_MAX, 10) || 5,
+                        queueLimit: process.env.TEST_DB_POOL_QUEUE || 0
+                    };
+                case 'development':
+                    return {
+                        host: process.env.DEV_DB_HOST || process.env.DB_HOST,
+                        user: process.env.DEV_DB_USER || process.env.DB_USER,
+                        password: process.env.DEV_DB_PASSWORD || process.env.DB_PASSWORD,
+                        database: process.env.DEV_DB_NAME || process.env.DB_NAME,
+                        port: process.env.DEV_DB_PORT || process.env.DB_PORT,
+                        connectionLimit: parseInt(process.env.DEV_DB_POOL_MAX, 10) || 10,
+                        queueLimit: process.env.DEV_DB_POOL_QUEUE || 0
+                    };
+                case 'local':
+                default:
+                    return {
+                        host: process.env.DB_HOST,
+                        user: process.env.DB_USER,
+                        password: process.env.DB_PASSWORD,
+                        database: process.env.DB_NAME,
+                        port: process.env.DB_PORT,
+                        connectionLimit: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+                        queueLimit: process.env.DB_POOL_QUEUE || 0
+                    };
             }
         })()
     },
@@ -86,31 +86,74 @@ export const infrastructureConfig = {
             };
 
             switch (NODE_ENV) {
-            case 'production':
-                return {
-                    ...baseConfig,
-                    environment: 'production',
-                    uploadDir: process.env.PROD_UPLOAD_DIR || 'production'
-                };
-            case 'test':
-                return {
-                    ...baseConfig,
-                    environment: 'test',
-                    uploadDir: process.env.TEST_UPLOAD_DIR || 'test'
-                };
-            case 'development':
-                return {
-                    ...baseConfig,
-                    environment: 'development',
-                    uploadDir: process.env.DEV_UPLOAD_DIR || 'development'
-                };
-            case 'local':
-            default:
-                return {
-                    ...baseConfig,
-                    environment: 'local',
-                    uploadDir: process.env.LOCAL_UPLOAD_DIR || 'local'
-                };
+                case 'production':
+                    return {
+                        ...baseConfig,
+                        environment: 'production',
+                        uploadDir: process.env.PROD_UPLOAD_DIR || 'production'
+                    };
+                case 'test':
+                    return {
+                        ...baseConfig,
+                        environment: 'test',
+                        uploadDir: process.env.TEST_UPLOAD_DIR || 'test'
+                    };
+                case 'development':
+                    return {
+                        ...baseConfig,
+                        environment: 'development',
+                        uploadDir: process.env.DEV_UPLOAD_DIR || 'development'
+                    };
+                case 'local':
+                default:
+                    return {
+                        ...baseConfig,
+                        environment: 'local',
+                        uploadDir: process.env.LOCAL_UPLOAD_DIR || 'local'
+                    };
+            }
+        })()
+    },
+    redis: {
+        config: (() => {
+            switch (NODE_ENV) {
+                case 'production':
+                    return {
+                        host: process.env.REDIS_HOST || 'localhost',
+                        port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+                        username: process.env.REDIS_USERNAME || null,
+                        password: process.env.REDIS_PASSWORD || null,
+                        db: parseInt(process.env.REDIS_DB, 10) || 0,
+                        ttl: parseInt(process.env.REDIS_TTL, 10) || 86400 // 24시간
+                    };
+                case 'test':
+                    return {
+                        host: process.env.REDIS_HOST || 'localhost',
+                        port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+                        username: process.env.REDIS_USERNAME || null,
+                        password: process.env.REDIS_PASSWORD || null,
+                        db: parseInt(process.env.REDIS_DB, 10) || 0,
+                        ttl: parseInt(process.env.REDIS_TTL, 10) || 86400 // 24시간
+                    };
+                case 'development':
+                    return {
+                        host: process.env.REDIS_HOST || 'localhost',
+                        port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+                        username: process.env.REDIS_USERNAME || null,
+                        password: process.env.REDIS_PASSWORD || null,
+                        db: parseInt(process.env.REDIS_DB, 10) || 0,
+                        ttl: parseInt(process.env.REDIS_TTL, 10) || 86400 // 24시간
+                    };
+                case 'local':
+                default:
+                    return {
+                        host: process.env.REDIS_HOST || 'localhost',
+                        port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+                        username: process.env.REDIS_USERNAME || null,
+                        password: process.env.REDIS_PASSWORD || null,
+                        db: parseInt(process.env.REDIS_DB, 10) || 0,
+                        ttl: parseInt(process.env.REDIS_TTL, 10) || 86400 // 24시간
+                    };
             }
         })()
     }

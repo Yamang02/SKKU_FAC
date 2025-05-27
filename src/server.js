@@ -27,6 +27,7 @@ console.log('=====================');
 // 동적으로 app 모듈 import
 try {
     const { default: app } = await import('./app.js');
+    const { default: sessionStore } = await import('./infrastructure/session/SessionStore.js');
 
     const PORT = process.env.PORT || 3000;
 
@@ -55,6 +56,21 @@ try {
         console.error(reason);
         process.exit(1);
     });
+
+    // 서버 종료 시 정리 작업
+    const gracefulShutdown = async (signal) => {
+        console.log(`\n${signal} 신호를 받았습니다. 서버를 종료합니다...`);
+        try {
+            await sessionStore.cleanup();
+            console.log('✅ Redis 연결이 정리되었습니다.');
+        } catch (error) {
+            console.error('❌ Redis 연결 정리 중 오류:', error);
+        }
+        process.exit(0);
+    };
+
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     startServer();
 } catch (error) {
