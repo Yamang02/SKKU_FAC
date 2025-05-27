@@ -1,5 +1,6 @@
 import { ImageError } from '../../../common/error/ImageError.js';
 import { deleteCloudinaryImage } from '../../../infrastructure/cloudinary/provider/cloudinaryStorageFactory.js';
+import logger from '../../../common/utils/Logger.js';
 
 /**
  * 이미지 서비스
@@ -33,7 +34,7 @@ class ImageService {
      */
     async deleteImage(publicId) {
         try {
-            console.log('이미지 삭제 시작 - publicId:', publicId);
+            logger.info('이미지 삭제 시작', { publicId });
 
             // 타임아웃 설정 (10초)
             const timeoutPromise = new Promise((_, reject) => {
@@ -46,15 +47,15 @@ class ImageService {
                 timeoutPromise
             ]);
 
-            console.log('이미지 삭제 결과:', result);
+            logger.info('이미지 삭제 결과', { publicId, result });
 
             if (result.result !== 'ok') {
-                console.warn(`Cloudinary 이미지 삭제 실패: ${result.result}`);
+                logger.warn(`Cloudinary 이미지 삭제 실패: ${result.result}`, { publicId, result: result.result });
             }
 
             return true;
         } catch (error) {
-            console.error('Cloudinary 이미지 삭제 중 에러:', error);
+            logger.error('Cloudinary 이미지 삭제 중 에러', error, { publicId });
             // 타임아웃이나 기타 에러가 발생해도 true 반환 (삭제 프로세스 중단 방지)
             return true;
         }
