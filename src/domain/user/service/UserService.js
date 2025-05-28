@@ -9,6 +9,7 @@ import bcrypt from 'bcrypt';
 import Page from '../../common/model/Page.js';
 import UserListManagementDto from '../../admin/model/dto/user/UserListManagementDto.js';
 import UserManagementDto from '../../admin/model/dto/user/UserManagementDto.js';
+import logger from '../../../common/utils/Logger.js';
 
 /**
  * 사용자 서비스
@@ -64,7 +65,7 @@ export default class UserService {
         try {
             await authService.createEmailVerificationToken(createdUser.id, createdUser.email);
         } catch (emailError) {
-            console.error('❌ 이메일 전송 실패:', emailError);
+            logger.error('이메일 전송 실패', emailError);
             throw new Error('인증 이메일 전송에 실패했습니다. 관리자에게 문의하세요');
         }
 
@@ -113,7 +114,7 @@ export default class UserService {
                 page: pageData
             };
         } catch (error) {
-            console.error('사용자 목록 조회 중 오류:', error);
+            logger.error('사용자 목록 조회 중 오류', error);
             throw new Error('사용자 목록을 조회하는데 실패했습니다.');
         }
     }
@@ -273,7 +274,7 @@ export default class UserService {
      */
     async authenticate(username, password) {
         const user = await this.userRepository.findUserByUsername(username);
-        console.log(user.username);
+        logger.auth('로그인 처리', { username: user.username });
 
         if (!user) {
             throw new UserNotFoundError('아이디 또는 비밀번호가 일치하지 않습니다.');
