@@ -339,7 +339,7 @@ export class ErrorHandler {
     }
 
     /**
-     * 에러 로깅
+     * 에러 로깅 (강화된 Winston 로거 통합)
      * @param {Error} err - 원본 에러 객체
      * @param {Request} req - Express Request 객체
      * @param {object} errorInfo - 추출된 에러 정보
@@ -352,6 +352,13 @@ export class ErrorHandler {
         if (!this.shouldLog(errorInfo.severity, activeConfig.logLevel)) {
             return;
         }
+
+        // 사용자 정보 추출
+        const userInfo = req.session?.user ? {
+            username: req.session.user.username,
+            role: req.session.user.role,
+            id: req.session.user.id
+        } : null;
 
         const logData = {
             url: req.originalUrl,
@@ -372,25 +379,32 @@ export class ErrorHandler {
         // 민감한 필드 제거
         const sanitizedLogData = this.sanitizeLogData(logData, req);
 
-        // 심각도에 따른 로깅 레벨 결정
-        switch (errorInfo.severity) {
-            case ErrorSeverity.CRITICAL:
-                logger.error('🚨 CRITICAL ERROR', { error: err, request: sanitizedLogData });
-                break;
-            case ErrorSeverity.HIGH:
-                logger.error('🔥 HIGH SEVERITY ERROR', { error: err, request: sanitizedLogData });
-                break;
-            case ErrorSeverity.MEDIUM:
-                logger.warn('⚠️ MEDIUM SEVERITY ERROR', { error: err, request: sanitizedLogData });
-                break;
-            case ErrorSeverity.LOW:
-            default:
-                if (errorInfo.statusCode === 404) {
-                    logger.debug(`📄 404 Error - ${req.originalUrl}`);
-                } else {
-                    logger.info('ℹ️ CLIENT ERROR', { error: err, request: sanitizedLogData });
-                }
-                break;
+        // 강화된 에러 로깅 사용 (분석 포함)
+        let errorId;
+        if (errorInfo.severity === ErrorSeverity.CRITICAL || errorInfo.severity === ErrorSeverity.HIGH) {
+            // 중요한 에러는 강화된 분석과 함께 로깅
+            errorId = logger.logErrorWithAnalysis(
+                this.getErrorMessage(errorInfo.severity),
+                err,
+                { request: sanitizedLogData, errorHandler: true },
+                userInfo,
+                req
+            );
+        } else {
+            // 일반 에러는 기본 로깅 사용
+            switch (errorInfo.severity) {
+                case ErrorSeverity.MEDIUM:
+                    logger.warn('⚠️ MEDIUM SEVERITY ERROR', { error: err, request: sanitizedLogData }, userInfo);
+                    break;
+                case ErrorSeverity.LOW:
+                default:
+                    if (errorInfo.statusCode === 404) {
+                        logger.debug(`📄 404 Error - ${req.originalUrl}`, { request: sanitizedLogData }, userInfo);
+                    } else {
+                        logger.info('ℹ️ CLIENT ERROR', { error: err, request: sanitizedLogData }, userInfo);
+                    }
+                    break;
+            }
         }
 
         // 상세 로깅이 활성화된 경우 추가 정보 로깅
@@ -403,7 +417,82 @@ export class ErrorHandler {
                 requestQuery: req.query
             };
 
-            logger.debug('상세 에러 정보', detailedInfo);
+            if (errorId) {
+                logger.debug(`상세 에러 정보 [${errorId}]`, detailedInfo, userInfo);
+            } else {
+                logger.debug('상세 에러 정보', detailedInfo, userInfo);
+            }
+        }
+
+        // 에러 패턴 감지 (동일한 에러가 반복되는 경우)
+        this.detectErrorPattern(err, req, errorInfo);
+
+        return errorId;
+    }
+
+    /**
+     * 심각도별 에러 메시지 생성
+     * @param {string} severity - 에러 심각도
+     * @returns {string} 에러 메시지
+     */
+    getErrorMessage(severity) {
+        switch (severity) {
+            case ErrorSeverity.CRITICAL:
+                return '🚨 시스템 중요 에러 발생';
+            case ErrorSeverity.HIGH:
+                return '🔥 높은 심각도 에러 발생';
+            case ErrorSeverity.MEDIUM:
+                return '⚠️ 중간 심각도 에러 발생';
+            case ErrorSeverity.LOW:
+            default:
+                return 'ℹ️ 클라이언트 에러 발생';
+        }
+    }
+
+    /**
+     * 에러 패턴 감지
+     * @param {Error} err - 에러 객체
+     * @param {Request} req - Express Request 객체
+     * @param {object} _errorInfo - 에러 정보 (미사용)
+     */
+    detectErrorPattern(err, req, _errorInfo) {
+        // 간단한 에러 패턴 감지 로직
+        const errorKey = `${err.name}:${err.message}:${req.originalUrl}`;
+        const now = Date.now();
+        const timeWindow = 5 * 60 * 1000; // 5분
+
+        // 에러 발생 기록 (메모리 기반 - 실제 구현에서는 Redis 등 사용 권장)
+        if (!this.errorPatterns) {
+            this.errorPatterns = new Map();
+        }
+
+        const pattern = this.errorPatterns.get(errorKey) || { count: 0, firstOccurrence: now, lastOccurrence: now };
+        pattern.count++;
+        pattern.lastOccurrence = now;
+
+        this.errorPatterns.set(errorKey, pattern);
+
+        // 패턴 감지 (5분 내에 동일한 에러가 5회 이상 발생)
+        if (pattern.count >= 5 && (now - pattern.firstOccurrence) <= timeWindow) {
+            logger.logErrorPattern(
+                errorKey,
+                pattern.count,
+                `${Math.round((now - pattern.firstOccurrence) / 1000 / 60)}분`
+            );
+
+            // 패턴 카운터 리셋
+            pattern.count = 0;
+            pattern.firstOccurrence = now;
+        }
+
+        // 오래된 패턴 정리 (메모리 누수 방지)
+        if (this.errorPatterns.size > 1000) {
+            const cutoff = now - timeWindow;
+            for (const [key, value] of this.errorPatterns.entries()) {
+                if (value.lastOccurrence < cutoff) {
+                    this.errorPatterns.delete(key);
+                }
+            }
         }
     }
 
