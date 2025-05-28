@@ -1,5 +1,7 @@
 import logger from './Logger.js';
 import sessionStore from '../../infrastructure/session/SessionStore.js';
+import ErrorHandler from '../middleware/ErrorHandler.js';
+import { railwayErrorHandlerConfig } from '../../config/railwayMonitoringConfig.js';
 
 class AppInitializer {
     constructor(app) {
@@ -86,55 +88,26 @@ class AppInitializer {
      * 에러 핸들러 설정
      */
     setupErrorHandlers() {
+        // Railway 최적화 설정을 적용한 ErrorHandler 생성
+        const { errorHandler, notFoundHandler, handler } = ErrorHandler.create(railwayErrorHandlerConfig);
+
+        // 핸들러 인스턴스를 앱에 저장 (동적 설정 변경을 위해)
+        this.app.set('errorHandler', handler);
+
         // 404 에러 처리
-        this.app.use((req, res) => {
-            logger.debug(`404 Error - URL: ${req.originalUrl}`);
-            const returnUrl = this.getReturnUrl(req);
-            const isAdminPath = req.originalUrl.startsWith('/admin');
+        this.app.use(notFoundHandler);
 
-            if (req.xhr || req.headers.accept?.includes('application/json')) {
-                return res.status(404).json({ error: '페이지를 찾을 수 없습니다.' });
-            }
-            res.status(404).render('common/error', {
-                title: '404 에러',
-                message: '페이지를 찾을 수 없습니다.',
-                returnUrl,
-                isAdminPath,
-                error: {
-                    code: 404,
-                    stack: null
-                }
-            });
+        // 전체 에러 처리
+        this.app.use(errorHandler);
+
+        logger.success('Railway 최적화 에러 핸들러 설정 완료');
+        logger.debug('에러 핸들러 설정', {
+            environment: process.env.NODE_ENV,
+            customHandlers: Object.keys(railwayErrorHandlerConfig.customHandlers || {}).length,
+            filterRules: Object.keys(railwayErrorHandlerConfig.filterRules || {}).length,
+            transformRules: Object.keys(railwayErrorHandlerConfig.transformRules || {}).length,
+            errorReporter: !!railwayErrorHandlerConfig.errorReporter
         });
-
-        // 500 에러 처리
-        this.app.use((err, req, res, _next) => {
-            logger.error(`500 Error - URL: ${req.originalUrl}`, err);
-            const returnUrl = this.getReturnUrl(req);
-            const isAdminPath = req.originalUrl.startsWith('/admin');
-
-            if (req.xhr || req.headers.accept?.includes('application/json')) {
-                return res.status(500).json({
-                    error: process.env.NODE_ENV === 'development'
-                        ? err.message
-                        : '서버 에러가 발생했습니다.'
-                });
-            }
-            res.status(500).render('common/error', {
-                title: '500 에러',
-                message: process.env.NODE_ENV === 'development'
-                    ? err.message
-                    : '서버 에러가 발생했습니다.',
-                returnUrl,
-                isAdminPath,
-                error: {
-                    code: 500,
-                    stack: process.env.NODE_ENV === 'development' ? err.stack : null
-                }
-            });
-        });
-
-        logger.success('에러 핸들러 설정 완료');
     }
 
     /**

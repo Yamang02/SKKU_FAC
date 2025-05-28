@@ -9,6 +9,7 @@ import { ExhibitionNotFoundError } from '../../../common/error/ExhibitionError.j
 import ExhibitionResponseDto from '../model/dto/ExhibitionResponseDto.js';
 import ExhibitionListDto from '../model/dto/ExhibitionListDto.js';
 import ExhibitionSimpleDto from '../model/dto/ExhibitionSimpleDto.js';
+import logger from '../../../common/utils/Logger.js';
 
 /**
  * 전시회 서비스
@@ -149,10 +150,10 @@ export default class ExhibitionService {
                 // 백그라운드에서 이미지 삭제 (에러가 발생해도 전시회 삭제는 성공으로 처리)
                 this.imageService.deleteImage(exhibition.imagePublicId)
                     .then(() => {
-                        console.log(`전시회 이미지 삭제 완료: ${exhibition.imagePublicId}`);
+                        logger.success('전시회 이미지 삭제 완료', { exhibitionId: id, publicId: exhibition.imagePublicId });
                     })
                     .catch((error) => {
-                        console.error(`전시회 이미지 삭제 실패 (전시회 ID: ${id}, publicId: ${exhibition.imagePublicId}):`, error);
+                        logger.error('전시회 이미지 삭제 실패', error, { exhibitionId: id, publicId: exhibition.imagePublicId });
                         // 이미지 삭제 실패는 로그만 남기고 전시회 삭제는 성공으로 처리
                     });
             }

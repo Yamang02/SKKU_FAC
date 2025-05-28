@@ -47,8 +47,8 @@ export function setupBasicMiddleware(app, swaggerDocument) {
     // 정적 파일 제공
     setupStaticFiles(app);
 
-    // 프로덕션 환경에서 프록시 신뢰 설정
-    if (process.env.NODE_ENV === 'production') {
+    // 프로덕션 및 테스트 환경에서 프록시 신뢰 설정
+    if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test') {
         app.set('trust proxy', 1);
     }
 

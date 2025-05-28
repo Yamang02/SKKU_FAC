@@ -1,16 +1,17 @@
 import { createClient } from 'redis';
 import { infrastructureConfig } from '../../config/infrastructure.js';
+import logger from '../../common/utils/Logger.js';
 
 // Redis 설정 가져오기
 const redisConfig = infrastructureConfig.redis.config;
 
 // Redis 연결 설정 로깅
-console.log('=== Redis 연결 설정 ===');
-console.log(`환경: ${infrastructureConfig.environment}`);
-console.log(`호스트: ${redisConfig.host}`);
-console.log(`포트: ${redisConfig.port}`);
-console.log(`데이터베이스: ${redisConfig.db}`);
-console.log('====================');
+logger.info('=== Redis 연결 설정 ===');
+logger.info(`환경: ${infrastructureConfig.environment}`);
+logger.info(`호스트: ${redisConfig.host}`);
+logger.info(`포트: ${redisConfig.port}`);
+logger.info(`데이터베이스: ${redisConfig.db}`);
+logger.info('====================');
 
 class RedisClient {
     constructor() {
@@ -39,7 +40,7 @@ class RedisClient {
                     lazyConnect: true,
                     reconnectStrategy: (retries) => {
                         if (retries > 10) {
-                            console.error('Redis 연결 재시도 횟수 초과');
+                            logger.error('Redis 연결 재시도 횟수 초과');
                             return new Error('Redis 연결 실패');
                         }
                         return Math.min(retries * 50, 500);
@@ -49,39 +50,37 @@ class RedisClient {
 
             // 에러 핸들링
             this.client.on('error', (err) => {
-                console.error('Redis 클라이언트 오류:', err);
+                logger.error('Redis 클라이언트 오류', err);
                 this.isConnected = false;
             });
 
             this.client.on('connect', () => {
-                console.log('✅ Redis 서버에 연결되었습니다.');
+                logger.success('Redis 서버에 연결되었습니다.');
                 this.isConnected = true;
             });
 
             this.client.on('ready', () => {
-                console.log('✅ Redis 클라이언트가 준비되었습니다.');
+                logger.success('Redis 클라이언트가 준비되었습니다.');
                 this.isConnected = true;
             });
 
             this.client.on('end', () => {
-                console.log('Redis 연결이 종료되었습니다.');
+                logger.info('Redis 연결이 종료되었습니다.');
                 this.isConnected = false;
             });
 
             // 연결 시도
             await this.client.connect();
 
-            console.log('✅ Redis 연결 성공!');
+            logger.success('Redis 연결 성공!');
             return this.client;
 
         } catch (error) {
-            console.error('❌ Redis 연결 실패! 상세 정보:');
-            console.error(`- 오류 메시지: ${error.message}`);
-            console.error(`- 오류 유형: ${error.name}`);
-            console.error(`- 사용 중인 Redis 설정:
-  - 호스트: ${redisConfig.host}
-  - 포트: ${redisConfig.port}
-  - 데이터베이스: ${redisConfig.db}`);
+            logger.error('Redis 연결 실패! 상세 정보', error, {
+                host: redisConfig.host,
+                port: redisConfig.port,
+                database: redisConfig.db
+            });
 
             this.isConnected = false;
             throw error;
@@ -92,9 +91,9 @@ class RedisClient {
         if (this.client && this.isConnected) {
             try {
                 await this.client.quit();
-                console.log('Redis 연결이 정상적으로 종료되었습니다.');
+                logger.info('Redis 연결이 정상적으로 종료되었습니다.');
             } catch (error) {
-                console.error('Redis 연결 종료 중 오류:', error);
+                logger.error('Redis 연결 종료 중 오류', error);
                 await this.client.disconnect();
             }
         }
@@ -112,14 +111,14 @@ class RedisClient {
     async testConnection() {
         try {
             if (!this.isClientConnected()) {
-                console.error('❌ Redis 클라이언트가 연결되지 않았습니다.');
+                logger.error('Redis 클라이언트가 연결되지 않았습니다.');
                 return false;
             }
             await this.client.ping();
-            console.log('✅ Redis 연결 테스트 성공!');
+            logger.success('Redis 연결 테스트 성공!');
             return true;
         } catch (error) {
-            console.error('❌ Redis 연결 테스트 실패:', error);
+            logger.error('Redis 연결 테스트 실패', error);
             return false;
         }
     }

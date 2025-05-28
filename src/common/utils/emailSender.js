@@ -35,3 +35,32 @@ export const sendVerificationEmail = async (to, token) => {
 
     await transporter.sendMail(mailOptions);
 };
+
+export const sendLogNotificationEmail = async (to, subject, htmlContent) => {
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to,
+        subject,
+        html: htmlContent
+    };
+
+    await transporter.sendMail(mailOptions);
+};
+
+export const sendDailyLogFileEmail = async (to, subject, logContent, filename) => {
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to,
+        subject,
+        text: `SKKU Gallery 일별 로그 파일을 첨부합니다.\n\n파일명: ${filename}\n생성 시간: ${new Date().toLocaleString('ko-KR')}`,
+        attachments: [
+            {
+                filename: filename,
+                content: logContent,
+                contentType: 'text/plain; charset=utf-8'
+            }
+        ]
+    };
+
+    await transporter.sendMail(mailOptions);
+};

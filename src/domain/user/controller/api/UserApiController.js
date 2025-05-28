@@ -13,6 +13,7 @@ import {
     UserUnverifiedError,
     UserBlockedError
 } from '../../../../common/error/UserError.js';
+import logger from '../../../../common/utils/Logger.js';
 export default class UserApiController {
     constructor() {
         this.userService = new UserService();
@@ -43,7 +44,7 @@ export default class UserApiController {
             const userResponseDto = new UserResponseDto(createdUser);
             return res.status(201).json(ApiResponse.success(userResponseDto, Message.USER.REGISTER_SUCCESS));
         } catch (error) {
-            console.error('회원가입 처리 중 오류:', error.message);
+            logger.withContext(req).error('회원가입 처리 중 오류', error);
             if (error instanceof UserEmailDuplicateError) {
                 return res.status(400).json(ApiResponse.error(Message.USER.DUPLICATE_EMAIL_ERROR));
             } else if (error instanceof UserUsernameDuplicateError) {
@@ -68,7 +69,7 @@ export default class UserApiController {
 
             return res.json(ApiResponse.success(user, Message.USER.LOGIN_SUCCESS));
         } catch (error) {
-            console.error('Error logging in user:', error);
+            logger.withContext(req).error('로그인 처리 중 오류', error);
             if (error instanceof UserNotFoundError) {
                 return res.status(404).json(ApiResponse.error(Message.USER.NOT_FOUND));
             }
