@@ -59,18 +59,41 @@
     max-width: 800px;
     padding: 2rem;
     z-index: 2;
+    position: relative;
 }
 
+/* 기본 제목과 설명 스타일 (텍스트 그림자만 적용) */
 .idx-hero__content h1 {
     font-size: 3rem;
-    color : #fff;
+    color: #fff;
     margin-bottom: 1rem;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+    line-height: 1.2;
 }
 
 .idx-hero__content p {
     font-size: 1.2rem;
     margin-bottom: 2rem;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
+
+/* Placeholder 슬라이드는 위의 기본 스타일을 그대로 사용 */
+
+/* 실제 전시회 슬라이드에만 불투명한 배경 적용 (data-exhibition-id가 있는 경우) */
+.hero-slide[data-exhibition-id] .idx-hero__content h1 {
+    padding: 1rem 2rem;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: inline-block;
+}
+
+/* 실제 전시회 슬라이드의 p 태그(장소 정보)는 불투명한 배경 제거 - 텍스트 그림자만 유지 */
 
 /* 슬라이드 버튼 */
 .hero-btn {
@@ -150,11 +173,21 @@
 
     .idx-hero__content h1 {
         font-size: 2rem;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
     }
 
     .idx-hero__content p {
         font-size: 1rem;
+        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9);
     }
+
+    /* 실제 전시회 슬라이드 반응형 */
+    .hero-slide[data-exhibition-id] .idx-hero__content h1 {
+        padding: 0.6rem 1rem;
+        background: rgba(0, 0, 0, 0.75);
+    }
+
+    /* 실제 전시회 슬라이드의 p 태그는 불투명한 배경 제거 */
 }
 
 @media (max-width: 480px) {
@@ -164,7 +197,21 @@
 
     .idx-hero__content h1 {
         font-size: 1.5rem;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.95);
     }
+
+    .idx-hero__content p {
+        font-size: 0.9rem;
+        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.95);
+    }
+
+    /* 실제 전시회 슬라이드 반응형 */
+    .hero-slide[data-exhibition-id] .idx-hero__content h1 {
+        padding: 0.6rem 1rem;
+        background: rgba(0, 0, 0, 0.75);
+    }
+
+    /* 실제 전시회 슬라이드의 p 태그는 불투명한 배경 제거 */
 }
 
 /* 홈페이지 섹션 */
