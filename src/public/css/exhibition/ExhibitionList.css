@@ -47,6 +47,10 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
+.exhibition-card:hover .exhibition-card__content {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.7), transparent);
+}
+
 .exhibition-card__image-container {
     width: 100%;
     height: 100%;
@@ -71,9 +75,11 @@
     left: 0;
     right: 0;
     padding: 20px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.6), transparent);
     color: white;
     text-align: left;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 
 .exhibition-card__title {
@@ -85,6 +91,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .exhibition-card__description {
@@ -97,7 +104,8 @@
     flex-direction: column;
     gap: 5px;
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 .exhibition-card__date {
