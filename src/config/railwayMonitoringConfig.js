@@ -11,22 +11,25 @@ import ErrorReporter from '../common/monitoring/ErrorReporter.js';
 export const railwayErrorReporterConfig = {
     projectName: 'SKKU Gallery',
 
-    // Railway에서는 기본적으로 프로덕션에서만 이메일 알림 활성화
-    enableNotifications: process.env.NODE_ENV === 'production',
+    // Railway에서는 기존 EMAIL 설정이 완전할 때만 이메일 알림 활성화
+    enableNotifications: process.env.NODE_ENV === 'production' &&
+        process.env.EMAIL_USER &&
+        process.env.EMAIL_PASS &&
+        process.env.ADMIN_EMAIL,
 
-    // 이메일 설정 (선택사항 - 환경변수로 제공)
-    emailConfig: process.env.SMTP_HOST ? {
+    // 이메일 설정 (기존 EMAIL_* 환경변수 사용)
+    emailConfig: (process.env.EMAIL_USER && process.env.EMAIL_PASS) ? {
         smtp: {
-            host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT) || 587,
-            secure: process.env.SMTP_SECURE === 'true',
+            host: 'smtp.gmail.com', // Gmail 고정
+            port: 587,
+            secure: false,
             auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
             }
         },
-        from: process.env.SMTP_FROM || 'noreply@skkugallery.com',
-        to: process.env.ADMIN_EMAIL || 'admin@skkugallery.com'
+        from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+        to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER
     } : null
 };
 
@@ -42,7 +45,10 @@ export const railwayErrorHandlerConfig = {
     // ErrorReporter 통합
     errorReporter: new ErrorReporter(railwayErrorReporterConfig),
     projectName: 'SKKU Gallery',
-    enableNotifications: process.env.NODE_ENV === 'production',
+    enableNotifications: process.env.NODE_ENV === 'production' &&
+        process.env.EMAIL_USER &&
+        process.env.EMAIL_PASS &&
+        process.env.ADMIN_EMAIL,
     emailConfig: railwayErrorReporterConfig.emailConfig,
 
     // 환경별 설정
