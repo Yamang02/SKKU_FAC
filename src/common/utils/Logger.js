@@ -21,6 +21,11 @@ class WinstonLogger {
 
         this.winston = this.createWinstonLogger();
 
+        // 로그 설정 상태 출력 (test 환경이 아닐 때만)
+        if (!this.isTest) {
+            this.logCurrentSettings();
+        }
+
         // Railway 환경에서 이메일 로그 전송을 위한 설정
         if (this.isRailway) {
             this.initializeEmailLogging();
@@ -195,24 +200,33 @@ class WinstonLogger {
         // 환경변수로 로그 레벨 오버라이드 가능
         const envLogLevel = process.env.LOG_LEVEL;
         if (envLogLevel && this.isValidLogLevel(envLogLevel)) {
+            console.log(`🔧 LOG_LEVEL 환경변수 적용: ${envLogLevel.toLowerCase()} (환경: ${this.environment})`);
             return envLogLevel.toLowerCase();
         }
 
         // 환경별 기본 로그 레벨 (ErrorHandler와 동일)
+        let defaultLevel;
         switch (this.environment) {
             case 'development':
             case 'local':
-                return 'debug';
+                defaultLevel = 'debug';
+                break;
             case 'test':
             case 'testing':
-                return 'error';
+                defaultLevel = 'error';
+                break;
             case 'staging':
-                return 'warn';
+                defaultLevel = 'warn';
+                break;
             case 'production':
-                return 'error';
+                defaultLevel = 'error';
+                break;
             default:
-                return 'info';
+                defaultLevel = 'info';
         }
+
+        console.log(`🔧 기본 로그 레벨 적용: ${defaultLevel} (환경: ${this.environment})`);
+        return defaultLevel;
     }
 
     /**
@@ -555,6 +569,12 @@ class WinstonLogger {
             return;
         }
 
+        // SMTP 설정이 완전하지 않으면 이메일 전송 건너뛰기
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            console.log('📧 EMAIL 설정이 완전하지 않아 일별 로그 이메일 전송을 건너뜁니다.');
+            return;
+        }
+
         const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
 
         // 이미 오늘 이메일을 보냈다면 스킵
@@ -572,7 +592,7 @@ class WinstonLogger {
             const subject = `📋 [SKKU Gallery] 일별 로그 파일 - ${today}`;
 
             await sendDailyLogFileEmail(
-                process.env.ADMIN_EMAIL || 'admin@skkugallery.com',
+                process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
                 subject,
                 logContent,
                 `skku-gallery-logs-${today}.txt`
@@ -599,6 +619,12 @@ class WinstonLogger {
             return;
         }
 
+        // SMTP 설정이 완전하지 않으면 이메일 전송 건너뛰기
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            console.log('�� EMAIL 설정이 완전하지 않아 긴급 로그 이메일 전송을 건너뜁니다.');
+            return;
+        }
+
         try {
             // 기존 emailSender 모듈 동적 import
             const { sendLogNotificationEmail } = await import('./emailSender.js');
@@ -607,7 +633,7 @@ class WinstonLogger {
             const htmlContent = this.generateCriticalLogEmailHTML(this.criticalLogBuffer);
 
             await sendLogNotificationEmail(
-                process.env.ADMIN_EMAIL || 'admin@skkugallery.com',
+                process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
                 subject,
                 htmlContent
             );
@@ -726,7 +752,6 @@ HTTP: ${stats.http}개
             </html>
         `;
     }
-
 
     /**
      * 일별 로그 버퍼에 추가
@@ -1663,6 +1688,22 @@ HTTP: ${stats.http}개
             dashboard: dashboardData,
             timestamp: new Date().toISOString()
         });
+    }
+
+    /**
+     * 현재 로그 설정 상태 출력 (디버깅용)
+     */
+    logCurrentSettings() {
+        console.log('=== Logger 설정 상태 ===');
+        console.log(`환경: ${this.environment}`);
+        console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+        console.log(`LOG_LEVEL 환경변수: ${process.env.LOG_LEVEL || 'undefined'}`);
+        console.log(`현재 로그 레벨: ${this.getLogLevel()}`);
+        console.log(`isDevelopment: ${this.isDevelopment}`);
+        console.log(`isTest: ${this.isTest}`);
+        console.log(`isProduction: ${this.isProduction}`);
+        console.log(`isRailway: ${this.isRailway}`);
+        console.log('========================');
     }
 }
 

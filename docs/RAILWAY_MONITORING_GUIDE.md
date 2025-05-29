@@ -12,6 +12,48 @@ SKKU 미술동아리 갤러리 프로젝트의 Railway 배포 환경에 최적�
 6. [메트릭 모니터링](#메트릭-모니터링)
 7. [실사용 예시](#실사용-예시)
 
+## 🚨 DNS 오류 해결 가이드
+
+### 문제 상황
+Task #2의 에러 모니터링 시스템 구현 후 다음과 같은 DNS 오류가 발생할 수 있습니다:
+```
+DNS Error: DNS type 'mx' lookup of skkugallery.com responded with code NXDOMAIN Domain name not found: skkugallery.com
+```
+
+### 원인
+- 이메일 알림 기능에서 존재하지 않는 도메인(`skkugallery.com`)을 사용
+- MX 레코드가 설정되지 않은 도메인으로 이메일 전송 시도
+
+### 해결책
+1. **SMTP 설정 검증 강화**: 필수 환경변수가 모두 설정되었을 때만 이메일 기능 활성화
+2. **안전한 기본값 사용**: 실제 존재하는 이메일 주소를 기본값으로 설정
+3. **환경변수 기반 설정**: 하드코딩된 도메인 제거
+
+### 수정된 설정
+```javascript
+// EMAIL 설정이 완전할 때만 이메일 알림 활성화
+enableNotifications: process.env.NODE_ENV === 'production' &&
+                    process.env.EMAIL_USER &&
+                    process.env.EMAIL_PASS &&
+                    process.env.ADMIN_EMAIL
+```
+
+### 권장 환경변수 설정
+
+기존 EMAIL_* 환경변수를 그대로 사용:
+```bash
+# 기본 설정
+NODE_ENV=production
+RAILWAY_ENVIRONMENT=production
+RAILWAY_SERVICE_NAME=skku-gallery
+
+# 이메일 알림 (기존 EMAIL_* 환경변수 사용)
+EMAIL_USER=skkfnrtclbdmnstrtn@gmail.com
+EMAIL_PASS=your-gmail-app-password
+EMAIL_FROM=skkfnrtclbdmnstrtn@gmail.com
+ADMIN_EMAIL=skkfnrtclbdmnstrtn@gmail.com
+```
+
 ## 개요
 
 이 시스템은 Railway 환경에서 효과적인 에러 모니터링을 위해 다음 기능을 제공합니다:
@@ -33,14 +75,11 @@ NODE_ENV=production
 RAILWAY_ENVIRONMENT=production
 RAILWAY_SERVICE_NAME=skku-gallery
 
-# 이메일 알림 (선택사항)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-SMTP_FROM=noreply@skkugallery.com
-ADMIN_EMAIL=admin@skkugallery.com
+# 이메일 알림 (기존 EMAIL_* 환경변수 사용)
+EMAIL_USER=skkfnrtclbdmnstrtn@gmail.com
+EMAIL_PASS=your-gmail-app-password
+EMAIL_FROM=skkfnrtclbdmnstrtn@gmail.com
+ADMIN_EMAIL=skkfnrtclbdmnstrtn@gmail.com
 ```
 
 ### 자동 설정
@@ -123,12 +162,10 @@ railway_environment: development
 2. Railway에서 환경 변수 설정:
 
 ```bash
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-16-digit-app-password
-ADMIN_EMAIL=admin@example.com
+EMAIL_USER=skkfnrtclbdmnstrtn@gmail.com
+EMAIL_PASS=your-16-digit-app-password
+EMAIL_FROM=skkfnrtclbdmnstrtn@gmail.com
+ADMIN_EMAIL=skkfnrtclbdmnstrtn@gmail.com
 ```
 
 ### 알림 정책
