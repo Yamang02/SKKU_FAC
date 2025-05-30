@@ -4,6 +4,12 @@
  */
 
 import ErrorReporter from '../common/monitoring/ErrorReporter.js';
+import Config from './Config.js';
+
+// Config 인스턴스 가져오기
+const config = Config.getInstance();
+const environment = config.getEnvironment();
+const emailConfig = config.getEmailConfig();
 
 /**
  * Railway 환경에 최적화된 에러 리포터 설정
@@ -12,24 +18,24 @@ export const railwayErrorReporterConfig = {
     projectName: 'SKKU Gallery',
 
     // Railway에서는 기존 EMAIL 설정이 완전할 때만 이메일 알림 활성화
-    enableNotifications: process.env.NODE_ENV === 'production' &&
-        process.env.EMAIL_USER &&
-        process.env.EMAIL_PASS &&
-        process.env.ADMIN_EMAIL,
+    enableNotifications: environment === 'production' &&
+        emailConfig.user &&
+        emailConfig.pass &&
+        emailConfig.adminEmail,
 
     // 이메일 설정 (기존 EMAIL_* 환경변수 사용)
-    emailConfig: (process.env.EMAIL_USER && process.env.EMAIL_PASS) ? {
+    emailConfig: (emailConfig.user && emailConfig.pass) ? {
         smtp: {
             host: 'smtp.gmail.com', // Gmail 고정
             port: 587,
             secure: false,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
+                user: emailConfig.user,
+                pass: emailConfig.pass
             }
         },
-        from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
-        to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER
+        from: emailConfig.from || emailConfig.user,
+        to: emailConfig.adminEmail || emailConfig.user
     } : null
 };
 
@@ -38,18 +44,17 @@ export const railwayErrorReporterConfig = {
  */
 export const railwayErrorHandlerConfig = {
     // 기본 설정
-    isDevelopment: process.env.NODE_ENV === 'development',
-    includeStackTrace: process.env.NODE_ENV === 'development',
+    isDevelopment: environment === 'development',
+    includeStackTrace: environment === 'development',
     enableDetailedLogging: true,
 
     // ErrorReporter 통합
     errorReporter: new ErrorReporter(railwayErrorReporterConfig),
     projectName: 'SKKU Gallery',
-    enableNotifications: process.env.NODE_ENV === 'production' &&
-        process.env.EMAIL_USER &&
-        process.env.EMAIL_PASS &&
-        process.env.ADMIN_EMAIL,
-    emailConfig: railwayErrorReporterConfig.emailConfig,
+    enableNotifications: environment === 'production' &&
+        emailConfig.user &&
+        emailConfig.pass &&
+        emailConfig.adminEmail,
 
     // 환경별 설정
     environmentConfig: {
@@ -74,8 +79,8 @@ export const railwayErrorHandlerConfig = {
         maxBodySize: 512, // Railway 로그 크기 제한 고려
         enableRequestId: true,
         customFields: {
-            railway_service: process.env.RAILWAY_SERVICE_NAME || 'skku-gallery',
-            railway_environment: process.env.RAILWAY_ENVIRONMENT || process.env.NODE_ENV || 'development'
+            railway_service: config.getAppConfig().name || 'skku-gallery',
+            railway_environment: environment
         }
     },
 
@@ -84,7 +89,7 @@ export const railwayErrorHandlerConfig = {
         enableCors: true,
         customHeaders: {
             'X-Service': 'SKKU-Gallery',
-            'X-Environment': process.env.NODE_ENV || 'development'
+            'X-Environment': environment
         }
     },
 

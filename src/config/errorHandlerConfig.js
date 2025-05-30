@@ -4,6 +4,12 @@
  */
 
 import logger from '../common/utils/Logger.js';
+import Config from './Config.js';
+
+// Config 인스턴스 가져오기
+const config = Config.getInstance();
+const environment = config.getEnvironment();
+const appConfig = config.getAppConfig();
 
 /**
  * 환경별 설정
@@ -50,7 +56,7 @@ export const loggingConfig = {
     maxBodySize: 2048, // bytes
     customFields: {
         service: 'skku-gallery',
-        version: process.env.APP_VERSION || '1.0.0'
+        version: appConfig.version
     }
 };
 
@@ -79,7 +85,7 @@ export const responseConfig = {
         },
         meta: {
             service: 'skku-gallery',
-            version: process.env.APP_VERSION || '1.0.0'
+            version: appConfig.version
         }
     }),
 
@@ -262,7 +268,7 @@ export const customHandlers = {
  * 위의 모든 설정을 통합한 최종 설정입니다.
  */
 export const errorHandlerConfig = {
-    isDevelopment: process.env.NODE_ENV === 'development',
+    isDevelopment: environment === 'development',
     environmentConfig,
     loggingConfig,
     responseConfig,

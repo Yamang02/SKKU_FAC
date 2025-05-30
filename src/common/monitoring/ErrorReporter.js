@@ -7,11 +7,13 @@ import logger from '../utils/Logger.js';
 import { ErrorSeverity } from '../error/BaseError.js';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+import Config from '../../config/Config.js';
 
 export class ErrorReporter {
     constructor(options = {}) {
+        this.config = Config.getInstance();
         this.projectName = options.projectName || 'SKKU Gallery';
-        this.environment = process.env.NODE_ENV || 'development';
+        this.environment = this.config.getEnvironment();
         this.notificationEnabled = options.enableNotifications ?? (this.environment === 'production');
         this.emailConfig = options.emailConfig || null;
 

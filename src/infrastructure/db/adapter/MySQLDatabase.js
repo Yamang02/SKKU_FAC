@@ -1,20 +1,22 @@
 import { Sequelize } from 'sequelize';
-import { infrastructureConfig } from '../../../config/infrastructure.js';
+import Config from '../../../config/Config.js';
 import logger from '../../../common/utils/Logger.js';
 
+// Config 인스턴스 가져오기
+const config = Config.getInstance();
+
 // 데이터베이스 설정 가져오기
-const dbConfig = infrastructureConfig.database.config;
+const dbConfig = config.getDatabaseConfig();
+const environment = config.getEnvironment();
 
 // 데이터베이스 연결 설정 로깅
 logger.info('=== 데이터베이스 연결 설정 ===');
-logger.info(`환경: ${infrastructureConfig.environment}`);
+logger.info(`환경: ${environment}`);
 logger.info(`호스트: ${dbConfig.host}`);
+logger.info(`사용자: ${dbConfig.user}`);
 logger.info(`데이터베이스: ${dbConfig.database}`);
 logger.info(`포트: ${dbConfig.port}`);
 logger.info('===========================');
-
-// connectionLimit이 유효한지 확인하고 기본값 설정
-const connectionLimit = (dbConfig.connectionLimit && dbConfig.connectionLimit > 0) ? dbConfig.connectionLimit : 10;
 
 // Sequelize 인스턴스 생성
 const db = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
@@ -22,12 +24,7 @@ const db = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
     dialect: 'mysql',
     port: dbConfig.port,
     logging: false,
-    pool: {
-        max: connectionLimit,
-        min: parseInt(process.env.DB_POOL_MIN, 10) || 0,
-        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 30000,
-        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 10000
-    },
+    pool: dbConfig.pool,
     retry: {
         max: 3, // 최대 3번 재시도
         match: [

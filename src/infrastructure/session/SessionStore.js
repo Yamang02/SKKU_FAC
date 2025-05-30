@@ -1,22 +1,23 @@
 import session from 'express-session';
 import { RedisStore } from 'connect-redis';
 import redisClient from '../redis/RedisClient.js';
-import { infrastructureConfig } from '../../config/infrastructure.js';
+import Config from '../../config/Config.js';
 import logger from '../../common/utils/Logger.js';
-
-// Redis 설정 가져오기
-const redisConfig = infrastructureConfig.redis.config;
 
 class SessionStore {
     constructor() {
         this.store = null;
         this.sessionConfig = null;
+        this.config = Config.getInstance();
     }
 
     async initialize() {
         try {
             // Redis 클라이언트 연결
             await redisClient.connect();
+
+            // Redis 설정 가져오기
+            const redisConfig = this.config.getRedisConfig();
 
             // Redis 스토어 생성
             this.store = new RedisStore({
@@ -27,24 +28,28 @@ class SessionStore {
                 disableTTL: false
             });
 
+            // 세션 설정 가져오기
+            const sessionConfig = this.config.getSessionConfig();
+            const environment = this.config.getEnvironment();
+
             // 세션 설정
             this.sessionConfig = {
                 store: this.store,
-                secret: process.env.SESSION_SECRET || 'your-secret-key-here',
+                secret: sessionConfig.secret,
                 resave: false,
                 saveUninitialized: false,
                 rolling: true,
                 cookie: {
-                    secure: infrastructureConfig.environment === 'production',
+                    secure: environment === 'production',
                     httpOnly: true,
-                    maxAge: redisConfig.ttl * 1000, // 밀리초로 변환
+                    maxAge: sessionConfig.maxAge,
                     sameSite: 'strict'
                 },
                 name: 'sessionId'
             };
 
             // 프로덕션 환경에서 추가 설정
-            if (infrastructureConfig.environment === 'production') {
+            if (environment === 'production') {
                 this.sessionConfig.cookie.secure = true;
                 this.sessionConfig.proxy = true; // nginx 등의 프록시 사용 시
             }
@@ -57,15 +62,19 @@ class SessionStore {
 
             // Redis 연결 실패 시 메모리 스토어로 폴백
             logger.warn('메모리 기반 세션 스토어로 폴백합니다.');
+
+            const sessionConfig = this.config.getSessionConfig();
+            const environment = this.config.getEnvironment();
+
             this.sessionConfig = {
-                secret: process.env.SESSION_SECRET || 'your-secret-key-here',
+                secret: sessionConfig.secret,
                 resave: false,
                 saveUninitialized: false,
                 rolling: true,
                 cookie: {
-                    secure: infrastructureConfig.environment === 'production',
+                    secure: environment === 'production',
                     httpOnly: true,
-                    maxAge: 24 * 60 * 60 * 1000, // 24시간
+                    maxAge: sessionConfig.maxAge,
                     sameSite: 'strict'
                 },
                 name: 'sessionId'

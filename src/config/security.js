@@ -2,84 +2,25 @@
  * 보안 설정
  */
 
+import config from './index.js';
+
+// 기존 코드와의 호환성을 위해 기존 내보내기 유지
+// 하지만 내부적으로는 새로운 Config 클래스를 사용
+
 // Content Security Policy 설정
-export const cspConfig = {
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ['\'self\''],
-            scriptSrc: [
-                '\'self\'',
-                '\'unsafe-inline\'',
-                'https://developers.kakao.com',
-                'https://t1.kakaocdn.net',
-                'https://k.kakaocdn.net',
-                'https://cdn.jsdelivr.net',
-                'blob:'
-            ],
-            styleSrc: [
-                '\'self\'',
-                'https://cdnjs.cloudflare.com',
-                'https://fonts.googleapis.com',
-                '\'unsafe-inline\''
-            ],
-            fontSrc: [
-                '\'self\'',
-                'https://fonts.googleapis.com',
-                'https://cdnjs.cloudflare.com',
-                'https://fonts.gstatic.com',
-                '\'unsafe-inline\''
-            ],
-            imgSrc: [
-                '\'self\'',
-                'https://res.cloudinary.com/dw57ytzhg/',
-                'https://res.cloudinary.com/dvkr4k6n8/',
-                'data:',
-                'blob:'
-            ],
-            connectSrc: [
-                '\'self\'',
-                'https://developers.kakao.com',
-                'https://t1.kakaocdn.net',
-                'https://k.kakaocdn.net',
-                'https://cdn.jsdelivr.net'
-            ],
-            frameSrc: [
-                '\'self\'',
-                'https://developers.kakao.com'
-            ],
-            objectSrc: [
-                '\'self\'',
-                'https://developers.kakao.com'
-            ],
-            formAction: [
-                '\'self\'',
-                'https://*.kakao.com'
-            ],
-            workerSrc: [
-                '\'self\'',
-                'blob:'
-            ],
-            scriptSrcAttr: ['\'unsafe-inline\'']
-        }
-    },
-    crossOriginEmbedderPolicy: false
-};
+export const cspConfig = config.get('security.csp');
 
 // Rate Limiter 설정
-export const rateLimitConfig = {
-    windowMs: 15 * 60 * 1000, // 15분
-    max: 300, // IP당 최대 요청 수
-    skip: (req) => req.path === '/health' // 헬스체크 엔드포인트 제외
-};
+export const rateLimitConfig = config.get('rateLimit');
 
 // 정적 파일 설정
-export const staticFileConfig = {
-    setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.js')) {
-            res.setHeader('Content-Type', 'text/javascript; charset=UTF-8');
-            res.setHeader('X-Content-Type-Options', 'nosniff');
-        }
-        // 캐시 설정
-        res.setHeader('Cache-Control', 'public, max-age=86400'); // 24시간
-    }
-};
+export const staticFileConfig = config.get('security.staticFiles');
+
+// 새로운 방식으로 보안 설정에 접근하는 함수들 제공
+export const getSecurityConfig = () => config.get('security');
+export const getCspConfig = () => config.get('security.csp');
+export const getRateLimitConfig = () => config.get('rateLimit');
+export const getStaticFileConfig = () => config.get('security.staticFiles');
+
+// 기본 내보내기로 새로운 config 인스턴스 제공
+export default config;
