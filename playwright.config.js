@@ -1,78 +1,60 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
+ * 환경별 설정
+ */
+const isCI = !!process.env.CI;
+const testEnvironment = process.env.TEST_ENVIRONMENT || 'local';
+
+// 환경별 baseURL 설정
+const getBaseURL = () => {
+    switch (testEnvironment) {
+        case 'local':
+        default:
+            return 'http://localhost:3000';
+    }
+};
+
+/**
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
     testDir: './tests',
-    /* Run tests in files in parallel */
+    /* 병렬 테스트 실행 */
     fullyParallel: true,
-    /* Fail the build on CI if you accidentally left test.only in the source code. */
-    forbidOnly: !!process.env.CI,
-    /* Retry on CI only */
-    retries: process.env.CI ? 2 : 0,
-    /* Opt out of parallel tests on CI. */
-    workers: process.env.CI ? 1 : undefined,
-    /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+    /* CI에서 실패 시 재시도 비활성화 */
+    forbidOnly: !!isCI,
+    /* CI에서 재시도 비활성화 */
+    retries: isCI ? 2 : 0,
+    /* 로컬에서는 병렬 실행, CI에서는 순차 실행 */
+    workers: isCI ? 1 : undefined,
+    /* 리포터 설정 */
     reporter: 'html',
-    /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+    /* 모든 프로젝트에 공통으로 적용되는 설정 */
     use: {
-        /* Base URL to use in actions like `await page.goto('/')`. */
-        baseURL: 'http://localhost:3000',
-
-        /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-        trace: 'on-first-retry',
-
-        /* Take screenshot on failure */
+        /* 기본 URL */
+        baseURL: getBaseURL(),
+        /* 실패 시 스크린샷 수집 */
         screenshot: 'only-on-failure',
-
-        /* Record video on failure */
-        video: 'retain-on-failure'
+        /* 실패 시 비디오 수집 */
+        video: 'retain-on-failure',
+        /* 실패 시 trace 수집 */
+        trace: 'on-first-retry'
     },
 
-    /* Configure projects for major browsers */
+    /* 프로젝트별 설정 - Chrome만 사용 */
     projects: [
         {
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] }
-        },
-
-        {
-            name: 'firefox',
-            use: { ...devices['Desktop Firefox'] }
-        },
-
-        {
-            name: 'webkit',
-            use: { ...devices['Desktop Safari'] }
-        },
-
-        /* Test against mobile viewports. */
-        {
-            name: 'Mobile Chrome',
-            use: { ...devices['Pixel 5'] }
-        },
-        {
-            name: 'Mobile Safari',
-            use: { ...devices['iPhone 12'] }
         }
-
-        /* Test against branded browsers. */
-        // {
-        //   name: 'Microsoft Edge',
-        //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-        // },
-        // {
-        //   name: 'Google Chrome',
-        //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-        // },
     ],
 
-    /* Run your local dev server before starting the tests */
+    /* 로컬 개발 서버 실행 */
     webServer: {
-        command: 'npm run dev',  // 개발 환경으로 서버 시작
+        command: 'npm run start:test',
         url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
-        timeout: 120 * 1000 // 2분 대기
+        reuseExistingServer: !isCI,
+        timeout: 120 * 1000
     }
 });

@@ -35,7 +35,13 @@
         "test:signup:simple": "playwright test tests/e2e/auth/simple-signup-test.spec.js",
         "test:smoke": "playwright test --grep='@smoke'",
         "test:report": "playwright show-report",
-        "test:install": "playwright install"
+        "test:install": "playwright install",
+        "test:railway": "cross-env TEST_ENVIRONMENT=railway playwright test --project=chromium",
+        "test:railway:auth": "cross-env TEST_ENVIRONMENT=railway playwright test tests/e2e/auth/ --project=chromium",
+        "test:railway:signup": "cross-env TEST_ENVIRONMENT=railway playwright test tests/e2e/auth/signup-test.spec.js --project=chromium",
+        "test:railway:critical": "cross-env TEST_ENVIRONMENT=railway playwright test tests/integration/basic-functionality.spec.js tests/e2e/auth/auth-tests.spec.js --project=chromium",
+        "test:railway:smoke": "cross-env TEST_ENVIRONMENT=railway playwright test --grep='@smoke' --project=chromium",
+        "test:railway:validation": "cross-env TEST_ENVIRONMENT=railway playwright test tests/unit/middleware/validation-middleware.spec.js --project=chromium"
     },
     "dependencies": {
         "all": "^0.0.0",

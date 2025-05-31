@@ -17,6 +17,7 @@ export const UserValidationSchemas = {
                 'string.alphanum': '사용자명은 영문자와 숫자만 포함할 수 있습니다',
                 'string.min': '사용자명은 최소 3자 이상이어야 합니다',
                 'string.max': '사용자명은 최대 30자까지 가능합니다',
+                'string.empty': '사용자명을 입력해주세요',
                 'any.required': '사용자명은 필수 입력 항목입니다'
             }),
 
@@ -45,7 +46,16 @@ export const UserValidationSchemas = {
             .messages({
                 'string.min': '비밀번호를 입력해주세요',
                 'string.max': '비밀번호는 최대 128자까지 가능합니다',
+                'string.empty': '비밀번호를 입력해주세요',
                 'any.required': '비밀번호는 필수 입력 항목입니다'
+            }),
+
+        confirmPassword: Joi.string()
+            .required()
+            .valid(Joi.ref('password'))
+            .messages({
+                'any.required': '비밀번호 확인을 입력해주세요',
+                'any.only': '비밀번호가 일치하지 않습니다'
             }),
 
         role: Joi.string()
@@ -57,42 +67,45 @@ export const UserValidationSchemas = {
 
         department: Joi.string()
             .max(100)
-            .allow('')
             .when('role', {
                 is: Joi.valid('SKKU_MEMBER', 'ADMIN'),
-                then: Joi.string().optional(),
-                otherwise: Joi.forbidden()
+                then: Joi.string().required().min(1).messages({
+                    'string.min': 'SKKU 사용자는 학과를 입력해야 합니다',
+                    'any.required': 'SKKU 사용자는 학과를 입력해야 합니다'
+                }),
+                otherwise: Joi.forbidden().messages({
+                    'any.unknown': '외부 사용자는 학과 정보를 입력할 수 없습니다'
+                })
             })
             .messages({
-                'string.max': '학과명은 최대 100자까지 가능합니다',
-                'any.unknown': '외부 사용자는 학과 정보를 입력할 수 없습니다'
+                'string.max': '학과명은 최대 100자까지 가능합니다'
             }),
 
         affiliation: Joi.string()
             .max(100)
             .when('role', {
                 is: 'EXTERNAL_MEMBER',
-                then: Joi.string().required().min(1),
+                then: Joi.string().required().min(1).messages({
+                    'string.min': '외부 사용자는 소속을 입력해야 합니다',
+                    'any.required': '외부 사용자는 소속을 입력해야 합니다'
+                }),
                 otherwise: Joi.string().allow('', null).optional()
             })
             .messages({
-                'string.max': '소속은 최대 100자까지 가능합니다',
-                'string.min': '외부 사용자는 소속을 입력해야 합니다',
-                'any.required': '외부 사용자는 소속을 입력해야 합니다'
+                'string.max': '소속은 최대 100자까지 가능합니다'
             }),
 
         studentYear: Joi.string()
             .pattern(/^[0-9]{2}$/)
-            .allow('', null)
             .when('role', {
                 is: Joi.valid('SKKU_MEMBER', 'ADMIN'),
-                then: Joi.string().optional(),
-                otherwise: Joi.forbidden()
-            })
-            .messages({
-                'string.pattern.base': '학번은 2자리 숫자여야 합니다 (예: 00, 23)',
-                'string.empty': '학번을 입력해주세요',
-                'any.unknown': '외부 사용자는 학번 정보를 입력할 수 없습니다'
+                then: Joi.string().required().messages({
+                    'string.pattern.base': '학번은 2자리 숫자여야 합니다 (예: 00, 23)',
+                    'any.required': 'SKKU 사용자는 학번을 입력해야 합니다'
+                }),
+                otherwise: Joi.forbidden().messages({
+                    'any.unknown': '외부 사용자는 학번 정보를 입력할 수 없습니다'
+                })
             }),
 
         isClubMember: Joi.boolean()
@@ -100,10 +113,9 @@ export const UserValidationSchemas = {
             .when('role', {
                 is: Joi.valid('SKKU_MEMBER', 'ADMIN'),
                 then: Joi.boolean().optional(),
-                otherwise: Joi.forbidden()
-            })
-            .messages({
-                'any.unknown': '외부 사용자는 동아리 회원 정보를 설정할 수 없습니다'
+                otherwise: Joi.forbidden().messages({
+                    'any.unknown': '외부 사용자는 동아리 회원 정보를 설정할 수 없습니다'
+                })
             })
     }),
 
@@ -112,12 +124,14 @@ export const UserValidationSchemas = {
         username: Joi.string()
             .required()
             .messages({
+                'string.empty': '사용자명을 입력해주세요',
                 'any.required': '사용자명을 입력해주세요'
             }),
 
         password: Joi.string()
             .required()
             .messages({
+                'string.empty': '비밀번호를 입력해주세요',
                 'any.required': '비밀번호를 입력해주세요'
             })
     }),
@@ -347,7 +361,13 @@ export const CustomValidators = {
                 errors.push('외부 사용자는 학번 정보를 입력할 수 없습니다');
             }
         } else if (role === 'SKKU_MEMBER' || role === 'ADMIN') {
-            // SKKU 사용자는 소속 선택적 (null 허용)
+            // SKKU 사용자는 학과와 학번 필수
+            if (!department || department.trim() === '') {
+                errors.push('SKKU 사용자는 학과를 입력해야 합니다');
+            }
+            if (!studentYear || studentYear.trim() === '') {
+                errors.push('SKKU 사용자는 학번을 입력해야 합니다');
+            }
             // 학번이 있다면 형식 검증
             if (studentYear && !this.isValidStudentYear(studentYear)) {
                 errors.push('학번은 2자리 숫자여야 합니다 (예: 00, 23)');

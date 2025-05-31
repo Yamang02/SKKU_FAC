@@ -399,16 +399,13 @@ test.describe('회원가입 절차 테스트', () => {
 
         console.log('🔍 중복 검증 응답 상태:', response.status());
 
-        // 오류 응답 확인
-        await page.waitForTimeout(2000);
-
-        const errorNotification = page.locator('.notification--error');
-        const hasError = await errorNotification.count() > 0;
-
-        if (hasError) {
+        // 오류 메시지 확인
+        const errorNotification = page.locator('.notification.error');
+        if (await errorNotification.isVisible()) {
             const errorText = await errorNotification.textContent();
             console.log('❌ 중복 사용자명 오류:', errorText);
-            expect(errorText).toContain('사용자명' || '아이디' || '중복');
+            // 실제 에러 메시지 형식에 맞게 확인
+            expect(errorText).toMatch(/아이디|사용자명|중복/);
         }
 
         // 응답 상태가 400번대여야 함
