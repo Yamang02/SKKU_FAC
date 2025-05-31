@@ -2,6 +2,7 @@ import express from 'express';
 import UserController from './UserController.js';
 import UserApiController from './api/UserApiController.js';
 import { isAuthenticated, isNotAuthenticated } from '../../../common/middleware/auth.js';
+import { UserValidationMiddleware } from '../../../common/middleware/validation.js';
 
 const UserRouter = express.Router();
 const userController = new UserController();
@@ -58,7 +59,7 @@ const userApiController = new UserApiController();
  *       500:
  *         description: 서버 오류
  */
-UserRouter.post('/', isNotAuthenticated, (req, res) => userApiController.registerUser(req, res));
+UserRouter.post('/', isNotAuthenticated, UserValidationMiddleware.validateRegister, (req, res) => userApiController.registerUser(req, res));
 
 // 로그인/로그아웃 API
 /**
@@ -96,7 +97,7 @@ UserRouter.post('/', isNotAuthenticated, (req, res) => userApiController.registe
  *       500:
  *         description: 서버 오류
 */
-UserRouter.post('/login', isNotAuthenticated, (req, res) => userApiController.loginUser(req, res));
+UserRouter.post('/login', isNotAuthenticated, UserValidationMiddleware.validateLogin, (req, res) => userApiController.loginUser(req, res));
 /**
  * @swagger
  * /logout:
@@ -215,7 +216,7 @@ UserRouter.get('/api/session', isAuthenticated, (req, res) => userApiController.
  *       500:
  *         description: 서버 오류
  */
-UserRouter.put('/me', isAuthenticated, (req, res) => userApiController.updateUserProfile(req, res));
+UserRouter.put('/me', isAuthenticated, UserValidationMiddleware.validateUpdateProfile, (req, res) => userApiController.updateUserProfile(req, res));
 
 // 현재 사용자 삭제 API
 /**
@@ -275,7 +276,7 @@ UserRouter.delete('/me', isAuthenticated, (req, res) => userApiController.delete
  *       500:
  *         description: 서버 오류
  */
-UserRouter.get('/api/find-username', (req, res) => userApiController.findUsername(req, res));
+UserRouter.get('/api/find-username', UserValidationMiddleware.validateEmailQuery, (req, res) => userApiController.findUsername(req, res));
 
 // 비밀번호 재설정 요청 API
 /**
@@ -310,7 +311,7 @@ UserRouter.get('/api/find-username', (req, res) => userApiController.findUsernam
  *       500:
  *         description: 서버 오류
  */
-UserRouter.post('/password/reset', isNotAuthenticated, (req, res) => userApiController.resetPassword(req, res));
+UserRouter.post('/password/reset', isNotAuthenticated, UserValidationMiddleware.validateResetPassword, (req, res) => userApiController.resetPassword(req, res));
 
 // 플래시 메시지 API
 UserRouter.get('/api/flash-message', (req, res) => userApiController.getFlashMessage(req, res));
