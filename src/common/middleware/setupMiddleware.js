@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 import { cspConfig, rateLimitConfig, staticFileConfig } from '../../config/security.js';
 import { createUploadDirs } from '../utils/createUploadDirs.js';
 import logger from '../utils/Logger.js';
+import Config from '../../config/Config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,8 @@ const __dirname = path.dirname(__filename);
  * 기본 미들웨어 설정
  */
 export function setupBasicMiddleware(app, swaggerDocument) {
+    const config = Config.getInstance();
+
     // 업로드 디렉토리 생성
     createUploadDirs();
 
@@ -25,7 +28,7 @@ export function setupBasicMiddleware(app, swaggerDocument) {
 
     // HTTPS 리디렉션 (프로덕션 환경)
     app.use((req, res, next) => {
-        if (process.env.NODE_ENV === 'production' && req.headers['x-forwarded-proto'] !== 'https') {
+        if (config.isProduction() && req.headers['x-forwarded-proto'] !== 'https') {
             return res.redirect('https://' + req.headers.host + req.url);
         }
         next();
@@ -48,7 +51,7 @@ export function setupBasicMiddleware(app, swaggerDocument) {
     setupStaticFiles(app);
 
     // 프로덕션 및 테스트 환경에서 프록시 신뢰 설정
-    if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test') {
+    if (config.isProduction() || config.isTest()) {
         app.set('trust proxy', 1);
     }
 

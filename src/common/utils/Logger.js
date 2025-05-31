@@ -1,16 +1,18 @@
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import { infrastructureConfig } from '../../config/infrastructure.js';
+import Config from '../../config/Config.js';
 import fs from 'fs';
 import path from 'path';
 
 class WinstonLogger {
     constructor() {
+        this.config = Config.getInstance();
         this.environment = infrastructureConfig.environment;
         this.isDevelopment = this.environment === 'development' || this.environment === 'local';
         this.isTest = this.environment === 'test';
         this.isStaging = this.environment === 'staging';
-        this.isProduction = process.env.NODE_ENV === 'production';
+        this.isProduction = this.config.getEnvironment() === 'production';
         this.isRailway = this.detectRailwayEnvironment();
         this.logDir = path.join(process.cwd(), 'logs');
 
@@ -194,39 +196,12 @@ class WinstonLogger {
     }
 
     /**
-     * 환경별 로그 레벨 결정 (ErrorHandler와 일관성 유지)
+     * 로그 레벨 가져오기
      */
     getLogLevel() {
-        // 환경변수로 로그 레벨 오버라이드 가능
-        const envLogLevel = process.env.LOG_LEVEL;
-        if (envLogLevel && this.isValidLogLevel(envLogLevel)) {
-            console.log(`🔧 LOG_LEVEL 환경변수 적용: ${envLogLevel.toLowerCase()} (환경: ${this.environment})`);
-            return envLogLevel.toLowerCase();
-        }
-
-        // 환경별 기본 로그 레벨 (ErrorHandler와 동일)
-        let defaultLevel;
-        switch (this.environment) {
-            case 'development':
-            case 'local':
-                defaultLevel = 'debug';
-                break;
-            case 'test':
-            case 'testing':
-                defaultLevel = 'error';
-                break;
-            case 'staging':
-                defaultLevel = 'warn';
-                break;
-            case 'production':
-                defaultLevel = 'error';
-                break;
-            default:
-                defaultLevel = 'info';
-        }
-
-        console.log(`🔧 기본 로그 레벨 적용: ${defaultLevel} (환경: ${this.environment})`);
-        return defaultLevel;
+        // Config 클래스에서 로그 레벨 가져오기
+        const loggingConfig = this.config.get('logging');
+        return loggingConfig ? loggingConfig.level : 'info';
     }
 
     /**
@@ -251,13 +226,10 @@ class WinstonLogger {
      * Railway 환경 감지 (Railway에서 자동으로 제공하는 환경변수들)
      */
     detectRailwayEnvironment() {
-        // Railway에서 자동으로 제공하는 환경변수들을 확인
-        return !!(
-            process.env.RAILWAY_ENVIRONMENT_NAME ||
-            process.env.RAILWAY_PROJECT_ID ||
-            process.env.RAILWAY_SERVICE_ID ||
-            process.env.RAILWAY_DEPLOYMENT_ID
-        );
+        // Railway 환경 변수를 직접 확인
+        return !!(process.env.RAILWAY_PROJECT_NAME ||
+            process.env.RAILWAY_ENVIRONMENT ||
+            process.env.RAILWAY_SERVICE_NAME);
     }
 
     /**

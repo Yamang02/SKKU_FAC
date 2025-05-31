@@ -14,13 +14,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirmPassword');
 
-    // 역할 선택에 따른 필드 표시/숨김
-    roleSelect.addEventListener('change', () => {
-        const isSkkuMember = roleSelect.value === 'SKKU_MEMBER';
-        const isExternalMember = roleSelect.value === 'EXTERNAL_MEMBER';
+    /**
+     * 폼 필드 초기화 함수
+     * @param {HTMLElement} container - 초기화할 필드들이 포함된 컨테이너
+     */
+    function clearFormFields(container) {
+        const inputs = container.querySelectorAll('input');
+        inputs.forEach(input => {
+            if (input.type === 'checkbox') {
+                input.checked = false;
+            } else {
+                input.value = '';
+            }
+            // 에러 상태 제거
+            input.classList.remove('is-invalid');
+        });
+    }
 
-        skkuFields.style.display = isSkkuMember ? 'block' : 'none';
-        externalFields.style.display = isExternalMember ? 'block' : 'none';
+    /**
+     * 역할별 필드 표시/숨김 처리 함수
+     * @param {string} selectedRole - 선택된 역할
+     */
+    function handleRoleChange(selectedRole) {
+        const isSkkuMember = selectedRole === 'SKKU_MEMBER';
+        const isExternalMember = selectedRole === 'EXTERNAL_MEMBER';
+
+        // 필드 표시/숨김 - WebKit 호환성을 위해 더 명확한 방법 사용
+        if (isSkkuMember) {
+            skkuFields.style.display = 'block';
+            skkuFields.style.visibility = 'visible';
+            externalFields.style.display = 'none';
+            externalFields.style.visibility = 'hidden';
+        } else if (isExternalMember) {
+            externalFields.style.display = 'block';
+            externalFields.style.visibility = 'visible';
+            skkuFields.style.display = 'none';
+            skkuFields.style.visibility = 'hidden';
+        } else {
+            // 기본 상태 (역할 미선택)
+            skkuFields.style.display = 'none';
+            skkuFields.style.visibility = 'hidden';
+            externalFields.style.display = 'none';
+            externalFields.style.visibility = 'hidden';
+        }
+
+        // 역할 변경 시 관련 필드 데이터 초기화
+        if (!isSkkuMember) {
+            clearFormFields(skkuFields);
+        }
+        if (!isExternalMember) {
+            clearFormFields(externalFields);
+        }
 
         // 필수 필드 설정
         skkuFields.querySelectorAll('input').forEach(input => {
@@ -29,6 +73,32 @@ document.addEventListener('DOMContentLoaded', () => {
         externalFields.querySelectorAll('input').forEach(input => {
             input.required = isExternalMember;
         });
+
+        // 기존 에러 메시지 제거
+        const errorAlerts = document.querySelectorAll('.alert-danger-user');
+        errorAlerts.forEach(alert => {
+            alert.style.display = 'none';
+            alert.textContent = '';
+        });
+
+        // WebKit에서 레이아웃 강제 업데이트
+        if (isSkkuMember) {
+            skkuFields.offsetHeight; // 강제 리플로우
+        } else if (isExternalMember) {
+            externalFields.offsetHeight; // 강제 리플로우
+        }
+    }
+
+    // 역할 선택에 따른 필드 표시/숨김 및 데이터 초기화
+    roleSelect.addEventListener('change', (e) => {
+        const selectedRole = e.target.value;
+        handleRoleChange(selectedRole);
+    });
+
+    // WebKit 호환성을 위한 추가 이벤트 리스너
+    roleSelect.addEventListener('input', (e) => {
+        const selectedRole = e.target.value;
+        handleRoleChange(selectedRole);
     });
 
     // 비밀번호 표시/숨김 토글
@@ -46,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-
         // 비밀번호 확인
         if (passwordInput.value !== confirmPasswordInput.value) {
             showErrorMessage('비밀번호가 일치하지 않습니다.');
@@ -57,29 +126,58 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(form);
         const userData = Object.fromEntries(formData.entries());
 
+        // confirmPassword는 서버 검증을 위해 유지
+        // const { confirmPassword, ...userDataToSend } = userData;
+        const userDataToSend = userData;
+
         // 불필요한 필드 제거
-        const { confirmPassword, ...userDataToSend } = userData;
+        // const { confirmPassword, ...userDataToSend } = userData;
 
-        // 체크박스 값 변환
-        userDataToSend.isClubMember = userDataToSend.isClubMember === 'on';
-
-        // 빈 문자열 처리
-        if (userDataToSend.affiliation === '') {
-            userDataToSend.affiliation = null;
+        // 역할에 따른 데이터 정리
+        const selectedRole = roleSelect.value;
+        if (selectedRole === 'EXTERNAL_MEMBER') {
+            // 외부 사용자는 SKKU 관련 필드 제거
+            delete userDataToSend.department;
+            delete userDataToSend.studentYear;
+            delete userDataToSend.isClubMember;
+        } else if (selectedRole === 'SKKU_MEMBER') {
+            // SKKU 사용자는 외부 관련 필드 제거 (affiliation은 선택적이므로 유지)
+            if (!userDataToSend.affiliation) {
+                delete userDataToSend.affiliation;
+            }
         }
 
-        // DTO 생성
+        // 체크박스 값 변환 (SKKU 멤버인 경우에만)
+        if (selectedRole === 'SKKU_MEMBER' || selectedRole === 'ADMIN') {
+            userDataToSend.isClubMember = userDataToSend.isClubMember === 'on';
+        }
+
+        // 빈 문자열을 null로 변환
+        Object.keys(userDataToSend).forEach(key => {
+            if (userDataToSend[key] === '') {
+                userDataToSend[key] = null;
+            }
+        });
+
+        // DTO 생성 - 역할에 따라 필요한 필드만 포함
         const userDto = {
             username: userDataToSend.username,
             name: userDataToSend.name,
             email: userDataToSend.email,
             password: userDataToSend.password,
-            department: userDataToSend.department,
-            role: userDataToSend.role,
-            isClubMember: userDataToSend.isClubMember,
-            studentYear: userDataToSend.studentYear,
-            affiliation: userDataToSend.affiliation
+            confirmPassword: userDataToSend.confirmPassword,
+            role: userDataToSend.role
         };
+
+        // 역할별 추가 필드
+        if (selectedRole === 'SKKU_MEMBER' || selectedRole === 'ADMIN') {
+            if (userDataToSend.department) userDto.department = userDataToSend.department;
+            if (userDataToSend.studentYear) userDto.studentYear = userDataToSend.studentYear;
+            if (userDataToSend.isClubMember !== undefined) userDto.isClubMember = userDataToSend.isClubMember;
+            if (userDataToSend.affiliation) userDto.affiliation = userDataToSend.affiliation;
+        } else if (selectedRole === 'EXTERNAL_MEMBER') {
+            if (userDataToSend.affiliation) userDto.affiliation = userDataToSend.affiliation;
+        }
 
         showLoading(true);
         try {
@@ -108,5 +206,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 초기 상태 설정
-    roleSelect.dispatchEvent(new Event('change'));
+    handleRoleChange(roleSelect.value || '');
 });
