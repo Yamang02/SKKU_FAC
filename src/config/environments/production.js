@@ -66,8 +66,35 @@ export default {
 
     rateLimit: {
         windowMs: 15 * 60 * 1000, // 15분
-        max: 100, // 프로덕션에서는 엄격한 제한
-        skipPaths: ['/health', '/favicon.ico']
+        max: (req) => {
+            // 헬스체크와 파비콘은 제외
+            const alwaysSkip = ['/health', '/favicon.ico'];
+            if (alwaysSkip.some(path => req.path === path)) {
+                return 0; // 무제한
+            }
+
+            // 정적파일 여부 확인
+            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
+            const isStatic = staticPaths.some(path => req.path.startsWith(path));
+
+            if (isStatic) {
+                // 정적파일: 프로덕션에서도 강제새로고침 고려하여 관대하게
+                return 200;
+            } else {
+                // 일반 요청: 엄격한 제한
+                return 50;
+            }
+        },
+        message: (req) => {
+            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
+            const isStatic = staticPaths.some(path => req.path.startsWith(path));
+
+            if (isStatic) {
+                return '정적파일 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+            } else {
+                return 'API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+            }
+        }
     },
 
     // 프로덕션 환경 전용 설정
