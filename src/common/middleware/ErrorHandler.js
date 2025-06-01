@@ -6,6 +6,7 @@ import {
     ErrorSeverity
 } from '../error/BaseError.js';
 import ErrorReporter from '../monitoring/ErrorReporter.js';
+import Config from '../../config/Config.js';
 
 /**
  * 중앙집중식 에러 처리 미들웨어
@@ -25,8 +26,11 @@ export class ErrorHandler {
      * @param {object} options.transformRules - 에러 변환 규칙
      */
     constructor(options = {}) {
+        this.config = Config.getInstance();
+        const environment = this.config.getEnvironment();
+
         // 기본 설정
-        this.isDevelopment = options.isDevelopment ?? process.env.NODE_ENV === 'development';
+        this.isDevelopment = options.isDevelopment ?? environment === 'development';
         this.includeStackTrace = options.includeStackTrace ?? this.isDevelopment;
         this.enableDetailedLogging = options.enableDetailedLogging ?? true;
 
@@ -87,7 +91,7 @@ export class ErrorHandler {
             }
         };
 
-        const environment = process.env.NODE_ENV || 'development';
+        const environment = this.config.getEnvironment();
         return {
             ...defaultConfig,
             ...config,

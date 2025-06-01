@@ -1,5 +1,6 @@
 import logger from './Logger.js';
 import sessionStore from '../../infrastructure/session/SessionStore.js';
+import Config from '../../config/Config.js';
 
 class ServerManager {
     constructor(app) {
@@ -7,12 +8,13 @@ class ServerManager {
         this.server = null;
         this.isShuttingDown = false;
         this.handlersSetup = false;
+        this.config = Config.getInstance();
     }
 
     /**
      * 서버 시작
      */
-    start(port = process.env.PORT || 3000, retryCount = 0) {
+    start(port = this.config.getAppConfig().port, retryCount = 0) {
         const maxRetries = 3;
 
         try {

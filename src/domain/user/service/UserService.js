@@ -25,54 +25,73 @@ export default class UserService {
      * 새로운 사용자를 생성합니다.
      */
     async createUser(userRequestDTO) {
-
-        // 이메일 중복 확인
-        const existingEmailUser = await this.getUserByEmail(userRequestDTO.email);
-        if (existingEmailUser) {
-            throw new UserEmailDuplicateError();
-        }
-
-        // 사용자명 중복 확인
-        const existingUsernameUser = await this.getUserByUsername(userRequestDTO.username);
-        if (existingUsernameUser) {
-            throw new UserUsernameDuplicateError();
-        }
-
-        // 비밀번호 해싱
-        const hashedPassword = await bcrypt.hash(userRequestDTO.password, 10);
-
-        // Id 생성
-        const userId = generateDomainUUID(DOMAINS.USER);
-        const skkuUserId = generateDomainUUID(DOMAINS.SKKU_USER);
-        const externalUserId = generateDomainUUID(DOMAINS.EXTERNAL_USER);
-
-
-        // 사용자 데이터 구성
-        const userDto = new UserRequestDto({
-            ...userRequestDTO,
-            id: userId,
-            skkuUserId,
-            externalUserId,
-            password: hashedPassword,
-            emailVerified: false,
-            status: 'PENDING'
-        });
-
-        const createdUser = await this.userRepository.createUser(userDto);
-
-        // 인증 서비스를 통해 이메일 인증 토큰 생성 및 이메일 발송
-        const authService = new AuthService();
         try {
-            await authService.createEmailVerificationToken(createdUser.id, createdUser.email);
-        } catch (emailError) {
-            logger.error('이메일 전송 실패', emailError);
-            throw new Error('인증 이메일 전송에 실패했습니다. 관리자에게 문의하세요');
+            // 이메일 중복 확인
+            const existingEmailUser = await this.getUserByEmail(userRequestDTO.email);
+            if (existingEmailUser) {
+                throw new UserEmailDuplicateError();
+            }
+
+            // 사용자명 중복 확인
+            const existingUsernameUser = await this.getUserByUsername(userRequestDTO.username);
+            if (existingUsernameUser) {
+                throw new UserUsernameDuplicateError();
+            }
+
+            // 비밀번호 해싱
+            const hashedPassword = await bcrypt.hash(userRequestDTO.password, 10);
+
+            // Id 생성
+            const userId = generateDomainUUID(DOMAINS.USER);
+            const skkuUserId = generateDomainUUID(DOMAINS.SKKU_USER);
+            const externalUserId = generateDomainUUID(DOMAINS.EXTERNAL_USER);
+
+            // 사용자 데이터 구성 (이메일 토큰 없이)
+            const userDto = new UserRequestDto({
+                ...userRequestDTO,
+                id: userId,
+                skkuUserId,
+                externalUserId,
+                password: hashedPassword,
+                emailVerified: false,
+                status: 'PENDING'
+                // emailToken, emailTokenExpiry 제거 - AuthService에서 관리
+            });
+
+            const createdUser = await this.userRepository.createUser(userDto);
+
+            // AuthService를 통한 이메일 인증 토큰 생성 및 전송
+            try {
+                await this.authService.createEmailVerificationToken(createdUser.id, createdUser.email);
+                logger.info(`인증 이메일 전송 성공: ${createdUser.email}`);
+            } catch (emailError) {
+                logger.warn(`이메일 전송 실패 (회원가입은 성공): ${createdUser.email}`, emailError);
+                // 이메일 전송 실패 시에도 회원가입은 성공으로 처리
+                // 사용자에게는 이메일 설정 문제로 인한 안내 메시지 표시
+            }
+
+            const userSimpleDto = new UserSimpleDto(createdUser);
+            return userSimpleDto;
+        } catch (error) {
+            logger.error('사용자 생성 중 오류 발생:', error);
+
+            // 이메일 전송 실패가 아닌 다른 오류인 경우에만 에러 던지기
+            if (error.message && error.message.includes('인증 이메일 전송에 실패')) {
+                // 이메일 전송 실패는 무시하고 회원가입 성공으로 처리
+                logger.warn('이메일 전송 실패로 인한 에러 무시');
+                return {
+                    username: userRequestDTO.username,
+                    email: userRequestDTO.email,
+                    name: userRequestDTO.name,
+                    role: userRequestDTO.role,
+                    isEmailVerified: false,
+                    emailSent: false
+                };
+            }
+
+            throw error;
         }
-
-        const userSimpleDto = new UserSimpleDto(createdUser);
-        return userSimpleDto;
     }
-
 
     /**
      * 사용자 목록을 조회합니다.
@@ -274,11 +293,13 @@ export default class UserService {
      */
     async authenticate(username, password) {
         const user = await this.userRepository.findUserByUsername(username);
-        logger.auth('로그인 처리', { username: user.username });
 
         if (!user) {
-            throw new UserNotFoundError('아이디 또는 비밀번호가 일치하지 않습니다.');
+            logger.auth('로그인 실패 - 존재하지 않는 사용자', { username });
+            throw new UserNotFoundError('가입되지 않은 아이디입니다.');
         }
+
+        logger.auth('로그인 처리', { username: user.username });
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {

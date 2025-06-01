@@ -1,7 +1,7 @@
 # 테스트 관련 파일 및 디렉토리 무시
 __tests__/
-*.test.js
-*.spec.js
+# *.test.js  # Playwright 테스트 파일은 포함하도록 주석 처리
+# *.spec.js  # Playwright 테스트 파일은 포함하도록 주석 처리
 
 # Logs
 logs
@@ -200,4 +200,70 @@ dev-debug.log
 # OS specific
 # Task files
 tasks.json
-tasks/ 
+tasks/
+
+# Playwright 테스트 결과
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# ===== 테스트 결과물 관리 =====
+# 테스트 결과물 세부 관리
+test-results/reports/
+test-results/screenshots/failed/
+test-results/screenshots/passed/
+test-results/videos/
+test-results/traces/
+test-results/coverage/
+test-results/performance/
+test-results/*.json
+test-results/*.xml
+test-results/*.html
+
+# 테스트 백업 파일
+tests/backup/
+tests/archive/
+
+# 임시 테스트 파일
+tests/temp/
+tests/tmp/
+*.test.tmp
+*.spec.tmp
+
+# 테스트 환경별 설정 (민감한 정보 포함 가능)
+tests/config/.env*
+tests/config/local.*
+
+# 테스트 데이터 (대용량 파일)
+tests/fixtures/images/*.jpg
+tests/fixtures/images/*.png
+tests/fixtures/images/*.gif
+tests/fixtures/videos/
+tests/fixtures/large-data/
+
+# 성능 테스트 결과
+tests/performance/results/
+tests/performance/reports/
+
+# 접근성 테스트 결과
+tests/accessibility/reports/
+
+# 시각적 회귀 테스트 결과
+tests/visual/screenshots/actual/
+tests/visual/screenshots/diff/
+tests/visual/reports/
+
+# Jest 관련 (단위/통합 테스트용)
+jest-coverage/
+jest-results/
+
+# 테스트 로그
+test-*.log
+tests-*.log
+playwright-*.log
+
+# 테스트 실행 중 생성되는 임시 파일
+.test-session-*
+.playwright-*
+.test-cache/

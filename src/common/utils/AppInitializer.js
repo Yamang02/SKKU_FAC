@@ -2,11 +2,13 @@ import logger from './Logger.js';
 import sessionStore from '../../infrastructure/session/SessionStore.js';
 import ErrorHandler from '../middleware/ErrorHandler.js';
 import { railwayErrorHandlerConfig } from '../../config/railwayMonitoringConfig.js';
+import Config from '../../config/Config.js';
 
 class AppInitializer {
     constructor(app) {
         this.app = app;
         this.initialized = false;
+        this.config = Config.getInstance();
     }
 
     /**
@@ -102,7 +104,7 @@ class AppInitializer {
 
         logger.success('Railway 최적화 에러 핸들러 설정 완료');
         logger.debug('에러 핸들러 설정', {
-            environment: process.env.NODE_ENV,
+            environment: this.config.getEnvironment(),
             customHandlers: Object.keys(railwayErrorHandlerConfig.customHandlers || {}).length,
             filterRules: Object.keys(railwayErrorHandlerConfig.filterRules || {}).length,
             transformRules: Object.keys(railwayErrorHandlerConfig.transformRules || {}).length,
