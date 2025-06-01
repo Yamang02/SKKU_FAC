@@ -143,8 +143,14 @@ class Config {
 
             rateLimit: Joi.object({
                 windowMs: Joi.number().integer().min(1000).required(), // 최소 1초
-                max: Joi.number().integer().min(1).required(),
-                skipPaths: Joi.array().items(Joi.string()).required()
+                max: Joi.alternatives().try(
+                    Joi.number().integer().min(1),
+                    Joi.function()
+                ).required(),
+                message: Joi.alternatives().try(
+                    Joi.string(),
+                    Joi.function()
+                ).optional()
             }).required(),
 
             // Redis 설정 (선택적)
@@ -492,8 +498,35 @@ class Config {
             // Rate Limiting 설정
             rateLimit: {
                 windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000, // 15분
-                max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 300, // IP당 최대 요청 수
-                skipPaths: ['/health', '/favicon.ico']
+                max: (req) => {
+                    // 헬스체크와 파비콘은 제외
+                    const alwaysSkip = ['/health', '/favicon.ico'];
+                    if (alwaysSkip.some(path => req.path === path)) {
+                        return 0; // 무제한
+                    }
+
+                    // 정적파일 여부 확인
+                    const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
+                    const isStatic = staticPaths.some(path => req.path.startsWith(path));
+
+                    if (isStatic) {
+                        // 정적파일: 더 관대한 제한 (강제새로고침 고려)
+                        return parseInt(process.env.RATE_LIMIT_STATIC_MAX, 10) || 500;
+                    } else {
+                        // 일반 요청: 엄격한 제한
+                        return parseInt(process.env.RATE_LIMIT_MAX, 10) || 100;
+                    }
+                },
+                message: (req) => {
+                    const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
+                    const isStatic = staticPaths.some(path => req.path.startsWith(path));
+
+                    if (isStatic) {
+                        return '정적파일 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+                    } else {
+                        return 'API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+                    }
+                }
             }
         };
     }
