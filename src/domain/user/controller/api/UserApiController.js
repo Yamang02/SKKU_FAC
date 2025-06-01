@@ -42,7 +42,14 @@ export default class UserApiController {
 
             const createdUser = await this.userService.createUser(userDto);
             const userResponseDto = new UserResponseDto(createdUser);
-            return res.status(201).json(ApiResponse.success(userResponseDto, Message.USER.REGISTER_SUCCESS));
+
+            // 이메일 전송 상태에 따른 메시지 결정
+            let successMessage = Message.USER.REGISTER_SUCCESS;
+            if (createdUser.emailSent === false) {
+                successMessage = '회원가입이 완료되었습니다. 이메일 설정 문제로 인증 메일 전송에 실패했습니다. 관리자에게 문의하세요.';
+            }
+
+            return res.status(201).json(ApiResponse.success(userResponseDto, successMessage));
         } catch (error) {
             logger.withContext(req).error('회원가입 처리 중 오류', error);
             if (error instanceof UserEmailDuplicateError) {

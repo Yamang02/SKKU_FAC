@@ -190,6 +190,10 @@
     cursor: pointer;
     transition: all 0.3s ease;
     min-width: 120px;
+    position: relative;
+    outline: none;
+    border: none;
+    text-decoration: none;
 }
 
 .btn-primary {
@@ -210,6 +214,71 @@
 
 .btn-secondary:hover {
     background-color: #e5e7eb;
+}
+
+/* 등록 버튼 로딩 상태 */
+.btn-primary:disabled,
+.btn-primary.btn-loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+    position: relative;
+}
+
+.btn-primary.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: register-button-spinner 1s ease infinite;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+}
+
+@keyframes register-button-spinner {
+    from {
+        transform: translateY(-50%) rotate(0turn);
+    }
+    to {
+        transform: translateY(-50%) rotate(1turn);
+    }
+}
+
+/* 폼 비활성화 상태 */
+.artwork-register-container.form-disabled {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.artwork-register-container.form-disabled input,
+.artwork-register-container.form-disabled select,
+.artwork-register-container.form-disabled textarea,
+.artwork-register-container.form-disabled button:not(.btn-primary) {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 처리 중인 버튼만 활성화 */
+.artwork-register-container.form-disabled .btn-primary.processing {
+    pointer-events: auto;
+    opacity: 0.7;
+}
+
+/* 이미지 업로드 영역 비활성화 */
+.artwork-register-container.form-disabled .image-preview-container {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* 취소 버튼 비활성화 */
+.artwork-register-container.form-disabled .btn-secondary {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* 반응형 스타일 */
@@ -255,4 +324,135 @@
 .form-actions .form-error {
     margin-top: 1rem;
     text-align: center;
+}
+
+/* 작품 등록 성공 후 페이지 차단 스타일 */
+.artwork-success-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(2px);
+    cursor: not-allowed;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.artwork-success-overlay.hidden {
+    display: none;
+}
+
+.artwork-success-message {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-align: center;
+    font-size: 16px;
+    color: #28a745;
+    border: 2px solid #28a745;
+    animation: slideUp 0.5s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.artwork-success-message .success-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.artwork-success-message .success-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.artwork-success-message .success-subtitle {
+    color: #666;
+    font-size: 14px;
+}
+
+.artwork-success-message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 2s infinite;
+}
+
+/* 숨김 클래스 */
+.hidden {
+    display: none !important;
+}
+
+#artwork-success-overlay {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+#artwork-success-overlay .success-message {
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 성공 후 비활성화된 요소들 */
+.artwork-form-disabled input,
+.artwork-form-disabled button,
+.artwork-form-disabled select,
+.artwork-form-disabled textarea {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+/* 성공 메시지 스타일 강화 */
+.artwork-success-message {
+    position: relative;
+    overflow: hidden;
+}
+
+.artwork-success-message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
 }

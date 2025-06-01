@@ -28,26 +28,50 @@ function getNotificationContainer() {
  */
 export function showConfirm(message) {
     return new Promise((resolve) => {
-        const container = getNotificationContainer();
+        // 배경 오버레이 생성
+        const overlay = document.createElement('div');
+        overlay.className = 'confirm-modal-overlay';
+
+        // 확인 대화상자 생성
         const confirmBox = document.createElement('div');
         confirmBox.className = 'notification notification--confirm';
 
-        const messageElement = document.createElement('p');
-        messageElement.textContent = message;
-        confirmBox.appendChild(messageElement);
+        // 메시지를 제목과 본문으로 분리
+        const lines = message.split('\n');
+        const title = lines[0]; // 첫 번째 줄은 제목
+        const body = lines.slice(1).join('\n'); // 나머지는 본문
+
+        // 제목 요소 생성 (가운데 정렬)
+        if (title.trim()) {
+            const titleElement = document.createElement('div');
+            titleElement.className = 'confirm-title';
+            titleElement.textContent = title;
+            confirmBox.appendChild(titleElement);
+        }
+
+        // 본문 요소 생성
+        if (body.trim()) {
+            const messageElement = document.createElement('p');
+            messageElement.textContent = body;
+            confirmBox.appendChild(messageElement);
+        }
 
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'button-container--notification';
+
+        // 정리 함수
+        const cleanup = () => {
+            if (overlay.parentNode) {
+                document.body.removeChild(overlay);
+            }
+        };
 
         const confirmButton = document.createElement('button');
         confirmButton.textContent = '확인';
         confirmButton.className = 'confirm-button';
         confirmButton.onclick = () => {
             resolve(true);
-            container.removeChild(confirmBox);
-            if (!container.hasChildNodes()) {
-                document.body.removeChild(container);
-            }
+            cleanup();
         };
 
         const cancelButton = document.createElement('button');
@@ -55,16 +79,38 @@ export function showConfirm(message) {
         cancelButton.className = 'cancel-button';
         cancelButton.onclick = () => {
             resolve(false);
-            container.removeChild(confirmBox);
-            if (!container.hasChildNodes()) {
-                document.body.removeChild(container);
+            cleanup();
+        };
+
+        // ESC 키로 취소
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                resolve(false);
+                cleanup();
+                document.removeEventListener('keydown', handleKeyDown);
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+
+        // 오버레이 클릭으로 취소 (선택사항)
+        overlay.onclick = (e) => {
+            if (e.target === overlay) {
+                resolve(false);
+                cleanup();
+                document.removeEventListener('keydown', handleKeyDown);
             }
         };
 
-        buttonContainer.appendChild(confirmButton);
         buttonContainer.appendChild(cancelButton);
+        buttonContainer.appendChild(confirmButton);
         confirmBox.appendChild(buttonContainer);
-        container.appendChild(confirmBox);
+        overlay.appendChild(confirmBox);
+        document.body.appendChild(overlay);
+
+        // 포커스를 취소 버튼에 설정 (안전한 기본값)
+        setTimeout(() => {
+            cancelButton.focus();
+        }, 100);
     });
 }
 

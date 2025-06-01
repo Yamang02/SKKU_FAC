@@ -85,11 +85,19 @@
     </div>
 
     <div class="form-actions">
-        <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
-        <button type="submit" id="submit-button" class="btn btn-primary">등록하기</button>
+        <button type="button" class="btn btn-secondary" id="cancel-button" onclick="handleCancelClick()">취소</button>
+        <button type="button" id="submit-button" class="btn btn-primary">등록하기</button>
     </div>
     <div id="formError" class="form-error"></div>
-    <div>
-    </div>
+</div>
 
-    <script type="module" src="/js/page/artwork/ArtworkRegister.js"></script>
+<!-- 작품 등록 성공 후 오버레이 (미리 정의, 숨김 상태) -->
+<div id="artwork-success-overlay" class="artwork-success-overlay hidden">
+    <div class="artwork-success-message">
+        <i class="fas fa-check-circle success-icon"></i>
+        <div class="success-title">작품 등록이 완료되었습니다!</div>
+        <div class="success-subtitle">잠시 후 성공 페이지로 이동합니다...</div>
+    </div>
+</div>
+
+<script type="module" src="/js/page/artwork/ArtworkRegister.js"></script>
