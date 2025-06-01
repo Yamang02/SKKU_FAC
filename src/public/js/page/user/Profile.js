@@ -5,10 +5,103 @@
 import UserApi from '../../api/UserApi.js';
 import { showLoading, showErrorMessage, showSuccessMessage, showConfirm } from '../../common/util/notification.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 사용자 정보를 저장할 전역 변수
-    let userData = null;
+// 계정 삭제 처리 상태 관리
+let isDeletingAccount = false;
+let originalBeforeUnload = null;
 
+// 사용자 정보를 저장할 전역 변수
+let userData = null;
+
+/**
+ * 계정 삭제 처리 중 페이지 이탈 방지
+ */
+function preventAccountDeletionPageUnload() {
+    isDeletingAccount = true;
+    originalBeforeUnload = window.onbeforeunload;
+    window.onbeforeunload = function (e) {
+        if (!isDeletingAccount) return undefined;
+        const message = '계정 삭제 처리 중입니다. 페이지를 떠나시겠습니까?';
+        e.returnValue = message;
+        return message;
+    };
+
+    // 키보드 이벤트 차단
+    document.addEventListener('keydown', handleAccountDeletionKeyboardEvents, true);
+
+    // 페이지 전체 비활성화
+    const body = document.body;
+    if (body) {
+        body.classList.add('account-deletion-processing');
+    }
+}
+
+/**
+ * 계정 삭제 처리 완료 후 페이지 이탈 방지 해제
+ */
+function allowAccountDeletionPageUnload() {
+    isDeletingAccount = false;
+    window.onbeforeunload = originalBeforeUnload;
+    document.removeEventListener('keydown', handleAccountDeletionKeyboardEvents, true);
+
+    // 페이지 활성화
+    const body = document.body;
+    if (body) {
+        body.classList.remove('account-deletion-processing');
+    }
+}
+
+/**
+ * 계정 삭제 처리 중 키보드 이벤트 차단
+ */
+function handleAccountDeletionKeyboardEvents(e) {
+    if (!isDeletingAccount) return;
+
+    // F5, Ctrl+R (새로고침) 차단
+    if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+        e.preventDefault();
+        e.stopPropagation();
+        showErrorMessage('계정 삭제 처리 중에는 새로고침할 수 없습니다.');
+        return false;
+    }
+
+    // Ctrl+W (탭 닫기) 차단
+    if (e.ctrlKey && e.key === 'w') {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+
+    // Backspace (뒤로가기) 차단 (입력 필드가 아닌 경우)
+    if (e.key === 'Backspace' &&
+        !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) &&
+        !e.target.isContentEditable) {
+        e.preventDefault();
+        e.stopPropagation();
+        showErrorMessage('계정 삭제 처리 중에는 뒤로갈 수 없습니다.');
+        return false;
+    }
+}
+
+/**
+ * 계정 삭제 확인 프로세스
+ */
+async function performAccountDeletionWithConfirmation() {
+    // 1단계: 최종 확인
+    const confirmed = await showConfirm(
+        '⚠️ 계정 삭제 경고\n\n' +
+        '계정을 삭제하면 다음 데이터가 삭제됩니다.\n\n' +
+        '• 프로필 정보\n' +
+        '• 등록한 모든 작품\n' +
+        '• 출품 기록\n' +
+        '• 기타 모든 활동 내역\n\n' +
+        '이 작업은 되돌릴 수 없습니다.\n' +
+        '정말로 계정을 삭제하시겠습니까?'
+    );
+
+    return confirmed;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     // 사용자 프로필 정보 가져오기
     fetchUserProfile();
 
@@ -140,23 +233,67 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 계정 삭제 처리 - showConfirm 사용
+    // 계정 삭제 처리 - 강화된 보안 로직 적용
     if (deleteAccountBtn) {
         deleteAccountBtn.addEventListener('click', async () => {
-            const confirmed = await showConfirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');
+            // 중복 클릭 방지
+            if (isDeletingAccount) {
+                showErrorMessage('이미 계정 삭제 처리 중입니다. 잠시만 기다려주세요.');
+                return;
+            }
+
+            // 사용자 데이터가 로드되지 않은 경우
+            if (!userData) {
+                showErrorMessage('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+
+            // 다단계 확인 프로세스 실행
+            const confirmed = await performAccountDeletionWithConfirmation();
             if (!confirmed) {
                 return;
             }
 
+            // 페이지 이탈 방지 활성화
+            preventAccountDeletionPageUnload();
+
+            // 버튼 상태 변경
+            const originalText = deleteAccountBtn.textContent;
+            deleteAccountBtn.disabled = true;
+            deleteAccountBtn.textContent = '계정 삭제 중...';
+            deleteAccountBtn.classList.add('btn-loading');
+
             try {
                 showLoading(true);
                 await UserApi.deleteAccount();
-                showSuccessMessage('계정이 성공적으로 삭제되었습니다. 로그인 페이지로 이동합니다.');
-                setTimeout(() => window.location.href = '/user/login', 3000);
+
+                showLoading(false);
+
+                // 성공 후 페이지 이탈 방지 완전 해제
+                allowAccountDeletionPageUnload();
+
+                // 성공 오버레이 표시
+                const overlay = document.getElementById('account-deletion-overlay');
+                if (overlay) {
+                    overlay.classList.remove('hidden');
+                }
+
+                // 3초 후 로그인 페이지로 리다이렉트 (beforeunload 없이)
+                setTimeout(() => {
+                    // 리다이렉트 직전에 모든 이벤트 리스너 완전 제거
+                    window.onbeforeunload = null;
+                    window.location.href = '/user/login';
+                }, 3000);
             } catch (error) {
                 showErrorMessage(error.message || '계정 삭제에 실패했습니다.');
-            } finally {
-                showLoading(false);
+
+                // 에러 발생 시 페이지 이탈 방지 해제
+                allowAccountDeletionPageUnload();
+
+                // 버튼 상태 복원
+                deleteAccountBtn.disabled = false;
+                deleteAccountBtn.textContent = originalText;
+                deleteAccountBtn.classList.remove('btn-loading');
             }
         });
     }

@@ -130,6 +130,68 @@ function initRelatedArtworks() {
     }
 }
 
+// 출품 관련 상태 관리
+let isSubmitting = false;
+let originalBeforeUnload = null;
+
+/**
+ * 출품 처리 중 페이지 이탈 방지
+ */
+function preventSubmissionPageUnload() {
+    isSubmitting = true;
+    originalBeforeUnload = window.onbeforeunload;
+    window.onbeforeunload = function (e) {
+        if (!isSubmitting) return undefined;
+        const message = '작품 출품 처리 중입니다. 페이지를 떠나시겠습니까?';
+        e.returnValue = message;
+        return message;
+    };
+
+    // 키보드 이벤트 차단
+    document.addEventListener('keydown', handleSubmissionKeyboardEvents, true);
+}
+
+/**
+ * 출품 처리 완료 후 페이지 이탈 방지 해제
+ */
+function allowSubmissionPageUnload() {
+    isSubmitting = false;
+    window.onbeforeunload = originalBeforeUnload;
+    document.removeEventListener('keydown', handleSubmissionKeyboardEvents, true);
+}
+
+/**
+ * 출품 처리 중 키보드 이벤트 차단
+ */
+function handleSubmissionKeyboardEvents(e) {
+    if (!isSubmitting) return;
+
+    // F5, Ctrl+R (새로고침) 차단
+    if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+        e.preventDefault();
+        e.stopPropagation();
+        showErrorMessage('작품 출품 처리 중에는 새로고침할 수 없습니다.');
+        return false;
+    }
+
+    // Ctrl+W (탭 닫기) 차단
+    if (e.ctrlKey && e.key === 'w') {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+
+    // Backspace (뒤로가기) 차단 (입력 필드가 아닌 경우)
+    if (e.key === 'Backspace' &&
+        !['INPUT', 'TEXTAREA'].includes(e.target.tagName) &&
+        !e.target.isContentEditable) {
+        e.preventDefault();
+        e.stopPropagation();
+        showErrorMessage('작품 출품 처리 중에는 뒤로갈 수 없습니다.');
+        return false;
+    }
+}
+
 // 페이지 초기화
 initPage();
 
@@ -181,7 +243,22 @@ async function loadArtworkDetail() {
                 submitButton.textContent = '출품하기';
                 submitButton.className = 'btn btn-submit'; // 클래스 추가
                 submitButton.onclick = async () => {
-                    await submitArtworkToExhibition(artwork.id, exhibition.id);
+                    // 버튼 비활성화 및 로딩 상태 표시
+                    const originalText = submitButton.textContent;
+                    submitButton.disabled = true;
+                    submitButton.textContent = '출품 중...';
+                    submitButton.classList.add('btn-loading');
+
+                    try {
+                        await submitArtworkToExhibition(artwork.id, exhibition.id);
+                    } finally {
+                        // 버튼 상태 복원 (페이지 새로고침되지 않은 경우)
+                        if (!isSubmitting) {
+                            submitButton.disabled = false;
+                            submitButton.textContent = originalText;
+                            submitButton.classList.remove('btn-loading');
+                        }
+                    }
                 };
 
                 // 전시회 제목 추가
@@ -212,7 +289,22 @@ async function loadArtworkDetail() {
                     cancelButton.textContent = '출품 취소';
                     cancelButton.className = 'btn btn-cancel';
                     cancelButton.onclick = async () => {
-                        await cancelSubmission(artwork.id, exhibition.id);
+                        // 버튼 비활성화 및 로딩 상태 표시
+                        const originalText = cancelButton.textContent;
+                        cancelButton.disabled = true;
+                        cancelButton.textContent = '취소 중...';
+                        cancelButton.classList.add('btn-loading');
+
+                        try {
+                            await cancelSubmission(artwork.id, exhibition.id);
+                        } finally {
+                            // 버튼 상태 복원 (페이지 새로고침되지 않은 경우)
+                            if (!isSubmitting) {
+                                cancelButton.disabled = false;
+                                cancelButton.textContent = originalText;
+                                cancelButton.classList.remove('btn-loading');
+                            }
+                        }
                     };
 
                     // 전시회 제목 추가
@@ -243,7 +335,16 @@ async function loadArtworkDetail() {
 
 // 출품 취소 함수
 async function cancelSubmission(artworkId, exhibitionId) {
+    // 중복 클릭 방지
+    if (isSubmitting) {
+        showErrorMessage('이미 처리 중입니다. 잠시만 기다려주세요.');
+        return;
+    }
+
     try {
+        // 페이지 이탈 방지 활성화
+        preventSubmissionPageUnload();
+
         const response = await ArtworkApi.cancelArtworkSubmission(artworkId, exhibitionId);
         if (response.success) {
             showSuccessMessage('출품이 취소되었습니다.');
@@ -255,12 +356,24 @@ async function cancelSubmission(artworkId, exhibitionId) {
     } catch (error) {
         console.error('출품 취소 중 오류:', error);
         showErrorMessage('출품 취소 중 오류가 발생했습니다.');
+    } finally {
+        // 페이지 이탈 방지 해제
+        allowSubmissionPageUnload();
     }
 }
 
 // 출품 함수
 async function submitArtworkToExhibition(artworkId, exhibitionId) {
+    // 중복 클릭 방지
+    if (isSubmitting) {
+        showErrorMessage('이미 처리 중입니다. 잠시만 기다려주세요.');
+        return;
+    }
+
     try {
+        // 페이지 이탈 방지 활성화
+        preventSubmissionPageUnload();
+
         const response = await ArtworkApi.submitArtworkToExhibition(artworkId, exhibitionId);
         if (response.success) {
             showSuccessMessage('출품이 완료되었습니다.');
@@ -271,6 +384,9 @@ async function submitArtworkToExhibition(artworkId, exhibitionId) {
     } catch (error) {
         console.error('출품 중 오류:', error);
         showErrorMessage('출품 중 오류가 발생했습니다.');
+    } finally {
+        // 페이지 이탈 방지 해제
+        allowSubmissionPageUnload();
     }
 }
 
@@ -391,15 +507,7 @@ async function saveArtworkChanges() {
  * 작품 삭제 확인 함수
  */
 function confirmDeleteArtwork() {
-    // 확인 모달이 표시되기 전에 오버레이 추가
-    const overlay = document.createElement('div');
-    overlay.className = 'confirm-overlay';
-    document.body.appendChild(overlay);
-
     showConfirm('정말로 이 작품을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.').then(result => {
-        // 확인 모달 응답 후 오버레이 제거
-        document.body.removeChild(overlay);
-
         if (result) {
             deleteArtwork();
         }

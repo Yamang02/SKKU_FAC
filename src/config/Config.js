@@ -32,8 +32,7 @@ class Config {
         this.sensitiveKeys = new Set([
             'database.password',
             'storage.apiSecret',
-            'session.secret',
-            'email.pass'
+            'session.secret'
         ]);
 
         this.loadMasterKey();
@@ -310,6 +309,14 @@ class Config {
                 console.warn(`⚠️ 환경 변수 파일 접근 중 오류 발생 (${envFile}):`, error.message);
             }
         }
+
+        // 이메일 관련 환경 변수 확인
+        console.log('📧 이메일 환경 변수 로딩 상태:', {
+            EMAIL_USER: process.env.EMAIL_USER ? `${process.env.EMAIL_USER.substring(0, 3)}***@${process.env.EMAIL_USER.split('@')[1] || 'unknown'}` : 'undefined',
+            EMAIL_PASS: process.env.EMAIL_PASS ? `설정됨 (${process.env.EMAIL_PASS.length}자)` : 'undefined',
+            EMAIL_FROM: process.env.EMAIL_FROM || 'undefined',
+            ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'undefined'
+        });
 
         // 로딩 결과 요약
         if (this.loadedEnvFiles.length === 0) {
@@ -989,8 +996,7 @@ class Config {
         const sensitiveKeysToProcess = [
             'database.password',
             'storage.apiSecret',
-            'session.secret',
-            'email.pass'
+            'session.secret'
         ];
 
         for (const key of sensitiveKeysToProcess) {
@@ -1270,7 +1276,9 @@ class Config {
      * @returns {object} 이메일 설정 객체
      */
     getEmailConfig() {
-        return this.get('email') || {
+        // 이메일 비밀번호는 암호화하지 않고 직접 환경변수에서 가져옴
+        // Gmail 앱 비밀번호는 암호화 시 손상될 수 있음
+        return {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
             from: process.env.EMAIL_FROM,
