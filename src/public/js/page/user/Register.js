@@ -71,9 +71,6 @@ function handleKeyboardEvents(e) {
  * 성공 후 모든 사용자 상호작용 차단
  */
 function blockAllInteractions() {
-    // 페이지 이탈 방지 유지
-    preventPageUnload();
-
     // 미리 정의된 오버레이 표시
     const overlay = document.getElementById('success-overlay');
     if (overlay) {
@@ -369,6 +366,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 3초 후 로그인 페이지로 리다이렉트
             setTimeout(() => {
+                // 페이지 이동 전에 이탈 방지 해제
+                allowPageUnload();
                 window.location.href = '/user/login';
             }, 3000);
         } catch (error) {
