@@ -510,11 +510,11 @@ class Config {
                     const isStatic = staticPaths.some(path => req.path.startsWith(path));
 
                     if (isStatic) {
-                        // 정적파일: 더 관대한 제한 (강제새로고침 고려)
-                        return parseInt(process.env.RATE_LIMIT_STATIC_MAX, 10) || 500;
+                        // 정적파일: 전시회 감상 시나리오 고려 (이미지 다수 로딩)
+                        return parseInt(process.env.RATE_LIMIT_STATIC_MAX, 10) || 1200;
                     } else {
-                        // 일반 요청: 엄격한 제한
-                        return parseInt(process.env.RATE_LIMIT_MAX, 10) || 100;
+                        // 일반 요청: 실제 사용 패턴 고려
+                        return parseInt(process.env.RATE_LIMIT_MAX, 10) || 200;
                     }
                 },
                 message: (req) => {

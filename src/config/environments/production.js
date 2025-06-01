@@ -78,11 +78,10 @@ export default {
             const isStatic = staticPaths.some(path => req.path.startsWith(path));
 
             if (isStatic) {
-                // 정적파일: 프로덕션에서도 강제새로고침 고려하여 관대하게
-                return 200;
+                return 800;
             } else {
-                // 일반 요청: 엄격한 제한
-                return 50;
+                // 일반 요청: 피크 시간 고려
+                return 200;
             }
         },
         message: (req) => {
