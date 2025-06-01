@@ -1,0 +1,55 @@
+:root {
+    /* Colors */
+    /* 통일된 색상 변수 */
+    --color-primary: #004C3F;
+    --color-primary-dark: #003D32;
+    --color-primary-light: #00684A;
+    --color-secondary: #465B63;
+    --color-background: #fff;
+    --color-background-light: #f8f9fa;
+    --color-text-primary: #333;
+    --color-text-secondary: #555;
+    --color-text-tertiary: #666;
+    --color-border: #e0e0e0;
+    --color-white: #fff;
+
+    /* Layout */
+    --header-height: 60px;
+    --modal-max-width: 1200px;
+    --modal-max-height: 80vh;
+    --container-width: 1400px;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    /* Border Radius */
+    --border-radius: 4px;
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 16px;
+    --border-radius-el: 24px;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgb(0 0 0 / 10%);
+    --shadow-md: 0 4px 8px rgb(0 0 0 / 10%);
+    --shadow-lg: 0 8px 16px rgb(0 0 0 / 10%);
+
+    /* Transitions */
+    --transition: all 0.3s ease;
+    --transition-fast: 0.2s;
+    --transition-normal: 0.3s;
+    --transition-slow: 0.5s;
+
+    /* Z-index */
+    --z-index-dropdown: 1000;
+    --z-index-sticky: 1020;
+    --z-index-fixed: 1030;
+    --z-index-modal-backdrop: 1040;
+    --z-index-modal: 1050;
+    --z-index-popover: 1060;
+    --z-index-tooltip: 1070;
+}

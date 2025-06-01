@@ -1,0 +1,246 @@
+.content-section {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.section-content {
+    margin: 20px 0;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: #fff;
+}
+
+/* 썸네일 이미지 업로드 (100%) */
+#exhibition-thumbnail-preview {
+    grid-column: span 12; /* 전체 열을 차지하도록 설정 */
+    margin-bottom: 1.5rem;
+    margin-top: 0;
+    width: 500px;
+    height: 500px;
+    justify-self: center;
+}
+
+/* 제목(70%) + 전시유형(30%) */
+.title-group {
+    grid-column: span 8; /* 제목 필드 8칸 차지 */
+}
+
+.type-group {
+    grid-column: span 4; /* 전시 유형 필드 4칸 차지 */
+}
+
+/* 장소(70%) + 주요 전시회 여부(30%) */
+.location-group {
+    grid-column: span 8; /* 장소 필드 8칸 차지 */
+}
+
+.featured-group {
+    grid-column: span 4; /* 주요 전시회 여부 필드 4칸 차지 */
+}
+
+/* 시작일(50%) + 종료일(50%) */
+.start-date-group,
+.end-date-group {
+    grid-column: span 6; /* 시작일과 종료일 각각 6칸 차지 */
+}
+
+/* 설명(100%) */
+.description-group {
+    grid-column: span 12; /* 설명 필드는 전체 열을 차지하도록 설정 */
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 1.5rem;
+}
+
+/* 출품가능 여부(50%) */
+.submission-group {
+    grid-column: span 6; /* 출품 가능 여부 필드 6칸 차지 */
+}
+
+/* ID(40%) + 생성일(30%) + 수정일(30%) */
+.id-group {
+    grid-column: span 5; /* ID 필드 5칸 차지 */
+    order: 10;
+}
+
+.created-at-group {
+    grid-column: span 4; /* 생성일 필드 4칸 차지 */
+    order: 11;
+}
+
+.updated-at-group {
+    grid-column: span 3; /* 수정일 필드 3칸 차지 */
+    order: 12;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group .required {
+    color: #dc3545;
+    margin-left: 4px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    background-color: #fff;
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-group input[readonly],
+.form-group select[disabled],
+.form-group textarea[readonly] {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+/* 생성 모드에서의 입력 필드 스타일 */
+.form-grid[data-mode="create"] input:not([readonly]),
+.form-grid[data-mode="create"] select:not([disabled]),
+.form-grid[data-mode="create"] textarea:not([readonly]) {
+    background-color: #fff;
+}
+
+/* 수정 모드에서의 입력 필드 스타일 */
+.form-grid.editing input:not([readonly]),
+.form-grid.editing select:not([disabled]),
+.form-grid.editing textarea:not([readonly]) {
+    background-color: #fff;
+}
+
+/* 관리 버튼 스타일링 */
+.section-footer {
+    margin-top: 2rem;
+    padding: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.admin-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* 썸네일 미리보기 스타일 */
+.exhibition-thumbnail-preview {
+    padding: 1.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fafafa;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #999;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.exhibition-thumbnail-preview h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.thumbnail-image {
+    max-width: 250px;
+    max-height: 500px;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 버튼 스타일 */
+.admin-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.admin-button--primary {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.admin-button--primary:hover {
+    background-color: #0069d9;
+}
+
+.admin-button--danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.admin-button--danger:hover {
+    background-color: #c82333;
+}
+
+.admin-button--backtolist {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.admin-button--backtolist:hover {
+    background-color: #5a6268;
+}
+
+.thumbnail-header {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.cancel-thumbnail {
+    color: #dc3545;
+    font-size: 0.9rem;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.cancel-thumbnail:hover {
+    text-decoration: underline;
+}
+

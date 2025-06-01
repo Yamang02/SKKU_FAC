@@ -1,0 +1,611 @@
+/* User 페이지 공통 스타일 */
+.page-container-user {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--spacing-md);
+    min-height: calc(100vh - var(--header-height));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+}
+
+.page-content-user {
+    background-color: white;
+    padding: var(--spacing-xl);
+    width: 100%;
+    max-width: 600px;
+}
+
+.page-card-user {
+    width: 100%;
+}
+
+.page-title-user {
+    font-size: 2rem;
+    color: var(--color-text-primary);
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* 폼 스타일 */
+.form-user {
+    margin-bottom: 2rem;
+}
+
+/* 기본 form-group 스타일 (로그인/회원가입/비밀번호 찾기용) */
+.form-group-user {
+    margin-bottom: 1.5rem;
+}
+
+.form-label-user {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+}
+
+.form-control-user {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: white;
+}
+
+.form-control-user:focus {
+    outline: none;
+    border-color: var(--primary-color, #4A90E2);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.form-control-user.readonly {
+    background-color: var(--bg-color-light);
+    cursor: not-allowed;
+}
+
+/* 비밀번호 입력 그룹 */
+.password-input-group-user {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-group-user .form-control-user {
+    padding-right: 2.5rem;
+}
+
+.toggle-password-user {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.toggle-password-user:hover {
+    color: var(--color-text-primary);
+}
+
+/* 체크박스 스타일 */
+.form-check-user {
+    margin: 1rem 0;
+}
+
+.form-check-wrapper-user {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-check-input-user {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+}
+
+.form-check-label-user {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+/* 공통 버튼 스타일 */
+.btn-primary-user,
+.btn-secondary-user,
+.btn-danger-user {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    border: none;
+    min-width: 120px;
+    text-decoration: none;
+}
+
+.btn-primary-user {
+    background-color: var(--primary-color, #4A90E2);
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary-user:hover {
+    background-color: var(--primary-color-dark, #357ABD);
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary-user {
+    background-color: var(--secondary-color, #f5f5f5);
+    color: var(--color-text-primary, #333) !important;
+    border: 1px solid var(--border-color, #e0e0e0);
+}
+
+.btn-secondary-user:hover {
+    background-color: var(--secondary-color-dark, #e0e0e0);
+    color: var(--color-text-primary, #333) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-danger-user {
+    background-color: var(--danger-color, #dc3545);
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-danger-user:hover {
+    background-color: var(--danger-color-dark, #c82333);
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 버튼 아이콘 스타일 */
+.btn-primary-user i,
+.btn-secondary-user i,
+.btn-danger-user i {
+    font-size: 1rem;
+}
+
+/* 버튼 그룹 스타일 */
+.button-group-user {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: nowrap;
+}
+
+.button-group-user.button-group--vertical-user {
+    flex-direction: column;
+    width: 100%;
+}
+
+/* 모달 스타일 */
+.modal-user {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content-user {
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+}
+
+.modal-header-user {
+    margin-bottom: 1rem;
+}
+
+.modal-title-user {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.modal-body-user {
+    margin-bottom: 1.5rem;
+    color: var(--color-text-primary);
+}
+
+.modal-footer-user {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+/* 링크 스타일 */
+.form-links-user {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.link-user {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+}
+
+.link-user:hover {
+    color: var(--primary-color);
+}
+
+/* 알림 스타일 */
+.alert-danger-user,
+.alert-success-user {
+    padding: 1rem;
+    border-radius: var(--border-radius-md);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.alert-danger-user {
+    background-color: var(--color-danger-light);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+}
+
+.alert-success-user {
+    background-color: var(--color-success-light);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+}
+
+/* 프로필 페이지 스타일 */
+.profile-info-user {
+    margin-bottom: 2rem;
+}
+
+.profile-group-user {
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color, #e0e0e0);
+}
+
+.profile-group-user::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--primary-color);
+    border-radius: 2px;
+    opacity: 0.7;
+}
+
+.profile-label-user {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color, #e0e0e0);
+}
+
+.profile-value-user {
+    padding: 0.75rem;
+    background-color: var(--bg-color-light, #f8f9fa);
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: 6px;
+    color: var(--color-text-primary);
+    font-size: 1rem;
+}
+
+.profile-actions-user {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2.5rem;
+}
+
+/* 프로필 페이지 form-group 스타일 */
+.profile-page .form-group-user {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color, #e0e0e0);
+}
+
+/* 프로필 수정 페이지 form-group 스타일 */
+.profile-edit-page .form-group-user {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color, #e0e0e0);
+}
+
+/* 프로필 페이지 그리드 */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-grid .profile-group-user:nth-child(3) {
+    grid-column: 1 / -1;
+}
+
+.profile-grid .student-info-group {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.profile-grid .student-info-group .profile-group-user:first-child {
+    flex: 7;
+}
+
+.profile-grid .student-info-group .profile-group-user:last-child {
+    flex: 3;
+}
+
+.profile-grid .role-info-group {
+    display: flex;
+    gap: 1rem;
+    grid-column: 1 / -1;
+}
+
+.profile-grid .role-info-group .profile-group-user {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* 프로필 수정 페이지 그리드 */
+.profile-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-edit-grid .form-group-user:nth-child(3) {
+    grid-column: 1 / -1;
+}
+
+.profile-edit-grid .student-info-group {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.profile-edit-grid .student-info-group .form-group-user:first-child {
+    flex: 7;
+}
+
+.profile-edit-grid .student-info-group .form-group-user:last-child {
+    flex: 3;
+}
+
+/* 비밀번호 섹션 스타일 */
+.password-section {
+    margin-top: 1.5rem;
+}
+
+.password-section .form-group-user {
+    margin-bottom: 1rem;
+}
+
+.password-section .form-group-user:last-child {
+    margin-bottom: 0;
+}
+
+/* 학번 입력 그룹 */
+.student-info-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.student-info-group .form-group-user {
+    flex: 1;
+}
+
+/* User 도메인 링크 스타일 재정의 */
+.page-container-user a.btn-primary-user,
+.page-container-user a.btn-secondary-user,
+.page-container-user a.btn-danger-user {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    .page-container-user {
+        padding: var(--spacing-md);
+        align-items: flex-start;
+    }
+
+    .page-content-user {
+        padding: var(--spacing-lg);
+    }
+
+    .page-title-user {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-actions-user {
+        flex-direction: column;
+    }
+
+    .button-group-user {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-primary-user,
+    .btn-secondary-user,
+    .btn-danger-user {
+        width: 100%;
+        padding: 0.6rem 1rem;
+    }
+
+    .form-links-user {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .profile-grid,
+    .profile-edit-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .profile-grid .student-info-group,
+    .profile-edit-grid .student-info-group,
+    .profile-grid .role-info-group {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .profile-grid .student-info-group .profile-group-user,
+    .profile-edit-grid .student-info-group .form-group-user,
+    .profile-grid .role-info-group .profile-group-user {
+        flex: 1;
+    }
+}
+
+/* 계정 삭제 모달 스타일 */
+.delete-account-modal-user {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.delete-account-modal-user.show {
+    display: flex;
+    opacity: 1;
+    visibility: visible;
+}
+
+.delete-account-modal-user .modal-content-user {
+    background-color: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+.delete-account-modal-user.show .modal-content-user {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.delete-account-modal-user .modal-header-user {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.delete-account-modal-user .modal-title-user {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.delete-account-modal-user .modal-close-user {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.delete-account-modal-user .modal-close-user:hover {
+    color: var(--color-text-primary);
+}
+
+.delete-account-modal-user .modal-body-user {
+    margin-bottom: 1.5rem;
+    color: var(--color-text-primary);
+    text-align: center;
+}
+
+.delete-account-modal-user .modal-footer-user {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .delete-account-modal-user .modal-content-user {
+        width: calc(100% - 2rem);
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    .delete-account-modal-user .modal-footer-user {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .delete-account-modal-user .modal-footer-user .btn-secondary-user,
+    .delete-account-modal-user .modal-footer-user .btn-danger-user {
+        width: 100%;
+    }
+}

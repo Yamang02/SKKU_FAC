@@ -6,4 +6,13 @@
 <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="/css/style.css">
+
+<!-- Vite 빌드된 CSS 사용 -->
+<% if (typeof viteAssets !=='undefined' && viteAssets.css && viteAssets.css.length> 0) { %>
+    <% viteAssets.css.forEach(function(cssFile) { %>
+        <link rel="stylesheet" href="/assets/<%= cssFile.replace('assets/', '') %>">
+        <% }); %>
+            <% } else { %>
+                <!-- Fallback CSS (manifest 파일을 찾을 수 없는 경우) -->
+                <link rel="stylesheet" href="/css/main.css">
+                <% } %>

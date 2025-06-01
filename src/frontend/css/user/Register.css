@@ -1,0 +1,310 @@
+/* 회원가입 페이지 고유 스타일 */
+.btn-block-user {
+    width: 100%;
+    display: flex;
+}
+
+.student-info-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.student-info-group .form-group-user {
+    flex: 1;
+}
+
+.form-description-user {
+    font-size: 0.8rem;
+    color: #c71c1c;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 480px) {
+    .student-info-group {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .student-info-group .form-group-user {
+        width: 100%;
+    }
+}
+
+/* 학과와 학번 입력 필드 레이아웃 */
+.input-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+    width: 100%;
+}
+
+.input-col {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.input-col.department {
+    grid-column: 1;
+}
+
+.input-col.student-year {
+    grid-column: 2;
+}
+
+/* 체크박스 그룹 스타일 */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* 비밀번호 입력 필드 그룹 스타일 */
+.password-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-input-group .form-control-user {
+    width: 100%;
+    padding-right: 40px; /* 토글 버튼을 위한 여백 */
+}
+
+.password-input-group .toggle-password-user {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+
+.password-input-group .toggle-password-user:hover {
+    color: #333;
+}
+
+/* 버튼 로딩 상태 */
+.btn-primary-user:disabled,
+.btn-primary-user.btn-loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+    position: relative;
+}
+
+/* 버튼 비활성화 상태 (필수 필드 미입력) */
+.btn-primary-user.btn-disabled {
+    background-color: #cccccc;
+    border-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+    opacity: 0.6;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary-user.btn-disabled:hover {
+    background-color: #cccccc;
+    border-color: #cccccc;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-primary-user.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: button-loading-spinner 1s ease infinite;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+}
+
+@keyframes button-loading-spinner {
+    from {
+        transform: translateY(-50%) rotate(0turn);
+    }
+    to {
+        transform: translateY(-50%) rotate(1turn);
+    }
+}
+
+/* 폼 비활성화 상태 */
+.form-user.form-disabled {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.form-user.form-disabled input,
+.form-user.form-disabled select,
+.form-user.form-disabled button {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 성공 후 페이지 차단 스타일 */
+.success-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(2px);
+    cursor: not-allowed;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.success-overlay.hidden {
+    display: none;
+}
+
+.success-message {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-align: center;
+    font-size: 16px;
+    color: #28a745;
+    border: 2px solid #28a745;
+    animation: slideUp 0.5s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.success-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.success-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.success-subtitle {
+    color: #666;
+    font-size: 14px;
+}
+
+.success-message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 2s infinite;
+}
+
+/* 숨김 클래스 */
+.hidden {
+    display: none !important;
+}
+
+#success-overlay {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+#success-overlay .success-message {
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 성공 후 비활성화된 요소들 */
+.form-disabled input,
+.form-disabled button,
+.form-disabled select,
+.form-disabled textarea {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+/* 성공 메시지 스타일 강화 */
+.success-message {
+    position: relative;
+    overflow: hidden;
+}
+
+.success-message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* 입력 필드 검증 상태 스타일 */
+.form-control-user.is-valid {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.form-control-user.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-control-user.is-valid:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.form-control-user.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}

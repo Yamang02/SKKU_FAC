@@ -1,0 +1,86 @@
+/* 관리자 페이지 유틸리티 클래스 */
+
+/* 마진 유틸리티 */
+.m-0 { margin: 0; }
+.m-1 { margin: var(--admin-spacing-xs); }
+.m-2 { margin: var(--admin-spacing-sm); }
+.m-3 { margin: var(--admin-spacing-md); }
+.m-4 { margin: var(--admin-spacing-lg); }
+.m-5 { margin: var(--admin-spacing-xl); }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--admin-spacing-xs); }
+.mt-2 { margin-top: var(--admin-spacing-sm); }
+.mt-3 { margin-top: var(--admin-spacing-md); }
+.mt-4 { margin-top: var(--admin-spacing-lg); }
+.mt-5 { margin-top: var(--admin-spacing-xl); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--admin-spacing-xs); }
+.mb-2 { margin-bottom: var(--admin-spacing-sm); }
+.mb-3 { margin-bottom: var(--admin-spacing-md); }
+.mb-4 { margin-bottom: var(--admin-spacing-lg); }
+.mb-5 { margin-bottom: var(--admin-spacing-xl); }
+
+/* 패딩 유틸리티 */
+.p-0 { padding: 0; }
+.p-1 { padding: var(--admin-spacing-xs); }
+.p-2 { padding: var(--admin-spacing-sm); }
+.p-3 { padding: var(--admin-spacing-md); }
+.p-4 { padding: var(--admin-spacing-lg); }
+.p-5 { padding: var(--admin-spacing-xl); }
+
+/* 디스플레이 유틸리티 */
+.d-none { display: none; }
+.d-block { display: block; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+.d-flex { display: flex; }
+.d-inline-flex { display: inline-flex; }
+
+/* 플렉스 유틸리티 */
+.flex-row { flex-direction: row; }
+.flex-column { flex-direction: column; }
+.justify-content-start { justify-content: flex-start; }
+.justify-content-end { justify-content: flex-end; }
+.justify-content-center { justify-content: center; }
+.justify-content-between { justify-content: space-between; }
+.justify-content-around { justify-content: space-around; }
+.align-items-start { align-items: flex-start; }
+.align-items-end { align-items: flex-end; }
+.align-items-center { align-items: center; }
+.align-items-baseline { align-items: baseline; }
+.align-items-stretch { align-items: stretch; }
+
+/* 배경색 유틸리티 */
+.bg-primary { background-color: var(--admin-color-primary); }
+.bg-secondary { background-color: var(--admin-color-secondary); }
+.bg-success { background-color: var(--admin-color-success); }
+.bg-danger { background-color: var(--admin-color-danger); }
+.bg-warning { background-color: var(--admin-color-warning); }
+.bg-info { background-color: var(--admin-color-info); }
+.bg-light { background-color: var(--admin-color-light); }
+.bg-dark { background-color: var(--admin-color-dark); }
+.bg-white { background-color: var(--admin-color-white); }
+
+/* 테두리 유틸리티 */
+.border { border: 1px solid var(--admin-color-border); }
+.border-0 { border: 0; }
+.rounded { border-radius: var(--admin-border-radius-md); }
+.rounded-sm { border-radius: var(--admin-border-radius-sm); }
+.rounded-lg { border-radius: var(--admin-border-radius-lg); }
+
+/* 그림자 유틸리티 */
+.shadow-sm { box-shadow: var(--admin-shadow-sm); }
+.shadow { box-shadow: var(--admin-shadow-md); }
+.shadow-lg { box-shadow: var(--admin-shadow-lg); }
+
+/* 포인터 유틸리티 */
+.cursor-pointer { cursor: pointer; }
+.cursor-default { cursor: default; }
+.cursor-not-allowed { cursor: not-allowed; }
+
+/* 오버플로우 유틸리티 */
+.overflow-auto { overflow: auto; }
+.overflow-hidden { overflow: hidden; }
+.overflow-scroll { overflow: scroll; }

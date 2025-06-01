@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 
 import { cspConfig, rateLimitConfig, staticFileConfig } from '../../config/security.js';
 import { createUploadDirs } from '../utils/createUploadDirs.js';
+import { getAssets } from '../utils/viteHelper.js';
 import logger from '../utils/Logger.js';
 import Config from '../../config/Config.js';
 
@@ -37,6 +38,19 @@ export function setupBasicMiddleware(app, swaggerDocument) {
     // Rate Limiter
     app.use(rateLimit(rateLimitConfig));
 
+    // Vite assets 정보를 모든 템플릿에서 사용할 수 있도록 추가
+    app.use((req, res, next) => {
+        const assets = getAssets('main.js');
+        res.locals.viteAssets = assets;
+
+        // 개발환경에서 디버깅 정보 출력
+        if (process.env.NODE_ENV === 'development') {
+            logger.info('Vite Assets:', assets);
+        }
+
+        next();
+    });
+
     // Swagger UI
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -63,9 +77,14 @@ export function setupBasicMiddleware(app, swaggerDocument) {
  */
 function setupStaticFiles(app) {
     const publicPath = path.resolve(__dirname, '../../public');
+    const distPath = path.resolve(__dirname, '../../../dist');
 
+    // Vite 빌드된 파일들 제공 (모든 환경에서)
+    app.use('/assets', express.static(path.join(distPath, 'assets'), staticFileConfig));
+    logger.info('Vite 빌드된 assets 파일들을 제공합니다.');
+
+    // 기존 정적 파일들 (빌드되지 않은 파일들)
     app.use(express.static(publicPath, staticFileConfig));
-    app.use('/assets', express.static(path.join(publicPath, 'assets'), staticFileConfig));
     app.use('/css', express.static(path.join(publicPath, 'css'), staticFileConfig));
     app.use('/js', express.static(path.join(publicPath, 'js'), staticFileConfig));
     app.use('/images', express.static(path.join(publicPath, 'images'), staticFileConfig));
