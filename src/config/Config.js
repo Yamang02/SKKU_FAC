@@ -73,7 +73,8 @@ class Config {
                 version: Joi.string().pattern(/^\d+\.\d+\.\d+$/).required(),
                 port: Joi.number().integer().min(1).max(65535).required(),
                 environment: Joi.string().valid('development', 'test', 'staging', 'production').required(),
-                debug: Joi.boolean().optional()
+                debug: Joi.boolean().optional(),
+                baseUrl: Joi.string().uri().optional()
             }).required(),
 
             database: Joi.object({
@@ -439,7 +440,8 @@ class Config {
                 name: process.env.APP_NAME || 'SKKU Gallery',
                 version: process.env.APP_VERSION || '1.0.0',
                 port: parseInt(process.env.PORT, 10) || 3000,
-                environment: this.environment
+                environment: this.environment,
+                baseUrl: process.env.BASE_URL
             },
 
             // 데이터베이스 설정
