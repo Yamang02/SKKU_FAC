@@ -3,7 +3,6 @@ import { Message } from '../../../../common/constants/Message.js';
 import { ApiResponse } from '../../../common/model/ApiResponse.js';
 import UserRequestDto from '../../model/dto/UserRequestDto.js';
 import UserResponseDto from '../../model/dto/UserResponseDto.js';
-import UserService from '../../service/UserService.js';
 import {
     UserNotFoundError,
     UserValidationError,
@@ -11,12 +10,23 @@ import {
     UserUsernameDuplicateError,
     UserInactiveError,
     UserUnverifiedError,
-    UserBlockedError
+    UserBlockedError,
+    UserAuthError
 } from '../../../../common/error/UserError.js';
 import logger from '../../../../common/utils/Logger.js';
+
 export default class UserApiController {
-    constructor() {
-        this.userService = new UserService();
+    /**
+     * 의존성 정의 (컨테이너에서 자동 주입)
+     */
+    static dependencies = ['UserService'];
+
+    /**
+     * 생성자 - 의존성 주입
+     * @param {UserService} userService - 사용자 서비스
+     */
+    constructor(userService) {
+        this.userService = userService;
     }
 
     // === API 엔드포인트 ===
@@ -72,8 +82,9 @@ export default class UserApiController {
             logger.withContext(req).error('로그인 처리 중 오류', error);
             if (error instanceof UserNotFoundError) {
                 return res.status(404).json(ApiResponse.error(Message.USER.NOT_FOUND));
-            }
-            if (error instanceof UserInactiveError) {
+            } else if (error instanceof UserAuthError) {
+                return res.status(401).json(ApiResponse.error(Message.USER.AUTH_ERROR));
+            } else if (error instanceof UserInactiveError) {
                 return res.status(401).json(ApiResponse.error(Message.USER.INACTIVE_ERROR));
             } else if (error instanceof UserUnverifiedError) {
                 return res.status(401).json(ApiResponse.error(Message.USER.UNVERIFIED_ERROR));
@@ -97,7 +108,7 @@ export default class UserApiController {
             await SessionUtil.destroySession(req);
             return res.json(ApiResponse.success(null, Message.USER.LOGOUT_SUCCESS));
         } catch (error) {
-            console.error('Error logging out user:', error);
+            logger.withContext(req).error('로그아웃 처리 중 오류:', error);
             return res.status(500).json(ApiResponse.error(Message.USER.LOGOUT_ERROR));
         }
     }
@@ -112,10 +123,10 @@ export default class UserApiController {
             const user = await this.userService.getUserDetail(userId);
             return res.json(ApiResponse.success(user));
         } catch (error) {
+            logger.withContext(req).error('사용자 프로필 조회 중 오류:', error);
             if (error instanceof UserNotFoundError) {
                 return res.status(404).json(ApiResponse.error(Message.USER.NOT_FOUND));
             }
-            console.error('Error getting user profile:', error);
             return res.status(500).json(ApiResponse.error(Message.USER.PROFILE_ERROR));
         }
     }
@@ -130,10 +141,12 @@ export default class UserApiController {
             const updatedUser = await this.userService.updateUserProfile(userId, profileData);
             return res.json(ApiResponse.success(updatedUser, Message.USER.UPDATE_SUCCESS));
         } catch (error) {
+            logger.withContext(req).error('사용자 프로필 수정 중 오류:', error);
             if (error instanceof UserValidationError) {
                 return res.status(400).json(ApiResponse.error(Message.USER.VALIDATION_ERROR));
+            } else if (error instanceof UserNotFoundError) {
+                return res.status(404).json(ApiResponse.error(Message.USER.NOT_FOUND));
             }
-            console.error('Error updating user profile:', error);
             return res.status(500).json(ApiResponse.error(Message.USER.UPDATE_ERROR));
         }
     }
@@ -154,7 +167,7 @@ export default class UserApiController {
 
             return res.json(ApiResponse.success({ flash }));
         } catch (error) {
-            console.error('Error getting flash message:', error);
+            logger.withContext(req).error('플래시 메시지 조회 중 오류:', error);
             return res.status(500).json(ApiResponse.error('플래시 메시지를 가져오는 중 오류가 발생했습니다.'));
         }
     }
@@ -169,7 +182,12 @@ export default class UserApiController {
             await SessionUtil.destroySession(req);
             return res.json(ApiResponse.success(null, Message.USER.DELETE_SUCCESS));
         } catch (error) {
-            console.error('Error deleting user account:', error);
+            logger.withContext(req).error('사용자 계정 삭제 중 오류:', error);
+            if (error instanceof UserNotFoundError) {
+                return res.status(404).json(ApiResponse.error(Message.USER.NOT_FOUND));
+            } else if (error instanceof UserValidationError) {
+                return res.status(400).json(ApiResponse.error(error.message));
+            }
             return res.status(500).json(ApiResponse.error(Message.USER.DELETE_ERROR));
         }
     }
@@ -183,7 +201,12 @@ export default class UserApiController {
             const user = await this.userService.requestResetPassword(email);
             return res.json(ApiResponse.success(user, Message.USER.RESET_PASSWORD_REQUEST_SUCCESS));
         } catch (error) {
-            console.error('Error resetting password:', error);
+            logger.withContext(req).error('비밀번호 재설정 요청 중 오류:', error);
+            if (error instanceof UserNotFoundError) {
+                return res.status(404).json(ApiResponse.error(Message.USER.NOT_FOUND));
+            } else if (error instanceof UserValidationError) {
+                return res.status(400).json(ApiResponse.error(error.message));
+            }
             return res.status(500).json(ApiResponse.error(error.message));
         }
     }
@@ -207,7 +230,12 @@ export default class UserApiController {
 
             return res.json(ApiResponse.success({ username: user.username }, '아이디를 찾았습니다.'));
         } catch (error) {
-            console.error('아이디 찾기 중 오류:', error);
+            logger.withContext(req).error('아이디 찾기 중 오류:', error);
+            if (error instanceof UserNotFoundError) {
+                return res.status(404).json(ApiResponse.error('해당 이메일로 등록된 사용자가 없습니다.'));
+            } else if (error instanceof UserValidationError) {
+                return res.status(400).json(ApiResponse.error(error.message));
+            }
             return res.status(500).json(ApiResponse.error('아이디 찾기 중 오류가 발생했습니다.'));
         }
     }

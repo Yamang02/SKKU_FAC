@@ -3,12 +3,14 @@ import sessionStore from '../../infrastructure/session/SessionStore.js';
 import ErrorHandler from '../middleware/ErrorHandler.js';
 import { railwayErrorHandlerConfig } from '../../config/railwayMonitoringConfig.js';
 import Config from '../../config/Config.js';
+import serviceRegistry from '../container/ServiceRegistry.js';
 
 class AppInitializer {
     constructor(app) {
         this.app = app;
         this.initialized = false;
         this.config = Config.getInstance();
+        this.container = null;
     }
 
     /**
@@ -17,6 +19,9 @@ class AppInitializer {
     async initialize() {
         try {
             logger.info('애플리케이션 초기화 시작');
+
+            // 0. 의존성 주입 컨테이너 초기화
+            this.initializeDependencyContainer();
 
             // 1. 세션 초기화
             await this.initializeSession();
@@ -37,6 +42,29 @@ class AppInitializer {
             logger.error('애플리케이션 초기화 실패', error);
             throw error;
         }
+    }
+
+    /**
+     * 의존성 주입 컨테이너 초기화
+     */
+    initializeDependencyContainer() {
+        try {
+            this.container = serviceRegistry.registerServices();
+            logger.success('의존성 주입 컨테이너 초기화 완료');
+        } catch (error) {
+            logger.error('의존성 주입 컨테이너 초기화 실패', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 컨테이너에서 서비스를 해결합니다.
+     */
+    resolve(serviceName) {
+        if (!this.container) {
+            throw new Error('의존성 주입 컨테이너가 초기화되지 않았습니다.');
+        }
+        return this.container.resolve(serviceName);
     }
 
     /**
@@ -73,15 +101,18 @@ class AppInitializer {
      * 라우터 설정
      */
     setupRoutes() {
-        const { HomeRouter, ExhibitionRouter, ArtworkRouter, UserRouter, AdminRouter, AuthRouter } = this.getRouters();
+        // 의존성 주입된 라우터들 생성
+        const { createRouters } = this.getRouterFactory();
+        const routers = createRouters(this.container);
+
         const { isAdmin } = this.getMiddleware();
 
-        this.app.use('/', HomeRouter);
-        this.app.use('/exhibition', ExhibitionRouter);
-        this.app.use('/artwork', ArtworkRouter);
-        this.app.use('/user', UserRouter);
-        this.app.use('/admin', isAdmin, AdminRouter);
-        this.app.use('/auth', AuthRouter);
+        this.app.use('/', routers.HomeRouter);
+        this.app.use('/exhibition', routers.ExhibitionRouter);
+        this.app.use('/artwork', routers.ArtworkRouter);
+        this.app.use('/user', routers.UserRouter);
+        this.app.use('/admin', isAdmin, routers.AdminRouter);
+        this.app.use('/auth', routers.AuthRouter);
 
         logger.success('라우터 설정 완료');
     }
@@ -135,6 +166,14 @@ class AppInitializer {
     getMiddlewareSetupFunctions() {
         // 이 함수들은 app.js에서 주입받을 예정
         throw new Error('미들웨어 설정 함수들이 주입되지 않았습니다.');
+    }
+
+    /**
+     * 라우터 팩토리 반환 (외부에서 주입)
+     */
+    getRouterFactory() {
+        // 이 함수는 app.js에서 주입받을 예정
+        throw new Error('라우터 팩토리가 주입되지 않았습니다.');
     }
 
     /**

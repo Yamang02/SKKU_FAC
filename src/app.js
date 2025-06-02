@@ -9,7 +9,7 @@ import AppInitializer from './common/utils/AppInitializer.js';
 import { setupBasicMiddleware } from './common/middleware/setupMiddleware.js';
 
 // 라우터
-import { HomeRouter, ExhibitionRouter, ArtworkRouter, UserRouter, AdminRouter, AuthRouter, CommonRouter } from './routeIndex.js';
+import { createRouters } from './routeIndex.js';
 import { pageTracker } from './common/middleware/PageTracker.js';
 import { isAdmin } from './common/middleware/auth.js';
 import flash from 'connect-flash';
@@ -24,6 +24,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 헬스체크 엔드포인트 (가장 먼저 등록)
+// CommonRouter는 의존성 주입이 필요하지 않으므로 직접 import
+import CommonRouter from './domain/common/controller/CommonRouter.js';
 app.use('/', CommonRouter);
 
 // 기본 미들웨어 설정
@@ -72,8 +74,8 @@ appInitializer.getMiddlewareSetupFunctions = () => ({
 });
 
 // 라우터들을 AppInitializer에 주입
-appInitializer.getRouters = () => ({
-    HomeRouter, ExhibitionRouter, ArtworkRouter, UserRouter, AdminRouter, AuthRouter
+appInitializer.getRouterFactory = () => ({
+    createRouters
 });
 
 // 미들웨어들을 AppInitializer에 주입
