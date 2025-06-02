@@ -67,8 +67,16 @@ export default {
 
     rateLimit: {
         windowMs: 15 * 60 * 1000, // 15분
-        max: 200, // 프로덕션과 테스트 사이
-        skipPaths: ['/health', '/favicon.ico', '/staging']
+        max: 200, // 스테이징에서는 프로덕션보다 약간 관대
+        skipPaths: ['/health', '/favicon.ico', '/api/staging']
+    },
+
+    // JWT 설정 (스테이징 환경 - 프로덕션 준비)
+    jwt: {
+        accessTokenExpiry: '30m',     // 30분 (프로덕션보다 약간 여유)
+        refreshTokenExpiry: '14d',    // 14일 (프로덕션보다 길게)
+        issuer: 'skku-fac-gallery-staging',
+        audience: 'skku-fac-gallery-staging-users'
     },
 
     // 스테이징 환경 전용 설정

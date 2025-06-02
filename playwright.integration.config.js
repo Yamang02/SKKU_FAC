@@ -1,14 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * 기본 Playwright 설정 (E2E 테스트용)
- * 단위 테스트: playwright.unit.config.js 사용
- * 통합 테스트: playwright.integration.config.js 사용
+ * 통합 테스트용 Playwright 설정
+ * 웹서버를 실행하여 실제 HTTP 요청을 테스트합니다.
  */
 const isCI = !!process.env.CI;
 
 export default defineConfig({
-    testDir: './tests/e2e',
+    testDir: './tests/integration',
     /* 병렬 테스트 실행 */
     fullyParallel: true,
     /* CI에서 실패 시 재시도 비활성화 */
@@ -19,7 +18,7 @@ export default defineConfig({
     workers: isCI ? 1 : undefined,
     /* 리포터 설정 */
     reporter: 'html',
-    /* E2E 테스트용 설정 */
+    /* 통합 테스트용 설정 */
     use: {
         /* 기본 URL */
         baseURL: 'http://localhost:3000',
@@ -31,7 +30,7 @@ export default defineConfig({
         trace: 'on-first-retry'
     },
 
-    /* 프로젝트별 설정 - Chrome만 사용 */
+    /* Chrome만 사용 */
     projects: [
         {
             name: 'chromium',

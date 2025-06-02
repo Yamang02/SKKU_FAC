@@ -70,6 +70,14 @@ export default {
         skipPaths: ['/health', '/favicon.ico']
     },
 
+    // JWT 설정 (프로덕션 환경 - 보안 우선)
+    jwt: {
+        accessTokenExpiry: '15m',     // 15분 (보안 강화)
+        refreshTokenExpiry: '7d',     // 7일 (적절한 보안 수준)
+        issuer: 'skku-fac-gallery',
+        audience: 'skku-fac-gallery-users'
+    },
+
     // 프로덕션 환경 전용 설정
     performance: {
         enableCompression: true,

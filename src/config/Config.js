@@ -33,7 +33,9 @@ class Config {
             'database.password',
             'storage.apiSecret',
             'session.secret',
-            'email.pass'
+            'email.pass',
+            'jwt.accessTokenSecret',
+            'jwt.refreshTokenSecret'
         ]);
 
         this.loadMasterKey();
@@ -194,6 +196,25 @@ class Config {
                 enableTestRoutes: Joi.boolean().optional(),
                 enableTestDatabase: Joi.boolean().optional(),
                 resetDatabaseOnStart: Joi.boolean().optional()
+            }).optional(),
+
+            // JWT 설정 추가
+            jwt: Joi.object({
+                accessTokenSecret: Joi.string().min(32).required(),
+                refreshTokenSecret: Joi.string().min(32).required(),
+                accessTokenExpiry: Joi.string().optional().default('15m'),
+                refreshTokenExpiry: Joi.string().optional().default('7d'),
+                issuer: Joi.string().optional().default('skku-fac-gallery'),
+                audience: Joi.string().optional().default('skku-fac-gallery-users')
+            }).required(),
+
+            // OAuth 설정 추가
+            oauth: Joi.object({
+                google: Joi.object({
+                    clientID: Joi.string().optional(),
+                    clientSecret: Joi.string().optional(),
+                    callbackURL: Joi.string().optional().default('/auth/google/callback')
+                }).optional()
             }).optional(),
 
             features: Joi.object({
@@ -485,6 +506,25 @@ class Config {
                 windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000, // 15분
                 max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 300, // IP당 최대 요청 수
                 skipPaths: ['/health', '/favicon.ico']
+            },
+
+            // JWT 설정
+            jwt: {
+                accessTokenSecret: process.env.JWT_ACCESS_SECRET || 'default-access-secret-change-in-production',
+                refreshTokenSecret: process.env.JWT_REFRESH_SECRET || 'default-refresh-secret-change-in-production',
+                accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
+                refreshTokenExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
+                issuer: process.env.JWT_ISSUER || 'skku-fac-gallery',
+                audience: process.env.JWT_AUDIENCE || 'skku-fac-gallery-users'
+            },
+
+            // OAuth 설정
+            oauth: {
+                google: {
+                    clientID: process.env.GOOGLE_CLIENT_ID,
+                    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+                    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback'
+                }
             }
         };
     }
@@ -1350,14 +1390,49 @@ class Config {
      * @returns {object} 세션 설정 객체
      */
     getSessionConfig() {
-        return this.get('session') || {
-            secret: process.env.SESSION_SECRET || 'default-secret-key',
-            resave: false,
-            saveUninitialized: false,
-            cookie: {
-                secure: this.environment === 'production',
-                maxAge: parseInt(process.env.SESSION_MAX_AGE, 10) || 24 * 60 * 60 * 1000 // 24시간
-            }
+        return this.get('session', {});
+    }
+
+    /**
+     * JWT 설정 가져오기
+     * @returns {Object} JWT 설정 객체
+     */
+    getJwtConfig() {
+        return this.get('jwt', {
+            accessTokenSecret: process.env.JWT_ACCESS_SECRET || 'default-access-secret-change-in-production',
+            refreshTokenSecret: process.env.JWT_REFRESH_SECRET || 'default-refresh-secret-change-in-production',
+            accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
+            refreshTokenExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
+            issuer: process.env.JWT_ISSUER || 'skku-fac-gallery',
+            audience: process.env.JWT_AUDIENCE || 'skku-fac-gallery-users'
+        });
+    }
+
+    /**
+     * JWT Access Token 설정 가져오기
+     * @returns {Object} Access Token 설정
+     */
+    getJwtAccessTokenConfig() {
+        const jwtConfig = this.getJwtConfig();
+        return {
+            secret: jwtConfig.accessTokenSecret,
+            expiry: jwtConfig.accessTokenExpiry,
+            issuer: jwtConfig.issuer,
+            audience: jwtConfig.audience
+        };
+    }
+
+    /**
+     * JWT Refresh Token 설정 가져오기
+     * @returns {Object} Refresh Token 설정
+     */
+    getJwtRefreshTokenConfig() {
+        const jwtConfig = this.getJwtConfig();
+        return {
+            secret: jwtConfig.refreshTokenSecret,
+            expiry: jwtConfig.refreshTokenExpiry,
+            issuer: jwtConfig.issuer,
+            audience: jwtConfig.audience
         };
     }
 }

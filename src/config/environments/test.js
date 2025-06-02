@@ -66,8 +66,16 @@ export default {
 
     rateLimit: {
         windowMs: 15 * 60 * 1000, // 15분
-        max: 500, // 테스트 환경에서는 프로덕션보다 관대
-        skipPaths: ['/health', '/favicon.ico', '/test']
+        max: 10000, // 테스트에서는 매우 관대한 제한
+        skipPaths: ['/health', '/favicon.ico', '/api/test']
+    },
+
+    // JWT 설정 (테스트 환경 - 테스트 시나리오용)
+    jwt: {
+        accessTokenExpiry: '10m',     // 10분 (테스트 시나리오용)
+        refreshTokenExpiry: '1h',     // 1시간 (테스트 완료 후 빠른 만료)
+        issuer: 'skku-fac-gallery-test',
+        audience: 'skku-fac-gallery-test-users'
     },
 
     // 테스트 환경 전용 설정

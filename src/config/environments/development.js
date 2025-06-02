@@ -73,6 +73,14 @@ export default {
         skipPaths: ['/health', '/favicon.ico', '/api/dev']
     },
 
+    // JWT 설정 (개발 환경 - 편의성 우선)
+    jwt: {
+        accessTokenExpiry: '1h',      // 1시간 (개발 시 자주 만료되면 불편)
+        refreshTokenExpiry: '30d',    // 30일 (개발 편의성)
+        issuer: 'skku-fac-gallery-dev',
+        audience: 'skku-fac-gallery-dev-users'
+    },
+
     // 개발 환경 전용 설정
     devTools: {
         enableHotReload: true,

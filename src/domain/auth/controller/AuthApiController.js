@@ -211,4 +211,107 @@ export default class AuthApiController {
             return res.status(400).json(ApiResponse.error(error.message));
         }
     }
+
+    /**
+     * JWT 로그인 - 토큰 발급
+     */
+    async loginWithJWT(req, res) {
+        try {
+            const { email, password } = req.body;
+
+            if (!email || !password) {
+                return res.status(400).json(ApiResponse.error('이메일과 비밀번호를 입력해주세요.'));
+            }
+
+            // 사용자 인증
+            const user = await this.userService.authenticateUser(email, password);
+
+            // JWT 토큰 생성
+            const tokens = await this.authService.authenticateAndGenerateTokens(user);
+
+            return res.json(ApiResponse.success({
+                user: tokens.user,
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken
+            }, '로그인에 성공했습니다.'));
+
+        } catch (error) {
+            console.error('JWT 로그인 오류:', error);
+            return res.status(401).json(ApiResponse.error(error.message || '로그인에 실패했습니다.'));
+        }
+    }
+
+    /**
+     * JWT 토큰 갱신
+     */
+    async refreshJWTToken(req, res) {
+        try {
+            const { refreshToken } = req.body;
+
+            if (!refreshToken) {
+                return res.status(400).json(ApiResponse.error('리프레시 토큰이 필요합니다.'));
+            }
+
+            // 토큰 갱신
+            const tokens = await this.authService.refreshTokens(refreshToken);
+
+            return res.json(ApiResponse.success({
+                user: tokens.user,
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken
+            }, '토큰이 갱신되었습니다.'));
+
+        } catch (error) {
+            console.error('JWT 토큰 갱신 오류:', error);
+            return res.status(401).json(ApiResponse.error(error.message || '토큰 갱신에 실패했습니다.'));
+        }
+    }
+
+    /**
+     * JWT 토큰 검증
+     */
+    async verifyJWTToken(req, res) {
+        try {
+            const authHeader = req.headers.authorization;
+            const token = authHeader && authHeader.startsWith('Bearer ')
+                ? authHeader.substring(7)
+                : null;
+
+            if (!token) {
+                return res.status(400).json(ApiResponse.error('토큰이 필요합니다.'));
+            }
+
+            // 토큰 검증
+            const decoded = this.authService.verifyAccessToken(token);
+
+            return res.json(ApiResponse.success({
+                valid: true,
+                user: {
+                    id: decoded.id,
+                    username: decoded.username,
+                    email: decoded.email,
+                    role: decoded.role,
+                    isActive: decoded.isActive
+                }
+            }, '유효한 토큰입니다.'));
+
+        } catch (error) {
+            console.error('JWT 토큰 검증 오류:', error);
+            return res.status(401).json(ApiResponse.error(error.message || '유효하지 않은 토큰입니다.', { valid: false }));
+        }
+    }
+
+    /**
+     * JWT 로그아웃 (클라이언트 측에서 토큰 삭제)
+     */
+    async logoutJWT(req, res) {
+        try {
+            // JWT는 stateless이므로 서버에서 특별한 처리가 필요 없음
+            // 클라이언트에서 토큰을 삭제하도록 안내
+            return res.json(ApiResponse.success(null, '로그아웃되었습니다. 클라이언트에서 토큰을 삭제해주세요.'));
+        } catch (error) {
+            console.error('JWT 로그아웃 오류:', error);
+            return res.status(500).json(ApiResponse.error('로그아웃 처리 중 오류가 발생했습니다.'));
+        }
+    }
 }
