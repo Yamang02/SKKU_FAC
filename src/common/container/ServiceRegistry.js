@@ -1,9 +1,19 @@
 import { Container } from './Container.js';
 import UserRepository from '../../infrastructure/db/repository/UserAccountRepository.js';
+import TokenRepository from '../../infrastructure/db/repository/TokenRepository.js';
+import ArtworkRepository from '../../infrastructure/db/repository/ArtworkRepository.js';
+import ArtworkExhibitionRelationshipRepository from '../../infrastructure/db/repository/relationship/ArtworkExhibitionRelationshipRepository.js';
+import ExhibitionRepository from '../../infrastructure/db/repository/ExhibitionRepository.js';
 import AuthService from '../../domain/auth/service/AuthService.js';
 import UserService from '../../domain/user/service/UserService.js';
+import ArtworkService from '../../domain/artwork/service/ArtworkService.js';
+import ImageService from '../../domain/image/service/ImageService.js';
+import ExhibitionService from '../../domain/exhibition/service/ExhibitionService.js';
+import SystemManagementService from '../../domain/admin/service/system/SystemManagementService.js';
 import UserController from '../../domain/user/controller/UserController.js';
 import UserApiController from '../../domain/user/controller/api/UserApiController.js';
+import ArtworkController from '../../domain/artwork/controller/ArtworkController.js';
+import SystemManagementController from '../../domain/admin/controller/system/SystemManagementController.js';
 import logger from '../utils/Logger.js';
 
 /**
@@ -28,14 +38,27 @@ export class ServiceRegistry {
         try {
             // Repository 등록 (Singleton)
             this.container.registerSingleton('UserAccountRepository', UserRepository);
+            this.container.registerSingleton('tokenRepository', TokenRepository);
+            this.container.registerSingleton('userRepository', UserRepository);
+            this.container.registerSingleton('ArtworkRepository', ArtworkRepository);
+            this.container.registerSingleton('ArtworkExhibitionRelationshipRepository', ArtworkExhibitionRelationshipRepository);
+            this.container.registerSingleton('ExhibitionRepository', ExhibitionRepository);
 
-            // Service 등록 (Singleton)
-            this.container.registerSingleton('AuthService', AuthService);
-            this.container.registerSingleton('UserService', UserService);
+            // Service 등록 (의존성 없는 서비스는 일반 Singleton)
+            this.container.registerSingleton('ImageService', ImageService);
 
-            // Controller 등록 (Transient - 요청마다 새 인스턴스)
-            this.container.registerTransient('UserController', UserController);
-            this.container.registerTransient('UserApiController', UserApiController);
+            // Service 등록 (AutoWired Singleton - 의존성 자동 주입)
+            this.container.registerAutoWired('AuthService', AuthService, 'singleton');
+            this.container.registerAutoWired('UserService', UserService, 'singleton');
+            this.container.registerAutoWired('ExhibitionService', ExhibitionService, 'singleton');
+            this.container.registerAutoWired('ArtworkService', ArtworkService, 'singleton');
+            this.container.registerAutoWired('SystemManagementService', SystemManagementService, 'singleton');
+
+            // Controller 등록 (AutoWired Transient - 요청마다 새 인스턴스)
+            this.container.registerAutoWired('UserController', UserController, 'transient');
+            this.container.registerAutoWired('UserApiController', UserApiController, 'transient');
+            this.container.registerAutoWired('ArtworkController', ArtworkController, 'transient');
+            this.container.registerAutoWired('SystemManagementController', SystemManagementController, 'transient');
 
             this.isRegistered = true;
             logger.success('모든 서비스가 컨테이너에 등록되었습니다.');

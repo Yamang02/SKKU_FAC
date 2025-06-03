@@ -318,7 +318,8 @@ export default class ArtworkService {
      */
     async getFeaturedArtworks() {
         const FEATURED_LIMIT = 6;
-        const artworks = await this.artworkRepository.findFeaturedArtworks(FEATURED_LIMIT);
+        const result = await this.artworkRepository.findFeaturedArtworks(FEATURED_LIMIT);
+        const artworks = result.items || []; // pagination: false일 때 items 배열 추출
         const artworkSimpleList = [];
 
         for (const artwork of artworks) {

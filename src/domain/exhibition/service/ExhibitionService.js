@@ -15,10 +15,22 @@ import logger from '../../../common/utils/Logger.js';
  * 전시회 서비스
  */
 export default class ExhibitionService {
-    constructor() {
-        this.exhibitionRepository = new ExhibitionRepository();
-        this.imageService = new ImageService();
-        this.artworkExhibitionRelationshipRepository = new ArtworkExhibitionRelationshipRepository();
+    // 의존성 주입을 위한 static dependencies 정의
+    static dependencies = ['ExhibitionRepository', 'ImageService', 'ArtworkExhibitionRelationshipRepository'];
+
+    constructor(exhibitionRepository = null, imageService = null, artworkExhibitionRelationshipRepository = null) {
+        // 의존성 주입 방식 (새로운 방식)
+        if (exhibitionRepository && imageService && artworkExhibitionRelationshipRepository) {
+            this.exhibitionRepository = exhibitionRepository;
+            this.imageService = imageService;
+            this.artworkExhibitionRelationshipRepository = artworkExhibitionRelationshipRepository;
+        } else {
+            // 기존 방식 호환성 유지 (임시)
+            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
+            this.exhibitionRepository = new ExhibitionRepository();
+            this.imageService = new ImageService();
+            this.artworkExhibitionRelationshipRepository = new ArtworkExhibitionRelationshipRepository();
+        }
     }
 
     async getExhibitionsSimple(exhibitionIds) {

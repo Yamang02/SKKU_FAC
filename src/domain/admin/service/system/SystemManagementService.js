@@ -9,9 +9,20 @@ import Page from '../../../common/model/Page.js';
  * 관리자 기능에 대한 비즈니스 로직을 처리합니다.
  */
 export default class SystemManagementService {
-    constructor() {
-        this.userService = new UserService();
-        this.artworkService = new ArtworkService();
+    // 의존성 주입을 위한 static dependencies 정의
+    static dependencies = ['UserService', 'ArtworkService'];
+
+    constructor(userService = null, artworkService = null) {
+        // 의존성 주입 방식 (새로운 방식)
+        if (userService && artworkService) {
+            this.userService = userService;
+            this.artworkService = artworkService;
+        } else {
+            // 기존 방식 호환성 유지 (임시)
+            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
+            this.userService = new UserService();
+            this.artworkService = new ArtworkService();
+        }
     }
 
     /**

@@ -1,8 +1,8 @@
 import HomeRouter from './domain/home/controller/HomeRouter.js';
 import ExhibitionRouter from './domain/exhibition/controller/ExhibitionRouter.js';
-import ArtworkRouter from './domain/artwork/controller/ArtworkRouter.js';
+import { createArtworkRouter } from './domain/artwork/controller/ArtworkRouter.js';
 import { createUserRouter } from './domain/user/controller/UserRouter.js';
-import AdminRouter from './domain/admin/controller/AdminRouter.js';
+import { createAdminRouter } from './domain/admin/controller/AdminRouter.js';
 import AuthRouter from './domain/auth/controller/AuthRouter.js';
 import CommonRouter from './domain/common/controller/CommonRouter.js';
 
@@ -19,6 +19,8 @@ export function createRouters(container) {
 
     // 라우터들 생성
     const UserRouter = createUserRouter(userController, userApiController);
+    const ArtworkRouter = createArtworkRouter(container);
+    const AdminRouter = createAdminRouter(container);
 
     return {
         HomeRouter,
@@ -30,6 +32,3 @@ export function createRouters(container) {
         CommonRouter
     };
 }
-
-// 기존 방식과의 호환성을 위한 export (임시)
-export { HomeRouter, ExhibitionRouter, ArtworkRouter, AdminRouter, AuthRouter, CommonRouter };

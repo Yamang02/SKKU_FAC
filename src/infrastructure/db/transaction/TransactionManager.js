@@ -1,4 +1,4 @@
-import db from '../adapter/database.js';
+import { db } from '../adapter/MySQLDatabase.js';
 import logger from '../../../common/utils/Logger.js';
 
 /**

@@ -8,22 +8,27 @@ import Page from '../../common/model/Page.js';
 import UserListManagementDto from '../../admin/model/dto/user/UserListManagementDto.js';
 import UserManagementDto from '../../admin/model/dto/user/UserManagementDto.js';
 import logger from '../../../common/utils/Logger.js';
+import UserAccountRepository from '../../../infrastructure/db/repository/UserAccountRepository.js';
+import AuthService from '../../auth/service/AuthService.js';
 
 /**
  * 사용자 서비스
  * 사용자 관련 비즈니스 로직을 처리합니다.
  */
 export default class UserService {
+    // 의존성 주입을 위한 static dependencies 정의
     static dependencies = ['UserAccountRepository', 'AuthService'];
 
     constructor(userRepository, authService) {
-        // 의존성 주입 검증
+        // 의존성 주입 검증 - 의존성이 없으면 기본 인스턴스 생성
         if (!userRepository || !authService) {
-            throw new Error('UserService requires UserAccountRepository and AuthService dependencies');
+            // 기존 방식 호환성 유지 (임시)
+            this.userRepository = new UserAccountRepository();
+            this.authService = new AuthService();
+        } else {
+            this.userRepository = userRepository;
+            this.authService = authService;
         }
-
-        this.userRepository = userRepository;
-        this.authService = authService;
     }
 
     /**
