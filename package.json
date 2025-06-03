@@ -44,11 +44,20 @@
         "test:railway:validation": "cross-env TEST_ENVIRONMENT=railway playwright test tests/unit/middleware/validation-middleware.spec.js --project=chromium",
         "test:unit": "playwright test --config=playwright.unit.config.js --reporter=html",
         "test:unit:auth": "playwright test tests/unit/auth/ --config=playwright.unit.config.js --reporter=html",
+        "test:unit:repository": "playwright test tests/unit/repository/ --config=playwright.unit.config.js --reporter=list",
         "test:integration": "playwright test --config=playwright.integration.config.js --reporter=html",
+        "test:integration:repository": "playwright test tests/integration/repository-integration.spec.js --config=playwright.integration.config.js --reporter=list",
         "test:e2e": "playwright test --config=playwright.config.js --reporter=html",
         "test:auth-unit": "playwright test tests/unit/auth/ --config=playwright.unit.config.js --reporter=list",
         "test:auth-features": "node scripts/test-auth-features.js",
-        "test:auth-full": "npm run test:auth-unit && npm run test:auth && npm run test:user-roles"
+        "test:auth-full": "npm run test:auth-unit && npm run test:auth && npm run test:user-roles",
+        "test:repository": "npm run test:unit:repository && npm run test:integration:repository",
+        "test:unit:service": "playwright test tests/unit/service/ --config=playwright.unit.config.js --reporter=list",
+        "test:service": "npm run test:unit:service",
+        "test:artwork-domain": "npm run test:unit:service && npm run test:unit:repository",
+        "test:unit:transaction": "playwright test tests/unit/transaction/ --config=playwright.unit.config.js --reporter=list",
+        "test:transaction": "npm run test:unit:transaction",
+        "test:transaction-management": "npm run test:unit:transaction && npm run test:unit:repository"
     },
     "dependencies": {
         "all": "^0.0.0",
