@@ -8,8 +8,6 @@ import Page from '../../common/model/Page.js';
 import UserListManagementDto from '../../admin/model/dto/user/UserListManagementDto.js';
 import UserManagementDto from '../../admin/model/dto/user/UserManagementDto.js';
 import logger from '../../../common/utils/Logger.js';
-import UserAccountRepository from '../../../infrastructure/db/repository/UserAccountRepository.js';
-import AuthService from '../../auth/service/AuthService.js';
 
 /**
  * 사용자 서비스
@@ -19,16 +17,13 @@ export default class UserService {
     static dependencies = ['UserAccountRepository', 'AuthService'];
 
     constructor(userRepository, authService) {
-        // 의존성 주입 방식 (새로운 방식)
-        if (userRepository && authService) {
-            this.userRepository = userRepository;
-            this.authService = authService;
-        } else {
-            // 기존 방식 호환성 유지 (임시)
-            // TODO: Artwork 도메인 리팩토링 시 제거 예정
-            this.userRepository = new UserAccountRepository();
-            this.authService = new AuthService();
+        // 의존성 주입 검증
+        if (!userRepository || !authService) {
+            throw new Error('UserService requires UserAccountRepository and AuthService dependencies');
         }
+
+        this.userRepository = userRepository;
+        this.authService = authService;
     }
 
     /**

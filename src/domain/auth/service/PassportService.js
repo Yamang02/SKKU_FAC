@@ -8,8 +8,18 @@ import config from '../../../config/index.js';
  * Passport.js 인증 전략 서비스
  */
 export default class PassportService {
-    constructor() {
-        this.userService = new UserService();
+    // 의존성 주입을 위한 static dependencies 정의
+    static dependencies = ['UserService'];
+
+    constructor(userService = null) {
+        // 의존성 주입 방식 (새로운 방식)
+        if (userService) {
+            this.userService = userService;
+        } else {
+            // 기존 방식 호환성 유지 (임시)
+            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
+            this.userService = new UserService();
+        }
         this.initializeStrategies();
     }
 

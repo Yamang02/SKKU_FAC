@@ -3,24 +3,38 @@ import ArtworkExhibitionRelationshipRepository from '../../../infrastructure/db/
 import ImageService from '../../image/service/ImageService.js';
 import UserService from '../../user/service/UserService.js';
 import ExhibitionService from '../../exhibition/service/ExhibitionService.js';
+import TransactionManager from '../../../infrastructure/db/transaction/TransactionManager.js';
 import { ArtworkNotFoundError, ArtworkValidationError } from '../../../common/error/ArtworkError.js';
 import ArtworkDetailDto from '../model/dto/ArtworkDetailDto.js';
 import ArtworkSimpleDto from '../model/dto/ArtworkSimpleDto.js';
 import { v4 as uuidv4 } from 'uuid';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
 import Page from '../../common/model/Page.js';
-import { db } from '../../../infrastructure/db/adapter/MySQLDatabase.js';
 /**
  * 작품 서비스
  * 작품 관련 비즈니스 로직을 처리합니다.
  */
 export default class ArtworkService {
-    constructor() {
-        this.artworkRepository = new ArtworkRepository();
-        this.artworkExhibitionRelationshipRepository = new ArtworkExhibitionRelationshipRepository();
-        this.imageService = new ImageService();
-        this.userService = new UserService();
-        this.exhibitionService = new ExhibitionService();
+    // 의존성 주입을 위한 static dependencies 정의
+    static dependencies = ['ArtworkRepository', 'ArtworkExhibitionRelationshipRepository', 'ImageService', 'UserService', 'ExhibitionService'];
+
+    constructor(artworkRepository = null, artworkExhibitionRelationshipRepository = null, imageService = null, userService = null, exhibitionService = null) {
+        // 의존성 주입 방식 (새로운 방식)
+        if (artworkRepository && artworkExhibitionRelationshipRepository && imageService && userService && exhibitionService) {
+            this.artworkRepository = artworkRepository;
+            this.artworkExhibitionRelationshipRepository = artworkExhibitionRelationshipRepository;
+            this.imageService = imageService;
+            this.userService = userService;
+            this.exhibitionService = exhibitionService;
+        } else {
+            // 기존 방식 호환성 유지 (임시)
+            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
+            this.artworkRepository = new ArtworkRepository();
+            this.artworkExhibitionRelationshipRepository = new ArtworkExhibitionRelationshipRepository();
+            this.imageService = new ImageService();
+            this.userService = new UserService();
+            this.exhibitionService = new ExhibitionService();
+        }
     }
 
     /**
@@ -224,8 +238,6 @@ export default class ArtworkService {
      * 새로운 작품을 생성합니다.
      */
     async createArtwork(artworkData, file) {
-        const transaction = await db.transaction();
-
         if (!artworkData.title) {
             throw new ArtworkValidationError('작품 제목은 필수입니다.');
         }
@@ -236,20 +248,22 @@ export default class ArtworkService {
         artworkData.imagePublicId = uploadedImage.publicId;
         artworkData.imageUrl = uploadedImage.imageUrl;
 
-        try {
+        return await TransactionManager.executeInTransaction(async (transaction) => {
             const artwork = await this.artworkRepository.createArtwork(artworkData, { transaction });
+
             if (artworkData.exhibitionId !== '') {
-                const result = await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(artwork.id, artworkData.exhibitionId, { transaction });
+                const result = await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(
+                    artwork.id,
+                    artworkData.exhibitionId,
+                    { transaction }
+                );
                 if (!result) {
                     throw new ArtworkValidationError('작품 출품 중 오류가 발생했습니다.');
                 }
             }
-            await transaction.commit();
+
             return new ArtworkSimpleDto(artwork);
-        } catch (error) {
-            await transaction.rollback();
-            throw error;
-        }
+        });
     }
 
     /**
