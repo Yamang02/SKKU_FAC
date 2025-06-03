@@ -1,4 +1,4 @@
-import { ArtworkExhibitionRelationship } from '../../model/entity/EntitityIndex.js';
+import { ArtworkExhibitionRelationship, Artwork } from '../../model/entity/EntitityIndex.js';
 import TransactionManager from '../../transaction/TransactionManager.js';
 
 export default class ArtworkExhibitionRelationshipRepository {
@@ -34,6 +34,40 @@ export default class ArtworkExhibitionRelationshipRepository {
                 artworkId
             }
         });
+    }
+
+    /**
+     * 전시회에 속한 작품들을 페이지네이션과 함께 조회합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {Object} options - 페이지네이션 옵션
+     * @returns {Promise<Object>} 작품 목록과 페이지네이션 정보
+     */
+    async findArtworksByExhibitionId(exhibitionId, options = {}) {
+        const { page = 1, limit = 10 } = options;
+        const offset = (page - 1) * limit;
+
+        const { count, rows } = await ArtworkExhibitionRelationship.findAndCountAll({
+            where: {
+                exhibitionId
+            },
+            include: [{
+                model: Artwork,
+                required: true
+            }],
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+            order: [['createdAt', 'DESC']]
+        });
+
+        return {
+            items: rows.map(relationship => relationship.Artwork),
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(count / limit),
+                totalItems: count,
+                itemsPerPage: parseInt(limit)
+            }
+        };
     }
 
     async countArtworksInExhibition(exhibitionId) {

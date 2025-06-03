@@ -63,6 +63,45 @@ export default class ExhibitionService {
         return exhibitionSimpleDtos;
     }
 
+    /**
+     * ID로 전시회를 조회합니다.
+     * @param {number} id - 전시회 ID
+     * @returns {Promise<ExhibitionResponseDto>} 전시회 상세 정보
+     */
+    async getExhibitionById(id) {
+        const exhibition = await this.exhibitionRepository.findExhibitionById(id);
+        if (!exhibition) {
+            throw new ExhibitionNotFoundError(`ID가 ${id}인 전시회를 찾을 수 없습니다.`);
+        }
+        return new ExhibitionResponseDto(exhibition);
+    }
+
+    /**
+     * 전시회에 출품된 작품 목록을 조회합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {Object} options - 페이지네이션 옵션
+     * @returns {Promise<Object>} 작품 목록과 페이지네이션 정보
+     */
+    async getExhibitionArtworks(exhibitionId, options = {}) {
+        try {
+            const { page = 1, limit = 10 } = options;
+
+            // 전시회 존재 확인
+            await this.getExhibitionById(exhibitionId);
+
+            // 전시회에 속한 작품들을 관계 테이블을 통해 조회
+            const result = await this.artworkExhibitionRelationshipRepository.findArtworksByExhibitionId(
+                exhibitionId,
+                { page, limit }
+            );
+
+            return result;
+        } catch (error) {
+            logger.error('전시회 작품 목록 조회 중 오류:', error);
+            throw error;
+        }
+    }
+
     // ===== 관리자용 메서드 =====
     /**
      * 새로운 전시회를 생성합니다.
@@ -105,7 +144,7 @@ export default class ExhibitionService {
             // 전시회 목록 조회
             return await this.exhibitionRepository.findExhibitions(filterOptions);
         } catch (error) {
-            console.error('전시회 목록 조회 중 오류:', error);
+            logger.error('전시회 목록 조회 중 오류:', error);
             throw error;
         }
     }
@@ -121,7 +160,7 @@ export default class ExhibitionService {
                 ...exhibitionData
             });
         } catch (error) {
-            console.error('전시회 생성 중 오류:', error);
+            logger.error('전시회 생성 중 오류:', error);
             throw error;
         }
     }
@@ -137,7 +176,7 @@ export default class ExhibitionService {
             const updatedExhibition = await this.exhibitionRepository.updateExhibition(id, exhibitionData);
             return updatedExhibition;
         } catch (error) {
-            console.error('전시회 수정 중 오류:', error);
+            logger.error('전시회 수정 중 오류:', error);
             throw error;
         }
     }
@@ -172,13 +211,13 @@ export default class ExhibitionService {
 
             return deleteResult;
         } catch (error) {
-            console.error('전시회 삭제 중 오류:', error);
+            logger.error('전시회 삭제 중 오류:', error);
             throw error;
         }
     }
 
     /**
-     * 전시회 정보를 수정합니다.
+     * 전시회 정보를 수정합니다. (레거시 메서드 - updateManagementExhibition 사용 권장)
      * @param {number} id - 전시회 ID
      * @param {ExhibitionRequestDto} exhibitionDto - 전시회 수정 데이터
      * @returns {Promise<ExhibitionResponseDto>} 수정된 전시회 정보
@@ -193,7 +232,7 @@ export default class ExhibitionService {
     }
 
     /**
-     * 전시회를 삭제합니다.
+     * 전시회를 삭제합니다. (레거시 메서드 - deleteManagementExhibition 사용 권장)
      * @param {string} id - 전시회 ID
      * @returns {Promise<void>}
      */
@@ -236,7 +275,7 @@ export default class ExhibitionService {
 
             return exhibitionListDtos;
         } catch (error) {
-            console.error('전시회 목록 조회 중 오류:', error);
+            logger.error('전시회 목록 조회 중 오류:', error);
             throw error;
         }
     }
@@ -259,16 +298,127 @@ export default class ExhibitionService {
         return exhibitions.map(exhibition => new ExhibitionSimpleDto(exhibition));
     }
 
+    // ===== 전시회 상태 관리 메서드 =====
     /**
-     * ID로 전시회를 조회합니다.
-     * @param {number} id - 전시회 ID
-     * @returns {Promise<ExhibitionResponseDto>} 전시회 상세 정보
+     * 전시회의 현재 상태를 계산합니다.
+     * @param {Object} exhibition - 전시회 객체
+     * @returns {string} 전시회 상태
      */
-    async getExhibitionById(id) {
-        const exhibition = await this.exhibitionRepository.findExhibitionById(id);
-        if (!exhibition) {
-            throw new ExhibitionNotFoundError(`ID가 ${id}인 전시회를 찾을 수 없습니다.`);
+    calculateExhibitionStatus(exhibition) {
+        const now = new Date();
+        const startDate = new Date(exhibition.startDate);
+        const endDate = new Date(exhibition.endDate);
+
+        // 전시 종료
+        if (now > endDate) {
+            return 'completed';
         }
-        return new ExhibitionResponseDto(exhibition);
+
+        // 전시 진행 중
+        if (now >= startDate && now <= endDate) {
+            return 'active';
+        }
+
+        // 전시 시작 전
+        if (now < startDate) {
+            if (exhibition.isSubmissionOpen) {
+                return 'submission_open';
+            } else {
+                return 'planning';
+            }
+        }
+
+        return 'planning';
+    }
+
+    /**
+     * 전시회 상태 전환이 유효한지 검증합니다.
+     * @param {string} currentStatus - 현재 상태
+     * @param {string} newStatus - 새로운 상태
+     * @returns {boolean} 전환 가능 여부
+     */
+    isValidStatusTransition(currentStatus, newStatus) {
+        const validTransitions = {
+            'planning': ['submission_open'],
+            'submission_open': ['planning', 'review'],
+            'review': ['active'],
+            'active': ['completed'],
+            'completed': [] // 완료된 전시회는 상태 변경 불가
+        };
+
+        return validTransitions[currentStatus]?.includes(newStatus) || false;
+    }
+
+    /**
+     * 전시회의 작품 제출 상태를 안전하게 변경합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {boolean} isOpen - 제출 열림 여부
+     * @returns {Promise<Object>} 업데이트된 전시회
+     */
+    async updateSubmissionStatus(exhibitionId, isOpen) {
+        try {
+            const exhibition = await this.getExhibitionById(exhibitionId);
+            const currentStatus = this.calculateExhibitionStatus(exhibition);
+
+            // 전시가 이미 시작되었거나 완료된 경우 제출 상태 변경 불가
+            if (currentStatus === 'active' || currentStatus === 'completed') {
+                throw new Error('진행 중이거나 완료된 전시회의 작품 제출 상태는 변경할 수 없습니다.');
+            }
+
+            return await this.updateManagementExhibition(exhibitionId, {
+                isSubmissionOpen: isOpen
+            });
+        } catch (error) {
+            logger.error('전시회 제출 상태 변경 실패:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 전시회의 주요 전시회 상태를 안전하게 변경합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {boolean} isFeatured - 주요 전시회 여부
+     * @returns {Promise<Object>} 업데이트된 전시회
+     */
+    async updateFeaturedStatus(exhibitionId, isFeatured) {
+        try {
+            const exhibition = await this.getExhibitionById(exhibitionId);
+            const currentStatus = this.calculateExhibitionStatus(exhibition);
+
+            // 완료된 전시회는 주요 전시회 상태 변경 불가
+            if (currentStatus === 'completed') {
+                throw new Error('완료된 전시회의 주요 전시회 상태는 변경할 수 없습니다.');
+            }
+
+            return await this.updateManagementExhibition(exhibitionId, {
+                isFeatured: isFeatured
+            });
+        } catch (error) {
+            logger.error('전시회 주요 상태 변경 실패:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 전시회 상태와 함께 전시회 정보를 조회합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @returns {Promise<Object>} 전시회 정보와 상태
+     */
+    async getExhibitionWithStatus(exhibitionId) {
+        try {
+            const exhibition = await this.getExhibitionById(exhibitionId);
+            const status = this.calculateExhibitionStatus(exhibition);
+
+            return {
+                ...exhibition,
+                currentStatus: status,
+                canSubmitArtworks: status === 'submission_open',
+                isActive: status === 'active',
+                isCompleted: status === 'completed'
+            };
+        } catch (error) {
+            logger.error('전시회 상태 조회 실패:', error);
+            throw error;
+        }
     }
 }
