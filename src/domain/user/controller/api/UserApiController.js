@@ -35,21 +35,31 @@ export default class UserApiController {
      */
     async registerUser(req, res) {
         try {
-            const { username, name, email, password, role, department, affiliation, studentYear, isClubMember } = req.body;
+            // 새로운 DTO 검증 미들웨어에서 제공하는 검증된 DTO 인스턴스 사용
+            const userDto = req.userDto;
 
-            // DTO 생성 시 role에 따라 추가 필드 설정
-            const userDto = new UserRequestDto({
-                username,
-                name,
-                email,
-                password,
-                role,
-                department: role === 'SKKU_MEMBER' ? department : null,
-                isClubMember: role === 'SKKU_MEMBER' ? isClubMember : false,
-                studentYear: role === 'SKKU_MEMBER' ? studentYear : null,
-                affiliation: role === 'EXTERNAL_MEMBER' ? affiliation : null
-            });
+            // DTO가 없는 경우 fallback (기존 방식)
+            if (!userDto) {
+                const { username, name, email, password, role, department, affiliation, studentYear, isClubMember } = req.body;
 
+                const fallbackDto = new UserRequestDto({
+                    username,
+                    name,
+                    email,
+                    password,
+                    role,
+                    department: role === 'SKKU_MEMBER' ? department : null,
+                    isClubMember: role === 'SKKU_MEMBER' ? isClubMember : false,
+                    studentYear: role === 'SKKU_MEMBER' ? studentYear : null,
+                    affiliation: role === 'EXTERNAL_MEMBER' ? affiliation : null
+                });
+
+                const createdUser = await this.userService.createUser(fallbackDto);
+                const userResponseDto = new UserResponseDto(createdUser);
+                return res.status(201).json(ApiResponse.success(userResponseDto, Message.USER.REGISTER_SUCCESS));
+            }
+
+            // 새로운 DTO 시스템 사용
             const createdUser = await this.userService.createUser(userDto);
             const userResponseDto = new UserResponseDto(createdUser);
             return res.status(201).json(ApiResponse.success(userResponseDto, Message.USER.REGISTER_SUCCESS));
@@ -71,7 +81,9 @@ export default class UserApiController {
      */
     async loginUser(req, res) {
         try {
-            const { username, password } = req.body;
+            // 새로운 DTO 검증 미들웨어에서 제공하는 검증된 데이터 사용
+            const { username, password } = req.userDto ? req.userDto.toPlainObject() : req.body;
+
             const user = await this.userService.authenticate(username, password);
 
             // 세션에 저장
@@ -136,8 +148,10 @@ export default class UserApiController {
      */
     async updateUserProfile(req, res) {
         try {
-            const profileData = req.body;
+            // 새로운 DTO 검증 미들웨어에서 제공하는 검증된 데이터 사용
+            const profileData = req.userDto ? req.userDto.toPlainObject() : req.body;
             const userId = req.session.user.id;
+
             const updatedUser = await this.userService.updateUserProfile(userId, profileData);
             return res.json(ApiResponse.success(updatedUser, Message.USER.UPDATE_SUCCESS));
         } catch (error) {
@@ -197,7 +211,9 @@ export default class UserApiController {
      */
     async resetPassword(req, res) {
         try {
-            const { email } = req.body;
+            // 새로운 DTO 검증 미들웨어에서 제공하는 검증된 데이터 사용
+            const { email } = req.userDto ? req.userDto.toPlainObject() : req.body;
+
             const user = await this.userService.requestResetPassword(email);
             return res.json(ApiResponse.success(user, Message.USER.RESET_PASSWORD_REQUEST_SUCCESS));
         } catch (error) {
@@ -216,7 +232,8 @@ export default class UserApiController {
      */
     async findUsername(req, res) {
         try {
-            const { email } = req.query;
+            // 새로운 DTO 검증 미들웨어에서 제공하는 검증된 데이터 사용
+            const { email } = req.emailDto ? req.emailDto.toPlainObject() : req.query;
 
             if (!email) {
                 return res.status(400).json(ApiResponse.error('이메일을 입력해주세요.'));
