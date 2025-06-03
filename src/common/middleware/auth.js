@@ -3,6 +3,7 @@ import { ViewPath } from '../constants/ViewPath.js';
 import { UserRole } from '../constants/UserRole.js';
 import RBACService from '../../domain/auth/service/rbacService.js';
 import { extractUserFromToken } from './jwtAuth.js';
+import { logUnauthorizedAccess } from './auditLogger.js';
 
 const rbacService = new RBACService();
 
@@ -39,6 +40,9 @@ export const isAuthenticated = async (req, res, next) => {
     await extractUser(req, res, () => { });
 
     if (!req.user) {
+        // 감사 로그 기록
+        logUnauthorizedAccess(req);
+
         if (req.xhr || req.headers.accept?.includes('application/json')) {
             return res.status(401).json({
                 success: false,
@@ -168,6 +172,48 @@ export const canUpdateArtwork = () => hasPermission(rbacService.permissions.ARTW
 export const canDeleteArtwork = () => hasPermission(rbacService.permissions.ARTWORK_DELETE);
 export const canManageUsers = () => hasPermission(rbacService.permissions.ADMIN_USERS);
 export const canAccessAdminPanel = () => hasPermission(rbacService.permissions.ADMIN_PANEL);
+
+// 새로운 세밀한 권한 체크 미들웨어들
+export const canViewAdminDashboard = () => hasPermission(rbacService.permissions.ADMIN_DASHBOARD);
+
+// 사용자 관리 권한
+export const canReadUsers = () => hasPermission(rbacService.permissions.ADMIN_USER_READ);
+export const canWriteUsers = () => hasPermission(rbacService.permissions.ADMIN_USER_WRITE);
+export const canManageUserDetails = () => hasPermission(rbacService.permissions.USER_VIEW_DETAILS);
+export const canResetUserPassword = () => hasPermission(rbacService.permissions.USER_RESET_PASSWORD);
+export const canDeleteUsers = () => hasPermission(rbacService.permissions.USER_DELETE);
+
+// 컨텐츠 관리 권한
+export const canReadContent = () => hasPermission(rbacService.permissions.ADMIN_CONTENT_READ);
+export const canWriteContent = () => hasPermission(rbacService.permissions.ADMIN_CONTENT_WRITE);
+export const canDeleteContent = () => hasPermission(rbacService.permissions.ADMIN_CONTENT_DELETE);
+
+// 작품 관리 권한
+export const canManageArtworks = () => hasPermission(rbacService.permissions.ADMIN_ARTWORK_MANAGEMENT);
+export const canViewArtworkDetails = () => hasPermission(rbacService.permissions.ARTWORK_VIEW_DETAILS);
+export const canModerateArtworks = () => hasPermission(rbacService.permissions.ARTWORK_MODERATE);
+export const canFeatureArtworks = () => hasPermission(rbacService.permissions.ARTWORK_FEATURE);
+
+// 전시회 관리 권한
+export const canManageExhibitions = () => hasPermission(rbacService.permissions.ADMIN_EXHIBITION_MANAGEMENT);
+export const canViewExhibitionDetails = () => hasPermission(rbacService.permissions.EXHIBITION_VIEW_DETAILS);
+export const canModerateExhibitions = () => hasPermission(rbacService.permissions.EXHIBITION_MODERATE);
+export const canFeatureExhibitions = () => hasPermission(rbacService.permissions.EXHIBITION_FEATURE);
+
+// 복합 권한 체크
+export const canManageUserManagement = () => hasAllPermissions([
+    rbacService.permissions.ADMIN_USER_MANAGEMENT,
+    rbacService.permissions.ADMIN_USER_READ,
+    rbacService.permissions.ADMIN_USER_WRITE
+]);
+
+export const canManageContentManagement = () => hasAllPermissions([
+    rbacService.permissions.ADMIN_CONTENT_READ,
+    rbacService.permissions.ADMIN_CONTENT_WRITE
+]);
+
+// 읽기 전용 체크
+export const isReadOnlyAdmin = () => hasPermission(rbacService.permissions.ADMIN_READ_ONLY);
 
 // RBAC 서비스 인스턴스 내보내기
 export { rbacService };

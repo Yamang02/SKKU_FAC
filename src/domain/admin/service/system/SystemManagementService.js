@@ -2,17 +2,19 @@ import UserService from '../../../user/service/UserService.js';
 import ArtworkService from '../../../artwork/service/ArtworkService.js';
 import TimeFormatter from '../../../../common/utils/TimeFormatter.js';
 import Page from '../../../common/model/Page.js';
-
+import BaseAdminService from '../BaseAdminService.js';
 
 /**
  * 관리자 서비스
  * 관리자 기능에 대한 비즈니스 로직을 처리합니다.
  */
-export default class SystemManagementService {
+export default class SystemManagementService extends BaseAdminService {
     // 의존성 주입을 위한 static dependencies 정의
     static dependencies = ['UserService', 'ArtworkService'];
 
     constructor(userService = null, artworkService = null) {
+        super('SystemManagementService');
+
         // 의존성 주입 방식 (새로운 방식)
         if (userService && artworkService) {
             this.userService = userService;
@@ -31,9 +33,9 @@ export default class SystemManagementService {
      * @returns {Promise<Object>} 대시보드 데이터
      */
     async getDashboardData(options = {}) {
-        const { page = 1, limit = 10 } = options;
+        return this.safeExecute(async () => {
+            const { page = 1, limit = 10 } = options;
 
-        try {
             // 사용자 및 작품 데이터 조회
             const userOptions = { page, limit };
             const artworkOptions = { page, limit };
@@ -72,10 +74,7 @@ export default class SystemManagementService {
                     total: featuredArtworks?.length || 0
                 }
             };
-        } catch (error) {
-            console.error('대시보드 데이터 조회 중 오류:', error);
-            throw new Error('대시보드 데이터를 가져오는데 실패했습니다.');
-        }
+        }, '대시보드 데이터 조회', { options });
     }
 
     /**

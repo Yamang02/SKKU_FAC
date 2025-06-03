@@ -272,31 +272,40 @@ export default class UserRequestDto extends BaseDto {
 
     /**
      * 특정 스키마로 검증하는 메서드
-     * @param {string} schemaType - 스키마 타입 ('register', 'login', 'updateProfile', 'email', 'resetPassword')
+     * @param {Object|string} schemaOrType - Joi 스키마 객체 또는 스키마 타입 문자열
      * @param {Object} options - 검증 옵션
      * @returns {Object} 검증 결과
      */
-    validateWithSchema(schemaType, options = {}) {
+    validateWithSchema(schemaOrType, options = {}) {
         let schema;
 
-        switch (schemaType) {
-            case 'register':
-                schema = UserRequestDto.getRegisterSchema();
-                break;
-            case 'login':
-                schema = UserRequestDto.getLoginSchema();
-                break;
-            case 'updateProfile':
-                schema = UserRequestDto.getUpdateProfileSchema();
-                break;
-            case 'email':
-                schema = UserRequestDto.getEmailSchema();
-                break;
-            case 'resetPassword':
-                schema = UserRequestDto.getResetPasswordSchema();
-                break;
-            default:
-                schema = this.getValidationSchema();
+        // 첫 번째 매개변수가 Joi 스키마 객체인 경우 (BaseDto 호환성)
+        if (schemaOrType && typeof schemaOrType === 'object' && schemaOrType.validate) {
+            schema = schemaOrType;
+        } else if (typeof schemaOrType === 'string') {
+            // 문자열인 경우 기존 로직 사용
+            switch (schemaOrType) {
+                case 'register':
+                    schema = UserRequestDto.getRegisterSchema();
+                    break;
+                case 'login':
+                    schema = UserRequestDto.getLoginSchema();
+                    break;
+                case 'updateProfile':
+                    schema = UserRequestDto.getUpdateProfileSchema();
+                    break;
+                case 'email':
+                    schema = UserRequestDto.getEmailSchema();
+                    break;
+                case 'resetPassword':
+                    schema = UserRequestDto.getResetPasswordSchema();
+                    break;
+                default:
+                    schema = this.getValidationSchema();
+            }
+        } else {
+            // 기본값
+            schema = this.getValidationSchema();
         }
 
         const { error, value } = schema.validate(this.toPlainObject(), {

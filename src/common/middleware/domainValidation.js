@@ -16,35 +16,35 @@ export const UserValidation = {
     // 사용자 등록 검증
     validateRegister: validateWithDto(
         UserRequestDto,
-        UserRequestDto.registerSchema,
+        UserRequestDto.getRegisterSchema,
         { source: 'body', dtoProperty: 'userDto' }
     ),
 
     // 로그인 검증
     validateLogin: validateWithDto(
         UserRequestDto,
-        UserRequestDto.loginSchema,
+        UserRequestDto.getLoginSchema,
         { source: 'body', dtoProperty: 'userDto' }
     ),
 
     // 프로필 업데이트 검증
     validateUpdateProfile: validateWithDto(
         UserRequestDto,
-        UserRequestDto.updateProfileSchema,
+        UserRequestDto.getUpdateProfileSchema,
         { source: 'body', dtoProperty: 'userDto' }
     ),
 
     // 이메일 검증 (쿼리 파라미터)
     validateEmailQuery: validateWithDto(
         UserRequestDto,
-        UserRequestDto.emailSchema,
+        UserRequestDto.getEmailSchema,
         { source: 'query', dtoProperty: 'emailDto' }
     ),
 
     // 비밀번호 재설정 검증
     validateResetPassword: validateWithDto(
         UserRequestDto,
-        UserRequestDto.resetPasswordSchema,
+        UserRequestDto.getResetPasswordSchema,
         { source: 'body', dtoProperty: 'userDto' }
     ),
 
@@ -218,7 +218,7 @@ export const CompositeValidation = {
     validateUserRegistrationWithFile: validateMultiple([
         {
             DtoClass: UserRequestDto,
-            schemaMethod: UserRequestDto.registerSchema,
+            schemaMethod: UserRequestDto.getRegisterSchema,
             source: 'body',
             dtoProperty: 'userDto'
         }

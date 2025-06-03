@@ -10,10 +10,18 @@ import ArtworkService from '../../domain/artwork/service/ArtworkService.js';
 import ImageService from '../../domain/image/service/ImageService.js';
 import ExhibitionService from '../../domain/exhibition/service/ExhibitionService.js';
 import SystemManagementService from '../../domain/admin/service/system/SystemManagementService.js';
+import UserManagementService from '../../domain/admin/service/user/UserManagementService.js';
+import ExhibitionManagementService from '../../domain/admin/service/exhibition/ExhibitionManagementService.js';
+import ArtworkManagementService from '../../domain/admin/service/artwork/ArtworkManagementService.js';
+import BatchProcessingService from '../service/BatchProcessingService.js';
 import UserController from '../../domain/user/controller/UserController.js';
 import UserApiController from '../../domain/user/controller/api/UserApiController.js';
 import ArtworkController from '../../domain/artwork/controller/ArtworkController.js';
 import SystemManagementController from '../../domain/admin/controller/system/SystemManagementController.js';
+import UserManagementController from '../../domain/admin/controller/user/UserManagementController.js';
+import ExhibitionManagementController from '../../domain/admin/controller/exhibition/ExhibitionManagementController.js';
+import ArtworkManagementController from '../../domain/admin/controller/artwork/ArtworkManagementController.js';
+import BatchController from '../../domain/admin/controller/BatchController.js';
 import logger from '../utils/Logger.js';
 
 /**
@@ -53,12 +61,26 @@ export class ServiceRegistry {
             this.container.registerAutoWired('ExhibitionService', ExhibitionService, 'singleton');
             this.container.registerAutoWired('ArtworkService', ArtworkService, 'singleton');
             this.container.registerAutoWired('SystemManagementService', SystemManagementService, 'singleton');
+            this.container.registerAutoWired('UserManagementService', UserManagementService, 'singleton');
+            this.container.registerAutoWired('ExhibitionManagementService', ExhibitionManagementService, 'singleton');
+            this.container.registerAutoWired('ArtworkManagementService', ArtworkManagementService, 'singleton');
+
+            // 배치 처리 서비스 - 컨테이너 자체를 주입
+            this.container.register('BatchProcessingService', () => {
+                const batchService = new BatchProcessingService();
+                batchService.setContainer(this.container);
+                return batchService;
+            }, 'singleton');
 
             // Controller 등록 (AutoWired Transient - 요청마다 새 인스턴스)
             this.container.registerAutoWired('UserController', UserController, 'transient');
             this.container.registerAutoWired('UserApiController', UserApiController, 'transient');
             this.container.registerAutoWired('ArtworkController', ArtworkController, 'transient');
             this.container.registerAutoWired('SystemManagementController', SystemManagementController, 'transient');
+            this.container.registerAutoWired('UserManagementController', UserManagementController, 'transient');
+            this.container.registerAutoWired('ExhibitionManagementController', ExhibitionManagementController, 'transient');
+            this.container.registerAutoWired('ArtworkManagementController', ArtworkManagementController, 'transient');
+            this.container.registerAutoWired('BatchController', BatchController, 'transient');
 
             this.isRegistered = true;
             logger.success('모든 서비스가 컨테이너에 등록되었습니다.');
