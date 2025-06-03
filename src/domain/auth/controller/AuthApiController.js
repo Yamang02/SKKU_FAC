@@ -5,9 +5,20 @@ import { ViewPath } from '../../../common/constants/ViewPath.js';
 import { ApiResponse } from '../../common/model/ApiResponse.js';
 
 export default class AuthApiController {
-    constructor() {
-        this.authService = new AuthService();
-        this.userService = new UserService();
+    // 의존성 주입을 위한 static dependencies 정의
+    static dependencies = ['AuthService', 'UserService'];
+
+    constructor(authService = null, userService = null) {
+        // 의존성 주입 방식 (새로운 방식)
+        if (authService && userService) {
+            this.authService = authService;
+            this.userService = userService;
+        } else {
+            // 기존 방식 호환성 유지 (임시)
+            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
+            this.authService = new AuthService();
+            this.userService = new UserService();
+        }
     }
 
     /**

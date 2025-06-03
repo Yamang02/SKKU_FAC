@@ -241,9 +241,18 @@ export class ErrorHandler {
         }
 
         // User-Agent 기반 필터링 (봇, 크롤러 등)
-        if (ignoreUserAgents && ignoreUserAgents.some(agent =>
-            req.get('User-Agent')?.includes(agent))) {
-            return true;
+        if (ignoreUserAgents && ignoreUserAgents.length > 0) {
+            const userAgent = req.get('User-Agent');
+            if (userAgent) {
+                return ignoreUserAgents.some(agent => {
+                    // 정규표현식 객체인 경우
+                    if (agent instanceof RegExp) {
+                        return agent.test(userAgent);
+                    }
+                    // 문자열인 경우
+                    return userAgent.includes(agent);
+                });
+            }
         }
 
         return false;
