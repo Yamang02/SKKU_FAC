@@ -3,9 +3,11 @@ import { Op } from 'sequelize';
 import { ArtworkExhibitionRelationship } from '../model/entity/EntitityIndex.js';
 import { Sequelize } from 'sequelize';
 import { ExhibitionError, ExhibitionNotFoundError } from '../../../common/error/ExhibitionError.js';
+import BaseRepository from './BaseRepository.js';
 
-export default class ExhibitionRepository {
+export default class ExhibitionRepository extends BaseRepository {
     constructor() {
+        super(Exhibition);
     }
 
     /**
@@ -40,7 +42,6 @@ export default class ExhibitionRepository {
             sortOrder = 'DESC'
         } = options;
 
-        const offset = (page - 1) * limit; // 페이지네이션을 위한 오프셋 계산
         const where = {};
 
         // 전시회 유형 필터링 (type 또는 exhibitionType 사용)
@@ -111,24 +112,12 @@ export default class ExhibitionRepository {
         const orderField = this.convertToSnakeCase(sortField);
         const order = [[orderField, sortOrder]];
 
-        try {
-            const { count, rows } = await Exhibition.findAndCountAll({
-                where,
-                limit,
-                offset,
-                order
-            });
-
-            return {
-                items: rows,
-                total: count,
-                page: Number(page),
-                totalPages: Math.ceil(count / limit)
-            };
-        } catch (error) {
-            console.error('전시회 목록 조회 중 오류:', error);
-            throw error;
-        }
+        return await this.findAll({
+            where,
+            page,
+            limit,
+            order
+        });
     }
 
     /**
@@ -160,12 +149,13 @@ export default class ExhibitionRepository {
      * ID로 전시회를 조회합니다.
      */
     async findExhibitionById(id) {
-        return await Exhibition.findByPk(id) || null;
+        return await this.findById(id);
     }
 
     async findExhibitionsByIds(ids) {
-        return await Exhibition.findAll({
-            where: { id: { [Op.in]: ids } }
+        return await this.findAll({
+            where: { id: { [Op.in]: ids } },
+            pagination: false
         });
     }
 
@@ -173,20 +163,14 @@ export default class ExhibitionRepository {
      * 새로운 전시회를 생성합니다.
      */
     async createExhibition(exhibitionData) {
-        const newExhibition = await Exhibition.create({
-            ...exhibitionData,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
-
-        return newExhibition;
+        return await this.create(exhibitionData);
     }
 
     /**
      * 전시회 정보를 수정합니다.
      */
     async updateExhibition(id, exhibitionData) {
-        const exhibition = await Exhibition.findByPk(id);
+        const exhibition = await this.findById(id);
         if (!exhibition) return null;
 
         // 제공된 데이터의 속성만 업데이트하고 나머지는 유지
@@ -202,11 +186,7 @@ export default class ExhibitionRepository {
             updatedData.isFeatured = updatedData.isFeatured === 'true' || updatedData.isFeatured === true;
         }
 
-        // 항상 업데이트 시간은 갱신
-        updatedData.updatedAt = new Date();
-
-        await exhibition.update(updatedData);
-        return exhibition;
+        return await this.updateById(id, updatedData);
     }
 
     /**
@@ -214,27 +194,27 @@ export default class ExhibitionRepository {
      */
     async deleteExhibition(id) {
         try {
-            const exhibition = await Exhibition.findByPk(id);
-            if (!exhibition) throw new ExhibitionNotFoundError('전시회를 찾을 수 없습니다.');
-
-            await exhibition.destroy();
+            const result = await this.deleteById(id);
+            if (!result) {
+                throw new ExhibitionNotFoundError('전시회를 찾을 수 없습니다.');
+            }
             return true;
         } catch (error) {
             throw new ExhibitionError('전시회 삭제 중 오류가 발생했습니다.', error);
         }
     }
 
-
     /**
      * 현재 진행 중인 전시회를 조회합니다.
      */
     async findActiveExhibitions() {
         const now = new Date();
-        return await Exhibition.findAll({
+        return await this.findAll({
             where: {
                 startDate: { [Op.lte]: now },
                 endDate: { [Op.gte]: now }
-            }
+            },
+            pagination: false
         });
     }
 
@@ -242,9 +222,11 @@ export default class ExhibitionRepository {
      * 출품 가능한 전시회 목록을 조회합니다.
      */
     async findSubmittableExhibitions(artworkId = null) {
-        const exhibitions = await Exhibition.findAll({
-            where: { is_submission_open: true }
+        const exhibitions = await this.findAll({
+            where: { is_submission_open: true },
+            pagination: false
         });
+
         if (artworkId) {
             // 이미 출품된 전시회 조회
             const submittedExhibitions = await ArtworkExhibitionRelationship.findAll({
@@ -253,18 +235,18 @@ export default class ExhibitionRepository {
 
             const submittedExhibitionIds = submittedExhibitions.map(exhibition => exhibition.exhibitionId);
 
-
             // 출품 가능한 전시회에서 이미 출품된 전시회 제외
-            return exhibitions.filter(exhibition => !submittedExhibitionIds.includes(exhibition.id));
+            return exhibitions.items.filter(exhibition => !submittedExhibitionIds.includes(exhibition.id));
         }
 
-        return exhibitions;
+        return exhibitions.items;
     }
 
     async findFeaturedExhibitions(limit = 10) {
-        return await Exhibition.findAll({
+        return await this.findAll({
             where: { is_featured: true },
-            limit: parseInt(limit, 10)
+            limit: parseInt(limit, 10),
+            pagination: false
         });
     }
 }

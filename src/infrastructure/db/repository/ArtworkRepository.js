@@ -2,21 +2,26 @@ import { Artwork, UserAccount } from '../model/entity/EntitityIndex.js';
 import { ArtworkError } from '../../../common/error/ArtworkError.js';
 import ArtworkExhibitionRelationship from '../model/relationship/ArtworkExhibitionRelationship.js';
 import { Op } from 'sequelize';
-import { db } from '../adapter/MySQLDatabase.js';
+import BaseRepository from './BaseRepository.js';
 
-class ArtworkRepository {
+class ArtworkRepository extends BaseRepository {
     constructor() {
+        super(Artwork);
+    }
+
+    /**
+     * 기본 include 옵션 (작가 정보 포함)
+     */
+    getDefaultInclude() {
+        return [{
+            model: UserAccount,
+            attributes: ['name']
+        }];
     }
 
     async createArtwork(artworkData, options = {}) {
-        const transaction = options.transaction || await db.transaction();
         try {
-            const artwork = await Artwork.create({
-                ...artworkData,
-                createdAt: new Date(),
-                updatedAt: new Date()
-            }, { transaction });
-            return artwork;
+            return await this.create(artworkData, options);
         } catch (error) {
             throw new ArtworkError('작품 생성 중 오류가 발생했습니다.', error);
         }
@@ -24,49 +29,39 @@ class ArtworkRepository {
 
     async updateArtwork(id, artworkData, isAdmin = false) {
         try {
-            const artwork = isAdmin ? await Artwork.scope('admin').findByPk(id) : await Artwork.findByPk(id);
+            const scope = isAdmin ? 'admin' : undefined;
+            const artwork = await this.findById(id, { scope });
+
             if (!artwork) {
                 throw new ArtworkError('작품을 찾을 수 없습니다.');
             }
 
-            await artwork.update({
-                ...artworkData,
-                updatedAt: new Date()
-            });
-            return artwork;
+            return await this.updateById(id, artworkData);
         } catch (error) {
             throw new ArtworkError('작품 수정 중 오류가 발생했습니다.', error);
         }
     }
 
     async updateArtworkDeleted(id) {
-        await Artwork.update({ status: 'DELETED' }, { where: { id } });
+        return await this.updateById(id, { status: 'DELETED' }, { returning: false });
     }
 
     async deleteArtwork(id) {
         try {
-            const artwork = await Artwork.findByPk(id);
-            if (!artwork) {
+            const result = await this.deleteById(id);
+            if (!result) {
                 throw new ArtworkError('작품을 찾을 수 없습니다.');
             }
-
-            await artwork.destroy();
             return true;
         } catch (error) {
             throw new ArtworkError('작품 삭제 중 오류가 발생했습니다.', error);
         }
     }
 
-
     async findArtworkById(id, isAdmin = false) {
         try {
-            if (isAdmin) {
-                const artwork = await Artwork.scope('admin').findByPk(id);
-                return artwork;
-            } else {
-                const artwork = await Artwork.findByPk(id);
-                return artwork;
-            }
+            const scope = isAdmin ? 'admin' : undefined;
+            return await this.findById(id, { scope });
         } catch (error) {
             throw new ArtworkError('작품 조회 중 오류가 발생했습니다.', error);
         }
@@ -74,17 +69,12 @@ class ArtworkRepository {
 
     async findArtworks(options = {}, isAdmin = false) {
         const where = {};
-        const include = [{
-            model: UserAccount,
-            attributes: ['name']
-        }];
+        const include = [...this.getDefaultInclude()];
 
         // 키워드 검색 조건이 있는 경우
         if (options.keyword) {
             // 작품명 검색만 먼저 설정
-            where[Op.or] = [
-                { title: { [Op.like]: `%${options.keyword}%` } }
-            ];
+            Object.assign(where, this.buildSearchCondition(options.keyword, ['title']));
         }
 
         // 상태 필터링
@@ -118,22 +108,24 @@ class ArtworkRepository {
         // 정렬 필드와 방향 설정
         const sortField = options.sortField || 'createdAt';
         const sortOrder = options.sortOrder || 'DESC';
+        const scope = isAdmin ? 'admin' : undefined;
 
-        // 일반 사용자는 defaultScope 사용 (승인된 작품만)
-        const queryOptions = this.buildQueryOptions(where, {
-            ...options,
+        const queryOptions = {
+            where,
             include,
-            sortField,
-            sortOrder
-        });
+            page: options.page || 1,
+            limit: options.limit || 12,
+            order: [[sortField, sortOrder.toUpperCase()]],
+            scope
+        };
 
         // 먼저 제목으로 검색한 결과 가져오기
-        const result = await this.executeQuery(queryOptions, isAdmin);
+        const result = await this.findAll(queryOptions);
 
         // 키워드 검색이 있는 경우 작가명으로도 검색 (작가 이름으로 검색)
         if (options.keyword) {
-            const artistQueryOptions = this.buildArtistSearchQueryOptions(options);
-            const artistResult = await this.executeQuery(artistQueryOptions, isAdmin);
+            const artistQueryOptions = this.buildArtistSearchQueryOptions(options, isAdmin);
+            const artistResult = await this.findAll(artistQueryOptions);
 
             // 중복 제거하여 두 결과 병합
             return this.mergeAndPaginateResults(result, artistResult, options, sortField, sortOrder);
@@ -142,27 +134,7 @@ class ArtworkRepository {
         return result;
     }
 
-    buildQueryOptions(where, options) {
-        const page = options.page || 1;
-        const limit = options.limit || 12;
-        const offset = (page - 1) * limit;
-        const sortField = options.sortField || 'createdAt';
-        const sortOrder = options.sortOrder || 'DESC';
-        const include = options.include || [{
-            model: UserAccount,
-            attributes: ['name']
-        }];
-
-        return {
-            where,
-            include,
-            limit,
-            offset,
-            order: [[sortField, sortOrder.toUpperCase()]]
-        };
-    }
-
-    buildArtistSearchQueryOptions(options) {
+    buildArtistSearchQueryOptions(options, isAdmin = false) {
         const artistWhere = {};
         const artistInclude = [{
             model: UserAccount,
@@ -198,30 +170,16 @@ class ArtworkRepository {
             artistWhere.year = options.year;
         }
 
-        return this.buildQueryOptions(artistWhere, { ...options, include: artistInclude });
-    }
+        const scope = isAdmin ? 'admin' : undefined;
 
-    async executeQuery(queryOptions, isAdmin) {
-        try {
-            let result;
-            if (isAdmin) {
-                // 관리자는 admin scope 사용하여 모든 작품 조회
-                result = await Artwork.scope('admin').findAndCountAll(queryOptions);
-            } else {
-                // 일반 사용자는 defaultScope 사용하여 승인된 작품만 조회
-                result = await Artwork.findAndCountAll(queryOptions);
-            }
-
-            return {
-                items: result.rows,
-                total: result.count,
-                page: queryOptions.page || 1,
-                limit: queryOptions.limit || 12
-            };
-        } catch (error) {
-            console.error('작품 목록 조회 중 오류:', error);
-            throw error;
-        }
+        return {
+            where: artistWhere,
+            include: artistInclude,
+            page: options.page || 1,
+            limit: options.limit || 12,
+            order: [[options.sortField || 'createdAt', (options.sortOrder || 'DESC').toUpperCase()]],
+            scope
+        };
     }
 
     mergeAndPaginateResults(titleResult, artistResult, options, sortField, sortOrder) {
@@ -266,13 +224,16 @@ class ArtworkRepository {
             items: paginatedItems,
             total,
             page,
-            limit
+            limit,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page < Math.ceil(total / limit),
+            hasPrev: page > 1
         };
     }
 
     async findArtists() {
         try {
-            const artworks = await Artwork.findAll({
+            const artworks = await this.getModel().findAll({
                 attributes: ['artistName'],
                 group: ['artistName']
             });
@@ -287,12 +248,12 @@ class ArtworkRepository {
 
     async findFeaturedArtworks(limit) {
         try {
-            const featuredArtworks = await Artwork.findAll({
+            return await this.findAll({
                 where: { isFeatured: true },
                 order: [['createdAt', 'DESC']],
-                limit: limit
+                limit: limit,
+                pagination: false
             });
-            return featuredArtworks;
         } catch (error) {
             throw new ArtworkError('추천 작품 조회 중 오류가 발생했습니다.', error);
         }
@@ -300,15 +261,17 @@ class ArtworkRepository {
 
     async findByArtistId(artistId, limit, excludeId) {
         try {
-            const artworks = await Artwork.findAll({
-                where: {
-                    userId: artistId,
-                    id: { [Op.ne]: excludeId } // 제외할 작품 ID
-                },
+            const where = { userId: artistId };
+            if (excludeId) {
+                where.id = { [Op.ne]: excludeId };
+            }
+
+            return await this.findAll({
+                where,
                 limit: limit,
-                order: [['createdAt', 'DESC']]
+                order: [['createdAt', 'DESC']],
+                pagination: false
             });
-            return artworks;
         } catch (error) {
             throw new ArtworkError('작가의 작품 조회 중 오류가 발생했습니다.', error);
         }
@@ -316,11 +279,13 @@ class ArtworkRepository {
 
     async findByExhibitionId(exhibitionId, limit, excludeId) {
         try {
+            const where = { exhibitionId: exhibitionId };
+            if (excludeId) {
+                where.artworkId = { [Op.ne]: excludeId };
+            }
+
             const artworkExhibitionRelationships = await ArtworkExhibitionRelationship.findAll({
-                where: {
-                    exhibitionId: exhibitionId,
-                    artworkId: { [Op.ne]: excludeId }
-                },
+                where,
                 include: [{
                     model: Artwork,
                     required: true
@@ -337,15 +302,7 @@ class ArtworkRepository {
 
     async findArtworkBySlug(slug) {
         try {
-            const artwork = await Artwork.findOne({
-                where: { slug: slug }
-            });
-
-            if (!artwork) {
-                return null;
-            }
-
-            return artwork;
+            return await this.findOne({ slug: slug });
         } catch (error) {
             console.error('작품 조회 오류:', error);
             throw error;
