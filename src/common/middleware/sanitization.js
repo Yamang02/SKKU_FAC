@@ -1,11 +1,11 @@
-import { createDOMPurify } from 'dompurify';
+import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import { body, query } from 'express-validator';
 import logger from '../utils/Logger.js';
 
 // 서버사이드 DOM 환경 설정
 const window = new JSDOM('').window;
-const DOMPurify = createDOMPurify(window);
+const purify = DOMPurify(window);
 
 /**
  * HTML Sanitization 설정
@@ -53,7 +53,7 @@ function sanitizeHTML(input, level = 'strict') {
     if (typeof input !== 'string') return input;
 
     const config = HTML_SANITIZE_CONFIG[level] || HTML_SANITIZE_CONFIG.strict;
-    return DOMPurify.sanitize(input, config);
+    return purify.sanitize(input, config);
 }
 
 /**

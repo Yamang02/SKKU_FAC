@@ -87,20 +87,36 @@ export class RateLimitMonitor {
  * 스토어 설정 (Redis > Memory 순서)
  */
 function createStore(windowMs) {
+    // 개발 환경에서는 메모리 스토어 사용 (안정성 우선)
+    if (!config.isProduction()) {
+        logger.info('개발 환경: 메모리 스토어 사용');
+        return undefined; // express-rate-limit의 기본 메모리 스토어 사용
+    }
+
     if (redisClient) {
         try {
+            // Redis 연결 상태 확인
+            if (!redisClient.isReady) {
+                logger.warn('Redis 클라이언트가 준비되지 않음, 메모리 스토어로 폴백');
+                return undefined;
+            }
+
             return new RedisStore({
                 client: redisClient,
                 prefix: 'rl:',
                 expiry: Math.ceil(windowMs / 1000)
             });
         } catch (error) {
-            logger.warn('Redis 스토어 생성 실패, 메모리 스토어로 폴백', { error: error.message });
+            logger.warn('Redis 스토어 생성 실패, 메모리 스토어로 폴백', {
+                error: error.message,
+                stack: error.stack?.substring(0, 200) + '...'
+            });
             return undefined;
         }
     }
 
     // 메모리 스토어 (기본값)
+    logger.info('Redis 클라이언트 없음: 메모리 스토어 사용');
     return undefined; // express-rate-limit의 기본 메모리 스토어 사용
 }
 
@@ -272,7 +288,7 @@ export const slowDownMiddleware = slowDown({
     maxDelayMs: 5000, // 최대 5초 지연
     skipFailedRequests: false,
     skipSuccessfulRequests: false,
-    store: createStore(15 * 60 * 1000),
+    // store: createStore(15 * 60 * 1000), // Redis 호환성 문제로 메모리 스토어 사용
     keyGenerator: (req) => req.ip,
     onLimitReached: (req, res, options) => {
         const ip = req.ip;

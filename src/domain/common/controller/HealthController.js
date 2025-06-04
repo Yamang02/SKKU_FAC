@@ -4,6 +4,7 @@ import Config from '../../../config/Config.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import getMetricsCollector from '../../../common/monitoring/getMetricsCollector.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,7 @@ class HealthController {
         this.config = Config.getInstance();
         this.redisClient = redisClient;
         this.startTime = Date.now();
+        this.metricsCollector = getMetricsCollector();
     }
 
     /**
@@ -40,9 +42,12 @@ class HealthController {
             // Redis 연결 상태 확인
             health.redis = await this.checkRedisConnection();
 
+            // 메트릭 수집기에 연결 상태 업데이트
+            this.metricsCollector.updateConnectionStatus('database', health.database.status === 'connected');
+            this.metricsCollector.updateConnectionStatus('redis', health.redis.status === 'connected');
+
             // 세션 스토어 상태 확인 (안전하게)
             try {
-                // 세션이 초기화되어 있는지 확인
                 if (req.session !== undefined) {
                     health.services.session = 'healthy';
                 } else {

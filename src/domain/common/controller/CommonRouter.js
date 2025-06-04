@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import HealthController from './HealthController.js';
+import DashboardController from './DashboardController.js';
 import { getMiddlewareStats, resetMiddlewareStats } from '../../../common/middleware/setupMiddleware.js';
 import { csrfTokenEndpoint, csrfDebugEndpoint } from '../../../common/middleware/csrfProtection.js';
 
@@ -7,6 +8,9 @@ const CommonRouter = Router();
 
 // 헬스체크 엔드포인트
 CommonRouter.get('/health', (req, res) => HealthController.checkHealth(req, res));
+
+// 모니터링 대시보드 API
+CommonRouter.get('/api/monitoring/metrics', (req, res) => DashboardController.getMetricsApi(req, res));
 
 // CSRF 토큰 제공 엔드포인트
 CommonRouter.get('/csrf-token', csrfTokenEndpoint);
