@@ -232,7 +232,9 @@ export function createSanitizationMiddleware(options = {}) {
             next();
         } catch (error) {
             logger.error('입력 sanitization 실패', {
-                error: error.message,
+                error: error.message || error.toString() || 'Unknown error',
+                errorName: error.name,
+                errorStack: error.stack,
                 method: req.method,
                 url: req.url,
                 ip: req.ip
@@ -277,7 +279,9 @@ export function sanitizeFields(fields, options = {}) {
             next();
         } catch (error) {
             logger.error('필드별 sanitization 실패', {
-                error: error.message,
+                error: error.message || error.toString() || 'Unknown error',
+                errorName: error.name,
+                errorStack: error.stack,
                 fields,
                 method: req.method,
                 url: req.url

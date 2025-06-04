@@ -258,9 +258,11 @@ class CacheMiddleware {
                         statusCode
                     });
 
-                    // 캐시 헤더 추가
-                    res.set('X-Cache', 'MISS');
-                    res.set('X-Cache-Key', cacheKey);
+                    // 헤더가 이미 전송되지 않은 경우에만 캐시 헤더 추가
+                    if (!res.headersSent) {
+                        res.set('X-Cache', 'MISS');
+                        res.set('X-Cache-Key', cacheKey);
+                    }
                 }
             } catch (error) {
                 logger.warn('응답 캐싱 실패', {
