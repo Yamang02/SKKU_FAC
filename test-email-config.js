@@ -1,5 +1,5 @@
 import Config from './src/config/Config.js';
-import nodemailer from 'nodemailer';
+import { createTransport } from 'nodemailer';
 
 console.log('🔍 이메일 설정 테스트 시작\n');
 
@@ -33,7 +33,7 @@ console.log('✅ 이메일 설정이 유효합니다. 연결 테스트를 시작
 async function testEmailConnection() {
     try {
         // Nodemailer transporter 생성
-        const transporter = nodemailer.createTransporter({
+        const transporter = createTransport({
             service: 'gmail',
             auth: {
                 user: emailConfig.user,
