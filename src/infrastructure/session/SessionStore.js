@@ -21,8 +21,10 @@ class SessionStore {
                 logger.info('Redis 클라이언트가 이미 연결되어 있습니다.');
             }
 
-            // Redis 설정 가져오기
-            const redisConfig = this.config.getRedisConfig();
+            // Redis 설정을 환경변수에서 직접 가져오기 (암호화 우회)
+            const redisConfig = {
+                ttl: parseInt(process.env.REDIS_TTL, 10) || 86400 // 24시간
+            };
 
             // Redis 스토어 생성
             this.store = new RedisStore({

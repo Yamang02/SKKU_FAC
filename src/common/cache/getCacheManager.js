@@ -7,6 +7,7 @@ import { createCache } from 'cache-manager';
 import redisStore from 'cache-manager-redis-store';
 import Config from '../../config/Config.js';
 import logger from '../utils/Logger.js';
+import redisClient from '../../infrastructure/redis/RedisClient.js';
 
 class CacheManager {
     constructor() {
@@ -20,19 +21,8 @@ class CacheManager {
 
     async init() {
         try {
-            const redisConfig = {
-                store: redisStore,
-                host: this.config.get('redis.host'),
-                port: this.config.get('redis.port'),
-                password: this.config.get('redis.password'),
-                db: this.config.get('redis.cacheDb', 1), // 캐시용 별도 DB 사용
-                ttl: this.defaultTTL,
-                max: 1000, // 최대 캐시 아이템 수
-                prefix: 'cache:' // 캐시 키 접두사
-            };
-
             // Redis 설정이 없으면 메모리 캐시 사용
-            if (!this.config.get('redis.host')) {
+            if (!process.env.REDIS_HOST) {
                 logger.warn('Redis 설정이 없어 메모리 캐시 사용');
                 this.cache = createCache({
                     store: 'memory',
@@ -40,14 +30,36 @@ class CacheManager {
                     ttl: this.defaultTTL * 1000 // 밀리초 단위로 변환
                 });
             } else {
+                // 기존 Redis 클라이언트 연결 확인 및 연결
+                if (!redisClient.isClientConnected()) {
+                    await redisClient.connect();
+                }
+
+                // Redis 설정을 환경변수에서 직접 가져오기 (암호화 우회)
+                const redisConfig = {
+                    store: redisStore,
+                    host: process.env.REDIS_HOST,
+                    port: parseInt(process.env.REDIS_PORT, 10),
+                    password: process.env.REDIS_PASSWORD,
+                    db: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 별도 DB 사용
+                    ttl: this.defaultTTL,
+                    max: 1000, // 최대 캐시 아이템 수
+                    prefix: 'cache:', // 캐시 키 접두사
+                    // 기존 연결된 Redis 클라이언트 재사용
+                    redisInstance: redisClient.getClient()
+                };
+
                 this.cache = createCache(redisConfig);
             }
 
             this.isInitialized = true;
             logger.info('✅ CacheManager 초기화 완료', {
-                backend: this.config.get('redis.host') ? 'Redis' : 'Memory',
+                backend: process.env.REDIS_HOST ? 'Redis' : 'Memory',
+                host: process.env.REDIS_HOST || 'N/A',
+                port: process.env.REDIS_PORT || 'N/A',
+                passwordLength: process.env.REDIS_PASSWORD ? process.env.REDIS_PASSWORD.length : 0,
                 defaultTTL: this.defaultTTL,
-                prefix: redisConfig.prefix
+                prefix: 'cache:'
             });
         } catch (error) {
             logger.error('❌ CacheManager 초기화 실패', {
