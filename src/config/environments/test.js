@@ -13,7 +13,7 @@ export default {
             max: 10, // Railway 환경에 맞는 풀 크기
             min: 2,
             acquire: 30000,
-            idle: 10000
+            idle: 30000
         }
     },
 
@@ -74,8 +74,8 @@ export default {
     jwt: {
         accessTokenExpiry: '10m', // 10분 (테스트 시나리오용)
         refreshTokenExpiry: '1h', // 1시간 (테스트 완료 후 빠른 만료)
-        issuer: 'skku-fac-gallery-test',
-        audience: 'skku-fac-gallery-test-users'
+        issuer: 'skku-fac-gallery',
+        audience: 'skku-fac-gallery-users'
     },
 
     // 테스트 환경 전용 설정
@@ -104,6 +104,6 @@ export default {
     // Redis 설정 (Railway 환경)
     redis: {
         keyPrefix: 'test:',
-        database: 1 // 테스트 전용 DB
+        database: 0 // 환경변수와 일치
     }
 };

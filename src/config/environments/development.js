@@ -29,7 +29,7 @@ export default {
         // 테스트 환경과 동일한 Redis 인스턴스 사용
         useTestInstance: true,
         keyPrefix: 'test:', // 테스트와 동일한 키 프리픽스
-        database: 1 // 테스트와 동일한 DB 번호
+        database: 0 // 테스트와 동일한 DB 번호
     },
 
     logging: {
