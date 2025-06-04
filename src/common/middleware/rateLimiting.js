@@ -13,6 +13,12 @@ const config = Config.getInstance();
 let redisClient = null;
 if (config.get('redis.host')) {
     try {
+        logger.info('=== RateLimit Redis 클라이언트 설정 ===');
+        logger.info(`호스트: ${config.get('redis.host')}`);
+        logger.info(`포트: ${config.get('redis.port')}`);
+        logger.info(`패스워드: ${config.get('redis.password') ? '설정됨' : '설정되지 않음'}`);
+        logger.info(`데이터베이스: ${config.get('redis.db', 0)}`);
+
         redisClient = createClient({
             host: config.get('redis.host'),
             port: config.get('redis.port'),
@@ -20,12 +26,22 @@ if (config.get('redis.host')) {
             db: config.get('redis.db', 0)
         });
         redisClient.on('error', err => {
-            logger.warn('Redis 연결 실패, 메모리 스토어로 폴백', { error: err.message });
+            logger.error('[RATE_LIMIT] Redis 클라이언트 오류', {
+                error: err.message || 'Unknown error',
+                code: err.code,
+                errno: err.errno,
+                name: err.name,
+                host: config.get('redis.host'),
+                port: config.get('redis.port')
+            });
             redisClient = null;
         });
-        logger.info('Redis 클라이언트 초기화 완료');
+        logger.info('RateLimit Redis 클라이언트 초기화 완료');
     } catch (error) {
-        logger.warn('Redis 클라이언트 생성 실패, 메모리 스토어 사용', { error: error.message });
+        logger.error('RateLimit Redis 클라이언트 생성 실패, 메모리 스토어 사용', {
+            error: error.message,
+            stack: error.stack?.substring(0, 200) + '...'
+        });
         redisClient = null;
     }
 }
