@@ -80,6 +80,46 @@ const Artwork = db.define('Artwork', {
         {
             name: 'idx_artwork_user',
             fields: ['userId']
+        },
+        {
+            name: 'idx_artwork_status',
+            fields: ['status']
+        },
+        {
+            name: 'idx_artwork_featured',
+            fields: ['isFeatured']
+        },
+        {
+            name: 'idx_artwork_title',
+            fields: ['title']
+        },
+        {
+            name: 'idx_artwork_slug',
+            fields: ['slug']
+        },
+        {
+            name: 'idx_artwork_year',
+            fields: ['year']
+        },
+        {
+            name: 'idx_artwork_status_featured',
+            fields: ['status', 'isFeatured']
+        },
+        {
+            name: 'idx_artwork_user_status',
+            fields: ['userId', 'status']
+        },
+        {
+            name: 'idx_artwork_status_created',
+            fields: ['status', 'createdAt']
+        },
+        {
+            name: 'idx_artwork_featured_created',
+            fields: ['isFeatured', 'createdAt']
+        },
+        {
+            name: 'idx_artwork_year_status',
+            fields: ['year', 'status']
         }
     ],
     defaultScope: {

@@ -3,6 +3,7 @@ import { ArtworkError } from '../../../common/error/ArtworkError.js';
 import ArtworkExhibitionRelationship from '../model/relationship/ArtworkExhibitionRelationship.js';
 import { Op } from 'sequelize';
 import BaseRepository from './BaseRepository.js';
+import logger from '../../../common/utils/Logger.js';
 
 class ArtworkRepository extends BaseRepository {
     constructor() {
@@ -307,6 +308,254 @@ class ArtworkRepository extends BaseRepository {
             console.error('작품 조회 오류:', error);
             throw error;
         }
+    }
+
+    /**
+     * 최적화된 키워드 검색 (UNION 쿼리 사용)
+     * @param {object} options - 검색 옵션
+     * @param {boolean} isAdmin - 관리자 여부
+     * @returns {Promise<object>} 검색 결과
+     */
+    async findArtworksOptimized(options = {}, isAdmin = false) {
+        if (!options.keyword) {
+            // 키워드가 없으면 기본 메서드 사용
+            return await this.findArtworks(options, isAdmin);
+        }
+
+        // UNION을 사용한 최적화된 검색 쿼리
+        const baseWhere = this.buildBaseWhereCondition(options);
+
+        const sql = `
+            SELECT DISTINCT a.*, u.name as user_name
+            FROM artworks a
+            LEFT JOIN user_accounts u ON a.user_id = u.id
+            WHERE (
+                (a.title LIKE :keyword OR u.name LIKE :keyword)
+                ${baseWhere.sql}
+            )
+            ${options.exhibition ? 'AND EXISTS (SELECT 1 FROM artwork_exhibition_relationships aer WHERE aer.artwork_id = a.id AND aer.exhibition_id = :exhibition)' : ''}
+            ORDER BY ${options.sortField || 'a.created_at'} ${(options.sortOrder || 'DESC').toUpperCase()}
+            LIMIT :limit OFFSET :offset
+        `;
+
+        const countSql = `
+            SELECT COUNT(DISTINCT a.id) as total
+            FROM artworks a
+            LEFT JOIN user_accounts u ON a.user_id = u.id
+            WHERE (
+                (a.title LIKE :keyword OR u.name LIKE :keyword)
+                ${baseWhere.sql}
+            )
+            ${options.exhibition ? 'AND EXISTS (SELECT 1 FROM artwork_exhibition_relationships aer WHERE aer.artwork_id = a.id AND aer.exhibition_id = :exhibition)' : ''}
+        `;
+
+        const page = parseInt(options.page) || 1;
+        const limit = parseInt(options.limit) || 12;
+        const offset = (page - 1) * limit;
+
+        const replacements = {
+            keyword: `%${options.keyword}%`,
+            limit,
+            offset,
+            ...baseWhere.replacements
+        };
+
+        if (options.exhibition) {
+            replacements.exhibition = options.exhibition;
+        }
+
+        try {
+            const [items, countResult] = await Promise.all([
+                this.executeRawQuery(sql, { replacements }),
+                this.executeRawQuery(countSql, { replacements })
+            ]);
+
+            const total = countResult[0]?.total || 0;
+            const totalPages = Math.ceil(total / limit);
+
+            return {
+                items,
+                total,
+                page,
+                limit,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrev: page > 1
+            };
+        } catch (error) {
+            logger.error('최적화된 작품 검색 실패:', error);
+            // 실패 시 기본 메서드로 폴백
+            return await this.findArtworks(options, isAdmin);
+        }
+    }
+
+    /**
+     * 기본 WHERE 조건 생성
+     * @param {object} options - 검색 옵션
+     * @returns {object} SQL 조건과 바인딩 파라미터
+     */
+    buildBaseWhereCondition(options) {
+        const conditions = [];
+        const replacements = {};
+
+        if (options.status) {
+            conditions.push('a.status = :status');
+            replacements.status = options.status;
+        }
+
+        if (options.isFeatured === true) {
+            conditions.push('a.is_featured = true');
+        } else if (options.isFeatured === false) {
+            conditions.push('a.is_featured = false');
+        }
+
+        if (options.year) {
+            conditions.push('a.year = :year');
+            replacements.year = options.year;
+        }
+
+        const sql = conditions.length > 0 ? ` AND ${conditions.join(' AND ')}` : '';
+
+        return { sql, replacements };
+    }
+
+    /**
+     * 전시회별 작품 조회 최적화 (배치 로딩)
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {object} options - 조회 옵션
+     * @returns {Promise<Array>} 작품 목록
+     */
+    async findArtworksByExhibitionOptimized(exhibitionId, options = {}) {
+        const { limit = 20, excludeId = null } = options;
+
+        // 1단계: 전시회-작품 관계 조회
+        const relationshipSql = `
+            SELECT artwork_id, display_order
+            FROM artwork_exhibition_relationships
+            WHERE exhibition_id = :exhibitionId
+            ${excludeId ? 'AND artwork_id != :excludeId' : ''}
+            ORDER BY display_order ASC, created_at DESC
+            LIMIT :limit
+        `;
+
+        const relationships = await this.executeRawQuery(relationshipSql, {
+            replacements: {
+                exhibitionId,
+                excludeId,
+                limit
+            }
+        });
+
+        if (relationships.length === 0) {
+            return [];
+        }
+
+        // 2단계: 작품 정보 배치 조회
+        const artworkIds = relationships.map(rel => rel.artwork_id);
+        const artworks = await this.findByIds(artworkIds, {
+            include: this.getDefaultInclude()
+        });
+
+        // 3단계: display_order에 따라 정렬
+        const orderMap = new Map(relationships.map(rel => [rel.artwork_id, rel.display_order]));
+
+        return artworks.sort((a, b) => {
+            const orderA = orderMap.get(a.id) || 999;
+            const orderB = orderMap.get(b.id) || 999;
+            return orderA - orderB;
+        });
+    }
+
+    /**
+     * 주요 작품 조회 최적화
+     * @param {number} limit - 조회 제한 수
+     * @returns {Promise<Array>} 주요 작품 목록
+     */
+    async findFeaturedArtworksOptimized(limit = 6) {
+        // 최적화된 쿼리로 주요 작품 조회
+        return await this.findAllOptimized({
+            where: { isFeatured: true, status: 'ACTIVE' },
+            includes: ['UserAccount'],
+            limit,
+            order: [['createdAt', 'DESC']],
+            pagination: false
+        });
+    }
+
+    /**
+     * 작가별 작품 통계 조회
+     * @param {string} artistId - 작가 ID (선택적)
+     * @returns {Promise<Array>} 작가별 작품 통계
+     */
+    async getArtworkStatsByArtist(artistId = null) {
+        const whereClause = artistId ? 'WHERE a.user_id = :artistId' : '';
+
+        const sql = `
+            SELECT
+                u.id as artist_id,
+                u.name as artist_name,
+                COUNT(a.id) as total_artworks,
+                COUNT(CASE WHEN a.is_featured = true THEN 1 END) as featured_count,
+                COUNT(CASE WHEN a.status = 'ACTIVE' THEN 1 END) as active_count,
+                MAX(a.created_at) as latest_artwork_date
+            FROM user_accounts u
+            LEFT JOIN artworks a ON u.id = a.user_id
+            ${whereClause}
+            GROUP BY u.id, u.name
+            HAVING total_artworks > 0
+            ORDER BY total_artworks DESC
+        `;
+
+        const replacements = artistId ? { artistId } : {};
+
+        return await this.executeRawQuery(sql, { replacements });
+    }
+
+    /**
+     * 연도별 작품 통계 조회
+     * @returns {Promise<Array>} 연도별 작품 통계
+     */
+    async getArtworkStatsByYear() {
+        return await this.aggregate({
+            field: 'id',
+            fn: 'COUNT',
+            where: { status: 'ACTIVE' },
+            group: ['year']
+        });
+    }
+
+    /**
+     * 관련 작품 추천 (같은 작가 또는 같은 전시회)
+     * @param {string} artworkId - 기준 작품 ID
+     * @param {number} limit - 추천 작품 수
+     * @returns {Promise<Array>} 추천 작품 목록
+     */
+    async findRelatedArtworks(artworkId, limit = 4) {
+        const sql = `
+            SELECT DISTINCT a.*, u.name as user_name,
+                   CASE
+                       WHEN a.user_id = (SELECT user_id FROM artworks WHERE id = :artworkId) THEN 1
+                       ELSE 2
+                   END as relevance_score
+            FROM artworks a
+            LEFT JOIN user_accounts u ON a.user_id = u.id
+            WHERE a.id != :artworkId
+              AND a.status = 'ACTIVE'
+              AND (
+                  a.user_id = (SELECT user_id FROM artworks WHERE id = :artworkId)
+                  OR EXISTS (
+                      SELECT 1 FROM artwork_exhibition_relationships aer1
+                      JOIN artwork_exhibition_relationships aer2 ON aer1.exhibition_id = aer2.exhibition_id
+                      WHERE aer1.artwork_id = a.id AND aer2.artwork_id = :artworkId
+                  )
+              )
+            ORDER BY relevance_score ASC, a.created_at DESC
+            LIMIT :limit
+        `;
+
+        return await this.executeRawQuery(sql, {
+            replacements: { artworkId, limit }
+        });
     }
 }
 

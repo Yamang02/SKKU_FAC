@@ -1,5 +1,6 @@
 import { Op } from 'sequelize';
 import { db } from '../adapter/MySQLDatabase.js';
+import logger from '../../../common/utils/Logger.js';
 
 /**
  * BaseRepository 클래스
@@ -403,5 +404,213 @@ export default class BaseRepository {
      */
     getDatabase() {
         return db;
+    }
+
+    /**
+     * 배치로 여러 ID의 레코드 조회 (N+1 문제 해결)
+     * @param {Array} ids - 조회할 ID 배열
+     * @param {object} options - 조회 옵션
+     * @returns {Promise<Array>} 조회된 레코드 배열
+     */
+    async findByIds(ids, options = {}) {
+        if (!ids || ids.length === 0) {
+            return [];
+        }
+
+        const queryOptions = this._buildQueryOptions({
+            ...options,
+            where: {
+                id: { [Op.in]: ids },
+                ...(options.where || {})
+            }
+        });
+
+        const results = await this.model.findAll(queryOptions);
+
+        // ID 순서대로 정렬하여 반환
+        const resultMap = new Map(results.map(item => [item.id, item]));
+        return ids.map(id => resultMap.get(id)).filter(Boolean);
+    }
+
+    /**
+     * 최적화된 관계 조회 (선택적 eager loading)
+     * @param {object} options - 조회 옵션
+     * @param {Array} options.includes - 포함할 관계 설정
+     * @param {boolean} options.optimized - 최적화 모드 사용 여부
+     * @returns {Promise<object>} 조회 결과
+     */
+    async findAllOptimized(options = {}) {
+        const { includes = [], optimized = true, ...baseOptions } = options;
+
+        if (!optimized || includes.length === 0) {
+            return await this.findAll(baseOptions);
+        }
+
+        // 최적화된 include 설정
+        const optimizedIncludes = includes.map(include => {
+            if (typeof include === 'string') {
+                // 문자열인 경우 기본 설정으로 변환
+                return { association: include, required: false };
+            }
+
+            return {
+                ...include,
+                // 기본적으로 LEFT JOIN 사용 (required: false)
+                required: include.required !== undefined ? include.required : false,
+                // 중복 제거를 위한 설정
+                duplicating: false
+            };
+        });
+
+        return await this.findAll({
+            ...baseOptions,
+            include: optimizedIncludes
+        });
+    }
+
+    /**
+     * Raw SQL 쿼리 실행
+     * @param {string} sql - 실행할 SQL 쿼리
+     * @param {object} options - 쿼리 옵션
+     * @param {Array} options.replacements - 바인딩 파라미터
+     * @param {string} options.type - 쿼리 타입 (SELECT, INSERT, UPDATE, DELETE)
+     * @returns {Promise<Array>} 쿼리 결과
+     */
+    async executeRawQuery(sql, options = {}) {
+        const { replacements = [], type = 'SELECT' } = options;
+
+        try {
+            const [results, metadata] = await this.model.sequelize.query(sql, {
+                replacements,
+                type: this.model.sequelize.QueryTypes[type],
+                raw: true,
+                nest: true
+            });
+
+            return type === 'SELECT' ? results : { results, metadata };
+        } catch (error) {
+            logger.error('Raw SQL 쿼리 실행 실패:', { sql, replacements, error: error.message });
+            throw error;
+        }
+    }
+
+    /**
+     * 집계 쿼리 최적화
+     * @param {object} options - 집계 옵션
+     * @param {string} options.field - 집계할 필드
+     * @param {string} options.fn - 집계 함수 (COUNT, SUM, AVG, MAX, MIN)
+     * @param {object} options.where - 조건
+     * @param {Array} options.group - 그룹화 필드
+     * @returns {Promise<Array|number>} 집계 결과
+     */
+    async aggregate(options = {}) {
+        const { field = '*', fn = 'COUNT', where = {}, group = [] } = options;
+
+        const aggregateOptions = {
+            where,
+            raw: true
+        };
+
+        if (group.length > 0) {
+            aggregateOptions.group = group;
+            aggregateOptions.attributes = [
+                ...group,
+                [this.model.sequelize.fn(fn, this.model.sequelize.col(field)), 'value']
+            ];
+
+            return await this.model.findAll(aggregateOptions);
+        } else {
+            return await this.model[fn.toLowerCase()](field, aggregateOptions);
+        }
+    }
+
+    /**
+     * 페이지네이션 최적화 (커서 기반)
+     * @param {object} options - 페이지네이션 옵션
+     * @param {string} options.cursor - 커서 값
+     * @param {number} options.limit - 제한 수
+     * @param {string} options.cursorField - 커서 필드 (기본: 'id')
+     * @param {string} options.direction - 방향 ('ASC' 또는 'DESC')
+     * @returns {Promise<object>} 페이지네이션 결과
+     */
+    async findWithCursor(options = {}) {
+        const {
+            cursor,
+            limit = 10,
+            cursorField = 'id',
+            direction = 'ASC',
+            where = {},
+            ...queryOptions
+        } = options;
+
+        const cursorWhere = { ...where };
+
+        if (cursor) {
+            const operator = direction === 'ASC' ? Op.gt : Op.lt;
+            cursorWhere[cursorField] = { [operator]: cursor };
+        }
+
+        const results = await this.findAll({
+            ...queryOptions,
+            where: cursorWhere,
+            limit: limit + 1, // 다음 페이지 존재 여부 확인을 위해 +1
+            order: [[cursorField, direction]],
+            pagination: false
+        });
+
+        const items = results.items || results;
+        const hasNext = items.length > limit;
+
+        if (hasNext) {
+            items.pop(); // 마지막 항목 제거
+        }
+
+        const nextCursor = items.length > 0 ? items[items.length - 1][cursorField] : null;
+
+        return {
+            items,
+            hasNext,
+            nextCursor,
+            limit
+        };
+    }
+
+    /**
+     * 관계 데이터 사전 로딩 (N+1 문제 해결)
+     * @param {Array} items - 기본 데이터 배열
+     * @param {string} relationField - 관계 필드명
+     * @param {string} foreignKey - 외래키 필드명
+     * @param {object} RelatedModel - 관련 모델
+     * @param {object} options - 추가 옵션
+     * @returns {Promise<Array>} 관계 데이터가 포함된 배열
+     */
+    async preloadRelations(items, relationField, foreignKey, RelatedModel, options = {}) {
+        if (!items || items.length === 0) {
+            return items;
+        }
+
+        // 외래키 값들 추출
+        const foreignKeys = [...new Set(
+            items.map(item => item[foreignKey]).filter(Boolean)
+        )];
+
+        if (foreignKeys.length === 0) {
+            return items;
+        }
+
+        // 관련 데이터 배치 조회
+        const relatedItems = await RelatedModel.findAll({
+            where: { id: { [Op.in]: foreignKeys } },
+            ...options
+        });
+
+        // 관련 데이터 매핑
+        const relatedMap = new Map(relatedItems.map(item => [item.id, item]));
+
+        // 원본 데이터에 관계 데이터 추가
+        return items.map(item => ({
+            ...item.toJSON ? item.toJSON() : item,
+            [relationField]: relatedMap.get(item[foreignKey]) || null
+        }));
     }
 }

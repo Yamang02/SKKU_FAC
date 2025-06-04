@@ -534,16 +534,58 @@ class Config {
      * @returns {object} 데이터베이스 설정 객체
      */
     getDatabaseConfig() {
+        // 환경별 최적화된 연결 풀 설정
+        const getOptimizedPoolConfig = () => {
+            switch (this.environment) {
+                case 'production':
+                    return {
+                        max: parseInt(process.env.DB_POOL_MAX, 10) || 20,     // 운영: 더 많은 연결
+                        min: parseInt(process.env.DB_POOL_MIN, 10) || 5,      // 운영: 최소 연결 유지
+                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 10000,  // 10초
+                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 60000,        // 60초
+                        evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,       // 1초마다 유휴 연결 확인
+                        handleDisconnects: true,  // 연결 끊김 자동 처리
+                        validate: (connection) => {
+                            // 연결 유효성 검사 - 연결이 존재하고 활성 상태인지 확인
+                            return connection && connection.state !== 'disconnected';
+                        }
+                    };
+
+                case 'test':
+                    return {
+                        max: parseInt(process.env.DB_POOL_MAX, 10) || 5,      // 테스트: 적은 연결
+                        min: parseInt(process.env.DB_POOL_MIN, 10) || 1,      // 테스트: 최소 1개 유지
+                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 5000,   // 5초
+                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 30000,        // 30초
+                        evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
+                        handleDisconnects: true
+                    };
+
+                case 'development':
+                    return {
+                        max: parseInt(process.env.DB_POOL_MAX, 10) || 10,     // 개발: 중간 수준
+                        min: parseInt(process.env.DB_POOL_MIN, 10) || 2,      // 개발: 최소 2개 유지
+                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 8000,   // 8초
+                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 45000,        // 45초
+                        evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
+                        handleDisconnects: true
+                    };
+
+                default:
+                    return {
+                        max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+                        min: parseInt(process.env.DB_POOL_MIN, 10) || 0,
+                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 30000,
+                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 10000
+                    };
+            }
+        };
+
         const baseConfig = {
             dialect: 'mysql',
             timezone: '+09:00',
             logging: this.environment === 'development' ? console.log : false,
-            pool: {
-                max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
-                min: parseInt(process.env.DB_POOL_MIN, 10) || 0,
-                acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 30000,
-                idle: parseInt(process.env.DB_POOL_IDLE, 10) || 10000
-            }
+            pool: getOptimizedPoolConfig()
         };
 
         // 환경별 설정을 먼저 생성하고, 나중에 get() 메서드로 password를 가져와서 복호화

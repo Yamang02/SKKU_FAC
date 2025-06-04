@@ -47,6 +47,18 @@ const Notice = db.define('Notice', {
         {
             name: 'idx_notice_important',
             fields: ['isImportant']
+        },
+        {
+            name: 'idx_notice_title',
+            fields: ['title']
+        },
+        {
+            name: 'idx_notice_important_created',
+            fields: ['isImportant', 'createdAt']
+        },
+        {
+            name: 'idx_notice_user_created',
+            fields: ['userId', 'createdAt']
         }
     ]
 });

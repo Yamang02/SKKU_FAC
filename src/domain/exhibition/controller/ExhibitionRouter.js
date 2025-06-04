@@ -1,6 +1,8 @@
 import express from 'express';
 import ExhibitionController from './ExhibitionController.js';
 import ExhibitionApiController from './api/ExhibitionApiController.js';
+import { cacheMiddleware } from '../../../common/middleware/CacheMiddleware.js';
+
 const ExhibitionRouter = express.Router();
 const exhibitionController = new ExhibitionController();
 const exhibitionApiController = new ExhibitionApiController();
@@ -113,7 +115,7 @@ const exhibitionApiController = new ExhibitionApiController();
         *       500:
         *         description: 서버 오류
         */
-ExhibitionRouter.get('/api/list', (req, res) => exhibitionApiController.getExhibitionList(req, res));
+ExhibitionRouter.get('/api/list', cacheMiddleware.exhibitionList(), (req, res) => exhibitionApiController.getExhibitionList(req, res));
 
 /**
  * @swagger
@@ -147,7 +149,7 @@ ExhibitionRouter.get('/api/list', (req, res) => exhibitionApiController.getExhib
  *       500:
  *         description: 서버 오류
  */
-ExhibitionRouter.get('/api/status/:status', (req, res) => exhibitionController.getExhibitionsByStatus(req, res));
+ExhibitionRouter.get('/api/status/:status', cacheMiddleware.exhibitionList(300), (req, res) => exhibitionController.getExhibitionsByStatus(req, res));
 
 /**
  * @swagger
@@ -173,7 +175,7 @@ ExhibitionRouter.get('/api/status/:status', (req, res) => exhibitionController.g
  *       500:
  *         description: 서버 오류
  */
-ExhibitionRouter.get('/api/submittable', (req, res) => exhibitionApiController.findSubmittableExhibitions(req, res));
+ExhibitionRouter.get('/api/submittable', cacheMiddleware.featuredExhibitions(900), (req, res) => exhibitionApiController.findSubmittableExhibitions(req, res));
 
 /**
  * @swagger
@@ -206,7 +208,7 @@ ExhibitionRouter.get('/api/submittable', (req, res) => exhibitionApiController.f
  *       500:
  *         description: 서버 오류
  */
-ExhibitionRouter.get('/api/featured', (req, res) => exhibitionApiController.getFeaturedExhibitions(req, res));
+ExhibitionRouter.get('/api/featured', cacheMiddleware.featuredExhibitions(), (req, res) => exhibitionApiController.getFeaturedExhibitions(req, res));
 
 // 관리자용 전시회 관리 API 라우트
 /**
@@ -232,7 +234,7 @@ ExhibitionRouter.get('/api/featured', (req, res) => exhibitionApiController.getF
  *       200:
  *         description: 전시회 목록 조회 성공
  */
-ExhibitionRouter.get('/api/admin/list', (req, res) => exhibitionController.getExhibitions(req, res));
+ExhibitionRouter.get('/api/admin/list', cacheMiddleware.exhibitionList(180), (req, res) => exhibitionController.getExhibitions(req, res));
 
 /**
  * @swagger
@@ -251,7 +253,7 @@ ExhibitionRouter.get('/api/admin/list', (req, res) => exhibitionController.getEx
  *       404:
  *         description: 전시회를 찾을 수 없음
  */
-ExhibitionRouter.get('/api/admin/:id', (req, res) => exhibitionController.getExhibition(req, res));
+ExhibitionRouter.get('/api/admin/:id', cacheMiddleware.exhibitionDetail(), (req, res) => exhibitionController.getExhibition(req, res));
 
 /**
  * @swagger
@@ -270,7 +272,7 @@ ExhibitionRouter.get('/api/admin/:id', (req, res) => exhibitionController.getExh
  *       404:
  *         description: 전시회를 찾을 수 없음
  */
-ExhibitionRouter.get('/api/admin/:id/status', (req, res) => exhibitionController.getExhibitionWithStatus(req, res));
+ExhibitionRouter.get('/api/admin/:id/status', cacheMiddleware.exhibitionDetail(600), (req, res) => exhibitionController.getExhibitionWithStatus(req, res));
 
 /**
  * @swagger
@@ -289,7 +291,7 @@ ExhibitionRouter.get('/api/admin/:id/status', (req, res) => exhibitionController
  *       400:
  *         description: 잘못된 요청
  */
-ExhibitionRouter.post('/api/admin', (req, res) => exhibitionController.createExhibition(req, res));
+ExhibitionRouter.post('/api/admin', cacheMiddleware.invalidate('exhibition'), (req, res) => exhibitionController.createExhibition(req, res));
 
 /**
  * @swagger
@@ -314,7 +316,7 @@ ExhibitionRouter.post('/api/admin', (req, res) => exhibitionController.createExh
  *       404:
  *         description: 전시회를 찾을 수 없음
  */
-ExhibitionRouter.put('/api/admin/:id', (req, res) => exhibitionController.updateExhibition(req, res));
+ExhibitionRouter.put('/api/admin/:id', cacheMiddleware.invalidate('exhibition'), (req, res) => exhibitionController.updateExhibition(req, res));
 
 /**
  * @swagger
@@ -333,7 +335,7 @@ ExhibitionRouter.put('/api/admin/:id', (req, res) => exhibitionController.update
  *       404:
  *         description: 전시회를 찾을 수 없음
  */
-ExhibitionRouter.delete('/api/admin/:id', (req, res) => exhibitionController.deleteExhibition(req, res));
+ExhibitionRouter.delete('/api/admin/:id', cacheMiddleware.invalidate('exhibition'), (req, res) => exhibitionController.deleteExhibition(req, res));
 
 // 상태 관리 API 라우트
 /**

@@ -40,6 +40,22 @@ const ArtworkExhibitionRelationship = db.define('ArtworkExhibition', {
         {
             name: 'idx_artwork_exhibition_exhibition',
             fields: ['exhibitionId']
+        },
+        {
+            name: 'idx_artwork_exhibition_display_order',
+            fields: ['displayOrder']
+        },
+        {
+            name: 'idx_artwork_exhibition_exhibition_order',
+            fields: ['exhibitionId', 'displayOrder']
+        },
+        {
+            name: 'idx_artwork_exhibition_artwork_created',
+            fields: ['artworkId', 'createdAt']
+        },
+        {
+            name: 'idx_artwork_exhibition_exhibition_created',
+            fields: ['exhibitionId', 'createdAt']
         }
     ]
 });
