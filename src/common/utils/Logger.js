@@ -595,7 +595,7 @@ class WinstonLogger {
 
         // SMTP 설정이 완전하지 않으면 이메일 전송 건너뛰기
         if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-            console.log('�� EMAIL 설정이 완전하지 않아 긴급 로그 이메일 전송을 건너뜁니다.');
+            console.log('📧 EMAIL 설정이 완전하지 않아 긴급 로그 이메일 전송을 건너뜁니다.');
             return;
         }
 

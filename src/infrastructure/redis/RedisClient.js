@@ -25,7 +25,15 @@ class RedisClient {
     }
 
     async connect() {
+        // 이미 연결되어 있으면 기존 클라이언트 반환
+        if (this.isConnected && this.client && this.client.isReady) {
+            logger.info(`[${environment.toUpperCase()}] Redis 클라이언트가 이미 연결되어 있습니다.`);
+            return this.client;
+        }
+
+        // 연결 시도 중이면 대기
         if (this.connectionAttempted && this.client) {
+            logger.info(`[${environment.toUpperCase()}] Redis 연결 시도 중... 기존 연결을 반환합니다.`);
             return this.client;
         }
 

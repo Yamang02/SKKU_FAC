@@ -13,8 +13,13 @@ class SessionStore {
 
     async initialize() {
         try {
-            // Redis 클라이언트 연결
-            await redisClient.connect();
+            // Redis 클라이언트가 이미 연결되어 있는지 확인
+            if (!redisClient.isClientConnected()) {
+                logger.info('Redis 클라이언트 연결 시도 중...');
+                await redisClient.connect();
+            } else {
+                logger.info('Redis 클라이언트가 이미 연결되어 있습니다.');
+            }
 
             // Redis 설정 가져오기
             const redisConfig = this.config.getRedisConfig();
