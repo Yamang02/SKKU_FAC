@@ -1,9 +1,10 @@
 import rateLimit from 'express-rate-limit';
 import slowDown from 'express-slow-down';
 import RedisStore from 'rate-limit-redis';
-import { createClient } from 'redis';
 import logger from '../utils/Logger.js';
 import Config from '../../config/Config.js';
+// 기존 싱글톤 Redis 클라이언트 재사용
+import redisClientSingleton from '../../infrastructure/redis/RedisClient.js';
 
 // 모듈 로드 시점 디버깅
 console.log('🔄 [RATE_LIMIT] rateLimiting.js 모듈이 로드되었습니다');
@@ -12,48 +13,10 @@ logger.info('🔄 [RATE_LIMIT] rateLimiting.js 모듈이 로드되었습니다')
 const config = Config.getInstance();
 
 /**
- * Redis 클라이언트 설정 (사용 가능한 경우)
+ * 싱글톤 Redis 클라이언트 사용 (별도 클라이언트 생성하지 않음)
  */
-let redisClient = null;
-if (config.get('redis.host')) {
-    try {
-        console.log('🔄 [RATE_LIMIT] Redis 클라이언트 생성 시작');
-        logger.info('=== RateLimit Redis 클라이언트 설정 ===');
-        logger.info(`호스트: ${config.get('redis.host')}`);
-        logger.info(`포트: ${config.get('redis.port')}`);
-        logger.info(`패스워드: ${config.get('redis.password') ? '설정됨' : '설정되지 않음'}`);
-        logger.info(`데이터베이스: ${config.get('redis.db', 0)}`);
-
-        const clientOptions = {
-            host: config.get('redis.host'),
-            port: config.get('redis.port'),
-            password: config.get('redis.password'),
-            db: config.get('redis.db', 0)
-        };
-
-        console.log('🔄 [RATE_LIMIT] createClient 호출 직전', clientOptions);
-        redisClient = createClient(clientOptions);
-        console.log('🔄 [RATE_LIMIT] createClient 호출 완료');
-        redisClient.on('error', err => {
-            logger.error('[RATE_LIMIT] Redis 클라이언트 오류', {
-                error: err.message || 'Unknown error',
-                code: err.code,
-                errno: err.errno,
-                name: err.name,
-                host: config.get('redis.host'),
-                port: config.get('redis.port')
-            });
-            redisClient = null;
-        });
-        logger.info('RateLimit Redis 클라이언트 초기화 완료');
-    } catch (error) {
-        logger.error('RateLimit Redis 클라이언트 생성 실패, 메모리 스토어 사용', {
-            error: error.message,
-            stack: error.stack?.substring(0, 200) + '...'
-        });
-        redisClient = null;
-    }
-}
+logger.info('🔄 [RATE_LIMIT] 기존 싱글톤 Redis 클라이언트 사용');
+const redisClient = redisClientSingleton;
 
 /**
  * Rate Limiting 통계 및 모니터링
@@ -118,16 +81,12 @@ function createStore(windowMs) {
         return undefined; // express-rate-limit의 기본 메모리 스토어 사용
     }
 
-    if (redisClient) {
+    // 싱글톤 Redis 클라이언트 연결 상태 확인
+    if (redisClient && redisClient.isClientConnected()) {
         try {
-            // Redis 연결 상태 확인
-            if (!redisClient.isReady) {
-                logger.warn('Redis 클라이언트가 준비되지 않음, 메모리 스토어로 폴백');
-                return undefined;
-            }
-
+            logger.info('🔄 [RATE_LIMIT] 싱글톤 Redis 클라이언트로 스토어 생성');
             return new RedisStore({
-                client: redisClient,
+                client: redisClient.getClient(),
                 prefix: 'rl:',
                 expiry: Math.ceil(windowMs / 1000)
             });
@@ -141,7 +100,7 @@ function createStore(windowMs) {
     }
 
     // 메모리 스토어 (기본값)
-    logger.info('Redis 클라이언트 없음: 메모리 스토어 사용');
+    logger.info('Redis 클라이언트 연결되지 않음: 메모리 스토어 사용');
     return undefined; // express-rate-limit의 기본 메모리 스토어 사용
 }
 
