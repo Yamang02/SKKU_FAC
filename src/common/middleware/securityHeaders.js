@@ -85,8 +85,9 @@ const cspPolicies = {
     test: {
         'default-src': ['\'self\''],
         'script-src': ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''],
-        'style-src': ['\'self\'', '\'unsafe-inline\''],
-        'img-src': ['\'self\'', 'data:'],
+        'style-src': ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
+        'img-src': ['\'self\'', 'data:', 'https://res.cloudinary.com'],
+        'font-src': ['\'self\'', 'https://fonts.gstatic.com', 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
         'connect-src': ['\'self\''],
         'object-src': ['\'none\'']
     }
