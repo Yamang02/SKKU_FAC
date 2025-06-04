@@ -93,7 +93,7 @@ export function setupCSRFProtection(app) {
             }
 
             req.flash('error', 'Security token is missing. Please try again.');
-            return res.redirect('back');
+            return res.redirect(req.get('Referrer') || '/');
         }
 
         // CSRF 토큰 검증
@@ -115,7 +115,7 @@ export function setupCSRFProtection(app) {
             }
 
             req.flash('error', 'Security token is invalid. Please try again.');
-            return res.redirect('back');
+            return res.redirect(req.get('Referrer') || '/');
         }
 
         // 검증 성공

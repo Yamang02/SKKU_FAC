@@ -4,78 +4,108 @@ import logger from '../../common/utils/Logger.js';
 
 // Redis 설정 가져오기
 const redisConfig = infrastructureConfig.redis.config;
+const environment = infrastructureConfig.environment;
 
 // Redis 연결 설정 로깅
 logger.info('=== Redis 연결 설정 ===');
-logger.info(`환경: ${infrastructureConfig.environment}`);
+logger.info(`환경: ${environment}`);
 logger.info(`호스트: ${redisConfig.host}`);
 logger.info(`포트: ${redisConfig.port}`);
 logger.info(`데이터베이스: ${redisConfig.db}`);
+if (process.env.REDIS_URL) {
+    logger.info(`Redis URL: ${process.env.REDIS_URL.replace(/:[^@]*@/, ':***@')}`); // 패스워드 마스킹
+}
 logger.info('====================');
 
 class RedisClient {
     constructor() {
         this.client = null;
         this.isConnected = false;
+        this.connectionAttempted = false;
     }
 
     async connect() {
+        if (this.connectionAttempted && this.client) {
+            return this.client;
+        }
+
+        this.connectionAttempted = true;
+
         try {
             // URL 형태로 연결 설정 (Redis 4.x 스타일)
-            let redisUrl = 'redis://';
-            if (redisConfig.username && redisConfig.password) {
-                redisUrl += `${redisConfig.username}:${redisConfig.password}@`;
-            } else if (redisConfig.password) {
-                redisUrl += `:${redisConfig.password}@`;
+            let redisUrl = process.env.REDIS_URL;
+
+            if (!redisUrl) {
+                redisUrl = 'redis://';
+                if (redisConfig.username && redisConfig.password) {
+                    redisUrl += `${redisConfig.username}:${redisConfig.password}@`;
+                } else if (redisConfig.password) {
+                    redisUrl += `:${redisConfig.password}@`;
+                }
+                redisUrl += `${redisConfig.host}:${redisConfig.port}`;
+                if (redisConfig.db) {
+                    redisUrl += `/${redisConfig.db}`;
+                }
             }
-            redisUrl += `${redisConfig.host}:${redisConfig.port}`;
-            if (redisConfig.db) {
-                redisUrl += `/${redisConfig.db}`;
-            }
+
+            logger.info(`Redis 연결 시도: ${redisUrl.replace(/:[^@]*@/, ':***@')}`);
 
             this.client = createClient({
                 url: redisUrl,
                 socket: {
-                    connectTimeout: 60000,
+                    connectTimeout: 10000, // 10초
                     lazyConnect: true,
                     reconnectStrategy: retries => {
-                        if (retries > 10) {
-                            logger.error('Redis 연결 재시도 횟수 초과');
+                        if (retries > 5) {
+                            logger.error(`[${environment.toUpperCase()}] Redis 연결 재시도 횟수 초과 (${retries})`);
                             return new Error('Redis 연결 실패');
                         }
-                        return Math.min(retries * 50, 500);
+                        const delay = Math.min(retries * 1000, 5000);
+                        logger.warn(`[${environment.toUpperCase()}] Redis 재연결 시도 ${retries} (${delay}ms 후)`);
+                        return delay;
                     }
                 }
             });
 
             // 에러 핸들링
             this.client.on('error', err => {
-                logger.error('Redis 클라이언트 오류', err);
+                logger.error(`[${environment.toUpperCase()}] Redis 클라이언트 오류`, {
+                    error: err.message,
+                    code: err.code,
+                    errno: err.errno
+                });
                 this.isConnected = false;
             });
 
             this.client.on('connect', () => {
-                logger.success('Redis 서버에 연결되었습니다.');
+                logger.success(`[${environment.toUpperCase()}] Redis 서버에 연결되었습니다.`);
                 this.isConnected = true;
             });
 
             this.client.on('ready', () => {
-                logger.success('Redis 클라이언트가 준비되었습니다.');
+                logger.success(`[${environment.toUpperCase()}] Redis 클라이언트가 준비되었습니다.`);
                 this.isConnected = true;
             });
 
             this.client.on('end', () => {
-                logger.info('Redis 연결이 종료되었습니다.');
+                logger.info(`[${environment.toUpperCase()}] Redis 연결이 종료되었습니다.`);
                 this.isConnected = false;
+            });
+
+            this.client.on('reconnecting', () => {
+                logger.info(`[${environment.toUpperCase()}] Redis 재연결 중...`);
             });
 
             // 연결 시도
             await this.client.connect();
 
-            logger.success('Redis 연결 성공!');
+            logger.success(`[${environment.toUpperCase()}] Redis 연결 성공!`);
             return this.client;
         } catch (error) {
-            logger.error('Redis 연결 실패! 상세 정보', error, {
+            logger.error(`[${environment.toUpperCase()}] Redis 연결 실패! 상세 정보`, {
+                error: error.message,
+                code: error.code,
+                errno: error.errno,
                 host: redisConfig.host,
                 port: redisConfig.port,
                 database: redisConfig.db
@@ -90,9 +120,9 @@ class RedisClient {
         if (this.client && this.isConnected) {
             try {
                 await this.client.quit();
-                logger.info('Redis 연결이 정상적으로 종료되었습니다.');
+                logger.info(`[${environment.toUpperCase()}] Redis 연결이 정상적으로 종료되었습니다.`);
             } catch (error) {
-                logger.error('Redis 연결 종료 중 오류', error);
+                logger.error(`[${environment.toUpperCase()}] Redis 연결 종료 중 오류`, error);
                 await this.client.disconnect();
             }
         }
@@ -110,14 +140,14 @@ class RedisClient {
     async testConnection() {
         try {
             if (!this.isClientConnected()) {
-                logger.error('Redis 클라이언트가 연결되지 않았습니다.');
+                logger.error(`[${environment.toUpperCase()}] Redis 클라이언트가 연결되지 않았습니다.`);
                 return false;
             }
             await this.client.ping();
-            logger.success('Redis 연결 테스트 성공!');
+            logger.success(`[${environment.toUpperCase()}] Redis 연결 테스트 성공!`);
             return true;
         } catch (error) {
-            logger.error('Redis 연결 테스트 실패', error);
+            logger.error(`[${environment.toUpperCase()}] Redis 연결 테스트 실패`, error);
             return false;
         }
     }

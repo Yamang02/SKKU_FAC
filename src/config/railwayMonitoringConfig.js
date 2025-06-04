@@ -11,14 +11,24 @@ const config = Config.getInstance();
 const environment = config.getEnvironment();
 const emailConfig = config.getEmailConfig();
 
+// 이메일 설정 디버깅
+console.log(`[${environment.toUpperCase()}] 이메일 설정 확인:`, {
+    hasUser: !!emailConfig.user,
+    hasPass: !!emailConfig.pass,
+    hasFrom: !!emailConfig.from,
+    hasAdminEmail: !!emailConfig.adminEmail,
+    user: emailConfig.user ? emailConfig.user.substring(0, 5) + '***' : 'MISSING',
+    from: emailConfig.from ? emailConfig.from.substring(0, 5) + '***' : 'MISSING'
+});
+
 /**
  * Railway 환경에 최적화된 에러 리포터 설정
  */
 export const railwayErrorReporterConfig = {
     projectName: 'SKKU Gallery',
 
-    // Railway에서는 기존 EMAIL 설정이 완전할 때만 이메일 알림 활성화
-    enableNotifications: environment === 'production' && emailConfig.user && emailConfig.pass && emailConfig.adminEmail,
+    // 모든 환경에서 이메일 설정이 있으면 알림 활성화
+    enableNotifications: emailConfig.user && emailConfig.pass && emailConfig.adminEmail,
 
     // 이메일 설정 (기존 EMAIL_* 환경변수 사용)
     emailConfig:

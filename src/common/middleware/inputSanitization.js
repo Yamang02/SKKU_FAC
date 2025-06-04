@@ -214,7 +214,16 @@ export function createSanitizationMiddleware(options = {}) {
             // 각 소스에 대해 sanitization 수행
             sanitizeOptions.sources.forEach(source => {
                 if (req[source] && typeof req[source] === 'object') {
-                    req[source] = sanitizeObject(req[source], sanitizeOptions);
+                    try {
+                        req[source] = sanitizeObject(req[source], sanitizeOptions);
+                    } catch (sourceError) {
+                        // 개별 소스 sanitization 실패 시 로깅만 하고 계속 진행
+                        logger.warn(`${source} sanitization 실패`, {
+                            error: sourceError.message,
+                            method: req.method,
+                            url: req.url
+                        });
+                    }
                 }
             });
 
@@ -228,13 +237,17 @@ export function createSanitizationMiddleware(options = {}) {
 
             next();
         } catch (error) {
-            logger.error('입력 sanitization 실패', {
+            const environment = config.getEnvironment();
+
+            logger.error(`[${environment.toUpperCase()}] 입력 sanitization 실패`, {
                 error: error.message || error.toString() || 'Unknown error',
                 errorName: error.name,
-                errorStack: error.stack,
+                errorStack: error.stack?.substring(0, 500),
                 method: req.method,
                 url: req.url,
-                ip: req.ip
+                ip: req.ip,
+                userAgent: req.get('User-Agent')?.substring(0, 100),
+                requestId: req.id || 'unknown'
             });
 
             // sanitization 실패 시에도 요청을 계속 처리
