@@ -19,18 +19,24 @@ const redisConfig = {
 
 const environment = infrastructureConfig.environment;
 
-// Redis 연결 설정 로깅
-logger.info('=== Redis 연결 설정 ===');
+// Redis 연결 설정 로깅 (상세 디버깅 정보 포함)
+logger.info('=== Redis 연결 설정 (상세 디버깅) ===');
 logger.info(`환경: ${environment}`);
-logger.info(`호스트: ${redisConfig.host}`);
-logger.info(`포트: ${redisConfig.port}`);
-logger.info(`사용자명: ${redisConfig.username || 'N/A'}`);
-logger.info(`패스워드 길이: ${redisConfig.password ? redisConfig.password.length : 0}자`);
-logger.info(`데이터베이스: ${redisConfig.db}`);
-if (process.env.REDIS_URL) {
-    logger.info(`Redis URL: ${process.env.REDIS_URL.replace(/:[^@]*@/, ':***@')}`); // 패스워드 마스킹
-}
-logger.info('====================');
+logger.info(`원본 REDIS_HOST: "${process.env.REDIS_HOST || 'undefined'}"`);
+logger.info(`원본 REDIS_PORT: "${process.env.REDIS_PORT || 'undefined'}"`);
+logger.info(`원본 REDIS_USERNAME: "${process.env.REDIS_USERNAME || 'undefined'}"`);
+logger.info(`원본 REDIS_PASSWORD: ${process.env.REDIS_PASSWORD ? `설정됨 (${process.env.REDIS_PASSWORD.length}자)` : '설정되지 않음'}`);
+logger.info(`원본 REDIS_DB: "${process.env.REDIS_DB || 'undefined'}"`);
+logger.info(`원본 REDIS_URL: ${process.env.REDIS_URL ? `설정됨 (${process.env.REDIS_URL.length}자)` : '설정되지 않음'}`);
+logger.info('--- 파싱된 설정 ---');
+logger.info(`파싱된 호스트: "${redisConfig.host}"`);
+logger.info(`파싱된 포트: ${redisConfig.port} (타입: ${typeof redisConfig.port})`);
+logger.info(`파싱된 사용자명: "${redisConfig.username}"`);
+logger.info(`파싱된 패스워드: ${redisConfig.password ? `설정됨 (${redisConfig.password.length}자)` : '설정되지 않음'}`);
+logger.info(`파싱된 데이터베이스: ${redisConfig.db} (타입: ${typeof redisConfig.db})`);
+logger.info(`추출된 포트 (호스트명에서): ${extractedPort || 'N/A'}`);
+logger.info(`Redis Cloud 감지: ${rawHost.includes('.redis-cloud.com')}`);
+logger.info('====================================');
 
 class RedisClient {
     constructor() {
@@ -94,11 +100,18 @@ class RedisClient {
                 }
             }
 
-            logger.info(`Redis 연결 시도: ${redisUrl.replace(/:[^@]*@/, ':***@')}`);
+            logger.info('=== Redis 연결 시도 상세 정보 ===');
+            logger.info(`최종 연결 URL: ${redisUrl.replace(/:[^@]*@/, ':***@')}`);
+            logger.info(`URL 구성 방식: ${process.env.REDIS_URL ? 'REDIS_URL 환경변수 사용' : '개별 환경변수로 구성'}`);
 
             // Redis Cloud 최적화 설정
             const isRedisCloud = redisConfig.host.includes('.redis-cloud.com');
             const isTLS = redisUrl.startsWith('rediss://');
+
+            logger.info(`Redis Cloud 감지: ${isRedisCloud}`);
+            logger.info(`TLS 사용: ${isTLS} (프로토콜: ${redisUrl.split('://')[0]})`);
+            logger.info(`호스트 분석: "${redisConfig.host}"`);
+            logger.info(`포트 분석: ${redisConfig.port}`);
 
             const clientOptions = {
                 url: redisUrl,
@@ -119,7 +132,13 @@ class RedisClient {
                 }
             };
 
-            logger.info(`Redis 클라이언트 옵션: TLS=${clientOptions.socket.tls}, Timeout=${clientOptions.socket.connectTimeout}ms, RedisCloud=${isRedisCloud}, RejectUnauth=${clientOptions.socket.rejectUnauthorized}`);
+            logger.info('--- 클라이언트 옵션 ---');
+            logger.info(`TLS 활성화: ${clientOptions.socket.tls}`);
+            logger.info(`연결 타임아웃: ${clientOptions.socket.connectTimeout}ms`);
+            logger.info(`Lazy Connect: ${clientOptions.socket.lazyConnect}`);
+            logger.info(`인증서 검증: ${clientOptions.socket.rejectUnauthorized}`);
+            logger.info(`Redis Cloud 최적화: ${isRedisCloud}`);
+            logger.info('=========================');
 
             this.client = createClient(clientOptions);
 
