@@ -305,6 +305,11 @@ export function httpsViolationDetector() {
             req.headers['x-forwarded-ssl'] === 'on' ||
             req.connection.encrypted;
 
+        // 개발 환경에서는 HTTP 사용이 정상이므로 경고하지 않음
+        if (config.isDevelopment()) {
+            return next();
+        }
+
         // 민감한 데이터를 포함할 수 있는 요청들
         const sensitiveEndpoints = [
             '/user/login',

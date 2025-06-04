@@ -21,7 +21,7 @@
         "dev:setup": "npm install && npm run test:install && echo '개발 환경 설정이 완료되었습니다.'",
         "dev:db": "cross-env NODE_ENV=development nodemon modelsync.js",
         "// === PRODUCTION ===": "",
-        "build": "echo 'Build completed - Static assets ready'",
+        "build": "echo 'No build step required for Node.js'",
         "start": "cross-env NODE_ENV=production node ./src/server.js",
         "start:test": "cross-env NODE_ENV=test node src/server.js",
         "// === DOCKER ===": "",
@@ -97,7 +97,8 @@
         "test:ci:performance": "cross-env CI=true playwright test --grep=\"응답 시간|성능|캐싱\" --reporter=json",
         "test:ci:security": "npm audit --audit-level=moderate && npx audit-ci --moderate",
         "test:ci:coverage": "cross-env CI=true playwright test tests/integration/api/ --reporter=html --output-dir=coverage",
-        "test:ci:full": "npm run test:ci:security && npm run test:ci && npm run test:ci:performance"
+        "test:ci:full": "npm run test:ci:security && npm run test:ci && npm run test:ci:performance",
+        "diagnose": "node scripts/diagnose-env.js"
     },
     "dependencies": {
         "@sentry/node": "^9.25.1",

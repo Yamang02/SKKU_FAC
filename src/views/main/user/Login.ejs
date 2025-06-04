@@ -1,63 +1,54 @@
 <style ref="stylesheet">
-  @import url('/css/common/components/usercommon.css');
-  @import url('/css/user/Login.css');
+    @import url('/css/common/components/usercommon.css');
+    @import url('/css/user/Login.css');
 </style>
 <div class="page-container-user">
-  <div class="page-content-user">
-    <div class="page-card-user">
-      <h1 class="page-title-user">로그인</h1>
-      <% if (locals.error) { %>
-      <div class="alert-danger-user"><%= locals.error %></div>
-      <% } %>
-      <form class="form-user" action="/user/login" method="POST">
-        <div class="form-group-user">
-          <label class="form-label-user" for="username">아이디</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            class="form-control-user"
-            value="<%= locals.username || '' %>"
-            required
-            autofocus
-            placeholder="아이디를 입력하세요"
-          />
-        </div>
-        <div class="form-group-user">
-          <label class="form-label-user" for="password">비밀번호</label>
-          <div class="password-input-group-user">
-            <input
-              type="password"
-              id="password"
-              name="password"
-              class="form-control-user"
-              required
-              placeholder="비밀번호를 입력하세요"
-            />
-            <button type="button" class="toggle-password-user" aria-label="비밀번호 표시">
-              <i class="fas fa-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="form-check-user">
-          <div class="form-check-wrapper-user">
-            <input type="hidden" id="remember" name="remember" class="form-check-input-user" />
-            <!-- <label class="form-check-label-user" for="remember">로그인 상태 유지</label> -->
-          </div>
-        </div>
-        <input type="hidden" name="redirectUrl" value="<%= locals.redirectUrl || '/' %>" />
+    <div class="page-content-user">
+        <div class="page-card-user">
+            <h1 class="page-title-user">로그인</h1>
+            <% if (locals.error) { %>
+                <div class="alert-danger-user">
+                    <%= locals.error %>
+                </div>
+                <% } %>
+                    <form class="form-user" action="/user/login" method="POST">
+                        <!-- CSRF 토큰 -->
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
-        <div class="button-group-user">
-          <button type="submit" class="btn-primary-user btn-block-user">로그인</button>
-        </div>
+                        <div class="form-group-user">
+                            <label class="form-label-user" for="username">아이디</label>
+                            <input type="text" id="username" name="username" class="form-control-user"
+                                value="<%= locals.username || '' %>" required autofocus placeholder="아이디를 입력하세요" />
+                        </div>
+                        <div class="form-group-user">
+                            <label class="form-label-user" for="password">비밀번호</label>
+                            <div class="password-input-group-user">
+                                <input type="password" id="password" name="password" class="form-control-user" required
+                                    placeholder="비밀번호를 입력하세요" />
+                                <button type="button" class="toggle-password-user" aria-label="비밀번호 표시">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-check-user">
+                            <div class="form-check-wrapper-user">
+                                <input type="hidden" id="remember" name="remember" class="form-check-input-user" />
+                                <!-- <label class="form-check-label-user" for="remember">로그인 상태 유지</label> -->
+                            </div>
+                        </div>
+                        <input type="hidden" name="redirectUrl" value="<%= locals.redirectUrl || '/' %>" />
 
-        <div class="form-links-user">
-          <a href="/user/new" class="link-user">회원가입</a>
-          <a href="/user/password/forgot" class="link-user">계정 찾기</a>
+                        <div class="button-group-user">
+                            <button type="submit" class="btn-primary-user btn-block-user">로그인</button>
+                        </div>
+
+                        <div class="form-links-user">
+                            <a href="/user/new" class="link-user">회원가입</a>
+                            <a href="/user/password/forgot" class="link-user">계정 찾기</a>
+                        </div>
+                    </form>
         </div>
-      </form>
     </div>
-  </div>
 </div>
 
 <script type="module" src="/js/page/user/Login.js"></script>
