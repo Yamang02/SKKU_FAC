@@ -269,3 +269,66 @@ playwright-*.log
 .playwright-*
 .test-cache/
 
+# ===== 보안 강화 패턴 =====
+# 환경 변수 파일들
+.env*
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+.env.docker
+.env.backup
+.env.example.local
+
+# 설정 파일들
+config/local.*
+config/production.*
+config/secrets.*
+src/config/local.*
+src/config/secrets.*
+
+# 인증서 및 키 파일들
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+ssl/
+certs/
+keys/
+
+# 데이터베이스 백업 및 덤프
+*.sql
+*.dump
+*.backup
+database/backups/
+db/dumps/
+
+# 로그 파일들 (민감한 정보 포함 가능)
+*.log
+logs/
+log/
+
+# 임시 파일들
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# 개발자 개인 설정
+.vscode/settings.json
+.idea/workspace.xml
+.idea/tasks.xml
+
+# OS specific
+# Task files
+tasks.json
+tasks/
+
+# Playwright 테스트 결과
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
