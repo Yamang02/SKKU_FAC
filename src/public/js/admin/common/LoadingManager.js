@@ -161,7 +161,7 @@ class LoadingManager {
      * 키보드 이벤트 차단 설정
      */
     setupKeyboardBlocking() {
-        this.keyboardHandler = (e) => {
+        this.keyboardHandler = e => {
             if (!this.isLoading) return;
 
             // F5, Ctrl+R (새로고침) 차단
@@ -186,9 +186,11 @@ class LoadingManager {
             }
 
             // Backspace (뒤로가기) 차단 (입력 필드가 아닌 경우)
-            if (e.key === 'Backspace' &&
+            if (
+                e.key === 'Backspace' &&
                 !['INPUT', 'TEXTAREA'].includes(e.target.tagName) &&
-                !e.target.isContentEditable) {
+                !e.target.isContentEditable
+            ) {
                 e.preventDefault();
                 e.stopPropagation();
                 return false;

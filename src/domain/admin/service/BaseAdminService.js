@@ -82,9 +82,9 @@ export default class BaseAdminService {
     async toggleEntityFeatured(id, repository, entityName = 'Entity') {
         try {
             // 현재 엔티티 조회
-            const entity = await repository.findById ?
-                await repository.findById(id) :
-                await repository.findArtworkById(id);
+            const entity = (await repository.findById)
+                ? await repository.findById(id)
+                : await repository.findArtworkById(id);
 
             if (!entity) {
                 throw new Error(`${entityName}을(를) 찾을 수 없습니다.`);
@@ -93,9 +93,9 @@ export default class BaseAdminService {
             // featured 상태 토글
             const updateData = { isFeatured: !entity.isFeatured };
 
-            const updatedEntity = await repository.updateArtwork ?
-                await repository.updateArtwork(id, updateData) :
-                await repository.update(id, updateData);
+            const updatedEntity = (await repository.updateArtwork)
+                ? await repository.updateArtwork(id, updateData)
+                : await repository.update(id, updateData);
 
             this.logSuccess(`${entityName} featured 토글`, {
                 id,
@@ -117,9 +117,7 @@ export default class BaseAdminService {
      */
     async deleteEntity(id, service, entityName = 'Entity') {
         try {
-            const result = await service.deleteArtwork ?
-                await service.deleteArtwork(id) :
-                await service.delete(id);
+            const result = (await service.deleteArtwork) ? await service.deleteArtwork(id) : await service.delete(id);
 
             this.logSuccess(`${entityName} 삭제`, { id });
             return result;

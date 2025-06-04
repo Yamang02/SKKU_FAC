@@ -151,13 +151,9 @@ class StaticDataCache {
      * @returns {Promise<number>} 성공한 무효화 수
      */
     async invalidateMultiple(keys) {
-        const results = await Promise.allSettled(
-            keys.map(key => this.invalidate(key))
-        );
+        const results = await Promise.allSettled(keys.map(key => this.invalidate(key)));
 
-        const successCount = results.filter(result =>
-            result.status === 'fulfilled' && result.value
-        ).length;
+        const successCount = results.filter(result => result.status === 'fulfilled' && result.value).length;
 
         logger.info('정적 데이터 다중 캐시 무효화', {
             총요청: keys.length,
@@ -221,9 +217,7 @@ class StaticDataCache {
             // 정적 데이터 캐시 관련 통계만 필터링
             const staticStats = {
                 ...allStats,
-                keys: (allStats.keys || []).filter(key =>
-                    key.startsWith(this.keyPrefix)
-                )
+                keys: (allStats.keys || []).filter(key => key.startsWith(this.keyPrefix))
             };
 
             return staticStats;
@@ -278,8 +272,7 @@ class StaticDataCache {
             }
         });
 
-        const successCount = Object.values(results)
-            .filter(r => r.status === 'success').length;
+        const successCount = Object.values(results).filter(r => r.status === 'success').length;
 
         logger.info('정적 데이터 프리로드 완료', {
             총요청: promises.length,

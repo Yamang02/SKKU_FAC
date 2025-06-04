@@ -1,4 +1,4 @@
-import CloudinaryUrlOptimizer from '../../../../../common/utils/CloudinaryUrlOptimizer.js';
+import CloudinaryUrlOptimizer from '#common/utils/CloudinaryUrlOptimizer.js';
 
 /**
  * 관리자 페이지 전시회 목록을 위한 DTO
@@ -24,8 +24,8 @@ export default class ExhibitionListManagementDto {
      */
     get exhibitionTypeDisplayName() {
         const typeMap = {
-            'regular': '정기',
-            'special': '특별'
+            regular: '정기',
+            special: '특별'
         };
         return typeMap[this.exhibitionType] || '기타';
     }

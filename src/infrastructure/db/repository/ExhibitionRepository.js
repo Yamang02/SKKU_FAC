@@ -55,10 +55,7 @@ export default class ExhibitionRepository extends CachedRepository {
         // 연도 필터링 (start_date의 연도 부분)
         if (year) {
             // MySQL에서 YEAR 함수 사용, 컬럼명을 start_date로 변경
-            where.start_date = Sequelize.where(
-                Sequelize.fn('YEAR', Sequelize.col('start_date')),
-                year
-            );
+            where.start_date = Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('start_date')), year);
         }
 
         // 카테고리 필터링
@@ -97,11 +94,7 @@ export default class ExhibitionRepository extends CachedRepository {
                 );
             } else if (searchType === 'all') {
                 where[Op.or] = [
-                    Sequelize.where(
-                        Sequelize.fn('LOWER', Sequelize.col('title')),
-                        'LIKE',
-                        likePattern.toLowerCase()
-                    ),
+                    Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('title')), 'LIKE', likePattern.toLowerCase()),
                     Sequelize.where(
                         Sequelize.fn('LOWER', Sequelize.col('description')),
                         'LIKE',
@@ -136,14 +129,14 @@ export default class ExhibitionRepository extends CachedRepository {
     convertToSnakeCase(camelCase) {
         // 정렬을 위한 특수 케이스 처리
         const specialCases = {
-            'startDate': 'start_date',
-            'endDate': 'end_date',
-            'createdAt': 'created_at',
-            'updatedAt': 'updated_at',
-            'exhibitionType': 'exhibition_type',
-            'isSubmissionOpen': 'is_submission_open',
-            'isFeatured': 'is_featured',
-            'status': 'status'
+            startDate: 'start_date',
+            endDate: 'end_date',
+            createdAt: 'created_at',
+            updatedAt: 'updated_at',
+            exhibitionType: 'exhibition_type',
+            isSubmissionOpen: 'is_submission_open',
+            isFeatured: 'is_featured',
+            status: 'status'
         };
 
         if (specialCases[camelCase]) {
@@ -189,7 +182,8 @@ export default class ExhibitionRepository extends CachedRepository {
 
         // isSubmissionOpen 필드가 있으면 형변환 처리
         if ('isSubmissionOpen' in updatedData) {
-            updatedData.isSubmissionOpen = updatedData.isSubmissionOpen === 'true' || updatedData.isSubmissionOpen === true;
+            updatedData.isSubmissionOpen =
+                updatedData.isSubmissionOpen === 'true' || updatedData.isSubmissionOpen === true;
         }
 
         // isFeatured 필드가 있으면 형변환 처리
@@ -211,7 +205,7 @@ export default class ExhibitionRepository extends CachedRepository {
      */
     validateAndAdjustData(data, existingData = null) {
         const adjustedData = { ...data };
-        const currentData = existingData ? { ...existingData.dataValues || existingData } : {};
+        const currentData = existingData ? { ...(existingData.dataValues || existingData) } : {};
         const finalData = { ...currentData, ...adjustedData };
 
         // status 필드가 있는 경우 관련 boolean 필드들을 자동 조정
@@ -219,20 +213,22 @@ export default class ExhibitionRepository extends CachedRepository {
             const status = adjustedData.status;
 
             switch (status) {
-                case 'planning':
-                    adjustedData.isSubmissionOpen = false;
-                    break;
-                case 'submission_open':
-                    adjustedData.isSubmissionOpen = true;
-                    break;
-                case 'review':
-                case 'active':
-                case 'completed':
-                    adjustedData.isSubmissionOpen = false;
-                    break;
+            case 'planning':
+                adjustedData.isSubmissionOpen = false;
+                break;
+            case 'submission_open':
+                adjustedData.isSubmissionOpen = true;
+                break;
+            case 'review':
+            case 'active':
+            case 'completed':
+                adjustedData.isSubmissionOpen = false;
+                break;
             }
 
-            logger.info(`전시회 데이터 일관성 조정: status=${status}, isSubmissionOpen=${adjustedData.isSubmissionOpen}`);
+            logger.info(
+                `전시회 데이터 일관성 조정: status=${status}, isSubmissionOpen=${adjustedData.isSubmissionOpen}`
+            );
         }
 
         // isSubmissionOpen 필드가 변경되는 경우 status와의 일관성 검증
@@ -242,9 +238,13 @@ export default class ExhibitionRepository extends CachedRepository {
 
             // 일관성 검증 및 경고
             if (isSubmissionOpen && !['planning', 'submission_open'].includes(currentStatus)) {
-                logger.warn(`데이터 일관성 경고: isSubmissionOpen=true이지만 status=${currentStatus}입니다. 상태를 확인해주세요.`);
+                logger.warn(
+                    `데이터 일관성 경고: isSubmissionOpen=true이지만 status=${currentStatus}입니다. 상태를 확인해주세요.`
+                );
             } else if (!isSubmissionOpen && currentStatus === 'submission_open') {
-                logger.warn('데이터 일관성 경고: isSubmissionOpen=false이지만 status=submission_open입니다. 상태를 확인해주세요.');
+                logger.warn(
+                    '데이터 일관성 경고: isSubmissionOpen=false이지만 status=submission_open입니다. 상태를 확인해주세요.'
+                );
             }
         }
 

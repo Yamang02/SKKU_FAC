@@ -8,62 +8,40 @@ import { ApiResponse } from '../../domain/common/model/ApiResponse.js';
 export const UserValidationSchemas = {
     // 사용자 등록 검증 스키마
     register: Joi.object({
-        username: Joi.string()
-            .alphanum()
-            .min(3)
-            .max(30)
-            .required()
-            .messages({
-                'string.alphanum': '사용자명은 영문자와 숫자만 포함할 수 있습니다',
-                'string.min': '사용자명은 최소 3자 이상이어야 합니다',
-                'string.max': '사용자명은 최대 30자까지 가능합니다',
-                'string.empty': '사용자명을 입력해주세요',
-                'any.required': '사용자명은 필수 입력 항목입니다'
-            }),
+        username: Joi.string().alphanum().min(3).max(30).required().messages({
+            'string.alphanum': '사용자명은 영문자와 숫자만 포함할 수 있습니다',
+            'string.min': '사용자명은 최소 3자 이상이어야 합니다',
+            'string.max': '사용자명은 최대 30자까지 가능합니다',
+            'string.empty': '사용자명을 입력해주세요',
+            'any.required': '사용자명은 필수 입력 항목입니다'
+        }),
 
-        name: Joi.string()
-            .min(2)
-            .max(50)
-            .required()
-            .messages({
-                'string.min': '이름은 최소 2자 이상이어야 합니다',
-                'string.max': '이름은 최대 50자까지 가능합니다',
-                'any.required': '이름은 필수 입력 항목입니다'
-            }),
+        name: Joi.string().min(2).max(50).required().messages({
+            'string.min': '이름은 최소 2자 이상이어야 합니다',
+            'string.max': '이름은 최대 50자까지 가능합니다',
+            'any.required': '이름은 필수 입력 항목입니다'
+        }),
 
-        email: Joi.string()
-            .email()
-            .required()
-            .messages({
-                'string.email': '올바른 이메일 형식을 입력해주세요',
-                'any.required': '이메일은 필수 입력 항목입니다'
-            }),
+        email: Joi.string().email().required().messages({
+            'string.email': '올바른 이메일 형식을 입력해주세요',
+            'any.required': '이메일은 필수 입력 항목입니다'
+        }),
 
-        password: Joi.string()
-            .min(1)
-            .max(128)
-            .required()
-            .messages({
-                'string.min': '비밀번호를 입력해주세요',
-                'string.max': '비밀번호는 최대 128자까지 가능합니다',
-                'string.empty': '비밀번호를 입력해주세요',
-                'any.required': '비밀번호는 필수 입력 항목입니다'
-            }),
+        password: Joi.string().min(1).max(128).required().messages({
+            'string.min': '비밀번호를 입력해주세요',
+            'string.max': '비밀번호는 최대 128자까지 가능합니다',
+            'string.empty': '비밀번호를 입력해주세요',
+            'any.required': '비밀번호는 필수 입력 항목입니다'
+        }),
 
-        confirmPassword: Joi.string()
-            .required()
-            .valid(Joi.ref('password'))
-            .messages({
-                'any.required': '비밀번호 확인을 입력해주세요',
-                'any.only': '비밀번호가 일치하지 않습니다'
-            }),
+        confirmPassword: Joi.string().required().valid(Joi.ref('password')).messages({
+            'any.required': '비밀번호 확인을 입력해주세요',
+            'any.only': '비밀번호가 일치하지 않습니다'
+        }),
 
-        role: Joi.string()
-            .valid('ADMIN', 'SKKU_MEMBER', 'EXTERNAL_MEMBER')
-            .default('SKKU_MEMBER')
-            .messages({
-                'any.only': '유효하지 않은 역할입니다'
-            }),
+        role: Joi.string().valid('ADMIN', 'SKKU_MEMBER', 'EXTERNAL_MEMBER').default('SKKU_MEMBER').messages({
+            'any.only': '유효하지 않은 역할입니다'
+        }),
 
         department: Joi.string()
             .max(100)
@@ -121,47 +99,31 @@ export const UserValidationSchemas = {
 
     // 로그인 검증 스키마
     login: Joi.object({
-        username: Joi.string()
-            .required()
-            .messages({
-                'string.empty': '사용자명을 입력해주세요',
-                'any.required': '사용자명을 입력해주세요'
-            }),
+        username: Joi.string().required().messages({
+            'string.empty': '사용자명을 입력해주세요',
+            'any.required': '사용자명을 입력해주세요'
+        }),
 
-        password: Joi.string()
-            .required()
-            .messages({
-                'string.empty': '비밀번호를 입력해주세요',
-                'any.required': '비밀번호를 입력해주세요'
-            })
+        password: Joi.string().required().messages({
+            'string.empty': '비밀번호를 입력해주세요',
+            'any.required': '비밀번호를 입력해주세요'
+        })
     }),
 
     // 프로필 수정 검증 스키마
     updateProfile: Joi.object({
-        name: Joi.string()
-            .min(2)
-            .max(50)
-            .optional()
-            .messages({
-                'string.min': '이름은 최소 2자 이상이어야 합니다',
-                'string.max': '이름은 최대 50자까지 가능합니다'
-            }),
+        name: Joi.string().min(2).max(50).optional().messages({
+            'string.min': '이름은 최소 2자 이상이어야 합니다',
+            'string.max': '이름은 최대 50자까지 가능합니다'
+        }),
 
-        department: Joi.string()
-            .max(100)
-            .allow('')
-            .optional()
-            .messages({
-                'string.max': '학과명은 최대 100자까지 가능합니다'
-            }),
+        department: Joi.string().max(100).allow('').optional().messages({
+            'string.max': '학과명은 최대 100자까지 가능합니다'
+        }),
 
-        affiliation: Joi.string()
-            .max(100)
-            .allow('', null)
-            .optional()
-            .messages({
-                'string.max': '소속은 최대 100자까지 가능합니다'
-            }),
+        affiliation: Joi.string().max(100).allow('', null).optional().messages({
+            'string.max': '소속은 최대 100자까지 가능합니다'
+        }),
 
         studentYear: Joi.string()
             .pattern(/^[0-9]{2}$/)
@@ -172,14 +134,10 @@ export const UserValidationSchemas = {
                 'string.empty': '학번을 입력해주세요'
             }),
 
-        newPassword: Joi.string()
-            .min(1)
-            .max(128)
-            .optional()
-            .messages({
-                'string.min': '새 비밀번호를 입력해주세요',
-                'string.max': '새 비밀번호는 최대 128자까지 가능합니다'
-            }),
+        newPassword: Joi.string().min(1).max(128).optional().messages({
+            'string.min': '새 비밀번호를 입력해주세요',
+            'string.max': '새 비밀번호는 최대 128자까지 가능합니다'
+        }),
 
         confirmPassword: Joi.string()
             .when('newPassword', {
@@ -195,24 +153,18 @@ export const UserValidationSchemas = {
 
     // 이메일 검증 스키마
     email: Joi.object({
-        email: Joi.string()
-            .email()
-            .required()
-            .messages({
-                'string.email': '올바른 이메일 형식을 입력해주세요',
-                'any.required': '이메일은 필수 입력 항목입니다'
-            })
+        email: Joi.string().email().required().messages({
+            'string.email': '올바른 이메일 형식을 입력해주세요',
+            'any.required': '이메일은 필수 입력 항목입니다'
+        })
     }),
 
     // 비밀번호 재설정 검증 스키마
     resetPassword: Joi.object({
-        email: Joi.string()
-            .email()
-            .required()
-            .messages({
-                'string.email': '올바른 이메일 형식을 입력해주세요',
-                'any.required': '이메일은 필수 입력 항목입니다'
-            })
+        email: Joi.string().email().required().messages({
+            'string.email': '올바른 이메일 형식을 입력해주세요',
+            'any.required': '이메일은 필수 입력 항목입니다'
+        })
     })
 };
 
@@ -231,7 +183,7 @@ export function validateInput(schema, source = 'body') {
             const { error, value } = schema.validate(dataToValidate, {
                 abortEarly: false, // 모든 에러를 수집
                 allowUnknown: true, // 정의되지 않은 필드 허용
-                stripUnknown: true  // 정의되지 않은 필드 제거
+                stripUnknown: true // 정의되지 않은 필드 제거
             });
 
             if (error) {

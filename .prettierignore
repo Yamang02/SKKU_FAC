@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Test results
+test-results/
+playwright-report/
+
+# Generated files
+*.min.js
+*.min.css
+
+# Configuration files
+package-lock.json
+.env*
+
+# Database files
+*.sql
+*.dump
+
+# Docker files
+Dockerfile
+docker-compose*.yml
+
+# Git files
+.git/
+.gitignore
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.cache

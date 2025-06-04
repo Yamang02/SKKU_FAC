@@ -76,7 +76,6 @@ class CacheMiddleware {
 
                 // 응답 캐싱을 위한 래퍼 설정
                 this.wrapResponse(req, res, next, cacheKey, ttl);
-
             } catch (error) {
                 logger.warn('캐시 미들웨어 오류', {
                     error: error.message,
@@ -121,7 +120,7 @@ class CacheMiddleware {
             ttl: 300, // 5분
             keyPrefix: 'user',
             varyOnUser: true,
-            condition: (req) => req.user?.id, // 인증된 사용자만
+            condition: req => req.user?.id, // 인증된 사용자만
             ...options
         });
     }
@@ -134,7 +133,7 @@ class CacheMiddleware {
         return this.create({
             ttl: 120, // 2분
             keyPrefix: 'list',
-            condition: (req) => {
+            condition: req => {
                 // 첫 페이지만 캐시 (성능상 이유)
                 const page = parseInt(req.query.page) || 1;
                 return page === 1;
@@ -159,9 +158,7 @@ class CacheMiddleware {
         // 쿼리 파라미터 추가 (정렬된 순서로)
         const queryKeys = Object.keys(req.query).sort();
         if (queryKeys.length > 0) {
-            const queryString = queryKeys
-                .map(key => `${key}=${req.query[key]}`)
-                .join('&');
+            const queryString = queryKeys.map(key => `${key}=${req.query[key]}`).join('&');
             parts.push(`query_${queryString}`);
         }
 

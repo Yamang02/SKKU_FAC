@@ -85,7 +85,16 @@ export default class UserResponseDto extends BaseDto {
      * @returns {Object} 공개 프로필 객체
      */
     toPublicProfile() {
-        return this.pick(['id', 'username', 'name', 'role', 'department', 'affiliation', 'studentYear', 'isClubMember']);
+        return this.pick([
+            'id',
+            'username',
+            'name',
+            'role',
+            'department',
+            'affiliation',
+            'studentYear',
+            'isClubMember'
+        ]);
     }
 
     /**
@@ -106,17 +115,17 @@ export default class UserResponseDto extends BaseDto {
         let schema;
 
         switch (schemaType) {
-            case 'response':
-                schema = UserResponseDto.getResponseSchema();
-                break;
-            case 'publicProfile':
-                schema = UserResponseDto.getPublicProfileSchema();
-                break;
-            case 'adminDetail':
-                schema = UserResponseDto.getAdminDetailSchema();
-                break;
-            default:
-                schema = this.getValidationSchema();
+        case 'response':
+            schema = UserResponseDto.getResponseSchema();
+            break;
+        case 'publicProfile':
+            schema = UserResponseDto.getPublicProfileSchema();
+            break;
+        case 'adminDetail':
+            schema = UserResponseDto.getAdminDetailSchema();
+            break;
+        default:
+            schema = this.getValidationSchema();
         }
 
         const { error, value } = schema.validate(this.toPlainObject(), {

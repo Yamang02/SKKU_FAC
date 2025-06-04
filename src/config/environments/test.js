@@ -72,8 +72,8 @@ export default {
 
     // JWT 설정 (테스트 환경 - 테스트 시나리오용)
     jwt: {
-        accessTokenExpiry: '10m',     // 10분 (테스트 시나리오용)
-        refreshTokenExpiry: '1h',     // 1시간 (테스트 완료 후 빠른 만료)
+        accessTokenExpiry: '10m', // 10분 (테스트 시나리오용)
+        refreshTokenExpiry: '1h', // 1시간 (테스트 완료 후 빠른 만료)
         issuer: 'skku-fac-gallery-test',
         audience: 'skku-fac-gallery-test-users'
     },

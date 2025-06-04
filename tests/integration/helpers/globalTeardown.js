@@ -17,7 +17,6 @@ async function globalTeardown() {
         await dockerTestSetup.stopTestEnvironment();
 
         console.log('✅ Playwright 전역 정리 완료');
-
     } catch (error) {
         console.error('⚠️ Playwright 전역 정리 중 오류:', error);
         // 정리 과정에서 오류가 발생해도 테스트는 계속 진행

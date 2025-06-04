@@ -15,21 +15,23 @@ export default class AdminResponseDto extends BaseDto {
      */
     static userManagementListResponseSchema() {
         return Joi.object({
-            items: Joi.array().items(
-                Joi.object({
-                    id: Joi.number().required(),
-                    username: Joi.string().required(),
-                    name: Joi.string().required(),
-                    email: Joi.string().email().required(),
-                    role: Joi.string().valid('ADMIN', 'SKKU_MEMBER', 'EXTERNAL_MEMBER').required(),
-                    status: Joi.string().valid('ACTIVE', 'INACTIVE', 'BLOCKED', 'UNVERIFIED').required(),
-                    emailVerified: Joi.boolean().required(),
-                    lastLoginAt: Joi.date().allow(null),
-                    createdAt: Joi.date().required(),
-                    updatedAt: Joi.date().required(),
-                    profileInfo: Joi.object().optional()
-                })
-            ).required(),
+            items: Joi.array()
+                .items(
+                    Joi.object({
+                        id: Joi.number().required(),
+                        username: Joi.string().required(),
+                        name: Joi.string().required(),
+                        email: Joi.string().email().required(),
+                        role: Joi.string().valid('ADMIN', 'SKKU_MEMBER', 'EXTERNAL_MEMBER').required(),
+                        status: Joi.string().valid('ACTIVE', 'INACTIVE', 'BLOCKED', 'UNVERIFIED').required(),
+                        emailVerified: Joi.boolean().required(),
+                        lastLoginAt: Joi.date().allow(null),
+                        createdAt: Joi.date().required(),
+                        updatedAt: Joi.date().required(),
+                        profileInfo: Joi.object().optional()
+                    })
+                )
+                .required(),
             page: Joi.number().integer().min(1).required(),
             total: Joi.number().integer().min(0).required(),
             totalPages: Joi.number().integer().min(0).required(),
@@ -64,26 +66,28 @@ export default class AdminResponseDto extends BaseDto {
      */
     static artworkManagementListResponseSchema() {
         return Joi.object({
-            items: Joi.array().items(
-                Joi.object({
-                    id: Joi.number().required(),
-                    title: Joi.string().required(),
-                    description: Joi.string().allow(''),
-                    medium: Joi.string().allow(''),
-                    dimensions: Joi.string().allow(''),
-                    year: Joi.number().integer().allow(null),
-                    status: Joi.string().valid('ACTIVE', 'INACTIVE', 'PENDING', 'REJECTED').required(),
-                    featured: Joi.boolean().required(),
-                    imageUrl: Joi.string().allow(null),
-                    artist: Joi.object({
+            items: Joi.array()
+                .items(
+                    Joi.object({
                         id: Joi.number().required(),
-                        name: Joi.string().required(),
-                        username: Joi.string().required()
-                    }).required(),
-                    createdAt: Joi.date().required(),
-                    updatedAt: Joi.date().required()
-                })
-            ).required(),
+                        title: Joi.string().required(),
+                        description: Joi.string().allow(''),
+                        medium: Joi.string().allow(''),
+                        dimensions: Joi.string().allow(''),
+                        year: Joi.number().integer().allow(null),
+                        status: Joi.string().valid('ACTIVE', 'INACTIVE', 'PENDING', 'REJECTED').required(),
+                        featured: Joi.boolean().required(),
+                        imageUrl: Joi.string().allow(null),
+                        artist: Joi.object({
+                            id: Joi.number().required(),
+                            name: Joi.string().required(),
+                            username: Joi.string().required()
+                        }).required(),
+                        createdAt: Joi.date().required(),
+                        updatedAt: Joi.date().required()
+                    })
+                )
+                .required(),
             page: Joi.number().integer().min(1).required(),
             total: Joi.number().integer().min(0).required(),
             totalPages: Joi.number().integer().min(0).required(),
@@ -113,13 +117,15 @@ export default class AdminResponseDto extends BaseDto {
                 username: Joi.string().required(),
                 email: Joi.string().email().required()
             }).required(),
-            exhibitions: Joi.array().items(
-                Joi.object({
-                    id: Joi.number().required(),
-                    title: Joi.string().required(),
-                    status: Joi.string().required()
-                })
-            ).optional(),
+            exhibitions: Joi.array()
+                .items(
+                    Joi.object({
+                        id: Joi.number().required(),
+                        title: Joi.string().required(),
+                        status: Joi.string().required()
+                    })
+                )
+                .optional(),
             createdAt: Joi.date().required(),
             updatedAt: Joi.date().required()
         });
@@ -130,21 +136,23 @@ export default class AdminResponseDto extends BaseDto {
      */
     static exhibitionManagementListResponseSchema() {
         return Joi.object({
-            items: Joi.array().items(
-                Joi.object({
-                    id: Joi.number().required(),
-                    title: Joi.string().required(),
-                    description: Joi.string().allow(''),
-                    startDate: Joi.date().required(),
-                    endDate: Joi.date().required(),
-                    location: Joi.string().allow(''),
-                    status: Joi.string().valid('UPCOMING', 'ONGOING', 'ENDED', 'CANCELLED').required(),
-                    featured: Joi.boolean().required(),
-                    artworkCount: Joi.number().integer().min(0).required(),
-                    createdAt: Joi.date().required(),
-                    updatedAt: Joi.date().required()
-                })
-            ).required(),
+            items: Joi.array()
+                .items(
+                    Joi.object({
+                        id: Joi.number().required(),
+                        title: Joi.string().required(),
+                        description: Joi.string().allow(''),
+                        startDate: Joi.date().required(),
+                        endDate: Joi.date().required(),
+                        location: Joi.string().allow(''),
+                        status: Joi.string().valid('UPCOMING', 'ONGOING', 'ENDED', 'CANCELLED').required(),
+                        featured: Joi.boolean().required(),
+                        artworkCount: Joi.number().integer().min(0).required(),
+                        createdAt: Joi.date().required(),
+                        updatedAt: Joi.date().required()
+                    })
+                )
+                .required(),
             page: Joi.number().integer().min(1).required(),
             total: Joi.number().integer().min(0).required(),
             totalPages: Joi.number().integer().min(0).required(),
@@ -166,17 +174,19 @@ export default class AdminResponseDto extends BaseDto {
             location: Joi.string().allow(''),
             status: Joi.string().valid('UPCOMING', 'ONGOING', 'ENDED', 'CANCELLED').required(),
             featured: Joi.boolean().required(),
-            artworks: Joi.array().items(
-                Joi.object({
-                    id: Joi.number().required(),
-                    title: Joi.string().required(),
-                    imageUrl: Joi.string().allow(null),
-                    artist: Joi.object({
+            artworks: Joi.array()
+                .items(
+                    Joi.object({
                         id: Joi.number().required(),
-                        name: Joi.string().required()
-                    }).required()
-                })
-            ).required(),
+                        title: Joi.string().required(),
+                        imageUrl: Joi.string().allow(null),
+                        artist: Joi.object({
+                            id: Joi.number().required(),
+                            name: Joi.string().required()
+                        }).required()
+                    })
+                )
+                .required(),
             createdAt: Joi.date().required(),
             updatedAt: Joi.date().required()
         });
@@ -234,15 +244,19 @@ export default class AdminResponseDto extends BaseDto {
                 upcoming: Joi.number().integer().min(0).required(),
                 featured: Joi.number().integer().min(0).required()
             }).required(),
-            recentActivity: Joi.array().items(
-                Joi.object({
-                    type: Joi.string().valid('user_registration', 'artwork_upload', 'exhibition_created').required(),
-                    description: Joi.string().required(),
-                    timestamp: Joi.date().required(),
-                    userId: Joi.number().integer().optional(),
-                    userName: Joi.string().optional()
-                })
-            ).required()
+            recentActivity: Joi.array()
+                .items(
+                    Joi.object({
+                        type: Joi.string()
+                            .valid('user_registration', 'artwork_upload', 'exhibition_created')
+                            .required(),
+                        description: Joi.string().required(),
+                        timestamp: Joi.date().required(),
+                        userId: Joi.number().integer().optional(),
+                        userName: Joi.string().optional()
+                    })
+                )
+                .required()
         });
     }
 

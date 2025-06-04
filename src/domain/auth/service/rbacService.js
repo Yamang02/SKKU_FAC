@@ -323,9 +323,7 @@ export default class RBACService {
                 });
             }
 
-            const permissions = Array.isArray(requiredPermissions)
-                ? requiredPermissions
-                : [requiredPermissions];
+            const permissions = Array.isArray(requiredPermissions) ? requiredPermissions : [requiredPermissions];
 
             const hasPermission = requireAll
                 ? this.hasAllPermissions(user.role, permissions, context)

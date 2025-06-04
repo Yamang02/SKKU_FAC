@@ -72,14 +72,7 @@ export default class BatchProcessingService {
      * @returns {string} 작업 ID
      */
     createJob(jobConfig) {
-        const {
-            type,
-            data,
-            options = {},
-            user,
-            priority = 5,
-            description = ''
-        } = jobConfig;
+        const { type, data, options = {}, user, priority = 5, description = '' } = jobConfig;
 
         const jobId = this.generateJobId();
         const job = {
@@ -146,10 +139,7 @@ export default class BatchProcessingService {
      * @returns {Object|null} 작업 정보
      */
     getJobStatus(jobId) {
-        return this.jobQueue.get(jobId) ||
-            this.runningJobs.get(jobId) ||
-            this.completedJobs.get(jobId) ||
-            null;
+        return this.jobQueue.get(jobId) || this.runningJobs.get(jobId) || this.completedJobs.get(jobId) || null;
     }
 
     /**
@@ -165,12 +155,14 @@ export default class BatchProcessingService {
             ...Array.from(this.completedJobs.values())
         ];
 
-        return allJobs.filter(job => {
-            if (status && job.status !== status) return false;
-            if (type && job.type !== type) return false;
-            if (userId && job.user?.id !== userId) return false;
-            return true;
-        }).sort((a, b) => b.createdAt - a.createdAt);
+        return allJobs
+            .filter(job => {
+                if (status && job.status !== status) return false;
+                if (type && job.type !== type) return false;
+                if (userId && job.user?.id !== userId) return false;
+                return true;
+            })
+            .sort((a, b) => b.createdAt - a.createdAt);
     }
 
     /**
@@ -302,7 +294,6 @@ export default class BatchProcessingService {
                 successful: job.progress.successful,
                 failed: job.progress.failed
             });
-
         } catch (error) {
             // 실패 처리
             job.error = error.message;
@@ -372,24 +363,24 @@ export default class BatchProcessingService {
      */
     async processJobByType(job) {
         switch (job.type) {
-            case BatchJobType.BULK_DELETE_USERS:
-                return await this.processBulkDeleteUsers(job);
-            case BatchJobType.BULK_UPDATE_USERS:
-                return await this.processBulkUpdateUsers(job);
-            case BatchJobType.BULK_DELETE_ARTWORKS:
-                return await this.processBulkDeleteArtworks(job);
-            case BatchJobType.BULK_UPDATE_ARTWORKS:
-                return await this.processBulkUpdateArtworks(job);
-            case BatchJobType.BULK_DELETE_EXHIBITIONS:
-                return await this.processBulkDeleteExhibitions(job);
-            case BatchJobType.BULK_UPDATE_EXHIBITIONS:
-                return await this.processBulkUpdateExhibitions(job);
-            case BatchJobType.BULK_FEATURE_TOGGLE:
-                return await this.processBulkFeatureToggle(job);
-            case BatchJobType.BULK_STATUS_CHANGE:
-                return await this.processBulkStatusChange(job);
-            default:
-                throw new Error(`지원하지 않는 배치 작업 타입: ${job.type}`);
+        case BatchJobType.BULK_DELETE_USERS:
+            return await this.processBulkDeleteUsers(job);
+        case BatchJobType.BULK_UPDATE_USERS:
+            return await this.processBulkUpdateUsers(job);
+        case BatchJobType.BULK_DELETE_ARTWORKS:
+            return await this.processBulkDeleteArtworks(job);
+        case BatchJobType.BULK_UPDATE_ARTWORKS:
+            return await this.processBulkUpdateArtworks(job);
+        case BatchJobType.BULK_DELETE_EXHIBITIONS:
+            return await this.processBulkDeleteExhibitions(job);
+        case BatchJobType.BULK_UPDATE_EXHIBITIONS:
+            return await this.processBulkUpdateExhibitions(job);
+        case BatchJobType.BULK_FEATURE_TOGGLE:
+            return await this.processBulkFeatureToggle(job);
+        case BatchJobType.BULK_STATUS_CHANGE:
+            return await this.processBulkStatusChange(job);
+        default:
+            throw new Error(`지원하지 않는 배치 작업 타입: ${job.type}`);
         }
     }
 
@@ -515,7 +506,10 @@ export default class BatchProcessingService {
      * 대량 추천 토글 처리
      */
     async processBulkFeatureToggle(job) {
-        const { data: items, options: { featured: _featured } } = job;
+        const {
+            data: items,
+            options: { featured: _featured }
+        } = job;
         job.progress.total = items.length;
 
         const results = {
@@ -543,7 +537,10 @@ export default class BatchProcessingService {
      * 대량 상태 변경 처리
      */
     async processBulkStatusChange(job) {
-        const { data: items, options: { status: _status } } = job;
+        const {
+            data: items,
+            options: { status: _status }
+        } = job;
         job.progress.total = items.length;
 
         const results = {
@@ -576,8 +573,7 @@ export default class BatchProcessingService {
         }
 
         // 오래된 작업부터 제거
-        const jobs = Array.from(this.completedJobs.values())
-            .sort((a, b) => a.completedAt - b.completedAt);
+        const jobs = Array.from(this.completedJobs.values()).sort((a, b) => a.completedAt - b.completedAt);
 
         const toRemove = jobs.slice(0, jobs.length - this.maxCompletedJobs);
         toRemove.forEach(job => {

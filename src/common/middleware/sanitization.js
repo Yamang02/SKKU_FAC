@@ -143,10 +143,7 @@ function sanitizeObject(obj, options = {}) {
  * @returns {Function} Express 미들웨어 함수
  */
 export function createSanitizationMiddleware(options = {}) {
-    const {
-        sources = ['body', 'query'],
-        level = 'strict'
-    } = options;
+    const { sources = ['body', 'query'], level = 'strict' } = options;
 
     return (req, res, next) => {
         try {
@@ -296,11 +293,7 @@ export const ValidationChains = {
         .withMessage('사용자명은 3-30자 사이여야 합니다'),
 
     // 이메일 검증 및 sanitization
-    email: body('email')
-        .trim()
-        .normalizeEmail()
-        .isEmail()
-        .withMessage('올바른 이메일 형식을 입력해주세요'),
+    email: body('email').trim().normalizeEmail().isEmail().withMessage('올바른 이메일 형식을 입력해주세요'),
 
     // 제목 검증 및 sanitization
     title: body('title')
@@ -351,8 +344,8 @@ export class SanitizationMonitor {
         return {
             ...this.stats,
             uptime: Math.floor(uptime / 1000),
-            sanitizationRate: (this.stats.sanitizedRequests / this.stats.totalRequests * 100).toFixed(2) + '%',
-            attackRate: (this.stats.potentialAttacks / this.stats.totalRequests * 100).toFixed(2) + '%'
+            sanitizationRate: ((this.stats.sanitizedRequests / this.stats.totalRequests) * 100).toFixed(2) + '%',
+            attackRate: ((this.stats.potentialAttacks / this.stats.totalRequests) * 100).toFixed(2) + '%'
         };
     }
 

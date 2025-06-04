@@ -37,7 +37,7 @@ export const testUsers = {
         name: 'Test User',
         role: 'SKKU_MEMBER',
         status: 'ACTIVE',
-        emailVerified: true
+        emailVerified: true,
     },
     adminUser: {
         id: generateUserId(),
@@ -48,7 +48,7 @@ export const testUsers = {
         name: 'Test Admin',
         role: 'ADMIN',
         status: 'ACTIVE',
-        emailVerified: true
+        emailVerified: true,
     },
     inactiveUser: {
         id: generateUserId(),
@@ -59,7 +59,7 @@ export const testUsers = {
         name: 'Inactive User',
         role: 'SKKU_MEMBER',
         status: 'INACTIVE',
-        emailVerified: false
+        emailVerified: false,
     },
     externalUser: {
         id: generateUserId(),
@@ -70,8 +70,8 @@ export const testUsers = {
         name: 'External User',
         role: 'EXTERNAL_MEMBER',
         status: 'ACTIVE',
-        emailVerified: true
-    }
+        emailVerified: true,
+    },
 };
 
 /**
@@ -83,15 +83,15 @@ export const testSkkuProfiles = {
         userId: testUsers.regularUser.id,
         department: 'Fine Art',
         studentYear: '2024',
-        isClubMember: true
+        isClubMember: true,
     },
     adminProfile: {
         id: generateSkkuProfileId(),
         userId: testUsers.adminUser.id,
         department: 'Art Administration',
         studentYear: '2023',
-        isClubMember: true
-    }
+        isClubMember: true,
+    },
 };
 
 /**
@@ -107,7 +107,7 @@ export const testExhibitions = {
         location: 'Test Gallery A',
         exhibitionType: 'regular',
         isSubmissionOpen: true,
-        isFeatured: false
+        isFeatured: false,
     },
     featuredExhibition: {
         id: generateExhibitionId(),
@@ -118,7 +118,7 @@ export const testExhibitions = {
         location: 'Test Gallery B',
         exhibitionType: 'special',
         isSubmissionOpen: false,
-        isFeatured: true
+        isFeatured: true,
     },
     pastExhibition: {
         id: generateExhibitionId(),
@@ -129,8 +129,8 @@ export const testExhibitions = {
         location: 'Test Gallery C',
         exhibitionType: 'regular',
         isSubmissionOpen: false,
-        isFeatured: false
-    }
+        isFeatured: false,
+    },
 };
 
 /**
@@ -148,7 +148,7 @@ export const testArtworks = {
         imageUrl: 'https://example.com/test-image-1.jpg',
         isFeatured: false,
         userId: testUsers.regularUser.id,
-        status: 'APPROVED'
+        status: 'APPROVED',
     },
     artwork2: {
         id: generateArtworkId(),
@@ -161,7 +161,7 @@ export const testArtworks = {
         imageUrl: 'https://example.com/test-image-2.jpg',
         isFeatured: true,
         userId: testUsers.regularUser.id,
-        status: 'APPROVED'
+        status: 'APPROVED',
     },
     pendingArtwork: {
         id: generateArtworkId(),
@@ -174,8 +174,8 @@ export const testArtworks = {
         imageUrl: 'https://example.com/test-image-3.jpg',
         isFeatured: false,
         userId: testUsers.regularUser.id,
-        status: 'PENDING'
-    }
+        status: 'PENDING',
+    },
 };
 
 /**
@@ -189,7 +189,7 @@ export const testApiRequests = {
         password: 'newpassword',
         confirmPassword: 'newpassword',
         department: 'Digital Art',
-        studentYear: '2024'
+        studentYear: '2024',
     },
     invalidSignup: {
         username: '',
@@ -198,15 +198,15 @@ export const testApiRequests = {
         password: '123',
         confirmPassword: '456',
         department: '',
-        studentYear: ''
+        studentYear: '',
     },
     validLogin: {
         email: 'test@skku.edu',
-        password: 'testpassword'
+        password: 'testpassword',
     },
     invalidLogin: {
         email: 'test@skku.edu',
-        password: 'wrongpassword'
+        password: 'wrongpassword',
     },
     validExhibition: {
         title: 'New Test Exhibition',
@@ -214,7 +214,7 @@ export const testApiRequests = {
         startDate: '2024-07-01',
         endDate: '2024-09-30',
         location: 'New Test Gallery',
-        exhibitionType: 'regular'
+        exhibitionType: 'regular',
     },
     invalidExhibition: {
         title: '',
@@ -222,22 +222,22 @@ export const testApiRequests = {
         startDate: 'invalid-date',
         endDate: 'invalid-date',
         location: '',
-        exhibitionType: 'invalid'
+        exhibitionType: 'invalid',
     },
     validArtwork: {
         title: 'New Test Artwork',
         description: 'A new artwork for testing',
         medium: 'Mixed Media',
         size: '150x100cm',
-        year: '2024'
+        year: '2024',
     },
     invalidArtwork: {
         title: '',
         description: '',
         medium: '',
         size: '',
-        year: 'invalid-year'
-    }
+        year: 'invalid-year',
+    },
 };
 
 /**
@@ -248,24 +248,24 @@ export const expectedResponses = {
         status: 'OK',
         timestamp: expect.any(String),
         database: {
-            status: 'connected'
+            status: 'connected',
         },
         redis: {
-            status: 'connected'
+            status: 'connected',
         },
         uptime: expect.any(Number),
         environment: 'test',
-        version: expect.any(String)
+        version: expect.any(String),
     },
     successResponse: {
         success: true,
         message: expect.any(String),
-        data: expect.any(Object)
+        data: expect.any(Object),
     },
     errorResponse: {
         success: false,
         error: expect.any(String),
-        message: expect.any(String)
+        message: expect.any(String),
     },
     paginatedResponse: {
         success: true,
@@ -274,9 +274,9 @@ export const expectedResponses = {
             page: expect.any(Number),
             limit: expect.any(Number),
             total: expect.any(Number),
-            totalPages: expect.any(Number)
-        }
-    }
+            totalPages: expect.any(Number),
+        },
+    },
 };
 
 /**
@@ -291,11 +291,11 @@ export const testConfig = {
         port: 3307,
         user: 'root',
         password: 'testpassword',
-        database: 'skku_sfa_gallery_test'
+        database: 'skku_sfa_gallery_test',
     },
     redis: {
-        url: 'redis://localhost:6380'
-    }
+        url: 'redis://localhost:6380',
+    },
 };
 
 /**
@@ -314,7 +314,7 @@ export function createTestUser(overrides = {}) {
         id: generateUserId(),
         username: `testuser_${Date.now()}`,
         email: `test_${Date.now()}@skku.edu`,
-        ...overrides
+        ...overrides,
     };
 }
 
@@ -323,7 +323,7 @@ export function createTestExhibition(overrides = {}) {
         ...testExhibitions.activeExhibition,
         id: generateExhibitionId(),
         title: `Test Exhibition ${Date.now()}`,
-        ...overrides
+        ...overrides,
     };
 }
 
@@ -333,7 +333,7 @@ export function createTestArtwork(overrides = {}) {
         id: generateArtworkId(),
         title: `Test Artwork ${Date.now()}`,
         slug: `test-artwork-${Date.now()}`,
-        ...overrides
+        ...overrides,
     };
 }
 
@@ -350,7 +350,7 @@ export function generateRandomUser() {
         password: 'testpassword',
         role: 'SKKU_MEMBER',
         status: 'ACTIVE',
-        emailVerified: true
+        emailVerified: true,
     };
 }
 
@@ -369,7 +369,7 @@ export function generateRandomExhibition() {
         location: `Test Gallery ${timestamp}`,
         exhibitionType: 'regular',
         isSubmissionOpen: true,
-        isFeatured: false
+        isFeatured: false,
     };
 }
 
@@ -386,6 +386,6 @@ export function generateRandomArtwork(userId = null) {
         imageUrl: `https://example.com/test-${timestamp}.jpg`,
         isFeatured: false,
         userId: userId || generateUserId(),
-        status: 'APPROVED'
+        status: 'APPROVED',
     };
 }

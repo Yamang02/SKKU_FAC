@@ -18,7 +18,7 @@ test.describe('TransactionManager', () => {
             rollback: () => Promise.resolve(),
             createSavepoint: () => Promise.resolve({ id: 'savepoint-1' }),
             rollbackToSavepoint: () => Promise.resolve(),
-            setTimeout: () => Promise.resolve()
+            setTimeout: () => Promise.resolve(),
         };
 
         // Mock 데이터베이스 객체
@@ -30,16 +30,16 @@ test.describe('TransactionManager', () => {
                     READ_UNCOMMITTED: 'READ_UNCOMMITTED',
                     READ_COMMITTED: 'READ_COMMITTED',
                     REPEATABLE_READ: 'REPEATABLE_READ',
-                    SERIALIZABLE: 'SERIALIZABLE'
-                }
-            }
+                    SERIALIZABLE: 'SERIALIZABLE',
+                },
+            },
         };
 
         // Mock logger
         const mockLogger = {
-            debug: () => { },
-            error: () => { },
-            warn: () => { }
+            debug: () => {},
+            error: () => {},
+            warn: () => {},
         };
 
         // 동적으로 TransactionManager 클래스 생성 (실제 import 없이)
@@ -63,7 +63,7 @@ test.describe('TransactionManager', () => {
                 mockLogger.debug('Transaction started', {
                     transactionId: transaction.id,
                     isolationLevel: options.isolationLevel,
-                    timeout: options.timeout
+                    timeout: options.timeout,
                 });
 
                 return transaction;
@@ -109,7 +109,7 @@ test.describe('TransactionManager', () => {
                 const savepoint = await parentTransaction.createSavepoint(savepointName);
                 mockLogger.debug('Savepoint created', {
                     parentTransactionId: parentTransaction.id,
-                    savepointName
+                    savepointName,
                 });
                 return savepoint;
             }
@@ -122,7 +122,7 @@ test.describe('TransactionManager', () => {
                 await transaction.rollbackToSavepoint(savepointName);
                 mockLogger.debug('Rolled back to savepoint', {
                     transactionId: transaction.id,
-                    savepointName
+                    savepointName,
                 });
             }
 
@@ -152,7 +152,7 @@ test.describe('TransactionManager', () => {
                 await transaction.setTimeout(timeoutMs);
                 mockLogger.debug('Transaction timeout set', {
                     transactionId: transaction.id,
-                    timeoutMs
+                    timeoutMs,
                 });
             }
 
@@ -170,13 +170,13 @@ test.describe('TransactionManager', () => {
                 READ_UNCOMMITTED: 'READ_UNCOMMITTED',
                 READ_COMMITTED: 'READ_COMMITTED',
                 REPEATABLE_READ: 'REPEATABLE_READ',
-                SERIALIZABLE: 'SERIALIZABLE'
+                SERIALIZABLE: 'SERIALIZABLE',
             };
 
             static DEFAULT_OPTIONS = {
                 isolationLevel: 'READ_COMMITTED',
                 autocommit: false,
-                timeout: 30000
+                timeout: 30000,
             };
         };
     });
@@ -192,7 +192,7 @@ test.describe('TransactionManager', () => {
         test('beginTransaction - 격리 수준 옵션과 함께 트랜잭션 생성', async () => {
             const transaction = await TransactionManager.beginTransaction({
                 isolationLevel: 'SERIALIZABLE',
-                timeout: 5000
+                timeout: 5000,
             });
 
             expect(transaction).toBeDefined();
@@ -206,7 +206,9 @@ test.describe('TransactionManager', () => {
         });
 
         test('commitTransaction - null 트랜잭션으로 커밋 시 에러', async () => {
-            await expect(TransactionManager.commitTransaction(null)).rejects.toThrow('Transaction is required for commit');
+            await expect(TransactionManager.commitTransaction(null)).rejects.toThrow(
+                'Transaction is required for commit'
+            );
         });
 
         test('rollbackTransaction - 트랜잭션 롤백 성공', async () => {
@@ -222,7 +224,7 @@ test.describe('TransactionManager', () => {
 
     test.describe('executeInTransaction', () => {
         test('성공적인 콜백 실행 후 자동 커밋', async () => {
-            const mockCallback = async (transaction) => {
+            const mockCallback = async transaction => {
                 expect(transaction.id).toBe('test-transaction-123');
                 return 'success result';
             };
@@ -240,14 +242,14 @@ test.describe('TransactionManager', () => {
         });
 
         test('옵션과 함께 executeInTransaction 실행', async () => {
-            const mockCallback = async (transaction) => {
+            const mockCallback = async transaction => {
                 expect(transaction.id).toBe('test-transaction-123');
                 return 'success with options';
             };
 
             const result = await TransactionManager.executeInTransaction(mockCallback, {
                 isolationLevel: 'REPEATABLE_READ',
-                timeout: 10000
+                timeout: 10000,
             });
 
             expect(result).toBe('success with options');
@@ -264,17 +266,23 @@ test.describe('TransactionManager', () => {
         });
 
         test('createSavepoint - 부모 트랜잭션 없이 생성 시 에러', async () => {
-            await expect(TransactionManager.createSavepoint(null, 'test-savepoint')).rejects.toThrow('Parent transaction is required for savepoint');
+            await expect(TransactionManager.createSavepoint(null, 'test-savepoint')).rejects.toThrow(
+                'Parent transaction is required for savepoint'
+            );
         });
 
         test('rollbackToSavepoint - 세이브포인트로 롤백 성공', async () => {
             const transaction = await TransactionManager.beginTransaction();
 
-            await expect(TransactionManager.rollbackToSavepoint(transaction, 'test-savepoint')).resolves.toBeUndefined();
+            await expect(
+                TransactionManager.rollbackToSavepoint(transaction, 'test-savepoint')
+            ).resolves.toBeUndefined();
         });
 
         test('rollbackToSavepoint - 트랜잭션 없이 롤백 시 에러', async () => {
-            await expect(TransactionManager.rollbackToSavepoint(null, 'test-savepoint')).rejects.toThrow('Transaction is required for savepoint rollback');
+            await expect(TransactionManager.rollbackToSavepoint(null, 'test-savepoint')).rejects.toThrow(
+                'Transaction is required for savepoint rollback'
+            );
         });
     });
 
@@ -322,7 +330,9 @@ test.describe('TransactionManager', () => {
         });
 
         test('setTransactionTimeout - 트랜잭션 없이 설정 시 에러', async () => {
-            await expect(TransactionManager.setTransactionTimeout(null, 5000)).rejects.toThrow('Transaction is required for timeout setting');
+            await expect(TransactionManager.setTransactionTimeout(null, 5000)).rejects.toThrow(
+                'Transaction is required for timeout setting'
+            );
         });
 
         test('checkDatabaseConnection - 연결 확인 성공', async () => {
@@ -344,7 +354,7 @@ test.describe('TransactionManager', () => {
                 READ_UNCOMMITTED: 'READ_UNCOMMITTED',
                 READ_COMMITTED: 'READ_COMMITTED',
                 REPEATABLE_READ: 'REPEATABLE_READ',
-                SERIALIZABLE: 'SERIALIZABLE'
+                SERIALIZABLE: 'SERIALIZABLE',
             });
         });
 
@@ -352,7 +362,7 @@ test.describe('TransactionManager', () => {
             expect(TransactionManager.DEFAULT_OPTIONS).toEqual({
                 isolationLevel: 'READ_COMMITTED',
                 autocommit: false,
-                timeout: 30000
+                timeout: 30000,
             });
         });
     });

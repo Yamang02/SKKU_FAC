@@ -18,9 +18,12 @@ export default class PerformanceMonitor {
         };
 
         // 주기적으로 메트릭 정리 (메모리 누수 방지)
-        setInterval(() => {
-            this.cleanupMetrics();
-        }, 5 * 60 * 1000); // 5분마다
+        setInterval(
+            () => {
+                this.cleanupMetrics();
+            },
+            5 * 60 * 1000
+        ); // 5분마다
     }
 
     /**
@@ -137,10 +140,8 @@ export default class PerformanceMonitor {
         agg.totalRequests++;
 
         // 평균 응답 시간 계산 (이동 평균)
-        agg.averageResponseTime = (
-            (agg.averageResponseTime * (agg.totalRequests - 1) + metrics.responseTime) /
-            agg.totalRequests
-        );
+        agg.averageResponseTime =
+            (agg.averageResponseTime * (agg.totalRequests - 1) + metrics.responseTime) / agg.totalRequests;
 
         // 에러 카운트
         if (metrics.statusCode >= 400) {
@@ -202,7 +203,8 @@ export default class PerformanceMonitor {
      * @param {Object} metrics - 메트릭 정보
      */
     logDetailedMetrics(metrics) {
-        if (metrics.responseTime > 500) { // 500ms 이상만 로깅
+        if (metrics.responseTime > 500) {
+            // 500ms 이상만 로깅
             logger.debug('API 성능 메트릭', {
                 path: metrics.path,
                 method: metrics.method,
@@ -219,7 +221,7 @@ export default class PerformanceMonitor {
      */
     cleanupMetrics() {
         const requests = this.metrics.requests;
-        const cutoffTime = Date.now() - (10 * 60 * 1000); // 10분 전
+        const cutoffTime = Date.now() - 10 * 60 * 1000; // 10분 전
 
         // 오래된 요청 메트릭 제거
         for (const [requestId, metrics] of requests.entries()) {
@@ -237,22 +239,20 @@ export default class PerformanceMonitor {
      */
     getPerformanceStats() {
         const recentRequests = Array.from(this.metrics.requests.values())
-            .filter(m => m.endTime > Date.now() - (5 * 60 * 1000)) // 최근 5분
+            .filter(m => m.endTime > Date.now() - 5 * 60 * 1000) // 최근 5분
             .sort((a, b) => b.endTime - a.endTime);
 
-        const slowestRequests = recentRequests
-            .filter(m => m.responseTime > 1000)
-            .slice(0, 10);
+        const slowestRequests = recentRequests.filter(m => m.responseTime > 1000).slice(0, 10);
 
-        const errorRequests = recentRequests
-            .filter(m => m.statusCode >= 400)
-            .slice(0, 10);
+        const errorRequests = recentRequests.filter(m => m.statusCode >= 400).slice(0, 10);
 
         return {
             summary: {
                 totalRequests: this.metrics.aggregated.totalRequests,
                 averageResponseTime: Math.round(this.metrics.aggregated.averageResponseTime),
-                errorRate: (this.metrics.aggregated.errorCount / this.metrics.aggregated.totalRequests * 100).toFixed(2),
+                errorRate: ((this.metrics.aggregated.errorCount / this.metrics.aggregated.totalRequests) * 100).toFixed(
+                    2
+                ),
                 recentRequestCount: recentRequests.length
             },
             recentSlowestRequests: slowestRequests.map(m => ({
@@ -288,9 +288,7 @@ export default class PerformanceMonitor {
 최근 5분 요청 수: ${stats.summary.recentRequestCount}
 
 느린 요청 (최근 10개):
-${stats.recentSlowestRequests.map(r =>
-            `- ${r.method} ${r.path}: ${r.responseTime}ms (${r.statusCode})`
-        ).join('\n')}
+${stats.recentSlowestRequests.map(r => `- ${r.method} ${r.path}: ${r.responseTime}ms (${r.statusCode})`).join('\n')}
 
 데이터베이스 풀:
 - 사용률: ${((stats.databasePool.using / stats.databasePool.max) * 100).toFixed(1)}%

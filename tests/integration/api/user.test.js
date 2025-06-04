@@ -25,7 +25,7 @@ test.describe('👤 User API Tests', () => {
                 confirmPassword: 'password123',
                 name: 'New User',
                 department: 'Computer Science',
-                studentYear: 2
+                studentYear: 2,
             };
 
             const response = await apiHelper.post('/user', newUser);
@@ -43,7 +43,7 @@ test.describe('👤 User API Tests', () => {
                 email: 'different@skku.edu',
                 password: 'password123',
                 confirmPassword: 'password123',
-                name: 'Duplicate User'
+                name: 'Duplicate User',
             };
 
             const response = await apiHelper.post('/user', duplicateUser);
@@ -56,7 +56,7 @@ test.describe('👤 User API Tests', () => {
                 email: 'test2@skku.edu',
                 password: 'password123',
                 confirmPassword: 'differentpassword',
-                name: 'Test User 2'
+                name: 'Test User 2',
             };
 
             const response = await apiHelper.post('/user', invalidUser);
@@ -71,7 +71,7 @@ test.describe('👤 User API Tests', () => {
 
             const response = await apiHelper.post('/user/login', {
                 username: user.username,
-                password: 'testpassword' // testData.js에서 정의된 비밀번호
+                password: 'testpassword', // testData.js에서 정의된 비밀번호
             });
 
             expect([200, 302]).toContain(response.status());
@@ -80,7 +80,7 @@ test.describe('👤 User API Tests', () => {
         test('POST /user/login - 잘못된 자격증명', async () => {
             const response = await apiHelper.post('/user/login', {
                 username: 'wronguser',
-                password: 'wrongpassword'
+                password: 'wrongpassword',
             });
 
             expect([401, 302]).toContain(response.status());
@@ -139,7 +139,7 @@ test.describe('👤 User API Tests', () => {
             const updateData = {
                 name: 'Updated Name',
                 department: 'Updated Department',
-                studentYear: 3
+                studentYear: 3,
             };
 
             const response = await apiHelper.put('/user/me', updateData);
@@ -167,7 +167,7 @@ test.describe('👤 User API Tests', () => {
                 email: user.email,
                 token: 'test-reset-token',
                 newPassword: 'newpassword123',
-                confirmPassword: 'newpassword123'
+                confirmPassword: 'newpassword123',
             });
 
             expect([200, 400]).toContain(response.status());
@@ -206,7 +206,7 @@ test.describe('👤 User API Tests', () => {
 
             const response = await apiHelper.post('/user/login', {
                 username: adminUser.username,
-                password: 'adminpassword'
+                password: 'adminpassword',
             });
 
             expect([200, 302]).toContain(response.status());

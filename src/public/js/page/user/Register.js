@@ -90,13 +90,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 역할 선택에 따른 필드 표시/숨김 및 데이터 초기화
-    roleSelect.addEventListener('change', (e) => {
+    roleSelect.addEventListener('change', e => {
         const selectedRole = e.target.value;
         handleRoleChange(selectedRole);
     });
 
     // WebKit 호환성을 위한 추가 이벤트 리스너
-    roleSelect.addEventListener('input', (e) => {
+    roleSelect.addEventListener('input', e => {
         const selectedRole = e.target.value;
         handleRoleChange(selectedRole);
     });
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 폼 제출 처리
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async e => {
         e.preventDefault();
 
         // 비밀번호 확인

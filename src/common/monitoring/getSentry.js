@@ -29,9 +29,7 @@ class SentryConfig {
             Sentry.init({
                 dsn: this.dsn,
                 environment: this.environment,
-                integrations: [
-                    ...(this.isProduction ? [nodeProfilingIntegration()] : [])
-                ],
+                integrations: [...(this.isProduction ? [nodeProfilingIntegration()] : [])],
                 tracesSampleRate: this.isProduction ? 0.1 : 1.0,
                 profilesSampleRate: this.isProduction ? 0.1 : 1.0,
                 beforeSend(event) {

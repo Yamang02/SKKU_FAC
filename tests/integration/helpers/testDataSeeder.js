@@ -15,7 +15,7 @@ class TestDataSeeder {
             users: [],
             exhibitions: [],
             artworks: [],
-            relationships: []
+            relationships: [],
         };
         this.mysqlConnection = null;
         this.redisClient = null;
@@ -82,7 +82,7 @@ class TestDataSeeder {
                     userData.email,
                     userData.passwordHash,
                     userData.role,
-                    userData.emailVerified
+                    userData.emailVerified,
                 ]);
 
                 // SKKU 사용자인 경우 SkkuUserProfile 생성
@@ -97,7 +97,7 @@ class TestDataSeeder {
                         userData.id,
                         userData.skkuProfile.name,
                         userData.skkuProfile.department,
-                        userData.skkuProfile.studentYear
+                        userData.skkuProfile.studentYear,
                     ]);
                 }
 
@@ -105,7 +105,7 @@ class TestDataSeeder {
                     key,
                     id: userData.id,
                     username: userData.username,
-                    email: userData.email
+                    email: userData.email,
                 });
 
                 console.log(`  ✅ User seeded: ${userData.username} (${userData.role})`);
@@ -143,14 +143,14 @@ class TestDataSeeder {
                     exhibitionData.exhibitionType,
                     exhibitionData.status,
                     exhibitionData.isFeatured,
-                    exhibitionData.submissionOpen
+                    exhibitionData.submissionOpen,
                 ]);
 
                 this.seededData.exhibitions.push({
                     key,
                     id: exhibitionData.id,
                     title: exhibitionData.title,
-                    slug: exhibitionData.slug
+                    slug: exhibitionData.slug,
                 });
 
                 console.log(`  ✅ Exhibition seeded: ${exhibitionData.title}`);
@@ -188,14 +188,14 @@ class TestDataSeeder {
                     artworkData.artistId,
                     artworkData.imageUrl,
                     artworkData.status,
-                    artworkData.isFeatured
+                    artworkData.isFeatured,
                 ]);
 
                 this.seededData.artworks.push({
                     key,
                     id: artworkData.id,
                     title: artworkData.title,
-                    slug: artworkData.slug
+                    slug: artworkData.slug,
                 });
 
                 console.log(`  ✅ Artwork seeded: ${artworkData.title}`);
@@ -216,7 +216,7 @@ class TestDataSeeder {
         const relationships = [
             { artworkKey: 'painting', exhibitionKey: 'currentExhibition' },
             { artworkKey: 'sculpture', exhibitionKey: 'currentExhibition' },
-            { artworkKey: 'digitalArt', exhibitionKey: 'upcomingExhibition' }
+            { artworkKey: 'digitalArt', exhibitionKey: 'upcomingExhibition' },
         ];
 
         for (const rel of relationships) {
@@ -225,7 +225,9 @@ class TestDataSeeder {
                 const exhibition = testExhibitions[rel.exhibitionKey];
 
                 if (!artwork || !exhibition) {
-                    console.warn(`  ⚠️ Skipping relationship: ${rel.artworkKey} -> ${rel.exhibitionKey} (data not found)`);
+                    console.warn(
+                        `  ⚠️ Skipping relationship: ${rel.artworkKey} -> ${rel.exhibitionKey} (data not found)`
+                    );
                     continue;
                 }
 
@@ -237,23 +239,22 @@ class TestDataSeeder {
                     ) VALUES (?, ?, ?, NOW(), NOW())
                 `;
 
-                await this.mysqlConnection.execute(query, [
-                    relationshipId,
-                    artwork.id,
-                    exhibition.id
-                ]);
+                await this.mysqlConnection.execute(query, [relationshipId, artwork.id, exhibition.id]);
 
                 this.seededData.relationships.push({
                     id: relationshipId,
                     artworkId: artwork.id,
                     exhibitionId: exhibition.id,
                     artworkTitle: artwork.title,
-                    exhibitionTitle: exhibition.title
+                    exhibitionTitle: exhibition.title,
                 });
 
                 console.log(`  ✅ Relationship seeded: ${artwork.title} -> ${exhibition.title}`);
             } catch (error) {
-                console.error(`  ❌ Failed to seed relationship ${rel.artworkKey} -> ${rel.exhibitionKey}:`, error.message);
+                console.error(
+                    `  ❌ Failed to seed relationship ${rel.artworkKey} -> ${rel.exhibitionKey}:`,
+                    error.message
+                );
                 throw error;
             }
         }
@@ -283,7 +284,7 @@ class TestDataSeeder {
                 users: [],
                 exhibitions: [],
                 artworks: [],
-                relationships: []
+                relationships: [],
             };
 
             console.log('✅ Test data cleanup completed');
@@ -367,7 +368,7 @@ class TestDataSeeder {
                 'cache:test:*',
                 'user:test:*',
                 'exhibition:test:*',
-                'artwork:test:*'
+                'artwork:test:*',
             ];
 
             for (const pattern of testPatterns) {
@@ -457,7 +458,9 @@ class TestDataSeeder {
             // 트랜잭션으로 빠른 정리
             await this.mysqlConnection.execute('START TRANSACTION');
 
-            await this.mysqlConnection.execute('DELETE FROM artwork_exhibition_relationships WHERE id LIKE "ARTWORK_EXHIBITION_%"');
+            await this.mysqlConnection.execute(
+                'DELETE FROM artwork_exhibition_relationships WHERE id LIKE "ARTWORK_EXHIBITION_%"'
+            );
             await this.mysqlConnection.execute('DELETE FROM artworks WHERE id LIKE "ARTWORK_%"');
             await this.mysqlConnection.execute('DELETE FROM exhibitions WHERE id LIKE "EXHIBITION_%"');
             await this.mysqlConnection.execute('DELETE FROM skku_user_profiles WHERE id LIKE "SKKU_PROFILE_%"');

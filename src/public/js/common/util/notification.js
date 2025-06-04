@@ -4,7 +4,7 @@
  */
 
 const NOTIFICATION_DURATION = 3000; // 알림이 표시되는 시간 (ms)
-const FADE_DURATION = 500;         // 페이드 아웃 시간 (ms)
+const FADE_DURATION = 500; // 페이드 아웃 시간 (ms)
 
 /**
  * 알림 메시지 표시를 위한 컨테이너 생성
@@ -27,7 +27,7 @@ function getNotificationContainer() {
  * @returns {Promise<boolean>} - 사용자가 확인(true) 또는 취소(false) 선택
  */
 export function showConfirm(message) {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
         const container = getNotificationContainer();
         const confirmBox = document.createElement('div');
         confirmBox.className = 'notification notification--confirm';
@@ -150,4 +150,3 @@ export function showLoading(isLoading) {
         }
     }
 }
-

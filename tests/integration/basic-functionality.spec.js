@@ -6,7 +6,6 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('기본 기능 테스트', () => {
-
     test.describe('홈페이지 테스트', () => {
         test('홈페이지 로드', async ({ page }) => {
             await page.goto('/');
@@ -16,12 +15,12 @@ test.describe('기본 기능 테스트', () => {
 
             // 기본 요소들 확인
             const header = page.locator('header, .header');
-            if (await header.count() > 0) {
+            if ((await header.count()) > 0) {
                 await expect(header).toBeVisible();
             }
 
             const nav = page.locator('nav, .nav, .navigation');
-            if (await nav.count() > 0) {
+            if ((await nav.count()) > 0) {
                 await expect(nav).toBeVisible();
             }
         });
@@ -33,12 +32,12 @@ test.describe('기본 기능 테스트', () => {
             const navLinks = [
                 { text: '작품', href: '/artwork' },
                 { text: '전시회', href: '/exhibition' },
-                { text: '로그인', href: '/user/login' }
+                { text: '로그인', href: '/user/login' },
             ];
 
             for (const link of navLinks) {
                 const linkElement = page.locator(`a:has-text("${link.text}"), a[href="${link.href}"]`);
-                if (await linkElement.count() > 0) {
+                if ((await linkElement.count()) > 0) {
                     await expect(linkElement).toBeVisible();
                 }
             }
@@ -76,14 +75,14 @@ test.describe('기본 기능 테스트', () => {
             // SKKU 회원 선택 시 추가 필드 표시
             await roleSelect.selectOption('SKKU_MEMBER');
             const skkuFields = page.locator('#skkuFields');
-            if (await skkuFields.count() > 0) {
+            if ((await skkuFields.count()) > 0) {
                 await expect(skkuFields).toBeVisible();
             }
 
             // 외부 회원 선택 시 추가 필드 표시
             await roleSelect.selectOption('EXTERNAL_MEMBER');
             const externalFields = page.locator('#externalFields');
-            if (await externalFields.count() > 0) {
+            if ((await externalFields.count()) > 0) {
                 await expect(externalFields).toBeVisible();
             }
         });
@@ -99,7 +98,7 @@ test.describe('기본 기능 테스트', () => {
 
             // 페이지 제목 확인
             const pageTitle = page.locator('h1, .page-title');
-            if (await pageTitle.count() > 0) {
+            if ((await pageTitle.count()) > 0) {
                 await expect(pageTitle).toContainText('작품');
             }
         });
@@ -109,7 +108,7 @@ test.describe('기본 기능 테스트', () => {
 
             // 검색 입력 필드 확인
             const searchInput = page.locator('#searchInput, input[name="search"]');
-            if (await searchInput.count() > 0) {
+            if ((await searchInput.count()) > 0) {
                 await expect(searchInput).toBeVisible();
 
                 // 검색어 입력 테스트
@@ -126,13 +125,13 @@ test.describe('기본 기능 테스트', () => {
 
             // 첫 번째 작품 클릭
             const firstArtwork = page.locator('.artwork-item, .artwork-card').first();
-            if (await firstArtwork.count() > 0) {
+            if ((await firstArtwork.count()) > 0) {
                 await firstArtwork.click();
 
                 // 상세 페이지 또는 모달 확인
                 await page.waitForTimeout(1000);
                 const detailView = page.locator('.artwork-detail, .artwork-modal, .modal');
-                if (await detailView.count() > 0) {
+                if ((await detailView.count()) > 0) {
                     await expect(detailView).toBeVisible();
                 }
             }
@@ -149,7 +148,7 @@ test.describe('기본 기능 테스트', () => {
 
             // 페이지 제목 확인
             const pageTitle = page.locator('h1, .page-title');
-            if (await pageTitle.count() > 0) {
+            if ((await pageTitle.count()) > 0) {
                 await expect(pageTitle).toContainText('전시');
             }
         });
@@ -159,13 +158,13 @@ test.describe('기본 기능 테스트', () => {
 
             // 첫 번째 전시회 클릭
             const firstExhibition = page.locator('.exhibition-item, .exhibition-card').first();
-            if (await firstExhibition.count() > 0) {
+            if ((await firstExhibition.count()) > 0) {
                 await firstExhibition.click();
 
                 // 상세 모달 또는 페이지 확인
                 await page.waitForTimeout(1000);
                 const detailView = page.locator('.exhibition-detail, .exhibition-modal, .modal');
-                if (await detailView.count() > 0) {
+                if ((await detailView.count()) > 0) {
                     await expect(detailView).toBeVisible();
                 }
             }
@@ -310,7 +309,7 @@ test.describe('기본 기능 테스트', () => {
 
             // 모바일에서도 기본 요소들이 보이는지 확인
             const header = page.locator('header, .header');
-            if (await header.count() > 0) {
+            if ((await header.count()) > 0) {
                 await expect(header).toBeVisible();
             }
         });
@@ -370,7 +369,7 @@ test.describe('기본 기능 테스트', () => {
 
             // main 요소 또는 role="main" 확인
             const main = page.locator('main, [role="main"]');
-            if (await main.count() > 0) {
+            if ((await main.count()) > 0) {
                 await expect(main).toBeVisible();
             }
         });
@@ -380,7 +379,7 @@ test.describe('기본 기능 테스트', () => {
 
             // nav 요소 또는 role="navigation" 확인
             const nav = page.locator('nav, [role="navigation"]');
-            if (await nav.count() > 0) {
+            if ((await nav.count()) > 0) {
                 await expect(nav).toBeVisible();
             }
         });

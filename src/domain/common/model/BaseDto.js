@@ -112,9 +112,7 @@ export default class BaseDto {
      * @returns {string} 에러 메시지 문자열
      */
     getValidationErrorMessages(separator = ', ') {
-        return this._validationErrors
-            .map(error => error.message)
-            .join(separator);
+        return this._validationErrors.map(error => error.message).join(separator);
     }
 
     /**

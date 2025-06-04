@@ -27,10 +27,12 @@ class CachedRepository extends BaseRepository {
         const paramString = JSON.stringify(params, (key, value) => {
             // 불필요한 객체 참조 제거
             if (typeof value === 'object' && value !== null && value.constructor === Object) {
-                return Object.keys(value).sort().reduce((sorted, key) => {
-                    sorted[key] = value[key];
-                    return sorted;
-                }, {});
+                return Object.keys(value)
+                    .sort()
+                    .reduce((sorted, key) => {
+                        sorted[key] = value[key];
+                        return sorted;
+                    }, {});
             }
             return value;
         });
@@ -82,16 +84,20 @@ class CachedRepository extends BaseRepository {
 
         const cacheKey = await this._createCacheKey('findById', { id, options });
 
-        return await this.cache.wrap(cacheKey, async () => {
-            const result = await super.findById(id, options);
-            logger.debug('데이터베이스에서 조회 후 캐시 저장', {
-                model: this.model.name,
-                method: 'findById',
-                id,
-                found: !!result
-            });
-            return result;
-        }, this.defaultTTL);
+        return await this.cache.wrap(
+            cacheKey,
+            async () => {
+                const result = await super.findById(id, options);
+                logger.debug('데이터베이스에서 조회 후 캐시 저장', {
+                    model: this.model.name,
+                    method: 'findById',
+                    id,
+                    found: !!result
+                });
+                return result;
+            },
+            this.defaultTTL
+        );
     }
 
     /**
@@ -108,15 +114,19 @@ class CachedRepository extends BaseRepository {
 
         const cacheKey = await this._createCacheKey('findOne', { where, options });
 
-        return await this.cache.wrap(cacheKey, async () => {
-            const result = await super.findOne(where, options);
-            logger.debug('데이터베이스에서 조회 후 캐시 저장', {
-                model: this.model.name,
-                method: 'findOne',
-                found: !!result
-            });
-            return result;
-        }, this.defaultTTL);
+        return await this.cache.wrap(
+            cacheKey,
+            async () => {
+                const result = await super.findOne(where, options);
+                logger.debug('데이터베이스에서 조회 후 캐시 저장', {
+                    model: this.model.name,
+                    method: 'findOne',
+                    found: !!result
+                });
+                return result;
+            },
+            this.defaultTTL
+        );
     }
 
     /**
@@ -131,7 +141,7 @@ class CachedRepository extends BaseRepository {
         }
 
         // 페이지네이션이 있는 경우 첫 페이지만 캐시 (성능상 이유)
-        const shouldCache = !options.pagination || (options.page === 1 || !options.page);
+        const shouldCache = !options.pagination || options.page === 1 || !options.page;
 
         if (!shouldCache) {
             return await super.findAll(options);
@@ -139,15 +149,19 @@ class CachedRepository extends BaseRepository {
 
         const cacheKey = await this._createCacheKey('findAll', options);
 
-        return await this.cache.wrap(cacheKey, async () => {
-            const result = await super.findAll(options);
-            logger.debug('데이터베이스에서 조회 후 캐시 저장', {
-                model: this.model.name,
-                method: 'findAll',
-                total: result.total || result.items?.length
-            });
-            return result;
-        }, this.shortTTL); // 목록은 더 짧은 TTL 사용
+        return await this.cache.wrap(
+            cacheKey,
+            async () => {
+                const result = await super.findAll(options);
+                logger.debug('데이터베이스에서 조회 후 캐시 저장', {
+                    model: this.model.name,
+                    method: 'findAll',
+                    total: result.total || result.items?.length
+                });
+                return result;
+            },
+            this.shortTTL
+        ); // 목록은 더 짧은 TTL 사용
     }
 
     /**
@@ -168,16 +182,20 @@ class CachedRepository extends BaseRepository {
 
         const cacheKey = await this._createCacheKey('findByIds', { ids: ids.sort(), options });
 
-        return await this.cache.wrap(cacheKey, async () => {
-            const result = await super.findByIds(ids, options);
-            logger.debug('데이터베이스에서 조회 후 캐시 저장', {
-                model: this.model.name,
-                method: 'findByIds',
-                idsCount: ids.length,
-                foundCount: result.length
-            });
-            return result;
-        }, this.defaultTTL);
+        return await this.cache.wrap(
+            cacheKey,
+            async () => {
+                const result = await super.findByIds(ids, options);
+                logger.debug('데이터베이스에서 조회 후 캐시 저장', {
+                    model: this.model.name,
+                    method: 'findByIds',
+                    idsCount: ids.length,
+                    foundCount: result.length
+                });
+                return result;
+            },
+            this.defaultTTL
+        );
     }
 
     /**
@@ -255,14 +273,18 @@ class CachedRepository extends BaseRepository {
 
         const cacheKey = await this._createCacheKey('count', { where, options });
 
-        return await this.cache.wrap(cacheKey, async () => {
-            const result = await super.count(where, options);
-            logger.debug('데이터베이스에서 카운트 후 캐시 저장', {
-                model: this.model.name,
-                count: result
-            });
-            return result;
-        }, this.defaultTTL);
+        return await this.cache.wrap(
+            cacheKey,
+            async () => {
+                const result = await super.count(where, options);
+                logger.debug('데이터베이스에서 카운트 후 캐시 저장', {
+                    model: this.model.name,
+                    count: result
+                });
+                return result;
+            },
+            this.defaultTTL
+        );
     }
 
     /**
@@ -283,19 +305,23 @@ class CachedRepository extends BaseRepository {
 
         const cacheKey = await this._createCacheKey('findAllGroupedBy', { field, options });
 
-        return await this.cache.wrap(cacheKey, async () => {
-            const result = await super.findAll({
-                ...options,
-                group: [field],
-                attributes: [field, [this.model.sequelize.fn('COUNT', this.model.sequelize.col('id')), 'count']]
-            });
-            logger.debug('데이터베이스에서 그룹핑 조회 후 캐시 저장', {
-                model: this.model.name,
-                field,
-                groupCount: result.items?.length || 0
-            });
-            return result;
-        }, this.longTTL); // 통계성 데이터는 긴 TTL 사용
+        return await this.cache.wrap(
+            cacheKey,
+            async () => {
+                const result = await super.findAll({
+                    ...options,
+                    group: [field],
+                    attributes: [field, [this.model.sequelize.fn('COUNT', this.model.sequelize.col('id')), 'count']]
+                });
+                logger.debug('데이터베이스에서 그룹핑 조회 후 캐시 저장', {
+                    model: this.model.name,
+                    field,
+                    groupCount: result.items?.length || 0
+                });
+                return result;
+            },
+            this.longTTL
+        ); // 통계성 데이터는 긴 TTL 사용
     }
 
     /**

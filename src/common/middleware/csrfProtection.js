@@ -18,7 +18,8 @@ export function setupCSRFProtection(app) {
     }
 
     // CSRF 시크릿 키 설정
-    const secret = config.get('security.csrf.secret') || process.env.CSRF_SECRET || 'default-csrf-secret-change-in-production';
+    const secret =
+        config.get('security.csrf.secret') || process.env.CSRF_SECRET || 'default-csrf-secret-change-in-production';
 
     if (secret === 'default-csrf-secret-change-in-production' && config.isProduction()) {
         logger.error('프로덕션 환경에서 기본 CSRF 시크릿을 사용하고 있습니다. 보안상 위험합니다.');
@@ -56,11 +57,7 @@ export function setupCSRFProtection(app) {
         }
 
         // 제외할 경로들 (API 문서, 건강 체크 등)
-        const excludePaths = config.get('security.csrf.excludePaths', [
-            '/api-docs',
-            '/health',
-            '/favicon.ico'
-        ]);
+        const excludePaths = config.get('security.csrf.excludePaths', ['/api-docs', '/health', '/favicon.ico']);
 
         if (excludePaths.some(path => req.path.startsWith(path))) {
             return next();
@@ -72,7 +69,8 @@ export function setupCSRFProtection(app) {
         }
 
         // CSRF 토큰 추출
-        const token = req.body['_csrf'] ||
+        const token =
+            req.body['_csrf'] ||
             req.query['_csrf'] ||
             req.headers['csrf-token'] ||
             req.headers['x-csrf-token'] ||

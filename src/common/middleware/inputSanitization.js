@@ -16,10 +16,25 @@ const DOMPurify = createDOMPurify(window);
 const HTML_SANITIZE_CONFIG = {
     // 허용할 태그들 (기본적으로 안전한 태그만)
     ALLOWED_TAGS: [
-        'p', 'br', 'strong', 'em', 'u', 'i', 'b',
-        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        'ul', 'ol', 'li',
-        'blockquote', 'pre', 'code'
+        'p',
+        'br',
+        'strong',
+        'em',
+        'u',
+        'i',
+        'b',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'ul',
+        'ol',
+        'li',
+        'blockquote',
+        'pre',
+        'code'
     ],
 
     // 허용할 속성들
@@ -101,15 +116,7 @@ export function sanitizeSql(input) {
 export function sanitizeNoSql(input) {
     if (typeof input === 'string') {
         // MongoDB operator 패턴 제거
-        const noSqlPatterns = [
-            /\$where/gi,
-            /\$regex/gi,
-            /\$ne/gi,
-            /\$gt/gi,
-            /\$lt/gi,
-            /\$in/gi,
-            /\$nin/gi
-        ];
+        const noSqlPatterns = [/\$where/gi, /\$regex/gi, /\$ne/gi, /\$gt/gi, /\$lt/gi, /\$in/gi, /\$nin/gi];
 
         let sanitized = input;
         noSqlPatterns.forEach(pattern => {
@@ -139,13 +146,7 @@ export function sanitizeNoSql(input) {
  * @returns {any} sanitized 객체
  */
 function sanitizeObject(obj, options = {}) {
-    const {
-        html = true,
-        xss = true,
-        sql = true,
-        nosql = true,
-        allowHtml = false
-    } = options;
+    const { html = true, xss = true, sql = true, nosql = true, allowHtml = false } = options;
 
     if (typeof obj === 'string') {
         let sanitized = obj;
@@ -198,11 +199,7 @@ export function createSanitizationMiddleware(options = {}) {
         nosql: true,
         allowHtml: false,
         sources: ['body', 'query', 'params'],
-        skipPaths: config.get('security.sanitization.skipPaths', [
-            '/api-docs',
-            '/health',
-            '/favicon.ico'
-        ])
+        skipPaths: config.get('security.sanitization.skipPaths', ['/api-docs', '/health', '/favicon.ico'])
     };
 
     const sanitizeOptions = { ...defaultOptions, ...options };

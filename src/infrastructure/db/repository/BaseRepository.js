@@ -192,13 +192,10 @@ export default class BaseRepository {
             await record.update(dataWithTimestamp, queryOptions);
             return record;
         } else {
-            const [affectedCount] = await this.model.update(
-                dataWithTimestamp,
-                {
-                    where: { id },
-                    ...queryOptions
-                }
-            );
+            const [affectedCount] = await this.model.update(dataWithTimestamp, {
+                where: { id },
+                ...queryOptions
+            });
             return affectedCount;
         }
     }
@@ -219,13 +216,10 @@ export default class BaseRepository {
             updatedAt: new Date()
         };
 
-        const [affectedCount] = await this.model.update(
-            dataWithTimestamp,
-            {
-                where,
-                ...queryOptions
-            }
-        );
+        const [affectedCount] = await this.model.update(dataWithTimestamp, {
+            where,
+            ...queryOptions
+        });
 
         return affectedCount;
     }
@@ -364,17 +358,7 @@ export default class BaseRepository {
      * @private
      */
     _buildQueryOptions(options = {}) {
-        const {
-            where,
-            include,
-            attributes,
-            order,
-            transaction,
-            paranoid,
-            raw,
-            nest,
-            ...otherOptions
-        } = options;
+        const { where, include, attributes, order, transaction, paranoid, raw, nest, ...otherOptions } = options;
 
         const queryOptions = { ...otherOptions };
 
@@ -534,14 +518,7 @@ export default class BaseRepository {
      * @returns {Promise<object>} 페이지네이션 결과
      */
     async findWithCursor(options = {}) {
-        const {
-            cursor,
-            limit = 10,
-            cursorField = 'id',
-            direction = 'ASC',
-            where = {},
-            ...queryOptions
-        } = options;
+        const { cursor, limit = 10, cursorField = 'id', direction = 'ASC', where = {}, ...queryOptions } = options;
 
         const cursorWhere = { ...where };
 
@@ -590,9 +567,7 @@ export default class BaseRepository {
         }
 
         // 외래키 값들 추출
-        const foreignKeys = [...new Set(
-            items.map(item => item[foreignKey]).filter(Boolean)
-        )];
+        const foreignKeys = [...new Set(items.map(item => item[foreignKey]).filter(Boolean))];
 
         if (foreignKeys.length === 0) {
             return items;
@@ -609,7 +584,7 @@ export default class BaseRepository {
 
         // 원본 데이터에 관계 데이터 추가
         return items.map(item => ({
-            ...item.toJSON ? item.toJSON() : item,
+            ...(item.toJSON ? item.toJSON() : item),
             [relationField]: relatedMap.get(item[foreignKey]) || null
         }));
     }

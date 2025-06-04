@@ -125,7 +125,6 @@ export default class AuthApiController {
                 await this.authService.deleteToken(token, 'PASSWORD_RESET');
                 return res.json(ApiResponse.success(null, '비밀번호가 성공적으로 재설정되었습니다.'));
             }
-
         } catch (error) {
             console.error('비밀번호 재설정 오류:', error);
 
@@ -135,15 +134,23 @@ export default class AuthApiController {
                     // 새 토큰 발급 및 이메일 재전송
                     await this.authService.handleExpiredToken(req.body.token, 'PASSWORD_RESET');
 
-                    return res.status(400).json(ApiResponse.error(
-                        '비밀번호 재설정 링크가 만료되었습니다. 새로운 링크가 이메일로 전송되었으니 확인해주세요.',
-                        { tokenExpired: true }
-                    ));
+                    return res
+                        .status(400)
+                        .json(
+                            ApiResponse.error(
+                                '비밀번호 재설정 링크가 만료되었습니다. 새로운 링크가 이메일로 전송되었으니 확인해주세요.',
+                                { tokenExpired: true }
+                            )
+                        );
                 } catch (tokenError) {
                     console.error('토큰 재발행 오류:', tokenError);
-                    return res.status(400).json(ApiResponse.error(
-                        '비밀번호 재설정 링크 갱신에 실패했습니다. 다시 시도하거나 관리자에게 문의하세요.'
-                    ));
+                    return res
+                        .status(400)
+                        .json(
+                            ApiResponse.error(
+                                '비밀번호 재설정 링크 갱신에 실패했습니다. 다시 시도하거나 관리자에게 문의하세요.'
+                            )
+                        );
                 }
             }
 
@@ -152,8 +159,8 @@ export default class AuthApiController {
     }
 
     /**
-    * 토큰 유효성을 검사합니다.
-    */
+     * 토큰 유효성을 검사합니다.
+     */
     async validateToken(req, res) {
         try {
             const { token, type } = req.query;
@@ -177,10 +184,14 @@ export default class AuthApiController {
             if (error.cause?.isExpired && req.query?.token) {
                 try {
                     // 토큰 정보 반환
-                    return res.status(400).json(ApiResponse.error(
-                        '토큰이 만료되었습니다.',
-                        { tokenExpired: true, userId: error.cause.userId }
-                    ));
+                    return res
+                        .status(400)
+                        .json(
+                            ApiResponse.error('토큰이 만료되었습니다.', {
+                                tokenExpired: true,
+                                userId: error.cause.userId
+                            })
+                        );
                 } catch (tokenError) {
                     console.error('토큰 검증 오류:', tokenError);
                 }
@@ -240,12 +251,16 @@ export default class AuthApiController {
             // JWT 토큰 생성
             const tokens = await this.authService.authenticateAndGenerateTokens(user);
 
-            return res.json(ApiResponse.success({
-                user: tokens.user,
-                accessToken: tokens.accessToken,
-                refreshToken: tokens.refreshToken
-            }, '로그인에 성공했습니다.'));
-
+            return res.json(
+                ApiResponse.success(
+                    {
+                        user: tokens.user,
+                        accessToken: tokens.accessToken,
+                        refreshToken: tokens.refreshToken
+                    },
+                    '로그인에 성공했습니다.'
+                )
+            );
         } catch (error) {
             console.error('JWT 로그인 오류:', error);
             return res.status(401).json(ApiResponse.error(error.message || '로그인에 실패했습니다.'));
@@ -266,12 +281,16 @@ export default class AuthApiController {
             // 토큰 갱신
             const tokens = await this.authService.refreshTokens(refreshToken);
 
-            return res.json(ApiResponse.success({
-                user: tokens.user,
-                accessToken: tokens.accessToken,
-                refreshToken: tokens.refreshToken
-            }, '토큰이 갱신되었습니다.'));
-
+            return res.json(
+                ApiResponse.success(
+                    {
+                        user: tokens.user,
+                        accessToken: tokens.accessToken,
+                        refreshToken: tokens.refreshToken
+                    },
+                    '토큰이 갱신되었습니다.'
+                )
+            );
         } catch (error) {
             console.error('JWT 토큰 갱신 오류:', error);
             return res.status(401).json(ApiResponse.error(error.message || '토큰 갱신에 실패했습니다.'));
@@ -284,9 +303,7 @@ export default class AuthApiController {
     async verifyJWTToken(req, res) {
         try {
             const authHeader = req.headers.authorization;
-            const token = authHeader && authHeader.startsWith('Bearer ')
-                ? authHeader.substring(7)
-                : null;
+            const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
             if (!token) {
                 return res.status(400).json(ApiResponse.error('토큰이 필요합니다.'));
@@ -295,20 +312,26 @@ export default class AuthApiController {
             // 토큰 검증
             const decoded = this.authService.verifyAccessToken(token);
 
-            return res.json(ApiResponse.success({
-                valid: true,
-                user: {
-                    id: decoded.id,
-                    username: decoded.username,
-                    email: decoded.email,
-                    role: decoded.role,
-                    isActive: decoded.isActive
-                }
-            }, '유효한 토큰입니다.'));
-
+            return res.json(
+                ApiResponse.success(
+                    {
+                        valid: true,
+                        user: {
+                            id: decoded.id,
+                            username: decoded.username,
+                            email: decoded.email,
+                            role: decoded.role,
+                            isActive: decoded.isActive
+                        }
+                    },
+                    '유효한 토큰입니다.'
+                )
+            );
         } catch (error) {
             console.error('JWT 토큰 검증 오류:', error);
-            return res.status(401).json(ApiResponse.error(error.message || '유효하지 않은 토큰입니다.', { valid: false }));
+            return res
+                .status(401)
+                .json(ApiResponse.error(error.message || '유효하지 않은 토큰입니다.', { valid: false }));
         }
     }
 

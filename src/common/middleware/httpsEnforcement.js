@@ -38,9 +38,10 @@ export class HttpsEnforcementMonitor {
 
     static getStats() {
         const uptime = Date.now() - this.stats.startTime;
-        const httpsRate = this.stats.totalRequests > 0
-            ? (this.stats.httpsRequests / this.stats.totalRequests * 100).toFixed(2)
-            : '0.00';
+        const httpsRate =
+            this.stats.totalRequests > 0
+                ? ((this.stats.httpsRequests / this.stats.totalRequests) * 100).toFixed(2)
+                : '0.00';
 
         return {
             ...this.stats,
@@ -118,7 +119,8 @@ export function httpsRedirect() {
     const policy = getCurrentHttpsPolicy();
 
     return (req, res, next) => {
-        const isHttps = req.secure ||
+        const isHttps =
+            req.secure ||
             req.headers['x-forwarded-proto'] === 'https' ||
             req.headers['x-forwarded-ssl'] === 'on' ||
             req.connection.encrypted;
@@ -165,7 +167,8 @@ export function hstsHeaders() {
     const policy = getCurrentHttpsPolicy();
 
     return (req, res, next) => {
-        const isHttps = req.secure ||
+        const isHttps =
+            req.secure ||
             req.headers['x-forwarded-proto'] === 'https' ||
             req.headers['x-forwarded-ssl'] === 'on' ||
             req.connection.encrypted;
@@ -202,7 +205,8 @@ export function mixedContentProtection() {
     const policy = getCurrentHttpsPolicy();
 
     return (req, res, next) => {
-        const isHttps = req.secure ||
+        const isHttps =
+            req.secure ||
             req.headers['x-forwarded-proto'] === 'https' ||
             req.headers['x-forwarded-ssl'] === 'on' ||
             req.connection.encrypted;
@@ -250,7 +254,8 @@ export function secureCookieSettings() {
     const policy = getCurrentHttpsPolicy();
 
     return (req, res, next) => {
-        const isHttps = req.secure ||
+        const isHttps =
+            req.secure ||
             req.headers['x-forwarded-proto'] === 'https' ||
             req.headers['x-forwarded-ssl'] === 'on' ||
             req.connection.encrypted;
@@ -294,23 +299,26 @@ export function secureCookieSettings() {
  */
 export function httpsViolationDetector() {
     return (req, res, next) => {
-        const isHttps = req.secure ||
+        const isHttps =
+            req.secure ||
             req.headers['x-forwarded-proto'] === 'https' ||
             req.headers['x-forwarded-ssl'] === 'on' ||
             req.connection.encrypted;
 
         // 민감한 데이터를 포함할 수 있는 요청들
         const sensitiveEndpoints = [
-            '/user/login', '/auth/login',
-            '/user/register', '/auth/register',
-            '/user/password', '/auth/password',
-            '/admin', '/api',
+            '/user/login',
+            '/auth/login',
+            '/user/register',
+            '/auth/register',
+            '/user/password',
+            '/auth/password',
+            '/admin',
+            '/api',
             '/user/profile'
         ];
 
-        const isSensitiveRequest = sensitiveEndpoints.some(endpoint =>
-            req.path.startsWith(endpoint)
-        );
+        const isSensitiveRequest = sensitiveEndpoints.some(endpoint => req.path.startsWith(endpoint));
 
         if (!isHttps && isSensitiveRequest) {
             HttpsEnforcementMonitor.recordRequest(isHttps, false, true);

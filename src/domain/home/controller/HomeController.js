@@ -2,8 +2,7 @@ import { ViewPath } from '../../../common/constants/ViewPath.js';
 import ViewResolver from '../../../common/utils/ViewResolver.js';
 
 export default class HomeController {
-    constructor() {
-    }
+    constructor() {}
 
     /**
      * 홈 페이지를 렌더링합니다.

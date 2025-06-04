@@ -1,6 +1,6 @@
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
-import { infrastructureConfig } from '../../config/infrastructure.js';
+import { infrastructureConfig } from '../../config/infrastructureConfig.js';
 import Config from '../../config/Config.js';
 import fs from 'fs';
 import path from 'path';
@@ -141,7 +141,7 @@ class WinstonLogger {
             winston.format.timestamp(),
             winston.format.errors({ stack: true }),
             winston.format.json(),
-            winston.format.printf((info) => {
+            winston.format.printf(info => {
                 // 민감한 정보 제거
                 const sanitized = this.sanitizeLogData(info);
                 return JSON.stringify(sanitized);
@@ -165,15 +165,24 @@ class WinstonLogger {
      */
     sanitizeLogData(data) {
         const sensitiveFields = [
-            'password', 'token', 'authorization', 'cookie', 'secret',
-            'x-auth-token', 'x-api-key', 'access_token', 'refresh_token',
-            'sessionId', 'apiKey', 'privateKey'
+            'password',
+            'token',
+            'authorization',
+            'cookie',
+            'secret',
+            'x-auth-token',
+            'x-api-key',
+            'access_token',
+            'refresh_token',
+            'sessionId',
+            'apiKey',
+            'privateKey'
         ];
 
         const sanitized = { ...data };
 
         // 재귀적으로 민감한 필드 제거
-        const sanitizeObject = (obj) => {
+        const sanitizeObject = obj => {
             if (typeof obj !== 'object' || obj === null) return obj;
 
             const result = Array.isArray(obj) ? [] : {};
@@ -227,9 +236,11 @@ class WinstonLogger {
      */
     detectRailwayEnvironment() {
         // Railway 환경 변수를 직접 확인
-        return !!(process.env.RAILWAY_PROJECT_NAME ||
+        return !!(
+            process.env.RAILWAY_PROJECT_NAME ||
             process.env.RAILWAY_ENVIRONMENT ||
-            process.env.RAILWAY_SERVICE_NAME);
+            process.env.RAILWAY_SERVICE_NAME
+        );
     }
 
     /**
@@ -266,10 +277,12 @@ class WinstonLogger {
             this.sendDailyLogEmail();
 
             // 이후 24시간마다 반복 실행
-            setInterval(() => {
-                this.sendDailyLogEmail();
-            }, 24 * 60 * 60 * 1000); // 24시간
-
+            setInterval(
+                () => {
+                    this.sendDailyLogEmail();
+                },
+                24 * 60 * 60 * 1000
+            ); // 24시간
         }, timeUntilMidnight);
 
         this.info('📅 일별 로그 이메일 스케줄링 완료', {
@@ -362,16 +375,18 @@ class WinstonLogger {
      * 에러 로그 (강화된 버전)
      */
     error(message, error = null, meta = {}, userInfo = null) {
-        const errorMeta = error ? {
-            ...meta,
-            error: {
-                message: error.message,
-                stack: this.isDevelopment ? error.stack : undefined,
-                name: error.name,
-                code: error.code,
-                statusCode: error.statusCode
+        const errorMeta = error
+            ? {
+                ...meta,
+                error: {
+                    message: error.message,
+                    stack: this.isDevelopment ? error.stack : undefined,
+                    name: error.name,
+                    code: error.code,
+                    statusCode: error.statusCode
+                }
             }
-        } : meta;
+            : meta;
 
         const logData = this.formatMessage('error', message, errorMeta, userInfo);
         this.winston.error(logData);
@@ -386,19 +401,23 @@ class WinstonLogger {
      */
     getErrorSeverity(error) {
         // 시스템 에러 (CRITICAL)
-        if (error.code === 'ECONNREFUSED' ||
+        if (
+            error.code === 'ECONNREFUSED' ||
             error.code === 'ENOTFOUND' ||
             error.message.toLowerCase().includes('database') ||
             error.message.toLowerCase().includes('connection') ||
-            error.name.toLowerCase().includes('error')) {
+            error.name.toLowerCase().includes('error')
+        ) {
             return 'CRITICAL';
         }
 
         // 보안 관련 에러 (HIGH)
-        if (error.statusCode === 401 ||
+        if (
+            error.statusCode === 401 ||
             error.statusCode === 403 ||
             error.message.includes('unauthorized') ||
-            error.message.includes('forbidden')) {
+            error.message.includes('forbidden')
+        ) {
             return 'HIGH';
         }
 
@@ -477,31 +496,15 @@ class WinstonLogger {
                 '데이터베이스 서버 상태를 점검하세요',
                 '연결 풀 설정을 확인하세요'
             ],
-            NETWORK: [
-                '네트워크 연결을 확인하세요',
-                '방화벽 설정을 점검하세요',
-                'DNS 설정을 확인하세요'
-            ],
-            AUTHENTICATION: [
-                '인증 토큰을 갱신하세요',
-                '사용자 권한을 확인하세요',
-                '세션 상태를 점검하세요'
-            ],
+            NETWORK: ['네트워크 연결을 확인하세요', '방화벽 설정을 점검하세요', 'DNS 설정을 확인하세요'],
+            AUTHENTICATION: ['인증 토큰을 갱신하세요', '사용자 권한을 확인하세요', '세션 상태를 점검하세요'],
             VALIDATION: [
                 '입력 데이터 형식을 확인하세요',
                 '필수 필드가 누락되지 않았는지 점검하세요',
                 '데이터 유효성 규칙을 검토하세요'
             ],
-            BUSINESS: [
-                '비즈니스 로직을 재검토하세요',
-                '데이터 상태를 확인하세요',
-                '워크플로우를 점검하세요'
-            ],
-            SYSTEM: [
-                '시스템 리소스를 확인하세요',
-                '메모리 사용량을 점검하세요',
-                '서버 상태를 모니터링하세요'
-            ],
+            BUSINESS: ['비즈니스 로직을 재검토하세요', '데이터 상태를 확인하세요', '워크플로우를 점검하세요'],
+            SYSTEM: ['시스템 리소스를 확인하세요', '메모리 사용량을 점검하세요', '서버 상태를 모니터링하세요'],
             EXTERNAL: [
                 '외부 서비스 상태를 확인하세요',
                 'API 키와 권한을 점검하세요',
@@ -576,7 +579,6 @@ class WinstonLogger {
             this.dailyLogBuffer = [];
 
             console.log(`✅ 일별 로그 파일 이메일 전송 완료: ${today}`);
-
         } catch (emailError) {
             // 이메일 전송 실패 시 콘솔에만 로그 (무한 루프 방지)
             console.error('Failed to send daily log email:', emailError.message);
@@ -604,17 +606,12 @@ class WinstonLogger {
             const subject = `🚨 [SKKU Gallery] 긴급 로그 알림 - ${new Date().toLocaleString('ko-KR')}`;
             const htmlContent = this.generateCriticalLogEmailHTML(this.criticalLogBuffer);
 
-            await sendLogNotificationEmail(
-                process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
-                subject,
-                htmlContent
-            );
+            await sendLogNotificationEmail(process.env.ADMIN_EMAIL || process.env.EMAIL_USER, subject, htmlContent);
 
             // 전송 후 중요 로그 버퍼 초기화
             this.criticalLogBuffer = [];
 
             console.log('🚨 긴급 로그 알림 이메일 전송 완료');
-
         } catch (emailError) {
             // 이메일 전송 실패 시 콘솔에만 로그 (무한 루프 방지)
             console.error('Failed to send critical log email:', emailError.message);
@@ -641,15 +638,18 @@ Railway 프로젝트: ${process.env.RAILWAY_PROJECT_NAME || 'Unknown'}
         // 로그를 시간순으로 정렬
         const sortedLogs = logs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-        const logEntries = sortedLogs.map(log => {
-            const timestamp = new Date(log.timestamp).toLocaleString('ko-KR');
-            const level = log.level.toUpperCase().padEnd(8);
-            const metaStr = log.meta && Object.keys(log.meta).length > 0
-                ? `\n    메타데이터: ${JSON.stringify(log.meta, null, 4)}`
-                : '';
+        const logEntries = sortedLogs
+            .map(log => {
+                const timestamp = new Date(log.timestamp).toLocaleString('ko-KR');
+                const level = log.level.toUpperCase().padEnd(8);
+                const metaStr =
+                    log.meta && Object.keys(log.meta).length > 0
+                        ? `\n    메타데이터: ${JSON.stringify(log.meta, null, 4)}`
+                        : '';
 
-            return `[${timestamp}] ${level} ${log.message}${metaStr}`;
-        }).join('\n\n');
+                return `[${timestamp}] ${level} ${log.message}${metaStr}`;
+            })
+            .join('\n\n');
 
         // 통계 정보
         const stats = {
@@ -709,13 +709,17 @@ HTTP: ${stats.http}개
                     <strong>⚠️ 주의:</strong> 중요한 에러가 ${logs.length}개 감지되어 즉시 알림을 전송합니다.
                 </div>
 
-                ${logs.map(log => `
+                ${logs
+                .map(
+                    log => `
                     <div class="log-item">
                         <div class="timestamp">${new Date(log.timestamp).toLocaleString('ko-KR')}</div>
                         <div class="message">${log.message}</div>
                         ${log.meta && Object.keys(log.meta).length > 0 ? `<div class="meta">${JSON.stringify(log.meta, null, 2)}</div>` : ''}
                     </div>
-                `).join('')}
+                `
+                )
+                .join('')}
 
                 <div style="margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 8px;">
                     <p><small>즉시 확인이 필요한 중요 로그입니다.</small></p>
@@ -938,10 +942,12 @@ HTTP: ${stats.http}개
      * HTTP 요청 로그 (사용자 정보 포함)
      */
     http(req, res, duration) {
-        const userInfo = req.session?.user ? {
-            username: req.session.user.username,
-            role: req.session.user.role
-        } : null;
+        const userInfo = req.session?.user
+            ? {
+                username: req.session.user.username,
+                role: req.session.user.role
+            }
+            : null;
 
         const userPrefix = userInfo ? `[${userInfo.username}]` : '';
         const message = `${userPrefix} ${req.method} ${req.originalUrl} - ${res.statusCode} (${duration}ms)`;
@@ -1291,14 +1297,16 @@ HTTP: ${stats.http}개
         };
 
         // 요청 컨텍스트 정보
-        const requestContext = context.req ? {
-            method: context.req.method,
-            url: context.req.originalUrl,
-            headers: this.sanitizeLogData(context.req.headers),
-            body: this.sanitizeLogData(context.req.body),
-            query: context.req.query,
-            params: context.req.params
-        } : {};
+        const requestContext = context.req
+            ? {
+                method: context.req.method,
+                url: context.req.originalUrl,
+                headers: this.sanitizeLogData(context.req.headers),
+                body: this.sanitizeLogData(context.req.body),
+                query: context.req.query,
+                params: context.req.params
+            }
+            : {};
 
         this.error(`🔍 강화된 에러 분석 - ${errorId}`, {
             errorId,
@@ -1530,9 +1538,11 @@ HTTP: ${stats.http}개
      * 성능 트렌드 분석 로깅
      */
     logPerformanceTrend(operation, currentMetrics, historicalAverage, trendAnalysis = {}) {
-        const performanceChange = currentMetrics.responseTime && historicalAverage.responseTime
-            ? ((currentMetrics.responseTime - historicalAverage.responseTime) / historicalAverage.responseTime * 100)
-            : 0;
+        const performanceChange =
+            currentMetrics.responseTime && historicalAverage.responseTime
+                ? ((currentMetrics.responseTime - historicalAverage.responseTime) / historicalAverage.responseTime) *
+                100
+                : 0;
 
         const level = Math.abs(performanceChange) > 20 ? 'warn' : 'info';
         const emoji = performanceChange > 20 ? '📈' : performanceChange < -20 ? '📉' : '📊';
@@ -1635,7 +1645,8 @@ HTTP: ${stats.http}개
      * 성능 회귀 감지 로깅
      */
     logPerformanceRegression(operation, baselineMetrics, currentMetrics, regressionThreshold = 20) {
-        const regressionPercentage = ((currentMetrics.responseTime - baselineMetrics.responseTime) / baselineMetrics.responseTime) * 100;
+        const regressionPercentage =
+            ((currentMetrics.responseTime - baselineMetrics.responseTime) / baselineMetrics.responseTime) * 100;
 
         if (regressionPercentage > regressionThreshold) {
             this.warn(`📉 성능 회귀 감지 - ${operation}`, {

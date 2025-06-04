@@ -69,12 +69,18 @@ export function createUserRouter(userController, userApiController) {
      *       500:
      *         description: 서버 오류
      */
-    UserRouter.post('/', isNotAuthenticated, DomainSanitization.user.register, UserValidation.validateRegister, async (req, res) => {
-        const result = await userApiController.registerUser(req, res);
-        // 사용자 관련 캐시 무효화 (필요시)
-        await cacheMiddleware.invalidatePattern('user_*');
-        return result;
-    });
+    UserRouter.post(
+        '/',
+        isNotAuthenticated,
+        DomainSanitization.user.register,
+        UserValidation.validateRegister,
+        async (req, res) => {
+            const result = await userApiController.registerUser(req, res);
+            // 사용자 관련 캐시 무효화 (필요시)
+            await cacheMiddleware.invalidatePattern('user_*');
+            return result;
+        }
+    );
 
     // 로그인/로그아웃 API
     /**
@@ -111,8 +117,14 @@ export function createUserRouter(userController, userApiController) {
      *         description: 사용자 없음
      *       500:
      *         description: 서버 오류
-    */
-    UserRouter.post('/login', isNotAuthenticated, DomainSanitization.user.register, UserValidation.validateLogin, (req, res) => userApiController.loginUser(req, res));
+     */
+    UserRouter.post(
+        '/login',
+        isNotAuthenticated,
+        DomainSanitization.user.register,
+        UserValidation.validateLogin,
+        (req, res) => userApiController.loginUser(req, res)
+    );
     /**
      * @swagger
      * /logout:
@@ -231,12 +243,18 @@ export function createUserRouter(userController, userApiController) {
      *       500:
      *         description: 서버 오류
      */
-    UserRouter.put('/me', isAuthenticated, DomainSanitization.user.updateProfile, UserValidation.validateUpdateProfile, async (req, res) => {
-        const result = await userApiController.updateProfile(req, res);
-        // 사용자 관련 캐시 무효화
-        await cacheMiddleware.invalidatePattern('user_*');
-        return result;
-    });
+    UserRouter.put(
+        '/me',
+        isAuthenticated,
+        DomainSanitization.user.updateProfile,
+        UserValidation.validateUpdateProfile,
+        async (req, res) => {
+            const result = await userApiController.updateProfile(req, res);
+            // 사용자 관련 캐시 무효화
+            await cacheMiddleware.invalidatePattern('user_*');
+            return result;
+        }
+    );
 
     // 현재 사용자 삭제 API
     /**
@@ -296,7 +314,12 @@ export function createUserRouter(userController, userApiController) {
      *       500:
      *         description: 서버 오류
      */
-    UserRouter.get('/api/find-username', DomainSanitization.user.register, UserValidation.validateEmailQuery, (req, res) => userApiController.findUsername(req, res));
+    UserRouter.get(
+        '/api/find-username',
+        DomainSanitization.user.register,
+        UserValidation.validateEmailQuery,
+        (req, res) => userApiController.findUsername(req, res)
+    );
 
     // 비밀번호 재설정 요청 API
     /**
@@ -331,7 +354,13 @@ export function createUserRouter(userController, userApiController) {
      *       500:
      *         description: 서버 오류
      */
-    UserRouter.post('/password/reset', isNotAuthenticated, DomainSanitization.user.register, UserValidation.validateResetPassword, (req, res) => userApiController.resetPassword(req, res));
+    UserRouter.post(
+        '/password/reset',
+        isNotAuthenticated,
+        DomainSanitization.user.register,
+        UserValidation.validateResetPassword,
+        (req, res) => userApiController.resetPassword(req, res)
+    );
 
     // 플래시 메시지 API
     UserRouter.get('/api/flash-message', (req, res) => userApiController.getFlashMessage(req, res));
@@ -347,8 +376,12 @@ export function createUserRouter(userController, userApiController) {
     UserRouter.get('/me', isAuthenticated, (req, res) => userController.getUserProfilePage(req, res));
 
     // 비밀번호 재설정 페이지
-    UserRouter.get('/password/forgot', isNotAuthenticated, (req, res) => userController.getUserPasswordForgotPage(req, res));
-    UserRouter.get('/password/reset', isNotAuthenticated, (req, res) => userController.getUserPasswordResetPage(req, res));
+    UserRouter.get('/password/forgot', isNotAuthenticated, (req, res) =>
+        userController.getUserPasswordForgotPage(req, res)
+    );
+    UserRouter.get('/password/reset', isNotAuthenticated, (req, res) =>
+        userController.getUserPasswordResetPage(req, res)
+    );
 
     // 이메일 인증 페이지
     UserRouter.get('/verify-email', (req, res) => userController.verifyEmailPage(req, res));

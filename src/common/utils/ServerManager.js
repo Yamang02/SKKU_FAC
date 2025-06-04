@@ -23,16 +23,21 @@ class ServerManager {
             });
 
             // 포트 사용 중 에러 처리
-            this.server.on('error', (error) => {
+            this.server.on('error', error => {
                 if (error.code === 'EADDRINUSE') {
                     if (retryCount < maxRetries) {
                         logger.warn(`포트 ${port}가 이미 사용 중입니다. ${retryCount + 1}/${maxRetries} 재시도 중...`);
-                        setTimeout(() => {
-                            this.server.close();
-                            this.start(port, retryCount + 1);
-                        }, 2000 * (retryCount + 1)); // 점진적으로 대기 시간 증가
+                        setTimeout(
+                            () => {
+                                this.server.close();
+                                this.start(port, retryCount + 1);
+                            },
+                            2000 * (retryCount + 1)
+                        ); // 점진적으로 대기 시간 증가
                     } else {
-                        logger.error(`포트 ${port}를 ${maxRetries}번 시도했지만 여전히 사용 중입니다. 서버를 종료합니다.`);
+                        logger.error(
+                            `포트 ${port}를 ${maxRetries}번 시도했지만 여전히 사용 중입니다. 서버를 종료합니다.`
+                        );
                         process.exit(1);
                     }
                 } else {
@@ -47,7 +52,6 @@ class ServerManager {
             }
 
             return this.server;
-
         } catch (error) {
             logger.error('서버 시작 실패', error);
             process.exit(1);
@@ -64,7 +68,7 @@ class ServerManager {
         }
 
         // 처리되지 않은 예외
-        this.uncaughtExceptionHandler = (error) => {
+        this.uncaughtExceptionHandler = error => {
             // EADDRINUSE 에러는 이미 처리했으므로 무시
             if (error.code === 'EADDRINUSE') {
                 return;
@@ -130,7 +134,6 @@ class ServerManager {
 
             logger.success('서버가 정상적으로 종료되었습니다.');
             process.exit(0);
-
         } catch (error) {
             logger.error('서버 종료 중 오류 발생', error);
             process.exit(1);

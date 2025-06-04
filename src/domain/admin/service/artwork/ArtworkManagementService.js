@@ -1,33 +1,29 @@
-import ArtworkService from '../../../artwork/service/ArtworkService.js';
+import ArtworkService from '#domain/artwork/service/ArtworkService.js';
 import ArtworkManagementDto from '../../model/dto/artwork/ArtworkManagementDto.js';
 import ArtworkListManagementDto from '../../model/dto/artwork/ArtworkListManagementDto.js';
-import ArtworkRepository from '../../../../infrastructure/db/repository/ArtworkRepository.js';
-import ExhibitionRepository from '../../../../infrastructure/db/repository/ExhibitionRepository.js';
-import UserAccountRepository from '../../../../infrastructure/db/repository/UserAccountRepository.js';
-import { ArtworkNotFoundError } from '../../../../common/error/ArtworkError.js';
+import ArtworkRepository from '#infrastructure/db/repository/ArtworkRepository.js';
+import ExhibitionRepository from '#infrastructure/db/repository/ExhibitionRepository.js';
+import UserAccountRepository from '#infrastructure/db/repository/UserAccountRepository.js';
+import { ArtworkNotFoundError } from '#common/error/ArtworkError.js';
 import BaseAdminService from '../BaseAdminService.js';
 
 export default class ArtworkManagementService extends BaseAdminService {
     // 의존성 주입을 위한 static dependencies 정의
     static dependencies = ['ArtworkService', 'ArtworkRepository', 'ExhibitionRepository', 'UserAccountRepository'];
 
-    constructor(artworkService = null, artworkRepository = null, exhibitionRepository = null, userAccountRepository = null) {
+    constructor(
+        artworkService = null,
+        artworkRepository = null,
+        exhibitionRepository = null,
+        userAccountRepository = null
+    ) {
         super('ArtworkManagementService');
 
-        // 의존성 주입 방식 (새로운 방식)
-        if (artworkService && artworkRepository && exhibitionRepository && userAccountRepository) {
-            this.artworkService = artworkService;
-            this.artworkRepository = artworkRepository;
-            this.exhibitionRepository = exhibitionRepository;
-            this.userAccountRepository = userAccountRepository;
-        } else {
-            // 기존 방식 호환성 유지 (임시)
-            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
-            this.artworkService = new ArtworkService();
-            this.artworkRepository = new ArtworkRepository();
-            this.exhibitionRepository = new ExhibitionRepository();
-            this.userAccountRepository = new UserAccountRepository();
-        }
+        // 의존성 주입이 되지 않은 경우 기본 인스턴스 생성 (하위 호환성)
+        this.artworkService = artworkService || new ArtworkService();
+        this.artworkRepository = artworkRepository || new ArtworkRepository();
+        this.exhibitionRepository = exhibitionRepository || new ExhibitionRepository();
+        this.userAccountRepository = userAccountRepository || new UserAccountRepository();
     }
 
     /**
@@ -36,53 +32,60 @@ export default class ArtworkManagementService extends BaseAdminService {
      * @returns {Promise<Object>} 작품 목록 데이터
      */
     async getArtworkList(options) {
-        return this.safeExecute(async () => {
-            const normalizedOptions = this.normalizeFilterOptions(options);
-            const { page, limit, keyword, status, isFeatured, sortField, sortOrder } = normalizedOptions;
+        return this.safeExecute(
+            async () => {
+                const normalizedOptions = this.normalizeFilterOptions(options);
+                const { page, limit, keyword, status, isFeatured, sortField, sortOrder } = normalizedOptions;
 
-            const filterOptions = {
-                page,
-                limit,
-                keyword,
-                status,
-                sortField,
-                sortOrder
-            };
+                const filterOptions = {
+                    page,
+                    limit,
+                    keyword,
+                    status,
+                    sortField,
+                    sortOrder
+                };
 
-            // 주요 작품 필터링 처리
-            if (isFeatured !== undefined) {
-                filterOptions.isFeatured = isFeatured;
-            }
+                // 주요 작품 필터링 처리
+                if (isFeatured !== undefined) {
+                    filterOptions.isFeatured = isFeatured;
+                }
 
-            const result = await this.artworkRepository.findArtworks(filterOptions, true);
-            const artworks = result.items || [];
-            const total = result.total || 0;
+                const result = await this.artworkRepository.findArtworks(filterOptions, true);
+                const artworks = result.items || [];
+                const total = result.total || 0;
 
-            // 작품 목록 DTO 변환
-            const artworkDtos = [];
-            for (const artwork of artworks) {
-                // 작가 정보 가져오기
-                const artist = artwork.userId ? await this.userAccountRepository.findUserById(artwork.userId) : null;
+                // 작품 목록 DTO 변환
+                const artworkDtos = [];
+                for (const artwork of artworks) {
+                    // 작가 정보 가져오기
+                    const artist = artwork.userId
+                        ? await this.userAccountRepository.findUserById(artwork.userId)
+                        : null;
 
-                // 전시회 정보 가져오기
-                const exhibition = artwork.exhibitionId ?
-                    await this.exhibitionRepository.findById(artwork.exhibitionId) : null;
+                    // 전시회 정보 가져오기
+                    const exhibition = artwork.exhibitionId
+                        ? await this.exhibitionRepository.findById(artwork.exhibitionId)
+                        : null;
 
-                const artworkData = new ArtworkListManagementDto(artwork);
+                    const artworkData = new ArtworkListManagementDto(artwork);
 
-                artworkData.artistName = artist?.name || '작가 미상';
-                artworkData.exhibitionTitle = exhibition?.title || '';
+                    artworkData.artistName = artist?.name || '작가 미상';
+                    artworkData.exhibitionTitle = exhibition?.title || '';
 
-                artworkDtos.push(artworkData);
-            }
+                    artworkDtos.push(artworkData);
+                }
 
-            // 표준화된 응답 생성
-            return this.createListResponse(artworkDtos, total, options, {
-                keyword: options.keyword,
-                status: options.status,
-                isFeatured: options.isFeatured
-            });
-        }, '작품 목록 조회', { options });
+                // 표준화된 응답 생성
+                return this.createListResponse(artworkDtos, total, options, {
+                    keyword: options.keyword,
+                    status: options.status,
+                    isFeatured: options.isFeatured
+                });
+            },
+            '작품 목록 조회',
+            { options }
+        );
     }
 
     /**
@@ -91,26 +94,30 @@ export default class ArtworkManagementService extends BaseAdminService {
      * @returns {Promise<Object>} 작품 상세 데이터
      */
     async getArtworkDetail(id) {
-        return this.safeExecute(async () => {
-            const artwork = await this.artworkRepository.findArtworkById(id, true);
-            if (!artwork) {
-                throw new ArtworkNotFoundError();
-            }
+        return this.safeExecute(
+            async () => {
+                const artwork = await this.artworkRepository.findArtworkById(id, true);
+                if (!artwork) {
+                    throw new ArtworkNotFoundError();
+                }
 
-            // 작가 정보 가져오기
-            const artist = artwork.userId ?
-                await this.userAccountRepository.findUserById(artwork.userId) : null;
+                // 작가 정보 가져오기
+                const artist = artwork.userId ? await this.userAccountRepository.findUserById(artwork.userId) : null;
 
-            // 전시회 정보 가져오기
-            const exhibition = artwork.exhibitionId ?
-                await this.exhibitionRepository.findById(artwork.exhibitionId) : null;
+                // 전시회 정보 가져오기
+                const exhibition = artwork.exhibitionId
+                    ? await this.exhibitionRepository.findById(artwork.exhibitionId)
+                    : null;
 
-            const artworkDto = new ArtworkManagementDto(artwork);
-            artworkDto.artistName = artist?.name || '작가 미상';
-            artworkDto.exhibitionTitle = exhibition?.title || '';
+                const artworkDto = new ArtworkManagementDto(artwork);
+                artworkDto.artistName = artist?.name || '작가 미상';
+                artworkDto.exhibitionTitle = exhibition?.title || '';
 
-            return artworkDto;
-        }, '작품 상세 조회', { id });
+                return artworkDto;
+            },
+            '작품 상세 조회',
+            { id }
+        );
     }
 
     /**
@@ -129,15 +136,19 @@ export default class ArtworkManagementService extends BaseAdminService {
      * @returns {Promise<ArtworkManagementDto>} 수정된 작품 정보
      */
     async updateArtwork(id, artworkData) {
-        return this.safeExecute(async () => {
-            const existingArtwork = await this.artworkRepository.findArtworkById(id, true);
-            if (!existingArtwork) {
-                throw new ArtworkNotFoundError();
-            }
+        return this.safeExecute(
+            async () => {
+                const existingArtwork = await this.artworkRepository.findArtworkById(id, true);
+                if (!existingArtwork) {
+                    throw new ArtworkNotFoundError();
+                }
 
-            const updatedArtwork = await this.artworkRepository.updateArtwork(id, artworkData, true);
-            return new ArtworkManagementDto(updatedArtwork);
-        }, '작품 수정', { id, artworkData });
+                const updatedArtwork = await this.artworkRepository.updateArtwork(id, artworkData, true);
+                return new ArtworkManagementDto(updatedArtwork);
+            },
+            '작품 수정',
+            { id, artworkData }
+        );
     }
 
     /**
@@ -147,15 +158,19 @@ export default class ArtworkManagementService extends BaseAdminService {
      * @returns {Promise<ArtworkManagementDto>} 수정된 작품 정보
      */
     async updateArtworkStatus(id, status) {
-        return this.safeExecute(async () => {
-            const existingArtwork = await this.artworkRepository.findArtworkById(id);
-            if (!existingArtwork) {
-                throw new ArtworkNotFoundError();
-            }
+        return this.safeExecute(
+            async () => {
+                const existingArtwork = await this.artworkRepository.findArtworkById(id);
+                if (!existingArtwork) {
+                    throw new ArtworkNotFoundError();
+                }
 
-            const updatedArtwork = await this.artworkRepository.updateArtwork(id, { status });
-            return new ArtworkManagementDto(updatedArtwork);
-        }, '작품 상태 업데이트', { id, status });
+                const updatedArtwork = await this.artworkRepository.updateArtwork(id, { status });
+                return new ArtworkManagementDto(updatedArtwork);
+            },
+            '작품 상태 업데이트',
+            { id, status }
+        );
     }
 
     /**
@@ -164,18 +179,22 @@ export default class ArtworkManagementService extends BaseAdminService {
      * @returns {Promise<ArtworkManagementDto>} 수정된 작품 정보
      */
     async toggleFeatured(id) {
-        return this.safeExecute(async () => {
-            const existingArtwork = await this.artworkRepository.findArtworkById(id);
-            if (!existingArtwork) {
-                throw new ArtworkNotFoundError();
-            }
+        return this.safeExecute(
+            async () => {
+                const existingArtwork = await this.artworkRepository.findArtworkById(id);
+                if (!existingArtwork) {
+                    throw new ArtworkNotFoundError();
+                }
 
-            const updatedArtwork = await this.artworkRepository.updateArtwork(id, {
-                isFeatured: !existingArtwork.isFeatured
-            });
+                const updatedArtwork = await this.artworkRepository.updateArtwork(id, {
+                    isFeatured: !existingArtwork.isFeatured
+                });
 
-            return new ArtworkManagementDto(updatedArtwork);
-        }, '작품 주요 작품 설정', { id });
+                return new ArtworkManagementDto(updatedArtwork);
+            },
+            '작품 주요 작품 설정',
+            { id }
+        );
     }
 
     /**
@@ -201,16 +220,20 @@ export default class ArtworkManagementService extends BaseAdminService {
      * @returns {Promise<ArtworkManagementDto>} 생성된 작품 정보
      */
     async createArtwork(artworkData, file) {
-        return this.safeExecute(async () => {
-            // 체크박스의 경우 체크 해제시 undefined가 옴
-            if (artworkData.isFeatured === undefined) {
-                artworkData.isFeatured = false;
-            } else if (artworkData.isFeatured === 'on') {
-                artworkData.isFeatured = true;
-            }
+        return this.safeExecute(
+            async () => {
+                // 체크박스의 경우 체크 해제시 undefined가 옴
+                if (artworkData.isFeatured === undefined) {
+                    artworkData.isFeatured = false;
+                } else if (artworkData.isFeatured === 'on') {
+                    artworkData.isFeatured = true;
+                }
 
-            const newArtwork = await this.artworkService.createArtwork(artworkData, file);
-            return new ArtworkManagementDto(newArtwork);
-        }, '작품 생성', { artworkData, file });
+                const newArtwork = await this.artworkService.createArtwork(artworkData, file);
+                return new ArtworkManagementDto(newArtwork);
+            },
+            '작품 생성',
+            { artworkData, file }
+        );
     }
 }

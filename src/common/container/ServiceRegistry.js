@@ -49,7 +49,10 @@ export class ServiceRegistry {
             this.container.registerSingleton('tokenRepository', TokenRepository);
             this.container.registerSingleton('userRepository', UserRepository);
             this.container.registerSingleton('ArtworkRepository', ArtworkRepository);
-            this.container.registerSingleton('ArtworkExhibitionRelationshipRepository', ArtworkExhibitionRelationshipRepository);
+            this.container.registerSingleton(
+                'ArtworkExhibitionRelationshipRepository',
+                ArtworkExhibitionRelationshipRepository
+            );
             this.container.registerSingleton('ExhibitionRepository', ExhibitionRepository);
 
             // Service 등록 (의존성 없는 서비스는 일반 Singleton)
@@ -66,11 +69,15 @@ export class ServiceRegistry {
             this.container.registerAutoWired('ArtworkManagementService', ArtworkManagementService, 'singleton');
 
             // 배치 처리 서비스 - 컨테이너 자체를 주입
-            this.container.register('BatchProcessingService', () => {
-                const batchService = new BatchProcessingService();
-                batchService.setContainer(this.container);
-                return batchService;
-            }, 'singleton');
+            this.container.register(
+                'BatchProcessingService',
+                () => {
+                    const batchService = new BatchProcessingService();
+                    batchService.setContainer(this.container);
+                    return batchService;
+                },
+                'singleton'
+            );
 
             // Controller 등록 (AutoWired Transient - 요청마다 새 인스턴스)
             this.container.registerAutoWired('UserController', UserController, 'transient');
@@ -78,7 +85,11 @@ export class ServiceRegistry {
             this.container.registerAutoWired('ArtworkController', ArtworkController, 'transient');
             this.container.registerAutoWired('SystemManagementController', SystemManagementController, 'transient');
             this.container.registerAutoWired('UserManagementController', UserManagementController, 'transient');
-            this.container.registerAutoWired('ExhibitionManagementController', ExhibitionManagementController, 'transient');
+            this.container.registerAutoWired(
+                'ExhibitionManagementController',
+                ExhibitionManagementController,
+                'transient'
+            );
             this.container.registerAutoWired('ArtworkManagementController', ArtworkManagementController, 'transient');
             this.container.registerAutoWired('BatchController', BatchController, 'transient');
 

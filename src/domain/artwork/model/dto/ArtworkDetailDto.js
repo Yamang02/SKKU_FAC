@@ -1,4 +1,4 @@
-import CloudinaryUrlOptimizer from '../../../../common/utils/CloudinaryUrlOptimizer.js';
+import CloudinaryUrlOptimizer from '#common/utils/CloudinaryUrlOptimizer.js';
 
 /**
  * 작품 상세 정보를 위한 DTO

@@ -81,11 +81,7 @@ export default class BaseAdminController {
      * @returns {Promise<void>}
      */
     async safeExecuteAPI(operation, req, res, options = {}) {
-        const {
-            operationName = '작업',
-            successStatus = 200,
-            errorStatus = 500
-        } = options;
+        const { operationName = '작업', successStatus = 200, errorStatus = 500 } = options;
 
         try {
             const result = await operation();
@@ -138,11 +134,7 @@ export default class BaseAdminController {
      * @param {Object} options - 렌더링 옵션
      */
     renderErrorPage(res, error, options = {}) {
-        const {
-            title = '오류 발생',
-            message = null,
-            statusCode = 500
-        } = options;
+        const { title = '오류 발생', message = null, statusCode = 500 } = options;
 
         const userErrorMessage = message || this.getUserFriendlyErrorMessage(error);
 

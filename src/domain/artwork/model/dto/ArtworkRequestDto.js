@@ -37,45 +37,28 @@ export default class ArtworkRequestDto extends BaseDto {
      */
     static getCreateSchema() {
         return Joi.object({
-            title: Joi.string()
-                .min(1)
-                .max(200)
-                .required()
-                .messages({
-                    'string.min': '작품 제목을 입력해주세요',
-                    'string.max': '작품 제목은 최대 200자까지 가능합니다',
-                    'any.required': '작품 제목은 필수 입력 항목입니다'
-                }),
+            title: Joi.string().min(1).max(200).required().messages({
+                'string.min': '작품 제목을 입력해주세요',
+                'string.max': '작품 제목은 최대 200자까지 가능합니다',
+                'any.required': '작품 제목은 필수 입력 항목입니다'
+            }),
 
-            description: Joi.string()
-                .max(1000)
-                .allow('')
-                .optional()
-                .messages({
-                    'string.max': '작품 설명은 최대 1000자까지 가능합니다'
-                }),
+            description: Joi.string().max(1000).allow('').optional().messages({
+                'string.max': '작품 설명은 최대 1000자까지 가능합니다'
+            }),
 
-            userId: Joi.number()
-                .integer()
-                .positive()
-                .required()
-                .messages({
-                    'number.base': '사용자 ID는 숫자여야 합니다',
-                    'number.integer': '사용자 ID는 정수여야 합니다',
-                    'number.positive': '사용자 ID는 양수여야 합니다',
-                    'any.required': '사용자 ID는 필수 입력 항목입니다'
-                }),
+            userId: Joi.number().integer().positive().required().messages({
+                'number.base': '사용자 ID는 숫자여야 합니다',
+                'number.integer': '사용자 ID는 정수여야 합니다',
+                'number.positive': '사용자 ID는 양수여야 합니다',
+                'any.required': '사용자 ID는 필수 입력 항목입니다'
+            }),
 
-            exhibitionId: Joi.number()
-                .integer()
-                .positive()
-                .optional()
-                .allow(null)
-                .messages({
-                    'number.base': '전시회 ID는 숫자여야 합니다',
-                    'number.integer': '전시회 ID는 정수여야 합니다',
-                    'number.positive': '전시회 ID는 양수여야 합니다'
-                }),
+            exhibitionId: Joi.number().integer().positive().optional().allow(null).messages({
+                'number.base': '전시회 ID는 숫자여야 합니다',
+                'number.integer': '전시회 ID는 정수여야 합니다',
+                'number.positive': '전시회 ID는 양수여야 합니다'
+            }),
 
             year: Joi.number()
                 .integer()
@@ -90,25 +73,15 @@ export default class ArtworkRequestDto extends BaseDto {
                     'number.max': `제작 연도는 ${new Date().getFullYear() + 10}년 이전이어야 합니다`
                 }),
 
-            medium: Joi.string()
-                .max(100)
-                .allow('')
-                .optional()
-                .messages({
-                    'string.max': '재료/기법은 최대 100자까지 가능합니다'
-                }),
+            medium: Joi.string().max(100).allow('').optional().messages({
+                'string.max': '재료/기법은 최대 100자까지 가능합니다'
+            }),
 
-            size: Joi.string()
-                .max(100)
-                .allow('')
-                .optional()
-                .messages({
-                    'string.max': '작품 크기는 최대 100자까지 가능합니다'
-                }),
+            size: Joi.string().max(100).allow('').optional().messages({
+                'string.max': '작품 크기는 최대 100자까지 가능합니다'
+            }),
 
-            featured: Joi.boolean()
-                .default(false)
-                .optional(),
+            featured: Joi.boolean().default(false).optional(),
 
             // 선택적 필드들
             id: Joi.number().integer().positive().optional(),
@@ -123,33 +96,20 @@ export default class ArtworkRequestDto extends BaseDto {
      */
     static getUpdateSchema() {
         return Joi.object({
-            title: Joi.string()
-                .min(1)
-                .max(200)
-                .optional()
-                .messages({
-                    'string.min': '작품 제목을 입력해주세요',
-                    'string.max': '작품 제목은 최대 200자까지 가능합니다'
-                }),
+            title: Joi.string().min(1).max(200).optional().messages({
+                'string.min': '작품 제목을 입력해주세요',
+                'string.max': '작품 제목은 최대 200자까지 가능합니다'
+            }),
 
-            description: Joi.string()
-                .max(1000)
-                .allow('')
-                .optional()
-                .messages({
-                    'string.max': '작품 설명은 최대 1000자까지 가능합니다'
-                }),
+            description: Joi.string().max(1000).allow('').optional().messages({
+                'string.max': '작품 설명은 최대 1000자까지 가능합니다'
+            }),
 
-            exhibitionId: Joi.number()
-                .integer()
-                .positive()
-                .optional()
-                .allow(null)
-                .messages({
-                    'number.base': '전시회 ID는 숫자여야 합니다',
-                    'number.integer': '전시회 ID는 정수여야 합니다',
-                    'number.positive': '전시회 ID는 양수여야 합니다'
-                }),
+            exhibitionId: Joi.number().integer().positive().optional().allow(null).messages({
+                'number.base': '전시회 ID는 숫자여야 합니다',
+                'number.integer': '전시회 ID는 정수여야 합니다',
+                'number.positive': '전시회 ID는 양수여야 합니다'
+            }),
 
             year: Joi.number()
                 .integer()
@@ -164,21 +124,13 @@ export default class ArtworkRequestDto extends BaseDto {
                     'number.max': `제작 연도는 ${new Date().getFullYear() + 10}년 이전이어야 합니다`
                 }),
 
-            medium: Joi.string()
-                .max(100)
-                .allow('')
-                .optional()
-                .messages({
-                    'string.max': '재료/기법은 최대 100자까지 가능합니다'
-                }),
+            medium: Joi.string().max(100).allow('').optional().messages({
+                'string.max': '재료/기법은 최대 100자까지 가능합니다'
+            }),
 
-            size: Joi.string()
-                .max(100)
-                .allow('')
-                .optional()
-                .messages({
-                    'string.max': '작품 크기는 최대 100자까지 가능합니다'
-                }),
+            size: Joi.string().max(100).allow('').optional().messages({
+                'string.max': '작품 크기는 최대 100자까지 가능합니다'
+            }),
 
             featured: Joi.boolean().optional(),
             imageUrl: Joi.string().uri().allow(null).optional(),
@@ -196,14 +148,14 @@ export default class ArtworkRequestDto extends BaseDto {
         let schema;
 
         switch (schemaType) {
-            case 'create':
-                schema = ArtworkRequestDto.getCreateSchema();
-                break;
-            case 'update':
-                schema = ArtworkRequestDto.getUpdateSchema();
-                break;
-            default:
-                schema = this.getValidationSchema();
+        case 'create':
+            schema = ArtworkRequestDto.getCreateSchema();
+            break;
+        case 'update':
+            schema = ArtworkRequestDto.getUpdateSchema();
+            break;
+        default:
+            schema = this.getValidationSchema();
         }
 
         const { error, value } = schema.validate(this.toPlainObject(), {

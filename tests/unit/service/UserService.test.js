@@ -21,12 +21,12 @@ test.describe('UserService', () => {
         mockUserRepository = createMockRepository({
             findByEmail: createSpy(null),
             findByUsername: createSpy(null),
-            create: createSpy({ id: 1 })
+            create: createSpy({ id: 1 }),
         });
 
         mockAuthService = createMockAuthService({
             hashPassword: createSpy('hashed_password'),
-            comparePassword: createSpy(true)
+            comparePassword: createSpy(true),
         });
 
         // UserService 클래스 모킹 (실제 import 대신)
@@ -130,8 +130,9 @@ test.describe('UserService', () => {
             const loginData = createLoginData();
             mockUserRepository.findByEmail.mockReturnValue(null);
 
-            await expect(userService.authenticateUser(loginData.username, loginData.password))
-                .rejects.toThrow('사용자를 찾을 수 없습니다.');
+            await expect(userService.authenticateUser(loginData.username, loginData.password)).rejects.toThrow(
+                '사용자를 찾을 수 없습니다.'
+            );
         });
 
         test('잘못된 비밀번호 로그인 시 에러', async () => {
@@ -141,8 +142,9 @@ test.describe('UserService', () => {
             mockUserRepository.findByEmail.mockReturnValue(user);
             mockAuthService.comparePassword.mockReturnValue(false);
 
-            await expect(userService.authenticateUser(loginData.username, loginData.password))
-                .rejects.toThrow('비밀번호가 일치하지 않습니다.');
+            await expect(userService.authenticateUser(loginData.username, loginData.password)).rejects.toThrow(
+                '비밀번호가 일치하지 않습니다.'
+            );
         });
     });
 
@@ -160,8 +162,7 @@ test.describe('UserService', () => {
         test('존재하지 않는 사용자 조회 시 에러', async () => {
             mockUserRepository.findById = createSpy(null);
 
-            await expect(userService.getUserById(999))
-                .rejects.toThrow('사용자를 찾을 수 없습니다.');
+            await expect(userService.getUserById(999)).rejects.toThrow('사용자를 찾을 수 없습니다.');
         });
     });
 

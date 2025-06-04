@@ -105,7 +105,7 @@ test.describe('🖼️ Artwork API Tests', () => {
         test('POST /artwork/api/new - 인증 없이 접근 시 401', async () => {
             const response = await apiHelper.post('/artwork/api/new', {
                 title: 'Test Artwork',
-                description: 'Test Description'
+                description: 'Test Description',
             });
 
             expect([401, 302]).toContain(response.status);
@@ -121,7 +121,7 @@ test.describe('🖼️ Artwork API Tests', () => {
                 description: 'Test Description',
                 medium: 'Oil on Canvas',
                 size: '50x70cm',
-                year: '2024'
+                year: '2024',
             };
 
             const response = await apiHelper.post('/artwork/api/new', artworkData);
@@ -132,7 +132,7 @@ test.describe('🖼️ Artwork API Tests', () => {
     test.describe('작품 수정 (인증 필요)', () => {
         test('PUT /artwork/api/:id - 인증 없이 접근 시 401', async () => {
             const response = await apiHelper.put('/artwork/api/test-id', {
-                title: 'Updated Title'
+                title: 'Updated Title',
             });
 
             expect([401, 302]).toContain(response.status);
@@ -142,7 +142,7 @@ test.describe('🖼️ Artwork API Tests', () => {
             await apiHelper.authenticateUser(testUsers.regularUser.username, testUsers.regularUser.password);
 
             const response = await apiHelper.put('/artwork/api/non-existent-id', {
-                title: 'Updated Title'
+                title: 'Updated Title',
             });
 
             expect([404, 400]).toContain(response.status);
@@ -167,7 +167,7 @@ test.describe('🖼️ Artwork API Tests', () => {
         test('POST /artwork/api/exhibiting - 인증 없이 접근 시 401', async () => {
             const response = await apiHelper.post('/artwork/api/exhibiting', {
                 artworkId: 'test-artwork-id',
-                exhibitionId: 'test-exhibition-id'
+                exhibitionId: 'test-exhibition-id',
             });
 
             expect([401, 302]).toContain(response.status);
@@ -178,7 +178,7 @@ test.describe('🖼️ Artwork API Tests', () => {
 
             const response = await apiHelper.post('/artwork/api/exhibiting', {
                 artworkId: testArtworks.painting.id,
-                exhibitionId: 'test-exhibition-id'
+                exhibitionId: 'test-exhibition-id',
             });
 
             expect([200, 400, 404]).toContain(response.status);

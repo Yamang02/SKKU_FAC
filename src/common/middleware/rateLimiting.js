@@ -19,7 +19,7 @@ if (config.get('redis.host')) {
             password: config.get('redis.password'),
             db: config.get('redis.db', 0)
         });
-        redisClient.on('error', (err) => {
+        redisClient.on('error', err => {
             logger.warn('Redis 연결 실패, 메모리 스토어로 폴백', { error: err.message });
             redisClient = null;
         });
@@ -64,7 +64,7 @@ export class RateLimitMonitor {
             ...this.stats,
             suspiciousIPCount: this.stats.suspiciousIPs.size,
             uptime: Math.floor(uptime / 1000),
-            blockRate: (this.stats.blockedRequests / this.stats.totalRequests * 100).toFixed(2) + '%'
+            blockRate: ((this.stats.blockedRequests / this.stats.totalRequests) * 100).toFixed(2) + '%'
         };
     }
 
@@ -147,7 +147,7 @@ function createRateLimitOptions(options = {}) {
         store: createStore(windowMs),
         skipSuccessfulRequests,
         skipFailedRequests,
-        skip: (req) => {
+        skip: req => {
             // 건강 체크 및 지정된 경로 제외
             const shouldSkip = skipPaths.some(path => req.path.startsWith(path));
             if (shouldSkip) return true;
@@ -158,9 +158,10 @@ function createRateLimitOptions(options = {}) {
 
             return false;
         },
-        keyGenerator: (req) => {
+        keyGenerator: req => {
             // 프록시 환경에서 실제 IP 추출
-            const ip = req.ip ||
+            const ip =
+                req.ip ||
                 req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
                 req.headers['x-real-ip'] ||
                 req.connection.remoteAddress ||
@@ -202,81 +203,95 @@ function createRateLimitOptions(options = {}) {
 /**
  * 기본 Rate Limiter (모든 요청)
  */
-export const generalRateLimit = rateLimit(createRateLimitOptions({
-    windowMs: 15 * 60 * 1000, // 15분
-    max: 300, // IP당 300 요청
-    message: 'Too many requests from this IP, please try again later.',
-    skipPaths: [
-        '/health',
-        '/favicon.ico',
-        '/robots.txt',
-        '/sitemap.xml',
-        '/css',     // CSS 파일들
-        '/js',      // JavaScript 파일들
-        '/images',  // 이미지 파일들
-        '/assets',  // 기타 정적 자산들
-        '/uploads'  // 업로드된 파일들
-    ]
-}));
+export const generalRateLimit = rateLimit(
+    createRateLimitOptions({
+        windowMs: 15 * 60 * 1000, // 15분
+        max: 300, // IP당 300 요청
+        message: 'Too many requests from this IP, please try again later.',
+        skipPaths: [
+            '/health',
+            '/favicon.ico',
+            '/robots.txt',
+            '/sitemap.xml',
+            '/css', // CSS 파일들
+            '/js', // JavaScript 파일들
+            '/images', // 이미지 파일들
+            '/assets', // 기타 정적 자산들
+            '/uploads' // 업로드된 파일들
+        ]
+    })
+);
 
 /**
  * Static 자원 전용 Rate Limiter (매우 관대한 제한)
  */
-export const staticAssetsRateLimit = rateLimit(createRateLimitOptions({
-    windowMs: 5 * 60 * 1000, // 5분
-    max: 1000, // 5분당 1000회 요청 (매우 관대)
-    message: 'Too many requests for static assets, please try again later.',
-    skipPaths: ['/health', '/favicon.ico']
-}));
+export const staticAssetsRateLimit = rateLimit(
+    createRateLimitOptions({
+        windowMs: 5 * 60 * 1000, // 5분
+        max: 1000, // 5분당 1000회 요청 (매우 관대)
+        message: 'Too many requests for static assets, please try again later.',
+        skipPaths: ['/health', '/favicon.ico']
+    })
+);
 
 /**
  * API Rate Limiter (API 엔드포인트)
  */
-export const apiRateLimit = rateLimit(createRateLimitOptions({
-    windowMs: 15 * 60 * 1000, // 15분
-    max: 100, // API는 더 엄격
-    message: 'Too many API requests from this IP, please try again later.',
-    attackType: 'ddos'
-}));
+export const apiRateLimit = rateLimit(
+    createRateLimitOptions({
+        windowMs: 15 * 60 * 1000, // 15분
+        max: 100, // API는 더 엄격
+        message: 'Too many API requests from this IP, please try again later.',
+        attackType: 'ddos'
+    })
+);
 
 /**
  * 인증 Rate Limiter (로그인, 회원가입 등)
  */
-export const authRateLimit = rateLimit(createRateLimitOptions({
-    windowMs: 15 * 60 * 1000, // 15분
-    max: 10, // 매우 엄격
-    message: 'Too many authentication attempts from this IP, please try again in 15 minutes.',
-    skipSuccessfulRequests: true, // 성공한 로그인은 카운트 제외
-    attackType: 'bruteForce'
-}));
+export const authRateLimit = rateLimit(
+    createRateLimitOptions({
+        windowMs: 15 * 60 * 1000, // 15분
+        max: 10, // 매우 엄격
+        message: 'Too many authentication attempts from this IP, please try again in 15 minutes.',
+        skipSuccessfulRequests: true, // 성공한 로그인은 카운트 제외
+        attackType: 'bruteForce'
+    })
+);
 
 /**
  * 비밀번호 재설정 Rate Limiter
  */
-export const passwordResetRateLimit = rateLimit(createRateLimitOptions({
-    windowMs: 60 * 60 * 1000, // 1시간
-    max: 3, // 시간당 3회만
-    message: 'Too many password reset attempts from this IP, please try again in 1 hour.',
-    attackType: 'bruteForce'
-}));
+export const passwordResetRateLimit = rateLimit(
+    createRateLimitOptions({
+        windowMs: 60 * 60 * 1000, // 1시간
+        max: 3, // 시간당 3회만
+        message: 'Too many password reset attempts from this IP, please try again in 1 hour.',
+        attackType: 'bruteForce'
+    })
+);
 
 /**
  * 업로드 Rate Limiter
  */
-export const uploadRateLimit = rateLimit(createRateLimitOptions({
-    windowMs: 60 * 60 * 1000, // 1시간
-    max: 20, // 시간당 20개 파일
-    message: 'Too many upload attempts from this IP, please try again later.'
-}));
+export const uploadRateLimit = rateLimit(
+    createRateLimitOptions({
+        windowMs: 60 * 60 * 1000, // 1시간
+        max: 20, // 시간당 20개 파일
+        message: 'Too many upload attempts from this IP, please try again later.'
+    })
+);
 
 /**
  * 검색 Rate Limiter
  */
-export const searchRateLimit = rateLimit(createRateLimitOptions({
-    windowMs: 5 * 60 * 1000, // 5분
-    max: 50, // 5분당 50회 검색
-    message: 'Too many search requests from this IP, please try again later.'
-}));
+export const searchRateLimit = rateLimit(
+    createRateLimitOptions({
+        windowMs: 5 * 60 * 1000, // 5분
+        max: 50, // 5분당 50회 검색
+        message: 'Too many search requests from this IP, please try again later.'
+    })
+);
 
 /**
  * 슬로우 다운 미들웨어 (점진적 지연)
@@ -289,7 +304,7 @@ export const slowDownMiddleware = slowDown({
     skipFailedRequests: false,
     skipSuccessfulRequests: false,
     // store: createStore(15 * 60 * 1000), // Redis 호환성 문제로 메모리 스토어 사용
-    keyGenerator: (req) => req.ip,
+    keyGenerator: req => req.ip,
     onLimitReached: (req, res, options) => {
         const ip = req.ip;
         RateLimitMonitor.recordRequest(ip, true, 'slowAttack');
@@ -312,7 +327,7 @@ export function createAdvancedDDoSProtection() {
     return (req, res, next) => {
         const ip = req.ip;
         const now = Date.now();
-        const windowStart = now - (60 * 1000); // 1분 윈도우
+        const windowStart = now - 60 * 1000; // 1분 윈도우
 
         // IP별 요청 기록 정리 (1분 이전 기록 삭제)
         if (!requestCounts.has(ip)) {
@@ -392,7 +407,7 @@ export function createAdaptiveRateLimit() {
         const adaptiveLimit = Math.floor(baseLimit * trustMultiplier);
 
         // 15분 윈도우에서 적응형 제한 체크
-        const windowStart = now - (15 * 60 * 1000);
+        const windowStart = now - 15 * 60 * 1000;
         if (profile.lastActivity > windowStart && profile.requestCount > adaptiveLimit) {
             profile.violations++;
             profile.trustScore = Math.max(0, profile.trustScore - 10);
@@ -432,95 +447,117 @@ export const DomainRateLimits = {
         assets: staticAssetsRateLimit,
 
         // 이미지 파일들 (관대한 제한)
-        images: rateLimit(createRateLimitOptions({
-            windowMs: 5 * 60 * 1000, // 5분
-            max: 500, // 5분당 500회 이미지 요청
-            message: 'Too many image requests, please try again later.'
-        })),
+        images: rateLimit(
+            createRateLimitOptions({
+                windowMs: 5 * 60 * 1000, // 5분
+                max: 500, // 5분당 500회 이미지 요청
+                message: 'Too many image requests, please try again later.'
+            })
+        ),
 
         // 업로드된 파일들 (중간 수준 제한)
-        uploads: rateLimit(createRateLimitOptions({
-            windowMs: 5 * 60 * 1000, // 5분
-            max: 300, // 5분당 300회 업로드 파일 요청
-            message: 'Too many file download requests, please try again later.'
-        }))
+        uploads: rateLimit(
+            createRateLimitOptions({
+                windowMs: 5 * 60 * 1000, // 5분
+                max: 300, // 5분당 300회 업로드 파일 요청
+                message: 'Too many file download requests, please try again later.'
+            })
+        )
     },
 
     // 사용자 도메인
     user: {
-        login: rateLimit(createRateLimitOptions({
-            windowMs: 15 * 60 * 1000,
-            max: 5,
-            message: 'Too many login attempts. Please try again in 15 minutes.',
-            skipSuccessfulRequests: true,
-            attackType: 'bruteForce'
-        })),
+        login: rateLimit(
+            createRateLimitOptions({
+                windowMs: 15 * 60 * 1000,
+                max: 5,
+                message: 'Too many login attempts. Please try again in 15 minutes.',
+                skipSuccessfulRequests: true,
+                attackType: 'bruteForce'
+            })
+        ),
 
-        registration: rateLimit(createRateLimitOptions({
-            windowMs: 60 * 60 * 1000, // 1시간
-            max: 3,
-            message: 'Too many registration attempts. Please try again in 1 hour.',
-            attackType: 'bruteForce'
-        })),
+        registration: rateLimit(
+            createRateLimitOptions({
+                windowMs: 60 * 60 * 1000, // 1시간
+                max: 3,
+                message: 'Too many registration attempts. Please try again in 1 hour.',
+                attackType: 'bruteForce'
+            })
+        ),
 
         passwordReset: passwordResetRateLimit,
 
-        profile: rateLimit(createRateLimitOptions({
-            windowMs: 15 * 60 * 1000,
-            max: 30,
-            message: 'Too many profile requests. Please try again later.'
-        }))
+        profile: rateLimit(
+            createRateLimitOptions({
+                windowMs: 15 * 60 * 1000,
+                max: 30,
+                message: 'Too many profile requests. Please try again later.'
+            })
+        )
     },
 
     // 작품 도메인
     artwork: {
         upload: uploadRateLimit,
 
-        list: rateLimit(createRateLimitOptions({
-            windowMs: 5 * 60 * 1000,
-            max: 100,
-            message: 'Too many artwork list requests. Please try again later.'
-        })),
+        list: rateLimit(
+            createRateLimitOptions({
+                windowMs: 5 * 60 * 1000,
+                max: 100,
+                message: 'Too many artwork list requests. Please try again later.'
+            })
+        ),
 
         search: searchRateLimit,
 
-        modify: rateLimit(createRateLimitOptions({
-            windowMs: 15 * 60 * 1000,
-            max: 20,
-            message: 'Too many artwork modification requests. Please try again later.'
-        }))
+        modify: rateLimit(
+            createRateLimitOptions({
+                windowMs: 15 * 60 * 1000,
+                max: 20,
+                message: 'Too many artwork modification requests. Please try again later.'
+            })
+        )
     },
 
     // 전시회 도메인
     exhibition: {
-        list: rateLimit(createRateLimitOptions({
-            windowMs: 5 * 60 * 1000,
-            max: 50,
-            message: 'Too many exhibition list requests. Please try again later.'
-        })),
+        list: rateLimit(
+            createRateLimitOptions({
+                windowMs: 5 * 60 * 1000,
+                max: 50,
+                message: 'Too many exhibition list requests. Please try again later.'
+            })
+        ),
 
         search: searchRateLimit,
 
-        admin: rateLimit(createRateLimitOptions({
-            windowMs: 15 * 60 * 1000,
-            max: 100,
-            message: 'Too many admin requests. Please try again later.'
-        }))
+        admin: rateLimit(
+            createRateLimitOptions({
+                windowMs: 15 * 60 * 1000,
+                max: 100,
+                message: 'Too many admin requests. Please try again later.'
+            })
+        )
     },
 
     // 관리자 도메인
     admin: {
-        management: rateLimit(createRateLimitOptions({
-            windowMs: 15 * 60 * 1000,
-            max: 200,
-            message: 'Too many admin management requests. Please try again later.'
-        })),
+        management: rateLimit(
+            createRateLimitOptions({
+                windowMs: 15 * 60 * 1000,
+                max: 200,
+                message: 'Too many admin management requests. Please try again later.'
+            })
+        ),
 
-        reports: rateLimit(createRateLimitOptions({
-            windowMs: 5 * 60 * 1000,
-            max: 20,
-            message: 'Too many report requests. Please try again later.'
-        }))
+        reports: rateLimit(
+            createRateLimitOptions({
+                windowMs: 5 * 60 * 1000,
+                max: 20,
+                message: 'Too many report requests. Please try again later.'
+            })
+        )
     }
 };
 

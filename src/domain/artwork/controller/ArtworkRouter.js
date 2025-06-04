@@ -82,12 +82,18 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.post('/api/new', isAuthenticated, DomainSanitization.artwork.create, imageUploadMiddleware('artwork'), async (req, res) => {
-        const result = await artworkApiController.createArtwork(req, res);
-        // 작품 관련 캐시 무효화
-        await cacheMiddleware.invalidatePattern('artwork_*');
-        return result;
-    });
+    ArtworkRouter.post(
+        '/api/new',
+        isAuthenticated,
+        DomainSanitization.artwork.create,
+        imageUploadMiddleware('artwork'),
+        async (req, res) => {
+            const result = await artworkApiController.createArtwork(req, res);
+            // 작품 관련 캐시 무효화
+            await cacheMiddleware.invalidatePattern('artwork_*');
+            return result;
+        }
+    );
 
     /**
      * @swagger
@@ -282,7 +288,12 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.get('/api/list', DomainSanitization.artwork.search, cacheMiddleware.list({ ttl: 600, keyPrefix: 'artwork_list' }), (req, res) => artworkApiController.getArtworkList(req, res));
+    ArtworkRouter.get(
+        '/api/list',
+        DomainSanitization.artwork.search,
+        cacheMiddleware.list({ ttl: 600, keyPrefix: 'artwork_list' }),
+        (req, res) => artworkApiController.getArtworkList(req, res)
+    );
 
     /**
      * @swagger
@@ -308,7 +319,11 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.get('/api/featured', cacheMiddleware.static({ ttl: 1800, keyPrefix: 'artwork_featured' }), (req, res) => artworkApiController.getFeaturedArtworks(req, res));
+    ArtworkRouter.get(
+        '/api/featured',
+        cacheMiddleware.static({ ttl: 1800, keyPrefix: 'artwork_featured' }),
+        (req, res) => artworkApiController.getFeaturedArtworks(req, res)
+    );
 
     /**
      * @swagger
@@ -341,7 +356,11 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.get('/api/detail/:slug', cacheMiddleware.create({ ttl: 900, keyPrefix: 'artwork_detail' }), (req, res) => artworkApiController.getArtworkDetail(req, res));
+    ArtworkRouter.get(
+        '/api/detail/:slug',
+        cacheMiddleware.create({ ttl: 900, keyPrefix: 'artwork_detail' }),
+        (req, res) => artworkApiController.getArtworkDetail(req, res)
+    );
 
     // 전시회 출품 및 취소하기
     /**

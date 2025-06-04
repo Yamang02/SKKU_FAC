@@ -28,7 +28,7 @@
     background-color: #fff;
     border-radius: 8px;
     padding: 1.5rem;
-    border-bottom:  1px solid #eee;
+    border-bottom: 1px solid #eee;
 }
 
 .form-grid {
@@ -114,7 +114,6 @@
     margin-top: 0.25rem;
 }
 
-
 /* 이미지 스타일 */
 .artwork-image {
     max-width: 300px; /* 이미지 최대 너비 */
@@ -170,9 +169,9 @@
     color: #666;
 }
 
-.form-group input:read-only, .form-group select:disabled, .form-group textarea:read-only {
+.form-group input:read-only,
+.form-group select:disabled,
+.form-group textarea:read-only {
     background-color: #f8f9fa;
     cursor: not-allowed;
 }
-
-

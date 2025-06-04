@@ -26,7 +26,7 @@ export const createTestUser = (overrides = {}) => ({
     status: 'ACTIVE',
     createdAt: new Date(),
     updatedAt: new Date(),
-    ...overrides
+    ...overrides,
 });
 
 /**
@@ -37,7 +37,7 @@ export const createTestAdmin = (overrides = {}) =>
         role: 'ADMIN',
         username: `admin${generateId()}`,
         email: `admin${generateId()}@skku.edu`,
-        ...overrides
+        ...overrides,
     });
 
 /**
@@ -55,7 +55,7 @@ export const createTestArtwork = (overrides = {}) => ({
     status: 'ACTIVE',
     createdAt: new Date(),
     updatedAt: new Date(),
-    ...overrides
+    ...overrides,
 });
 
 /**
@@ -73,7 +73,7 @@ export const createTestExhibition = (overrides = {}) => ({
     status: 'ACTIVE',
     createdAt: new Date(),
     updatedAt: new Date(),
-    ...overrides
+    ...overrides,
 });
 
 /**
@@ -82,7 +82,7 @@ export const createTestExhibition = (overrides = {}) => ({
 export const createLoginData = (overrides = {}) => ({
     username: `testuser${generateId()}`,
     password: 'Test123!@#',
-    ...overrides
+    ...overrides,
 });
 
 /**
@@ -97,7 +97,7 @@ export const createSignupData = (overrides = {}) => ({
     role: 'SKKU_MEMBER',
     department: '컴퓨터공학과',
     affiliation: '성균관대학교',
-    ...overrides
+    ...overrides,
 });
 
 /**

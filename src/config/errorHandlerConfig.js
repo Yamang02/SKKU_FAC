@@ -50,8 +50,14 @@ export const loggingConfig = {
     enableMetrics: true,
     enableRequestId: true,
     excludeFields: [
-        'password', 'token', 'authorization', 'cookie',
-        'x-auth-token', 'x-api-key', 'access_token', 'refresh_token'
+        'password',
+        'token',
+        'authorization',
+        'cookie',
+        'x-auth-token',
+        'x-api-key',
+        'access_token',
+        'refresh_token'
     ],
     maxBodySize: 2048, // bytes
     customFields: {
@@ -143,26 +149,26 @@ export const transformRules = {
     // 메시지 변환 (정규식 패턴 -> 대체값)
     messageTransforms: {
         // 데이터베이스 관련 에러
-        'SequelizeConnectionError': '데이터베이스 연결에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
-        'SequelizeValidationError': '입력하신 정보에 오류가 있습니다. 다시 확인해주세요.',
-        'SequelizeUniqueConstraintError': '이미 존재하는 정보입니다.',
+        SequelizeConnectionError: '데이터베이스 연결에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+        SequelizeValidationError: '입력하신 정보에 오류가 있습니다. 다시 확인해주세요.',
+        SequelizeUniqueConstraintError: '이미 존재하는 정보입니다.',
 
         // Cloudinary 관련 에러
-        'CloudinaryError': '이미지 처리 중 문제가 발생했습니다.',
+        CloudinaryError: '이미지 처리 중 문제가 발생했습니다.',
 
         // 일반적인 에러 패턴
-        'ECONNREFUSED': '외부 서비스 연결에 실패했습니다.',
-        'ENOTFOUND': '요청하신 리소스를 찾을 수 없습니다.',
-        'TIMEOUT': '요청 처리 시간이 초과되었습니다.',
+        ECONNREFUSED: '외부 서비스 연결에 실패했습니다.',
+        ENOTFOUND: '요청하신 리소스를 찾을 수 없습니다.',
+        TIMEOUT: '요청 처리 시간이 초과되었습니다.',
 
         // 함수형 변환 예시
-        'Invalid.*token': (_message) => '인증이 만료되었습니다. 다시 로그인해주세요.'
+        'Invalid.*token': _message => '인증이 만료되었습니다. 다시 로그인해주세요.'
     },
 
     // 에러 코드 변환
     codeTransforms: {
-        'INTERNAL_ERROR': 'SERVICE_TEMPORARILY_UNAVAILABLE',
-        'DB_CONNECTION_ERROR': 'SERVICE_TEMPORARILY_UNAVAILABLE'
+        INTERNAL_ERROR: 'SERVICE_TEMPORARILY_UNAVAILABLE',
+        DB_CONNECTION_ERROR: 'SERVICE_TEMPORARILY_UNAVAILABLE'
     }
 };
 
@@ -174,7 +180,7 @@ export const customHandlers = {
     // 에러 타입별 핸들러
     byType: {
         // 인증 에러 특별 처리
-        'UnauthorizedError': (err, req, res, _next) => {
+        UnauthorizedError: (err, req, res, _next) => {
             logger.warn('인증 실패 시도', {
                 ip: req.ip,
                 userAgent: req.get('User-Agent'),
@@ -200,7 +206,7 @@ export const customHandlers = {
         },
 
         // 이미지 업로드 에러
-        'ImageUploadError': (err, req, res, _next) => {
+        ImageUploadError: (err, req, res, _next) => {
             logger.error('이미지 업로드 실패', {
                 error: err.message,
                 fileSize: req.file?.size,
@@ -249,7 +255,7 @@ export const customHandlers = {
 
     // 에러 코드별 핸들러
     byCode: {
-        'FILE_TOO_LARGE': (err, req, res, _next) => {
+        FILE_TOO_LARGE: (err, req, res, _next) => {
             return res.status(413).json({
                 success: false,
                 error: {

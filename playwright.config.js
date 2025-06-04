@@ -12,15 +12,15 @@ const config = {
         baseURL: 'http://localhost:3000',
         mysql: {
             host: 'localhost',
-            port: 3307,  // 테스트용 MySQL 포트
+            port: 3307, // 테스트용 MySQL 포트
             user: 'root',
             password: 'testpassword',
-            database: 'skku_sfa_gallery_test'
+            database: 'skku_sfa_gallery_test',
         },
         redis: {
-            url: 'redis://localhost:6380'  // 테스트용 Redis 포트
-        }
-    }
+            url: 'redis://localhost:6380', // 테스트용 Redis 포트
+        },
+    },
 };
 
 export default defineConfig({
@@ -40,7 +40,7 @@ export default defineConfig({
     reporter: [
         ['html', { outputFolder: 'playwright-report' }],
         ['json', { outputFile: 'test-results/results.json' }],
-        ['list']
+        ['list'],
     ],
 
     // 전역 설정
@@ -59,13 +59,13 @@ export default defineConfig({
 
         // API 테스트 설정
         extraHTTPHeaders: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
         },
 
         // 타임아웃 설정
         actionTimeout: 30000,
-        navigationTimeout: 30000
+        navigationTimeout: 30000,
     },
 
     // 프로젝트별 설정
@@ -76,8 +76,8 @@ export default defineConfig({
             use: {
                 ...devices['Desktop Chrome'],
                 // API 테스트는 헤드리스 모드
-                headless: true
-            }
+                headless: true,
+            },
         },
         {
             name: 'e2e-tests',
@@ -85,10 +85,10 @@ export default defineConfig({
             use: {
                 ...devices['Desktop Chrome'],
                 // E2E 테스트는 브라우저 필요
-                headless: process.env.CI ? true : false
+                headless: process.env.CI ? true : false,
             },
-            dependencies: ['api-tests'] // API 테스트 후 E2E 실행
-        }
+            dependencies: ['api-tests'], // API 테스트 후 E2E 실행
+        },
     ],
 
     // 전역 설정 (webServer 제거 - 수동으로 서버 실행)
@@ -98,7 +98,7 @@ export default defineConfig({
     // 테스트 타임아웃
     timeout: 60000, // 60초
     expect: {
-        timeout: 10000 // expect 타임아웃 10초
+        timeout: 10000, // expect 타임아웃 10초
     },
 
     // 출력 디렉토리
@@ -106,8 +106,8 @@ export default defineConfig({
 
     // 환경 변수 전달
     metadata: {
-        testEnvironment: config.testEnvironment
-    }
+        testEnvironment: config.testEnvironment,
+    },
 });
 
 // 환경별 설정 내보내기

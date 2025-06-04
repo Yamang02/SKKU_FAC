@@ -477,7 +477,10 @@ export default class ExhibitionController {
             const { id } = req.params;
             const exhibition = await this.exhibitionService.getExhibitionById(id);
 
-            const updatedExhibition = await this.exhibitionService.updateSubmissionStatus(id, !exhibition.isSubmissionOpen);
+            const updatedExhibition = await this.exhibitionService.updateSubmissionStatus(
+                id,
+                !exhibition.isSubmissionOpen
+            );
 
             res.json({
                 success: true,

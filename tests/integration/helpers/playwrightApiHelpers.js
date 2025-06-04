@@ -33,7 +33,7 @@ class PlaywrightApiHelpers {
     async get(url, options = {}) {
         return await this.request.get(`${this.baseURL}${url}`, {
             ...options,
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
     }
 
@@ -44,7 +44,7 @@ class PlaywrightApiHelpers {
         return await this.request.post(`${this.baseURL}${url}`, {
             data,
             ...options,
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
     }
 
@@ -55,7 +55,7 @@ class PlaywrightApiHelpers {
         return await this.request.put(`${this.baseURL}${url}`, {
             data,
             ...options,
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
     }
 
@@ -65,7 +65,7 @@ class PlaywrightApiHelpers {
     async delete(url, options = {}) {
         return await this.request.delete(`${this.baseURL}${url}`, {
             ...options,
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
     }
 
@@ -75,7 +75,7 @@ class PlaywrightApiHelpers {
     async authenticateUser(username, password) {
         const response = await this.post('/user/login', {
             username,
-            password
+            password,
         });
 
         // 세션 쿠키 저장
@@ -104,7 +104,7 @@ class PlaywrightApiHelpers {
     async loginAsTestUser(email = 'test@skku.edu', password = 'testpassword') {
         const response = await this.request.post(`${this.baseURL}/auth/login`, {
             data: { email, password },
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
 
         // 세션 쿠키 저장
@@ -127,7 +127,7 @@ class PlaywrightApiHelpers {
     async loginAsAdmin(email = 'admin@skku.edu', password = 'adminpassword') {
         const response = await this.request.post(`${this.baseURL}/auth/login`, {
             data: { email, password },
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
 
         const cookies = response.headers()['set-cookie'];
@@ -153,7 +153,7 @@ class PlaywrightApiHelpers {
 
         const response = await this.request.post(`${this.baseURL}/auth/logout`, {
             headers,
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
 
         this.authCookies = null;
@@ -173,7 +173,7 @@ class PlaywrightApiHelpers {
         return await this.request.get(`${this.baseURL}${url}`, {
             ...options,
             headers,
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
     }
 
@@ -189,7 +189,7 @@ class PlaywrightApiHelpers {
         return await this.request.post(`${this.baseURL}${url}`, {
             ...options,
             headers,
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
     }
 
@@ -205,7 +205,7 @@ class PlaywrightApiHelpers {
         return await this.request.put(`${this.baseURL}${url}`, {
             ...options,
             headers,
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
     }
 
@@ -221,7 +221,7 @@ class PlaywrightApiHelpers {
         return await this.request.delete(`${this.baseURL}${url}`, {
             ...options,
             headers,
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
     }
 
@@ -230,7 +230,7 @@ class PlaywrightApiHelpers {
      */
     async checkHealth() {
         const response = await this.request.get(`${this.baseURL}/health`, {
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
         expect(response.status()).toBe(200);
         return response;
@@ -246,14 +246,14 @@ class PlaywrightApiHelpers {
             password: 'testpassword',
             confirmPassword: 'testpassword',
             major: 'Fine Art',
-            studentId: '2024000001'
+            studentId: '2024000001',
         };
 
         const userToCreate = { ...defaultUser, ...userData };
 
         return await this.request.post(`${this.baseURL}/auth/signup`, {
             data: userToCreate,
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
     }
 
@@ -266,13 +266,13 @@ class PlaywrightApiHelpers {
             description: 'Test artwork description',
             medium: 'Oil on Canvas',
             year: new Date().getFullYear(),
-            dimensions: '100x80cm'
+            dimensions: '100x80cm',
         };
 
         const artworkToCreate = { ...defaultArtwork, ...artworkData };
 
         return await this.authenticatedPost('/api/artworks', {
-            data: artworkToCreate
+            data: artworkToCreate,
         });
     }
 
@@ -286,13 +286,13 @@ class PlaywrightApiHelpers {
             startDate: new Date().toISOString(),
             endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
             location: 'Test Gallery',
-            isActive: true
+            isActive: true,
         };
 
         const exhibitionToCreate = { ...defaultExhibition, ...exhibitionData };
 
         return await this.authenticatedPost('/api/exhibitions', {
-            data: exhibitionToCreate
+            data: exhibitionToCreate,
         });
     }
 
@@ -352,11 +352,11 @@ class PlaywrightApiHelpers {
                 [fieldName]: {
                     name: 'test-image.jpg',
                     mimeType: 'image/jpeg',
-                    buffer: require('fs').readFileSync(fileToUpload)
-                }
+                    buffer: require('fs').readFileSync(fileToUpload),
+                },
             },
             headers,
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
     }
 
@@ -404,7 +404,7 @@ class PlaywrightApiHelpers {
 
         const response = await this.request.fetch(`${this.baseURL}${endpoint}`, {
             method: method.toUpperCase(),
-            failOnStatusCode: false
+            failOnStatusCode: false,
         });
 
         // 인증이 필요한 페이지는 로그인 페이지로 리다이렉트되거나 401 상태 반환

@@ -12,112 +12,117 @@ const cacheMiddleware = new CacheMiddleware();
 // API 라우트
 
 /**
-     * @swagger
-     * /exhibition/api/list:
-     *   get:
-     *     summary: 전시회 목록 조회
-     *     parameters:
-     *       - in: query
-     *         name: page
-     *         required: false
-     *         description: 페이지 번호
-     *         schema:
-     *           type: integer
-     *       - in: query
-     *         name: limit
-     *         required: false
-     *         description: 페이지당 전시회 수
-     *         schema:
-     *           type: integer
-     *       - in: query
-     *         name: type
-     *         required: false
-     *         description: 전시회 유형
-     *         schema:
-     *           type: string
-     *       - in: query
-     *         name: year
-     *         required: false
-     *         description: 전시회 연도
-     *         schema:
-     *           type: string
-     *       - in: query
-     *         name: category
-     *         required: false
-     *         description: 전시회 카테고리
-     *         schema:
-     *           type: string
-     *       - in: query
-     *         name: submission
-     *         required: false
-     *         description: 출품 상태
-     *         schema:
-     *           type: string
-     *       - in: query
-     *         name: sort
-     *         required: false
-     *         description: 정렬 기준
-     *         schema:
-     *           type: string
-     *       - in: query
-     *         name: search
-     *         required: false
-     *         description: 검색어
-     *         schema:
-     *           type: string
-     *       - in: query
-     *         name: searchType
-     *         required: false
-     *         description: 검색 유형
-     *         schema:
-     *           type: string
-     *       - in: query
-     *         name: status
-     *         required: false
-     *         description: 전시회 상태 (planning, submission_open, review, active, completed)
-     *         schema:
-     *           type: string
-     *     responses:
-     *       200:
-    *         description: 전시회 목록 조회 성공
-    *         content:
-        *           application/json:
-        *             schema:
-        *               type: object
-        *               properties:
-        *                 success:
-        *                   type: boolean
-        *                 data:
-        *                   type: object
-        *                   properties:
-        *                     exhibitions:
-        *                       type: array
-        *                       items:
-        *                         type: object
-        *                         properties:
-        *                           ExhibitionListDto
-        *                     page:
-        *                       type: object
-        *                       properties:
-        *                         currentPage:
-        *                           type: integer
-        *                           description: 현재 페이지 번호
-        *                         totalPages:
-        *                           type: integer
-        *                           description: 총 페이지 수
-        *                         totalItems:
-        *                           type: integer
-        *                           description: 총 전시회 수
-        *                         limit:
-        *                           type: integer
-        *                           description: 페이지당 전시회 수
-        *                     total:
-        *                       type: integer
-        *                       description: 전시회 총 개수
-        *       500:
-        *         description: 서버 오류
-        */
-ExhibitionRouter.get('/api/list', DomainSanitization.exhibition.search, cacheMiddleware.list({ ttl: 600, keyPrefix: 'exhibition_list' }), (req, res) => exhibitionApiController.getExhibitionList(req, res));
+ * @swagger
+ * /exhibition/api/list:
+ *   get:
+ *     summary: 전시회 목록 조회
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         description: 페이지 번호
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         description: 페이지당 전시회 수
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: type
+ *         required: false
+ *         description: 전시회 유형
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: year
+ *         required: false
+ *         description: 전시회 연도
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: category
+ *         required: false
+ *         description: 전시회 카테고리
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: submission
+ *         required: false
+ *         description: 출품 상태
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: sort
+ *         required: false
+ *         description: 정렬 기준
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: search
+ *         required: false
+ *         description: 검색어
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: searchType
+ *         required: false
+ *         description: 검색 유형
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         required: false
+ *         description: 전시회 상태 (planning, submission_open, review, active, completed)
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 전시회 목록 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     exhibitions:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           ExhibitionListDto
+ *                     page:
+ *                       type: object
+ *                       properties:
+ *                         currentPage:
+ *                           type: integer
+ *                           description: 현재 페이지 번호
+ *                         totalPages:
+ *                           type: integer
+ *                           description: 총 페이지 수
+ *                         totalItems:
+ *                           type: integer
+ *                           description: 총 전시회 수
+ *                         limit:
+ *                           type: integer
+ *                           description: 페이지당 전시회 수
+ *                     total:
+ *                       type: integer
+ *                       description: 전시회 총 개수
+ *       500:
+ *         description: 서버 오류
+ */
+ExhibitionRouter.get(
+    '/api/list',
+    DomainSanitization.exhibition.search,
+    cacheMiddleware.list({ ttl: 600, keyPrefix: 'exhibition_list' }),
+    (req, res) => exhibitionApiController.getExhibitionList(req, res)
+);
 
 /**
  * @swagger
@@ -151,7 +156,11 @@ ExhibitionRouter.get('/api/list', DomainSanitization.exhibition.search, cacheMid
  *       500:
  *         description: 서버 오류
  */
-ExhibitionRouter.get('/api/status/:status', cacheMiddleware.dynamic({ ttl: 300, keyPrefix: 'exhibition_status' }), (req, res) => exhibitionController.getExhibitionsByStatus(req, res));
+ExhibitionRouter.get(
+    '/api/status/:status',
+    cacheMiddleware.dynamic({ ttl: 300, keyPrefix: 'exhibition_status' }),
+    (req, res) => exhibitionController.getExhibitionsByStatus(req, res)
+);
 
 /**
  * @swagger
@@ -177,7 +186,11 @@ ExhibitionRouter.get('/api/status/:status', cacheMiddleware.dynamic({ ttl: 300, 
  *       500:
  *         description: 서버 오류
  */
-ExhibitionRouter.get('/api/submittable', cacheMiddleware.static({ ttl: 900, keyPrefix: 'exhibition_submittable' }), (req, res) => exhibitionApiController.findSubmittableExhibitions(req, res));
+ExhibitionRouter.get(
+    '/api/submittable',
+    cacheMiddleware.static({ ttl: 900, keyPrefix: 'exhibition_submittable' }),
+    (req, res) => exhibitionApiController.findSubmittableExhibitions(req, res)
+);
 
 /**
  * @swagger
@@ -210,7 +223,11 @@ ExhibitionRouter.get('/api/submittable', cacheMiddleware.static({ ttl: 900, keyP
  *       500:
  *         description: 서버 오류
  */
-ExhibitionRouter.get('/api/featured', cacheMiddleware.static({ ttl: 1800, keyPrefix: 'exhibition_featured' }), (req, res) => exhibitionApiController.getFeaturedExhibitions(req, res));
+ExhibitionRouter.get(
+    '/api/featured',
+    cacheMiddleware.static({ ttl: 1800, keyPrefix: 'exhibition_featured' }),
+    (req, res) => exhibitionApiController.getFeaturedExhibitions(req, res)
+);
 
 // 관리자용 전시회 관리 API 라우트
 /**
@@ -236,7 +253,11 @@ ExhibitionRouter.get('/api/featured', cacheMiddleware.static({ ttl: 1800, keyPre
  *       200:
  *         description: 전시회 목록 조회 성공
  */
-ExhibitionRouter.get('/api/admin/list', cacheMiddleware.dynamic({ ttl: 180, keyPrefix: 'exhibition_admin_list' }), (req, res) => exhibitionController.getExhibitions(req, res));
+ExhibitionRouter.get(
+    '/api/admin/list',
+    cacheMiddleware.dynamic({ ttl: 180, keyPrefix: 'exhibition_admin_list' }),
+    (req, res) => exhibitionController.getExhibitions(req, res)
+);
 
 /**
  * @swagger
@@ -255,7 +276,11 @@ ExhibitionRouter.get('/api/admin/list', cacheMiddleware.dynamic({ ttl: 180, keyP
  *       404:
  *         description: 전시회를 찾을 수 없음
  */
-ExhibitionRouter.get('/api/admin/:id', cacheMiddleware.create({ ttl: 900, keyPrefix: 'exhibition_detail' }), (req, res) => exhibitionController.getExhibition(req, res));
+ExhibitionRouter.get(
+    '/api/admin/:id',
+    cacheMiddleware.create({ ttl: 900, keyPrefix: 'exhibition_detail' }),
+    (req, res) => exhibitionController.getExhibition(req, res)
+);
 
 /**
  * @swagger
@@ -274,7 +299,11 @@ ExhibitionRouter.get('/api/admin/:id', cacheMiddleware.create({ ttl: 900, keyPre
  *       404:
  *         description: 전시회를 찾을 수 없음
  */
-ExhibitionRouter.get('/api/admin/:id/status', cacheMiddleware.create({ ttl: 600, keyPrefix: 'exhibition_status' }), (req, res) => exhibitionController.getExhibitionWithStatus(req, res));
+ExhibitionRouter.get(
+    '/api/admin/:id/status',
+    cacheMiddleware.create({ ttl: 600, keyPrefix: 'exhibition_status' }),
+    (req, res) => exhibitionController.getExhibitionWithStatus(req, res)
+);
 
 /**
  * @swagger
@@ -556,7 +585,9 @@ ExhibitionRouter.post('/api/admin/:id/toggle-featured', (req, res) => exhibition
  *       200:
  *         description: 작품 제출 상태 변경 성공
  */
-ExhibitionRouter.post('/api/admin/:id/toggle-submission', (req, res) => exhibitionController.toggleSubmissionOpen(req, res));
+ExhibitionRouter.post('/api/admin/:id/toggle-submission', (req, res) =>
+    exhibitionController.toggleSubmissionOpen(req, res)
+);
 
 /**
  * @swagger

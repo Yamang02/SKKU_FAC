@@ -75,14 +75,14 @@ const getConnectionPoolStats = () => {
 
         return {
             available: true,
-            size: pool.size || 0,                    // 현재 연결 수
-            availableConnections: pool.available || 0,          // 사용 가능한 연결 수
-            using: pool.using || 0,                  // 사용 중인 연결 수
-            waiting: pool.waiting || 0,              // 대기 중인 요청 수
-            max: dbConfig.pool.max,                  // 최대 연결 수
-            min: dbConfig.pool.min,                  // 최소 연결 수
-            acquireTimeout: dbConfig.pool.acquire,   // 연결 획득 타임아웃
-            idleTimeout: dbConfig.pool.idle,         // 유휴 타임아웃
+            size: pool.size || 0, // 현재 연결 수
+            availableConnections: pool.available || 0, // 사용 가능한 연결 수
+            using: pool.using || 0, // 사용 중인 연결 수
+            waiting: pool.waiting || 0, // 대기 중인 요청 수
+            max: dbConfig.pool.max, // 최대 연결 수
+            min: dbConfig.pool.min, // 최소 연결 수
+            acquireTimeout: dbConfig.pool.acquire, // 연결 획득 타임아웃
+            idleTimeout: dbConfig.pool.idle, // 유휴 타임아웃
             environment: environment
         };
     } catch (error) {
@@ -145,9 +145,12 @@ testConnection();
 
 // 개발 환경에서는 주기적으로 연결 풀 상태 로깅 (5분마다)
 if (environment === 'development') {
-    setInterval(() => {
-        logConnectionPoolStats();
-    }, 5 * 60 * 1000); // 5분
+    setInterval(
+        () => {
+            logConnectionPoolStats();
+        },
+        5 * 60 * 1000
+    ); // 5분
 }
 
 // sequelize 인스턴스 내보내기

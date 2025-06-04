@@ -23,16 +23,16 @@ export default defineConfig({
         /* 실패 시 비디오 비활성화 */
         video: 'off',
         /* trace 비활성화 */
-        trace: 'off'
+        trace: 'off',
     },
 
     /* Chrome만 사용 */
     projects: [
         {
             name: 'chromium',
-            use: { ...devices['Desktop Chrome'] }
-        }
-    ]
+            use: { ...devices['Desktop Chrome'] },
+        },
+    ],
 
     /* 웹서버 설정 없음 - 단위 테스트는 서버가 필요하지 않음 */
 });

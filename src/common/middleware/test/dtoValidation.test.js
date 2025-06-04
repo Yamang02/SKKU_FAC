@@ -7,7 +7,7 @@ import { ApiResponse } from '../../../domain/common/model/ApiResponse.js';
 jest.mock('../../utils/Logger.js', () => ({
     warn: jest.fn(),
     debug: jest.fn(),
-    error: jest.fn()
+    error: jest.fn(),
 }));
 
 describe('DTO Validation Middleware', () => {
@@ -21,11 +21,11 @@ describe('DTO Validation Middleware', () => {
             originalUrl: '/test',
             method: 'POST',
             get: jest.fn().mockReturnValue('test-agent'),
-            ip: '127.0.0.1'
+            ip: '127.0.0.1',
         };
         res = {
             status: jest.fn().mockReturnThis(),
-            json: jest.fn().mockReturnThis()
+            json: jest.fn().mockReturnThis(),
         };
         next = jest.fn();
     });
@@ -35,15 +35,14 @@ describe('DTO Validation Middleware', () => {
             // Arrange
             const validData = {
                 username: 'testuser',
-                password: 'password123'
+                password: 'password123',
             };
             req.body = validData;
 
-            const middleware = validateWithDto(
-                UserRequestDto,
-                UserRequestDto.loginSchema,
-                { source: 'body', dtoProperty: 'userDto' }
-            );
+            const middleware = validateWithDto(UserRequestDto, UserRequestDto.loginSchema, {
+                source: 'body',
+                dtoProperty: 'userDto',
+            });
 
             // Act
             await middleware(req, res, next);
@@ -61,15 +60,14 @@ describe('DTO Validation Middleware', () => {
             // Arrange
             const invalidData = {
                 username: '', // 빈 사용자명
-                password: ''  // 빈 비밀번호
+                password: '', // 빈 비밀번호
             };
             req.body = invalidData;
 
-            const middleware = validateWithDto(
-                UserRequestDto,
-                UserRequestDto.loginSchema,
-                { source: 'body', dtoProperty: 'userDto' }
-            );
+            const middleware = validateWithDto(UserRequestDto, UserRequestDto.loginSchema, {
+                source: 'body',
+                dtoProperty: 'userDto',
+            });
 
             // Act
             await middleware(req, res, next);
@@ -80,7 +78,7 @@ describe('DTO Validation Middleware', () => {
             expect(res.json).toHaveBeenCalledWith(
                 expect.objectContaining({
                     success: false,
-                    message: expect.stringContaining('사용자명')
+                    message: expect.stringContaining('사용자명'),
                 })
             );
         });
@@ -88,15 +86,14 @@ describe('DTO Validation Middleware', () => {
         it('should validate query parameters when source is query', async () => {
             // Arrange
             const validQuery = {
-                email: 'test@example.com'
+                email: 'test@example.com',
             };
             req.query = validQuery;
 
-            const middleware = validateWithDto(
-                UserRequestDto,
-                UserRequestDto.emailSchema,
-                { source: 'query', dtoProperty: 'emailDto' }
-            );
+            const middleware = validateWithDto(UserRequestDto, UserRequestDto.emailSchema, {
+                source: 'query',
+                dtoProperty: 'emailDto',
+            });
 
             // Act
             await middleware(req, res, next);
@@ -114,11 +111,7 @@ describe('DTO Validation Middleware', () => {
             };
             req.body = { test: 'data' };
 
-            const middleware = validateWithDto(
-                UserRequestDto,
-                invalidSchema,
-                { source: 'body' }
-            );
+            const middleware = validateWithDto(UserRequestDto, invalidSchema, { source: 'body' });
 
             // Act
             await middleware(req, res, next);
@@ -129,7 +122,7 @@ describe('DTO Validation Middleware', () => {
             expect(res.json).toHaveBeenCalledWith(
                 expect.objectContaining({
                     success: false,
-                    message: '서버 내부 오류가 발생했습니다'
+                    message: '서버 내부 오류가 발생했습니다',
                 })
             );
         });
@@ -140,7 +133,7 @@ describe('DTO Validation Middleware', () => {
             // Arrange
             const validData = {
                 username: 'testuser',
-                password: 'password123'
+                password: 'password123',
             };
             req.body = validData;
 
@@ -149,8 +142,8 @@ describe('DTO Validation Middleware', () => {
                     DtoClass: UserRequestDto,
                     schemaMethod: UserRequestDto.loginSchema,
                     source: 'body',
-                    dtoProperty: 'userDto'
-                }
+                    dtoProperty: 'userDto',
+                },
             ];
 
             const middleware = validateMultiple(rules);
@@ -167,7 +160,7 @@ describe('DTO Validation Middleware', () => {
             // Arrange
             const invalidData = {
                 username: '', // 빈 사용자명
-                password: ''  // 빈 비밀번호
+                password: '', // 빈 비밀번호
             };
             req.body = invalidData;
 
@@ -176,8 +169,8 @@ describe('DTO Validation Middleware', () => {
                     DtoClass: UserRequestDto,
                     schemaMethod: UserRequestDto.loginSchema,
                     source: 'body',
-                    dtoProperty: 'userDto'
-                }
+                    dtoProperty: 'userDto',
+                },
             ];
 
             const middleware = validateMultiple(rules);
@@ -200,8 +193,8 @@ describe('DTO Validation Middleware', () => {
                     DtoClass: UserRequestDto,
                     schemaMethod: UserRequestDto.loginSchema,
                     source: 'body',
-                    condition: (req) => req.user && req.user.role === 'ADMIN'
-                }
+                    condition: req => req.user && req.user.role === 'ADMIN',
+                },
             ];
 
             const middleware = validateMultiple(rules);
@@ -220,20 +213,16 @@ describe('DTO Validation Middleware', () => {
             // Arrange
             req.body = {
                 username: 'testuser',
-                password: 'password123'
+                password: 'password123',
             };
             req.user = { id: 1 }; // 인증된 사용자
 
-            const baseMiddleware = validateWithDto(
-                UserRequestDto,
-                UserRequestDto.loginSchema,
-                { source: 'body', dtoProperty: 'userDto' }
-            );
+            const baseMiddleware = validateWithDto(UserRequestDto, UserRequestDto.loginSchema, {
+                source: 'body',
+                dtoProperty: 'userDto',
+            });
 
-            const middleware = validateIf(
-                (req) => req.user && req.user.id,
-                baseMiddleware
-            );
+            const middleware = validateIf(req => req.user && req.user.id, baseMiddleware);
 
             // Act
             await middleware(req, res, next);
@@ -248,16 +237,12 @@ describe('DTO Validation Middleware', () => {
             req.body = { test: 'data' };
             // req.user는 undefined (인증되지 않은 사용자)
 
-            const baseMiddleware = validateWithDto(
-                UserRequestDto,
-                UserRequestDto.loginSchema,
-                { source: 'body', dtoProperty: 'userDto' }
-            );
+            const baseMiddleware = validateWithDto(UserRequestDto, UserRequestDto.loginSchema, {
+                source: 'body',
+                dtoProperty: 'userDto',
+            });
 
-            const middleware = validateIf(
-                (req) => req.user && req.user.id,
-                baseMiddleware
-            );
+            const middleware = validateIf(req => req.user && req.user.id, baseMiddleware);
 
             // Act
             await middleware(req, res, next);
@@ -298,11 +283,9 @@ describe('DTO Validation Middleware', () => {
                 }
             }
 
-            const middleware = validateWithDto(
-                ErrorDto,
-                () => ({ validate: () => ({ error: null, value: {} }) }),
-                { source: 'body' }
-            );
+            const middleware = validateWithDto(ErrorDto, () => ({ validate: () => ({ error: null, value: {} }) }), {
+                source: 'body',
+            });
 
             // Act
             await middleware(req, res, next);
@@ -318,15 +301,11 @@ describe('DTO Validation Middleware', () => {
             // Arrange
             const invalidData = {
                 username: '', // 빈 사용자명
-                password: ''  // 빈 비밀번호
+                password: '', // 빈 비밀번호
             };
             req.body = invalidData;
 
-            const middleware = validateWithDto(
-                UserRequestDto,
-                UserRequestDto.loginSchema,
-                { source: 'body' }
-            );
+            const middleware = validateWithDto(UserRequestDto, UserRequestDto.loginSchema, { source: 'body' });
 
             // Act
             await middleware(req, res, next);
@@ -337,7 +316,7 @@ describe('DTO Validation Middleware', () => {
                     success: false,
                     message: expect.any(String),
                     data: null,
-                    timestamp: expect.any(String)
+                    timestamp: expect.any(String),
                 })
             );
         });

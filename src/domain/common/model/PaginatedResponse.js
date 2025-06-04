@@ -18,12 +18,7 @@ export default class PaginatedResponse {
      * @returns {ResponseBuilder} ResponseBuilder 인스턴스
      */
     static create(items, totalItems, options = {}) {
-        const {
-            page = 1,
-            limit = 10,
-            message = null,
-            metadata = {}
-        } = options;
+        const { page = 1, limit = 10, message = null, metadata = {} } = options;
 
         // Page 객체 생성
         const pageInfo = new Page(totalItems, { page, limit });
@@ -45,15 +40,17 @@ export default class PaginatedResponse {
         };
 
         // ResponseBuilder를 사용하여 응답 생성
-        return ResponseBuilder.success({
-            items: items || [],
-            pagination: paginationMetadata
-        }, message)
-            .setMetadata({
-                responseType: 'paginated',
-                generatedAt: new Date().toISOString(),
-                ...metadata
-            });
+        return ResponseBuilder.success(
+            {
+                items: items || [],
+                pagination: paginationMetadata
+            },
+            message
+        ).setMetadata({
+            responseType: 'paginated',
+            generatedAt: new Date().toISOString(),
+            ...metadata
+        });
     }
 
     /**
@@ -68,10 +65,7 @@ export default class PaginatedResponse {
      * @returns {ResponseBuilder} ResponseBuilder 인스턴스
      */
     static createCursorBased(items, cursor, options = {}) {
-        const {
-            message = null,
-            metadata = {}
-        } = options;
+        const { message = null, metadata = {} } = options;
 
         const cursorMetadata = {
             next: cursor.next || null,
@@ -81,15 +75,17 @@ export default class PaginatedResponse {
             count: items ? items.length : 0
         };
 
-        return ResponseBuilder.success({
-            items: items || [],
-            cursor: cursorMetadata
-        }, message)
-            .setMetadata({
-                responseType: 'cursor-paginated',
-                generatedAt: new Date().toISOString(),
-                ...metadata
-            });
+        return ResponseBuilder.success(
+            {
+                items: items || [],
+                cursor: cursorMetadata
+            },
+            message
+        ).setMetadata({
+            responseType: 'cursor-paginated',
+            generatedAt: new Date().toISOString(),
+            ...metadata
+        });
     }
 
     /**
@@ -103,10 +99,7 @@ export default class PaginatedResponse {
      * @returns {ResponseBuilder} ResponseBuilder 인스턴스
      */
     static createInfiniteScroll(items, scrollInfo, options = {}) {
-        const {
-            message = null,
-            metadata = {}
-        } = options;
+        const { message = null, metadata = {} } = options;
 
         const scrollMetadata = {
             hasMore: scrollInfo.hasMore || false,
@@ -116,15 +109,17 @@ export default class PaginatedResponse {
             loadedAt: new Date().toISOString()
         };
 
-        return ResponseBuilder.success({
-            items: items || [],
-            scroll: scrollMetadata
-        }, message)
-            .setMetadata({
-                responseType: 'infinite-scroll',
-                generatedAt: new Date().toISOString(),
-                ...metadata
-            });
+        return ResponseBuilder.success(
+            {
+                items: items || [],
+                scroll: scrollMetadata
+            },
+            message
+        ).setMetadata({
+            responseType: 'infinite-scroll',
+            generatedAt: new Date().toISOString(),
+            ...metadata
+        });
     }
 
     /**
@@ -135,12 +130,7 @@ export default class PaginatedResponse {
      * @returns {ResponseBuilder} ResponseBuilder 인스턴스
      */
     static createEmpty(options = {}) {
-        const {
-            page = 1,
-            limit = 10,
-            message = 'No items found',
-            metadata = {}
-        } = options;
+        const { page = 1, limit = 10, message = 'No items found', metadata = {} } = options;
 
         return this.create([], 0, { page, limit, message, metadata });
     }
@@ -157,11 +147,7 @@ export default class PaginatedResponse {
      * @returns {ResponseBuilder} ResponseBuilder 인스턴스
      */
     static createSearchResult(items, totalItems, searchInfo, paginationOptions = {}) {
-        const {
-            page = 1,
-            limit = 10,
-            message = null
-        } = paginationOptions;
+        const { page = 1, limit = 10, message = null } = paginationOptions;
 
         const searchMetadata = {
             query: searchInfo.query || '',
@@ -170,11 +156,10 @@ export default class PaginatedResponse {
             searchedAt: new Date().toISOString()
         };
 
-        return this.create(items, totalItems, { page, limit, message })
-            .setMetadata({
-                responseType: 'search-result',
-                search: searchMetadata
-            });
+        return this.create(items, totalItems, { page, limit, message }).setMetadata({
+            responseType: 'search-result',
+            search: searchMetadata
+        });
     }
 
     /**
@@ -188,10 +173,7 @@ export default class PaginatedResponse {
      * @returns {object} 검증된 파라미터
      */
     static validatePaginationParams(params, options = {}) {
-        const {
-            maxLimit = 100,
-            defaultLimit = 10
-        } = options;
+        const { maxLimit = 100, defaultLimit = 10 } = options;
 
         let { page, limit } = params;
 

@@ -15,13 +15,10 @@ export default class AuthRequestDto extends BaseDto {
      */
     static passwordResetRequestSchema() {
         return Joi.object({
-            email: Joi.string()
-                .email()
-                .required()
-                .messages({
-                    'string.email': '올바른 이메일 형식을 입력해주세요.',
-                    'any.required': '이메일은 필수 입력 항목입니다.'
-                })
+            email: Joi.string().email().required().messages({
+                'string.email': '올바른 이메일 형식을 입력해주세요.',
+                'any.required': '이메일은 필수 입력 항목입니다.'
+            })
         });
     }
 
@@ -30,11 +27,9 @@ export default class AuthRequestDto extends BaseDto {
      */
     static passwordResetSchema() {
         return Joi.object({
-            token: Joi.string()
-                .required()
-                .messages({
-                    'any.required': '재설정 토큰이 필요합니다.'
-                }),
+            token: Joi.string().required().messages({
+                'any.required': '재설정 토큰이 필요합니다.'
+            }),
             newPassword: Joi.string()
                 .min(8)
                 .max(128)
@@ -54,18 +49,13 @@ export default class AuthRequestDto extends BaseDto {
      */
     static tokenValidationSchema() {
         return Joi.object({
-            token: Joi.string()
-                .required()
-                .messages({
-                    'any.required': '토큰이 필요합니다.'
-                }),
-            type: Joi.string()
-                .valid('EMAIL_VERIFICATION', 'PASSWORD_RESET')
-                .required()
-                .messages({
-                    'any.only': '유효하지 않은 토큰 유형입니다.',
-                    'any.required': '토큰 유형이 필요합니다.'
-                })
+            token: Joi.string().required().messages({
+                'any.required': '토큰이 필요합니다.'
+            }),
+            type: Joi.string().valid('EMAIL_VERIFICATION', 'PASSWORD_RESET').required().messages({
+                'any.only': '유효하지 않은 토큰 유형입니다.',
+                'any.required': '토큰 유형이 필요합니다.'
+            })
         });
     }
 
@@ -74,20 +64,14 @@ export default class AuthRequestDto extends BaseDto {
      */
     static tokenResendSchema() {
         return Joi.object({
-            email: Joi.string()
-                .email()
-                .required()
-                .messages({
-                    'string.email': '올바른 이메일 형식을 입력해주세요.',
-                    'any.required': '이메일은 필수 입력 항목입니다.'
-                }),
-            type: Joi.string()
-                .valid('EMAIL_VERIFICATION', 'PASSWORD_RESET')
-                .required()
-                .messages({
-                    'any.only': '유효하지 않은 토큰 유형입니다.',
-                    'any.required': '토큰 유형이 필요합니다.'
-                })
+            email: Joi.string().email().required().messages({
+                'string.email': '올바른 이메일 형식을 입력해주세요.',
+                'any.required': '이메일은 필수 입력 항목입니다.'
+            }),
+            type: Joi.string().valid('EMAIL_VERIFICATION', 'PASSWORD_RESET').required().messages({
+                'any.only': '유효하지 않은 토큰 유형입니다.',
+                'any.required': '토큰 유형이 필요합니다.'
+            })
         });
     }
 
@@ -96,18 +80,13 @@ export default class AuthRequestDto extends BaseDto {
      */
     static jwtLoginSchema() {
         return Joi.object({
-            email: Joi.string()
-                .email()
-                .required()
-                .messages({
-                    'string.email': '올바른 이메일 형식을 입력해주세요.',
-                    'any.required': '이메일은 필수 입력 항목입니다.'
-                }),
-            password: Joi.string()
-                .required()
-                .messages({
-                    'any.required': '비밀번호는 필수 입력 항목입니다.'
-                })
+            email: Joi.string().email().required().messages({
+                'string.email': '올바른 이메일 형식을 입력해주세요.',
+                'any.required': '이메일은 필수 입력 항목입니다.'
+            }),
+            password: Joi.string().required().messages({
+                'any.required': '비밀번호는 필수 입력 항목입니다.'
+            })
         });
     }
 
@@ -116,11 +95,9 @@ export default class AuthRequestDto extends BaseDto {
      */
     static jwtRefreshSchema() {
         return Joi.object({
-            refreshToken: Joi.string()
-                .required()
-                .messages({
-                    'any.required': '리프레시 토큰이 필요합니다.'
-                })
+            refreshToken: Joi.string().required().messages({
+                'any.required': '리프레시 토큰이 필요합니다.'
+            })
         });
     }
 
@@ -129,11 +106,9 @@ export default class AuthRequestDto extends BaseDto {
      */
     static jwtVerifySchema() {
         return Joi.object({
-            token: Joi.string()
-                .required()
-                .messages({
-                    'any.required': '액세스 토큰이 필요합니다.'
-                })
+            token: Joi.string().required().messages({
+                'any.required': '액세스 토큰이 필요합니다.'
+            })
         });
     }
 
@@ -142,11 +117,9 @@ export default class AuthRequestDto extends BaseDto {
      */
     static emailVerificationSchema() {
         return Joi.object({
-            token: Joi.string()
-                .required()
-                .messages({
-                    'any.required': '인증 토큰이 필요합니다.'
-                })
+            token: Joi.string().required().messages({
+                'any.required': '인증 토큰이 필요합니다.'
+            })
         });
     }
 

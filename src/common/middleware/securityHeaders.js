@@ -145,9 +145,8 @@ export function advancedCSP() {
  */
 export function crossOriginPolicies() {
     return (req, res, next) => {
-        const isSecureEndpoint = req.path.startsWith('/admin/') ||
-            req.path.startsWith('/api/') ||
-            req.path.startsWith('/user/');
+        const isSecureEndpoint =
+            req.path.startsWith('/admin/') || req.path.startsWith('/api/') || req.path.startsWith('/user/');
 
         // Cross-Origin-Opener-Policy
         if (config.isProduction() || isSecureEndpoint) {
@@ -217,11 +216,7 @@ export function permissionsPolicy() {
 export function securityHeadersValidator() {
     return (req, res, next) => {
         // 의심스러운 헤더 검사
-        const suspiciousHeaders = [
-            'x-forwarded-host',
-            'x-original-host',
-            'x-rewrite-url'
-        ];
+        const suspiciousHeaders = ['x-forwarded-host', 'x-original-host', 'x-rewrite-url'];
 
         suspiciousHeaders.forEach(header => {
             if (req.headers[header]) {

@@ -2,8 +2,7 @@ import { ArtworkExhibitionRelationship, Artwork } from '../../model/entity/Entit
 import TransactionManager from '../../transaction/TransactionManager.js';
 
 export default class ArtworkExhibitionRelationshipRepository {
-    constructor() {
-    }
+    constructor() {}
 
     /**
      * 작품-전시회 관계를 생성합니다.
@@ -13,17 +12,23 @@ export default class ArtworkExhibitionRelationshipRepository {
 
         if (externalTransaction) {
             // 외부에서 트랜잭션이 제공된 경우 그대로 사용
-            return await ArtworkExhibitionRelationship.create({
-                artworkId,
-                exhibitionId
-            }, { transaction: externalTransaction });
-        } else {
-            // 트랜잭션이 제공되지 않은 경우 새로 생성
-            return await TransactionManager.executeInTransaction(async (transaction) => {
-                return await ArtworkExhibitionRelationship.create({
+            return await ArtworkExhibitionRelationship.create(
+                {
                     artworkId,
                     exhibitionId
-                }, { transaction });
+                },
+                { transaction: externalTransaction }
+            );
+        } else {
+            // 트랜잭션이 제공되지 않은 경우 새로 생성
+            return await TransactionManager.executeInTransaction(async transaction => {
+                return await ArtworkExhibitionRelationship.create(
+                    {
+                        artworkId,
+                        exhibitionId
+                    },
+                    { transaction }
+                );
             });
         }
     }
@@ -50,10 +55,12 @@ export default class ArtworkExhibitionRelationshipRepository {
             where: {
                 exhibitionId
             },
-            include: [{
-                model: Artwork,
-                required: true
-            }],
+            include: [
+                {
+                    model: Artwork,
+                    required: true
+                }
+            ],
             limit: parseInt(limit),
             offset: parseInt(offset),
             order: [['createdAt', 'DESC']]

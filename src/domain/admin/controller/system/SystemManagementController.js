@@ -23,20 +23,23 @@ export default class SystemManagementController extends BaseAdminController {
      * 관리자 대시보드를 렌더링합니다.
      */
     async getDashboard(req, res) {
-        return this.safeExecuteSSR(async () => {
-            const dashboardData = await this.systemManagementService.getDashboardData();
+        return this.safeExecuteSSR(
+            async () => {
+                const dashboardData = await this.systemManagementService.getDashboardData();
 
-            return ViewResolver.render(res, ViewPath.ADMIN.DASHBOARD, {
-                title: '관리자 대시보드',
-                dashboardData,
-                user: req.user
-            });
-        }, req, res, {
-            operationName: '대시보드 조회',
-            errorRedirectPath: '/admin',
-            errorMessage: '대시보드 데이터를 불러오는 중 오류가 발생했습니다.'
-        });
+                return ViewResolver.render(res, ViewPath.ADMIN.DASHBOARD, {
+                    title: '관리자 대시보드',
+                    dashboardData,
+                    user: req.user
+                });
+            },
+            req,
+            res,
+            {
+                operationName: '대시보드 조회',
+                errorRedirectPath: '/admin',
+                errorMessage: '대시보드 데이터를 불러오는 중 오류가 발생했습니다.'
+            }
+        );
     }
 }
-
-

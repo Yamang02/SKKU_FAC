@@ -74,9 +74,8 @@ export function securityMonitoring() {
             /eval\s*\(/i // Code injection
         ];
 
-        const isSuspicious = suspiciousPatterns.some(pattern =>
-            pattern.test(req.url) ||
-            pattern.test(JSON.stringify(req.body || {}))
+        const isSuspicious = suspiciousPatterns.some(
+            pattern => pattern.test(req.url) || pattern.test(JSON.stringify(req.body || {}))
         );
 
         if (isSuspicious) {

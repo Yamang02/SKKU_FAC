@@ -103,8 +103,16 @@ export default class ArtworkResponseDto extends BaseDto {
      */
     toPublic() {
         return this.pick([
-            'id', 'title', 'description', 'year', 'medium', 'size',
-            'featured', 'imageUrl', 'user', 'exhibition'
+            'id',
+            'title',
+            'description',
+            'year',
+            'medium',
+            'size',
+            'featured',
+            'imageUrl',
+            'user',
+            'exhibition'
         ]);
     }
 
@@ -126,17 +134,17 @@ export default class ArtworkResponseDto extends BaseDto {
         let schema;
 
         switch (schemaType) {
-            case 'response':
-                schema = ArtworkResponseDto.getResponseSchema();
-                break;
-            case 'public':
-                schema = ArtworkResponseDto.getPublicSchema();
-                break;
-            case 'adminDetail':
-                schema = ArtworkResponseDto.getAdminDetailSchema();
-                break;
-            default:
-                schema = this.getValidationSchema();
+        case 'response':
+            schema = ArtworkResponseDto.getResponseSchema();
+            break;
+        case 'public':
+            schema = ArtworkResponseDto.getPublicSchema();
+            break;
+        case 'adminDetail':
+            schema = ArtworkResponseDto.getAdminDetailSchema();
+            break;
+        default:
+            schema = this.getValidationSchema();
         }
 
         const { error, value } = schema.validate(this.toPlainObject(), {

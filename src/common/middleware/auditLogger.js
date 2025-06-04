@@ -224,10 +224,12 @@ class AuditLogger {
     getClientIP(request) {
         if (!request) return null;
 
-        return request.ip ||
+        return (
+            request.ip ||
             request.connection?.remoteAddress ||
             request.socket?.remoteAddress ||
-            (request.connection?.socket ? request.connection.socket.remoteAddress : null);
+            (request.connection?.socket ? request.connection.socket.remoteAddress : null)
+        );
     }
 
     /**
@@ -235,9 +237,7 @@ class AuditLogger {
      */
     maskEmail(email) {
         const [local, domain] = email.split('@');
-        const maskedLocal = local.length > 2
-            ? local.substring(0, 2) + '*'.repeat(local.length - 2)
-            : local;
+        const maskedLocal = local.length > 2 ? local.substring(0, 2) + '*'.repeat(local.length - 2) : local;
         return `${maskedLocal}@${domain}`;
     }
 
@@ -246,15 +246,15 @@ class AuditLogger {
      */
     getLogLevel(severity) {
         switch (severity) {
-            case AuditSeverity.CRITICAL:
-                return 'error';
-            case AuditSeverity.HIGH:
-                return 'warn';
-            case AuditSeverity.MEDIUM:
-                return 'info';
-            case AuditSeverity.LOW:
-            default:
-                return 'debug';
+        case AuditSeverity.CRITICAL:
+            return 'error';
+        case AuditSeverity.HIGH:
+            return 'warn';
+        case AuditSeverity.MEDIUM:
+            return 'info';
+        case AuditSeverity.LOW:
+        default:
+            return 'debug';
         }
     }
 
@@ -374,9 +374,12 @@ class AuditLogger {
 const auditLogger = new AuditLogger();
 
 // 주기적 세션 정리 (1시간마다)
-setInterval(() => {
-    auditLogger.cleanupSessions();
-}, 60 * 60 * 1000);
+setInterval(
+    () => {
+        auditLogger.cleanupSessions();
+    },
+    60 * 60 * 1000
+);
 
 /**
  * 감사 로깅 미들웨어 팩토리
@@ -459,8 +462,8 @@ export function createAuditMiddleware(actionType, options = {}) {
 export const auditAdminAccess = createAuditMiddleware(AuditLogType.ADMIN_ACCESS, {
     severity: AuditSeverity.MEDIUM,
     captureRequest: true,
-    extractResource: (req) => `admin${req.path}`,
-    extractDetails: (req) => ({
+    extractResource: req => `admin${req.path}`,
+    extractDetails: req => ({
         adminRole: req.user?.role,
         accessedFeature: req.path.split('/')[2] || 'dashboard'
     })
@@ -469,33 +472,35 @@ export const auditAdminAccess = createAuditMiddleware(AuditLogType.ADMIN_ACCESS,
 /**
  * 사용자 관리 감사 미들웨어
  */
-export const auditUserManagement = (actionType) => createAuditMiddleware(actionType, {
-    severity: AuditSeverity.HIGH,
-    captureRequest: true,
-    extractResource: (req) => `user/${req.params?.id || 'bulk'}`,
-    extractDetails: (req, _res, _data) => ({
-        targetUserId: req.params?.id,
-        changes: req.body,
-        adminRole: req.user?.role
-    })
-});
+export const auditUserManagement = actionType =>
+    createAuditMiddleware(actionType, {
+        severity: AuditSeverity.HIGH,
+        captureRequest: true,
+        extractResource: req => `user/${req.params?.id || 'bulk'}`,
+        extractDetails: (req, _res, _data) => ({
+            targetUserId: req.params?.id,
+            changes: req.body,
+            adminRole: req.user?.role
+        })
+    });
 
 /**
  * 컨텐츠 관리 감사 미들웨어
  */
-export const auditContentManagement = (actionType) => createAuditMiddleware(actionType, {
-    severity: AuditSeverity.MEDIUM,
-    captureRequest: true,
-    extractResource: (req) => {
-        const resourceType = req.path.includes('artwork') ? 'artwork' : 'exhibition';
-        return `${resourceType}/${req.params?.id || 'bulk'}`;
-    },
-    extractDetails: (req, _res, _data) => ({
-        resourceId: req.params?.id,
-        changes: req.body,
-        adminRole: req.user?.role
-    })
-});
+export const auditContentManagement = actionType =>
+    createAuditMiddleware(actionType, {
+        severity: AuditSeverity.MEDIUM,
+        captureRequest: true,
+        extractResource: req => {
+            const resourceType = req.path.includes('artwork') ? 'artwork' : 'exhibition';
+            return `${resourceType}/${req.params?.id || 'bulk'}`;
+        },
+        extractDetails: (req, _res, _data) => ({
+            resourceId: req.params?.id,
+            changes: req.body,
+            adminRole: req.user?.role
+        })
+    });
 
 /**
  * 권한 거부 감사 로그

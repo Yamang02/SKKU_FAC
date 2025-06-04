@@ -18,17 +18,17 @@ class DockerTestSetup {
         this.testConfig = {
             mysql: {
                 host: 'localhost',
-                port: 3307,  // 테스트용 포트
+                port: 3307, // 테스트용 포트
                 user: 'root',
                 password: 'testpassword',
-                database: 'skku_sfa_gallery_test'
+                database: 'skku_sfa_gallery_test',
             },
             redis: {
-                url: 'redis://localhost:6380'  // 테스트용 포트
+                url: 'redis://localhost:6380', // 테스트용 포트
             },
             app: {
-                url: 'http://localhost:3000'
-            }
+                url: 'http://localhost:3000',
+            },
         };
 
         this.mysqlConnection = null;
@@ -46,7 +46,7 @@ class DockerTestSetup {
             // Docker 컨테이너 시작
             execSync('docker-compose --profile test up -d mysql_test redis_test', {
                 stdio: 'inherit',
-                cwd: path.resolve(__dirname, '../../../')
+                cwd: path.resolve(__dirname, '../../../'),
             });
 
             // 컨테이너 준비 대기
@@ -72,7 +72,7 @@ class DockerTestSetup {
                     host: this.testConfig.mysql.host,
                     port: this.testConfig.mysql.port,
                     user: this.testConfig.mysql.user,
-                    password: this.testConfig.mysql.password
+                    password: this.testConfig.mysql.password,
                 });
                 await mysqlConnection.ping();
                 await mysqlConnection.end();
@@ -106,7 +106,7 @@ class DockerTestSetup {
                 host: this.testConfig.mysql.host,
                 port: this.testConfig.mysql.port,
                 user: this.testConfig.mysql.user,
-                password: this.testConfig.mysql.password
+                password: this.testConfig.mysql.password,
             });
 
             // 테스트 데이터베이스 생성 (존재하지 않는 경우)
@@ -234,7 +234,7 @@ class DockerTestSetup {
                 INDEX idx_artwork_user (user_id),
                 INDEX idx_artwork_slug (slug),
                 INDEX idx_artwork_status (status)
-            )`
+            )`,
         ];
 
         for (const tableSQL of tables) {
@@ -259,7 +259,7 @@ class DockerTestSetup {
                 name: 'Test User',
                 role: 'SKKU_MEMBER',
                 status: 'ACTIVE',
-                email_verified: true
+                email_verified: true,
             },
             {
                 id: 'USER_test-admin-001',
@@ -269,7 +269,7 @@ class DockerTestSetup {
                 name: 'Test Admin',
                 role: 'ADMIN',
                 status: 'ACTIVE',
-                email_verified: true
+                email_verified: true,
             },
             {
                 id: 'USER_test-external-001',
@@ -279,14 +279,23 @@ class DockerTestSetup {
                 name: 'External User',
                 role: 'EXTERNAL_MEMBER',
                 status: 'ACTIVE',
-                email_verified: true
-            }
+                email_verified: true,
+            },
         ];
 
         for (const user of testUsers) {
             await this.mysqlConnection.execute(
                 'INSERT INTO user_accounts (id, username, email, password, name, role, status, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                [user.id, user.username, user.email, user.password, user.name, user.role, user.status, user.email_verified]
+                [
+                    user.id,
+                    user.username,
+                    user.email,
+                    user.password,
+                    user.name,
+                    user.role,
+                    user.status,
+                    user.email_verified,
+                ]
             );
         }
 
@@ -297,15 +306,15 @@ class DockerTestSetup {
                 user_id: 'USER_test-user-001',
                 department: 'Fine Art',
                 student_year: '2024',
-                is_club_member: true
+                is_club_member: true,
             },
             {
                 id: 'SKKU_PROFILE_test-002',
                 user_id: 'USER_test-admin-001',
                 department: 'Art Administration',
                 student_year: '2023',
-                is_club_member: true
-            }
+                is_club_member: true,
+            },
         ];
 
         for (const profile of skkuProfiles) {
@@ -365,7 +374,7 @@ class DockerTestSetup {
             // Docker 컨테이너 정리
             execSync('npm run docker:test:down', {
                 stdio: 'inherit',
-                cwd: path.resolve(__dirname, '../../../')
+                cwd: path.resolve(__dirname, '../../../'),
             });
 
             this.isInitialized = false;
@@ -383,7 +392,7 @@ class DockerTestSetup {
             dockerRunning: this.isInitialized,
             mysqlConnected: !!this.mysqlConnection,
             redisConnected: !!this.redisClient,
-            config: this.testConfig
+            config: this.testConfig,
         };
     }
 

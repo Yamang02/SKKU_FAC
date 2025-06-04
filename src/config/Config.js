@@ -73,7 +73,9 @@ class Config {
         return Joi.object({
             app: Joi.object({
                 name: Joi.string().min(1).max(100).required(),
-                version: Joi.string().pattern(/^\d+\.\d+\.\d+$/).required(),
+                version: Joi.string()
+                    .pattern(/^\d+\.\d+\.\d+$/)
+                    .required(),
                 port: Joi.number().integer().min(1).max(65535).required(),
                 environment: Joi.string().valid('development', 'test', 'staging', 'production').required(),
                 debug: Joi.boolean().optional()
@@ -304,12 +306,7 @@ class Config {
      * 환경 변수 로드 (개선된 버전)
      */
     loadEnvironmentVariables() {
-        const envFiles = [
-            '.env.local',
-            '.env',
-            `.env.${this.environment}`,
-            `.env.${this.environment}.local`
-        ];
+        const envFiles = ['.env.local', '.env', `.env.${this.environment}`, `.env.${this.environment}.local`];
 
         for (const envFile of envFiles) {
             try {
@@ -357,27 +354,27 @@ class Config {
     validateCriticalEnvironmentVariables() {
         const criticalVars = {
             // 데이터베이스 관련
-            'DB_HOST': { required: this.environment !== 'production', type: 'string' },
-            'DB_USER': { required: this.environment !== 'production', type: 'string' },
-            'DB_PASSWORD': { required: this.environment !== 'production', type: 'string' },
-            'DB_NAME': { required: this.environment !== 'production', type: 'string' },
+            DB_HOST: { required: this.environment !== 'production', type: 'string' },
+            DB_USER: { required: this.environment !== 'production', type: 'string' },
+            DB_PASSWORD: { required: this.environment !== 'production', type: 'string' },
+            DB_NAME: { required: this.environment !== 'production', type: 'string' },
 
             // 프로덕션 환경 (Railway) 데이터베이스
-            'MYSQLHOST': { required: this.environment === 'production', type: 'string' },
-            'MYSQLUSER': { required: this.environment === 'production', type: 'string' },
-            'MYSQLPASSWORD': { required: this.environment === 'production', type: 'string' },
-            'MYSQL_DATABASE': { required: this.environment === 'production', type: 'string' },
+            MYSQLHOST: { required: this.environment === 'production', type: 'string' },
+            MYSQLUSER: { required: this.environment === 'production', type: 'string' },
+            MYSQLPASSWORD: { required: this.environment === 'production', type: 'string' },
+            MYSQL_DATABASE: { required: this.environment === 'production', type: 'string' },
 
             // Cloudinary 설정
-            'CLOUDINARY_CLOUD_NAME': { required: true, type: 'string' },
-            'CLOUDINARY_API_KEY': { required: true, type: 'string' },
-            'CLOUDINARY_API_SECRET': { required: true, type: 'string' },
+            CLOUDINARY_CLOUD_NAME: { required: true, type: 'string' },
+            CLOUDINARY_API_KEY: { required: true, type: 'string' },
+            CLOUDINARY_API_SECRET: { required: true, type: 'string' },
 
             // 세션 보안
-            'SESSION_SECRET': { required: true, type: 'string', minLength: 32 },
+            SESSION_SECRET: { required: true, type: 'string', minLength: 32 },
 
             // 포트 번호
-            'PORT': { required: false, type: 'number', min: 1, max: 65535 }
+            PORT: { required: false, type: 'number', min: 1, max: 65535 }
         };
 
         const validationErrors = [];
@@ -441,8 +438,8 @@ class Config {
 
             // 프로덕션 환경에서는 중요한 오류가 있으면 종료
             if (this.environment === 'production') {
-                const criticalErrors = validationErrors.filter(error =>
-                    error.includes('MYSQL') || error.includes('CLOUDINARY') || error.includes('SESSION_SECRET')
+                const criticalErrors = validationErrors.filter(
+                    error => error.includes('MYSQL') || error.includes('CLOUDINARY') || error.includes('SESSION_SECRET')
                 );
                 if (criticalErrors.length > 0) {
                     console.error('💥 프로덕션 환경에서 중요한 환경 변수 오류가 발견되어 애플리케이션을 종료합니다.');
@@ -549,47 +546,47 @@ class Config {
         // 환경별 최적화된 연결 풀 설정
         const getOptimizedPoolConfig = () => {
             switch (this.environment) {
-                case 'production':
-                    return {
-                        max: parseInt(process.env.DB_POOL_MAX, 10) || 20,     // 운영: 더 많은 연결
-                        min: parseInt(process.env.DB_POOL_MIN, 10) || 5,      // 운영: 최소 연결 유지
-                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 10000,  // 10초
-                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 60000,        // 60초
-                        evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,       // 1초마다 유휴 연결 확인
-                        handleDisconnects: true,  // 연결 끊김 자동 처리
-                        validate: (connection) => {
-                            // 연결 유효성 검사 - 연결이 존재하고 활성 상태인지 확인
-                            return connection && connection.state !== 'disconnected';
-                        }
-                    };
+            case 'production':
+                return {
+                    max: parseInt(process.env.DB_POOL_MAX, 10) || 20, // 운영: 더 많은 연결
+                    min: parseInt(process.env.DB_POOL_MIN, 10) || 5, // 운영: 최소 연결 유지
+                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 10000, // 10초
+                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 60000, // 60초
+                    evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000, // 1초마다 유휴 연결 확인
+                    handleDisconnects: true, // 연결 끊김 자동 처리
+                    validate: connection => {
+                        // 연결 유효성 검사 - 연결이 존재하고 활성 상태인지 확인
+                        return connection && connection.state !== 'disconnected';
+                    }
+                };
 
-                case 'test':
-                    return {
-                        max: parseInt(process.env.DB_POOL_MAX, 10) || 5,      // 테스트: 적은 연결
-                        min: parseInt(process.env.DB_POOL_MIN, 10) || 1,      // 테스트: 최소 1개 유지
-                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 5000,   // 5초
-                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 30000,        // 30초
-                        evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
-                        handleDisconnects: true
-                    };
+            case 'test':
+                return {
+                    max: parseInt(process.env.DB_POOL_MAX, 10) || 5, // 테스트: 적은 연결
+                    min: parseInt(process.env.DB_POOL_MIN, 10) || 1, // 테스트: 최소 1개 유지
+                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 5000, // 5초
+                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 30000, // 30초
+                    evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
+                    handleDisconnects: true
+                };
 
-                case 'development':
-                    return {
-                        max: parseInt(process.env.DB_POOL_MAX, 10) || 10,     // 개발: 중간 수준
-                        min: parseInt(process.env.DB_POOL_MIN, 10) || 2,      // 개발: 최소 2개 유지
-                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 8000,   // 8초
-                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 45000,        // 45초
-                        evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
-                        handleDisconnects: true
-                    };
+            case 'development':
+                return {
+                    max: parseInt(process.env.DB_POOL_MAX, 10) || 10, // 개발: 중간 수준
+                    min: parseInt(process.env.DB_POOL_MIN, 10) || 2, // 개발: 최소 2개 유지
+                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 8000, // 8초
+                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 45000, // 45초
+                    evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
+                    handleDisconnects: true
+                };
 
-                default:
-                    return {
-                        max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
-                        min: parseInt(process.env.DB_POOL_MIN, 10) || 0,
-                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 30000,
-                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 10000
-                    };
+            default:
+                return {
+                    max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+                    min: parseInt(process.env.DB_POOL_MIN, 10) || 0,
+                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 30000,
+                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 10000
+                };
             }
         };
 
@@ -603,48 +600,48 @@ class Config {
         // 환경별 설정을 먼저 생성하고, 나중에 get() 메서드로 password를 가져와서 복호화
         let envConfig;
         switch (this.environment) {
-            case 'production':
-                envConfig = {
-                    ...baseConfig,
-                    host: process.env.MYSQLHOST,
-                    user: process.env.MYSQLUSER,
-                    password: process.env.MYSQLPASSWORD,
-                    database: process.env.MYSQL_DATABASE,
-                    port: parseInt(process.env.MYSQLPORT, 10) || 3306
-                };
-                break;
+        case 'production':
+            envConfig = {
+                ...baseConfig,
+                host: process.env.MYSQLHOST,
+                user: process.env.MYSQLUSER,
+                password: process.env.MYSQLPASSWORD,
+                database: process.env.MYSQL_DATABASE,
+                port: parseInt(process.env.MYSQLPORT, 10) || 3306
+            };
+            break;
 
-            case 'test':
-                envConfig = {
-                    ...baseConfig,
-                    host: process.env.TEST_DB_HOST || process.env.DB_HOST,
-                    user: process.env.TEST_DB_USER || process.env.DB_USER,
-                    password: process.env.TEST_DB_PASSWORD || process.env.DB_PASSWORD,
-                    database: process.env.TEST_DB_NAME || process.env.DB_NAME,
-                    port: parseInt(process.env.TEST_DB_PORT || process.env.DB_PORT, 10) || 3306
-                };
-                break;
+        case 'test':
+            envConfig = {
+                ...baseConfig,
+                host: process.env.TEST_DB_HOST || process.env.DB_HOST,
+                user: process.env.TEST_DB_USER || process.env.DB_USER,
+                password: process.env.TEST_DB_PASSWORD || process.env.DB_PASSWORD,
+                database: process.env.TEST_DB_NAME || process.env.DB_NAME,
+                port: parseInt(process.env.TEST_DB_PORT || process.env.DB_PORT, 10) || 3306
+            };
+            break;
 
-            case 'development':
-                envConfig = {
-                    ...baseConfig,
-                    host: process.env.DEV_DB_HOST || process.env.DB_HOST,
-                    user: process.env.DEV_DB_USER || process.env.DB_USER,
-                    password: process.env.DEV_DB_PASSWORD || process.env.DB_PASSWORD,
-                    database: process.env.DEV_DB_NAME || process.env.DB_NAME,
-                    port: parseInt(process.env.DEV_DB_PORT || process.env.DB_PORT, 10) || 3306
-                };
-                break;
+        case 'development':
+            envConfig = {
+                ...baseConfig,
+                host: process.env.DEV_DB_HOST || process.env.DB_HOST,
+                user: process.env.DEV_DB_USER || process.env.DB_USER,
+                password: process.env.DEV_DB_PASSWORD || process.env.DB_PASSWORD,
+                database: process.env.DEV_DB_NAME || process.env.DB_NAME,
+                port: parseInt(process.env.DEV_DB_PORT || process.env.DB_PORT, 10) || 3306
+            };
+            break;
 
-            default:
-                envConfig = {
-                    ...baseConfig,
-                    host: process.env.DB_HOST,
-                    user: process.env.DB_USER,
-                    password: process.env.DB_PASSWORD,
-                    database: process.env.DB_NAME,
-                    port: parseInt(process.env.DB_PORT, 10) || 3306
-                };
+        default:
+            envConfig = {
+                ...baseConfig,
+                host: process.env.DB_HOST,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_NAME,
+                port: parseInt(process.env.DB_PORT, 10) || 3306
+            };
         }
 
         // 초기화가 완료된 후에는 get() 메서드를 사용하여 암호화된 비밀번호를 복호화
@@ -734,22 +731,10 @@ class Config {
                             'https://k.kakaocdn.net',
                             'https://cdn.jsdelivr.net'
                         ],
-                        frameSrc: [
-                            '\'self\'',
-                            'https://developers.kakao.com'
-                        ],
-                        objectSrc: [
-                            '\'self\'',
-                            'https://developers.kakao.com'
-                        ],
-                        formAction: [
-                            '\'self\'',
-                            'https://*.kakao.com'
-                        ],
-                        workerSrc: [
-                            '\'self\'',
-                            'blob:'
-                        ],
+                        frameSrc: ['\'self\'', 'https://developers.kakao.com'],
+                        objectSrc: ['\'self\'', 'https://developers.kakao.com'],
+                        formAction: ['\'self\'', 'https://*.kakao.com'],
+                        workerSrc: ['\'self\'', 'blob:'],
                         scriptSrcAttr: ['\'unsafe-inline\'']
                     }
                 },
@@ -1023,7 +1008,8 @@ class Config {
 
             // 전체 길이 확인
             const totalLength = combined.length();
-            if (totalLength < 28) { // 최소 12(IV) + 16(tag) = 28바이트
+            if (totalLength < 28) {
+                // 최소 12(IV) + 16(tag) = 28바이트
                 throw new Error('암호화된 데이터가 너무 짧습니다.');
             }
 
@@ -1080,12 +1066,7 @@ class Config {
             return;
         }
 
-        const sensitiveKeysToProcess = [
-            'database.password',
-            'storage.apiSecret',
-            'session.secret',
-            'email.pass'
-        ];
+        const sensitiveKeysToProcess = ['database.password', 'storage.apiSecret', 'session.secret', 'email.pass'];
 
         for (const key of sensitiveKeysToProcess) {
             const currentValue = this.getRawValue(key);
@@ -1294,7 +1275,9 @@ class Config {
      */
     async setEnvironment(newEnvironment) {
         if (!this.supportedEnvironments.includes(newEnvironment)) {
-            throw new Error(`지원되지 않는 환경입니다: ${newEnvironment}. 지원되는 환경: ${this.supportedEnvironments.join(', ')}`);
+            throw new Error(
+                `지원되지 않는 환경입니다: ${newEnvironment}. 지원되는 환경: ${this.supportedEnvironments.join(', ')}`
+            );
         }
 
         const oldEnvironment = this.environment;
@@ -1364,12 +1347,14 @@ class Config {
      * @returns {object} 이메일 설정 객체
      */
     getEmailConfig() {
-        return this.get('email') || {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-            from: process.env.EMAIL_FROM,
-            adminEmail: process.env.ADMIN_EMAIL
-        };
+        return (
+            this.get('email') || {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+                from: process.env.EMAIL_FROM,
+                adminEmail: process.env.ADMIN_EMAIL
+            }
+        );
     }
 
     /**
@@ -1389,44 +1374,44 @@ class Config {
 
         // 환경별 Redis 설정 조정
         switch (this.environment) {
-            case 'production':
-                return {
-                    ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 0, // 세션용 DB 0
-                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 DB 1
-                    ttl: parseInt(process.env.REDIS_TTL, 10) || 86400
-                };
+        case 'production':
+            return {
+                ...baseConfig,
+                db: parseInt(process.env.REDIS_DB, 10) || 0, // 세션용 DB 0
+                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 DB 1
+                ttl: parseInt(process.env.REDIS_TTL, 10) || 86400
+            };
 
-            case 'test':
-                return {
-                    ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 14, // 테스트 세션용 DB 14
-                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 15, // 테스트 캐시용 DB 15
-                    ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
-                    prefix: 'test:'
-                };
+        case 'test':
+            return {
+                ...baseConfig,
+                db: parseInt(process.env.REDIS_DB, 10) || 14, // 테스트 세션용 DB 14
+                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 15, // 테스트 캐시용 DB 15
+                ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
+                prefix: 'test:'
+            };
 
-            case 'development':
-                // 개발환경은 별도 DB 사용
-                return {
-                    ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 0, // 개발 세션용 DB 0
-                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 개발 캐시용 DB 1
-                    ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
-                    prefix: 'dev:' // 개발환경 전용 prefix
-                };
+        case 'development':
+            // 개발환경은 별도 DB 사용
+            return {
+                ...baseConfig,
+                db: parseInt(process.env.REDIS_DB, 10) || 0, // 개발 세션용 DB 0
+                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 개발 캐시용 DB 1
+                ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
+                prefix: 'dev:' // 개발환경 전용 prefix
+            };
 
-            case 'staging':
-                return {
-                    ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 2, // 스테이징 세션용 DB 2
-                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 3, // 스테이징 캐시용 DB 3
-                    ttl: parseInt(process.env.REDIS_TTL, 10) || 43200, // 12시간
-                    prefix: 'staging:'
-                };
+        case 'staging':
+            return {
+                ...baseConfig,
+                db: parseInt(process.env.REDIS_DB, 10) || 2, // 스테이징 세션용 DB 2
+                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 3, // 스테이징 캐시용 DB 3
+                ttl: parseInt(process.env.REDIS_TTL, 10) || 43200, // 12시간
+                prefix: 'staging:'
+            };
 
-            default:
-                return baseConfig;
+        default:
+            return baseConfig;
         }
     }
 
@@ -1435,13 +1420,15 @@ class Config {
      * @returns {object} 앱 설정 객체
      */
     getAppConfig() {
-        return this.get('app') || {
-            name: process.env.APP_NAME || 'SKKU Gallery',
-            version: process.env.APP_VERSION || '1.0.0',
-            port: parseInt(process.env.PORT, 10) || 3000,
-            environment: this.environment,
-            baseUrl: process.env.BASE_URL
-        };
+        return (
+            this.get('app') || {
+                name: process.env.APP_NAME || 'SKKU Gallery',
+                version: process.env.APP_VERSION || '1.0.0',
+                port: parseInt(process.env.PORT, 10) || 3000,
+                environment: this.environment,
+                baseUrl: process.env.BASE_URL
+            }
+        );
     }
 
     /**

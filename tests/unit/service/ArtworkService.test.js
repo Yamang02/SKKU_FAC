@@ -23,17 +23,17 @@ test.describe('ArtworkService', () => {
             findById: createSpy(null),
             update: createSpy({ id: 1 }),
             delete: createSpy(true),
-            findByArtistId: createSpy([])
+            findByArtistId: createSpy([]),
         });
 
         mockUserRepository = createMockRepository({
-            findById: createSpy({ id: 1, role: 'SKKU_MEMBER' })
+            findById: createSpy({ id: 1, role: 'SKKU_MEMBER' }),
         });
 
         mockImageService = createMockService({
             uploadImage: createSpy({ url: 'https://example.com/image.jpg', publicId: 'test_image' }),
             deleteImage: createSpy(true),
-            processImage: createSpy({ processedUrl: 'https://example.com/processed.jpg' })
+            processImage: createSpy({ processedUrl: 'https://example.com/processed.jpg' }),
         });
 
         // ArtworkService 클래스 모킹
@@ -64,7 +64,7 @@ test.describe('ArtworkService', () => {
                     artistId,
                     status: 'ACTIVE',
                     createdAt: new Date(),
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
                 };
 
                 return await this.artworkRepository.create(artwork);
@@ -161,8 +161,7 @@ test.describe('ArtworkService', () => {
             const artworkData = createTestArtwork();
             mockUserRepository.findById.mockReturnValue(null);
 
-            await expect(artworkService.createArtwork(artworkData, 999))
-                .rejects.toThrow('작가를 찾을 수 없습니다.');
+            await expect(artworkService.createArtwork(artworkData, 999)).rejects.toThrow('작가를 찾을 수 없습니다.');
         });
     });
 
@@ -180,8 +179,7 @@ test.describe('ArtworkService', () => {
         test('존재하지 않는 작품 조회 시 에러', async () => {
             mockArtworkRepository.findById.mockReturnValue(null);
 
-            await expect(artworkService.getArtworkById(999))
-                .rejects.toThrow('작품을 찾을 수 없습니다.');
+            await expect(artworkService.getArtworkById(999)).rejects.toThrow('작품을 찾을 수 없습니다.');
         });
 
         test('작가별 작품 목록 조회', async () => {
@@ -226,8 +224,9 @@ test.describe('ArtworkService', () => {
             const artwork = createTestArtwork({ artistId: 1 });
             mockArtworkRepository.findById.mockReturnValue(artwork);
 
-            await expect(artworkService.updateArtwork(1, { title: '수정' }, 2))
-                .rejects.toThrow('작품을 수정할 권한이 없습니다.');
+            await expect(artworkService.updateArtwork(1, { title: '수정' }, 2)).rejects.toThrow(
+                '작품을 수정할 권한이 없습니다.'
+            );
         });
     });
 
@@ -247,15 +246,13 @@ test.describe('ArtworkService', () => {
             const artwork = createTestArtwork({ artistId: 1 });
             mockArtworkRepository.findById.mockReturnValue(artwork);
 
-            await expect(artworkService.deleteArtwork(1, 2))
-                .rejects.toThrow('작품을 삭제할 권한이 없습니다.');
+            await expect(artworkService.deleteArtwork(1, 2)).rejects.toThrow('작품을 삭제할 권한이 없습니다.');
         });
 
         test('존재하지 않는 작품 삭제 시 에러', async () => {
             mockArtworkRepository.findById.mockReturnValue(null);
 
-            await expect(artworkService.deleteArtwork(999, 1))
-                .rejects.toThrow('작품을 찾을 수 없습니다.');
+            await expect(artworkService.deleteArtwork(999, 1)).rejects.toThrow('작품을 찾을 수 없습니다.');
         });
     });
 
@@ -275,7 +272,7 @@ test.describe('ArtworkService', () => {
             expect(mockArtworkRepository.create.calls[0][0]).toMatchObject({
                 ...artworkData,
                 artistId: 1,
-                status: 'ACTIVE'
+                status: 'ACTIVE',
             });
         });
     });

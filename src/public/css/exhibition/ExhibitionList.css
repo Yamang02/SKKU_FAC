@@ -3,7 +3,7 @@
  */
 
 :root {
-    --exhibition-primary: #072B61;
+    --exhibition-primary: #072b61;
     --exhibition-primary-rgb: 7, 43, 97;
     --exhibition-primary-dark: #051d42;
     --exhibition-secondary: #6c757d;
@@ -35,7 +35,9 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
     margin-bottom: 0;
     border: none;
     cursor: pointer;
@@ -217,7 +219,7 @@
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 1rem;
-    color: #072B61;  /* 전시회 시그니처 색상 */
+    color: #072b61; /* 전시회 시그니처 색상 */
 }
 
 .modal-date--exhibition {
@@ -280,7 +282,6 @@
     justify-self: center;
     color: var(--exhibition-primary);
 }
-
 
 .section-title--exhibition {
     font-size: 2rem;
@@ -415,9 +416,8 @@
     box-shadow: 0 0 0 3px rgba(var(--exhibition-primary-rgb), 0.1);
 }
 
-
-
-.btn-search, .btn-reset {
+.btn-search,
+.btn-reset {
     padding: 12px 25px;
     border: none;
     border-radius: var(--border-radius-sm);
@@ -679,7 +679,6 @@
     color: white !important;
 }
 
-
 .exhibition-btn-primary:hover {
     background-color: var(--exhibition-primary-dark);
     transform: translateY(-2px);
@@ -743,7 +742,9 @@
     background-clip: padding-box;
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+        border-color 0.15s ease-in-out,
+        box-shadow 0.15s ease-in-out;
 }
 
 .exhibition-form-control:focus,

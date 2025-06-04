@@ -21,14 +21,12 @@ async function fetchArtworkList(pagination, filters = {}) {
 
 async function fetchExhibitionList() {
     try {
-
         // 캐러셀용 전시회는 제한 없이 모두 가져오기 위해 특별 파라미터 전달
         const response = await ExhibitionApi.getExhibitionList({
             limit: 100, // 충분히 많은 수의 전시회를 가져오기 위한 값
             page: 1,
             sort: 'date-desc' // 최신 전시회부터 정렬
         });
-
 
         // API 응답 구조 확인
         if (!response || !response.items) {
@@ -525,7 +523,7 @@ async function loadArtworkList() {
         }
 
         const data = response.data;
-        const artworks = Array.isArray(data) ? data : (data.items || []);
+        const artworks = Array.isArray(data) ? data : data.items || [];
 
         // 총 작품 수 업데이트
         if (totalCountElement) {
@@ -544,7 +542,6 @@ async function loadArtworkList() {
         if (artworks.length > 0) {
             const cardFragment = document.createDocumentFragment();
             const tableFragment = document.createDocumentFragment();
-
 
             artworks.forEach(artwork => {
                 if (cardView) {
@@ -585,7 +582,7 @@ async function loadArtworkList() {
             const clonedPaginationContainer = paginationContainer.cloneNode(true);
             paginationContainer.parentNode.replaceChild(clonedPaginationContainer, paginationContainer);
 
-            clonedPaginationContainer.addEventListener('pagination:change', async (e) => {
+            clonedPaginationContainer.addEventListener('pagination:change', async e => {
                 const page = e.detail.page;
                 // URL 파라미터 업데이트
                 urlParams.set('page', page);
@@ -598,7 +595,6 @@ async function loadArtworkList() {
                 await loadArtworkList();
             });
         }
-
     } catch (error) {
         console.error('작품 목록을 로드하는 중 오류 발생:', error);
         showErrorMessage(error.message || '작품 목록을 불러오는 중 오류가 발생했습니다.');

@@ -38,66 +38,40 @@ export default class ExhibitionRequestDto extends BaseDto {
      */
     static getCreateSchema() {
         return Joi.object({
-            title: Joi.string()
-                .min(1)
-                .max(200)
-                .required()
-                .messages({
-                    'string.min': '전시회 제목을 입력해주세요',
-                    'string.max': '전시회 제목은 최대 200자까지 가능합니다',
-                    'any.required': '전시회 제목은 필수 입력 항목입니다'
-                }),
+            title: Joi.string().min(1).max(200).required().messages({
+                'string.min': '전시회 제목을 입력해주세요',
+                'string.max': '전시회 제목은 최대 200자까지 가능합니다',
+                'any.required': '전시회 제목은 필수 입력 항목입니다'
+            }),
 
-            description: Joi.string()
-                .max(2000)
-                .allow('')
-                .optional()
-                .messages({
-                    'string.max': '전시회 설명은 최대 2000자까지 가능합니다'
-                }),
+            description: Joi.string().max(2000).allow('').optional().messages({
+                'string.max': '전시회 설명은 최대 2000자까지 가능합니다'
+            }),
 
-            startDate: Joi.date()
-                .required()
-                .messages({
-                    'date.base': '시작일은 유효한 날짜여야 합니다',
-                    'any.required': '시작일은 필수 입력 항목입니다'
-                }),
+            startDate: Joi.date().required().messages({
+                'date.base': '시작일은 유효한 날짜여야 합니다',
+                'any.required': '시작일은 필수 입력 항목입니다'
+            }),
 
-            endDate: Joi.date()
-                .min(Joi.ref('startDate'))
-                .required()
-                .messages({
-                    'date.base': '종료일은 유효한 날짜여야 합니다',
-                    'date.min': '종료일은 시작일보다 늦어야 합니다',
-                    'any.required': '종료일은 필수 입력 항목입니다'
-                }),
+            endDate: Joi.date().min(Joi.ref('startDate')).required().messages({
+                'date.base': '종료일은 유효한 날짜여야 합니다',
+                'date.min': '종료일은 시작일보다 늦어야 합니다',
+                'any.required': '종료일은 필수 입력 항목입니다'
+            }),
 
-            exhibitionType: Joi.string()
-                .valid('SOLO', 'GROUP', 'SPECIAL')
-                .default('GROUP')
-                .messages({
-                    'any.only': '전시회 유형은 SOLO, GROUP, SPECIAL 중 하나여야 합니다'
-                }),
+            exhibitionType: Joi.string().valid('SOLO', 'GROUP', 'SPECIAL').default('GROUP').messages({
+                'any.only': '전시회 유형은 SOLO, GROUP, SPECIAL 중 하나여야 합니다'
+            }),
 
-            location: Joi.string()
-                .max(200)
-                .allow('')
-                .optional()
-                .messages({
-                    'string.max': '전시 장소는 최대 200자까지 가능합니다'
-                }),
+            location: Joi.string().max(200).allow('').optional().messages({
+                'string.max': '전시 장소는 최대 200자까지 가능합니다'
+            }),
 
-            isActive: Joi.boolean()
-                .default(false)
-                .optional(),
+            isActive: Joi.boolean().default(false).optional(),
 
-            isSubmissionOpen: Joi.boolean()
-                .default(false)
-                .optional(),
+            isSubmissionOpen: Joi.boolean().default(false).optional(),
 
-            isFeatured: Joi.boolean()
-                .default(false)
-                .optional(),
+            isFeatured: Joi.boolean().default(false).optional(),
 
             // 선택적 필드들
             id: Joi.number().integer().positive().optional(),
@@ -112,28 +86,18 @@ export default class ExhibitionRequestDto extends BaseDto {
      */
     static getUpdateSchema() {
         return Joi.object({
-            title: Joi.string()
-                .min(1)
-                .max(200)
-                .optional()
-                .messages({
-                    'string.min': '전시회 제목을 입력해주세요',
-                    'string.max': '전시회 제목은 최대 200자까지 가능합니다'
-                }),
+            title: Joi.string().min(1).max(200).optional().messages({
+                'string.min': '전시회 제목을 입력해주세요',
+                'string.max': '전시회 제목은 최대 200자까지 가능합니다'
+            }),
 
-            description: Joi.string()
-                .max(2000)
-                .allow('')
-                .optional()
-                .messages({
-                    'string.max': '전시회 설명은 최대 2000자까지 가능합니다'
-                }),
+            description: Joi.string().max(2000).allow('').optional().messages({
+                'string.max': '전시회 설명은 최대 2000자까지 가능합니다'
+            }),
 
-            startDate: Joi.date()
-                .optional()
-                .messages({
-                    'date.base': '시작일은 유효한 날짜여야 합니다'
-                }),
+            startDate: Joi.date().optional().messages({
+                'date.base': '시작일은 유효한 날짜여야 합니다'
+            }),
 
             endDate: Joi.date()
                 .when('startDate', {
@@ -147,20 +111,13 @@ export default class ExhibitionRequestDto extends BaseDto {
                     'date.min': '종료일은 시작일보다 늦어야 합니다'
                 }),
 
-            exhibitionType: Joi.string()
-                .valid('SOLO', 'GROUP', 'SPECIAL')
-                .optional()
-                .messages({
-                    'any.only': '전시회 유형은 SOLO, GROUP, SPECIAL 중 하나여야 합니다'
-                }),
+            exhibitionType: Joi.string().valid('SOLO', 'GROUP', 'SPECIAL').optional().messages({
+                'any.only': '전시회 유형은 SOLO, GROUP, SPECIAL 중 하나여야 합니다'
+            }),
 
-            location: Joi.string()
-                .max(200)
-                .allow('')
-                .optional()
-                .messages({
-                    'string.max': '전시 장소는 최대 200자까지 가능합니다'
-                }),
+            location: Joi.string().max(200).allow('').optional().messages({
+                'string.max': '전시 장소는 최대 200자까지 가능합니다'
+            }),
 
             isActive: Joi.boolean().optional(),
             isSubmissionOpen: Joi.boolean().optional(),
@@ -180,14 +137,14 @@ export default class ExhibitionRequestDto extends BaseDto {
         let schema;
 
         switch (schemaType) {
-            case 'create':
-                schema = ExhibitionRequestDto.getCreateSchema();
-                break;
-            case 'update':
-                schema = ExhibitionRequestDto.getUpdateSchema();
-                break;
-            default:
-                schema = this.getValidationSchema();
+        case 'create':
+            schema = ExhibitionRequestDto.getCreateSchema();
+            break;
+        case 'update':
+            schema = ExhibitionRequestDto.getUpdateSchema();
+            break;
+        default:
+            schema = this.getValidationSchema();
         }
 
         const { error, value } = schema.validate(this.toPlainObject(), {

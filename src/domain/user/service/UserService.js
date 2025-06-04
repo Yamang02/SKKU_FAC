@@ -1,7 +1,16 @@
 import UserRequestDto from '../model/dto/UserRequestDto.js';
 import UserSimpleDto from '../model/dto/UserSimpleDto.js';
 import UserDetailDto from '../model/dto/UserDetailDto.js';
-import { UserNotFoundError, UserEmailDuplicateError, UserUsernameDuplicateError, UserInactiveError, UserUnverifiedError, UserBlockedError, UserAuthError, UserValidationError } from '../../../common/error/UserError.js';
+import {
+    UserNotFoundError,
+    UserEmailDuplicateError,
+    UserUsernameDuplicateError,
+    UserInactiveError,
+    UserUnverifiedError,
+    UserBlockedError,
+    UserAuthError,
+    UserValidationError
+} from '../../../common/error/UserError.js';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
 import bcrypt from 'bcrypt';
 import Page from '../../common/model/Page.js';
@@ -35,7 +44,6 @@ export default class UserService {
      * 새로운 사용자를 생성합니다.
      */
     async createUser(userRequestDTO) {
-
         // 이메일과 사용자명 중복 확인을 하나의 쿼리로 최적화
         const [existingEmailUser, existingUsernameUser] = await Promise.all([
             this.userRepository.findUserByEmail(userRequestDTO.email),
@@ -57,7 +65,6 @@ export default class UserService {
         const userId = generateDomainUUID(DOMAINS.USER);
         const skkuUserId = generateDomainUUID(DOMAINS.SKKU_USER);
         const externalUserId = generateDomainUUID(DOMAINS.EXTERNAL_USER);
-
 
         // 사용자 데이터 구성
         const userDto = new UserRequestDto({
@@ -83,7 +90,6 @@ export default class UserService {
         const userSimpleDto = new UserSimpleDto(createdUser);
         return userSimpleDto;
     }
-
 
     /**
      * 사용자 목록을 조회합니다.
@@ -156,16 +162,16 @@ export default class UserService {
     async getUserSimple(userId) {
         const user = await this._findUserOrThrow(userId);
         const userSimpleDto = new UserSimpleDto(user);
-        userSimpleDto.affiliation = user.SkkuUserProfile ?
-            user.SkkuUserProfile.department + ' ' + user.SkkuUserProfile.studentYear :
-            user.ExternalUserProfile?.affiliation || '';
+        userSimpleDto.affiliation = user.SkkuUserProfile
+            ? user.SkkuUserProfile.department + ' ' + user.SkkuUserProfile.studentYear
+            : user.ExternalUserProfile?.affiliation || '';
 
         return userSimpleDto;
     }
 
     /**
-    * 이메일로 사용자를 조회합니다.
-    */
+     * 이메일로 사용자를 조회합니다.
+     */
     async getUserByEmail(email) {
         return await this.userRepository.findUserByEmail(email);
     }
@@ -178,12 +184,11 @@ export default class UserService {
     }
 
     /**
-      * username으로 사용자를 조회합니다.
-      */
+     * username으로 사용자를 조회합니다.
+     */
     async getUserByUsername(username) {
         return await this.userRepository.findUserByUsername(username);
     }
-
 
     /**
      * 사용자 프로필 정보를 수정합니다.
@@ -224,8 +229,8 @@ export default class UserService {
     }
 
     /**
-    * 비밀번호를 업데이트합니다.
-    */
+     * 비밀번호를 업데이트합니다.
+     */
     async updatePassword(userId, newPassword) {
         await this._findUserOrThrow(userId);
         const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -233,8 +238,8 @@ export default class UserService {
     }
 
     /**
-    * 사용자 계정을 활성화합니다.
-    */
+     * 사용자 계정을 활성화합니다.
+     */
     async activateUser(userId) {
         await this._findUserOrThrow(userId);
 
@@ -383,8 +388,8 @@ export default class UserService {
     }
 
     /**
-    * 사용자 프로필 정보를 매핑합니다.
-    */
+     * 사용자 프로필 정보를 매핑합니다.
+     */
     mapUserToDto(user) {
         const dtoData = new UserDetailDto(user);
 

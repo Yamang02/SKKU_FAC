@@ -8,7 +8,11 @@
  */
 import ArtworkApi from '../../api/ArtworkApi.js';
 import ExhibitionApi from '../../api/ExhibitionApi.js';
-import { emptyArtworkTemplate, errorMessageTemplate, loadingSpinnerTemplate } from '../../templates/emptyArtworkTemplate.js';
+import {
+    emptyArtworkTemplate,
+    errorMessageTemplate,
+    loadingSpinnerTemplate
+} from '../../templates/emptyArtworkTemplate.js';
 import { modalTemplate, artworkModalContent } from '../../templates/modalTemplate.js';
 import { initModal, showModal, updateModalContent } from '../../common/modal.js';
 import { createArtworkCard } from '../../common/util/card.js';

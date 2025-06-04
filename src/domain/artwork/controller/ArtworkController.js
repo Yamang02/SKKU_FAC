@@ -62,7 +62,6 @@ export default class ArtworkController {
         }
     }
 
-
     /**
      * 전시회별 작품 목록을 조회합니다.
      */
@@ -88,5 +87,4 @@ export default class ArtworkController {
             return ViewResolver.renderError(res, error);
         }
     }
-
 }

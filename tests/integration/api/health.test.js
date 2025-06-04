@@ -73,7 +73,9 @@ test.describe('🏥 Health Check API Tests', () => {
 
     test.describe('헬스체크 안정성', () => {
         test('GET /health - 연속 요청 처리', async () => {
-            const requests = Array(5).fill().map(() => apiHelper.get('/health'));
+            const requests = Array(5)
+                .fill()
+                .map(() => apiHelper.get('/health'));
             const responses = await Promise.all(requests);
 
             responses.forEach(response => {
@@ -82,11 +84,13 @@ test.describe('🏥 Health Check API Tests', () => {
         });
 
         test('GET /health - 동시 요청 처리', async () => {
-            const concurrentRequests = Array(10).fill().map(async () => {
-                const response = await apiHelper.get('/health');
-                expect(response.status()).toBe(200);
-                return response.json();
-            });
+            const concurrentRequests = Array(10)
+                .fill()
+                .map(async () => {
+                    const response = await apiHelper.get('/health');
+                    expect(response.status()).toBe(200);
+                    return response.json();
+                });
 
             const results = await Promise.all(concurrentRequests);
 

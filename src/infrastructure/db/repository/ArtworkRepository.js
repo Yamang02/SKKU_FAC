@@ -14,10 +14,12 @@ class ArtworkRepository extends CachedRepository {
      * 기본 include 옵션 (작가 정보 포함)
      */
     getDefaultInclude() {
-        return [{
-            model: UserAccount,
-            attributes: ['name']
-        }];
+        return [
+            {
+                model: UserAccount,
+                attributes: ['name']
+            }
+        ];
     }
 
     async createArtwork(artworkData, options = {}) {
@@ -137,12 +139,14 @@ class ArtworkRepository extends CachedRepository {
 
     buildArtistSearchQueryOptions(options, isAdmin = false) {
         const artistWhere = {};
-        const artistInclude = [{
-            model: UserAccount,
-            where: { name: { [Op.like]: `%${options.keyword}%` } },
-            attributes: ['name'],
-            required: true
-        }];
+        const artistInclude = [
+            {
+                model: UserAccount,
+                where: { name: { [Op.like]: `%${options.keyword}%` } },
+                attributes: ['name'],
+                required: true
+            }
+        ];
 
         // 상태 필터링
         if (options.status) {
@@ -287,10 +291,12 @@ class ArtworkRepository extends CachedRepository {
 
             const artworkExhibitionRelationships = await ArtworkExhibitionRelationship.findAll({
                 where,
-                include: [{
-                    model: Artwork,
-                    required: true
-                }],
+                include: [
+                    {
+                        model: Artwork,
+                        required: true
+                    }
+                ],
                 limit: limit,
                 order: [['createdAt', 'DESC']]
             });

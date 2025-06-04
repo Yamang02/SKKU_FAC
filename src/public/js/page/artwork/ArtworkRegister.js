@@ -3,7 +3,6 @@ import ArtworkApi from '../../api/ArtworkApi.js';
 import ExhibitionApi from '../../api/ExhibitionApi.js';
 import { showErrorMessage, showSuccessMessage, showLoading } from '../../common/util/notification.js';
 
-
 // 페이지 초기화 함수
 async function initializePage() {
     try {
@@ -30,9 +29,8 @@ async function initializePage() {
         // 소속 정보 설정
         let affiliation = '';
         if (user.role === 'ADMIN' || user.role === 'SKKU_MEMBER') {
-            affiliation = user.department && user.studentYear ?
-                `${user.department} ${user.studentYear}` :
-                (user.department || '');
+            affiliation =
+                user.department && user.studentYear ? `${user.department} ${user.studentYear}` : user.department || '';
         } else {
             affiliation = user.affiliation || '';
         }
@@ -88,9 +86,7 @@ async function initializePage() {
         handleExhibitionParam();
     } catch (error) {
         // 오류가 401(Unauthorized) 관련인지 확인
-        if (error.message && (
-            error.status === 401
-        )) {
+        if (error.message && error.status === 401) {
             showErrorMessage('로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.');
             // 3초 후 로그인 페이지로 리디렉션
             setTimeout(() => {
@@ -144,7 +140,7 @@ function initImageUpload() {
     // 이미지 미리보기 업데이트 함수
     function updateImagePreview(file) {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = e => {
             imagePreview.src = e.target.result;
             imagePreview.style.display = 'block';
             imageOverlay.style.opacity = '0';
@@ -179,7 +175,7 @@ function initImageUpload() {
     });
 
     // 파일 선택 시 처리
-    fileInput.addEventListener('change', (e) => {
+    fileInput.addEventListener('change', e => {
         const file = e.target.files[0];
         if (!handleImageFile(file)) {
             fileInput.value = '';
@@ -187,7 +183,7 @@ function initImageUpload() {
     });
 
     // 드래그 앤 드롭 처리
-    imagePreviewContainer.addEventListener('dragover', (e) => {
+    imagePreviewContainer.addEventListener('dragover', e => {
         e.preventDefault();
         imagePreviewContainer.classList.add('dragover');
     });
@@ -196,7 +192,7 @@ function initImageUpload() {
         imagePreviewContainer.classList.remove('dragover');
     });
 
-    imagePreviewContainer.addEventListener('drop', (e) => {
+    imagePreviewContainer.addEventListener('drop', e => {
         e.preventDefault();
         imagePreviewContainer.classList.remove('dragover');
         const file = e.dataTransfer.files[0];
@@ -225,9 +221,8 @@ function initSubmitButton() {
         return;
     }
 
-    submitButton.addEventListener('click', async (event) => {
+    submitButton.addEventListener('click', async event => {
         event.preventDefault();
-
 
         // 입력값 가져오기
         const title = document.getElementById('title').value.trim();
@@ -316,7 +311,6 @@ function initSubmitButton() {
             submitButton.textContent = '등록하기';
             submitButton.classList.remove('processing');
         }
-
     });
 }
 

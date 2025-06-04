@@ -60,20 +60,14 @@ export default class UserAccountRepository extends CachedRepository {
      * 이메일로 사용자를 조회합니다.
      */
     async findUserByEmail(email) {
-        return await this.findOne(
-            { email },
-            { include: this.getDefaultInclude() }
-        );
+        return await this.findOne({ email }, { include: this.getDefaultInclude() });
     }
 
     /**
      * 사용자명으로 사용자를 조회합니다.
      */
     async findUserByUsername(username) {
-        return await this.findOne(
-            { username },
-            { include: this.getDefaultInclude() }
-        );
+        return await this.findOne({ username }, { include: this.getDefaultInclude() });
     }
 
     /**
@@ -87,29 +81,35 @@ export default class UserAccountRepository extends CachedRepository {
      * 새로운 사용자를 생성합니다.
      */
     async createUser(userData) {
-        return await TransactionManager.executeInTransaction(async (transaction) => {
+        return await TransactionManager.executeInTransaction(async transaction => {
             // UserAccount 생성
             const user = await this.create(userData, { transaction });
 
             // 프로필 정보 생성
             if (userData.role === 'SKKU_MEMBER') {
-                await SkkuUserProfile.create({
-                    id: userData.skkuUserId,
-                    userId: user.id,
-                    department: userData.department,
-                    studentYear: userData.studentYear,
-                    isClubMember: userData.isClubMember,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                }, { transaction });
+                await SkkuUserProfile.create(
+                    {
+                        id: userData.skkuUserId,
+                        userId: user.id,
+                        department: userData.department,
+                        studentYear: userData.studentYear,
+                        isClubMember: userData.isClubMember,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    },
+                    { transaction }
+                );
             } else if (userData.role === 'EXTERNAL_MEMBER') {
-                await ExternalUserProfile.create({
-                    id: userData.externalUserId,
-                    userId: user.id,
-                    affiliation: userData.affiliation,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                }, { transaction });
+                await ExternalUserProfile.create(
+                    {
+                        id: userData.externalUserId,
+                        userId: user.id,
+                        affiliation: userData.affiliation,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    },
+                    { transaction }
+                );
             }
 
             return user;
@@ -120,7 +120,7 @@ export default class UserAccountRepository extends CachedRepository {
      * 사용자 정보를 수정합니다.
      */
     async updateUserProfile(userData) {
-        return await TransactionManager.executeInTransaction(async (transaction) => {
+        return await TransactionManager.executeInTransaction(async transaction => {
             userData.updatedAt = new Date();
             await userData.save({ transaction });
 
@@ -147,7 +147,7 @@ export default class UserAccountRepository extends CachedRepository {
      * 사용자를 삭제합니다.
      */
     async deleteUser(id) {
-        return await TransactionManager.executeInTransaction(async (transaction) => {
+        return await TransactionManager.executeInTransaction(async transaction => {
             const user = await this.findById(id, {
                 include: [
                     { model: SkkuUserProfile, required: false },

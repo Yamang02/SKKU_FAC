@@ -1,5 +1,8 @@
 import { performanceMonitor } from '../../../../common/middleware/PerformanceMonitor.js';
-import { getConnectionPoolStats, checkConnectionPoolHealth } from '../../../../infrastructure/db/adapter/MySQLDatabase.js';
+import {
+    getConnectionPoolStats,
+    checkConnectionPoolHealth
+} from '../../../../infrastructure/db/adapter/MySQLDatabase.js';
 import logger from '../../../../common/utils/Logger.js';
 
 /**
@@ -7,7 +10,6 @@ import logger from '../../../../common/utils/Logger.js';
  * 관리자용 성능 통계 및 모니터링 기능을 제공합니다.
  */
 export default class PerformanceApiController {
-
     /**
      * 성능 통계 조회
      * @param {Object} req - Express 요청 객체
@@ -73,8 +75,7 @@ export default class PerformanceApiController {
             const poolStats = getConnectionPoolStats();
             const isHealthy = checkConnectionPoolHealth();
 
-            const utilizationRate = poolStats.available ?
-                (poolStats.using / poolStats.max * 100).toFixed(1) : 0;
+            const utilizationRate = poolStats.available ? ((poolStats.using / poolStats.max) * 100).toFixed(1) : 0;
 
             res.json({
                 success: true,
@@ -121,7 +122,10 @@ export default class PerformanceApiController {
                     total: this.formatBytes(systemMemory.totalMemory),
                     free: this.formatBytes(systemMemory.freeMemory),
                     used: this.formatBytes(systemMemory.totalMemory - systemMemory.freeMemory),
-                    usedPercentage: (((systemMemory.totalMemory - systemMemory.freeMemory) / systemMemory.totalMemory) * 100).toFixed(1)
+                    usedPercentage: (
+                        ((systemMemory.totalMemory - systemMemory.freeMemory) / systemMemory.totalMemory) *
+                        100
+                    ).toFixed(1)
                 }
             };
 
@@ -248,7 +252,8 @@ export default class PerformanceApiController {
             });
         }
 
-        if (processMemory.rss > 1024 * 1024 * 1024) { // 1GB
+        if (processMemory.rss > 1024 * 1024 * 1024) {
+            // 1GB
             recommendations.push({
                 type: 'info',
                 message: 'RSS 메모리가 1GB를 초과했습니다. 애플리케이션 최적화를 고려하세요.'
@@ -278,17 +283,17 @@ export default class PerformanceApiController {
         let results = {};
 
         switch (testType) {
-            case 'basic':
-                results = await this.basicBenchmark(iterations);
-                break;
-            case 'database':
-                results = await this.databaseBenchmark(iterations);
-                break;
-            case 'memory':
-                results = await this.memoryBenchmark(iterations);
-                break;
-            default:
-                throw new Error(`지원하지 않는 벤치마크 유형: ${testType}`);
+        case 'basic':
+            results = await this.basicBenchmark(iterations);
+            break;
+        case 'database':
+            results = await this.databaseBenchmark(iterations);
+            break;
+        case 'memory':
+            results = await this.memoryBenchmark(iterations);
+            break;
+        default:
+            throw new Error(`지원하지 않는 벤치마크 유형: ${testType}`);
         }
 
         const endTime = Date.now();
@@ -345,7 +350,8 @@ export default class PerformanceApiController {
         // 실제 구현에서는 간단한 SELECT 쿼리를 반복 실행
         const times = [];
 
-        for (let i = 0; i < Math.min(iterations, 10); i++) { // DB 부하 방지를 위해 최대 10회
+        for (let i = 0; i < Math.min(iterations, 10); i++) {
+            // DB 부하 방지를 위해 최대 10회
             const start = Date.now();
 
             // 간단한 쿼리 시뮬레이션 (실제로는 DB 쿼리 실행)

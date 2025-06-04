@@ -10,10 +10,12 @@ export default class NoticeRepository extends BaseRepository {
      * 기본 include 옵션 (작성자 정보 포함)
      */
     getDefaultInclude() {
-        return [{
-            model: UserAccount,
-            attributes: ['id', 'name', 'email']
-        }];
+        return [
+            {
+                model: UserAccount,
+                attributes: ['id', 'name', 'email']
+            }
+        ];
     }
 
     /**
@@ -41,7 +43,10 @@ export default class NoticeRepository extends BaseRepository {
             where,
             page,
             limit,
-            order: [['isImportant', 'DESC'], ['createdAt', 'DESC']],
+            order: [
+                ['isImportant', 'DESC'],
+                ['createdAt', 'DESC']
+            ],
             include: this.getDefaultInclude()
         });
     }

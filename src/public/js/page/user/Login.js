@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 폼 제출 전 유효성 검사
     if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
+        loginForm.addEventListener('submit', async e => {
             e.preventDefault(); // 폼 제출의 기본 동작을 먼저 막습니다
 
             const username = document.querySelector('#username').value;

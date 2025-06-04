@@ -11,7 +11,6 @@ import NoticeRepository from '../../src/infrastructure/db/repository/NoticeRepos
  * 실제 애플리케이션 내부 연결 및 구조 확인
  */
 test.describe('Repository Integration Tests', () => {
-
     test.describe('Repository 클래스 구조 검증', () => {
         test('BaseRepository 클래스가 올바르게 정의됨', () => {
             expect(BaseRepository).toBeDefined();
@@ -19,21 +18,21 @@ test.describe('Repository Integration Tests', () => {
 
             // BaseRepository의 주요 메서드들이 정의되어 있는지 확인
             const baseRepo = new BaseRepository({
-                findByPk: () => { },
-                findOne: () => { },
-                findAll: () => { },
-                findAndCountAll: () => { },
-                create: () => { },
-                bulkCreate: () => { },
-                update: () => { },
-                destroy: () => { },
-                count: () => { },
+                findByPk: () => {},
+                findOne: () => {},
+                findAll: () => {},
+                findAndCountAll: () => {},
+                create: () => {},
+                bulkCreate: () => {},
+                update: () => {},
+                destroy: () => {},
+                count: () => {},
                 scope: () => ({}),
                 sequelize: {
-                    query: () => { },
-                    transaction: () => { },
-                    QueryTypes: { SELECT: 'SELECT' }
-                }
+                    query: () => {},
+                    transaction: () => {},
+                    QueryTypes: { SELECT: 'SELECT' },
+                },
             });
 
             expect(typeof baseRepo.findById).toBe('function');
@@ -93,9 +92,9 @@ test.describe('Repository Integration Tests', () => {
                 scope: () => mockModel,
                 sequelize: {
                     query: () => Promise.resolve([]),
-                    transaction: (callback) => callback({}),
-                    QueryTypes: { SELECT: 'SELECT' }
-                }
+                    transaction: callback => callback({}),
+                    QueryTypes: { SELECT: 'SELECT' },
+                },
             };
         });
 
@@ -192,10 +191,11 @@ test.describe('Repository Integration Tests', () => {
                 findByPk: () => Promise.resolve({ id: 1, name: 'Test' }),
                 findOne: () => Promise.resolve({ id: 1, name: 'Test' }),
                 findAll: () => Promise.resolve([{ id: 1 }, { id: 2 }]),
-                findAndCountAll: () => Promise.resolve({
-                    rows: [{ id: 1 }, { id: 2 }],
-                    count: 2
-                }),
+                findAndCountAll: () =>
+                    Promise.resolve({
+                        rows: [{ id: 1 }, { id: 2 }],
+                        count: 2,
+                    }),
                 create: () => Promise.resolve({ id: 1, name: 'Test' }),
                 bulkCreate: () => Promise.resolve([{ id: 1 }, { id: 2 }]),
                 update: () => Promise.resolve([1]),
@@ -204,9 +204,9 @@ test.describe('Repository Integration Tests', () => {
                 scope: () => mockModel,
                 sequelize: {
                     query: () => Promise.resolve([{ id: 1 }]),
-                    transaction: (callback) => callback({}),
-                    QueryTypes: { SELECT: 'SELECT' }
-                }
+                    transaction: callback => callback({}),
+                    QueryTypes: { SELECT: 'SELECT' },
+                },
             };
 
             baseRepo = new BaseRepository(mockModel);

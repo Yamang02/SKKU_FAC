@@ -43,7 +43,10 @@ class SessionStore {
                 name: sessionConfig.name || 'sessionId',
                 proxy: sessionConfig.proxy !== undefined ? sessionConfig.proxy : environment === 'production',
                 cookie: {
-                    secure: sessionConfig.cookie.secure !== undefined ? sessionConfig.cookie.secure : environment === 'production',
+                    secure:
+                        sessionConfig.cookie.secure !== undefined
+                            ? sessionConfig.cookie.secure
+                            : environment === 'production',
                     httpOnly: sessionConfig.cookie.httpOnly !== undefined ? sessionConfig.cookie.httpOnly : true,
                     maxAge: sessionConfig.cookie.maxAge || 24 * 60 * 60 * 1000,
                     sameSite: sessionConfig.cookie.sameSite || 'strict',
@@ -70,7 +73,6 @@ class SessionStore {
                 sessionName: this.sessionConfig.name
             });
             return this.sessionConfig;
-
         } catch (error) {
             logger.error('Redis 세션 스토어 초기화 실패', error);
 
@@ -89,7 +91,10 @@ class SessionStore {
                 name: sessionConfig.name || 'sessionId',
                 proxy: sessionConfig.proxy !== undefined ? sessionConfig.proxy : environment === 'production',
                 cookie: {
-                    secure: sessionConfig.cookie.secure !== undefined ? sessionConfig.cookie.secure : environment === 'production',
+                    secure:
+                        sessionConfig.cookie.secure !== undefined
+                            ? sessionConfig.cookie.secure
+                            : environment === 'production',
                     httpOnly: sessionConfig.cookie.httpOnly !== undefined ? sessionConfig.cookie.httpOnly : true,
                     maxAge: sessionConfig.cookie.maxAge || 24 * 60 * 60 * 1000,
                     sameSite: sessionConfig.cookie.sameSite || 'strict',

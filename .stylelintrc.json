@@ -1,12 +1,50 @@
 {
+    "extends": [
+        "stylelint-config-standard"
+    ],
+    "plugins": [
+        "stylelint-order"
+    ],
     "rules": {
         "color-named": null,
-        "selector-class-pattern": null,
+        "selector-class-pattern": "^[a-z][a-zA-Z0-9]*(-[a-z][a-zA-Z0-9]*)*$",
+        "selector-id-pattern": "^[a-z][a-zA-Z0-9]*(-[a-z][a-zA-Z0-9]*)*$",
         "selector-max-id": 1,
-        "max-nesting-depth": 3,
+        "max-nesting-depth": 4,
         "declaration-block-no-duplicate-properties": true,
         "declaration-block-no-shorthand-property-overrides": true,
         "block-no-empty": true,
-        "no-descending-specificity": null
-    }
+        "no-descending-specificity": null,
+        "comment-empty-line-before": "always",
+        "comment-whitespace-inside": "always",
+        "indentation": 4,
+        "string-quotes": "single",
+        "property-no-vendor-prefix": null,
+        "value-no-vendor-prefix": null,
+        "at-rule-no-vendor-prefix": null,
+        "selector-no-vendor-prefix": null,
+        "order/order": [
+            "custom-properties",
+            "declarations"
+        ],
+        "order/properties-alphabetical-order": true,
+        "alpha-value-notation": "number",
+        "color-function-notation": "modern",
+        "custom-property-pattern": "^[a-z][a-zA-Z0-9]*(-[a-z][a-zA-Z0-9]*)*$",
+        "declaration-block-single-line-max-declarations": 1,
+        "font-family-name-quotes": "always-where-recommended",
+        "function-url-quotes": "always",
+        "media-feature-range-notation": "context",
+        "number-max-precision": 3,
+        "selector-attribute-quotes": "always",
+        "shorthand-property-no-redundant-values": true,
+        "value-keyword-case": "lower"
+    },
+    "ignoreFiles": [
+        "node_modules/**",
+        "dist/**",
+        "build/**",
+        "coverage/**",
+        "test-results/**"
+    ]
 }

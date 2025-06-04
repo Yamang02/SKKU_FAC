@@ -299,12 +299,12 @@ class MetricsCollector {
         const status = isConnected ? 1 : 0;
 
         switch (service) {
-            case 'redis':
-                this.redisConnectionStatus.set(status);
-                break;
-            case 'database':
-                this.dbConnectionStatus.set(status);
-                break;
+        case 'redis':
+            this.redisConnectionStatus.set(status);
+            break;
+        case 'database':
+            this.dbConnectionStatus.set(status);
+            break;
         }
 
         logger.debug('📊 연결 상태 메트릭 업데이트', {

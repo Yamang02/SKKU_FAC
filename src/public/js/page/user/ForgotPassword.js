@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 비밀번호 재설정 링크 요청 처리
     if (accountRecoveryForm) {
-        accountRecoveryForm.addEventListener('submit', async (e) => {
+        accountRecoveryForm.addEventListener('submit', async e => {
             e.preventDefault();
 
             const email = emailInput.value;

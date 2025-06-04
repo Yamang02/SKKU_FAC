@@ -1,10 +1,5 @@
 import logger from '../utils/Logger.js';
-import {
-    getErrorStatusCode,
-    getErrorSeverity,
-    getErrorCategory,
-    ErrorSeverity
-} from '../error/BaseError.js';
+import { getErrorStatusCode, getErrorSeverity, getErrorCategory, ErrorSeverity } from '../error/BaseError.js';
 import ErrorReporter from '../monitoring/ErrorReporter.js';
 import Config from '../../config/Config.js';
 
@@ -43,11 +38,13 @@ export class ErrorHandler {
         this.transformRules = options.transformRules || {};
 
         // 에러 리포터 설정
-        this.errorReporter = options.errorReporter || new ErrorReporter({
-            projectName: options.projectName || 'SKKU Gallery',
-            enableNotifications: options.enableNotifications,
-            emailConfig: options.emailConfig
-        });
+        this.errorReporter =
+            options.errorReporter ||
+            new ErrorReporter({
+                projectName: options.projectName || 'SKKU Gallery',
+                enableNotifications: options.enableNotifications,
+                emailConfig: options.emailConfig
+            });
 
         // 메트릭 및 통계
         this.errorStats = {
@@ -194,7 +191,6 @@ export class ErrorHandler {
 
             // 응답 전송
             this.sendErrorResponse(transformedError, req, res, errorInfo);
-
         } catch (handlingError) {
             // 에러 처리 중 에러가 발생한 경우
             logger.error('에러 처리 중 오류 발생', handlingError);
@@ -235,8 +231,7 @@ export class ErrorHandler {
         }
 
         // URL 패턴 기반 필터링
-        if (ignorePatterns && ignorePatterns.some(pattern =>
-            new RegExp(pattern).test(req.originalUrl))) {
+        if (ignorePatterns && ignorePatterns.some(pattern => new RegExp(pattern).test(req.originalUrl))) {
             return true;
         }
 
@@ -271,9 +266,7 @@ export class ErrorHandler {
         if (messageTransforms) {
             for (const [pattern, replacement] of Object.entries(messageTransforms)) {
                 if (new RegExp(pattern).test(err.message)) {
-                    err.message = typeof replacement === 'function'
-                        ? replacement(err.message, err, req)
-                        : replacement;
+                    err.message = typeof replacement === 'function' ? replacement(err.message, err, req) : replacement;
                     break;
                 }
             }
@@ -367,11 +360,13 @@ export class ErrorHandler {
         }
 
         // 사용자 정보 추출
-        const userInfo = req.session?.user ? {
-            username: req.session.user.username,
-            role: req.session.user.role,
-            id: req.session.user.id
-        } : null;
+        const userInfo = req.session?.user
+            ? {
+                username: req.session.user.username,
+                role: req.session.user.role,
+                id: req.session.user.id
+            }
+            : null;
 
         const logData = {
             url: req.originalUrl,
@@ -406,17 +401,17 @@ export class ErrorHandler {
         } else {
             // 일반 에러는 기본 로깅 사용
             switch (errorInfo.severity) {
-                case ErrorSeverity.MEDIUM:
-                    logger.warn('⚠️ MEDIUM SEVERITY ERROR', { error: err, request: sanitizedLogData }, userInfo);
-                    break;
-                case ErrorSeverity.LOW:
-                default:
-                    if (errorInfo.statusCode === 404) {
-                        logger.debug(`📄 404 Error - ${req.originalUrl}`, { request: sanitizedLogData }, userInfo);
-                    } else {
-                        logger.info('ℹ️ CLIENT ERROR', { error: err, request: sanitizedLogData }, userInfo);
-                    }
-                    break;
+            case ErrorSeverity.MEDIUM:
+                logger.warn('⚠️ MEDIUM SEVERITY ERROR', { error: err, request: sanitizedLogData }, userInfo);
+                break;
+            case ErrorSeverity.LOW:
+            default:
+                if (errorInfo.statusCode === 404) {
+                    logger.debug(`📄 404 Error - ${req.originalUrl}`, { request: sanitizedLogData }, userInfo);
+                } else {
+                    logger.info('ℹ️ CLIENT ERROR', { error: err, request: sanitizedLogData }, userInfo);
+                }
+                break;
             }
         }
 
@@ -450,15 +445,15 @@ export class ErrorHandler {
      */
     getErrorMessage(severity) {
         switch (severity) {
-            case ErrorSeverity.CRITICAL:
-                return '🚨 시스템 중요 에러 발생';
-            case ErrorSeverity.HIGH:
-                return '🔥 높은 심각도 에러 발생';
-            case ErrorSeverity.MEDIUM:
-                return '⚠️ 중간 심각도 에러 발생';
-            case ErrorSeverity.LOW:
-            default:
-                return 'ℹ️ 클라이언트 에러 발생';
+        case ErrorSeverity.CRITICAL:
+            return '🚨 시스템 중요 에러 발생';
+        case ErrorSeverity.HIGH:
+            return '🔥 높은 심각도 에러 발생';
+        case ErrorSeverity.MEDIUM:
+            return '⚠️ 중간 심각도 에러 발생';
+        case ErrorSeverity.LOW:
+        default:
+            return 'ℹ️ 클라이언트 에러 발생';
         }
     }
 
@@ -486,7 +481,7 @@ export class ErrorHandler {
         this.errorPatterns.set(errorKey, pattern);
 
         // 패턴 감지 (5분 내에 동일한 에러가 5회 이상 발생)
-        if (pattern.count >= 5 && (now - pattern.firstOccurrence) <= timeWindow) {
+        if (pattern.count >= 5 && now - pattern.firstOccurrence <= timeWindow) {
             logger.logErrorPattern(
                 errorKey,
                 pattern.count,

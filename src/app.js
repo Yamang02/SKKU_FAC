@@ -31,9 +31,7 @@ const sentry = getSentry();
 getCacheManager();
 
 // Swagger 문서 로드
-const swaggerDocument = JSON.parse(
-    fs.readFileSync(path.resolve('./src/swagger.json'), 'utf8')
-);
+const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve('./src/swagger.json'), 'utf8'));
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -65,7 +63,7 @@ const appInitializer = new AppInitializer(app);
 
 // 미들웨어 설정 함수들을 AppInitializer에 주입
 appInitializer.getMiddlewareSetupFunctions = () => ({
-    setupFlashMiddleware: (app) => {
+    setupFlashMiddleware: app => {
         app.use(flash());
         app.use((req, res, next) => {
             res.locals.messages = {
@@ -77,11 +75,11 @@ appInitializer.getMiddlewareSetupFunctions = () => ({
             next();
         });
     },
-    setupViewEngine: (app) => {
+    setupViewEngine: app => {
         app.set('view engine', 'ejs');
         app.set('views', path.join(__dirname, 'views'));
     },
-    setupGlobalMiddleware: (app) => {
+    setupGlobalMiddleware: app => {
         app.use(pageTracker);
         app.use((req, res, next) => {
             res.locals.user = req.session?.user || null;
@@ -89,7 +87,7 @@ appInitializer.getMiddlewareSetupFunctions = () => ({
             next();
         });
     },
-    setupLoggingMiddleware: (app) => {
+    setupLoggingMiddleware: app => {
         app.use((req, res, next) => {
             const start = Date.now();
             res.on('finish', () => {
@@ -118,4 +116,3 @@ appInitializer.initialize();
 app.use(sentry.getErrorHandler());
 
 export default app;
-

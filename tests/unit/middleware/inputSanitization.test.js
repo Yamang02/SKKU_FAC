@@ -5,7 +5,7 @@ import {
     sanitizeSql,
     sanitizeNoSql,
     createSanitizationMiddleware,
-    sanitizeFields
+    sanitizeFields,
 } from '../../../src/common/middleware/inputSanitization.js';
 
 describe('Input Sanitization Middleware', () => {
@@ -119,7 +119,7 @@ describe('Input Sanitization Middleware', () => {
         it('should handle nested objects', () => {
             const input = {
                 user: { $ne: null },
-                data: { $regex: 'test' }
+                data: { $regex: 'test' },
             };
             const result = sanitizeNoSql(input);
 
@@ -139,17 +139,17 @@ describe('Input Sanitization Middleware', () => {
                 params: {},
                 method: 'POST',
                 url: '/test',
-                ip: '127.0.0.1'
+                ip: '127.0.0.1',
             };
             res = {};
-            next = () => { };
+            next = () => {};
         });
 
-        it('should sanitize request body', (done) => {
+        it('should sanitize request body', done => {
             const middleware = createSanitizationMiddleware();
             req.body = {
                 title: '<script>alert("xss")</script>Test Title',
-                description: "'; DROP TABLE users; --"
+                description: "'; DROP TABLE users; --",
             };
 
             middleware(req, res, () => {
@@ -159,11 +159,11 @@ describe('Input Sanitization Middleware', () => {
             });
         });
 
-        it('should sanitize query parameters', (done) => {
+        it('should sanitize query parameters', done => {
             const middleware = createSanitizationMiddleware();
             req.query = {
                 search: '<img src=x onerror=alert(1)>',
-                filter: 'SELECT * FROM users'
+                filter: 'SELECT * FROM users',
             };
 
             middleware(req, res, () => {
@@ -173,9 +173,9 @@ describe('Input Sanitization Middleware', () => {
             });
         });
 
-        it('should skip specified paths', (done) => {
+        it('should skip specified paths', done => {
             const middleware = createSanitizationMiddleware({
-                skipPaths: ['/api-docs', '/health']
+                skipPaths: ['/api-docs', '/health'],
             });
             req.path = '/api-docs';
             req.body = { malicious: '<script>alert("xss")</script>' };
@@ -186,7 +186,7 @@ describe('Input Sanitization Middleware', () => {
             });
         });
 
-        it('should handle errors gracefully', (done) => {
+        it('should handle errors gracefully', done => {
             const middleware = createSanitizationMiddleware();
             // 순환 참조를 가진 객체로 에러 유발
             const circular = {};
@@ -207,18 +207,18 @@ describe('Input Sanitization Middleware', () => {
             req = {
                 body: {},
                 method: 'POST',
-                url: '/test'
+                url: '/test',
             };
             res = {};
-            next = () => { };
+            next = () => {};
         });
 
-        it('should sanitize specified fields only', (done) => {
+        it('should sanitize specified fields only', done => {
             const middleware = sanitizeFields(['title', 'description']);
             req.body = {
                 title: '<script>alert("xss")</script>',
                 description: "'; DROP TABLE users; --",
-                safe_field: '<p>This should not be changed</p>'
+                safe_field: '<p>This should not be changed</p>',
             };
 
             middleware(req, res, () => {
@@ -229,14 +229,14 @@ describe('Input Sanitization Middleware', () => {
             });
         });
 
-        it('should handle nested field paths', (done) => {
+        it('should handle nested field paths', done => {
             const middleware = sanitizeFields(['user.profile.bio']);
             req.body = {
                 user: {
                     profile: {
-                        bio: '<script>alert("xss")</script>Safe bio'
-                    }
-                }
+                        bio: '<script>alert("xss")</script>Safe bio',
+                    },
+                },
             };
 
             middleware(req, res, () => {
@@ -246,7 +246,7 @@ describe('Input Sanitization Middleware', () => {
             });
         });
 
-        it('should handle missing fields gracefully', (done) => {
+        it('should handle missing fields gracefully', done => {
             const middleware = sanitizeFields(['nonexistent.field']);
             req.body = { title: 'Test' };
 
@@ -265,13 +265,10 @@ describe('Input Sanitization Middleware', () => {
                     content: 'Normal content with <p>safe HTML</p>',
                     metadata: {
                         tags: ['<script>tag1</script>', 'normal tag'],
-                        author: "'; DROP TABLE users; --"
-                    }
+                        author: "'; DROP TABLE users; --",
+                    },
                 },
-                comments: [
-                    { text: '<img src=x onerror=alert(1)>' },
-                    { text: 'Normal comment' }
-                ]
+                comments: [{ text: '<img src=x onerror=alert(1)>' }, { text: 'Normal comment' }],
             };
 
             const middleware = createSanitizationMiddleware({ allowHtml: false });
@@ -293,7 +290,7 @@ describe('Input Sanitization Middleware', () => {
                 score: 45.67,
                 created: new Date(),
                 tags: null,
-                config: undefined
+                config: undefined,
             };
 
             const middleware = createSanitizationMiddleware();

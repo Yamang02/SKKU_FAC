@@ -1,8 +1,9 @@
 /**
- * 간단한 전시회 정보를 위한 DTO
+ * 전시회 간단 DTO
+ * 간단한 전시회 정보를 담는 객체입니다.
  */
 
-import CloudinaryUrlOptimizer from '../../../../common/utils/CloudinaryUrlOptimizer.js';
+import CloudinaryUrlOptimizer from '#common/utils/CloudinaryUrlOptimizer.js';
 
 export default class ExhibitionSimpleDto {
     constructor(exhibition) {

@@ -7,9 +7,7 @@ import logger from '../../../common/utils/Logger.js';
  * 이미지 업로드, 삭제, 조회 등의 비즈니스 로직을 담당합니다.
  */
 class ImageService {
-
-    constructor() {
-    }
+    constructor() {}
 
     /**
      * 업로드된 파일 정보를 추출합니다.
@@ -22,8 +20,8 @@ class ImageService {
         }
 
         return {
-            imageUrl: file.path,          // 업로드된 이미지의 URL
-            publicId: file.filename       // Cloudinary에서의 고유 식별자
+            imageUrl: file.path, // 업로드된 이미지의 URL
+            publicId: file.filename // Cloudinary에서의 고유 식별자
         };
     }
 
@@ -42,10 +40,7 @@ class ImageService {
             });
 
             // 인프라 레이어의 삭제 함수 사용 (타임아웃과 경쟁)
-            const result = await Promise.race([
-                deleteCloudinaryImage(publicId),
-                timeoutPromise
-            ]);
+            const result = await Promise.race([deleteCloudinaryImage(publicId), timeoutPromise]);
 
             logger.info('이미지 삭제 결과', { publicId, result });
 

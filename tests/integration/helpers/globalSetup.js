@@ -18,7 +18,6 @@ async function globalSetup() {
         console.log('📋 현재 상태:', status);
 
         console.log('✅ Playwright 전역 설정 완료');
-
     } catch (error) {
         console.error('❌ Playwright 전역 설정 실패:', error);
         // 설정 실패 시에도 테스트 진행 (Docker 컨테이너가 수동으로 시작될 수 있음)

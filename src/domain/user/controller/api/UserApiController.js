@@ -40,7 +40,8 @@ export default class UserApiController {
 
             // DTO가 없는 경우 fallback (기존 방식)
             if (!userDto) {
-                const { username, name, email, password, role, department, affiliation, studentYear, isClubMember } = req.body;
+                const { username, name, email, password, role, department, affiliation, studentYear, isClubMember } =
+                    req.body;
 
                 const fallbackDto = new UserRequestDto({
                     username,
@@ -172,7 +173,7 @@ export default class UserApiController {
         try {
             const flash = req.session.flash;
 
-            ('플래시 메시지 : ', flash);
+            '플래시 메시지 : ', flash;
 
             // 플래시 메시지를 세션에서 제거
             if (flash) {

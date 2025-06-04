@@ -38,7 +38,6 @@ class AppInitializer {
 
             this.initialized = true;
             logger.success('애플리케이션 초기화 완료');
-
         } catch (error) {
             logger.error('애플리케이션 초기화 실패', error);
             throw error;
@@ -88,7 +87,8 @@ class AppInitializer {
      * 세션 의존 미들웨어 설정
      */
     setupSessionDependentMiddleware() {
-        const { setupFlashMiddleware, setupViewEngine, setupGlobalMiddleware, setupLoggingMiddleware } = this.getMiddlewareSetupFunctions();
+        const { setupFlashMiddleware, setupViewEngine, setupGlobalMiddleware, setupLoggingMiddleware } =
+            this.getMiddlewareSetupFunctions();
 
         setupFlashMiddleware(this.app);
         setupViewEngine(this.app);

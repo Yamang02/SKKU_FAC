@@ -5,7 +5,7 @@ import {
     mixedContentProtection,
     secureCookieSettings,
     httpsViolationDetector,
-    HttpsEnforcementMonitor
+    HttpsEnforcementMonitor,
 } from '../../../src/common/middleware/httpsEnforcement.js';
 
 // Mock dependencies
@@ -15,22 +15,22 @@ vi.mock('../../../src/common/utils/Logger.js', () => ({
         warn: vi.fn(),
         error: vi.fn(),
         debug: vi.fn(),
-        success: vi.fn()
-    }
+        success: vi.fn(),
+    },
 }));
 
 vi.mock('../../../src/config/Config.js', () => ({
     default: {
         getInstance: vi.fn(() => ({
             getEnvironment: vi.fn(() => 'test'),
-            get: vi.fn((key) => {
+            get: vi.fn(key => {
                 const configs = {
-                    'security.https': {}
+                    'security.https': {},
                 };
                 return configs[key] || {};
-            })
-        }))
-    }
+            }),
+        })),
+    },
 }));
 
 describe('HTTPS Enforcement 미들웨어', () => {
@@ -44,14 +44,14 @@ describe('HTTPS Enforcement 미들웨어', () => {
             url: '/test',
             ip: '127.0.0.1',
             get: vi.fn(),
-            method: 'GET'
+            method: 'GET',
         };
 
         res = {
             redirect: vi.fn(),
             setHeader: vi.fn(),
             getHeader: vi.fn(),
-            status: vi.fn().mockReturnThis()
+            status: vi.fn().mockReturnThis(),
         };
 
         next = vi.fn();
@@ -127,10 +127,7 @@ describe('HTTPS Enforcement 미들웨어', () => {
 
             middleware(req, res, next);
 
-            expect(res.setHeader).not.toHaveBeenCalledWith(
-                'Strict-Transport-Security',
-                expect.any(String)
-            );
+            expect(res.setHeader).not.toHaveBeenCalledWith('Strict-Transport-Security', expect.any(String));
             expect(next).toHaveBeenCalled();
         });
     });
@@ -143,10 +140,7 @@ describe('HTTPS Enforcement 미들웨어', () => {
 
             middleware(req, res, next);
 
-            expect(res.setHeader).toHaveBeenCalledWith(
-                'Content-Security-Policy',
-                expect.any(String)
-            );
+            expect(res.setHeader).toHaveBeenCalledWith('Content-Security-Policy', expect.any(String));
             expect(next).toHaveBeenCalled();
         });
 
@@ -156,10 +150,7 @@ describe('HTTPS Enforcement 미들웨어', () => {
 
             middleware(req, res, next);
 
-            expect(res.setHeader).not.toHaveBeenCalledWith(
-                'Content-Security-Policy',
-                expect.any(String)
-            );
+            expect(res.setHeader).not.toHaveBeenCalledWith('Content-Security-Policy', expect.any(String));
             expect(next).toHaveBeenCalled();
         });
     });

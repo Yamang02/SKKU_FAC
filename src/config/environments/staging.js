@@ -73,8 +73,8 @@ export default {
 
     // JWT 설정 (스테이징 환경 - 프로덕션 준비)
     jwt: {
-        accessTokenExpiry: '30m',     // 30분 (프로덕션보다 약간 여유)
-        refreshTokenExpiry: '14d',    // 14일 (프로덕션보다 길게)
+        accessTokenExpiry: '30m', // 30분 (프로덕션보다 약간 여유)
+        refreshTokenExpiry: '14d', // 14일 (프로덕션보다 길게)
         issuer: 'skku-fac-gallery-staging',
         audience: 'skku-fac-gallery-staging-users'
     },

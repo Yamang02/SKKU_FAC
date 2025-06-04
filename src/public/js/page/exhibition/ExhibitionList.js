@@ -14,8 +14,6 @@ const urlParams = new URLSearchParams(window.location.search);
 // API 함수 - 서버에서 가져오기
 async function fetchExhibitionList(pagination, filters = {}) {
     try {
-
-
         const params = {
             page: pagination.page,
             limit: pagination.limit,
@@ -86,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // 검색 기능
 function initSearch() {
-    elements.searchForm?.addEventListener('submit', (e) => {
+    elements.searchForm?.addEventListener('submit', e => {
         e.preventDefault();
 
         // 모든 필터 값 설정
@@ -208,8 +206,6 @@ function initExhibitionModal() {
 
 // 전시회 모달 표시
 function showExhibitionModal(exhibition) {
-
-
     const imageUrl = exhibition.imageUrl || exhibition.image || '/images/exhibition-placeholder.svg';
     const date = exhibition.date || `${exhibition.startDate} ~ ${exhibition.endDate}`;
 
@@ -347,7 +343,7 @@ async function loadExhibitionList() {
             pagination.renderUI(elements.paginationContainer);
 
             // 페이지 변경 이벤트 리스너
-            elements.paginationContainer.addEventListener('pagination:change', async (e) => {
+            elements.paginationContainer.addEventListener('pagination:change', async e => {
                 const page = e.detail.page;
                 // URL 파라미터 업데이트
                 urlParams.set('page', page);
@@ -357,7 +353,6 @@ async function loadExhibitionList() {
                 await loadExhibitionList();
             });
         }
-
     } catch (error) {
         console.error('전시회 목록을 로드하는 중 오류 발생:', error);
         showErrorMessage(error.message || '전시회 목록을 불러오는 중 오류가 발생했습니다.');
@@ -405,8 +400,9 @@ function createExhibitionCard(exhibition) {
     const typeBadgeClass = exhibition.exhibitionType === 'special' ? 'badge-special' : 'badge-regular';
 
     // 출품 가능 여부 배지
-    const submissionBadge = exhibition.isSubmissionOpen ?
-        '<span class="exhibition-badge badge-submission-open">출품가능</span>' : '';
+    const submissionBadge = exhibition.isSubmissionOpen
+        ? '<span class="exhibition-badge badge-submission-open">출품가능</span>'
+        : '';
 
     card.innerHTML = `
         <div class="exhibition-card__image-container">

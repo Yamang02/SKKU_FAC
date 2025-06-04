@@ -55,8 +55,10 @@ function getCSRFToken() {
 
     XMLHttpRequest.prototype.send = function (data) {
         // GET, HEAD, OPTIONS 요청이 아니고 같은 도메인인 경우 CSRF 토큰 추가
-        if (!['GET', 'HEAD', 'OPTIONS'].includes(this._method) &&
-            (!this._url || !this._url.startsWith('http') || this._url.startsWith(window.location.origin))) {
+        if (
+            !['GET', 'HEAD', 'OPTIONS'].includes(this._method) &&
+            (!this._url || !this._url.startsWith('http') || this._url.startsWith(window.location.origin))
+        ) {
             this.setRequestHeader('X-CSRF-Token', token);
         }
         return originalSend.call(this, data);

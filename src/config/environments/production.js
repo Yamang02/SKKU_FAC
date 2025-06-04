@@ -56,11 +56,7 @@ export default {
                         'https://res.cloudinary.com', // Cloudinary 이미지
                         'https://*.cloudinary.com'
                     ],
-                    connectSrc: [
-                        '\'self\'',
-                        'https://api.cloudinary.com',
-                        'https://res.cloudinary.com'
-                    ],
+                    connectSrc: ['\'self\'', 'https://api.cloudinary.com', 'https://res.cloudinary.com'],
                     frameSrc: ['\'none\''], // iframe 완전 금지
                     objectSrc: ['\'none\''], // object 요소 금지
                     baseUri: ['\'self\''], // base 태그 제한
@@ -116,8 +112,8 @@ export default {
 
     // JWT 설정 (프로덕션 환경 - 보안 우선)
     jwt: {
-        accessTokenExpiry: '15m',     // 15분 (보안 강화)
-        refreshTokenExpiry: '7d',     // 7일 (적절한 보안 수준)
+        accessTokenExpiry: '15m', // 15분 (보안 강화)
+        refreshTokenExpiry: '7d', // 7일 (적절한 보안 수준)
         issuer: 'skku-fac-gallery',
         audience: 'skku-fac-gallery-users'
     },

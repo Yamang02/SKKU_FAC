@@ -27,15 +27,15 @@ export default defineConfig({
         /* 실패 시 비디오 수집 */
         video: 'retain-on-failure',
         /* 실패 시 trace 수집 */
-        trace: 'on-first-retry'
+        trace: 'on-first-retry',
     },
 
     /* Chrome만 사용 */
     projects: [
         {
             name: 'chromium',
-            use: { ...devices['Desktop Chrome'] }
-        }
+            use: { ...devices['Desktop Chrome'] },
+        },
     ],
 
     /* 로컬 개발 서버 실행 */
@@ -43,6 +43,6 @@ export default defineConfig({
         command: 'npm run start:test',
         url: 'http://localhost:3000',
         reuseExistingServer: !isCI,
-        timeout: 120 * 1000
-    }
+        timeout: 120 * 1000,
+    },
 });

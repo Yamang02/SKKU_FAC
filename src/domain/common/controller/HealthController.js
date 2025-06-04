@@ -58,9 +58,7 @@ class HealthController {
             }
 
             // 전체 상태 결정 (핵심 서비스만 체크)
-            const coreServicesHealthy =
-                health.database.status === 'connected' &&
-                health.redis.status === 'connected';
+            const coreServicesHealthy = health.database.status === 'connected' && health.redis.status === 'connected';
 
             if (!coreServicesHealthy) {
                 health.status = 'DEGRADED';

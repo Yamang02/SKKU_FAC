@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1400" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <title><%= title %> - SKKU Art Gallery</title>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <!-- 기본 관리자 스타일 -->
+    <style>
+      @import url('/css/admin/style/adminStyle.css');
+    </style>
+    <!-- CSRF 보호 스크립트 -->
+    <script src="/js/common/csrf.js"></script>
+  </head>
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=1400">
-        <meta name="csrf-token" content="<%= csrfToken %>">
-        <title>
-            <%= title %> - SKKU Art Gallery
-        </title>
-        <!-- Font Awesome -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        <!-- 기본 관리자 스타일 -->
-        <style>
-            @import url('/css/admin/style/adminStyle.css');
-        </style>
-        <!-- CSRF 보호 스크립트 -->
-        <script src="/js/common/csrf.js"></script>
-    </head>
+  <body>
+    <div class="admin-container">
+      <%- include('./AdminSidebar') %>
+      <div class="admin-content">
+        <%- include('./AdminHeader') %>
+        <!-- 알림 컨테이너 -->
+        <div id="notification-container" class="notification-container"></div>
 
-    <body>
-        <div class="admin-container">
-            <%- include('./AdminSidebar') %>
-                <div class="admin-content">
-                    <%- include('./AdminHeader') %>
-                        <!-- 알림 컨테이너 -->
-                        <div id="notification-container" class="notification-container"></div>
+        <main class="admin-main"><%- content %></main>
+      </div>
+    </div>
 
-                        <main class="admin-main">
-                            <%- content %>
-                        </main>
-                </div>
-        </div>
-
-        <!-- 로딩 관리자 스크립트 -->
-        <script src="/js/admin/common/LoadingManager.js"></script>
-    </body>
-
+    <!-- 로딩 관리자 스크립트 -->
+    <script src="/js/admin/common/LoadingManager.js"></script>
+  </body>
 </html>

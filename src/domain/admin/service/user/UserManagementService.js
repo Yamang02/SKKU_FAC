@@ -27,10 +27,14 @@ export default class UserManagementService extends BaseAdminService {
      * @returns {Promise<Object>} 사용자 목록 데이터
      */
     async getUserList(options) {
-        return this.safeExecute(async () => {
-            const { page, limit, filters } = options;
-            return await this.userService.getUserList({ page, limit, filters });
-        }, '사용자 목록 조회', { options });
+        return this.safeExecute(
+            async () => {
+                const { page, limit, filters } = options;
+                return await this.userService.getUserList({ page, limit, filters });
+            },
+            '사용자 목록 조회',
+            { options }
+        );
     }
 
     /**
@@ -39,9 +43,13 @@ export default class UserManagementService extends BaseAdminService {
      * @returns {Promise<Object>} 사용자 상세 데이터
      */
     async getUserDetail(userId) {
-        return this.safeExecute(async () => {
-            return await this.userService.getUserDetail(userId);
-        }, '사용자 상세 조회', { userId });
+        return this.safeExecute(
+            async () => {
+                return await this.userService.getUserDetail(userId);
+            },
+            '사용자 상세 조회',
+            { userId }
+        );
     }
 
     /**
@@ -51,9 +59,13 @@ export default class UserManagementService extends BaseAdminService {
      * @returns {Promise<boolean>} 성공 여부
      */
     async updateUser(userId, userData) {
-        return this.safeExecute(async () => {
-            return await this.userService.updateUserByAdmin(userId, userData);
-        }, '사용자 정보 수정', { userId, userData });
+        return this.safeExecute(
+            async () => {
+                return await this.userService.updateUserByAdmin(userId, userData);
+            },
+            '사용자 정보 수정',
+            { userId, userData }
+        );
     }
 
     /**
@@ -62,9 +74,13 @@ export default class UserManagementService extends BaseAdminService {
      * @returns {Promise<boolean>} 성공 여부
      */
     async deleteUser(userId) {
-        return this.safeExecute(async () => {
-            return await this.userService.deleteUser(userId);
-        }, '사용자 삭제', { userId });
+        return this.safeExecute(
+            async () => {
+                return await this.userService.deleteUser(userId);
+            },
+            '사용자 삭제',
+            { userId }
+        );
     }
 
     /**
@@ -73,9 +89,13 @@ export default class UserManagementService extends BaseAdminService {
      * @returns {Promise<Object>} 초기화 결과와 임시 비밀번호
      */
     async resetUserPassword(userId) {
-        return this.safeExecute(async () => {
-            return await this.userService.resetUserPassword(userId);
-        }, '사용자 비밀번호 초기화', { userId });
+        return this.safeExecute(
+            async () => {
+                return await this.userService.resetUserPassword(userId);
+            },
+            '사용자 비밀번호 초기화',
+            { userId }
+        );
     }
 
     /**
@@ -84,53 +104,57 @@ export default class UserManagementService extends BaseAdminService {
      * @returns {Promise<Object>} 삭제 결과
      */
     async bulkDeleteUsers(userIds) {
-        return this.safeExecute(async () => {
-            const results = {
-                deleted: [],
-                failed: [],
-                skipped: []
-            };
+        return this.safeExecute(
+            async () => {
+                const results = {
+                    deleted: [],
+                    failed: [],
+                    skipped: []
+                };
 
-            for (const userId of userIds) {
-                try {
-                    // 관리자 계정은 삭제 방지
-                    const user = await this.userService.getUserDetail(userId);
-                    if (user && user.role === 'ADMIN') {
-                        results.skipped.push({
-                            userId,
-                            reason: '관리자 계정은 삭제할 수 없습니다.'
-                        });
-                        continue;
-                    }
+                for (const userId of userIds) {
+                    try {
+                        // 관리자 계정은 삭제 방지
+                        const user = await this.userService.getUserDetail(userId);
+                        if (user && user.role === 'ADMIN') {
+                            results.skipped.push({
+                                userId,
+                                reason: '관리자 계정은 삭제할 수 없습니다.'
+                            });
+                            continue;
+                        }
 
-                    const success = await this.userService.deleteUser(userId);
-                    if (success) {
-                        results.deleted.push(userId);
-                        this.logSuccess('대량 사용자 삭제 - 개별 성공', { userId });
-                    } else {
+                        const success = await this.userService.deleteUser(userId);
+                        if (success) {
+                            results.deleted.push(userId);
+                            this.logSuccess('대량 사용자 삭제 - 개별 성공', { userId });
+                        } else {
+                            results.failed.push({
+                                userId,
+                                reason: '삭제 처리 실패'
+                            });
+                        }
+                    } catch (error) {
                         results.failed.push({
                             userId,
-                            reason: '삭제 처리 실패'
+                            reason: error.message
                         });
+                        this.handleError(error, '대량 사용자 삭제 - 개별 실패', { userId });
                     }
-                } catch (error) {
-                    results.failed.push({
-                        userId,
-                        reason: error.message
-                    });
-                    this.handleError(error, '대량 사용자 삭제 - 개별 실패', { userId });
                 }
-            }
 
-            this.logSuccess('대량 사용자 삭제 완료', {
-                total: userIds.length,
-                deleted: results.deleted.length,
-                failed: results.failed.length,
-                skipped: results.skipped.length
-            });
+                this.logSuccess('대량 사용자 삭제 완료', {
+                    total: userIds.length,
+                    deleted: results.deleted.length,
+                    failed: results.failed.length,
+                    skipped: results.skipped.length
+                });
 
-            return results;
-        }, '대량 사용자 삭제', { userCount: userIds.length });
+                return results;
+            },
+            '대량 사용자 삭제',
+            { userCount: userIds.length }
+        );
     }
 
     /**
@@ -139,42 +163,46 @@ export default class UserManagementService extends BaseAdminService {
      * @returns {Promise<Object>} 업데이트 결과
      */
     async bulkUpdateUsers(updates) {
-        return this.safeExecute(async () => {
-            const results = {
-                updated: [],
-                failed: []
-            };
+        return this.safeExecute(
+            async () => {
+                const results = {
+                    updated: [],
+                    failed: []
+                };
 
-            for (const update of updates) {
-                try {
-                    const { userId, userData } = update;
-                    const success = await this.userService.updateUserByAdmin(userId, userData);
+                for (const update of updates) {
+                    try {
+                        const { userId, userData } = update;
+                        const success = await this.userService.updateUserByAdmin(userId, userData);
 
-                    if (success) {
-                        results.updated.push(userId);
-                        this.logSuccess('대량 사용자 업데이트 - 개별 성공', { userId, userData });
-                    } else {
+                        if (success) {
+                            results.updated.push(userId);
+                            this.logSuccess('대량 사용자 업데이트 - 개별 성공', { userId, userData });
+                        } else {
+                            results.failed.push({
+                                userId,
+                                reason: '업데이트 처리 실패'
+                            });
+                        }
+                    } catch (error) {
                         results.failed.push({
-                            userId,
-                            reason: '업데이트 처리 실패'
+                            userId: update.userId,
+                            reason: error.message
                         });
+                        this.handleError(error, '대량 사용자 업데이트 - 개별 실패', { update });
                     }
-                } catch (error) {
-                    results.failed.push({
-                        userId: update.userId,
-                        reason: error.message
-                    });
-                    this.handleError(error, '대량 사용자 업데이트 - 개별 실패', { update });
                 }
-            }
 
-            this.logSuccess('대량 사용자 업데이트 완료', {
-                total: updates.length,
-                updated: results.updated.length,
-                failed: results.failed.length
-            });
+                this.logSuccess('대량 사용자 업데이트 완료', {
+                    total: updates.length,
+                    updated: results.updated.length,
+                    failed: results.failed.length
+                });
 
-            return results;
-        }, '대량 사용자 업데이트', { updateCount: updates.length });
+                return results;
+            },
+            '대량 사용자 업데이트',
+            { updateCount: updates.length }
+        );
     }
 }

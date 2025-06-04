@@ -2,15 +2,15 @@
  * 전시회 서비스
  * 전시회 관련 비즈니스 로직을 처리합니다.
  */
-import ExhibitionRepository from '../../../infrastructure/db/repository/ExhibitionRepository.js';
-import ArtworkExhibitionRelationshipRepository from '../../../infrastructure/db/repository/relationship/ArtworkExhibitionRelationshipRepository.js';
-import ImageService from '../../image/service/ImageService.js';
-import { ExhibitionNotFoundError } from '../../../common/error/ExhibitionError.js';
+import ExhibitionRepository from '#infrastructure/db/repository/ExhibitionRepository.js';
+import ArtworkExhibitionRelationshipRepository from '#infrastructure/db/repository/relationship/ArtworkExhibitionRelationshipRepository.js';
+import ImageService from '#domain/image/service/ImageService.js';
+import { ExhibitionNotFoundError } from '#common/error/ExhibitionError.js';
 import ExhibitionResponseDto from '../model/dto/ExhibitionResponseDto.js';
 import ExhibitionListDto from '../model/dto/ExhibitionListDto.js';
 import ExhibitionSimpleDto from '../model/dto/ExhibitionSimpleDto.js';
-import Exhibition from '../../../infrastructure/db/model/entity/Exhibition.js';
-import logger from '../../../common/utils/Logger.js';
+import Exhibition from '#infrastructure/db/model/entity/Exhibition.js';
+import logger from '#common/utils/Logger.js';
 
 /**
  * 전시회 서비스
@@ -20,18 +20,10 @@ export default class ExhibitionService {
     static dependencies = ['ExhibitionRepository', 'ImageService', 'ArtworkExhibitionRelationshipRepository'];
 
     constructor(exhibitionRepository = null, imageService = null, artworkExhibitionRelationshipRepository = null) {
-        // 의존성 주입 방식 (새로운 방식)
-        if (exhibitionRepository && imageService && artworkExhibitionRelationshipRepository) {
-            this.exhibitionRepository = exhibitionRepository;
-            this.imageService = imageService;
-            this.artworkExhibitionRelationshipRepository = artworkExhibitionRelationshipRepository;
-        } else {
-            // 기존 방식 호환성 유지 (임시)
-            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
-            this.exhibitionRepository = new ExhibitionRepository();
-            this.imageService = new ImageService();
-            this.artworkExhibitionRelationshipRepository = new ArtworkExhibitionRelationshipRepository();
-        }
+        // 의존성 주입이 되지 않은 경우 기본 인스턴스 생성 (하위 호환성)
+        this.exhibitionRepository = exhibitionRepository || new ExhibitionRepository();
+        this.imageService = imageService || new ImageService();
+        this.artworkExhibitionRelationshipRepository = artworkExhibitionRelationshipRepository || new ArtworkExhibitionRelationshipRepository();
     }
 
     async getExhibitionsSimple(exhibitionIds) {
@@ -92,10 +84,10 @@ export default class ExhibitionService {
             await this.getExhibitionById(exhibitionId);
 
             // 전시회에 속한 작품들을 관계 테이블을 통해 조회
-            const result = await this.artworkExhibitionRelationshipRepository.findArtworksByExhibitionId(
-                exhibitionId,
-                { page, limit }
-            );
+            const result = await this.artworkExhibitionRelationshipRepository.findArtworksByExhibitionId(exhibitionId, {
+                page,
+                limit
+            });
 
             return result;
         } catch (error) {
@@ -201,12 +193,19 @@ export default class ExhibitionService {
             // 전시회 이미지 존재 시 백그라운드에서 삭제 (비동기 처리)
             if (exhibition.imagePublicId) {
                 // 백그라운드에서 이미지 삭제 (에러가 발생해도 전시회 삭제는 성공으로 처리)
-                this.imageService.deleteImage(exhibition.imagePublicId)
+                this.imageService
+                    .deleteImage(exhibition.imagePublicId)
                     .then(() => {
-                        logger.success('전시회 이미지 삭제 완료', { exhibitionId: id, publicId: exhibition.imagePublicId });
+                        logger.success('전시회 이미지 삭제 완료', {
+                            exhibitionId: id,
+                            publicId: exhibition.imagePublicId
+                        });
                     })
-                    .catch((error) => {
-                        logger.error('전시회 이미지 삭제 실패', error, { exhibitionId: id, publicId: exhibition.imagePublicId });
+                    .catch(error => {
+                        logger.error('전시회 이미지 삭제 실패', error, {
+                            exhibitionId: id,
+                            publicId: exhibition.imagePublicId
+                        });
                         // 이미지 삭제 실패는 로그만 남기고 전시회 삭제는 성공으로 처리
                     });
             }
@@ -269,7 +268,8 @@ export default class ExhibitionService {
             const exhibitionListDtos = [];
             for (const exhibition of result.items) {
                 // 전시회에 속한 작품 수 조회
-                const countArtworksInExhibition = await this.artworkExhibitionRelationshipRepository.countArtworksInExhibition(exhibition.id);
+                const countArtworksInExhibition =
+                    await this.artworkExhibitionRelationshipRepository.countArtworksInExhibition(exhibition.id);
                 const exhibitionListDto = new ExhibitionListDto(exhibition);
                 exhibitionListDto.artworkCount = countArtworksInExhibition;
                 exhibitionListDtos.push(exhibitionListDto);
@@ -338,7 +338,9 @@ export default class ExhibitionService {
 
             // 상태 전환 검증 (skipValidation이 true가 아닌 경우)
             if (!skipValidation && !this.isValidStatusTransition(currentStatus, newStatus)) {
-                throw new Error(`잘못된 상태 전환: ${currentStatus} → ${newStatus}. 허용되는 전환: ${Exhibition.getValidTransitions(currentStatus).join(', ')}`);
+                throw new Error(
+                    `잘못된 상태 전환: ${currentStatus} → ${newStatus}. 허용되는 전환: ${Exhibition.getValidTransitions(currentStatus).join(', ')}`
+                );
             }
 
             // 상태 변경 로깅

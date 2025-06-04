@@ -8,18 +8,18 @@
  */
 export const createMockRepository = (methods = {}) => {
     const defaultMethods = {
-        findById: async (_id) => ({ id: _id, found: true }),
+        findById: async _id => ({ id: _id, found: true }),
         findAll: async () => [],
-        create: async (data) => ({ id: 1, ...data }),
+        create: async data => ({ id: 1, ...data }),
         update: async (_id, data) => ({ id: _id, ...data }),
-        delete: async (_id) => true,
-        findByEmail: async (email) => ({ id: 1, email }),
-        findByUsername: async (username) => ({ id: 1, username })
+        delete: async _id => true,
+        findByEmail: async email => ({ id: 1, email }),
+        findByUsername: async username => ({ id: 1, username }),
     };
 
     return {
         ...defaultMethods,
-        ...methods
+        ...methods,
     };
 };
 
@@ -28,16 +28,16 @@ export const createMockRepository = (methods = {}) => {
  */
 export const createMockService = (methods = {}) => {
     const defaultMethods = {
-        create: async (data) => ({ id: 1, ...data }),
-        findById: async (_id) => ({ id: _id, found: true }),
+        create: async data => ({ id: 1, ...data }),
+        findById: async _id => ({ id: _id, found: true }),
         update: async (_id, data) => ({ id: _id, ...data }),
-        delete: async (_id) => true,
-        list: async () => []
+        delete: async _id => true,
+        list: async () => [],
     };
 
     return {
         ...defaultMethods,
-        ...methods
+        ...methods,
     };
 };
 
@@ -46,15 +46,15 @@ export const createMockService = (methods = {}) => {
  */
 export const createMockAuthService = (methods = {}) => {
     const defaultMethods = {
-        hashPassword: async (_password) => `hashed_${_password}`,
+        hashPassword: async _password => `hashed_${_password}`,
         comparePassword: async (_password, _hash) => true,
-        generateToken: async (user) => `token_${user.id}`,
-        verifyToken: async (_token) => ({ id: 1, username: 'test' })
+        generateToken: async user => `token_${user.id}`,
+        verifyToken: async _token => ({ id: 1, username: 'test' }),
     };
 
     return {
         ...defaultMethods,
-        ...methods
+        ...methods,
     };
 };
 
@@ -80,12 +80,12 @@ export const createSpy = (returnValue = undefined) => {
     spy.throwValue = new Error('Mock error');
 
     // 헬퍼 메서드들
-    spy.mockReturnValue = (value) => {
+    spy.mockReturnValue = value => {
         spy.returnValue = value;
         return spy;
     };
 
-    spy.mockThrow = (error) => {
+    spy.mockThrow = error => {
         spy.shouldThrow = true;
         spy.throwValue = error;
         return spy;
@@ -111,7 +111,7 @@ export const createMockContainer = (dependencies = {}) => {
             ArtworkRepository: createMockRepository(),
             ExhibitionRepository: createMockRepository(),
             AuthService: createMockAuthService(),
-            ...dependencies
+            ...dependencies,
         },
 
         get(name) {
@@ -120,7 +120,7 @@ export const createMockContainer = (dependencies = {}) => {
 
         set(name, mock) {
             this.dependencies[name] = mock;
-        }
+        },
     };
 
     return container;

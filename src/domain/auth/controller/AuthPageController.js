@@ -67,7 +67,7 @@ export default class AuthPageController {
     async handleLogout(req, res) {
         try {
             // Passport 로그아웃
-            req.logout((err) => {
+            req.logout(err => {
                 if (err) {
                     console.error('Passport 로그아웃 오류:', err);
                 }
@@ -75,7 +75,7 @@ export default class AuthPageController {
 
             // 세션 데이터 정리
             if (req.session) {
-                req.session.destroy((err) => {
+                req.session.destroy(err => {
                     if (err) {
                         console.error('세션 파기 오류:', err);
                     }

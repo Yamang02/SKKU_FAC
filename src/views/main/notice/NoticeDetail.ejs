@@ -1,78 +1,67 @@
 <style ref="stylesheet">
-    @import url('../../css/notice/NoticeDetail.css');
+  @import url('../../css/notice/NoticeDetail.css');
 </style>
 <div class="notice-detail-container">
-    <!-- 공지사항 헤더 -->
-    <div class="notice-detail-header">
-        <% if (notice.isImportant) { %>
-            <span class="notice-badge important">중요</span>
-            <% } %>
-                <h1 class="notice-detail-title">
-                    <%= notice.title %>
-                </h1>
-                <div class="notice-meta">
-                    <span class="notice-author">
-                        <%= notice.author %>
-                    </span>
-                    <span class="notice-date">
-                        <%= notice.formattedCreatedAt %>
-                    </span>
-                    <span class="notice-views">조회수 <%= notice.views %></span>
-                </div>
+  <!-- 공지사항 헤더 -->
+  <div class="notice-detail-header">
+    <% if (notice.isImportant) { %>
+    <span class="notice-badge important">중요</span>
+    <% } %>
+    <h1 class="notice-detail-title"><%= notice.title %></h1>
+    <div class="notice-meta">
+      <span class="notice-author"> <%= notice.author %> </span>
+      <span class="notice-date"> <%= notice.formattedCreatedAt %> </span>
+      <span class="notice-views">조회수 <%= notice.views %></span>
+    </div>
+  </div>
+
+  <!-- 공지사항 본문 -->
+  <div class="notice-detail-content">
+    <!-- 이미지 갤러리 (이미지가 있는 경우) -->
+    <% if (notice.images && notice.images.length> 0) { %>
+    <div class="notice-images">
+      <% notice.images.forEach((image, index)=> { %>
+      <div class="notice-image-wrapper">
+        <img src="<%= image %>" alt="공지사항 이미지 <%= index + 1 %>" class="notice-image" />
+      </div>
+      <% }); %>
+    </div>
+    <% } %>
+
+    <!-- 본문 내용 -->
+    <div class="notice-content"><%= notice.content %></div>
+  </div>
+
+  <!-- 이전/다음 글 네비게이션 -->
+  <div class="notice-navigation">
+    <div class="nav-group">
+      <% if (notice.prevId) { %>
+      <span class="nav-title">
+        <a href="/notice/<%= notice.prevId %>"> <%= notice.prevTitle %> </a>
+      </span>
+      <a href="/notice/<%= notice.prevId %>" class="btn--nav">
+        <i class="fas fa-chevron-left"></i>
+      </a>
+      <% } %>
     </div>
 
-    <!-- 공지사항 본문 -->
-    <div class="notice-detail-content">
-        <!-- 이미지 갤러리 (이미지가 있는 경우) -->
-        <% if (notice.images && notice.images.length> 0) { %>
-            <div class="notice-images">
-                <% notice.images.forEach((image, index)=> { %>
-                    <div class="notice-image-wrapper">
-                        <img src="<%= image %>" alt="공지사항 이미지 <%= index + 1 %>" class="notice-image">
-                    </div>
-                    <% }); %>
-            </div>
-            <% } %>
+    <a href="/notice" class="btn--list">
+      <i class="fas fa-list"></i>
+      <span>목록으로</span>
+    </a>
 
-                <!-- 본문 내용 -->
-                <div class="notice-content">
-                    <%= notice.content %>
-                </div>
+    <div class="nav-group">
+      <% if (notice.nextId) { %>
+      <a href="/notice/<%= notice.nextId %>" class="btn--nav">
+        <i class="fas fa-chevron-right"></i>
+      </a>
+      <span class="nav-title">
+        <a href="/notice/<%= notice.nextId %>"> <%= notice.nextTitle %> </a>
+      </span>
+      <% } %>
     </div>
+  </div>
 
-    <!-- 이전/다음 글 네비게이션 -->
-    <div class="notice-navigation">
-        <div class="nav-group">
-            <% if (notice.prevId) { %>
-                <span class="nav-title">
-                    <a href="/notice/<%= notice.prevId %>">
-                        <%= notice.prevTitle %>
-                    </a>
-                </span>
-                <a href="/notice/<%= notice.prevId %>" class="btn--nav">
-                    <i class="fas fa-chevron-left"></i>
-                </a>
-                <% } %>
-        </div>
-
-        <a href="/notice" class="btn--list">
-            <i class="fas fa-list"></i>
-            <span>목록으로</span>
-        </a>
-
-        <div class="nav-group">
-            <% if (notice.nextId) { %>
-                <a href="/notice/<%= notice.nextId %>" class="btn--nav">
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <span class="nav-title">
-                    <a href="/notice/<%= notice.nextId %>">
-                        <%= notice.nextTitle %>
-                    </a>
-                </span>
-                <% } %>
-        </div>
-    </div>
-
-    <!-- 외부 스크립트 파일 로드 -->
-    <script src="/js/page/notice/NoticeDetail.js"></script>
+  <!-- 외부 스크립트 파일 로드 -->
+  <script src="/js/page/notice/NoticeDetail.js"></script>
+</div>

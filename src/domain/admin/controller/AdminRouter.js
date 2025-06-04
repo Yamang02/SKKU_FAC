@@ -71,7 +71,7 @@ export function createAdminRouter(container) {
         }
 
         // 읽기 전용 관리자인 경우 쓰기 작업 차단
-        isReadOnlyAdmin()(req, res, (err) => {
+        isReadOnlyAdmin()(req, res, err => {
             if (err) return next(err);
 
             // 읽기 전용 관리자라면 403 반환
@@ -86,51 +86,160 @@ export function createAdminRouter(container) {
     AdminRouter.get(['/', '/dashboard'], canViewAdminDashboard(), (req, res) => adminController.getDashboard(req, res));
 
     // 사용자 관리 라우트
-    AdminRouter.get('/management/user', canReadUsers(), auditUserManagement(AuditLogType.USER_VIEW), (req, res) => userManagementController.getManagementUserList(req, res));
-    AdminRouter.get('/management/user/:id', canManageUserDetails(), auditUserManagement(AuditLogType.USER_VIEW), (req, res) => userManagementController.getManagementUserDetail(req, res));
-    AdminRouter.put('/management/user/:id', canWriteUsers(), preventReadOnlyActions, auditUserManagement(AuditLogType.USER_UPDATE), (req, res) => userManagementController.updateManagementUser(req, res));
-    AdminRouter.delete('/management/user/:id', canDeleteUsers(), preventReadOnlyActions, deleteTimeoutMiddleware, auditUserManagement(AuditLogType.USER_DELETE), (req, res) => userManagementController.deleteManagementUser(req, res));
-    AdminRouter.post('/management/user/:id/reset-password', canResetUserPassword(), preventReadOnlyActions, auditUserManagement(AuditLogType.USER_PASSWORD_RESET), (req, res) => userManagementController.resetManagementUserPassword(req, res));
+    AdminRouter.get('/management/user', canReadUsers(), auditUserManagement(AuditLogType.USER_VIEW), (req, res) =>
+        userManagementController.getManagementUserList(req, res)
+    );
+    AdminRouter.get(
+        '/management/user/:id',
+        canManageUserDetails(),
+        auditUserManagement(AuditLogType.USER_VIEW),
+        (req, res) => userManagementController.getManagementUserDetail(req, res)
+    );
+    AdminRouter.put(
+        '/management/user/:id',
+        canWriteUsers(),
+        preventReadOnlyActions,
+        auditUserManagement(AuditLogType.USER_UPDATE),
+        (req, res) => userManagementController.updateManagementUser(req, res)
+    );
+    AdminRouter.delete(
+        '/management/user/:id',
+        canDeleteUsers(),
+        preventReadOnlyActions,
+        deleteTimeoutMiddleware,
+        auditUserManagement(AuditLogType.USER_DELETE),
+        (req, res) => userManagementController.deleteManagementUser(req, res)
+    );
+    AdminRouter.post(
+        '/management/user/:id/reset-password',
+        canResetUserPassword(),
+        preventReadOnlyActions,
+        auditUserManagement(AuditLogType.USER_PASSWORD_RESET),
+        (req, res) => userManagementController.resetManagementUserPassword(req, res)
+    );
 
     // 전시회 관리 라우트
-    AdminRouter.get('/management/exhibition', canReadContent(), auditContentManagement(AuditLogType.EXHIBITION_VIEW), (req, res) => exhibitionManagementController.getManagementExhibitionListPage(req, res));
-    AdminRouter.get('/management/exhibition/new', canWriteContent(), (req, res) => exhibitionManagementController.getManagementExhibitionCreatePage(req, res));
-    AdminRouter.post('/management/exhibition/new', canWriteContent(), preventReadOnlyActions, imageUploadMiddleware('exhibition'), auditContentManagement(AuditLogType.EXHIBITION_CREATE), (req, res) => exhibitionManagementController.createManagementExhibition(req, res));
-    AdminRouter.get('/management/exhibition/:id', canViewExhibitionDetails(), auditContentManagement(AuditLogType.EXHIBITION_VIEW), (req, res) => exhibitionManagementController.getManagementExhibitionDetailPage(req, res));
-    AdminRouter.put('/management/exhibition/:id', canWriteContent(), preventReadOnlyActions, auditContentManagement(AuditLogType.EXHIBITION_UPDATE), (req, res) => exhibitionManagementController.updateManagementExhibition(req, res));
-    AdminRouter.delete('/management/exhibition/:id', canDeleteContent(), preventReadOnlyActions, deleteTimeoutMiddleware, auditContentManagement(AuditLogType.EXHIBITION_DELETE), (req, res) => exhibitionManagementController.deleteManagementExhibition(req, res));
-    AdminRouter.post('/management/exhibition/:id/featured', canFeatureExhibitions(), preventReadOnlyActions, auditContentManagement(AuditLogType.EXHIBITION_FEATURE), (req, res) => exhibitionManagementController.toggleFeatured(req, res));
+    AdminRouter.get(
+        '/management/exhibition',
+        canReadContent(),
+        auditContentManagement(AuditLogType.EXHIBITION_VIEW),
+        (req, res) => exhibitionManagementController.getManagementExhibitionListPage(req, res)
+    );
+    AdminRouter.get('/management/exhibition/new', canWriteContent(), (req, res) =>
+        exhibitionManagementController.getManagementExhibitionCreatePage(req, res)
+    );
+    AdminRouter.post(
+        '/management/exhibition/new',
+        canWriteContent(),
+        preventReadOnlyActions,
+        imageUploadMiddleware('exhibition'),
+        auditContentManagement(AuditLogType.EXHIBITION_CREATE),
+        (req, res) => exhibitionManagementController.createManagementExhibition(req, res)
+    );
+    AdminRouter.get(
+        '/management/exhibition/:id',
+        canViewExhibitionDetails(),
+        auditContentManagement(AuditLogType.EXHIBITION_VIEW),
+        (req, res) => exhibitionManagementController.getManagementExhibitionDetailPage(req, res)
+    );
+    AdminRouter.put(
+        '/management/exhibition/:id',
+        canWriteContent(),
+        preventReadOnlyActions,
+        auditContentManagement(AuditLogType.EXHIBITION_UPDATE),
+        (req, res) => exhibitionManagementController.updateManagementExhibition(req, res)
+    );
+    AdminRouter.delete(
+        '/management/exhibition/:id',
+        canDeleteContent(),
+        preventReadOnlyActions,
+        deleteTimeoutMiddleware,
+        auditContentManagement(AuditLogType.EXHIBITION_DELETE),
+        (req, res) => exhibitionManagementController.deleteManagementExhibition(req, res)
+    );
+    AdminRouter.post(
+        '/management/exhibition/:id/featured',
+        canFeatureExhibitions(),
+        preventReadOnlyActions,
+        auditContentManagement(AuditLogType.EXHIBITION_FEATURE),
+        (req, res) => exhibitionManagementController.toggleFeatured(req, res)
+    );
 
     // 작품 관리 라우트
-    AdminRouter.get('/management/artwork', canReadContent(), auditContentManagement(AuditLogType.ARTWORK_VIEW), (req, res) => artworkManagementController.getManagementArtworkListPage(req, res));
-    AdminRouter.get('/management/artwork/:id', canViewArtworkDetails(), auditContentManagement(AuditLogType.ARTWORK_VIEW), (req, res) => artworkManagementController.getManagementArtworkDetailPage(req, res));
-    AdminRouter.put('/management/artwork/:id', canWriteContent(), preventReadOnlyActions, auditContentManagement(AuditLogType.ARTWORK_UPDATE), (req, res) => artworkManagementController.updateManagementArtwork(req, res));
-    AdminRouter.delete('/management/artwork/:id', canDeleteContent(), preventReadOnlyActions, deleteTimeoutMiddleware, auditContentManagement(AuditLogType.ARTWORK_DELETE), (req, res) => artworkManagementController.deleteManagementArtwork(req, res));
-    AdminRouter.post('/management/artwork/:id/featured', canFeatureArtworks(), preventReadOnlyActions, auditContentManagement(AuditLogType.ARTWORK_FEATURE), (req, res) => artworkManagementController.toggleFeatured(req, res));
+    AdminRouter.get(
+        '/management/artwork',
+        canReadContent(),
+        auditContentManagement(AuditLogType.ARTWORK_VIEW),
+        (req, res) => artworkManagementController.getManagementArtworkListPage(req, res)
+    );
+    AdminRouter.get(
+        '/management/artwork/:id',
+        canViewArtworkDetails(),
+        auditContentManagement(AuditLogType.ARTWORK_VIEW),
+        (req, res) => artworkManagementController.getManagementArtworkDetailPage(req, res)
+    );
+    AdminRouter.put(
+        '/management/artwork/:id',
+        canWriteContent(),
+        preventReadOnlyActions,
+        auditContentManagement(AuditLogType.ARTWORK_UPDATE),
+        (req, res) => artworkManagementController.updateManagementArtwork(req, res)
+    );
+    AdminRouter.delete(
+        '/management/artwork/:id',
+        canDeleteContent(),
+        preventReadOnlyActions,
+        deleteTimeoutMiddleware,
+        auditContentManagement(AuditLogType.ARTWORK_DELETE),
+        (req, res) => artworkManagementController.deleteManagementArtwork(req, res)
+    );
+    AdminRouter.post(
+        '/management/artwork/:id/featured',
+        canFeatureArtworks(),
+        preventReadOnlyActions,
+        auditContentManagement(AuditLogType.ARTWORK_FEATURE),
+        (req, res) => artworkManagementController.toggleFeatured(req, res)
+    );
 
     // 배치 처리 라우트
     AdminRouter.get('/batch', canWriteContent(), (req, res) => batchController.getBatchJobListPage(req, res));
     AdminRouter.get('/batch/:jobId', canWriteContent(), (req, res) => batchController.getBatchJobDetailPage(req, res));
-    AdminRouter.post('/batch/:jobId/cancel', canWriteContent(), preventReadOnlyActions, (req, res) => batchController.cancelBatchJob(req, res));
+    AdminRouter.post('/batch/:jobId/cancel', canWriteContent(), preventReadOnlyActions, (req, res) =>
+        batchController.cancelBatchJob(req, res)
+    );
 
     // 배치 작업 생성 라우트
-    AdminRouter.post('/batch/bulk-delete-users', canDeleteUsers(), preventReadOnlyActions, (req, res) => batchController.createBulkDeleteUsersJob(req, res));
-    AdminRouter.post('/batch/bulk-delete-artworks', canDeleteContent(), preventReadOnlyActions, (req, res) => batchController.createBulkDeleteArtworksJob(req, res));
-    AdminRouter.post('/batch/bulk-delete-exhibitions', canDeleteContent(), preventReadOnlyActions, (req, res) => batchController.createBulkDeleteExhibitionsJob(req, res));
-    AdminRouter.post('/batch/bulk-feature-toggle', canWriteContent(), preventReadOnlyActions, (req, res) => batchController.createBulkFeatureToggleJob(req, res));
+    AdminRouter.post('/batch/bulk-delete-users', canDeleteUsers(), preventReadOnlyActions, (req, res) =>
+        batchController.createBulkDeleteUsersJob(req, res)
+    );
+    AdminRouter.post('/batch/bulk-delete-artworks', canDeleteContent(), preventReadOnlyActions, (req, res) =>
+        batchController.createBulkDeleteArtworksJob(req, res)
+    );
+    AdminRouter.post('/batch/bulk-delete-exhibitions', canDeleteContent(), preventReadOnlyActions, (req, res) =>
+        batchController.createBulkDeleteExhibitionsJob(req, res)
+    );
+    AdminRouter.post('/batch/bulk-feature-toggle', canWriteContent(), preventReadOnlyActions, (req, res) =>
+        batchController.createBulkFeatureToggleJob(req, res)
+    );
 
     // 배치 작업 API 라우트 (AJAX용)
-    AdminRouter.get('/api/batch/:jobId/status', canReadContent(), (req, res) => batchController.getBatchJobStatusAPI(req, res));
+    AdminRouter.get('/api/batch/:jobId/status', canReadContent(), (req, res) =>
+        batchController.getBatchJobStatusAPI(req, res)
+    );
     AdminRouter.get('/api/batch/stats', canReadContent(), (req, res) => batchController.getBatchJobStatsAPI(req, res));
 
     // Rate Limiting 통계 API (보안 모니터링용)
-    AdminRouter.get('/api/security/rate-limit-stats', canViewAdminDashboard(), (req, res) => getRateLimitStats(req, res));
+    AdminRouter.get('/api/security/rate-limit-stats', canViewAdminDashboard(), (req, res) =>
+        getRateLimitStats(req, res)
+    );
 
     // HTTPS Enforcement 통계 API (보안 모니터링용)
     AdminRouter.get('/api/security/https-stats', canViewAdminDashboard(), (req, res) => getHttpsStats(req, res));
 
     // Security Headers 통계 API (보안 모니터링용)
-    AdminRouter.get('/api/security/headers-stats', canViewAdminDashboard(), (req, res) => getSecurityHeadersStats(req, res));
+    AdminRouter.get('/api/security/headers-stats', canViewAdminDashboard(), (req, res) =>
+        getSecurityHeadersStats(req, res)
+    );
 
     // 통합 보안 대시보드 API
     AdminRouter.get('/api/security/dashboard', canViewAdminDashboard(), (req, res) => getSecurityDashboard(req, res));

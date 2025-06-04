@@ -36,36 +36,42 @@ export default class PassportService {
      * 로컬 전략 (이메일/비밀번호) 초기화
      */
     initializeLocalStrategy() {
-        passport.use('local', new LocalStrategy({
-            usernameField: 'email', // email을 username으로 사용
-            passwordField: 'password',
-            passReqToCallback: true
-        }, async (req, email, password, done) => {
-            try {
-                // 사용자 인증
-                const user = await this.userService.authenticateUser(email, password);
+        passport.use(
+            'local',
+            new LocalStrategy(
+                {
+                    usernameField: 'email', // email을 username으로 사용
+                    passwordField: 'password',
+                    passReqToCallback: true
+                },
+                async (req, email, password, done) => {
+                    try {
+                        // 사용자 인증
+                        const user = await this.userService.authenticateUser(email, password);
 
-                if (!user) {
-                    return done(null, false, {
-                        message: '이메일 또는 비밀번호가 올바르지 않습니다.'
-                    });
+                        if (!user) {
+                            return done(null, false, {
+                                message: '이메일 또는 비밀번호가 올바르지 않습니다.'
+                            });
+                        }
+
+                        // 계정 활성화 확인
+                        if (!user.isActive) {
+                            return done(null, false, {
+                                message: '계정이 비활성화되어 있습니다. 관리자에게 문의하세요.'
+                            });
+                        }
+
+                        return done(null, user);
+                    } catch (error) {
+                        console.error('로컬 인증 오류:', error);
+                        return done(error, false, {
+                            message: '로그인 처리 중 오류가 발생했습니다.'
+                        });
+                    }
                 }
-
-                // 계정 활성화 확인
-                if (!user.isActive) {
-                    return done(null, false, {
-                        message: '계정이 비활성화되어 있습니다. 관리자에게 문의하세요.'
-                    });
-                }
-
-                return done(null, user);
-            } catch (error) {
-                console.error('로컬 인증 오류:', error);
-                return done(error, false, {
-                    message: '로그인 처리 중 오류가 발생했습니다.'
-                });
-            }
-        }));
+            )
+        );
     }
 
     /**
@@ -79,46 +85,52 @@ export default class PassportService {
         });
 
         if (googleConfig.clientID && googleConfig.clientSecret) {
-            passport.use('google', new GoogleStrategy({
-                clientID: googleConfig.clientID,
-                clientSecret: googleConfig.clientSecret,
-                callbackURL: googleConfig.callbackURL,
-                scope: ['profile', 'email']
-            }, async (accessToken, refreshToken, profile, done) => {
-                try {
-                    // Google 프로필에서 사용자 정보 추출
-                    const googleUser = {
-                        googleId: profile.id,
-                        email: profile.emails?.[0]?.value,
-                        username: profile.displayName,
-                        firstName: profile.name?.givenName,
-                        lastName: profile.name?.familyName,
-                        profileImage: profile.photos?.[0]?.value
-                    };
+            passport.use(
+                'google',
+                new GoogleStrategy(
+                    {
+                        clientID: googleConfig.clientID,
+                        clientSecret: googleConfig.clientSecret,
+                        callbackURL: googleConfig.callbackURL,
+                        scope: ['profile', 'email']
+                    },
+                    async (accessToken, refreshToken, profile, done) => {
+                        try {
+                            // Google 프로필에서 사용자 정보 추출
+                            const googleUser = {
+                                googleId: profile.id,
+                                email: profile.emails?.[0]?.value,
+                                username: profile.displayName,
+                                firstName: profile.name?.givenName,
+                                lastName: profile.name?.familyName,
+                                profileImage: profile.photos?.[0]?.value
+                            };
 
-                    if (!googleUser.email) {
-                        return done(new Error('Google 계정에서 이메일을 가져올 수 없습니다.'), null);
-                    }
+                            if (!googleUser.email) {
+                                return done(new Error('Google 계정에서 이메일을 가져올 수 없습니다.'), null);
+                            }
 
-                    // 기존 사용자 확인
-                    const user = await this.userService.getUserByEmail(googleUser.email);
+                            // 기존 사용자 확인
+                            const user = await this.userService.getUserByEmail(googleUser.email);
 
-                    if (user) {
-                        // 기존 사용자의 Google 연동 정보 업데이트
-                        if (!user.googleId) {
-                            await this.userService.linkGoogleAccount(user.id, googleUser.googleId);
+                            if (user) {
+                                // 기존 사용자의 Google 연동 정보 업데이트
+                                if (!user.googleId) {
+                                    await this.userService.linkGoogleAccount(user.id, googleUser.googleId);
+                                }
+                                return done(null, user);
+                            } else {
+                                // 새 사용자 생성 (Google 계정으로 회원가입)
+                                const newUser = await this.userService.createGoogleUser(googleUser);
+                                return done(null, newUser);
+                            }
+                        } catch (error) {
+                            console.error('Google OAuth 오류:', error);
+                            return done(error, null);
                         }
-                        return done(null, user);
-                    } else {
-                        // 새 사용자 생성 (Google 계정으로 회원가입)
-                        const newUser = await this.userService.createGoogleUser(googleUser);
-                        return done(null, newUser);
                     }
-                } catch (error) {
-                    console.error('Google OAuth 오류:', error);
-                    return done(error, null);
-                }
-            }));
+                )
+            );
         } else {
             console.warn('⚠️ Google OAuth 설정이 누락되어 Google 전략을 건너뜁니다.');
         }

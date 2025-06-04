@@ -22,13 +22,13 @@ test.describe('ExhibitionService', () => {
             findById: createSpy(null),
             update: createSpy({ id: 1 }),
             delete: createSpy(true),
-            findAll: createSpy([])
+            findAll: createSpy([]),
         });
 
         mockArtworkExhibitionRepository = createMockRepository({
             create: createSpy({ id: 1 }),
             findByExhibitionId: createSpy([]),
-            deleteByExhibitionAndArtwork: createSpy(true)
+            deleteByExhibitionAndArtwork: createSpy(true),
         });
 
         // ExhibitionService 클래스 모킹
@@ -46,7 +46,7 @@ test.describe('ExhibitionService', () => {
                     isFeatured: false,
                     submissionOpen: true,
                     createdAt: new Date(),
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
                 };
 
                 return await this.exhibitionRepository.create(exhibition);
@@ -91,7 +91,7 @@ test.describe('ExhibitionService', () => {
 
                 const updateData = {
                     isFeatured: !exhibition.isFeatured,
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
                 };
 
                 return await this.exhibitionRepository.update(id, updateData);
@@ -105,7 +105,7 @@ test.describe('ExhibitionService', () => {
 
                 const updateData = {
                     submissionOpen: !exhibition.submissionOpen,
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
                 };
 
                 return await this.exhibitionRepository.update(id, updateData);
@@ -126,7 +126,7 @@ test.describe('ExhibitionService', () => {
                 const relationData = {
                     exhibitionId,
                     artworkId,
-                    createdAt: new Date()
+                    createdAt: new Date(),
                 };
 
                 return await this.artworkExhibitionRepository.create(relationData);
@@ -174,8 +174,7 @@ test.describe('ExhibitionService', () => {
         test('존재하지 않는 전시회 조회 시 에러', async () => {
             mockExhibitionRepository.findById.mockReturnValue(null);
 
-            await expect(exhibitionService.getExhibitionById(999))
-                .rejects.toThrow('전시회를 찾을 수 없습니다.');
+            await expect(exhibitionService.getExhibitionById(999)).rejects.toThrow('전시회를 찾을 수 없습니다.');
         });
 
         test('모든 전시회 목록 조회', async () => {
@@ -206,8 +205,9 @@ test.describe('ExhibitionService', () => {
         test('존재하지 않는 전시회 수정 시 에러', async () => {
             mockExhibitionRepository.findById.mockReturnValue(null);
 
-            await expect(exhibitionService.updateExhibition(999, { title: '수정' }))
-                .rejects.toThrow('전시회를 찾을 수 없습니다.');
+            await expect(exhibitionService.updateExhibition(999, { title: '수정' })).rejects.toThrow(
+                '전시회를 찾을 수 없습니다.'
+            );
         });
     });
 
@@ -225,8 +225,7 @@ test.describe('ExhibitionService', () => {
         test('존재하지 않는 전시회 삭제 시 에러', async () => {
             mockExhibitionRepository.findById.mockReturnValue(null);
 
-            await expect(exhibitionService.deleteExhibition(999))
-                .rejects.toThrow('전시회를 찾을 수 없습니다.');
+            await expect(exhibitionService.deleteExhibition(999)).rejects.toThrow('전시회를 찾을 수 없습니다.');
         });
     });
 
@@ -269,8 +268,7 @@ test.describe('ExhibitionService', () => {
             const exhibition = createTestExhibition({ submissionOpen: false });
             mockExhibitionRepository.findById.mockReturnValue(exhibition);
 
-            await expect(exhibitionService.addArtworkToExhibition(1, 1))
-                .rejects.toThrow('작품 제출이 마감되었습니다.');
+            await expect(exhibitionService.addArtworkToExhibition(1, 1)).rejects.toThrow('작품 제출이 마감되었습니다.');
         });
 
         test('전시회에서 작품 제거', async () => {
@@ -307,7 +305,7 @@ test.describe('ExhibitionService', () => {
                 ...exhibitionData,
                 status: 'ACTIVE',
                 isFeatured: false,
-                submissionOpen: true
+                submissionOpen: true,
             });
         });
     });

@@ -11,8 +11,8 @@ export class QRCodeModal {
     }
 
     /**
-   * 이벤트 리스너 설정
-   */
+     * 이벤트 리스너 설정
+     */
     setupEventListeners() {
         if (!this.modal) return;
 
@@ -23,14 +23,14 @@ export class QRCodeModal {
         });
 
         // 모달 외부 클릭시 닫기
-        window.addEventListener('click', (e) => {
+        window.addEventListener('click', e => {
             if (e.target === this.modal) {
                 this.close();
             }
         });
 
         // esc키 이벤트 설정
-        document.addEventListener('keydown', (e) => {
+        document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
                 this.close();
             }
@@ -47,9 +47,9 @@ export class QRCodeModal {
     }
 
     /**
-   * QR 코드 모달을 엽니다.
-   * @param {Object} data - 모달에 표시할 데이터 (title, subtitle, url)
-   */
+     * QR 코드 모달을 엽니다.
+     * @param {Object} data - 모달에 표시할 데이터 (title, subtitle, url)
+     */
     async open(data) {
         try {
             if (!this.modal) return;
@@ -76,8 +76,8 @@ export class QRCodeModal {
     }
 
     /**
-   * 모달을 닫습니다.
-   */
+     * 모달을 닫습니다.
+     */
     close() {
         if (!this.modal) return;
         this.modal.style.display = 'none';
@@ -85,9 +85,9 @@ export class QRCodeModal {
     }
 
     /**
-   * QR 코드 컨테이너를 이미지로 변환하여 다운로드합니다.
-   * @param {string} filename - 파일명에 사용할 텍스트
-   */
+     * QR 코드 컨테이너를 이미지로 변환하여 다운로드합니다.
+     * @param {string} filename - 파일명에 사용할 텍스트
+     */
     async downloadAsImage(filename) {
         try {
             const container = document.getElementById('qrCodeContainer');

@@ -33,48 +33,52 @@ export default class SystemManagementService extends BaseAdminService {
      * @returns {Promise<Object>} 대시보드 데이터
      */
     async getDashboardData(options = {}) {
-        return this.safeExecute(async () => {
-            const { page = 1, limit = 10 } = options;
+        return this.safeExecute(
+            async () => {
+                const { page = 1, limit = 10 } = options;
 
-            // 사용자 및 작품 데이터 조회
-            const userOptions = { page, limit };
-            const artworkOptions = { page, limit };
+                // 사용자 및 작품 데이터 조회
+                const userOptions = { page, limit };
+                const artworkOptions = { page, limit };
 
-            const [users, artworks] = await Promise.all([
-                this.userService.getUserList(userOptions),
-                this.artworkService.getArtworkListWithDetails(artworkOptions)
-            ]);
+                const [users, artworks] = await Promise.all([
+                    this.userService.getUserList(userOptions),
+                    this.artworkService.getArtworkListWithDetails(artworkOptions)
+                ]);
 
-            // 추천 작품 조회
-            const featuredArtworks = await this.artworkService.getFeaturedArtworks();
+                // 추천 작품 조회
+                const featuredArtworks = await this.artworkService.getFeaturedArtworks();
 
-            // 페이지네이션 데이터 생성
-            const pageData = new Page(users?.total || 0, {
-                page,
-                limit,
-                baseUrl: '/admin/dashboard'
-            });
+                // 페이지네이션 데이터 생성
+                const pageData = new Page(users?.total || 0, {
+                    page,
+                    limit,
+                    baseUrl: '/admin/dashboard'
+                });
 
-            // 대시보드 통계 데이터 생성
-            const statsData = this._createStatsData(users, artworks);
+                // 대시보드 통계 데이터 생성
+                const statsData = this._createStatsData(users, artworks);
 
-            // 최근 활동 데이터 생성
-            const activities = this._createActivityData(users, artworks);
+                // 최근 활동 데이터 생성
+                const activities = this._createActivityData(users, artworks);
 
-            // 공지사항 데이터 생성 (임시 데이터)
-            const notices = this._createNoticeData();
+                // 공지사항 데이터 생성 (임시 데이터)
+                const notices = this._createNoticeData();
 
-            return {
-                page: pageData,
-                stats: statsData,
-                recentActivities: activities,
-                recentNotices: notices,
-                featuredArtworks: {
-                    items: featuredArtworks || [],
-                    total: featuredArtworks?.length || 0
-                }
-            };
-        }, '대시보드 데이터 조회', { options });
+                return {
+                    page: pageData,
+                    stats: statsData,
+                    recentActivities: activities,
+                    recentNotices: notices,
+                    featuredArtworks: {
+                        items: featuredArtworks || [],
+                        total: featuredArtworks?.length || 0
+                    }
+                };
+            },
+            '대시보드 데이터 조회',
+            { options }
+        );
     }
 
     /**

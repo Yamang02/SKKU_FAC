@@ -6,7 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { staticFileConfig } from '../../config/security.js';
+import { staticFileConfig } from '../../config/securityConfig.js';
 import { createUploadDirs } from '../utils/createUploadDirs.js';
 import logger from '../utils/Logger.js';
 import Config from '../../config/Config.js';
@@ -131,7 +131,7 @@ function setupPerformanceMonitoring(app, config) {
         });
 
         // 에러 처리
-        res.on('error', (error) => {
+        res.on('error', error => {
             middlewareStats.errors++;
             logger.error('Response error:', error);
         });
@@ -231,10 +231,12 @@ function setupSecurityMiddleware(app, config) {
     // 환경별 Helmet 설정
     const helmetConfig = {
         // Content Security Policy
-        contentSecurityPolicy: cspConfig.contentSecurityPolicy ? {
-            directives: cspConfig.contentSecurityPolicy.directives,
-            reportOnly: config.isDevelopment() // 개발 환경에서는 report-only 모드
-        } : false,
+        contentSecurityPolicy: cspConfig.contentSecurityPolicy
+            ? {
+                directives: cspConfig.contentSecurityPolicy.directives,
+                reportOnly: config.isDevelopment() // 개발 환경에서는 report-only 모드
+            }
+            : false,
 
         // Cross-Origin Embedder Policy
         crossOriginEmbedderPolicy: cspConfig.crossOriginEmbedderPolicy || false,
@@ -245,10 +247,12 @@ function setupSecurityMiddleware(app, config) {
         },
 
         // Expect-CT (Certificate Transparency)
-        expectCt: config.isProduction() ? {
-            maxAge: 86400, // 24시간
-            enforce: true
-        } : false,
+        expectCt: config.isProduction()
+            ? {
+                maxAge: 86400, // 24시간
+                enforce: true
+            }
+            : false,
 
         // Feature Policy / Permissions Policy
         permissionsPolicy: {
@@ -289,9 +293,9 @@ function setupSecurityMiddleware(app, config) {
 
         // Referrer Policy
         referrerPolicy: {
-            policy: config.isProduction() ?
-                ['no-referrer-when-downgrade', 'strict-origin-when-cross-origin'] :
-                ['no-referrer', 'strict-origin-when-cross-origin']
+            policy: config.isProduction()
+                ? ['no-referrer-when-downgrade', 'strict-origin-when-cross-origin']
+                : ['no-referrer', 'strict-origin-when-cross-origin']
         },
 
         // X-XSS-Protection

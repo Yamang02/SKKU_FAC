@@ -10,7 +10,6 @@ import { createArtworkCard } from '../../common/util/card.js';
 import { getArtworkSlug } from '../../common/util/url.js';
 import QRCodeService from '../../common/service/QRCodeService.js';
 
-
 function animateButtonClick(button) {
     if (!button) return;
     button.classList.add('clicked');
@@ -80,7 +79,7 @@ function initImageZoom() {
         isZoomed = !isZoomed;
     });
 
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
         if (isZoomed && e.target !== artworkImage) {
             artworkImage.classList.remove('zoomed');
             imageWrapper.classList.remove('zoomed-wrapper');
@@ -88,7 +87,7 @@ function initImageZoom() {
         }
     });
 
-    artworkImage.addEventListener('click', (e) => {
+    artworkImage.addEventListener('click', e => {
         e.stopPropagation();
     });
 }
@@ -296,7 +295,7 @@ function initModalHandlers() {
     }
 
     // 모달 외부 클릭시 닫기
-    window.addEventListener('click', (e) => {
+    window.addEventListener('click', e => {
         if (e.target === modal) {
             closeModal();
         }
@@ -409,7 +408,7 @@ function confirmDeleteArtwork() {
 /**
  * ESC 키를 눌렀을 때 모달 닫기
  */
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         closeModal();
     }
@@ -628,7 +627,6 @@ function shareByKakaoTalk(artwork) {
         Kakao.init(jsKey);
     }
 
-
     Kakao.Link.sendDefault({
         objectType: 'feed',
         content: {
@@ -655,4 +653,3 @@ if (generateQRBtn) {
         });
     });
 }
-

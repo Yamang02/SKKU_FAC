@@ -23,12 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveProfileBtn = document.getElementById('save-profile-btn');
 
     // 모달 닫기 함수
-    const closeModal = (modal) => {
+    const closeModal = modal => {
         modal.style.display = 'none';
     };
 
     // 모달 열기 함수
-    const openModal = (modal) => {
+    const openModal = modal => {
         modal.style.display = 'flex';
     };
 
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ESC 키를 눌렀을 때 모달 닫기
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             closeModal(editProfileModal);
         }
@@ -81,13 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('affiliation-group').style.display = 'none';
 
                     document.querySelector('#edit-profile-form [name="department"]').value = userData.department || '';
-                    document.querySelector('#edit-profile-form [name="studentYear"]').value = userData.studentYear || '';
+                    document.querySelector('#edit-profile-form [name="studentYear"]').value =
+                        userData.studentYear || '';
                 } else if (userData.role === 'EXTERNAL_MEMBER') {
                     document.getElementById('department-group').style.display = 'none';
                     document.getElementById('studentYear-group').style.display = 'none';
                     document.getElementById('affiliation-group').style.display = 'block';
 
-                    document.querySelector('#edit-profile-form [name="affiliation"]').value = userData.affiliation || '';
+                    document.querySelector('#edit-profile-form [name="affiliation"]').value =
+                        userData.affiliation || '';
                 }
 
                 // 비밀번호 필드 초기화
@@ -152,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showLoading(true);
                 await UserApi.deleteAccount();
                 showSuccessMessage('계정이 성공적으로 삭제되었습니다. 로그인 페이지로 이동합니다.');
-                setTimeout(() => window.location.href = '/user/login', 3000);
+                setTimeout(() => (window.location.href = '/user/login'), 3000);
             } catch (error) {
                 showErrorMessage(error.message || '계정 삭제에 실패했습니다.');
             } finally {
@@ -172,9 +174,14 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('email').innerText = userData.email;
             document.getElementById('name-text').innerText = userData.name;
             document.getElementById('department-text').innerText = userData.department || '학과 정보 없음';
-            document.getElementById('studentYear-text').innerText = userData.studentYear ? userData.studentYear + '학번' : '미입력';
-            document.getElementById('isClubMember-text').innerText = userData.isClubMember ? '동아리 회원' : '일반 회원';
-            document.getElementById('role').innerText = userData.role === 'SKKU_MEMBER' ? '성균관대 재학/졸업생' : '외부 인원';
+            document.getElementById('studentYear-text').innerText = userData.studentYear
+                ? userData.studentYear + '학번'
+                : '미입력';
+            document.getElementById('isClubMember-text').innerText = userData.isClubMember
+                ? '동아리 회원'
+                : '일반 회원';
+            document.getElementById('role').innerText =
+                userData.role === 'SKKU_MEMBER' ? '성균관대 재학/졸업생' : '외부 인원';
 
             // 가입일 처리
             const createdAt = userData.createdAt; // 가입일

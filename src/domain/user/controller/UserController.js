@@ -80,7 +80,6 @@ export default class UserController {
         }
     }
 
-
     /**
      * 이메일 인증을 처리합니다.
      */
@@ -152,5 +151,4 @@ export default class UserController {
             return ViewResolver.renderError(res, error);
         }
     }
-
 }

@@ -1,6 +1,7 @@
 # DTO 기반 검증 미들웨어 시스템
 
-이 문서는 SKKU Fine Art Club Gallery 프로젝트의 새로운 DTO 기반 검증 미들웨어 시스템에 대한 사용법을 설명합니다.
+이 문서는 SKKU Fine Art Club Gallery 프로젝트의 새로운 DTO 기반 검증 미들웨어
+시스템에 대한 사용법을 설명합니다.
 
 ## 📋 개요
 
@@ -20,8 +21,9 @@
 import { UserValidation } from '../common/middleware/domainValidation.js';
 
 // 라우터에서 사용
-router.post('/register',
-    UserValidation.validateRegister,  // DTO 검증 미들웨어
+router.post(
+    '/register',
+    UserValidation.validateRegister, // DTO 검증 미들웨어
     userController.register
 );
 
@@ -50,18 +52,20 @@ const validateUserWithProfile = validateMultiple([
         DtoClass: UserRequestDto,
         schemaMethod: UserRequestDto.registerSchema,
         source: 'body',
-        dtoProperty: 'userDto'
-    }
+        dtoProperty: 'userDto',
+    },
 ]);
 
-router.post('/register-with-profile',
-    upload.single('profileImage'),  // multer 미들웨어
-    validateFiles({                 // 파일 검증
-        maxSize: 5 * 1024 * 1024,  // 5MB
+router.post(
+    '/register-with-profile',
+    upload.single('profileImage'), // multer 미들웨어
+    validateFiles({
+        // 파일 검증
+        maxSize: 5 * 1024 * 1024, // 5MB
         allowedMimeTypes: ['image/jpeg', 'image/png'],
-        required: false
+        required: false,
     }),
-    validateUserWithProfile,        // DTO 검증
+    validateUserWithProfile, // DTO 검증
     userController.registerWithProfile
 );
 ```
@@ -74,13 +78,14 @@ import { AdminValidation } from '../common/middleware/domainValidation.js';
 
 // 관리자만 접근 가능한 기능
 const validateAdminUpdate = validateIf(
-    (req) => req.user && req.user.role === 'ADMIN',
+    req => req.user && req.user.role === 'ADMIN',
     AdminValidation.validateUserManagementUpdate
 );
 
-router.put('/admin/users/:id',
-    authMiddleware,           // 인증 확인
-    validateAdminUpdate,      // 관리자 권한 + DTO 검증
+router.put(
+    '/admin/users/:id',
+    authMiddleware, // 인증 확인
+    validateAdminUpdate, // 관리자 권한 + DTO 검증
     adminController.updateUser
 );
 ```
@@ -93,11 +98,11 @@ router.put('/admin/users/:id',
 import { UserValidation } from '../common/middleware/domainValidation.js';
 
 // 사용 가능한 검증 미들웨어
-UserValidation.validateRegister        // 사용자 등록
-UserValidation.validateLogin           // 로그인
-UserValidation.validateUpdateProfile   // 프로필 업데이트
-UserValidation.validateEmailQuery      // 이메일 쿼리 (query params)
-UserValidation.validateResetPassword   // 비밀번호 재설정
+UserValidation.validateRegister; // 사용자 등록
+UserValidation.validateLogin; // 로그인
+UserValidation.validateUpdateProfile; // 프로필 업데이트
+UserValidation.validateEmailQuery; // 이메일 쿼리 (query params)
+UserValidation.validateResetPassword; // 비밀번호 재설정
 ```
 
 ### Artwork Domain
@@ -105,9 +110,9 @@ UserValidation.validateResetPassword   // 비밀번호 재설정
 ```javascript
 import { ArtworkValidation } from '../common/middleware/domainValidation.js';
 
-ArtworkValidation.validateCreate       // 작품 생성
-ArtworkValidation.validateUpdate       // 작품 업데이트
-ArtworkValidation.validateListQuery    // 작품 목록 쿼리
+ArtworkValidation.validateCreate; // 작품 생성
+ArtworkValidation.validateUpdate; // 작품 업데이트
+ArtworkValidation.validateListQuery; // 작품 목록 쿼리
 ```
 
 ### Exhibition Domain
@@ -115,9 +120,9 @@ ArtworkValidation.validateListQuery    // 작품 목록 쿼리
 ```javascript
 import { ExhibitionValidation } from '../common/middleware/domainValidation.js';
 
-ExhibitionValidation.validateCreate      // 전시회 생성
-ExhibitionValidation.validateUpdate      // 전시회 업데이트
-ExhibitionValidation.validateListQuery   // 전시회 목록 쿼리
+ExhibitionValidation.validateCreate; // 전시회 생성
+ExhibitionValidation.validateUpdate; // 전시회 업데이트
+ExhibitionValidation.validateListQuery; // 전시회 목록 쿼리
 ```
 
 ### Auth Domain
@@ -125,12 +130,12 @@ ExhibitionValidation.validateListQuery   // 전시회 목록 쿼리
 ```javascript
 import { AuthValidation } from '../common/middleware/domainValidation.js';
 
-AuthValidation.validatePasswordResetRequest  // 비밀번호 재설정 요청
-AuthValidation.validatePasswordReset         // 비밀번호 재설정
-AuthValidation.validateTokenVerification     // 토큰 검증
-AuthValidation.validateJwtLogin              // JWT 로그인
-AuthValidation.validateJwtRefresh            // JWT 토큰 갱신
-AuthValidation.validateEmailVerification     // 이메일 인증
+AuthValidation.validatePasswordResetRequest; // 비밀번호 재설정 요청
+AuthValidation.validatePasswordReset; // 비밀번호 재설정
+AuthValidation.validateTokenVerification; // 토큰 검증
+AuthValidation.validateJwtLogin; // JWT 로그인
+AuthValidation.validateJwtRefresh; // JWT 토큰 갱신
+AuthValidation.validateEmailVerification; // 이메일 인증
 ```
 
 ### Admin Domain
@@ -138,12 +143,12 @@ AuthValidation.validateEmailVerification     // 이메일 인증
 ```javascript
 import { AdminValidation } from '../common/middleware/domainValidation.js';
 
-AdminValidation.validateUserManagementUpdate      // 사용자 관리
-AdminValidation.validateArtworkManagementUpdate   // 작품 관리
-AdminValidation.validateExhibitionManagementUpdate // 전시회 관리
-AdminValidation.validateSystemSettingsUpdate      // 시스템 설정
-AdminValidation.validateListFilter                // 목록 필터
-AdminValidation.validatePasswordReset             // 비밀번호 초기화
+AdminValidation.validateUserManagementUpdate; // 사용자 관리
+AdminValidation.validateArtworkManagementUpdate; // 작품 관리
+AdminValidation.validateExhibitionManagementUpdate; // 전시회 관리
+AdminValidation.validateSystemSettingsUpdate; // 시스템 설정
+AdminValidation.validateListFilter; // 목록 필터
+AdminValidation.validatePasswordReset; // 비밀번호 초기화
 ```
 
 ## 🔧 고급 사용법
@@ -154,19 +159,16 @@ AdminValidation.validatePasswordReset             // 비밀번호 초기화
 import { validateWithDto } from '../common/middleware/dtoValidation.js';
 import CustomDto from './CustomDto.js';
 
-const validateCustomData = validateWithDto(
-    CustomDto,
-    CustomDto.customSchema,
-    {
-        source: 'body',           // 'body', 'query', 'params'
-        attachDto: true,          // DTO 인스턴스를 req에 첨부할지 여부
-        dtoProperty: 'customDto', // req에 첨부될 속성명
-        validationOptions: {      // Joi 검증 옵션
-            allowUnknown: true,
-            stripUnknown: true
-        }
-    }
-);
+const validateCustomData = validateWithDto(CustomDto, CustomDto.customSchema, {
+    source: 'body', // 'body', 'query', 'params'
+    attachDto: true, // DTO 인스턴스를 req에 첨부할지 여부
+    dtoProperty: 'customDto', // req에 첨부될 속성명
+    validationOptions: {
+        // Joi 검증 옵션
+        allowUnknown: true,
+        stripUnknown: true,
+    },
+});
 ```
 
 ### 2. 응답 검증 (개발 환경)
@@ -176,15 +178,12 @@ import { validateResponse } from '../common/middleware/dtoValidation.js';
 import UserResponseDto from '../../domain/user/model/dto/UserResponseDto.js';
 
 // 개발 환경에서만 응답 검증
-router.get('/users/:id',
-    validateResponse(
-        UserResponseDto,
-        UserResponseDto.responseSchema,
-        {
-            enabled: process.env.NODE_ENV !== 'production',
-            logOnly: true  // 에러 발생 시 로그만 남기고 정상 응답
-        }
-    ),
+router.get(
+    '/users/:id',
+    validateResponse(UserResponseDto, UserResponseDto.responseSchema, {
+        enabled: process.env.NODE_ENV !== 'production',
+        logOnly: true, // 에러 발생 시 로그만 남기고 정상 응답
+    }),
     userController.getUser
 );
 ```
@@ -196,16 +195,17 @@ import { validateFiles } from '../common/middleware/dtoValidation.js';
 
 // 이미지 파일 검증
 const validateImageUpload = validateFiles({
-    maxSize: 10 * 1024 * 1024,  // 10MB
+    maxSize: 10 * 1024 * 1024, // 10MB
     allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
-    maxFiles: 5,                 // 최대 5개 파일
-    required: true               // 파일 업로드 필수
+    maxFiles: 5, // 최대 5개 파일
+    required: true, // 파일 업로드 필수
 });
 
-router.post('/artworks',
-    upload.array('images', 5),   // multer 설정
-    validateImageUpload,         // 파일 검증
-    ArtworkValidation.validateCreate,  // DTO 검증
+router.post(
+    '/artworks',
+    upload.array('images', 5), // multer 설정
+    validateImageUpload, // 파일 검증
+    ArtworkValidation.validateCreate, // DTO 검증
     artworkController.create
 );
 ```
@@ -218,7 +218,8 @@ router.post('/artworks',
 // 기존 방식 (계속 지원됨)
 import { UserValidationMiddleware } from '../common/middleware/validation.js';
 
-router.post('/legacy-register',
+router.post(
+    '/legacy-register',
     UserValidationMiddleware.validateRegister,
     userController.register
 );
@@ -226,7 +227,8 @@ router.post('/legacy-register',
 // 새로운 방식
 import { UserValidation } from '../common/middleware/domainValidation.js';
 
-router.post('/new-register',
+router.post(
+    '/new-register',
     UserValidation.validateRegister,
     userController.register
 );
@@ -280,13 +282,13 @@ export const createArtwork = async (req, res) => {
 ```javascript
 // 사용자 역할에 따른 다른 검증
 const validateBasedOnRole = validateIf(
-    (req) => req.user.role === 'ADMIN',
+    req => req.user.role === 'ADMIN',
     AdminValidation.validateUserManagementUpdate
 );
 
 // 요청 메서드에 따른 다른 검증
 const validateBasedOnMethod = validateIf(
-    (req) => req.method === 'POST',
+    req => req.method === 'POST',
     ArtworkValidation.validateCreate
 );
 ```
@@ -304,7 +306,10 @@ const customValidationMiddleware = (req, res, next) => {
         return res.status(422).json({
             error: 'VALIDATION_FAILED',
             details: result.errors,
-            suggestions: ['사용자명을 확인해주세요', '이메일 형식을 확인해주세요']
+            suggestions: [
+                '사용자명을 확인해주세요',
+                '이메일 형식을 확인해주세요',
+            ],
         });
     }
 

@@ -10,12 +10,12 @@ import dockerTestSetup from './dockerTestSetup.js';
  * 🧪 테스트 훅 설정 옵션
  */
 const DEFAULT_HOOK_OPTIONS = {
-    seedData: true,           // 테스트 데이터 자동 시딩
-    cleanupAfter: true,       // 테스트 후 자동 정리
-    quickCleanup: false,      // 빠른 정리 모드 (트랜잭션 사용)
+    seedData: true, // 테스트 데이터 자동 시딩
+    cleanupAfter: true, // 테스트 후 자동 정리
+    quickCleanup: false, // 빠른 정리 모드 (트랜잭션 사용)
     seedTypes: ['users', 'exhibitions', 'artworks', 'relationships'], // 시딩할 데이터 타입
-    isolateTests: true,       // 테스트 간 격리
-    retryOnFailure: true      // 실패 시 재시도
+    isolateTests: true, // 테스트 간 격리
+    retryOnFailure: true, // 실패 시 재시도
 };
 
 /**
@@ -262,7 +262,7 @@ export const setupMinimalTestEnvironment = () => {
     return setupFullTestEnvironment({
         seedData: false,
         cleanupAfter: false,
-        isolateTests: false
+        isolateTests: false,
     });
 };
 
@@ -272,7 +272,7 @@ export const setupMinimalTestEnvironment = () => {
 export const setupUserOnlyTestEnvironment = () => {
     return setupFullTestEnvironment({
         seedTypes: ['users'],
-        quickCleanup: true
+        quickCleanup: true,
     });
 };
 
@@ -282,7 +282,7 @@ export const setupUserOnlyTestEnvironment = () => {
 export const setupExhibitionTestEnvironment = () => {
     return setupFullTestEnvironment({
         seedTypes: ['users', 'exhibitions'],
-        quickCleanup: true
+        quickCleanup: true,
     });
 };
 
@@ -292,7 +292,7 @@ export const setupExhibitionTestEnvironment = () => {
 export const setupArtworkTestEnvironment = () => {
     return setupFullTestEnvironment({
         seedTypes: ['users', 'exhibitions', 'artworks', 'relationships'],
-        quickCleanup: true
+        quickCleanup: true,
     });
 };
 
@@ -303,14 +303,14 @@ export const setupFastTestEnvironment = () => {
     return setupFullTestEnvironment({
         quickCleanup: true,
         isolateTests: true,
-        retryOnFailure: false
+        retryOnFailure: false,
     });
 };
 
 /**
  * 🧪 커스텀 테스트 환경 설정
  */
-export const setupCustomTestEnvironment = (customOptions) => {
+export const setupCustomTestEnvironment = customOptions => {
     return setupFullTestEnvironment(customOptions);
 };
 
@@ -318,10 +318,10 @@ export const setupCustomTestEnvironment = (customOptions) => {
  * 📊 테스트 데이터 접근 헬퍼
  */
 export const getTestData = () => testHooks.getCurrentTestData();
-export const getSeededUser = (key) => testHooks.getSeededUser(key);
-export const getSeededExhibition = (key) => testHooks.getSeededExhibition(key);
-export const getSeededArtwork = (key) => testHooks.getSeededArtwork(key);
-export const reseedTestData = (type) => testHooks.reseedData(type);
+export const getSeededUser = key => testHooks.getSeededUser(key);
+export const getSeededExhibition = key => testHooks.getSeededExhibition(key);
+export const getSeededArtwork = key => testHooks.getSeededArtwork(key);
+export const reseedTestData = type => testHooks.reseedData(type);
 
 /**
  * 🔧 직접 시더 접근 (고급 사용)

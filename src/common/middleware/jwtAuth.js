@@ -13,9 +13,7 @@ const authService = new AuthService();
 export const extractUserFromToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
-        const token = authHeader && authHeader.startsWith('Bearer ')
-            ? authHeader.substring(7)
-            : null;
+        const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
         if (token) {
             try {
@@ -37,9 +35,7 @@ export const extractUserFromToken = async (req, res, next) => {
 export const requireJwtAuth = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
-        const token = authHeader && authHeader.startsWith('Bearer ')
-            ? authHeader.substring(7)
-            : null;
+        const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
         if (!token) {
             if (req.xhr || req.headers.accept?.includes('application/json')) {
@@ -112,7 +108,7 @@ export const requireJwtAdmin = (req, res, next) => {
 };
 
 // JWT 기반 특정 역할 확인
-export const requireJwtRole = (role) => {
+export const requireJwtRole = role => {
     return (req, res, next) => {
         if (!req.jwtUser || req.jwtUser.role !== role) {
             if (req.xhr || req.headers.accept?.includes('application/json')) {

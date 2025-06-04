@@ -34,62 +34,40 @@ export default class UserRequestDto extends BaseDto {
      */
     static getRegisterSchema() {
         return Joi.object({
-            username: Joi.string()
-                .alphanum()
-                .min(3)
-                .max(30)
-                .required()
-                .messages({
-                    'string.alphanum': '사용자명은 영문자와 숫자만 포함할 수 있습니다',
-                    'string.min': '사용자명은 최소 3자 이상이어야 합니다',
-                    'string.max': '사용자명은 최대 30자까지 가능합니다',
-                    'string.empty': '사용자명을 입력해주세요',
-                    'any.required': '사용자명은 필수 입력 항목입니다'
-                }),
+            username: Joi.string().alphanum().min(3).max(30).required().messages({
+                'string.alphanum': '사용자명은 영문자와 숫자만 포함할 수 있습니다',
+                'string.min': '사용자명은 최소 3자 이상이어야 합니다',
+                'string.max': '사용자명은 최대 30자까지 가능합니다',
+                'string.empty': '사용자명을 입력해주세요',
+                'any.required': '사용자명은 필수 입력 항목입니다'
+            }),
 
-            name: Joi.string()
-                .min(2)
-                .max(50)
-                .required()
-                .messages({
-                    'string.min': '이름은 최소 2자 이상이어야 합니다',
-                    'string.max': '이름은 최대 50자까지 가능합니다',
-                    'any.required': '이름은 필수 입력 항목입니다'
-                }),
+            name: Joi.string().min(2).max(50).required().messages({
+                'string.min': '이름은 최소 2자 이상이어야 합니다',
+                'string.max': '이름은 최대 50자까지 가능합니다',
+                'any.required': '이름은 필수 입력 항목입니다'
+            }),
 
-            email: Joi.string()
-                .email()
-                .required()
-                .messages({
-                    'string.email': '올바른 이메일 형식을 입력해주세요',
-                    'any.required': '이메일은 필수 입력 항목입니다'
-                }),
+            email: Joi.string().email().required().messages({
+                'string.email': '올바른 이메일 형식을 입력해주세요',
+                'any.required': '이메일은 필수 입력 항목입니다'
+            }),
 
-            password: Joi.string()
-                .min(1)
-                .max(128)
-                .required()
-                .messages({
-                    'string.min': '비밀번호를 입력해주세요',
-                    'string.max': '비밀번호는 최대 128자까지 가능합니다',
-                    'string.empty': '비밀번호를 입력해주세요',
-                    'any.required': '비밀번호는 필수 입력 항목입니다'
-                }),
+            password: Joi.string().min(1).max(128).required().messages({
+                'string.min': '비밀번호를 입력해주세요',
+                'string.max': '비밀번호는 최대 128자까지 가능합니다',
+                'string.empty': '비밀번호를 입력해주세요',
+                'any.required': '비밀번호는 필수 입력 항목입니다'
+            }),
 
-            confirmPassword: Joi.string()
-                .required()
-                .valid(Joi.ref('password'))
-                .messages({
-                    'any.required': '비밀번호 확인을 입력해주세요',
-                    'any.only': '비밀번호가 일치하지 않습니다'
-                }),
+            confirmPassword: Joi.string().required().valid(Joi.ref('password')).messages({
+                'any.required': '비밀번호 확인을 입력해주세요',
+                'any.only': '비밀번호가 일치하지 않습니다'
+            }),
 
-            role: Joi.string()
-                .valid('ADMIN', 'SKKU_MEMBER', 'EXTERNAL_MEMBER')
-                .default('SKKU_MEMBER')
-                .messages({
-                    'any.only': '유효하지 않은 역할입니다'
-                }),
+            role: Joi.string().valid('ADMIN', 'SKKU_MEMBER', 'EXTERNAL_MEMBER').default('SKKU_MEMBER').messages({
+                'any.only': '유효하지 않은 역할입니다'
+            }),
 
             department: Joi.string()
                 .max(100)
@@ -160,19 +138,15 @@ export default class UserRequestDto extends BaseDto {
      */
     static getLoginSchema() {
         return Joi.object({
-            username: Joi.string()
-                .required()
-                .messages({
-                    'string.empty': '사용자명을 입력해주세요',
-                    'any.required': '사용자명을 입력해주세요'
-                }),
+            username: Joi.string().required().messages({
+                'string.empty': '사용자명을 입력해주세요',
+                'any.required': '사용자명을 입력해주세요'
+            }),
 
-            password: Joi.string()
-                .required()
-                .messages({
-                    'string.empty': '비밀번호를 입력해주세요',
-                    'any.required': '비밀번호를 입력해주세요'
-                })
+            password: Joi.string().required().messages({
+                'string.empty': '비밀번호를 입력해주세요',
+                'any.required': '비밀번호를 입력해주세요'
+            })
         });
     }
 
@@ -182,30 +156,18 @@ export default class UserRequestDto extends BaseDto {
      */
     static getUpdateProfileSchema() {
         return Joi.object({
-            name: Joi.string()
-                .min(2)
-                .max(50)
-                .optional()
-                .messages({
-                    'string.min': '이름은 최소 2자 이상이어야 합니다',
-                    'string.max': '이름은 최대 50자까지 가능합니다'
-                }),
+            name: Joi.string().min(2).max(50).optional().messages({
+                'string.min': '이름은 최소 2자 이상이어야 합니다',
+                'string.max': '이름은 최대 50자까지 가능합니다'
+            }),
 
-            department: Joi.string()
-                .max(100)
-                .allow('')
-                .optional()
-                .messages({
-                    'string.max': '학과명은 최대 100자까지 가능합니다'
-                }),
+            department: Joi.string().max(100).allow('').optional().messages({
+                'string.max': '학과명은 최대 100자까지 가능합니다'
+            }),
 
-            affiliation: Joi.string()
-                .max(100)
-                .allow('', null)
-                .optional()
-                .messages({
-                    'string.max': '소속은 최대 100자까지 가능합니다'
-                }),
+            affiliation: Joi.string().max(100).allow('', null).optional().messages({
+                'string.max': '소속은 최대 100자까지 가능합니다'
+            }),
 
             studentYear: Joi.string()
                 .pattern(/^[0-9]{2}$/)
@@ -216,14 +178,10 @@ export default class UserRequestDto extends BaseDto {
                     'string.empty': '학번을 입력해주세요'
                 }),
 
-            newPassword: Joi.string()
-                .min(1)
-                .max(128)
-                .optional()
-                .messages({
-                    'string.min': '새 비밀번호를 입력해주세요',
-                    'string.max': '새 비밀번호는 최대 128자까지 가능합니다'
-                }),
+            newPassword: Joi.string().min(1).max(128).optional().messages({
+                'string.min': '새 비밀번호를 입력해주세요',
+                'string.max': '새 비밀번호는 최대 128자까지 가능합니다'
+            }),
 
             confirmPassword: Joi.string()
                 .when('newPassword', {
@@ -244,13 +202,10 @@ export default class UserRequestDto extends BaseDto {
      */
     static getEmailSchema() {
         return Joi.object({
-            email: Joi.string()
-                .email()
-                .required()
-                .messages({
-                    'string.email': '올바른 이메일 형식을 입력해주세요',
-                    'any.required': '이메일은 필수 입력 항목입니다'
-                })
+            email: Joi.string().email().required().messages({
+                'string.email': '올바른 이메일 형식을 입력해주세요',
+                'any.required': '이메일은 필수 입력 항목입니다'
+            })
         });
     }
 
@@ -260,13 +215,10 @@ export default class UserRequestDto extends BaseDto {
      */
     static getResetPasswordSchema() {
         return Joi.object({
-            email: Joi.string()
-                .email()
-                .required()
-                .messages({
-                    'string.email': '올바른 이메일 형식을 입력해주세요',
-                    'any.required': '이메일은 필수 입력 항목입니다'
-                })
+            email: Joi.string().email().required().messages({
+                'string.email': '올바른 이메일 형식을 입력해주세요',
+                'any.required': '이메일은 필수 입력 항목입니다'
+            })
         });
     }
 
@@ -285,23 +237,23 @@ export default class UserRequestDto extends BaseDto {
         } else if (typeof schemaOrType === 'string') {
             // 문자열인 경우 기존 로직 사용
             switch (schemaOrType) {
-                case 'register':
-                    schema = UserRequestDto.getRegisterSchema();
-                    break;
-                case 'login':
-                    schema = UserRequestDto.getLoginSchema();
-                    break;
-                case 'updateProfile':
-                    schema = UserRequestDto.getUpdateProfileSchema();
-                    break;
-                case 'email':
-                    schema = UserRequestDto.getEmailSchema();
-                    break;
-                case 'resetPassword':
-                    schema = UserRequestDto.getResetPasswordSchema();
-                    break;
-                default:
-                    schema = this.getValidationSchema();
+            case 'register':
+                schema = UserRequestDto.getRegisterSchema();
+                break;
+            case 'login':
+                schema = UserRequestDto.getLoginSchema();
+                break;
+            case 'updateProfile':
+                schema = UserRequestDto.getUpdateProfileSchema();
+                break;
+            case 'email':
+                schema = UserRequestDto.getEmailSchema();
+                break;
+            case 'resetPassword':
+                schema = UserRequestDto.getResetPasswordSchema();
+                break;
+            default:
+                schema = this.getValidationSchema();
             }
         } else {
             // 기본값

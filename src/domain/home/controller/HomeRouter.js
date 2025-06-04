@@ -13,6 +13,8 @@ HomeRouter.get('/', cacheMiddleware.static({ ttl: 1800 }), (req, res) => homeCon
 HomeRouter.get('/about', cacheMiddleware.static({ ttl: 3600 }), (req, res) => homeController.getAboutPage(req, res));
 
 // 성공 페이지 (짧은 캐싱 - 5분)
-HomeRouter.get('/success', cacheMiddleware.dynamic({ ttl: 300 }), (req, res) => homeController.getSuccessPage(req, res));
+HomeRouter.get('/success', cacheMiddleware.dynamic({ ttl: 300 }), (req, res) =>
+    homeController.getSuccessPage(req, res)
+);
 
 export default HomeRouter;

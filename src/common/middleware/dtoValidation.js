@@ -14,12 +14,7 @@ import { ApiResponse } from '../../domain/common/model/ApiResponse.js';
  * @returns {Function} Express 미들웨어 함수
  */
 export function validateWithDto(DtoClass, schemaMethod, options = {}) {
-    const {
-        source = 'body',
-        attachDto = true,
-        dtoProperty = 'dto',
-        validationOptions = {}
-    } = options;
+    const { source = 'body', attachDto = true, dtoProperty = 'dto', validationOptions = {} } = options;
 
     return (req, res, next) => {
         try {
@@ -65,9 +60,7 @@ export function validateWithDto(DtoClass, schemaMethod, options = {}) {
                 });
 
                 // 에러 메시지 생성
-                const errorMessage = validationResult.errors
-                    .map(error => error.message)
-                    .join(', ');
+                const errorMessage = validationResult.errors.map(error => error.message).join(', ');
 
                 return res.status(400).json(ApiResponse.error(errorMessage));
             }
@@ -148,9 +141,7 @@ export function validateMultiple(validationRules) {
 
                 if (!validationResult.isValid) {
                     // 첫 번째 검증 실패 시 즉시 응답
-                    const errorMessage = validationResult.errors
-                        .map(error => error.message)
-                        .join(', ');
+                    const errorMessage = validationResult.errors.map(error => error.message).join(', ');
 
                     logger.warn('다중 DTO 검증 실패', {
                         endpoint: req.originalUrl,
@@ -232,10 +223,7 @@ export function validateIf(condition, validationMiddleware) {
  * @returns {Function} Express 미들웨어 함수
  */
 export function validateResponse(ResponseDtoClass, schemaMethod, options = {}) {
-    const {
-        enabled = process.env.NODE_ENV !== 'production',
-        logOnly = false
-    } = options;
+    const { enabled = process.env.NODE_ENV !== 'production', logOnly = false } = options;
 
     return (req, res, next) => {
         if (!enabled) {

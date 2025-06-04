@@ -15,10 +15,7 @@ export default class StandardizedErrorResponse {
      * @returns {ResponseBuilder} ResponseBuilder 인스턴스
      */
     static fromError(error, options = {}) {
-        const {
-            includeStack = process.env.NODE_ENV === 'development',
-            metadata = {}
-        } = options;
+        const { includeStack = process.env.NODE_ENV === 'development', metadata = {} } = options;
 
         // 에러 정보 추출
         const statusCode = getErrorStatusCode(error);
@@ -44,12 +41,11 @@ export default class StandardizedErrorResponse {
         }
 
         // ResponseBuilder를 사용하여 에러 응답 생성
-        const builder = ResponseBuilder.error(error.message, statusCode, errorCode)
-            .setMetadata({
-                errorId: this.generateErrorId(),
-                category,
-                ...metadata
-            });
+        const builder = ResponseBuilder.error(error.message, statusCode, errorCode).setMetadata({
+            errorId: this.generateErrorId(),
+            category,
+            ...metadata
+        });
 
         // 에러 데이터 설정
         builder.response.data = errorData;
@@ -144,16 +140,11 @@ export default class StandardizedErrorResponse {
      * @returns {ResponseBuilder} ResponseBuilder 인스턴스
      */
     static notFoundError(resource = 'Resource', identifier = null, metadata = {}) {
-        const message = identifier
-            ? `${resource} with identifier '${identifier}' not found`
-            : `${resource} not found`;
+        const message = identifier ? `${resource} with identifier '${identifier}' not found` : `${resource} not found`;
 
-        return this.createStandardError(
-            404,
-            message,
-            'RESOURCE_NOT_FOUND',
-            { resource, identifier }
-        ).setMetadata(metadata);
+        return this.createStandardError(404, message, 'RESOURCE_NOT_FOUND', { resource, identifier }).setMetadata(
+            metadata
+        );
     }
 
     /**
@@ -221,7 +212,6 @@ export default class StandardizedErrorResponse {
 
                 // 응답 전송
                 errorResponse.send(res);
-
             } catch (handlingError) {
                 // 에러 처리 중 에러가 발생한 경우 기본 응답
                 console.error('Error handling failed:', handlingError);
