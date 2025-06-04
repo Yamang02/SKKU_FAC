@@ -53,7 +53,8 @@ export default class ExhibitionService {
     }
 
     async getFeaturedExhibitions(limit = 5) {
-        const exhibitions = await this.exhibitionRepository.findFeaturedExhibitions(limit);
+        const result = await this.exhibitionRepository.findFeaturedExhibitions(limit);
+        const exhibitions = result.items || []; // findAll returns {items: [], total: n, pagination: false}
         const exhibitionSimpleDtos = [];
         if (exhibitions.length > 0) {
             for (const exhibition of exhibitions) {

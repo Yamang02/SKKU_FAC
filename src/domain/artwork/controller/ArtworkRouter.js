@@ -2,6 +2,7 @@ import express from 'express';
 import ArtworkApiController from './api/ArtworkApiController.js';
 import { imageUploadMiddleware } from '../../../common/middleware/imageUploadMiddleware.js';
 import { isAuthenticated } from '../../../common/middleware/auth.js';
+import { DomainSanitization } from '../../../common/middleware/sanitization.js';
 
 /**
  * 작품 라우터 팩토리 함수
@@ -79,7 +80,7 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.post('/api/new', isAuthenticated, imageUploadMiddleware('artwork'), artworkApiController.createArtwork.bind(artworkApiController));
+    ArtworkRouter.post('/api/new', isAuthenticated, DomainSanitization.artwork.create, imageUploadMiddleware('artwork'), artworkApiController.createArtwork.bind(artworkApiController));
 
     /**
      * @swagger
@@ -135,7 +136,7 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.put('/api/:id', isAuthenticated, artworkApiController.updateArtwork.bind(artworkApiController));
+    ArtworkRouter.put('/api/:id', isAuthenticated, DomainSanitization.artwork.update, artworkApiController.updateArtwork.bind(artworkApiController));
 
     /**
      * @swagger
@@ -264,7 +265,7 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.get('/api/list', artworkApiController.getArtworkList.bind(artworkApiController));
+    ArtworkRouter.get('/api/list', DomainSanitization.artwork.search, artworkApiController.getArtworkList.bind(artworkApiController));
 
     /**
      * @swagger
@@ -364,7 +365,7 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.post('/api/exhibiting', artworkApiController.submitArtwork.bind(artworkApiController));
+    ArtworkRouter.post('/api/exhibiting', DomainSanitization.artwork.create, artworkApiController.submitArtwork.bind(artworkApiController));
 
     /**
      * @swagger

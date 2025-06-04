@@ -4,6 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=1400">
+        <meta name="csrf-token" content="<%= csrfToken %>">
         <title>
             <%= title %> - SKKU Art Gallery
         </title>
@@ -13,6 +14,8 @@
         <style>
             @import url('/css/admin/style/adminStyle.css');
         </style>
+        <!-- CSRF 보호 스크립트 -->
+        <script src="/js/common/csrf.js"></script>
     </head>
 
     <body>

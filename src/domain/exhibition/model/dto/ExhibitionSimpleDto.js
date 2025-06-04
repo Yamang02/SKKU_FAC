@@ -12,6 +12,7 @@ export default class ExhibitionSimpleDto {
         }
         this.id = exhibition.id;
         this.title = exhibition.title;
+        this.location = exhibition.location || '';
         this.isFeatured = exhibition.isFeatured;
         this.imageUrl = exhibition.imageUrl ? CloudinaryUrlOptimizer.optimizeImageUrl(exhibition.imageUrl) : '';
         this.isSubmissionOpen = exhibition.isSubmissionOpen === true;

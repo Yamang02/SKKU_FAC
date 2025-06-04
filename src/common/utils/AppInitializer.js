@@ -4,6 +4,7 @@ import ErrorHandler from '../middleware/ErrorHandler.js';
 import { railwayErrorHandlerConfig } from '../../config/railwayMonitoringConfig.js';
 import Config from '../../config/Config.js';
 import serviceRegistry from '../container/ServiceRegistry.js';
+import { setupSessionMiddleware } from '../middleware/setupMiddleware.js';
 
 class AppInitializer {
     constructor(app) {
@@ -93,6 +94,9 @@ class AppInitializer {
         setupViewEngine(this.app);
         setupGlobalMiddleware(this.app);
         setupLoggingMiddleware(this.app);
+
+        // CSRF 보호 미들웨어 설정 (세션 설정 후)
+        setupSessionMiddleware(this.app);
 
         logger.success('세션 의존 미들웨어 설정 완료');
     }

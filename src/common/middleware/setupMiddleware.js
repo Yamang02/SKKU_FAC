@@ -1,6 +1,5 @@
 import express from 'express';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 import compression from 'compression';
 import methodOverride from 'method-override';
 import swaggerUi from 'swagger-ui-express';
@@ -11,6 +10,11 @@ import { staticFileConfig } from '../../config/security.js';
 import { createUploadDirs } from '../utils/createUploadDirs.js';
 import logger from '../utils/Logger.js';
 import Config from '../../config/Config.js';
+import { setupCSRFProtection } from './csrfProtection.js';
+import { sanitizeFormInput } from './inputSanitization.js';
+import { setupHttpsEnforcement } from './httpsEnforcement.js';
+import { setupAdvancedSecurityHeaders } from './securityHeaders.js';
+import { securityMonitoring } from './securityMonitoring.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,13 +42,8 @@ export function setupBasicMiddleware(app, swaggerDocument) {
         setupPerformanceMonitoring(app, config);
     }
 
-    // 1. HTTPS 리디렉션 (가장 먼저 - 보안 필수)
-    app.use((req, res, next) => {
-        if (config.isProduction() && req.headers['x-forwarded-proto'] !== 'https') {
-            return res.redirect('https://' + req.headers.host + req.url);
-        }
-        next();
-    });
+    // 1. HTTPS Enforcement (가장 먼저 - 보안 필수)
+    setupHttpsEnforcement(app);
 
     // 2. Rate Limiter (조기 차단으로 리소스 절약)
     setupRateLimitingMiddleware(app, config);
@@ -54,6 +53,12 @@ export function setupBasicMiddleware(app, swaggerDocument) {
 
     // 4. 보안 미들웨어 (보안 헤더 설정)
     setupSecurityMiddleware(app, config);
+
+    // 4-1. 고급 보안 헤더 추가 설정
+    setupAdvancedSecurityHeaders(app);
+
+    // 4-2. 보안 모니터링 추가
+    app.use(securityMonitoring());
 
     // 5. 정적 파일 제공 (빠른 응답을 위해 우선 처리)
     setupStaticFiles(app);
@@ -75,7 +80,7 @@ export function setupBasicMiddleware(app, swaggerDocument) {
         app.set('trust proxy', 1);
     }
 
-    logger.success('기본 미들웨어 설정 완료 (최적화된 순서)');
+    logger.success('기본 미들웨어 설정 완료 (HTTPS Enforcement 포함)');
 }
 
 /**
@@ -221,6 +226,7 @@ function setupCompressionMiddleware(app, config) {
  */
 function setupSecurityMiddleware(app, config) {
     const cspConfig = config.get('security.csp');
+    const additionalHeaders = config.get('security.additionalHeaders', {});
 
     // 환경별 Helmet 설정
     const helmetConfig = {
@@ -251,7 +257,13 @@ function setupSecurityMiddleware(app, config) {
                 microphone: ['none'],
                 geolocation: ['none'],
                 payment: ['none'],
-                usb: ['none']
+                usb: ['none'],
+                bluetooth: ['none'],
+                accelerometer: ['none'],
+                gyroscope: ['none'],
+                magnetometer: ['none'],
+                fullscreen: ['self'],
+                'picture-in-picture': ['none']
             }
         },
 
@@ -264,11 +276,7 @@ function setupSecurityMiddleware(app, config) {
         hidePoweredBy: true,
 
         // HSTS (HTTP Strict Transport Security)
-        hsts: config.isProduction() ? {
-            maxAge: 31536000, // 1년
-            includeSubDomains: true,
-            preload: true
-        } : false,
+        hsts: false,
 
         // IE No Open
         ieNoOpen: true,
@@ -281,12 +289,20 @@ function setupSecurityMiddleware(app, config) {
 
         // Referrer Policy
         referrerPolicy: {
-            policy: ['no-referrer', 'strict-origin-when-cross-origin']
+            policy: config.isProduction() ?
+                ['no-referrer-when-downgrade', 'strict-origin-when-cross-origin'] :
+                ['no-referrer', 'strict-origin-when-cross-origin']
         },
 
         // X-XSS-Protection
         xssFilter: true
     };
+
+    // Cross-Origin 정책은 별도로 설정 (helmet이 지원하지 않는 경우 대비)
+    if (config.isProduction()) {
+        helmetConfig.crossOriginOpenerPolicy = { policy: 'same-origin' };
+        helmetConfig.crossOriginResourcePolicy = { policy: 'same-origin' };
+    }
 
     app.use(helmet(helmetConfig));
 
@@ -296,23 +312,36 @@ function setupSecurityMiddleware(app, config) {
         res.removeHeader('X-Powered-By');
         res.removeHeader('Server');
 
-        // 추가 보안 헤더
+        // 기본 보안 헤더
         res.setHeader('X-Content-Type-Options', 'nosniff');
         res.setHeader('X-Frame-Options', 'DENY');
         res.setHeader('X-XSS-Protection', '1; mode=block');
 
+        // 환경별 추가 헤더 적용
+        Object.entries(additionalHeaders).forEach(([header, value]) => {
+            res.setHeader(header, value);
+        });
+
         // 프로덕션 환경에서만 적용되는 헤더
         if (config.isProduction()) {
-            res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+            // HSTS 헤더는 HTTPS Enforcement에서 관리
             res.setHeader('X-Download-Options', 'noopen');
             res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
+            res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+            res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+
+            // COEP 헤더 (특정 경로에서만)
+            if (req.path.startsWith('/secure/') || req.path.startsWith('/admin/')) {
+                res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+            }
         }
 
         // 개발 환경에서의 CORS 설정
         if (config.isDevelopment()) {
-            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token');
+            res.setHeader('Access-Control-Allow-Credentials', 'true');
         }
 
         next();
@@ -324,72 +353,10 @@ function setupSecurityMiddleware(app, config) {
 /**
  * Rate Limiting 미들웨어 설정
  */
-function setupRateLimitingMiddleware(app, config) {
-    const baseRateLimitConfig = config.get('rateLimit');
-
-    // 기본 Rate Limiter
-    const generalLimiter = rateLimit({
-        ...baseRateLimitConfig,
-        message: {
-            error: 'Too many requests from this IP, please try again later.',
-            retryAfter: Math.ceil(baseRateLimitConfig.windowMs / 1000)
-        },
-        standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-        legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-        skip: (req) => {
-            // 건강 체크 및 정적 파일 제외
-            return baseRateLimitConfig.skipPaths.some(path => req.path.startsWith(path));
-        },
-        keyGenerator: (req) => {
-            // IP 기반 키 생성 (프록시 환경 고려)
-            return req.ip || req.connection.remoteAddress;
-        }
-    });
-
-    // API 엔드포인트용 엄격한 Rate Limiter
-    const apiLimiter = rateLimit({
-        windowMs: 15 * 60 * 1000, // 15분
-        max: config.isProduction() ? 50 : 200, // API는 더 엄격하게
-        message: {
-            error: 'Too many API requests from this IP, please try again later.',
-            retryAfter: 900 // 15분
-        },
-        standardHeaders: true,
-        legacyHeaders: false
-    });
-
-    // 인증 관련 엔드포인트용 매우 엄격한 Rate Limiter
-    const authLimiter = rateLimit({
-        windowMs: 15 * 60 * 1000, // 15분
-        max: config.isProduction() ? 5 : 20, // 로그인 시도 제한
-        message: {
-            error: 'Too many authentication attempts from this IP, please try again later.',
-            retryAfter: 900
-        },
-        standardHeaders: true,
-        legacyHeaders: false,
-        skipSuccessfulRequests: true // 성공한 요청은 카운트에서 제외
-    });
-
-    // 업로드 엔드포인트용 Rate Limiter
-    const uploadLimiter = rateLimit({
-        windowMs: 60 * 60 * 1000, // 1시간
-        max: config.isProduction() ? 10 : 50, // 업로드 제한
-        message: {
-            error: 'Too many upload attempts from this IP, please try again later.',
-            retryAfter: 3600
-        },
-        standardHeaders: true,
-        legacyHeaders: false
-    });
-
-    // Rate Limiter 적용
-    app.use(generalLimiter);
-    app.use('/api/', apiLimiter);
-    app.use(['/auth/login', '/auth/signup', '/auth/forgot-password'], authLimiter);
-    app.use(['/artwork/upload', '/image/upload'], uploadLimiter);
-
-    logger.info('Rate Limiting 미들웨어 설정 완료');
+async function setupRateLimitingMiddleware(app, _config) {
+    // 새로운 고급 Rate Limiting 시스템 사용
+    const { setupAdvancedRateLimiting } = await import('./rateLimiting.js');
+    setupAdvancedRateLimiting(app);
 }
 
 /**
@@ -404,4 +371,17 @@ function setupStaticFiles(app) {
     app.use('/js', express.static(path.join(publicPath, 'js'), staticFileConfig));
     app.use('/images', express.static(path.join(publicPath, 'images'), staticFileConfig));
     app.use('/uploads', express.static(path.join(publicPath, 'uploads'), staticFileConfig));
+}
+
+/**
+ * 세션 및 인증 관련 미들웨어 설정 (세션 설정 후 호출)
+ */
+export function setupSessionMiddleware(app) {
+    // CSRF 보호 미들웨어 (세션 설정 후에 설정해야 함)
+    setupCSRFProtection(app);
+
+    // 입력 sanitization 미들웨어 (CSRF 보호 후)
+    app.use(sanitizeFormInput);
+
+    logger.info('세션 관련 미들웨어 설정 완료');
 }

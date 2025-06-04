@@ -124,11 +124,18 @@ class Config {
                 secret: Joi.string().min(32).required(),
                 resave: Joi.boolean().required(),
                 saveUninitialized: Joi.boolean().required(),
+                rolling: Joi.boolean().optional(),
+                unset: Joi.string().valid('destroy', 'keep').optional(),
+                name: Joi.string().optional(),
+                proxy: Joi.boolean().optional(),
+                genid: Joi.function().optional(),
                 cookie: Joi.object({
                     secure: Joi.boolean().required(),
                     maxAge: Joi.number().integer().min(60000).required(), // 최소 1분
                     httpOnly: Joi.boolean().optional(),
-                    sameSite: Joi.string().valid('strict', 'lax', 'none').optional()
+                    sameSite: Joi.string().valid('strict', 'lax', 'none').optional(),
+                    domain: Joi.string().optional(),
+                    path: Joi.string().optional()
                 }).required()
             }).required(),
 

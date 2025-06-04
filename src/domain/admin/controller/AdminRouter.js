@@ -23,6 +23,10 @@ import {
     auditContentManagement,
     AuditLogType
 } from '../../../common/middleware/auditLogger.js';
+import { getRateLimitStats } from '../../../common/middleware/rateLimiting.js';
+import { getHttpsStats } from '../../../common/middleware/httpsEnforcement.js';
+import { getSecurityHeadersStats } from '../../../common/middleware/securityHeaders.js';
+import { getSecurityDashboard } from '../../../common/middleware/securityMonitoring.js';
 
 /**
  * 관리자 라우터 팩토리 함수
@@ -118,6 +122,18 @@ export function createAdminRouter(container) {
     // 배치 작업 API 라우트 (AJAX용)
     AdminRouter.get('/api/batch/:jobId/status', canReadContent(), (req, res) => batchController.getBatchJobStatusAPI(req, res));
     AdminRouter.get('/api/batch/stats', canReadContent(), (req, res) => batchController.getBatchJobStatsAPI(req, res));
+
+    // Rate Limiting 통계 API (보안 모니터링용)
+    AdminRouter.get('/api/security/rate-limit-stats', canViewAdminDashboard(), (req, res) => getRateLimitStats(req, res));
+
+    // HTTPS Enforcement 통계 API (보안 모니터링용)
+    AdminRouter.get('/api/security/https-stats', canViewAdminDashboard(), (req, res) => getHttpsStats(req, res));
+
+    // Security Headers 통계 API (보안 모니터링용)
+    AdminRouter.get('/api/security/headers-stats', canViewAdminDashboard(), (req, res) => getSecurityHeadersStats(req, res));
+
+    // 통합 보안 대시보드 API
+    AdminRouter.get('/api/security/dashboard', canViewAdminDashboard(), (req, res) => getSecurityDashboard(req, res));
 
     return AdminRouter;
 }
