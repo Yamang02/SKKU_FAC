@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import logger from './common/utils/Logger.js';
 import AppInitializer from './common/utils/AppInitializer.js';
 import { setupBasicMiddleware } from './common/middleware/setupMiddleware.js';
+import Config from './config/Config.js';
 
 // 라우터
 import { createRouters } from './routeIndex.js';
@@ -22,6 +23,10 @@ const swaggerDocument = JSON.parse(
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Config 인스턴스를 앱에 저장
+const config = Config.getInstance();
+app.set('config', config);
 
 // 헬스체크 엔드포인트 (가장 먼저 등록)
 // CommonRouter는 의존성 주입이 필요하지 않으므로 직접 import

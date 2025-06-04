@@ -1,18 +1,28 @@
 import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 import methodOverride from 'method-override';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { cspConfig, rateLimitConfig, staticFileConfig } from '../../config/security.js';
+import { staticFileConfig } from '../../config/security.js';
 import { createUploadDirs } from '../utils/createUploadDirs.js';
 import logger from '../utils/Logger.js';
 import Config from '../../config/Config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// 미들웨어 성능 통계
+const middlewareStats = {
+    requests: 0,
+    totalTime: 0,
+    averageTime: 0,
+    slowRequests: 0,
+    errors: 0
+};
 
 /**
  * 기본 미들웨어 설정
@@ -23,10 +33,12 @@ export function setupBasicMiddleware(app, swaggerDocument) {
     // 업로드 디렉토리 생성
     createUploadDirs();
 
-    // 보안 미들웨어
-    app.use(helmet(cspConfig));
+    // 성능 모니터링 미들웨어 (가장 먼저)
+    if (config.get('monitoring.enableMetrics', false)) {
+        setupPerformanceMonitoring(app, config);
+    }
 
-    // HTTPS 리디렉션 (프로덕션 환경)
+    // 1. HTTPS 리디렉션 (가장 먼저 - 보안 필수)
     app.use((req, res, next) => {
         if (config.isProduction() && req.headers['x-forwarded-proto'] !== 'https') {
             return res.redirect('https://' + req.headers.host + req.url);
@@ -34,28 +46,350 @@ export function setupBasicMiddleware(app, swaggerDocument) {
         next();
     });
 
-    // Rate Limiter
-    app.use(rateLimit(rateLimitConfig));
+    // 2. Rate Limiter (조기 차단으로 리소스 절약)
+    setupRateLimitingMiddleware(app, config);
 
-    // Swagger UI
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    // 3. Compression 미들웨어 (응답 크기 감소)
+    setupCompressionMiddleware(app, config);
 
-    // Body Parser
+    // 4. 보안 미들웨어 (보안 헤더 설정)
+    setupSecurityMiddleware(app, config);
+
+    // 5. 정적 파일 제공 (빠른 응답을 위해 우선 처리)
+    setupStaticFiles(app);
+
+    // 6. Body Parser (요청 파싱)
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-    // HTTP 메서드 재정의
+    // 7. HTTP 메서드 재정의
     app.use(methodOverride('_method'));
 
-    // 정적 파일 제공
-    setupStaticFiles(app);
+    // 8. Swagger UI (개발/문서화 도구) - 개발 환경에서만
+    if (config.isDevelopment() || config.isTest()) {
+        app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    }
 
     // 프로덕션 및 테스트 환경에서 프록시 신뢰 설정
     if (config.isProduction() || config.isTest()) {
         app.set('trust proxy', 1);
     }
 
-    logger.success('기본 미들웨어 설정 완료');
+    logger.success('기본 미들웨어 설정 완료 (최적화된 순서)');
+}
+
+/**
+ * 성능 모니터링 미들웨어 설정
+ */
+function setupPerformanceMonitoring(app, config) {
+    app.use((req, res, next) => {
+        const startTime = Date.now();
+        const startMemory = process.memoryUsage();
+
+        // 요청 시작 로깅
+        if (config.get('monitoring.enableDetailedLogging', false)) {
+            logger.debug(`Request started: ${req.method} ${req.url}`, {
+                ip: req.ip,
+                userAgent: req.get('User-Agent'),
+                memory: startMemory
+            });
+        }
+
+        // 응답 완료 시 통계 수집
+        res.on('finish', () => {
+            const duration = Date.now() - startTime;
+            const endMemory = process.memoryUsage();
+
+            // 통계 업데이트
+            middlewareStats.requests++;
+            middlewareStats.totalTime += duration;
+            middlewareStats.averageTime = middlewareStats.totalTime / middlewareStats.requests;
+
+            // 느린 요청 감지 (500ms 이상)
+            if (duration > 500) {
+                middlewareStats.slowRequests++;
+                logger.warn(`Slow request detected: ${req.method} ${req.url} took ${duration}ms`);
+            }
+
+            // 메모리 사용량 모니터링
+            const memoryDiff = endMemory.heapUsed - startMemory.heapUsed;
+
+            if (config.get('monitoring.enableDetailedLogging', false)) {
+                logger.debug(`Request completed: ${req.method} ${req.url}`, {
+                    duration: `${duration}ms`,
+                    statusCode: res.statusCode,
+                    memoryDiff: `${Math.round(memoryDiff / 1024)}KB`,
+                    totalRequests: middlewareStats.requests,
+                    averageTime: `${Math.round(middlewareStats.averageTime)}ms`
+                });
+            }
+        });
+
+        // 에러 처리
+        res.on('error', (error) => {
+            middlewareStats.errors++;
+            logger.error('Response error:', error);
+        });
+
+        next();
+    });
+
+    // 통계 리포트 주기적 출력 (프로덕션 환경에서는 비활성화)
+    if (!config.isProduction()) {
+        setInterval(() => {
+            if (middlewareStats.requests > 0) {
+                logger.info('Middleware Performance Stats:', {
+                    totalRequests: middlewareStats.requests,
+                    averageResponseTime: `${Math.round(middlewareStats.averageTime)}ms`,
+                    slowRequests: middlewareStats.slowRequests,
+                    errorRate: `${((middlewareStats.errors / middlewareStats.requests) * 100).toFixed(2)}%`,
+                    memoryUsage: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`
+                });
+            }
+        }, 60000); // 1분마다
+    }
+
+    logger.info('성능 모니터링 미들웨어 활성화');
+}
+
+/**
+ * 미들웨어 성능 통계 조회
+ */
+export function getMiddlewareStats() {
+    return {
+        ...middlewareStats,
+        memoryUsage: process.memoryUsage(),
+        uptime: process.uptime()
+    };
+}
+
+/**
+ * 미들웨어 성능 통계 초기화
+ */
+export function resetMiddlewareStats() {
+    middlewareStats.requests = 0;
+    middlewareStats.totalTime = 0;
+    middlewareStats.averageTime = 0;
+    middlewareStats.slowRequests = 0;
+    middlewareStats.errors = 0;
+    logger.info('미들웨어 성능 통계 초기화됨');
+}
+
+/**
+ * Compression 미들웨어 설정
+ */
+function setupCompressionMiddleware(app, config) {
+    const compressionConfig = {
+        // 압축 레벨 (1-9, 6이 기본값)
+        level: config.isProduction() ? 6 : 1,
+
+        // 압축 임계값 (바이트 단위, 기본 1024)
+        threshold: 1024,
+
+        // 압축할 MIME 타입 필터
+        filter: (req, res) => {
+            // 이미 압축된 파일은 제외
+            if (req.headers['x-no-compression']) {
+                return false;
+            }
+
+            // 기본 compression 필터 사용
+            return compression.filter(req, res);
+        },
+
+        // 메모리 레벨 (1-9, 8이 기본값)
+        memLevel: config.isProduction() ? 8 : 6,
+
+        // 압축 창 크기 (9-15, 15가 기본값)
+        windowBits: config.isProduction() ? 15 : 13,
+
+        // 압축 전략
+        strategy: config.isProduction() ? 0 : 1 // 0: Z_DEFAULT_STRATEGY, 1: Z_FILTERED
+    };
+
+    // 환경별 압축 설정 적용
+    if (config.get('performance.enableCompression', true)) {
+        app.use(compression(compressionConfig));
+        logger.info(`Compression 미들웨어 활성화 (레벨: ${compressionConfig.level})`);
+    } else {
+        logger.info('Compression 미들웨어 비활성화');
+    }
+}
+
+/**
+ * 보안 헤더 미들웨어 설정
+ */
+function setupSecurityMiddleware(app, config) {
+    const cspConfig = config.get('security.csp');
+
+    // 환경별 Helmet 설정
+    const helmetConfig = {
+        // Content Security Policy
+        contentSecurityPolicy: cspConfig.contentSecurityPolicy ? {
+            directives: cspConfig.contentSecurityPolicy.directives,
+            reportOnly: config.isDevelopment() // 개발 환경에서는 report-only 모드
+        } : false,
+
+        // Cross-Origin Embedder Policy
+        crossOriginEmbedderPolicy: cspConfig.crossOriginEmbedderPolicy || false,
+
+        // DNS Prefetch Control
+        dnsPrefetchControl: {
+            allow: false
+        },
+
+        // Expect-CT (Certificate Transparency)
+        expectCt: config.isProduction() ? {
+            maxAge: 86400, // 24시간
+            enforce: true
+        } : false,
+
+        // Feature Policy / Permissions Policy
+        permissionsPolicy: {
+            features: {
+                camera: ['self'],
+                microphone: ['none'],
+                geolocation: ['none'],
+                payment: ['none'],
+                usb: ['none']
+            }
+        },
+
+        // Frame Options
+        frameguard: {
+            action: 'deny'
+        },
+
+        // Hide Powered-By
+        hidePoweredBy: true,
+
+        // HSTS (HTTP Strict Transport Security)
+        hsts: config.isProduction() ? {
+            maxAge: 31536000, // 1년
+            includeSubDomains: true,
+            preload: true
+        } : false,
+
+        // IE No Open
+        ieNoOpen: true,
+
+        // No Sniff
+        noSniff: true,
+
+        // Origin Agent Cluster
+        originAgentCluster: true,
+
+        // Referrer Policy
+        referrerPolicy: {
+            policy: ['no-referrer', 'strict-origin-when-cross-origin']
+        },
+
+        // X-XSS-Protection
+        xssFilter: true
+    };
+
+    app.use(helmet(helmetConfig));
+
+    // 추가 보안 헤더 설정
+    app.use((req, res, next) => {
+        // 서버 정보 숨기기
+        res.removeHeader('X-Powered-By');
+        res.removeHeader('Server');
+
+        // 추가 보안 헤더
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'DENY');
+        res.setHeader('X-XSS-Protection', '1; mode=block');
+
+        // 프로덕션 환경에서만 적용되는 헤더
+        if (config.isProduction()) {
+            res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+            res.setHeader('X-Download-Options', 'noopen');
+            res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
+        }
+
+        // 개발 환경에서의 CORS 설정
+        if (config.isDevelopment()) {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        }
+
+        next();
+    });
+
+    logger.info('보안 헤더 미들웨어 설정 완료');
+}
+
+/**
+ * Rate Limiting 미들웨어 설정
+ */
+function setupRateLimitingMiddleware(app, config) {
+    const baseRateLimitConfig = config.get('rateLimit');
+
+    // 기본 Rate Limiter
+    const generalLimiter = rateLimit({
+        ...baseRateLimitConfig,
+        message: {
+            error: 'Too many requests from this IP, please try again later.',
+            retryAfter: Math.ceil(baseRateLimitConfig.windowMs / 1000)
+        },
+        standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+        legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+        skip: (req) => {
+            // 건강 체크 및 정적 파일 제외
+            return baseRateLimitConfig.skipPaths.some(path => req.path.startsWith(path));
+        },
+        keyGenerator: (req) => {
+            // IP 기반 키 생성 (프록시 환경 고려)
+            return req.ip || req.connection.remoteAddress;
+        }
+    });
+
+    // API 엔드포인트용 엄격한 Rate Limiter
+    const apiLimiter = rateLimit({
+        windowMs: 15 * 60 * 1000, // 15분
+        max: config.isProduction() ? 50 : 200, // API는 더 엄격하게
+        message: {
+            error: 'Too many API requests from this IP, please try again later.',
+            retryAfter: 900 // 15분
+        },
+        standardHeaders: true,
+        legacyHeaders: false
+    });
+
+    // 인증 관련 엔드포인트용 매우 엄격한 Rate Limiter
+    const authLimiter = rateLimit({
+        windowMs: 15 * 60 * 1000, // 15분
+        max: config.isProduction() ? 5 : 20, // 로그인 시도 제한
+        message: {
+            error: 'Too many authentication attempts from this IP, please try again later.',
+            retryAfter: 900
+        },
+        standardHeaders: true,
+        legacyHeaders: false,
+        skipSuccessfulRequests: true // 성공한 요청은 카운트에서 제외
+    });
+
+    // 업로드 엔드포인트용 Rate Limiter
+    const uploadLimiter = rateLimit({
+        windowMs: 60 * 60 * 1000, // 1시간
+        max: config.isProduction() ? 10 : 50, // 업로드 제한
+        message: {
+            error: 'Too many upload attempts from this IP, please try again later.',
+            retryAfter: 3600
+        },
+        standardHeaders: true,
+        legacyHeaders: false
+    });
+
+    // Rate Limiter 적용
+    app.use(generalLimiter);
+    app.use('/api/', apiLimiter);
+    app.use(['/auth/login', '/auth/signup', '/auth/forgot-password'], authLimiter);
+    app.use(['/artwork/upload', '/image/upload'], uploadLimiter);
+
+    logger.info('Rate Limiting 미들웨어 설정 완료');
 }
 
 /**

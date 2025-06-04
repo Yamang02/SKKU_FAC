@@ -92,7 +92,10 @@ class Config {
                     max: Joi.number().integer().min(1).required(),
                     min: Joi.number().integer().min(0).required(),
                     acquire: Joi.number().integer().min(1000).required(),
-                    idle: Joi.number().integer().min(1000).required()
+                    idle: Joi.number().integer().min(1000).required(),
+                    evict: Joi.number().integer().min(100).optional(),
+                    handleDisconnects: Joi.boolean().optional(),
+                    validate: Joi.function().optional()
                 }).required()
             }).required(),
 
