@@ -22,6 +22,7 @@ class RedisClient {
         this.client = null;
         this.isConnected = false;
         this.connectionAttempted = false;
+        this.connectionPromise = null; // 연결 프로미스를 저장하여 중복 연결 방지
     }
 
     async connect() {
@@ -31,12 +32,26 @@ class RedisClient {
             return this.client;
         }
 
-        // 연결 시도 중이면 대기
-        if (this.connectionAttempted && this.client) {
-            logger.info(`[${environment.toUpperCase()}] Redis 연결 시도 중... 기존 연결을 반환합니다.`);
-            return this.client;
+        // 연결 시도 중이면 기존 프로미스를 반환 (중복 연결 방지)
+        if (this.connectionPromise) {
+            logger.info(`[${environment.toUpperCase()}] Redis 연결 시도 중... 기존 프로미스를 대기합니다.`);
+            return await this.connectionPromise;
         }
 
+        // 새로운 연결 시도
+        this.connectionPromise = this._performConnection();
+
+        try {
+            const result = await this.connectionPromise;
+            this.connectionPromise = null; // 성공 시 프로미스 정리
+            return result;
+        } catch (error) {
+            this.connectionPromise = null; // 실패 시 프로미스 정리
+            throw error;
+        }
+    }
+
+    async _performConnection() {
         this.connectionAttempted = true;
 
         try {

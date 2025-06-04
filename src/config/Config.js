@@ -491,11 +491,11 @@ class Config {
                 logDir: process.env.LOG_DIR || 'logs'
             },
 
-            // 이메일 설정
+            // 이메일 설정 (Railway 환경변수 지원)
             email: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-                from: process.env.EMAIL_FROM,
+                user: process.env.EMAIL_USER || process.env.GMAIL_USER,
+                pass: process.env.EMAIL_PASS || process.env.GMAIL_PASS,
+                from: process.env.EMAIL_FROM || process.env.GMAIL_USER || process.env.EMAIL_USER,
                 adminEmail: process.env.ADMIN_EMAIL
             },
 
@@ -546,47 +546,47 @@ class Config {
         // 환경별 최적화된 연결 풀 설정
         const getOptimizedPoolConfig = () => {
             switch (this.environment) {
-            case 'production':
-                return {
-                    max: parseInt(process.env.DB_POOL_MAX, 10) || 20, // 운영: 더 많은 연결
-                    min: parseInt(process.env.DB_POOL_MIN, 10) || 5, // 운영: 최소 연결 유지
-                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 10000, // 10초
-                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 60000, // 60초
-                    evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000, // 1초마다 유휴 연결 확인
-                    handleDisconnects: true, // 연결 끊김 자동 처리
-                    validate: connection => {
-                        // 연결 유효성 검사 - 연결이 존재하고 활성 상태인지 확인
-                        return connection && connection.state !== 'disconnected';
-                    }
-                };
+                case 'production':
+                    return {
+                        max: parseInt(process.env.DB_POOL_MAX, 10) || 20, // 운영: 더 많은 연결
+                        min: parseInt(process.env.DB_POOL_MIN, 10) || 5, // 운영: 최소 연결 유지
+                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 10000, // 10초
+                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 60000, // 60초
+                        evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000, // 1초마다 유휴 연결 확인
+                        handleDisconnects: true, // 연결 끊김 자동 처리
+                        validate: connection => {
+                            // 연결 유효성 검사 - 연결이 존재하고 활성 상태인지 확인
+                            return connection && connection.state !== 'disconnected';
+                        }
+                    };
 
-            case 'test':
-                return {
-                    max: parseInt(process.env.DB_POOL_MAX, 10) || 5, // 테스트: 적은 연결
-                    min: parseInt(process.env.DB_POOL_MIN, 10) || 1, // 테스트: 최소 1개 유지
-                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 5000, // 5초
-                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 30000, // 30초
-                    evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
-                    handleDisconnects: true
-                };
+                case 'test':
+                    return {
+                        max: parseInt(process.env.DB_POOL_MAX, 10) || 5, // 테스트: 적은 연결
+                        min: parseInt(process.env.DB_POOL_MIN, 10) || 1, // 테스트: 최소 1개 유지
+                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 5000, // 5초
+                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 30000, // 30초
+                        evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
+                        handleDisconnects: true
+                    };
 
-            case 'development':
-                return {
-                    max: parseInt(process.env.DB_POOL_MAX, 10) || 10, // 개발: 중간 수준
-                    min: parseInt(process.env.DB_POOL_MIN, 10) || 2, // 개발: 최소 2개 유지
-                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 8000, // 8초
-                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 45000, // 45초
-                    evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
-                    handleDisconnects: true
-                };
+                case 'development':
+                    return {
+                        max: parseInt(process.env.DB_POOL_MAX, 10) || 10, // 개발: 중간 수준
+                        min: parseInt(process.env.DB_POOL_MIN, 10) || 2, // 개발: 최소 2개 유지
+                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 8000, // 8초
+                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 45000, // 45초
+                        evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
+                        handleDisconnects: true
+                    };
 
-            default:
-                return {
-                    max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
-                    min: parseInt(process.env.DB_POOL_MIN, 10) || 0,
-                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 30000,
-                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 10000
-                };
+                default:
+                    return {
+                        max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+                        min: parseInt(process.env.DB_POOL_MIN, 10) || 0,
+                        acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 30000,
+                        idle: parseInt(process.env.DB_POOL_IDLE, 10) || 10000
+                    };
             }
         };
 
@@ -600,48 +600,48 @@ class Config {
         // 환경별 설정을 먼저 생성하고, 나중에 get() 메서드로 password를 가져와서 복호화
         let envConfig;
         switch (this.environment) {
-        case 'production':
-            envConfig = {
-                ...baseConfig,
-                host: process.env.MYSQLHOST,
-                user: process.env.MYSQLUSER,
-                password: process.env.MYSQLPASSWORD,
-                database: process.env.MYSQL_DATABASE,
-                port: parseInt(process.env.MYSQLPORT, 10) || 3306
-            };
-            break;
+            case 'production':
+                envConfig = {
+                    ...baseConfig,
+                    host: process.env.MYSQLHOST,
+                    user: process.env.MYSQLUSER,
+                    password: process.env.MYSQLPASSWORD,
+                    database: process.env.MYSQL_DATABASE,
+                    port: parseInt(process.env.MYSQLPORT, 10) || 3306
+                };
+                break;
 
-        case 'test':
-            envConfig = {
-                ...baseConfig,
-                host: process.env.TEST_DB_HOST || process.env.DB_HOST,
-                user: process.env.TEST_DB_USER || process.env.DB_USER,
-                password: process.env.TEST_DB_PASSWORD || process.env.DB_PASSWORD,
-                database: process.env.TEST_DB_NAME || process.env.DB_NAME,
-                port: parseInt(process.env.TEST_DB_PORT || process.env.DB_PORT, 10) || 3306
-            };
-            break;
+            case 'test':
+                envConfig = {
+                    ...baseConfig,
+                    host: process.env.TEST_DB_HOST || process.env.DB_HOST,
+                    user: process.env.TEST_DB_USER || process.env.DB_USER,
+                    password: process.env.TEST_DB_PASSWORD || process.env.DB_PASSWORD,
+                    database: process.env.TEST_DB_NAME || process.env.DB_NAME,
+                    port: parseInt(process.env.TEST_DB_PORT || process.env.DB_PORT, 10) || 3306
+                };
+                break;
 
-        case 'development':
-            envConfig = {
-                ...baseConfig,
-                host: process.env.DEV_DB_HOST || process.env.DB_HOST,
-                user: process.env.DEV_DB_USER || process.env.DB_USER,
-                password: process.env.DEV_DB_PASSWORD || process.env.DB_PASSWORD,
-                database: process.env.DEV_DB_NAME || process.env.DB_NAME,
-                port: parseInt(process.env.DEV_DB_PORT || process.env.DB_PORT, 10) || 3306
-            };
-            break;
+            case 'development':
+                envConfig = {
+                    ...baseConfig,
+                    host: process.env.DEV_DB_HOST || process.env.DB_HOST,
+                    user: process.env.DEV_DB_USER || process.env.DB_USER,
+                    password: process.env.DEV_DB_PASSWORD || process.env.DB_PASSWORD,
+                    database: process.env.DEV_DB_NAME || process.env.DB_NAME,
+                    port: parseInt(process.env.DEV_DB_PORT || process.env.DB_PORT, 10) || 3306
+                };
+                break;
 
-        default:
-            envConfig = {
-                ...baseConfig,
-                host: process.env.DB_HOST,
-                user: process.env.DB_USER,
-                password: process.env.DB_PASSWORD,
-                database: process.env.DB_NAME,
-                port: parseInt(process.env.DB_PORT, 10) || 3306
-            };
+            default:
+                envConfig = {
+                    ...baseConfig,
+                    host: process.env.DB_HOST,
+                    user: process.env.DB_USER,
+                    password: process.env.DB_PASSWORD,
+                    database: process.env.DB_NAME,
+                    port: parseInt(process.env.DB_PORT, 10) || 3306
+                };
         }
 
         // 초기화가 완료된 후에는 get() 메서드를 사용하여 암호화된 비밀번호를 복호화
@@ -1349,9 +1349,10 @@ class Config {
     getEmailConfig() {
         return (
             this.get('email') || {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-                from: process.env.EMAIL_FROM,
+                // Railway 환경변수명과 애플리케이션 환경변수명 매핑
+                user: process.env.EMAIL_USER || process.env.GMAIL_USER,
+                pass: process.env.EMAIL_PASS || process.env.GMAIL_PASS,
+                from: process.env.EMAIL_FROM || process.env.GMAIL_USER || process.env.EMAIL_USER,
                 adminEmail: process.env.ADMIN_EMAIL
             }
         );
@@ -1374,44 +1375,44 @@ class Config {
 
         // 환경별 Redis 설정 조정
         switch (this.environment) {
-        case 'production':
-            return {
-                ...baseConfig,
-                db: parseInt(process.env.REDIS_DB, 10) || 0, // 세션용 DB 0
-                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 DB 1
-                ttl: parseInt(process.env.REDIS_TTL, 10) || 86400
-            };
+            case 'production':
+                return {
+                    ...baseConfig,
+                    db: parseInt(process.env.REDIS_DB, 10) || 0, // 세션용 DB 0
+                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 DB 1
+                    ttl: parseInt(process.env.REDIS_TTL, 10) || 86400
+                };
 
-        case 'test':
-            return {
-                ...baseConfig,
-                db: parseInt(process.env.REDIS_DB, 10) || 14, // 테스트 세션용 DB 14
-                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 15, // 테스트 캐시용 DB 15
-                ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
-                prefix: 'test:'
-            };
+            case 'test':
+                return {
+                    ...baseConfig,
+                    db: parseInt(process.env.REDIS_DB, 10) || 14, // 테스트 세션용 DB 14
+                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 15, // 테스트 캐시용 DB 15
+                    ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
+                    prefix: 'test:'
+                };
 
-        case 'development':
-            // 개발환경은 별도 DB 사용
-            return {
-                ...baseConfig,
-                db: parseInt(process.env.REDIS_DB, 10) || 0, // 개발 세션용 DB 0
-                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 개발 캐시용 DB 1
-                ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
-                prefix: 'dev:' // 개발환경 전용 prefix
-            };
+            case 'development':
+                // 개발환경은 별도 DB 사용
+                return {
+                    ...baseConfig,
+                    db: parseInt(process.env.REDIS_DB, 10) || 0, // 개발 세션용 DB 0
+                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 개발 캐시용 DB 1
+                    ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
+                    prefix: 'dev:' // 개발환경 전용 prefix
+                };
 
-        case 'staging':
-            return {
-                ...baseConfig,
-                db: parseInt(process.env.REDIS_DB, 10) || 2, // 스테이징 세션용 DB 2
-                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 3, // 스테이징 캐시용 DB 3
-                ttl: parseInt(process.env.REDIS_TTL, 10) || 43200, // 12시간
-                prefix: 'staging:'
-            };
+            case 'staging':
+                return {
+                    ...baseConfig,
+                    db: parseInt(process.env.REDIS_DB, 10) || 2, // 스테이징 세션용 DB 2
+                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 3, // 스테이징 캐시용 DB 3
+                    ttl: parseInt(process.env.REDIS_TTL, 10) || 43200, // 12시간
+                    prefix: 'staging:'
+                };
 
-        default:
-            return baseConfig;
+            default:
+                return baseConfig;
         }
     }
 
