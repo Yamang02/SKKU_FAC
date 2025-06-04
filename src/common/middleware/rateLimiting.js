@@ -17,18 +17,23 @@ const config = Config.getInstance();
 let redisClient = null;
 if (config.get('redis.host')) {
     try {
+        console.log('🔄 [RATE_LIMIT] Redis 클라이언트 생성 시작');
         logger.info('=== RateLimit Redis 클라이언트 설정 ===');
         logger.info(`호스트: ${config.get('redis.host')}`);
         logger.info(`포트: ${config.get('redis.port')}`);
         logger.info(`패스워드: ${config.get('redis.password') ? '설정됨' : '설정되지 않음'}`);
         logger.info(`데이터베이스: ${config.get('redis.db', 0)}`);
 
-        redisClient = createClient({
+        const clientOptions = {
             host: config.get('redis.host'),
             port: config.get('redis.port'),
             password: config.get('redis.password'),
             db: config.get('redis.db', 0)
-        });
+        };
+
+        console.log('🔄 [RATE_LIMIT] createClient 호출 직전', clientOptions);
+        redisClient = createClient(clientOptions);
+        console.log('🔄 [RATE_LIMIT] createClient 호출 완료');
         redisClient.on('error', err => {
             logger.error('[RATE_LIMIT] Redis 클라이언트 오류', {
                 error: err.message || 'Unknown error',
@@ -207,15 +212,6 @@ function createRateLimitOptions(options = {}) {
                 type: 'rate_limit_exceeded',
                 timestamp: new Date().toISOString()
             });
-        },
-        onLimitReached: (req, res, options) => {
-            logger.error('Rate limit 한계 도달', {
-                ip: req.ip,
-                path: req.path,
-                limit: options.max,
-                window: options.windowMs,
-                attackType
-            });
         }
     };
 }
@@ -324,17 +320,7 @@ export const slowDownMiddleware = slowDown({
     skipFailedRequests: false,
     skipSuccessfulRequests: false,
     // store: createStore(15 * 60 * 1000), // Redis 호환성 문제로 메모리 스토어 사용
-    keyGenerator: req => req.ip,
-    onLimitReached: (req, res, options) => {
-        const ip = req.ip;
-        RateLimitMonitor.recordRequest(ip, true, 'slowAttack');
-
-        logger.warn('슬로우 다운 활성화', {
-            ip,
-            path: req.path,
-            delay: options.delay
-        });
-    }
+    keyGenerator: req => req.ip
 });
 
 /**
