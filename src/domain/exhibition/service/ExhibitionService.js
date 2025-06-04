@@ -9,6 +9,7 @@ import { ExhibitionNotFoundError } from '../../../common/error/ExhibitionError.j
 import ExhibitionResponseDto from '../model/dto/ExhibitionResponseDto.js';
 import ExhibitionListDto from '../model/dto/ExhibitionListDto.js';
 import ExhibitionSimpleDto from '../model/dto/ExhibitionSimpleDto.js';
+import Exhibition from '../../../infrastructure/db/model/entity/Exhibition.js';
 import logger from '../../../common/utils/Logger.js';
 
 /**
@@ -298,37 +299,16 @@ export default class ExhibitionService {
         return exhibitions.map(exhibition => new ExhibitionSimpleDto(exhibition));
     }
 
-    // ===== 전시회 상태 관리 메서드 =====
+    // ===== 전시회 상태 관리 메서드 (리팩토링됨) =====
     /**
-     * 전시회의 현재 상태를 계산합니다.
+     * 전시회의 현재 상태를 데이터베이스에서 조회합니다.
      * @param {Object} exhibition - 전시회 객체
      * @returns {string} 전시회 상태
+     * @deprecated 이제 exhibition.status를 직접 사용하세요
      */
     calculateExhibitionStatus(exhibition) {
-        const now = new Date();
-        const startDate = new Date(exhibition.startDate);
-        const endDate = new Date(exhibition.endDate);
-
-        // 전시 종료
-        if (now > endDate) {
-            return 'completed';
-        }
-
-        // 전시 진행 중
-        if (now >= startDate && now <= endDate) {
-            return 'active';
-        }
-
-        // 전시 시작 전
-        if (now < startDate) {
-            if (exhibition.isSubmissionOpen) {
-                return 'submission_open';
-            } else {
-                return 'planning';
-            }
-        }
-
-        return 'planning';
+        logger.warn('calculateExhibitionStatus는 deprecated입니다. exhibition.status를 직접 사용하세요.');
+        return exhibition.status || 'planning';
     }
 
     /**
@@ -338,19 +318,122 @@ export default class ExhibitionService {
      * @returns {boolean} 전환 가능 여부
      */
     isValidStatusTransition(currentStatus, newStatus) {
-        const validTransitions = {
-            'planning': ['submission_open'],
-            'submission_open': ['planning', 'review'],
-            'review': ['active'],
-            'active': ['completed'],
-            'completed': [] // 완료된 전시회는 상태 변경 불가
-        };
-
-        return validTransitions[currentStatus]?.includes(newStatus) || false;
+        return Exhibition.isValidStatusTransition(currentStatus, newStatus);
     }
 
     /**
-     * 전시회의 작품 제출 상태를 안전하게 변경합니다.
+     * 전시회 상태를 안전하게 변경합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {string} newStatus - 새로운 상태
+     * @param {Object} options - 추가 옵션 (로깅, 검증 등)
+     * @returns {Promise<Object>} 업데이트된 전시회
+     */
+    async changeExhibitionStatus(exhibitionId, newStatus, options = {}) {
+        try {
+            const { skipValidation = false, reason = '', userId = null } = options;
+
+            const exhibition = await this.getExhibitionById(exhibitionId);
+            const currentStatus = exhibition.status;
+
+            // 상태 전환 검증 (skipValidation이 true가 아닌 경우)
+            if (!skipValidation && !this.isValidStatusTransition(currentStatus, newStatus)) {
+                throw new Error(`잘못된 상태 전환: ${currentStatus} → ${newStatus}. 허용되는 전환: ${Exhibition.getValidTransitions(currentStatus).join(', ')}`);
+            }
+
+            // 상태 변경 로깅
+            logger.info(`전시회 상태 변경: ${exhibitionId} (${currentStatus} → ${newStatus})`, {
+                exhibitionId,
+                currentStatus,
+                newStatus,
+                reason,
+                userId,
+                timestamp: new Date().toISOString()
+            });
+
+            // 상태 변경과 함께 관련 필드도 업데이트
+            const updateData = { status: newStatus };
+
+            // 상태에 따른 자동 필드 업데이트
+            if (newStatus === 'submission_open') {
+                updateData.isSubmissionOpen = true;
+            } else if (newStatus === 'review' || newStatus === 'active' || newStatus === 'completed') {
+                updateData.isSubmissionOpen = false;
+            }
+
+            return await this.updateManagementExhibition(exhibitionId, updateData);
+        } catch (error) {
+            logger.error('전시회 상태 변경 실패:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 전시회를 작품 제출 상태로 변경합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {Object} options - 추가 옵션
+     * @returns {Promise<Object>} 업데이트된 전시회
+     */
+    async openSubmissions(exhibitionId, options = {}) {
+        return await this.changeExhibitionStatus(exhibitionId, 'submission_open', {
+            ...options,
+            reason: '작품 제출 시작'
+        });
+    }
+
+    /**
+     * 전시회를 심사 상태로 변경합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {Object} options - 추가 옵션
+     * @returns {Promise<Object>} 업데이트된 전시회
+     */
+    async startReview(exhibitionId, options = {}) {
+        return await this.changeExhibitionStatus(exhibitionId, 'review', {
+            ...options,
+            reason: '작품 심사 시작'
+        });
+    }
+
+    /**
+     * 전시회를 활성화(진행 중) 상태로 변경합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {Object} options - 추가 옵션
+     * @returns {Promise<Object>} 업데이트된 전시회
+     */
+    async activateExhibition(exhibitionId, options = {}) {
+        return await this.changeExhibitionStatus(exhibitionId, 'active', {
+            ...options,
+            reason: '전시회 시작'
+        });
+    }
+
+    /**
+     * 전시회를 완료 상태로 변경합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {Object} options - 추가 옵션
+     * @returns {Promise<Object>} 업데이트된 전시회
+     */
+    async completeExhibition(exhibitionId, options = {}) {
+        return await this.changeExhibitionStatus(exhibitionId, 'completed', {
+            ...options,
+            reason: '전시회 종료'
+        });
+    }
+
+    /**
+     * 전시회를 기획 상태로 되돌립니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {Object} options - 추가 옵션
+     * @returns {Promise<Object>} 업데이트된 전시회
+     */
+    async resetToPlanning(exhibitionId, options = {}) {
+        return await this.changeExhibitionStatus(exhibitionId, 'planning', {
+            ...options,
+            reason: '기획 상태로 되돌림'
+        });
+    }
+
+    /**
+     * 전시회의 작품 제출 상태를 안전하게 변경합니다. (레거시 호환성)
      * @param {string} exhibitionId - 전시회 ID
      * @param {boolean} isOpen - 제출 열림 여부
      * @returns {Promise<Object>} 업데이트된 전시회
@@ -358,13 +441,31 @@ export default class ExhibitionService {
     async updateSubmissionStatus(exhibitionId, isOpen) {
         try {
             const exhibition = await this.getExhibitionById(exhibitionId);
-            const currentStatus = this.calculateExhibitionStatus(exhibition);
+            const currentStatus = exhibition.status;
 
-            // 전시가 이미 시작되었거나 완료된 경우 제출 상태 변경 불가
-            if (currentStatus === 'active' || currentStatus === 'completed') {
-                throw new Error('진행 중이거나 완료된 전시회의 작품 제출 상태는 변경할 수 없습니다.');
+            // 완료된 전시회는 제출 상태 변경 불가
+            if (currentStatus === 'completed') {
+                throw new Error('완료된 전시회의 작품 제출 상태는 변경할 수 없습니다.');
             }
 
+            // 진행 중인 전시회는 제출 상태 변경 불가
+            if (currentStatus === 'active') {
+                throw new Error('진행 중인 전시회의 작품 제출 상태는 변경할 수 없습니다.');
+            }
+
+            if (isOpen) {
+                // 제출 열기: submission_open 상태로 변경
+                if (currentStatus === 'planning') {
+                    return await this.openSubmissions(exhibitionId, { reason: '레거시 API를 통한 제출 상태 변경' });
+                }
+            } else {
+                // 제출 닫기: planning 상태로 변경
+                if (currentStatus === 'submission_open') {
+                    return await this.resetToPlanning(exhibitionId, { reason: '레거시 API를 통한 제출 상태 변경' });
+                }
+            }
+
+            // 상태 변경이 필요 없는 경우 현재 상태 유지하면서 isSubmissionOpen만 업데이트
             return await this.updateManagementExhibition(exhibitionId, {
                 isSubmissionOpen: isOpen
             });
@@ -383,7 +484,7 @@ export default class ExhibitionService {
     async updateFeaturedStatus(exhibitionId, isFeatured) {
         try {
             const exhibition = await this.getExhibitionById(exhibitionId);
-            const currentStatus = this.calculateExhibitionStatus(exhibition);
+            const currentStatus = exhibition.status;
 
             // 완료된 전시회는 주요 전시회 상태 변경 불가
             if (currentStatus === 'completed') {
@@ -407,17 +508,44 @@ export default class ExhibitionService {
     async getExhibitionWithStatus(exhibitionId) {
         try {
             const exhibition = await this.getExhibitionById(exhibitionId);
-            const status = this.calculateExhibitionStatus(exhibition);
+            const status = exhibition.status;
 
             return {
                 ...exhibition,
                 currentStatus: status,
+                statusDescription: Exhibition.getStatusDescription(status),
                 canSubmitArtworks: status === 'submission_open',
                 isActive: status === 'active',
-                isCompleted: status === 'completed'
+                isCompleted: status === 'completed',
+                validTransitions: Exhibition.getValidTransitions(status)
             };
         } catch (error) {
             logger.error('전시회 상태 조회 실패:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 상태별 전시회 목록을 조회합니다.
+     * @param {string} status - 조회할 상태
+     * @param {Object} options - 페이지네이션 옵션
+     * @returns {Promise<Array>} 해당 상태의 전시회 목록
+     */
+    async getExhibitionsByStatus(status, options = {}) {
+        try {
+            const { page = 1, limit = 10 } = options;
+
+            const result = await this.exhibitionRepository.findExhibitions({
+                status,
+                page,
+                limit,
+                sortField: 'createdAt',
+                sortOrder: 'DESC'
+            });
+
+            return result.items.map(exhibition => new ExhibitionListDto(exhibition));
+        } catch (error) {
+            logger.error(`상태별 전시회 조회 실패 (${status}):`, error);
             throw error;
         }
     }

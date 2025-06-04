@@ -2,6 +2,7 @@ import { ViewPath } from '../../../common/constants/ViewPath.js';
 import ViewResolver from '../../../common/utils/ViewResolver.js';
 import ExhibitionService from '../service/ExhibitionService.js';
 import { ExhibitionNotFoundError } from '../../../common/error/ExhibitionError.js';
+import Exhibition from '../../../infrastructure/db/model/entity/Exhibition.js';
 import logger from '../../../common/utils/Logger.js';
 
 /**
@@ -34,13 +35,14 @@ export default class ExhibitionController {
      */
     async getExhibitions(req, res) {
         try {
-            const { page = 1, limit = 10, exhibitionType, isFeatured, year, search } = req.query;
+            const { page = 1, limit = 10, exhibitionType, isFeatured, year, search, status } = req.query;
             const options = { page: parseInt(page), limit: parseInt(limit) };
 
             if (exhibitionType) options.exhibitionType = exhibitionType;
             if (isFeatured !== undefined) options.isFeatured = isFeatured === 'true';
             if (year) options.year = parseInt(year);
             if (search) options.search = search;
+            if (status) options.status = status;
 
             const result = await this.exhibitionService.getManagementExhibitions(options);
 
@@ -54,6 +56,42 @@ export default class ExhibitionController {
             res.status(500).json({
                 success: false,
                 message: '전시회 목록 조회 중 오류가 발생했습니다.',
+                error: error.message
+            });
+        }
+    }
+
+    /**
+     * 상태별 전시회 목록을 조회합니다.
+     */
+    async getExhibitionsByStatus(req, res) {
+        try {
+            const { status } = req.params;
+            const { page = 1, limit = 10 } = req.query;
+
+            // 유효한 상태인지 확인
+            if (!Exhibition.getAllStatuses().includes(status)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `잘못된 상태입니다. 유효한 상태: ${Exhibition.getAllStatuses().join(', ')}`
+                });
+            }
+
+            const exhibitions = await this.exhibitionService.getExhibitionsByStatus(status, {
+                page: parseInt(page),
+                limit: parseInt(limit)
+            });
+
+            res.json({
+                success: true,
+                data: exhibitions,
+                message: `${Exhibition.getStatusDescription(status)} 전시회 목록을 성공적으로 조회했습니다.`
+            });
+        } catch (error) {
+            logger.error('상태별 전시회 조회 실패:', error);
+            res.status(500).json({
+                success: false,
+                message: '상태별 전시회 조회 중 오류가 발생했습니다.',
                 error: error.message
             });
         }
@@ -173,6 +211,232 @@ export default class ExhibitionController {
         }
     }
 
+    // ===== 상태 관리 엔드포인트 =====
+    /**
+     * 전시회 상태를 변경합니다.
+     */
+    async changeStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const { status, reason } = req.body;
+            const userId = req.user?.id || req.session?.user?.id;
+
+            // 유효한 상태인지 확인
+            if (!Exhibition.getAllStatuses().includes(status)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `잘못된 상태입니다. 유효한 상태: ${Exhibition.getAllStatuses().join(', ')}`
+                });
+            }
+
+            const updatedExhibition = await this.exhibitionService.changeExhibitionStatus(id, status, {
+                reason: reason || '관리자에 의한 상태 변경',
+                userId
+            });
+
+            res.json({
+                success: true,
+                data: updatedExhibition,
+                message: `전시회 상태가 ${Exhibition.getStatusDescription(status)}(으)로 변경되었습니다.`
+            });
+        } catch (error) {
+            if (error instanceof ExhibitionNotFoundError) {
+                res.status(404).json({
+                    success: false,
+                    message: '전시회를 찾을 수 없습니다.'
+                });
+            } else {
+                logger.error('전시회 상태 변경 실패:', error);
+                res.status(400).json({
+                    success: false,
+                    message: error.message || '전시회 상태 변경 중 오류가 발생했습니다.',
+                    error: error.message
+                });
+            }
+        }
+    }
+
+    /**
+     * 전시회를 작품 제출 상태로 변경합니다.
+     */
+    async openSubmissions(req, res) {
+        try {
+            const { id } = req.params;
+            const { reason } = req.body;
+            const userId = req.user?.id || req.session?.user?.id;
+
+            const updatedExhibition = await this.exhibitionService.openSubmissions(id, {
+                reason: reason || '작품 제출 시작',
+                userId
+            });
+
+            res.json({
+                success: true,
+                data: updatedExhibition,
+                message: '전시회 작품 제출이 시작되었습니다.'
+            });
+        } catch (error) {
+            if (error instanceof ExhibitionNotFoundError) {
+                res.status(404).json({
+                    success: false,
+                    message: '전시회를 찾을 수 없습니다.'
+                });
+            } else {
+                logger.error('작품 제출 시작 실패:', error);
+                res.status(400).json({
+                    success: false,
+                    message: error.message || '작품 제출 시작 중 오류가 발생했습니다.',
+                    error: error.message
+                });
+            }
+        }
+    }
+
+    /**
+     * 전시회를 심사 상태로 변경합니다.
+     */
+    async startReview(req, res) {
+        try {
+            const { id } = req.params;
+            const { reason } = req.body;
+            const userId = req.user?.id || req.session?.user?.id;
+
+            const updatedExhibition = await this.exhibitionService.startReview(id, {
+                reason: reason || '작품 심사 시작',
+                userId
+            });
+
+            res.json({
+                success: true,
+                data: updatedExhibition,
+                message: '전시회 작품 심사가 시작되었습니다.'
+            });
+        } catch (error) {
+            if (error instanceof ExhibitionNotFoundError) {
+                res.status(404).json({
+                    success: false,
+                    message: '전시회를 찾을 수 없습니다.'
+                });
+            } else {
+                logger.error('작품 심사 시작 실패:', error);
+                res.status(400).json({
+                    success: false,
+                    message: error.message || '작품 심사 시작 중 오류가 발생했습니다.',
+                    error: error.message
+                });
+            }
+        }
+    }
+
+    /**
+     * 전시회를 활성화합니다.
+     */
+    async activateExhibition(req, res) {
+        try {
+            const { id } = req.params;
+            const { reason } = req.body;
+            const userId = req.user?.id || req.session?.user?.id;
+
+            const updatedExhibition = await this.exhibitionService.activateExhibition(id, {
+                reason: reason || '전시회 시작',
+                userId
+            });
+
+            res.json({
+                success: true,
+                data: updatedExhibition,
+                message: '전시회가 시작되었습니다.'
+            });
+        } catch (error) {
+            if (error instanceof ExhibitionNotFoundError) {
+                res.status(404).json({
+                    success: false,
+                    message: '전시회를 찾을 수 없습니다.'
+                });
+            } else {
+                logger.error('전시회 시작 실패:', error);
+                res.status(400).json({
+                    success: false,
+                    message: error.message || '전시회 시작 중 오류가 발생했습니다.',
+                    error: error.message
+                });
+            }
+        }
+    }
+
+    /**
+     * 전시회를 완료합니다.
+     */
+    async completeExhibition(req, res) {
+        try {
+            const { id } = req.params;
+            const { reason } = req.body;
+            const userId = req.user?.id || req.session?.user?.id;
+
+            const updatedExhibition = await this.exhibitionService.completeExhibition(id, {
+                reason: reason || '전시회 종료',
+                userId
+            });
+
+            res.json({
+                success: true,
+                data: updatedExhibition,
+                message: '전시회가 완료되었습니다.'
+            });
+        } catch (error) {
+            if (error instanceof ExhibitionNotFoundError) {
+                res.status(404).json({
+                    success: false,
+                    message: '전시회를 찾을 수 없습니다.'
+                });
+            } else {
+                logger.error('전시회 완료 실패:', error);
+                res.status(400).json({
+                    success: false,
+                    message: error.message || '전시회 완료 중 오류가 발생했습니다.',
+                    error: error.message
+                });
+            }
+        }
+    }
+
+    /**
+     * 전시회를 기획 상태로 되돌립니다.
+     */
+    async resetToPlanning(req, res) {
+        try {
+            const { id } = req.params;
+            const { reason } = req.body;
+            const userId = req.user?.id || req.session?.user?.id;
+
+            const updatedExhibition = await this.exhibitionService.resetToPlanning(id, {
+                reason: reason || '기획 상태로 되돌림',
+                userId
+            });
+
+            res.json({
+                success: true,
+                data: updatedExhibition,
+                message: '전시회가 기획 상태로 되돌려졌습니다.'
+            });
+        } catch (error) {
+            if (error instanceof ExhibitionNotFoundError) {
+                res.status(404).json({
+                    success: false,
+                    message: '전시회를 찾을 수 없습니다.'
+                });
+            } else {
+                logger.error('기획 상태 되돌리기 실패:', error);
+                res.status(400).json({
+                    success: false,
+                    message: error.message || '기획 상태 되돌리기 중 오류가 발생했습니다.',
+                    error: error.message
+                });
+            }
+        }
+    }
+
+    // ===== 레거시 호환성 메서드 =====
     /**
      * 전시회의 주요 전시회 상태를 토글합니다.
      */
@@ -206,7 +470,7 @@ export default class ExhibitionController {
     }
 
     /**
-     * 전시회의 작품 제출 가능 상태를 토글합니다.
+     * 전시회의 작품 제출 가능 상태를 토글합니다. (레거시 호환성)
      */
     async toggleSubmissionOpen(req, res) {
         try {
