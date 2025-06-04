@@ -1,6 +1,6 @@
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
-import { infrastructureConfig } from '../../../config/infrastructure.js';
+import { infrastructureConfig } from '../../../config/infrastructureConfig.js';
 
 // Cloudinary 설정
 const cloudConfig = infrastructureConfig.storage.config;
@@ -44,7 +44,7 @@ export const createCloudinaryStorage = (type = 'default') => {
  * @param {string} publicId - 삭제할 이미지의 public_id
  * @returns {Promise<Object>} - 삭제 결과 객체
  */
-export const deleteCloudinaryImage = async (publicId) => {
+export const deleteCloudinaryImage = async publicId => {
     try {
         const result = await cloudinary.uploader.destroy(publicId);
         return result;

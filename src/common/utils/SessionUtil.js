@@ -12,7 +12,7 @@ class SessionUtil {
             };
 
             // 세션 저장
-            req.session.save((err) => {
+            req.session.save(err => {
                 if (err) {
                     console.error('세션 저장 중 오류:', err);
                     reject(err);
@@ -24,9 +24,9 @@ class SessionUtil {
     }
 
     static destroySession(req) {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             req.session.user = null;
-            req.session.save((err) => {
+            req.session.save(err => {
                 if (err) {
                     console.error('세션 저장 중 오류:', err);
                 }

@@ -14,7 +14,7 @@ export function generateTestUser(suffix = '') {
         name: `테스트 사용자${suffix}`,
         email: `test${suffix}${timestamp}@example.com`,
         password: 'Test123!@#',
-        role: 'SKKU_MEMBER'
+        role: 'SKKU_MEMBER',
     };
 }
 
@@ -31,7 +31,7 @@ export function generateSKKUTestUser(suffix = '') {
         role: 'SKKU_MEMBER',
         department: '컴퓨터공학과',
         studentYear: 3,
-        isClubMember: true
+        isClubMember: true,
     };
 }
 
@@ -46,7 +46,7 @@ export function generateExternalTestUser(suffix = '') {
         email: `external${suffix}${timestamp}@example.com`,
         password: 'Test123!@#',
         role: 'EXTERNAL_MEMBER',
-        affiliation: '외부 기관'
+        affiliation: '외부 기관',
     };
 }
 
@@ -63,7 +63,7 @@ export function generateAdminTestUser(suffix = '') {
         role: 'ADMIN',
         department: '미술학과',
         studentYear: 4,
-        isClubMember: true
+        isClubMember: true,
     };
 }
 
@@ -73,7 +73,7 @@ export function generateAdminTestUser(suffix = '') {
 export const DEFAULT_ADMIN = {
     username: 'admin',
     password: 'admin123',
-    role: 'ADMIN'
+    role: 'ADMIN',
 };
 
 /**
@@ -82,7 +82,7 @@ export const DEFAULT_ADMIN = {
 export const DEFAULT_SKKU_USER = {
     username: 'testskku',
     password: 'test123',
-    role: 'SKKU_MEMBER'
+    role: 'SKKU_MEMBER',
 };
 
 /**
@@ -91,7 +91,7 @@ export const DEFAULT_SKKU_USER = {
 export const DEFAULT_EXTERNAL_USER = {
     username: 'testexternal',
     password: 'test123',
-    role: 'EXTERNAL_MEMBER'
+    role: 'EXTERNAL_MEMBER',
 };
 
 /**
@@ -151,7 +151,7 @@ export async function logoutUser(page) {
     // 로그아웃 버튼 클릭 (실제 구현에 맞게 수정)
     const logoutButton = page.locator('a[href="/user/logout"], button:has-text("로그아웃"), .logout-btn');
 
-    if (await logoutButton.count() > 0) {
+    if ((await logoutButton.count()) > 0) {
         await logoutButton.click();
     } else {
         // 세션 쿠키 삭제로 로그아웃 시뮬레이션
@@ -204,7 +204,7 @@ export async function registerUser(page, userData) {
  */
 export async function registerUserAPI(page, userData) {
     return await page.request.post('/user', {
-        data: userData
+        data: userData,
     });
 }
 
@@ -215,8 +215,8 @@ export async function loginUserAPI(page, credentials) {
     return await page.request.post('/user/login', {
         data: {
             username: credentials.username,
-            password: credentials.password
-        }
+            password: credentials.password,
+        },
     });
 }
 
@@ -225,15 +225,10 @@ export async function loginUserAPI(page, credentials) {
  */
 export async function isLoggedIn(page) {
     // 로그인 상태를 나타내는 요소 확인 (실제 구현에 맞게 수정)
-    const loginIndicators = [
-        '.user-menu',
-        '.logout-btn',
-        'a[href="/user/logout"]',
-        ':has-text("로그아웃")'
-    ];
+    const loginIndicators = ['.user-menu', '.logout-btn', 'a[href="/user/logout"]', ':has-text("로그아웃")'];
 
     for (const indicator of loginIndicators) {
-        if (await page.locator(indicator).count() > 0) {
+        if ((await page.locator(indicator).count()) > 0) {
             return true;
         }
     }
@@ -244,12 +239,7 @@ export async function isLoggedIn(page) {
  * 로그인 상태별 테스트 실행 헬퍼
  */
 export async function testWithLoginStates(page, testFunction, options = {}) {
-    const {
-        testLoggedOut = true,
-        testSKKUUser = true,
-        testExternalUser = true,
-        testAdmin = true
-    } = options;
+    const { testLoggedOut = true, testSKKUUser = true, testExternalUser = true, testAdmin = true } = options;
 
     const results = {};
 
@@ -291,7 +281,7 @@ export async function testAccessByRole(page, url, expectedResults = {}) {
         loggedOut: _loggedOut = 'redirect', // 'redirect', 'forbidden', 'allowed'
         skkuUser: _skkuUser = 'allowed',
         externalUser: _externalUser = 'allowed',
-        admin: _admin = 'allowed'
+        admin: _admin = 'allowed',
     } = expectedResults;
 
     const results = {};
@@ -332,9 +322,11 @@ async function getAccessResult(page) {
         return 'redirect';
     }
 
-    const statusCode = await page.evaluate(() => {
-        return fetch(window.location.href).then(r => r.status);
-    }).catch(() => 200);
+    const statusCode = await page
+        .evaluate(() => {
+            return fetch(window.location.href).then(r => r.status);
+        })
+        .catch(() => 200);
 
     if (statusCode === 403 || statusCode === 401) {
         return 'forbidden';
@@ -413,6 +405,6 @@ export async function captureScreenshot(page, name) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     await page.screenshot({
         path: `test-results/screenshots/${name}-${timestamp}.png`,
-        fullPage: true
+        fullPage: true,
     });
 }

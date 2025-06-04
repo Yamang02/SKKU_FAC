@@ -2,9 +2,9 @@
  * 에러 심각도 레벨 정의
  */
 export const ErrorSeverity = {
-    LOW: 'low',        // 일반적인 비즈니스 로직 에러 (404, 400 등)
-    MEDIUM: 'medium',  // 권한, 인증 에러 (401, 403 등)
-    HIGH: 'high',      // 서버 내부 에러 (500, 503 등)
+    LOW: 'low', // 일반적인 비즈니스 로직 에러 (404, 400 등)
+    MEDIUM: 'medium', // 권한, 인증 에러 (401, 403 등)
+    HIGH: 'high', // 서버 내부 에러 (500, 503 등)
     CRITICAL: 'critical' // 시스템 치명적 에러
 };
 
@@ -12,10 +12,10 @@ export const ErrorSeverity = {
  * 에러 카테고리 정의
  */
 export const ErrorCategory = {
-    CLIENT: 'client',     // 클라이언트 요청 오류 (4xx)
-    SERVER: 'server',     // 서버 내부 오류 (5xx)
+    CLIENT: 'client', // 클라이언트 요청 오류 (4xx)
+    SERVER: 'server', // 서버 내부 오류 (5xx)
     BUSINESS: 'business', // 비즈니스 로직 오류
-    SYSTEM: 'system'      // 시스템 오류
+    SYSTEM: 'system' // 시스템 오류
 };
 
 /**

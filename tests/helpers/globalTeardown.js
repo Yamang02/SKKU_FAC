@@ -21,7 +21,6 @@ async function globalTeardown() {
         }
 
         console.log('✅ Railway 테스트 환경 정리 완료');
-
     } catch (error) {
         console.error('❌ Railway 테스트 정리 중 오류:', error.message);
         // 정리 작업 실패는 치명적이지 않으므로 에러를 던지지 않음

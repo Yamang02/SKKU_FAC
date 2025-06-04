@@ -26,5 +26,4 @@ export class ApiResponse {
     static error(error) {
         return new ApiResponse(false, null, error);
     }
-
 }

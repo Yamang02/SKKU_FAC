@@ -1,103 +1,115 @@
 <style ref="stylesheet">
-    @import url('/css/artwork/ArtworkRegister.css');
+  @import url('/css/artwork/ArtworkRegister.css');
 </style>
 
 <div class="artwork-register-container">
-    <h1 class="register-title">작품 등록</h1>
-    <div class="form-grid">
-        <!-- 이미지 업로드 섹션 -->
-        <div class="image-upload-section">
-            <div class="image-preview-container" id="imagePreview">
-                <img src="/images/artwork-placeholder.svg" alt="작품 이미지 미리보기" id="previewImage">
-                <div class="image-upload-overlay">
-                    <span>이미지를 클릭하거나 드래그하여 업로드</span>
-                    <div class="image-upload-info">
-                        <p>지원 형식: JPG, PNG, GIF</p>
-                        <p>최대 크기: 5MB</p>
-                    </div>
-                </div>
-            </div>
-            <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
-            <div class="form-error" id="imageError"></div>
+  <h1 class="register-title">작품 등록</h1>
+  <div class="form-grid">
+    <!-- 이미지 업로드 섹션 -->
+    <div class="image-upload-section">
+      <div class="image-preview-container" id="imagePreview">
+        <img src="/images/artwork-placeholder.svg" alt="작품 이미지 미리보기" id="previewImage" />
+        <div class="image-upload-overlay">
+          <span>이미지를 클릭하거나 드래그하여 업로드</span>
+          <div class="image-upload-info">
+            <p>지원 형식: JPG, PNG, GIF</p>
+            <p>최대 크기: 5MB</p>
+          </div>
         </div>
-
-        <!-- 기본 정보 입력 섹션 -->
-        <div class="basic-info-section">
-            <div class="form-group">
-                <label for="title" class="form-label">작품 제목 <span class="required">*</span></label>
-                <input type="text" id="title" name="title" class="form-input" required maxlength="100">
-                <div class="form-error" id="titleError"></div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">작가 정보</label>
-                <div class="artist-info" id="artist-info">
-                    <p><strong>이름:</strong> <span id="artist-name"></span></p>
-                    <p><strong>소속:</strong> <span id="artist-affiliation"></span></p>
-                    <input type="hidden" id="department-input" name="department">
-                    <input type="hidden" id="artist-id" name="artistId">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="medium" class="form-label">매체</label>
-                <input type="text" id="medium" name="medium" class="form-input" maxlength="50"
-                    placeholder="예: 캔버스에 유화, 디지털 프린트 등">
-                <div class="form-error" id="mediumError"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="size" class="form-label">작품 크기</label>
-                <input type="text" id="size" name="size" class="form-input" maxlength="50">
-                <div class="form-error" id="sizeError"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="year" class="form-label">제작 연도</label>
-                <input type="number" id="year" name="year" class="form-input" min="1900"
-                    max="<%= new Date().getFullYear() %>" value="<%= new Date().getFullYear() %>">
-                <div class="form-error" id="yearError"></div>
-            </div>
-        </div>
+      </div>
+      <input type="file" id="imageInput" name="image" accept="image/*" style="display: none" />
+      <div class="form-error" id="imageError"></div>
     </div>
 
-    <!-- 추가 정보 섹션 -->
-    <div class="additional-info-section">
-        <div class="description-section">
-            <div class="form-group">
-                <label for="description" class="form-label">작품 설명<span class="char-counter"><span
-                            id="charCount">0</span>/500자</span></label>
-                <textarea id="description" name="description" class="form-textarea" maxlength="500"
-                    placeholder="작품에 대한 설명을 입력하세요 (최대 500자)"><%= '' %></textarea>
+    <!-- 기본 정보 입력 섹션 -->
+    <div class="basic-info-section">
+      <div class="form-group">
+        <label for="title" class="form-label">작품 제목 <span class="required">*</span></label>
+        <input type="text" id="title" name="title" class="form-input" required maxlength="100" />
+        <div class="form-error" id="titleError"></div>
+      </div>
 
-            </div>
+      <div class="form-group">
+        <label class="form-label">작가 정보</label>
+        <div class="artist-info" id="artist-info">
+          <p><strong>이름:</strong> <span id="artist-name"></span></p>
+          <p><strong>소속:</strong> <span id="artist-affiliation"></span></p>
+          <input type="hidden" id="department-input" name="department" />
+          <input type="hidden" id="artist-id" name="artistId" />
         </div>
+      </div>
 
-        <div class="exhibition-section">
-            <div class="form-group">
-                <label for="exhibition" class="form-label">전시회 선택</label>
-                <select id="exhibition" name="exhibitionId" class="form-select">
-                    <option value="">전시회 선택 (선택사항)</option>
-                    <!-- 전시회 목록은 JavaScript에서 동적으로 추가됩니다 -->
-                </select>
-            </div>
-        </div>
+      <div class="form-group">
+        <label for="medium" class="form-label">매체</label>
+        <input
+          type="text"
+          id="medium"
+          name="medium"
+          class="form-input"
+          maxlength="50"
+          placeholder="예: 캔버스에 유화, 디지털 프린트 등"
+        />
+        <div class="form-error" id="mediumError"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="size" class="form-label">작품 크기</label>
+        <input type="text" id="size" name="size" class="form-input" maxlength="50" />
+        <div class="form-error" id="sizeError"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="year" class="form-label">제작 연도</label>
+        <input
+          type="number"
+          id="year"
+          name="year"
+          class="form-input"
+          min="1900"
+          max="<%= new Date().getFullYear() %>"
+          value="<%= new Date().getFullYear() %>"
+        />
+        <div class="form-error" id="yearError"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 추가 정보 섹션 -->
+  <div class="additional-info-section">
+    <div class="description-section">
+      <div class="form-group">
+        <label for="description" class="form-label"
+          >작품 설명<span class="char-counter"><span id="charCount">0</span>/500자</span></label
+        >
+        <textarea
+          id="description"
+          name="description"
+          class="form-textarea"
+          maxlength="500"
+          placeholder="작품에 대한 설명을 입력하세요 (최대 500자)"
+        >
+<%= '' %></textarea
+        >
+      </div>
     </div>
 
-    <div class="form-actions">
-        <button type="button" class="btn btn-secondary" id="cancel-button" onclick="handleCancelClick()">취소</button>
-        <button type="button" id="submit-button" class="btn btn-primary">등록하기</button>
+    <div class="exhibition-section">
+      <div class="form-group">
+        <label for="exhibition" class="form-label">전시회 선택</label>
+        <select id="exhibition" name="exhibitionId" class="form-select">
+          <option value="">전시회 선택 (선택사항)</option>
+          <!-- 전시회 목록은 JavaScript에서 동적으로 추가됩니다 -->
+        </select>
+      </div>
     </div>
-    <div id="formError" class="form-error"></div>
+  </div>
+
+  <div class="form-actions">
+    <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+    <button type="submit" id="submit-button" class="btn btn-primary">등록하기</button>
+  </div>
+  <div id="formError" class="form-error"></div>
+  <div></div>
+
+  <script type="module" src="/js/page/artwork/ArtworkRegister.js"></script>
 </div>
-
-<!-- 작품 등록 성공 후 오버레이 (미리 정의, 숨김 상태) -->
-<div id="artwork-success-overlay" class="artwork-success-overlay hidden">
-    <div class="artwork-success-message">
-        <i class="fas fa-check-circle success-icon"></i>
-        <div class="success-title">작품 등록이 완료되었습니다!</div>
-        <div class="success-subtitle">잠시 후 성공 페이지로 이동합니다...</div>
-    </div>
-</div>
-
-<script type="module" src="/js/page/artwork/ArtworkRegister.js"></script>

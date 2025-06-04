@@ -1,26 +1,30 @@
-import ArtworkRepository from '../../../infrastructure/db/repository/ArtworkRepository.js';
-import ArtworkExhibitionRelationshipRepository from '../../../infrastructure/db/repository/relationship/ArtworkExhibitionRelationshipRepository.js';
-import ImageService from '../../image/service/ImageService.js';
-import UserService from '../../user/service/UserService.js';
-import ExhibitionService from '../../exhibition/service/ExhibitionService.js';
-import { ArtworkNotFoundError, ArtworkValidationError } from '../../../common/error/ArtworkError.js';
+import ArtworkRepository from '#infrastructure/db/repository/ArtworkRepository.js';
+import ArtworkExhibitionRelationshipRepository from '#infrastructure/db/repository/relationship/ArtworkExhibitionRelationshipRepository.js';
+import ImageService from '#domain/image/service/ImageService.js';
+import UserService from '#domain/user/service/UserService.js';
+import ExhibitionService from '#domain/exhibition/service/ExhibitionService.js';
+import TransactionManager from '#infrastructure/db/transaction/TransactionManager.js';
+import { ArtworkNotFoundError, ArtworkValidationError } from '#common/error/ArtworkError.js';
 import ArtworkDetailDto from '../model/dto/ArtworkDetailDto.js';
 import ArtworkSimpleDto from '../model/dto/ArtworkSimpleDto.js';
 import { v4 as uuidv4 } from 'uuid';
-import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
-import Page from '../../common/model/Page.js';
-import { db } from '../../../infrastructure/db/adapter/MySQLDatabase.js';
+import { generateDomainUUID, DOMAINS } from '#common/utils/uuid.js';
+import Page from '#domain/common/model/Page.js';
 /**
  * 작품 서비스
  * 작품 관련 비즈니스 로직을 처리합니다.
  */
 export default class ArtworkService {
-    constructor() {
-        this.artworkRepository = new ArtworkRepository();
-        this.artworkExhibitionRelationshipRepository = new ArtworkExhibitionRelationshipRepository();
-        this.imageService = new ImageService();
-        this.userService = new UserService();
-        this.exhibitionService = new ExhibitionService();
+    // 의존성 주입을 위한 static dependencies 정의
+    static dependencies = ['ArtworkRepository', 'ArtworkExhibitionRelationshipRepository', 'ImageService', 'UserService', 'ExhibitionService'];
+
+    constructor(artworkRepository = null, artworkExhibitionRelationshipRepository = null, imageService = null, userService = null, exhibitionService = null) {
+        // 의존성 주입이 되지 않은 경우 기본 인스턴스 생성 (하위 호환성)
+        this.artworkRepository = artworkRepository || new ArtworkRepository();
+        this.artworkExhibitionRelationshipRepository = artworkExhibitionRelationshipRepository || new ArtworkExhibitionRelationshipRepository();
+        this.imageService = imageService || new ImageService();
+        this.userService = userService || new UserService();
+        this.exhibitionService = exhibitionService || new ExhibitionService();
     }
 
     /**
@@ -124,7 +128,10 @@ export default class ArtworkService {
 
         // 작품 출품 전시회 조회
         const exhibitions = [];
-        const artworkExhibitionRelationships = await this.artworkExhibitionRelationshipRepository.findArtworkExhibitionRelationshipsByArtworkId(artwork.id);
+        const artworkExhibitionRelationships =
+            await this.artworkExhibitionRelationshipRepository.findArtworkExhibitionRelationshipsByArtworkId(
+                artwork.id
+            );
         if (artworkExhibitionRelationships.length > 0) {
             for (const exhibition of artworkExhibitionRelationships) {
                 const exhibitionSimple = await this.exhibitionService.getExhibitionSimple(exhibition.exhibitionId);
@@ -185,7 +192,11 @@ export default class ArtworkService {
                 const exhibitionIds = artwork.exhibitions.map(exhibition => exhibition.id);
                 for (const exhibitionId of exhibitionIds) {
                     // 출품된 전시회 번호에 해당하는 작품 조회
-                    const sameExhibitionArtworkRelationships = await this.artworkRepository.findByExhibitionId(exhibitionId, remainingLimit, artwork.id);
+                    const sameExhibitionArtworkRelationships = await this.artworkRepository.findByExhibitionId(
+                        exhibitionId,
+                        remainingLimit,
+                        artwork.id
+                    );
 
                     // 동일 작가 작품 제외
                     for (const relatedArtwork of sameExhibitionArtworkRelationships) {
@@ -219,13 +230,10 @@ export default class ArtworkService {
         return relatedArtworks.slice(0, 8); // 최대 8개로 제한
     }
 
-
     /**
      * 새로운 작품을 생성합니다.
      */
     async createArtwork(artworkData, file) {
-        const transaction = await db.transaction();
-
         if (!artworkData.title) {
             throw new ArtworkValidationError('작품 제목은 필수입니다.');
         }
@@ -236,20 +244,22 @@ export default class ArtworkService {
         artworkData.imagePublicId = uploadedImage.publicId;
         artworkData.imageUrl = uploadedImage.imageUrl;
 
-        try {
+        return await TransactionManager.executeInTransaction(async transaction => {
             const artwork = await this.artworkRepository.createArtwork(artworkData, { transaction });
+
             if (artworkData.exhibitionId !== '') {
-                const result = await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(artwork.id, artworkData.exhibitionId, { transaction });
+                const result = await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(
+                    artwork.id,
+                    artworkData.exhibitionId,
+                    { transaction }
+                );
                 if (!result) {
                     throw new ArtworkValidationError('작품 출품 중 오류가 발생했습니다.');
                 }
             }
-            await transaction.commit();
+
             return new ArtworkSimpleDto(artwork);
-        } catch (error) {
-            await transaction.rollback();
-            throw error;
-        }
+        });
     }
 
     /**
@@ -304,7 +314,8 @@ export default class ArtworkService {
      */
     async getFeaturedArtworks() {
         const FEATURED_LIMIT = 6;
-        const artworks = await this.artworkRepository.findFeaturedArtworks(FEATURED_LIMIT);
+        const result = await this.artworkRepository.findFeaturedArtworks(FEATURED_LIMIT);
+        const artworks = result.items || []; // pagination: false일 때 items 배열 추출
         const artworkSimpleList = [];
 
         for (const artwork of artworks) {
@@ -316,11 +327,15 @@ export default class ArtworkService {
                 artworkSimple.artistAffiliation = user.affiliation;
             }
 
-
-            const exhibitions = await this.artworkExhibitionRelationshipRepository.findArtworkExhibitionRelationshipsByArtworkId(artwork.id);
+            const exhibitions =
+                await this.artworkExhibitionRelationshipRepository.findArtworkExhibitionRelationshipsByArtworkId(
+                    artwork.id
+                );
             if (exhibitions.length > 0) {
                 artworkSimple.RepresentativeExhibitionId = exhibitions[0].exhibitionId;
-                const exhibitionSimple = await this.exhibitionService.getExhibitionSimple(artworkSimple.RepresentativeExhibitionId);
+                const exhibitionSimple = await this.exhibitionService.getExhibitionSimple(
+                    artworkSimple.RepresentativeExhibitionId
+                );
                 artworkSimple.RepresentativeExhibitionTitle = exhibitionSimple.title;
             }
 
@@ -331,10 +346,16 @@ export default class ArtworkService {
     }
 
     async submitArtworkToExhibition(artworkId, exhibitionId) {
-        return await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(artworkId, exhibitionId);
+        return await this.artworkExhibitionRelationshipRepository.createArtworkExhibitionRelationship(
+            artworkId,
+            exhibitionId
+        );
     }
 
     async cancelArtworkSubmission(artworkId, exhibitionId) {
-        return await this.artworkExhibitionRelationshipRepository.deleteArtworkExhibitionRelationship(artworkId, exhibitionId);
+        return await this.artworkExhibitionRelationshipRepository.deleteArtworkExhibitionRelationship(
+            artworkId,
+            exhibitionId
+        );
     }
 }

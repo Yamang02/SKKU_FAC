@@ -1,145 +1,178 @@
 <style ref="stylesheet">
-    @import url('/css/common/components/usercommon.css');
-    @import url('/css/user/Profile.css');
+  @import url('/css/common/components/usercommon.css');
+  @import url('/css/user/Profile.css');
 </style>
 
 <div class="profile-container">
-    <div class="profile-header">
-        <h1 class="profile-header__title">프로필</h1>
-        <p class="profile-header__subtitle">회원 정보를 확인하고 관리할 수 있습니다.</p>
+  <div class="profile-header">
+    <h1 class="profile-header__title">프로필</h1>
+    <p class="profile-header__subtitle">회원 정보를 확인하고 관리할 수 있습니다.</p>
+  </div>
+
+  <div class="profile-content">
+    <!-- 기본 정보 -->
+    <div class="profile-section">
+      <h2 class="profile-section__title">기본 정보</h2>
+      <div class="profile-info">
+        <div class="profile-info__label">사용자 ID</div>
+        <div class="profile-info__value" id="username"></div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-info__label">이메일</div>
+        <div class="profile-info__value" id="email"></div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-info__label">이름</div>
+        <div class="profile-info__value">
+          <span class="profile-info__text" id="name-text"></span>
+          <input type="text" class="profile-info__input" id="name-input" style="display: none" />
+        </div>
+      </div>
     </div>
 
-    <div class="profile-content">
-        <!-- 기본 정보 -->
-        <div class="profile-section">
-            <h2 class="profile-section__title">기본 정보</h2>
-            <div class="profile-info">
-                <div class="profile-info__label">사용자 ID</div>
-                <div class="profile-info__value" id="username"></div>
-            </div>
-            <div class="profile-info">
-                <div class="profile-info__label">이메일</div>
-                <div class="profile-info__value" id="email"></div>
-            </div>
-            <div class="profile-info">
-                <div class="profile-info__label">이름</div>
-                <div class="profile-info__value">
-                    <span class="profile-info__text" id="name-text"></span>
-                    <input type="text" class="profile-info__input" id="name-input" style="display: none;">
-                </div>
-            </div>
+    <!-- 상세 정보 -->
+    <div class="profile-section" id="school-info" style="display: none">
+      <h2 class="profile-section__title">학교 정보</h2>
+      <div class="profile-info">
+        <div class="profile-info__label">학과</div>
+        <div class="profile-info__value">
+          <span class="profile-info__text" id="department-text"></span>
+          <input
+            type="text"
+            class="profile-info__input"
+            id="department-input"
+            style="display: none"
+          />
         </div>
-
-        <!-- 상세 정보 -->
-        <div class="profile-section" id="school-info" style="display: none;">
-            <h2 class="profile-section__title">학교 정보</h2>
-            <div class="profile-info">
-                <div class="profile-info__label">학과</div>
-                <div class="profile-info__value">
-                    <span class="profile-info__text" id="department-text"></span>
-                    <input type="text" class="profile-info__input" id="department-input" style="display: none;">
-                </div>
-            </div>
-            <div class="profile-info">
-                <div class="profile-info__label">학번</div>
-                <div class="profile-info__value">
-                    <span class="profile-info__text" id="studentYear-text"></span>
-                    <input type="text" class="profile-info__input" id="studentYear-input" style="display: none;">
-                </div>
-            </div>
-            <div class="profile-info">
-                <div class="profile-info__label">동아리 회원여부</div>
-                <div class="profile-info__value">
-                    <span class="profile-info__text" id="isClubMember-text"></span>
-                    <div class="profile-info__checkbox" style="display: none;">
-                        <input type="checkbox" id="isClubMember-input">
-                        <label for="isClubMember-input">동아리 회원입니다</label>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-info__label">학번</div>
+        <div class="profile-info__value">
+          <span class="profile-info__text" id="studentYear-text"></span>
+          <input
+            type="text"
+            class="profile-info__input"
+            id="studentYear-input"
+            style="display: none"
+          />
         </div>
-
-        <div class="profile-section" id="external-info" style="display: none;">
-            <h2 class="profile-section__title">소속 정보</h2>
-            <div class="profile-info">
-                <div class="profile-info__label">소속</div>
-                <div class="profile-info__value">
-                    <span class="profile-info__text" id="affiliation-text"></span>
-                    <input type="text" class="profile-info__input" id="affiliation-input" style="display: none;">
-                </div>
-            </div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-info__label">동아리 회원여부</div>
+        <div class="profile-info__value">
+          <span class="profile-info__text" id="isClubMember-text"></span>
+          <div class="profile-info__checkbox" style="display: none">
+            <input type="checkbox" id="isClubMember-input" />
+            <label for="isClubMember-input">동아리 회원입니다</label>
+          </div>
         </div>
-
-        <div class="profile-section">
-            <h2 class="profile-section__title">계정 정보</h2>
-            <div class="profile-info">
-                <div class="profile-info__label">회원 유형</div>
-                <div class="profile-info__value" id="role"></div>
-            </div>
-            <div class="profile-info">
-                <div class="profile-info__label">가입일</div>
-                <div class="profile-info__value" id="createdAt"></div>
-            </div>
-        </div>
-
-        <div class="profile-actions">
-            <button type="button" id="edit-profile-btn" class="profile-button profile-button--primary">
-                <i class="fas fa-edit"></i>
-                프로필 수정
-            </button>
-            <button type="button" id="logout-btn" class="profile-button profile-button--logout">
-                <i class="fas fa-sign-out-alt"></i>
-                로그아웃
-            </button>
-            <button type="button" id="delete-account-btn" class="profile-button profile-button--danger">
-                <i class="fas fa-user-times"></i>
-                계정 삭제
-            </button>
-        </div>
+      </div>
     </div>
+
+    <div class="profile-section" id="external-info" style="display: none">
+      <h2 class="profile-section__title">소속 정보</h2>
+      <div class="profile-info">
+        <div class="profile-info__label">소속</div>
+        <div class="profile-info__value">
+          <span class="profile-info__text" id="affiliation-text"></span>
+          <input
+            type="text"
+            class="profile-info__input"
+            id="affiliation-input"
+            style="display: none"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h2 class="profile-section__title">계정 정보</h2>
+      <div class="profile-info">
+        <div class="profile-info__label">회원 유형</div>
+        <div class="profile-info__value" id="role"></div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-info__label">가입일</div>
+        <div class="profile-info__value" id="createdAt"></div>
+      </div>
+    </div>
+
+    <div class="profile-actions">
+      <button type="button" id="edit-profile-btn" class="profile-button profile-button--primary">
+        <i class="fas fa-edit"></i>
+        프로필 수정
+      </button>
+      <button type="button" id="logout-btn" class="profile-button profile-button--logout">
+        <i class="fas fa-sign-out-alt"></i>
+        로그아웃
+      </button>
+      <button type="button" id="delete-account-btn" class="profile-button profile-button--danger">
+        <i class="fas fa-user-times"></i>
+        계정 삭제
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- 프로필 수정 모달 -->
 <div class="profile-modal" id="editProfileModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">프로필 수정</h5>
-        </div>
-        <div class="modal-body">
-            <form id="edit-profile-form">
-                <div class="form-group">
-                    <label class="form-label">이름</label>
-                    <input type="text" class="form-control" name="name" required>
-                </div>
-
-                <div class="form-group" id="department-group" style="display: none;">
-                    <label class="form-label">학과</label>
-                    <input type="text" class="form-control" name="department">
-                </div>
-                <div class="form-group" id="studentYear-group" style="display: none;">
-                    <label class="form-label">학번</label>
-                    <input type="text" class="form-control" name="studentYear" pattern="[0-9]{2}" placeholder="예: 23">
-                </div>
-                <div class="form-group" id="affiliation-group" style="display: none;">
-                    <label class="form-label">소속</label>
-                    <input type="text" class="form-control" name="affiliation" placeholder="소속 기관명">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">새 비밀번호</label>
-                    <input type="password" class="form-control" name="newPassword" placeholder="변경하지 않으려면 비워두세요">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">새 비밀번호 확인</label>
-                    <input type="password" class="form-control" name="confirmPassword" placeholder="변경하지 않으려면 비워두세요">
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="profile-button modal-close">취소</button>
-            <button type="button" class="profile-button profile-button--primary" id="save-profile-btn">저장</button>
-        </div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">프로필 수정</h5>
     </div>
+    <div class="modal-body">
+      <form id="edit-profile-form">
+        <div class="form-group">
+          <label class="form-label">이름</label>
+          <input type="text" class="form-control" name="name" required />
+        </div>
+
+        <div class="form-group" id="department-group" style="display: none">
+          <label class="form-label">학과</label>
+          <input type="text" class="form-control" name="department" />
+        </div>
+        <div class="form-group" id="studentYear-group" style="display: none">
+          <label class="form-label">학번</label>
+          <input
+            type="text"
+            class="form-control"
+            name="studentYear"
+            pattern="[0-9]{2}"
+            placeholder="예: 23"
+          />
+        </div>
+        <div class="form-group" id="affiliation-group" style="display: none">
+          <label class="form-label">소속</label>
+          <input type="text" class="form-control" name="affiliation" placeholder="소속 기관명" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">새 비밀번호</label>
+          <input
+            type="password"
+            class="form-control"
+            name="newPassword"
+            placeholder="변경하지 않으려면 비워두세요"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">새 비밀번호 확인</label>
+          <input
+            type="password"
+            class="form-control"
+            name="confirmPassword"
+            placeholder="변경하지 않으려면 비워두세요"
+          />
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="profile-button modal-close">취소</button>
+      <button type="button" class="profile-button profile-button--primary" id="save-profile-btn">
+        저장
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- 계정 삭제 성공 후 오버레이 (미리 정의, 숨김 상태) -->

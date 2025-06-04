@@ -13,8 +13,6 @@ export default class ExhibitionApi {
      */
     static async getExhibitionList(params = {}) {
         try {
-
-
             // 페이지네이션 파라미터
             const pageParams = [];
             if (params.page) pageParams.push(`page=${params.page}`);
@@ -36,37 +34,41 @@ export default class ExhibitionApi {
             const queryParams = [...pageParams, ...filterParams].join('&');
             const queryString = queryParams ? `?${queryParams}` : '';
 
-
             const response = await api.get(`/exhibition/api/list${queryString}`);
 
             // 응답 데이터 포맷 표준화
             const result = {
                 // API 응답 구조 처리 (success, data 객체 포함 여부 확인)
-                items: response.success && response.data && response.data.exhibitions
-                    ? response.data.exhibitions
-                    : (response.exhibitions || []),
+                items:
+                    response.success && response.data && response.data.exhibitions
+                        ? response.data.exhibitions
+                        : response.exhibitions || [],
 
                 // 총 개수 처리
-                total: response.success && response.data && response.data.total
-                    ? response.data.total
-                    : (response.total || 0),
+                total:
+                    response.success && response.data && response.data.total
+                        ? response.data.total
+                        : response.total || 0,
 
                 // 페이지 정보
                 page: parseInt(params.page) || 1,
                 limit: parseInt(params.limit) || 12,
 
                 // 페이지 관련 메타데이터
-                pageInfo: response.success && response.data && response.data.page
-                    ? response.data.page
-                    : {
-                        currentPage: parseInt(params.page) || 1,
-                        totalPages: response.success && response.data && response.data.total
-                            ? Math.ceil(response.data.total / (parseInt(params.limit) || 12))
-                            : Math.ceil((response.total || 0) / (parseInt(params.limit) || 12)),
-                        totalItems: response.success && response.data && response.data.total
-                            ? response.data.total
-                            : (response.total || 0)
-                    }
+                pageInfo:
+                    response.success && response.data && response.data.page
+                        ? response.data.page
+                        : {
+                            currentPage: parseInt(params.page) || 1,
+                            totalPages:
+                                  response.success && response.data && response.data.total
+                                      ? Math.ceil(response.data.total / (parseInt(params.limit) || 12))
+                                      : Math.ceil((response.total || 0) / (parseInt(params.limit) || 12)),
+                            totalItems:
+                                  response.success && response.data && response.data.total
+                                      ? response.data.total
+                                      : response.total || 0
+                        }
             };
 
             return result;

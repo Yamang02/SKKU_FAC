@@ -11,13 +11,11 @@ class ArtworkApi {
         try {
             const pageParams = pagination.toQueryParams();
             const filterParams = createFilterParams(filters);
-            const queryString = [pageParams, filterParams]
-                .filter(Boolean)
-                .join('&');
+            const queryString = [pageParams, filterParams].filter(Boolean).join('&');
 
-            ('작품 목록 API 호출:', `/artwork/api/list?${queryString}`);
+            '작품 목록 API 호출:', `/artwork/api/list?${queryString}`;
             const response = await api.get(`/artwork/api/list?${queryString}`);
-            ('작품 목록 API 응답:', response);
+            '작품 목록 API 응답:', response;
 
             return response;
         } catch (error) {
@@ -54,9 +52,7 @@ class ArtworkApi {
         try {
             const pageParams = pagination.toQueryParams();
             const filterParams = createFilterParams(filters);
-            const queryString = [pageParams, filterParams]
-                .filter(Boolean)
-                .join('&');
+            const queryString = [pageParams, filterParams].filter(Boolean).join('&');
 
             return await api.get(`/admin/management/artwork/list?${queryString}`);
         } catch (error) {
@@ -69,13 +65,12 @@ class ArtworkApi {
     // 작품 등록
     static async createArtwork(formData) {
         try {
-
             // FormData 내용 로깅 (개발 목적으로만 사용)
             for (const [key, value] of formData.entries()) {
                 if (key === 'image') {
-                    ('이미지 파일:', value.name, value.type, value.size + 'bytes');
+                    '이미지 파일:', value.name, value.type, value.size + 'bytes';
                 } else {
-                    (key + ':', value);
+                    key + ':', value;
                 }
             }
 
@@ -96,9 +91,8 @@ class ArtworkApi {
     // 작품 수정
     static async updateArtwork(artworkId, updatedData) {
         try {
-
             const response = await api.put(`/artwork/api/${artworkId}`, updatedData);
-            ('작품 수정 API 응답:', response);
+            '작품 수정 API 응답:', response;
 
             return response;
         } catch (error) {
@@ -114,7 +108,7 @@ class ArtworkApi {
             ('작품 삭제 API 호출 시작');
 
             const response = await api.delete(`/artwork/api/${artworkId}`);
-            ('작품 삭제 API 응답:', response);
+            '작품 삭제 API 응답:', response;
 
             return response;
         } catch (error) {

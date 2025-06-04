@@ -3,80 +3,6 @@ import ArtworkApi from '../../api/ArtworkApi.js';
 import ExhibitionApi from '../../api/ExhibitionApi.js';
 import { showErrorMessage, showSuccessMessage, showLoading } from '../../common/util/notification.js';
 
-// 작품 등록 처리 상태 관리
-let isRegistering = false;
-let originalBeforeUnload = null;
-
-/**
- * 작품 등록 처리 중 페이지 이탈 방지
- */
-function preventRegistrationPageUnload() {
-    isRegistering = true;
-    originalBeforeUnload = window.onbeforeunload;
-    window.onbeforeunload = function (e) {
-        if (!isRegistering) return undefined;
-        const message = '작품 등록 처리 중입니다. 페이지를 떠나시겠습니까?';
-        e.returnValue = message;
-        return message;
-    };
-
-    // 키보드 이벤트 차단
-    document.addEventListener('keydown', handleRegistrationKeyboardEvents, true);
-
-    // 폼 전체 비활성화
-    const form = document.querySelector('.artwork-register-container');
-    if (form) {
-        form.classList.add('form-disabled');
-    }
-}
-
-/**
- * 작품 등록 처리 완료 후 페이지 이탈 방지 해제
- */
-function allowRegistrationPageUnload() {
-    isRegistering = false;
-    window.onbeforeunload = originalBeforeUnload;
-    document.removeEventListener('keydown', handleRegistrationKeyboardEvents, true);
-
-    // 폼 활성화
-    const form = document.querySelector('.artwork-register-container');
-    if (form) {
-        form.classList.remove('form-disabled');
-    }
-}
-
-/**
- * 작품 등록 처리 중 키보드 이벤트 차단
- */
-function handleRegistrationKeyboardEvents(e) {
-    if (!isRegistering) return;
-
-    // F5, Ctrl+R (새로고침) 차단
-    if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
-        e.preventDefault();
-        e.stopPropagation();
-        showErrorMessage('작품 등록 처리 중에는 새로고침할 수 없습니다.');
-        return false;
-    }
-
-    // Ctrl+W (탭 닫기) 차단
-    if (e.ctrlKey && e.key === 'w') {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }
-
-    // Backspace (뒤로가기) 차단 (입력 필드가 아닌 경우)
-    if (e.key === 'Backspace' &&
-        !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) &&
-        !e.target.isContentEditable) {
-        e.preventDefault();
-        e.stopPropagation();
-        showErrorMessage('작품 등록 처리 중에는 뒤로갈 수 없습니다.');
-        return false;
-    }
-}
-
 // 페이지 초기화 함수
 async function initializePage() {
     try {
@@ -103,9 +29,8 @@ async function initializePage() {
         // 소속 정보 설정
         let affiliation = '';
         if (user.role === 'ADMIN' || user.role === 'SKKU_MEMBER') {
-            affiliation = user.department && user.studentYear ?
-                `${user.department} ${user.studentYear}` :
-                (user.department || '');
+            affiliation =
+                user.department && user.studentYear ? `${user.department} ${user.studentYear}` : user.department || '';
         } else {
             affiliation = user.affiliation || '';
         }
@@ -161,9 +86,7 @@ async function initializePage() {
         handleExhibitionParam();
     } catch (error) {
         // 오류가 401(Unauthorized) 관련인지 확인
-        if (error.message && (
-            error.status === 401
-        )) {
+        if (error.message && error.status === 401) {
             showErrorMessage('로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.');
             // 3초 후 로그인 페이지로 리디렉션
             setTimeout(() => {
@@ -217,7 +140,7 @@ function initImageUpload() {
     // 이미지 미리보기 업데이트 함수
     function updateImagePreview(file) {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = e => {
             imagePreview.src = e.target.result;
             imagePreview.style.display = 'block';
             imageOverlay.style.opacity = '0';
@@ -252,7 +175,7 @@ function initImageUpload() {
     });
 
     // 파일 선택 시 처리
-    fileInput.addEventListener('change', (e) => {
+    fileInput.addEventListener('change', e => {
         const file = e.target.files[0];
         if (!handleImageFile(file)) {
             fileInput.value = '';
@@ -260,7 +183,7 @@ function initImageUpload() {
     });
 
     // 드래그 앤 드롭 처리
-    imagePreviewContainer.addEventListener('dragover', (e) => {
+    imagePreviewContainer.addEventListener('dragover', e => {
         e.preventDefault();
         imagePreviewContainer.classList.add('dragover');
     });
@@ -269,7 +192,7 @@ function initImageUpload() {
         imagePreviewContainer.classList.remove('dragover');
     });
 
-    imagePreviewContainer.addEventListener('drop', (e) => {
+    imagePreviewContainer.addEventListener('drop', e => {
         e.preventDefault();
         imagePreviewContainer.classList.remove('dragover');
         const file = e.dataTransfer.files[0];
@@ -298,27 +221,8 @@ function initSubmitButton() {
         return;
     }
 
-    submitButton.addEventListener('click', async (event) => {
+    submitButton.addEventListener('click', async event => {
         event.preventDefault();
-        event.stopPropagation();
-
-        // 스크롤 위치 고정
-        const currentScrollY = window.scrollY;
-
-        // 스크롤 방지 함수
-        const preventScroll = () => {
-            window.scrollTo(0, currentScrollY);
-        };
-
-        // 스크롤 이벤트 임시 차단
-        window.addEventListener('scroll', preventScroll);
-
-        // 중복 클릭 방지
-        if (isRegistering) {
-            showErrorMessage('이미 처리 중입니다. 잠시만 기다려주세요.');
-            window.removeEventListener('scroll', preventScroll);
-            return;
-        }
 
         // 입력값 가져오기
         const title = document.getElementById('title').value.trim();
@@ -369,13 +273,10 @@ function initSubmitButton() {
             return;
         }
 
-        // 페이지 이탈 방지 활성화
-        preventRegistrationPageUnload();
-
         // 버튼 상태 및 로딩 표시 업데이트 (시각적 피드백 추가)
         submitButton.disabled = true;
-        submitButton.textContent = '등록 중...';
-        submitButton.classList.add('processing', 'btn-loading');
+        submitButton.textContent = '처리 중...';
+        submitButton.classList.add('processing');
 
         try {
             // FormData 생성
@@ -394,10 +295,6 @@ function initSubmitButton() {
             if (response.success) {
                 showLoading(false);
                 showSuccessMessage('작품 등록에 성공하였습니다.');
-
-                // 성공 후 완전한 페이지 차단
-                blockAllArtworkInteractions();
-
                 setTimeout(() => {
                     window.location.href = '/success?message=작품 등록에 성공하였습니다.';
                 }, 2000);
@@ -410,18 +307,10 @@ function initSubmitButton() {
             showErrorMessage('다음 이유로 작품 등록에 실패했습니다 : ' + error.message);
         } finally {
             showLoading(false);
-            // 스크롤 이벤트 리스너 제거
-            window.removeEventListener('scroll', preventScroll);
-            // 페이지 이탈 방지 해제 (에러 발생 시)
-            allowRegistrationPageUnload();
-            // 버튼 상태 복원 (에러 발생 시에만)
-            if (!window.location.href.includes('/success')) {
-                submitButton.disabled = false;
-                submitButton.textContent = '등록하기';
-                submitButton.classList.remove('processing', 'btn-loading');
-            }
+            submitButton.disabled = false;
+            submitButton.textContent = '등록하기';
+            submitButton.classList.remove('processing');
         }
-
     });
 }
 
@@ -464,74 +353,5 @@ function handleExhibitionParam() {
             exhibitionSelect.value = exhibitionId;
             exhibitionSelect.disabled = true;
         }
-    }
-}
-
-/**
- * 취소 버튼 클릭 처리
- */
-window.handleCancelClick = function () {
-    if (isRegistering) {
-        showErrorMessage('작품 등록 처리 중에는 취소할 수 없습니다. 잠시만 기다려주세요.');
-        return;
-    }
-
-    // 입력된 내용이 있는지 확인
-    const title = document.getElementById('title').value.trim();
-    const image = document.getElementById('imageInput').files[0];
-    const description = document.getElementById('description').value.trim();
-
-    if (title || image || description) {
-        if (confirm('입력한 내용이 사라집니다. 정말 취소하시겠습니까?')) {
-            history.back();
-        }
-    } else {
-        history.back();
-    }
-};
-
-/**
- * 작품 등록 성공 후 모든 사용자 상호작용 차단
- */
-function blockAllArtworkInteractions() {
-    // 페이지 이탈 방지 유지
-    preventRegistrationPageUnload();
-
-    // 미리 정의된 오버레이 표시
-    const overlay = document.getElementById('artwork-success-overlay');
-    if (overlay) {
-        overlay.classList.remove('hidden');
-
-        // 모든 클릭 이벤트 차단
-        overlay.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        });
-    }
-
-    // 모든 키보드 이벤트 차단 (기존 것보다 더 강력)
-    const blockAllKeys = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    };
-
-    document.addEventListener('keydown', blockAllKeys, true);
-    document.addEventListener('keyup', blockAllKeys, true);
-    document.addEventListener('keypress', blockAllKeys, true);
-
-    // 폼 요소들 비활성화
-    const allInputs = document.querySelectorAll('input, button, select, textarea');
-    allInputs.forEach(element => {
-        element.disabled = true;
-        element.style.pointerEvents = 'none';
-    });
-
-    // 취소 버튼도 비활성화
-    const cancelButton = document.querySelector('.btn-secondary');
-    if (cancelButton) {
-        cancelButton.disabled = true;
-        cancelButton.style.pointerEvents = 'none';
     }
 }

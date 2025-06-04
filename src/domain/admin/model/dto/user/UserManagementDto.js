@@ -44,9 +44,9 @@ export default class UserManagementDto {
      */
     get roleDisplayName() {
         const roleMap = {
-            'ADMIN': '관리자',
-            'SKKU_MEMBER': '성균관대 구성원',
-            'EXTERNAL_MEMBER': '외부인'
+            ADMIN: '관리자',
+            SKKU_MEMBER: '성균관대 구성원',
+            EXTERNAL_MEMBER: '외부인'
         };
         return roleMap[this.role] || '미분류';
     }
@@ -56,10 +56,10 @@ export default class UserManagementDto {
      */
     get statusDisplayName() {
         const statusMap = {
-            'ACTIVE': '활성',
-            'INACTIVE': '비활성',
-            'BLOCKED': '차단',
-            'UNVERIFIED': '미인증'
+            ACTIVE: '활성',
+            INACTIVE: '비활성',
+            BLOCKED: '차단',
+            UNVERIFIED: '미인증'
         };
         return statusMap[this.status] || '미분류';
     }

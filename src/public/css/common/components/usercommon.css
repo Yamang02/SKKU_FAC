@@ -59,7 +59,7 @@
 
 .form-control-user:focus {
     outline: none;
-    border-color: var(--primary-color, #4A90E2);
+    border-color: var(--primary-color, #4a90e2);
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
 }
 
@@ -135,13 +135,13 @@
 }
 
 .btn-primary-user {
-    background-color: var(--primary-color, #4A90E2);
+    background-color: var(--primary-color, #4a90e2);
     color: white !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary-user:hover {
-    background-color: var(--primary-color-dark, #357ABD);
+    background-color: var(--primary-color-dark, #357abd);
     color: white !important;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -521,7 +521,9 @@
     z-index: 1000;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    transition:
+        opacity 0.3s ease-in-out,
+        visibility 0.3s ease-in-out;
 }
 
 .delete-account-modal-user.show {

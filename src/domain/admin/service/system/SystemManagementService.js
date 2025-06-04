@@ -2,16 +2,29 @@ import UserService from '../../../user/service/UserService.js';
 import ArtworkService from '../../../artwork/service/ArtworkService.js';
 import TimeFormatter from '../../../../common/utils/TimeFormatter.js';
 import Page from '../../../common/model/Page.js';
-
+import BaseAdminService from '../BaseAdminService.js';
 
 /**
  * 관리자 서비스
  * 관리자 기능에 대한 비즈니스 로직을 처리합니다.
  */
-export default class SystemManagementService {
-    constructor() {
-        this.userService = new UserService();
-        this.artworkService = new ArtworkService();
+export default class SystemManagementService extends BaseAdminService {
+    // 의존성 주입을 위한 static dependencies 정의
+    static dependencies = ['UserService', 'ArtworkService'];
+
+    constructor(userService = null, artworkService = null) {
+        super('SystemManagementService');
+
+        // 의존성 주입 방식 (새로운 방식)
+        if (userService && artworkService) {
+            this.userService = userService;
+            this.artworkService = artworkService;
+        } else {
+            // 기존 방식 호환성 유지 (임시)
+            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
+            this.userService = new UserService();
+            this.artworkService = new ArtworkService();
+        }
     }
 
     /**
@@ -20,51 +33,52 @@ export default class SystemManagementService {
      * @returns {Promise<Object>} 대시보드 데이터
      */
     async getDashboardData(options = {}) {
-        const { page = 1, limit = 10 } = options;
+        return this.safeExecute(
+            async () => {
+                const { page = 1, limit = 10 } = options;
 
-        try {
-            // 사용자 및 작품 데이터 조회
-            const userOptions = { page, limit };
-            const artworkOptions = { page, limit };
+                // 사용자 및 작품 데이터 조회
+                const userOptions = { page, limit };
+                const artworkOptions = { page, limit };
 
-            const [users, artworks] = await Promise.all([
-                this.userService.getUserList(userOptions),
-                this.artworkService.getArtworkListWithDetails(artworkOptions)
-            ]);
+                const [users, artworks] = await Promise.all([
+                    this.userService.getUserList(userOptions),
+                    this.artworkService.getArtworkListWithDetails(artworkOptions)
+                ]);
 
-            // 추천 작품 조회
-            const featuredArtworks = await this.artworkService.getFeaturedArtworks();
+                // 추천 작품 조회
+                const featuredArtworks = await this.artworkService.getFeaturedArtworks();
 
-            // 페이지네이션 데이터 생성
-            const pageData = new Page(users?.total || 0, {
-                page,
-                limit,
-                baseUrl: '/admin/dashboard'
-            });
+                // 페이지네이션 데이터 생성
+                const pageData = new Page(users?.total || 0, {
+                    page,
+                    limit,
+                    baseUrl: '/admin/dashboard'
+                });
 
-            // 대시보드 통계 데이터 생성
-            const statsData = this._createStatsData(users, artworks);
+                // 대시보드 통계 데이터 생성
+                const statsData = this._createStatsData(users, artworks);
 
-            // 최근 활동 데이터 생성
-            const activities = this._createActivityData(users, artworks);
+                // 최근 활동 데이터 생성
+                const activities = this._createActivityData(users, artworks);
 
-            // 공지사항 데이터 생성 (임시 데이터)
-            const notices = this._createNoticeData();
+                // 공지사항 데이터 생성 (임시 데이터)
+                const notices = this._createNoticeData();
 
-            return {
-                page: pageData,
-                stats: statsData,
-                recentActivities: activities,
-                recentNotices: notices,
-                featuredArtworks: {
-                    items: featuredArtworks || [],
-                    total: featuredArtworks?.length || 0
-                }
-            };
-        } catch (error) {
-            console.error('대시보드 데이터 조회 중 오류:', error);
-            throw new Error('대시보드 데이터를 가져오는데 실패했습니다.');
-        }
+                return {
+                    page: pageData,
+                    stats: statsData,
+                    recentActivities: activities,
+                    recentNotices: notices,
+                    featuredArtworks: {
+                        items: featuredArtworks || [],
+                        total: featuredArtworks?.length || 0
+                    }
+                };
+            },
+            '대시보드 데이터 조회',
+            { options }
+        );
     }
 
     /**

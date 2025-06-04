@@ -1,4 +1,4 @@
-import CloudinaryUrlOptimizer from '../../../../common/utils/CloudinaryUrlOptimizer.js';
+import CloudinaryUrlOptimizer from '#common/utils/CloudinaryUrlOptimizer.js';
 
 /**
  * 전시회 목록 DTO
@@ -20,5 +20,4 @@ export default class ExhibitionListDto {
         this.isSubmissionOpen = data.isSubmissionOpen === true;
         this.isFeatured = data.isFeatured === true;
     }
-
 }

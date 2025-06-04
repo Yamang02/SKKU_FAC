@@ -1,193 +1,227 @@
 import { ViewPath } from '../../../../common/constants/ViewPath.js';
 import ViewResolver from '../../../../common/utils/ViewResolver.js';
-import ExhibitionManagementService from '../../service/exhibition/ExhibitionManagementService.js';
+import BaseAdminController from '../BaseAdminController.js';
 
-export default class ExhibitionManagementController {
-    constructor() {
-        this.exhibitionManagementService = new ExhibitionManagementService();
+export default class ExhibitionManagementController extends BaseAdminController {
+    // 의존성 주입을 위한 static dependencies 정의
+    static dependencies = ['ExhibitionManagementService'];
+
+    constructor(exhibitionManagementService = null) {
+        super('ExhibitionManagementController');
+
+        // 의존성 주입 방식 (새로운 방식)
+        if (exhibitionManagementService) {
+            this.exhibitionManagementService = exhibitionManagementService;
+        } else {
+            // 기존 방식 호환성 유지 (임시)
+            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
+            throw new Error('ExhibitionManagementService가 주입되지 않았습니다.');
+        }
     }
 
     /**
      * 관리자 전시회 목록 페이지를 렌더링합니다.
      */
     async getManagementExhibitionListPage(req, res) {
-        try {
-            const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 10;
-            const filters = {
-                exhibitionType: req.query.exhibitionType,
-                featured: req.query.featured,
-                year: req.query.year ? parseInt(req.query.year) : null,
-                keyword: req.query.keyword
-            };
+        return this.safeExecuteSSR(
+            async () => {
+                const { page = 1, limit = 10, exhibitionType, featured, year, keyword } = req.query;
 
-            const exhibitionListData = await this.exhibitionManagementService.getExhibitionList({
-                page,
-                limit,
-                ...filters
-            });
+                const filters = {
+                    exhibitionType,
+                    featured,
+                    year: year ? parseInt(year) : null,
+                    keyword
+                };
 
-            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.LIST, {
-                title: '전시회 관리',
-                breadcrumb: '전시회 관리',
-                currentPage: 'exhibition',
-                exhibitions: exhibitionListData.exhibitions,
-                page: exhibitionListData.page,
-                total: exhibitionListData.total,
-                filters: exhibitionListData.filters
-            });
-        } catch (error) {
-            console.error('전시회 목록 조회 중 오류:', error);
-            req.flash('error', error.message || '전시회 목록 조회 중 오류가 발생했습니다.');
-            ViewResolver.renderError(res, error);
-        }
+                const exhibitionListData = await this.exhibitionManagementService.getExhibitionList({
+                    page: parseInt(page),
+                    limit: parseInt(limit),
+                    ...filters
+                });
+
+                const pagination = this.createPaginationInfo(page, limit, exhibitionListData.total);
+
+                return ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.LIST, {
+                    title: '전시회 관리',
+                    exhibitions: exhibitionListData.exhibitions,
+                    pagination,
+                    filters
+                });
+            },
+            req,
+            res,
+            {
+                operationName: '전시회 목록 조회',
+                errorRedirectPath: '/admin',
+                errorMessage: '전시회 목록을 불러오는 중 오류가 발생했습니다.'
+            }
+        );
     }
 
     /**
      * 관리자 전시회 생성 페이지를 렌더링합니다.
      */
     async getManagementExhibitionCreatePage(req, res) {
-        try {
-            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
-                title: '전시회 등록',
-                breadcrumb: '전시회 등록',
-                currentPage: 'exhibition',
-                mode: 'create',
-                exhibition: null
-            });
-        } catch (error) {
-            console.error('전시회 등록 페이지 렌더링 중 오류:', error);
-            req.flash('error', error.message || '전시회 등록 페이지 렌더링 중 오류가 발생했습니다.');
-            ViewResolver.renderError(res, error);
-        }
+        return this.safeExecuteSSR(
+            async () => {
+                return ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
+                    title: '전시회 등록',
+                    mode: 'create',
+                    exhibition: null
+                });
+            },
+            req,
+            res,
+            {
+                operationName: '전시회 생성 페이지 조회',
+                errorRedirectPath: '/admin/management/exhibition',
+                errorMessage: '전시회 생성 페이지를 불러오는 중 오류가 발생했습니다.'
+            }
+        );
     }
 
     /**
      * 관리자 전시회 상세 페이지를 렌더링합니다.
      */
     async getManagementExhibitionDetailPage(req, res) {
-        try {
-            const exhibitionId = req.params.id;
+        return this.safeExecuteSSR(
+            async () => {
+                const exhibitionId = req.params.id;
+                const exhibition = await this.exhibitionManagementService.getExhibitionDetail(exhibitionId);
 
-            const exhibition = await this.exhibitionManagementService.getExhibitionDetail(exhibitionId);
+                if (!exhibition) {
+                    throw new Error('전시회를 찾을 수 없습니다.');
+                }
 
-            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
-                title: '전시회 상세',
-                breadcrumb: '전시회 상세',
-                currentPage: 'exhibition',
-                exhibition: exhibition,
-                mode: 'edit'
-            });
-        } catch (error) {
-            console.error('전시회 상세 조회 중 오류:', error);
-            req.flash('error', error.message || '전시회를 찾을 수 없습니다.');
-            res.redirect('/admin/management/exhibition');
-        }
+                return ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
+                    title: `전시회 상세 - ${exhibition.title}`,
+                    exhibition,
+                    mode: 'edit'
+                });
+            },
+            req,
+            res,
+            {
+                operationName: '전시회 상세 조회',
+                errorRedirectPath: '/admin/management/exhibition',
+                errorMessage: '전시회 정보를 불러오는 중 오류가 발생했습니다.'
+            }
+        );
     }
 
     /**
-    * 관리자 전시회를 생성합니다.
-    */
+     * 관리자 전시회를 생성합니다.
+     */
     async createManagementExhibition(req, res) {
-        try {
-            const exhibitionData = req.body;
-            const file = req.file;
-            let exhibitionImage = {};
+        return this.safeExecuteSSR(
+            async () => {
+                const exhibitionData = req.body;
+                const file = req.file;
+                let exhibitionImage = {};
 
-            if (file) {
-                exhibitionImage = {
-                    url: file.path,
-                    publicId: file.filename
-                };
+                if (file) {
+                    exhibitionImage = {
+                        url: file.path,
+                        publicId: file.filename
+                    };
+                }
+
+                const createdExhibition = await this.exhibitionManagementService.createExhibition(
+                    exhibitionData,
+                    exhibitionImage
+                );
+
+                req.flash('success', `${createdExhibition.title} 전시회가 성공적으로 등록되었습니다.`);
+                return res.redirect(`/admin/management/exhibition/${createdExhibition.id}`);
+            },
+            req,
+            res,
+            {
+                operationName: '전시회 생성',
+                errorRedirectPath: '/admin/management/exhibition/new',
+                errorMessage: '전시회 생성 중 오류가 발생했습니다.'
             }
-
-
-            const createdExhibition = await this.exhibitionManagementService.createExhibition(exhibitionData, exhibitionImage);
-
-            req.flash('success', createdExhibition.title + '전시회가 성공적으로 등록되었습니다.');
-            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
-                title: '전시회 상세',
-                breadcrumb: '전시회 상세',
-                currentPage: 'exhibition',
-                exhibition: createdExhibition,
-                mode: 'edit'
-            });
-        } catch (error) {
-            console.error('전시회 등록 중 오류:', error);
-            req.flash('error', error.message || '전시회 등록 중 오류가 발생했습니다.');
-            ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.EXHIBITION.DETAIL, {
-                title: '전시회 상세',
-                breadcrumb: '전시회 상세',
-                currentPage: 'exhibition',
-                exhibition: null,
-                mode: 'create'
-            });
-        }
+        );
     }
+
     /**
      * 관리자 전시회를 수정합니다.
      */
-
     async updateManagementExhibition(req, res) {
-        try {
-            const exhibitionId = req.params.id;
-            const exhibitionData = req.body;
-            // 업데이트 시 이미지는 처리하지 않음
+        return this.safeExecuteSSR(
+            async () => {
+                const exhibitionId = req.params.id;
+                const exhibitionData = req.body;
 
-            const result = await this.exhibitionManagementService.updateExhibition(exhibitionId, exhibitionData);
+                const result = await this.exhibitionManagementService.updateExhibition(exhibitionId, exhibitionData);
 
-            if (result) {
-                req.flash('success', '전시회가 성공적으로 수정되었습니다.');
-                // 전시회 목록 페이지로 리다이렉트
-                res.redirect('/admin/management/exhibition?page=1&limit=10'); // 초기값으로 페이지 1과 limit 10 설정
-            } else {
-                req.flash('error', '전시회를 찾을 수 없습니다.');
-                res.redirect('/admin/management/exhibition'); // 전시회 목록 페이지로 리다이렉트
+                if (!result) {
+                    throw new Error('전시회를 찾을 수 없습니다.');
+                }
+
+                return null; // safeExecuteSSR에서 리다이렉트 처리
+            },
+            req,
+            res,
+            {
+                operationName: '전시회 수정',
+                successRedirectPath: '/admin/management/exhibition',
+                successMessage: '전시회가 성공적으로 수정되었습니다.',
+                errorRedirectPath: `/admin/management/exhibition/${req.params.id}`,
+                errorMessage: '전시회 수정 중 오류가 발생했습니다.'
             }
-        } catch (error) {
-            console.error('전시회 수정 중 오류:', error);
-            req.flash('error', error.message || '전시회 수정 중 오류가 발생했습니다.');
-            res.redirect('/admin/management/exhibition/' + req.params.id);
-        }
+        );
     }
 
     /**
      * 관리자 전시회를 삭제합니다.
      */
     async deleteManagementExhibition(req, res) {
-        try {
-            const exhibitionId = req.params.id;
+        return this.safeExecuteSSR(
+            async () => {
+                const exhibitionId = req.params.id;
+                const result = await this.exhibitionManagementService.deleteExhibition(exhibitionId);
 
-            const result = await this.exhibitionManagementService.deleteExhibition(exhibitionId);
+                if (!result) {
+                    throw new Error('전시회를 찾을 수 없습니다.');
+                }
 
-            if (result) {
-                req.flash('success', '전시회가 성공적으로 삭제되었습니다.');
-                res.redirect('/admin/management/exhibition?page=1&limit=10');
-            } else {
-                req.flash('error', '전시회를 찾을 수 없습니다.');
-                res.redirect('/admin/management/exhibition?page=1&limit=10');
+                return null; // safeExecuteSSR에서 리다이렉트 처리
+            },
+            req,
+            res,
+            {
+                operationName: '전시회 삭제',
+                successRedirectPath: '/admin/management/exhibition',
+                successMessage: '전시회가 성공적으로 삭제되었습니다.',
+                errorRedirectPath: '/admin/management/exhibition',
+                errorMessage: '전시회 삭제 중 오류가 발생했습니다.'
             }
-        } catch (error) {
-            console.error('전시회 삭제 중 오류:', error);
-            req.flash('error', error.message || '전시회 삭제 중 오류가 발생했습니다.');
-            res.redirect('/admin/management/exhibition?page=1&limit=10');
-        }
+        );
     }
 
     /**
      * 전시회의 주요 전시 여부를 토글합니다.
      */
     async toggleFeatured(req, res) {
-        try {
-            const exhibitionId = req.params.id;
-            const updatedExhibition = await this.exhibitionManagementService.toggleFeatured(exhibitionId);
+        return this.safeExecuteSSR(
+            async () => {
+                const exhibitionId = req.params.id;
+                const updatedExhibition = await this.exhibitionManagementService.toggleFeatured(exhibitionId);
 
-            req.flash('success', `전시회가 ${updatedExhibition.isFeatured ? '주요 전시로 설정' : '일반 전시로 변경'}되었습니다.`);
-            res.redirect('/admin/management/exhibition');
-        } catch (error) {
-            console.error('전시회 주요 전시 설정 중 오류:', error);
-            req.flash('error', '전시회 주요 전시 설정 중 오류가 발생했습니다.');
-            res.redirect('/admin/management/exhibition');
-        }
+                const message = `전시회가 ${updatedExhibition.isFeatured ? '주요 전시로 설정' : '일반 전시로 변경'}되었습니다.`;
+                req.flash('success', message);
+
+                return res.redirect('/admin/management/exhibition');
+            },
+            req,
+            res,
+            {
+                operationName: '전시회 주요 전시 설정',
+                errorRedirectPath: '/admin/management/exhibition',
+                errorMessage: '전시회 주요 전시 설정 중 오류가 발생했습니다.'
+            }
+        );
     }
 }

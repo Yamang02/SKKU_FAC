@@ -4,34 +4,41 @@
 
 ## 1. 프로젝트 개요
 
-SKKU 미술동아리 갤러리는 성균관대학교 순수 미술 동아리 전시의 예술 작품을 전시하고 관리하는 웹 플랫폼입니다. 이 시스템은 전시회 관리, 작품 업로드, 사용자 인증 등의 기능을 제공합니다.
+SKKU 미술동아리 갤러리는 성균관대학교 순수 미술 동아리 전시의 예술 작품을
+전시하고 관리하는 웹 플랫폼입니다. 이 시스템은 전시회 관리, 작품 업로드, 사용자
+인증 등의 기능을 제공합니다.
 
 ## 2. 기술 스택
 
 ### 2.1 프론트엔드
+
 - **템플릿 엔진**: EJS
 - **CSS 프레임워크**: 자체 CSS
 - **JavaScript**: 바닐라 자바스크립트
 
 ### 2.2 백엔드
+
 - **런타임**: Node.js (22.13.0)
 - **프레임워크**: Express.js
 - **데이터베이스**: MySQL
 - **ORM**: Sequelize
 
 ### 2.3 인프라
+
 - **클라우드 스토리지**: Cloudinary (이미지 저장)
 - **캐싱**: Redis (세션 스토어 및 캐싱)
 - **CDN**: jsDelivr, Google Fonts, Cloudflare (외부 라이브러리 및 폰트)
 - **배포 환경**: Railway
 
 ### 2.4 보안
+
 - **인증**: 세션 기반 인증
 - **암호화**: bcrypt
 - **보안 헤더**: helmet
 - **요청 제한**: express-rate-limit
 
 ### 2.5 로깅 및 모니터링
+
 - **로깅**: Winston 기반 구조화된 로깅
 - **로그 로테이션**: winston-daily-rotate-file
 - **에러 추적**: 자동 에러 분류 및 심각도 판단
@@ -106,6 +113,7 @@ SKKU_FAC_GALLERY/
 ### 4.1 도메인 모듈
 
 각 도메인은 MVC 패턴을 따르며 다음 구조로 구성됩니다:
+
 - **Controller**: 요청 처리 및 라우팅
 - **Service**: 비즈니스 로직 처리
 - **Model**: 데이터 모델 정의
@@ -128,6 +136,7 @@ SKKU_FAC_GALLERY/
 ### 4.3 데이터베이스 모델
 
 주요 엔티티:
+
 - **UserAccount**: 사용자 계정 정보
 - **SkkuUserProfile**: 성균관대 사용자 프로필
 - **ExternalUserProfile**: 외부 사용자 프로필
@@ -159,42 +168,50 @@ SKKU_FAC_GALLERY/
 ## 8. 로깅 시스템
 
 ### 8.1 Winston 기반 구조화된 로깅
+
 - **Winston 3.8.2**: 강력한 로깅 라이브러리 기반
 - **환경별 최적화**: 개발(콘솔+이모지), 프로덕션(파일+JSON), 테스트(최소화)
 - **로그 레벨**: debug, info, warn, error 레벨 지원
 - **민감정보 보호**: 패스워드, 토큰 등 자동 마스킹 ([REDACTED])
 
 ### 8.2 환경별 로그 전략
+
 - **개발환경**: 콘솔 출력, 이모지 포함, debug 레벨
 - **테스트환경**: 최소 출력, error 레벨만, TEST_SILENT 지원
 - **스테이징환경**: 콘솔 + 파일, warn 레벨
 - **프로덕션환경**: 파일 로테이션, error 레벨, JSON 포맷
 
 ### 8.3 로그 파일 관리
+
 - **자동 로테이션**: 일별 로그 파일 생성 및 압축
 - **크기 제한**: 에러 로그 20MB, 전체 로그 50MB, 액세스 로그 100MB
 - **보관 정책**: 에러 로그 30일, 전체 로그 14일, 액세스 로그 7일
 - **Railway 환경**: 파일 시스템 제약으로 이메일 기반 로그 전송
 
 ### 8.4 에러 로깅 강화
-- **자동 분류**: 7가지 카테고리 (DATABASE, NETWORK, AUTH, VALIDATION, BUSINESS, SYSTEM, EXTERNAL)
+
+- **자동 분류**: 7가지 카테고리 (DATABASE, NETWORK, AUTH, VALIDATION, BUSINESS,
+  SYSTEM, EXTERNAL)
 - **심각도 판단**: CRITICAL, HIGH, MEDIUM, LOW 4단계
 - **복구 제안**: 에러 카테고리별 자동 복구 제안 생성
 - **패턴 감지**: 반복되는 에러 패턴 자동 감지 및 알림
 
 ### 8.5 성능 모니터링
+
 - **메트릭 수집**: 메모리, CPU, 응답시간, DB 쿼리 시간 등
 - **임계값 체크**: 자동 성능 임계값 모니터링 및 알림
 - **트렌드 분석**: 성능 변화 추이 분석 및 회귀 감지
 - **리소스 모니터링**: 시스템 리소스 사용량 추적
 
 ### 8.6 Railway 환경 특화 기능
+
 - **자동 환경 감지**: RAILWAY_PROJECT_ID 등을 통한 자동 감지
 - **이메일 로그 전송**: 일별 로그 요약 이메일 (자정 전송)
 - **긴급 알림**: 에러 5개 이상 누적 시 즉시 이메일 알림
 - **스마트 버퍼링**: 메모리 효율적인 로그 버퍼 관리
 
 ### 8.7 로깅 API
+
 ```javascript
 import logger from './src/common/utils/Logger.js';
 
@@ -217,6 +234,7 @@ logger.logErrorWithAnalysis('에러 발생', error, { context }, userInfo, req);
 ```
 
 ### 8.8 환경변수 설정
+
 ```bash
 # 로그 레벨 오버라이드 (선택적)
 LOG_LEVEL=debug
@@ -240,11 +258,13 @@ CUSTOM_RECOVERY_SUGGESTIONS='{"PAYMENT":["결제 설정을 확인하세요"]}'
 ## 10. Redis 캐싱 시스템
 
 ### 10.1 Redis 구성
+
 - **세션 스토어**: 사용자 세션 데이터를 Redis에 저장하여 확장성 확보
 - **캐싱 전략**: 자주 사용되는 데이터의 캐싱을 통한 성능 향상
 - **환경별 설정**: 개발/테스트/프로덕션 환경별 Redis 설정 분리
 
 ### 10.2 세션 관리
+
 - **Redis 기반 세션**: connect-redis를 사용한 세션 스토어
 - **세션 만료**: TTL 설정을 통한 자동 세션 만료 (기본 24시간)
 - **폴백 메커니즘**: Redis 연결 실패 시 메모리 기반 세션으로 자동 전환
@@ -252,12 +272,14 @@ CUSTOM_RECOVERY_SUGGESTIONS='{"PAYMENT":["결제 설정을 확인하세요"]}'
 ## 11. CDN 및 외부 리소스
 
 ### 11.1 사용 중인 CDN
+
 - **jsDelivr**: QR 코드 생성, html2canvas 라이브러리
 - **Google Fonts**: 웹 폰트 제공
 - **Cloudflare**: 기타 외부 리소스
 - **Kakao CDN**: 카카오 SDK 및 관련 리소스
 
 ### 11.2 보안 정책
+
 - **CSP 설정**: Content Security Policy를 통한 허용된 CDN만 접근 가능
 - **HTTPS 강제**: 모든 외부 리소스는 HTTPS를 통해서만 로드
 - **리소스 무결성**: 중요한 외부 스크립트에 대한 무결성 검증
@@ -271,6 +293,7 @@ CUSTOM_RECOVERY_SUGGESTIONS='{"PAYMENT":["결제 설정을 확인하세요"]}'
 ## 13. 의존성
 
 주요 패키지:
+
 - express: 웹 서버 프레임워크
 - sequelize: ORM
 - redis: Redis 클라이언트
@@ -287,6 +310,7 @@ CUSTOM_RECOVERY_SUGGESTIONS='{"PAYMENT":["결제 설정을 확인하세요"]}'
 - nodemailer: 이메일 전송 (로그 알림)
 
 ### 외부 CDN 라이브러리:
+
 - **Kakao SDK**: 카카오 소셜 로그인 및 공유 기능
 - **QR Code**: QR 코드 생성 (jsDelivr CDN)
 - **html2canvas**: 화면 캡처 기능 (jsDelivr CDN)

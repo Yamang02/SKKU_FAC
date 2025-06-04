@@ -110,7 +110,6 @@ export function createExhibitionCarouselCard(exhibition) {
         meta.appendChild(artworkCount);
     }
 
-
     imageContainer.appendChild(image);
     info.appendChild(title);
     info.appendChild(meta);

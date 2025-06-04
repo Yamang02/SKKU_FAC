@@ -118,7 +118,9 @@
     padding: 8px 15px;
     color: var(--color-text-primary);
     text-decoration: none;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
     font-size: 0.95rem;
 }
 

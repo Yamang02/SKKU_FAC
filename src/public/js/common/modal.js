@@ -14,14 +14,14 @@ export function initModal(modalId) {
     }
 
     // 모달 외부 클릭 시 닫기
-    modal.onclick = (event) => {
+    modal.onclick = event => {
         if (event.target === modal) {
             closeModal(modal);
         }
     };
 
     // ESC 키 누를 때 모달 닫기
-    const escHandler = (e) => {
+    const escHandler = e => {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
             closeModal(modal);
             document.removeEventListener('keydown', escHandler);

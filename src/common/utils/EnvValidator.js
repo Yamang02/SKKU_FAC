@@ -2,11 +2,7 @@ import logger from './Logger.js';
 
 class EnvValidator {
     constructor() {
-        this.requiredVars = [
-            'SESSION_SECRET',
-            'ADMIN_USER',
-            'ADMIN_PASSWORD'
-        ];
+        this.requiredVars = ['SESSION_SECRET', 'ADMIN_USER', 'ADMIN_PASSWORD'];
 
         this.defaultValues = {
             SESSION_SECRET: 'temp_session_secret_for_health_check',

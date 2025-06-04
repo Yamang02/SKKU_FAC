@@ -1,44 +1,20 @@
 <!DOCTYPE html>
 <html lang="ko">
+  <head>
+    <%- include('./MainHead') %>
+  </head>
 
-    <head>
-        <%- include('./MainHead') %>
-    </head>
+  <body class="main-layout">
+    <!-- 헤더 -->
+    <%- include('./MainHeader') %>
 
-    <body class="main-layout">
-        <!-- 헤더 -->
-        <%- include('./MainHeader') %>
+    <!-- 알림 컨테이너 -->
+    <div id="notification-container" class="notification-container"></div>
 
-            <!-- 알림 컨테이너 -->
-            <div id="notification-container" class="notification-container"></div>
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content"><%- content %></main>
 
-            <!-- 메인 컨텐츠 -->
-            <main class="main-content">
-                <%- content %>
-            </main>
-
-            <!-- 푸터 -->
-            <%- include('./MainFooter') %>
-
-                <!-- Vite 빌드된 JavaScript -->
-                <% if (typeof viteAssets !=='undefined' && viteAssets.js && viteAssets.js.length> 0) { %>
-                    <% if (process.env.NODE_ENV==='production' && viteAssets.legacy) { %>
-                        <!-- 레거시 브라우저 지원을 위한 폴리필 -->
-                        <% if (viteAssets.polyfills) { %>
-                            <script nomodule src="/assets/<%= viteAssets.polyfills.replace('assets/', '') %>"></script>
-                            <% } %>
-                                <!-- 레거시 브라우저용 번들 -->
-                                <script nomodule src="/assets/<%= viteAssets.legacy.replace('assets/', '') %>"></script>
-                                <% } %>
-                                    <!-- 모던 브라우저용 번들 -->
-                                    <% viteAssets.js.forEach(function(jsFile) { %>
-                                        <script type="module"
-                                            src="/assets/<%= jsFile.replace('assets/', '') %>"></script>
-                                        <% }); %>
-                                            <% } else { %>
-                                                <!-- Fallback JavaScript (manifest 파일을 찾을 수 없는 경우) -->
-                                                <script src="/js/main.js"></script>
-                                                <% } %>
-    </body>
-
+    <!-- 푸터 -->
+    <%- include('./MainFooter') %>
+  </body>
 </html>

@@ -9,7 +9,6 @@ export default class ExhibitionApiController {
         this.exhibitionService = new ExhibitionService();
     }
 
-
     /**
      * 관리자용 전시회를 등록합니다.
      */
@@ -90,8 +89,6 @@ export default class ExhibitionApiController {
      */
     async getExhibitionList(req, res) {
         try {
-
-
             const {
                 page = 1,
                 limit = 12,
@@ -130,7 +127,7 @@ export default class ExhibitionApiController {
                 type: type !== 'all' ? type : undefined,
                 year: year && year !== 'all' ? year : undefined,
                 category: category !== 'all' ? category : undefined,
-                isSubmissionOpen: submission === 'open' ? true : (submission === 'closed' ? false : undefined),
+                isSubmissionOpen: submission === 'open' ? true : submission === 'closed' ? false : undefined,
                 keyword: keyword || undefined,
                 searchType: searchType || 'title',
                 ...sortOptions
@@ -184,6 +181,4 @@ export default class ExhibitionApiController {
             return res.status(500).json(ApiResponse.error(error.message));
         }
     }
-
 }
-

@@ -1,3 +1,4 @@
+/* eslint-disable filenames/match-exported */
 /**
  * 보안 설정
  */

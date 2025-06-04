@@ -1,61 +1,48 @@
-<%- /** * 페이지네이션 부분 템플릿 * 필요한 파라미터: * - page: Page 객체 * - name?: 페이지네이션 구분자 (선택사항) */ %>
-
-    <% if (!page || typeof page !=='object' ) { %>
-        <!-- 페이지 객체가 없는 경우 -->
-        <div class="pagination pagination--disabled">
-            <span class="pagination__message">페이지 정보가 없습니다.</span>
-        </div>
-        <% } else { %>
-            <div class="pagination <%= typeof name !== 'undefined' ? `pagination--${name}` : '' %>">
-                <% if (page.hasPrev) { %>
-                    <a href="<%= page.getPageUrl(page.currentPage - 1) %>" class="pagination__btn pagination__btn--prev"
-                        aria-label="이전 페이지">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                    <% } %>
-
-                        <% if (page.showFirstPage) { %>
-                            <a href="<%= page.getPageUrl(1) %>" class="pagination__btn">1</a>
-                            <% } %>
-
-                                <% if (page.showFirstEllipsis) { %>
-                                    <span class="pagination__ellipsis">...</span>
-                                    <% } %>
-
-                                        <% const pages=page.getPages(); %>
-                                            <% pages.forEach(pageNum=> { %>
-                                                <% if (pageNum===page.currentPage) { %>
-                                                    <a href="<%= page.getPageUrl(pageNum) %>"
-                                                        class="pagination__btn pagination__btn--active"
-                                                        aria-current="page">
-                                                        <%= pageNum %>
-                                                    </a>
-                                                    <% } else { %>
-                                                        <a href="<%= page.getPageUrl(pageNum) %>"
-                                                            class="pagination__btn">
-                                                            <%= pageNum %>
-                                                        </a>
-                                                        <% } %>
-                                                            <% }); %>
-
-                                                                <% if (page.showLastEllipsis) { %>
-                                                                    <span class="pagination__ellipsis">...</span>
-                                                                    <% } %>
-
-                                                                        <% if (page.showLastPage) { %>
-                                                                            <a href="<%= page.getPageUrl(page.totalPages) %>"
-                                                                                class="pagination__btn">
-                                                                                <%= page.totalPages %>
-                                                                            </a>
-                                                                            <% } %>
-
-                                                                                <% if (page.hasNext) { %>
-                                                                                    <a href="<%= page.getPageUrl(page.currentPage + 1) %>"
-                                                                                        class="pagination__btn pagination__btn--next"
-                                                                                        aria-label="다음 페이지">
-                                                                                        <i
-                                                                                            class="fas fa-chevron-right"></i>
-                                                                                    </a>
-                                                                                    <% } %>
-            </div>
-            <% } %>
+<%- /** * 페이지네이션 부분 템플릿 * 필요한 파라미터: * - page: Page 객체 * - name?: 페이지네이션
+구분자 (선택사항) */ %> <% if (!page || typeof page !=='object' ) { %>
+<!-- 페이지 객체가 없는 경우 -->
+<div class="pagination pagination--disabled">
+  <span class="pagination__message">페이지 정보가 없습니다.</span>
+</div>
+<% } else { %>
+<div class="pagination <%= typeof name !== 'undefined' ? `pagination--${name}` : '' %>">
+  <% if (page.hasPrev) { %>
+  <a
+    href="<%= page.getPageUrl(page.currentPage - 1) %>"
+    class="pagination__btn pagination__btn--prev"
+    aria-label="이전 페이지"
+  >
+    <i class="fas fa-chevron-left"></i>
+  </a>
+  <% } %> <% if (page.showFirstPage) { %>
+  <a href="<%= page.getPageUrl(1) %>" class="pagination__btn">1</a>
+  <% } %> <% if (page.showFirstEllipsis) { %>
+  <span class="pagination__ellipsis">...</span>
+  <% } %> <% const pages=page.getPages(); %> <% pages.forEach(pageNum=> { %> <% if
+  (pageNum===page.currentPage) { %>
+  <a
+    href="<%= page.getPageUrl(pageNum) %>"
+    class="pagination__btn pagination__btn--active"
+    aria-current="page"
+  >
+    <%= pageNum %>
+  </a>
+  <% } else { %>
+  <a href="<%= page.getPageUrl(pageNum) %>" class="pagination__btn"> <%= pageNum %> </a>
+  <% } %> <% }); %> <% if (page.showLastEllipsis) { %>
+  <span class="pagination__ellipsis">...</span>
+  <% } %> <% if (page.showLastPage) { %>
+  <a href="<%= page.getPageUrl(page.totalPages) %>" class="pagination__btn">
+    <%= page.totalPages %>
+  </a>
+  <% } %> <% if (page.hasNext) { %>
+  <a
+    href="<%= page.getPageUrl(page.currentPage + 1) %>"
+    class="pagination__btn pagination__btn--next"
+    aria-label="다음 페이지"
+  >
+    <i class="fas fa-chevron-right"></i>
+  </a>
+  <% } %>
+</div>
+<% } %>

@@ -1,4 +1,4 @@
-import CloudinaryUrlOptimizer from '../../../../../common/utils/CloudinaryUrlOptimizer.js';
+import CloudinaryUrlOptimizer from '#common/utils/CloudinaryUrlOptimizer.js';
 
 /**
  * 관리자 페이지 작품 상세 정보를 위한 DTO
@@ -44,10 +44,10 @@ export default class ArtworkManagementDto {
      */
     get statusDisplayName() {
         const statusMap = {
-            'PENDING': '대기 중',
-            'APPROVED': '승인됨',
-            'BLOCKED': '차단됨',
-            'DELETED': '삭제됨'
+            PENDING: '대기 중',
+            APPROVED: '승인됨',
+            BLOCKED: '차단됨',
+            DELETED: '삭제됨'
         };
         return statusMap[this.status] || '알 수 없음';
     }
@@ -57,10 +57,10 @@ export default class ArtworkManagementDto {
      */
     get statusClass() {
         const classMap = {
-            'PENDING': 'status-pending',
-            'APPROVED': 'status-approved',
-            'BLOCKED': 'status-blocked',
-            'DELETED': 'status-deleted'
+            PENDING: 'status-pending',
+            APPROVED: 'status-approved',
+            BLOCKED: 'status-blocked',
+            DELETED: 'status-deleted'
         };
         return classMap[this.status] || '';
     }

@@ -4,11 +4,7 @@ import { ImageError } from '../../../../common/error/ImageError.js';
 import ArtworkRequestDTO from '../../model/dto/ArtworkRequestDto.js';
 import ArtworkService from '../../service/ArtworkService.js';
 import ImageService from '../../../image/service/ImageService.js';
-import {
-    ArtworkNotFoundError,
-    ArtworkValidationError
-} from '../../../../common/error/ArtworkError.js';
-
+import { ArtworkNotFoundError, ArtworkValidationError } from '../../../../common/error/ArtworkError.js';
 
 export default class ArtworkApiController {
     constructor() {
@@ -18,8 +14,8 @@ export default class ArtworkApiController {
 
     // === API 엔드포인트 ===
     /**
-         * 관리자용 작품을 삭제합니다.
-         */
+     * 관리자용 작품을 삭제합니다.
+     */
     async deleteManagementArtwork(req, res) {
         try {
             const { id } = req.params;
@@ -35,10 +31,9 @@ export default class ArtworkApiController {
         }
     }
 
-
     /**
-        * 작품 목록을 조회합니다.
-        */
+     * 작품 목록을 조회합니다.
+     */
     async getArtworkList(req, res) {
         try {
             const { page = 1, limit = 10, sortField = 'createdAt', sortOrder = 'desc', ...filters } = req.query;
@@ -60,7 +55,6 @@ export default class ArtworkApiController {
         }
     }
 
-
     /**
      * 추천 작품 목록을 조회합니다.
      */
@@ -74,7 +68,6 @@ export default class ArtworkApiController {
         }
     }
 
-
     /**
      * 작품 상세 정보를 조회합니다.
      */
@@ -87,7 +80,6 @@ export default class ArtworkApiController {
             return res.status(404).json(ApiResponse.error(Message.ARTWORK.NOT_FOUND));
         }
     }
-
 
     /**
      * 작품을 등록합니다.
@@ -109,7 +101,6 @@ export default class ArtworkApiController {
                 return res.status(401).json(ApiResponse.error('로그인이 필요합니다.'));
             }
 
-
             // 파일 검사
             if (!file) {
                 console.error('파일이 업로드되지 않았습니다.');
@@ -119,7 +110,6 @@ export default class ArtworkApiController {
             const artworkRequestDTO = new ArtworkRequestDTO();
 
             try {
-
                 artworkRequestDTO.title = artworkData.title;
                 artworkRequestDTO.userId = req.session.user.id;
                 artworkRequestDTO.medium = artworkData.medium;
@@ -159,14 +149,14 @@ export default class ArtworkApiController {
     }
 
     /**
-    * 작품을 수정합니다.
-    */
+     * 작품을 수정합니다.
+     */
     async updateArtwork(req, res) {
         try {
             const { id } = req.params;
             const artworkData = req.body;
             const artwork = await this.artworkService.updateArtwork(id, artworkData);
-            ('작품 수정 완료:', artwork);
+            '작품 수정 완료:', artwork;
             return res.json(ApiResponse.success(artwork, Message.ARTWORK.UPDATE_SUCCESS));
         } catch (error) {
             if (error instanceof ArtworkNotFoundError) {
@@ -180,7 +170,6 @@ export default class ArtworkApiController {
             return res.status(500).json(ApiResponse.error(Message.ARTWORK.UPDATE_ERROR));
         }
     }
-
 
     /**
      * 작품을 삭제합니다.
@@ -238,7 +227,4 @@ export default class ArtworkApiController {
             return res.status(500).json(ApiResponse.error(Message.ARTWORK.CANCEL_ERROR));
         }
     }
-
 }
-
-

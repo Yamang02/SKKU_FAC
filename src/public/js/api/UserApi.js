@@ -12,11 +12,10 @@ export default class UserApi {
             return response.data;
         } catch (error) {
             console.error('회원가입 중 오류 발생:', error);
-            ('회원가입 오류 : ', error);
+            '회원가입 오류 : ', error;
             throw error;
         }
     }
-
 
     // 프로필 조회
     static async getProfile() {
@@ -82,7 +81,7 @@ export default class UserApi {
         try {
             return await api.get('/user/logout', {
                 headers: {
-                    'Accept': 'application/json'
+                    Accept: 'application/json'
                 }
             });
         } catch (error) {
@@ -127,4 +126,3 @@ export default class UserApi {
         }
     }
 }
-

@@ -3,10 +3,7 @@
  */
 export default class Page {
     constructor(totalItems, options = {}) {
-        const {
-            page = 1,
-            limit = 12
-        } = options;
+        const { page = 1, limit = 12 } = options;
 
         this.currentPage = Number(page);
         this.itemsPerPage = Number(limit);

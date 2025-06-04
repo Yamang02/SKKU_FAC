@@ -16,7 +16,6 @@ try {
     const PORT = envValidator.getEnvNumber('PORT', 3000);
 
     serverManager.start(PORT);
-
 } catch (error) {
     logger.error('앱 모듈 임포트 실패', error);
     process.exit(1);

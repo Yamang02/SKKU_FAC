@@ -99,11 +99,11 @@
 }
 
 .share-by-kakao-talk-btn:hover {
-    background-color: #FEE500;
+    background-color: #fee500;
     /* 호버 시 카카오톡 노란색 배경 */
-    color: #3C1E1E;
+    color: #3c1e1e;
     /* 호버 시 카카오톡 아이콘 색상 */
-    border-color: #FEE500;
+    border-color: #fee500;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -122,7 +122,9 @@
     white-space: nowrap;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
+    transition:
+        opacity 0.3s,
+        visibility 0.3s;
     pointer-events: none;
 }
 
@@ -395,7 +397,10 @@
     background-color: white;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    transition:
+        background-color 0.3s,
+        color 0.3s,
+        border-color 0.3s;
     color: rgba(7, 43, 97, 0.9);
     border: 1px solid rgba(7, 43, 97, 0.1);
 }

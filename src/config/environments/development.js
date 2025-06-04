@@ -54,7 +54,60 @@ export default {
                         'https://k.kakaocdn.net',
                         'https://cdn.jsdelivr.net',
                         'blob:'
-                    ]
+                    ],
+                    styleSrc: [
+                        '\'self\'',
+                        '\'unsafe-inline\'', // 개발 환경에서 인라인 스타일 허용
+                        'https://cdnjs.cloudflare.com',
+                        'https://fonts.googleapis.com'
+                    ],
+                    fontSrc: [
+                        '\'self\'',
+                        'https://fonts.googleapis.com',
+                        'https://fonts.gstatic.com',
+                        'https://cdnjs.cloudflare.com'
+                    ],
+                    imgSrc: [
+                        '\'self\'',
+                        'data:', // Base64 이미지 허용
+                        'blob:', // Blob URL 허용
+                        'https://res.cloudinary.com', // Cloudinary 이미지
+                        'https://*.cloudinary.com'
+                    ],
+                    connectSrc: [
+                        '\'self\'',
+                        'https://api.cloudinary.com',
+                        'https://res.cloudinary.com',
+                        'ws://localhost:*', // 개발 서버 웹소켓
+                        'wss://localhost:*'
+                    ],
+                    frameSrc: ['\'none\''], // iframe 금지
+                    objectSrc: ['\'none\''], // object 요소 금지
+                    baseUri: ['\'self\''], // base 태그 제한
+                    formAction: ['\'self\''], // form action 제한
+                    frameAncestors: ['\'none\''], // 외부 사이트에서 iframe 금지
+                    manifestSrc: ['\'self\''],
+                    mediaSrc: ['\'self\'', 'https://res.cloudinary.com'],
+                    workerSrc: ['\'self\'', 'blob:'],
+                    childSrc: ['\'self\'']
+                }
+            },
+            crossOriginEmbedderPolicy: false // 개발 환경에서는 비활성화
+        },
+        additionalHeaders: {
+            'X-Development-Mode': 'true',
+            'X-Debug-Info': 'enabled'
+        },
+        staticFiles: {
+            setHeaders: (res, filePath) => {
+                // 개발 환경에서는 캐시 비활성화
+                res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+                res.setHeader('Pragma', 'no-cache');
+                res.setHeader('Expires', '0');
+
+                // 정적 파일별 보안 헤더
+                if (filePath.includes('.js')) {
+                    res.setHeader('X-Content-Type-Options', 'nosniff');
                 }
             }
         }
@@ -63,8 +116,15 @@ export default {
     session: {
         cookie: {
             secure: false, // HTTP에서도 작동
-            maxAge: 24 * 60 * 60 * 1000 // 24시간
-        }
+            maxAge: 24 * 60 * 60 * 1000, // 24시간
+            httpOnly: true,
+            sameSite: 'lax', // 개발 환경에서는 lax 모드
+            path: '/'
+        },
+        name: 'dev_gallery_sid', // 개발 환경 세션명
+        rolling: true,
+        unset: 'destroy',
+        proxy: false // 개발 환경에서는 프록시 없음
     },
 
     rateLimit: {
@@ -103,6 +163,14 @@ export default {
                 return 'API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
             }
         }
+    },
+
+    // JWT 설정 (개발 환경 - 편의성 우선)
+    jwt: {
+        accessTokenExpiry: '1h', // 1시간 (개발 시 자주 만료되면 불편)
+        refreshTokenExpiry: '30d', // 30일 (개발 편의성)
+        issuer: 'skku-fac-gallery-dev',
+        audience: 'skku-fac-gallery-dev-users'
     },
 
     // 개발 환경 전용 설정

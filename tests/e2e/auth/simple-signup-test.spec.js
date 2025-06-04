@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { generateTestUser, generateSKKUTestUser, generateExternalTestUser, captureScreenshot } from '../helpers/test-helpers.js';
+import {
+    generateTestUser,
+    generateSKKUTestUser,
+    generateExternalTestUser,
+    captureScreenshot,
+} from '../helpers/test-helpers.js';
 
 /**
  * 간단한 회원가입 테스트
@@ -152,7 +157,7 @@ test.describe('간단한 회원가입 테스트', () => {
             username: usernameValue,
             password: passwordValue,
             confirmPassword: confirmPasswordValue,
-            studentYear: studentYearValue
+            studentYear: studentYearValue,
         });
 
         await captureScreenshot(page, 'invalid-student-year');

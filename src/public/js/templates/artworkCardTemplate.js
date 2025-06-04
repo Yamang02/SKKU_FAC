@@ -1,5 +1,5 @@
 // 작품 카드 템플릿 정의
-export const artworkCardTemplate = (artwork) => {
+export const artworkCardTemplate = artwork => {
     const imageUrl = artwork.relations?.image?.storedName
         ? `/uploads/artworks/${artwork.relations.image.storedName}`
         : '/images/artwork-placeholder.svg';

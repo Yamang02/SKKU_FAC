@@ -30,7 +30,9 @@
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 20px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
 }
 
 .admin-dashboard__stat:hover {
@@ -152,7 +154,9 @@
     background-color: #f8fafc;
     border-radius: 8px;
     overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
 }
 
 .admin-dashboard__artwork-item:hover {

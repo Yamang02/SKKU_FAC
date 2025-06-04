@@ -1,4 +1,28 @@
+/* eslint-disable filenames/match-exported */
 import Config from './Config.js';
+
+// Infrastructure 클래스 생성
+class Infrastructure {
+    constructor() {
+        this.config = Config.getInstance();
+    }
+
+    getDatabaseConfig() {
+        return this.config.getDatabaseConfig();
+    }
+
+    getStorageConfig() {
+        return this.config.getStorageConfig();
+    }
+
+    getRedisConfig() {
+        return this.config.getRedisConfig();
+    }
+
+    getEnvironment() {
+        return this.config.getEnvironment();
+    }
+}
 
 // Config 인스턴스 가져오기
 const config = Config.getInstance();
@@ -36,3 +60,9 @@ if (config.getEnvironment() === 'production') {
 
 // 기본 내보내기로 새로운 config 인스턴스 제공
 export default config;
+
+// Infrastructure 클래스 export
+export { Infrastructure };
+
+// 파일명과 일치하는 export 추가
+export { infrastructureConfig as InfrastructureConfig };

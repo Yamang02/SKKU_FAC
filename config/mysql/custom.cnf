@@ -1,0 +1,42 @@
+[mysqld]
+# 🌏 Character Set
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+# 🔐 Authentication
+default_authentication_plugin = mysql_native_password
+
+# 📈 Performance Settings
+innodb_buffer_pool_size = 256M
+innodb_log_file_size = 64M
+innodb_flush_method = O_DIRECT
+innodb_flush_log_at_trx_commit = 2
+
+# 🔗 Connection Settings
+max_connections = 200
+max_connect_errors = 1000
+connect_timeout = 10
+wait_timeout = 600
+interactive_timeout = 600
+
+# 📊 Query Settings
+max_allowed_packet = 64M
+thread_cache_size = 8
+query_cache_size = 64M
+query_cache_type = 1
+
+# 📝 Logging (for development)
+general_log = 1
+general_log_file = /var/log/mysql/general.log
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/slow.log
+long_query_time = 2
+
+# 🛠️ SQL Mode
+sql_mode = STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+
+[mysql]
+default-character-set = utf8mb4
+
+[client]
+default-character-set = utf8mb4

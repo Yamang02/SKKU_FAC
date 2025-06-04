@@ -18,25 +18,25 @@ export const railwayErrorReporterConfig = {
     projectName: 'SKKU Gallery',
 
     // Railway에서는 기존 EMAIL 설정이 완전할 때만 이메일 알림 활성화
-    enableNotifications: environment === 'production' &&
-        emailConfig.user &&
-        emailConfig.pass &&
-        emailConfig.adminEmail,
+    enableNotifications: environment === 'production' && emailConfig.user && emailConfig.pass && emailConfig.adminEmail,
 
     // 이메일 설정 (기존 EMAIL_* 환경변수 사용)
-    emailConfig: (emailConfig.user && emailConfig.pass) ? {
-        smtp: {
-            host: 'smtp.gmail.com', // Gmail 고정
-            port: 587,
-            secure: false,
-            auth: {
-                user: emailConfig.user,
-                pass: emailConfig.pass
+    emailConfig:
+        emailConfig.user && emailConfig.pass
+            ? {
+                smtp: {
+                    host: 'smtp.gmail.com', // Gmail 고정
+                    port: 587,
+                    secure: false,
+                    auth: {
+                        user: emailConfig.user,
+                        pass: emailConfig.pass
+                    }
+                },
+                from: emailConfig.from || emailConfig.user,
+                to: emailConfig.adminEmail || emailConfig.user
             }
-        },
-        from: emailConfig.from || emailConfig.user,
-        to: emailConfig.adminEmail || emailConfig.user
-    } : null
+            : null
 };
 
 /**
@@ -51,10 +51,7 @@ export const railwayErrorHandlerConfig = {
     // ErrorReporter 통합
     errorReporter: new ErrorReporter(railwayErrorReporterConfig),
     projectName: 'SKKU Gallery',
-    enableNotifications: environment === 'production' &&
-        emailConfig.user &&
-        emailConfig.pass &&
-        emailConfig.adminEmail,
+    enableNotifications: environment === 'production' && emailConfig.user && emailConfig.pass && emailConfig.adminEmail,
 
     // 환경별 설정
     environmentConfig: {
@@ -96,26 +93,13 @@ export const railwayErrorHandlerConfig = {
     // Railway에서 자주 발생하는 불필요한 에러들 필터링
     filterRules: {
         // 봇, 크롤러 요청 무시
-        ignoreUserAgents: [
-            /googlebot/i,
-            /bingbot/i,
-            /slurp/i,
-            /crawler/i,
-            /spider/i,
-            /facebookexternalhit/i
-        ],
+        ignoreUserAgents: [/googlebot/i, /bingbot/i, /slurp/i, /crawler/i, /spider/i, /facebookexternalhit/i],
 
         // 자주 발생하는 404들 무시 (로그는 남기되 알림은 하지 않음)
-        ignorePatterns: [
-            /favicon\.ico$/,
-            /robots\.txt$/,
-            /\.well-known/,
-            /wp-admin/,
-            /phpMyAdmin/
-        ],
+        ignorePatterns: [/favicon\.ico$/, /robots\.txt$/, /\.well-known/, /wp-admin/, /phpMyAdmin/],
 
         // 무시할 상태코드 (너무 빈번한 것들)
-        ignoreStatusCodes: []  // Railway에서는 모든 에러를 로그로 남기는 것이 좋음
+        ignoreStatusCodes: [] // Railway에서는 모든 에러를 로그로 남기는 것이 좋음
     },
 
     // 에러 메시지 사용자 친화화
@@ -143,7 +127,7 @@ export const railwayLogFilters = {
     low: '🚨 ERROR_REPORT | LOW',
 
     // 특정 에러 ID 추적
-    errorId: (id) => `🚨 ERROR_REPORT | ${id}`,
+    errorId: id => `🚨 ERROR_REPORT | ${id}`,
 
     // 서비스별 필터
     service: 'X-Service: SKKU-Gallery',
@@ -209,21 +193,25 @@ export class RailwayMetricsCollector {
      * 메트릭 수집 시작
      */
     startMetricsCollection() {
-        setInterval(() => {
-            // 메모리 사용량 기록
-            const memUsage = process.memoryUsage();
-            this.metrics.performance.memoryUsage.push({
-                ...memUsage,
-                timestamp: Date.now()
-            });
+        setInterval(
+            () => {
+                // 메모리 사용량 기록
+                const memUsage = process.memoryUsage();
+                this.metrics.performance.memoryUsage.push({
+                    ...memUsage,
+                    timestamp: Date.now()
+                });
 
-            // 최근 24시간 데이터만 유지
-            if (this.metrics.performance.memoryUsage.length > 144) { // 10분마다 = 144개/24시간
-                this.metrics.performance.memoryUsage = this.metrics.performance.memoryUsage.slice(-144);
-            }
+                // 최근 24시간 데이터만 유지
+                if (this.metrics.performance.memoryUsage.length > 144) {
+                    // 10분마다 = 144개/24시간
+                    this.metrics.performance.memoryUsage = this.metrics.performance.memoryUsage.slice(-144);
+                }
 
-            this.metrics.performance.lastCheck = Date.now();
-        }, 10 * 60 * 1000); // 10분마다
+                this.metrics.performance.lastCheck = Date.now();
+            },
+            10 * 60 * 1000
+        ); // 10분마다
     }
 
     /**
@@ -247,9 +235,7 @@ export class RailwayMetricsCollector {
     getAverageMemoryUsage() {
         if (this.metrics.performance.memoryUsage.length === 0) return 0;
 
-        const total = this.metrics.performance.memoryUsage.reduce(
-            (sum, usage) => sum + usage.heapUsed, 0
-        );
+        const total = this.metrics.performance.memoryUsage.reduce((sum, usage) => sum + usage.heapUsed, 0);
         return Math.round(total / this.metrics.performance.memoryUsage.length / 1024 / 1024); // MB
     }
 
@@ -259,9 +245,7 @@ export class RailwayMetricsCollector {
     getAverageResponseTime() {
         if (this.metrics.performance.responseTime.length === 0) return 0;
 
-        const total = this.metrics.performance.responseTime.reduce(
-            (sum, rt) => sum + rt.time, 0
-        );
+        const total = this.metrics.performance.responseTime.reduce((sum, rt) => sum + rt.time, 0);
         return Math.round(total / this.metrics.performance.responseTime.length);
     }
 

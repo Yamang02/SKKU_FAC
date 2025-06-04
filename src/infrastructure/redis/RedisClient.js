@@ -1,5 +1,5 @@
 import { createClient } from 'redis';
-import { infrastructureConfig } from '../../config/infrastructure.js';
+import { infrastructureConfig } from '../../config/infrastructureConfig.js';
 import logger from '../../common/utils/Logger.js';
 
 // Redis 설정 가져오기
@@ -38,7 +38,7 @@ class RedisClient {
                 socket: {
                     connectTimeout: 60000,
                     lazyConnect: true,
-                    reconnectStrategy: (retries) => {
+                    reconnectStrategy: retries => {
                         if (retries > 10) {
                             logger.error('Redis 연결 재시도 횟수 초과');
                             return new Error('Redis 연결 실패');
@@ -49,7 +49,7 @@ class RedisClient {
             });
 
             // 에러 핸들링
-            this.client.on('error', (err) => {
+            this.client.on('error', err => {
                 logger.error('Redis 클라이언트 오류', err);
                 this.isConnected = false;
             });
@@ -74,7 +74,6 @@ class RedisClient {
 
             logger.success('Redis 연결 성공!');
             return this.client;
-
         } catch (error) {
             logger.error('Redis 연결 실패! 상세 정보', error, {
                 host: redisConfig.host,

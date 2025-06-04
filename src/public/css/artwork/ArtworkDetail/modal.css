@@ -190,40 +190,40 @@ textarea.form-control {
 
 /* QR 코드 모달 스타일 */
 .qr-modal-content {
-  max-width: 400px;
+    max-width: 400px;
 }
 
 .qr-code-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: white;
 }
 
 .qr-artwork-title {
-  font-size: 1.5rem;
-  margin-bottom: 5px;
-  text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    text-align: center;
 }
 
 .qr-artist-name {
-  font-size: 1.2rem;
-  color: #666;
-  margin-bottom: 20px;
-  text-align: center;
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
 .qr-code-image-container {
-  margin: 20px 0;
-  padding: 15px;
-  border: 1px solid #eee;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .qr-scan-text {
-  font-size: 0.9rem;
-  color: #666;
-  text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center;
 }

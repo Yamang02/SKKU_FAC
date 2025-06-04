@@ -121,11 +121,13 @@
     border-radius: 8px;
     background-color: white;
     color: #1a202c;
-    transition: background-color 0.2s, color 0.2s;
+    transition:
+        background-color 0.2s,
+        color 0.2s;
     text-decoration: none;
 }
 
 .adminHeader__home-button:hover {
-    background-color: #004C3F;
+    background-color: #004c3f;
     color: white;
 }

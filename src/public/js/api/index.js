@@ -6,7 +6,7 @@
 const API_BASE_URL = '';
 
 // API 응답 처리 함수
-const handleResponse = async (response) => {
+const handleResponse = async response => {
     const contentType = response.headers.get('content-type');
 
     // HTML 응답 확인 (서버 오류 페이지인 경우)

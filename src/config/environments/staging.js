@@ -67,40 +67,16 @@ export default {
 
     rateLimit: {
         windowMs: 15 * 60 * 1000, // 15분
-        max: (req) => {
-            // 헬스체크와 파비콘은 제외
-            const alwaysSkip = ['/health', '/favicon.ico'];
-            if (alwaysSkip.some(path => req.path === path)) {
-                return 0; // 무제한
-            }
+        max: 200, // 스테이징에서는 프로덕션보다 약간 관대
+        skipPaths: ['/health', '/favicon.ico', '/api/staging']
+    },
 
-            // 스테이징 API 경로 확인
-            if (req.path.startsWith('/staging')) {
-                return 0; // 스테이징 API는 무제한
-            }
-
-            // 정적파일 여부 확인
-            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
-            const isStatic = staticPaths.some(path => req.path.startsWith(path));
-
-            if (isStatic) {
-                // 정적파일: 스테이징에서는 적당히 관대하게
-                return 300;
-            } else {
-                // 일반 요청: 스테이징에서는 프로덕션과 개발 사이
-                return 100;
-            }
-        },
-        message: (req) => {
-            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
-            const isStatic = staticPaths.some(path => req.path.startsWith(path));
-
-            if (isStatic) {
-                return '정적파일 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-            } else {
-                return 'API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-            }
-        }
+    // JWT 설정 (스테이징 환경 - 프로덕션 준비)
+    jwt: {
+        accessTokenExpiry: '30m', // 30분 (프로덕션보다 약간 여유)
+        refreshTokenExpiry: '14d', // 14일 (프로덕션보다 길게)
+        issuer: 'skku-fac-gallery-staging',
+        audience: 'skku-fac-gallery-staging-users'
     },
 
     // 스테이징 환경 전용 설정
