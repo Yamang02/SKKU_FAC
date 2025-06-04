@@ -3,10 +3,16 @@ import { infrastructureConfig } from '../../config/infrastructureConfig.js';
 import logger from '../../common/utils/Logger.js';
 
 // Redis 설정을 환경변수에서 직접 가져오기 (암호화 우회)
+// Redis Cloud의 경우 호스트명에 포트가 포함될 수 있음
+const rawHost = process.env.REDIS_HOST || 'localhost';
+const hostParts = rawHost.split('.');
+const extractedPort = hostParts[0].includes('-') ? hostParts[0].split('-').pop() : null;
+
 const redisConfig = {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT, 10) || 6379,
-    username: process.env.REDIS_USERNAME || null,
+    host: rawHost,
+    // Redis Cloud의 경우 호스트명에서 포트 추출 시도, 아니면 환경변수 또는 기본값 사용
+    port: parseInt(process.env.REDIS_PORT, 10) || (extractedPort ? parseInt(extractedPort, 10) : 6379),
+    username: process.env.REDIS_USERNAME || 'default', // Redis Cloud는 보통 default 사용자 사용
     password: process.env.REDIS_PASSWORD || null,
     db: parseInt(process.env.REDIS_DB, 10) || 0
 };
@@ -64,44 +70,56 @@ class RedisClient {
         this.connectionAttempted = true;
 
         try {
-            // URL 형태로 연결 설정 (Redis 4.x 스타일)
+            // URL 형태로 연결 설정 (Redis Cloud 최적화)
             let redisUrl = process.env.REDIS_URL;
 
             if (!redisUrl) {
-                redisUrl = 'redis://';
+                // Redis Cloud는 TLS를 사용하므로 rediss:// 프로토콜 사용
+                const isRedisCloud = redisConfig.host.includes('.redis-cloud.com');
+                const protocol = isRedisCloud ? 'rediss://' : 'redis://';
+
+                redisUrl = protocol;
+
+                // Redis Cloud는 username:password 형식 필요
                 if (redisConfig.username && redisConfig.password) {
                     redisUrl += `${redisConfig.username}:${redisConfig.password}@`;
                 } else if (redisConfig.password) {
                     redisUrl += `:${redisConfig.password}@`;
                 }
+
                 redisUrl += `${redisConfig.host}:${redisConfig.port}`;
-                if (redisConfig.db) {
+
+                if (redisConfig.db && redisConfig.db !== 0) {
                     redisUrl += `/${redisConfig.db}`;
                 }
             }
 
             logger.info(`Redis 연결 시도: ${redisUrl.replace(/:[^@]*@/, ':***@')}`);
 
-            // Redis Cloud는 TLS가 필요할 수 있음
+            // Redis Cloud 최적화 설정
+            const isRedisCloud = redisConfig.host.includes('.redis-cloud.com');
+            const isTLS = redisUrl.startsWith('rediss://');
+
             const clientOptions = {
                 url: redisUrl,
                 socket: {
-                    connectTimeout: 15000, // 15초로 증가
+                    connectTimeout: 20000, // 20초로 증가 (Redis Cloud는 느릴 수 있음)
                     lazyConnect: true,
-                    tls: redisConfig.host.includes('.redis-cloud.com'), // Redis Cloud 감지시 TLS 활성화
+                    tls: isTLS,
+                    rejectUnauthorized: !isRedisCloud, // Redis Cloud는 인증서 검증 문제가 있을 수 있음
                     reconnectStrategy: retries => {
-                        if (retries > 5) {
+                        if (retries > 3) { // 재시도 횟수 줄임
                             logger.error(`[${environment.toUpperCase()}] Redis 연결 재시도 횟수 초과 (${retries})`);
                             return new Error('Redis 연결 실패');
                         }
-                        const delay = Math.min(retries * 1000, 5000);
+                        const delay = Math.min(retries * 2000, 8000); // 지연 시간 증가
                         logger.warn(`[${environment.toUpperCase()}] Redis 재연결 시도 ${retries} (${delay}ms 후)`);
                         return delay;
                     }
                 }
             };
 
-            logger.info(`Redis 클라이언트 옵션: TLS=${clientOptions.socket.tls}, Timeout=${clientOptions.socket.connectTimeout}ms`);
+            logger.info(`Redis 클라이언트 옵션: TLS=${clientOptions.socket.tls}, Timeout=${clientOptions.socket.connectTimeout}ms, RedisCloud=${isRedisCloud}, RejectUnauth=${clientOptions.socket.rejectUnauthorized}`);
 
             this.client = createClient(clientOptions);
 

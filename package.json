@@ -99,7 +99,9 @@
         "test:ci:security": "npm audit --audit-level=moderate && npx audit-ci --moderate",
         "test:ci:coverage": "cross-env CI=true playwright test tests/integration/api/ --reporter=html --output-dir=coverage",
         "test:ci:full": "npm run test:ci:security && npm run test:ci && npm run test:ci:performance",
-        "diagnose": "node scripts/diagnose-env.js"
+        "diagnose": "node scripts/diagnose-env.js",
+        "debug:env": "node debug-env.js",
+        "debug:redis": "node test-redis-direct.js"
     },
     "dependencies": {
         "@sentry/node": "^9.25.1",

@@ -13,10 +13,17 @@ class SessionStore {
 
     async initialize() {
         try {
-            // Redis 클라이언트가 이미 연결되어 있는지 확인
+            // Redis 클라이언트 연결 시도 (타임아웃 적용)
             if (!redisClient.isClientConnected()) {
                 logger.info('Redis 클라이언트 연결 시도 중...');
-                await redisClient.connect();
+
+                // 연결 타임아웃 설정 (30초)
+                const connectPromise = redisClient.connect();
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Redis 연결 타임아웃 (30초)')), 30000);
+                });
+
+                await Promise.race([connectPromise, timeoutPromise]);
             } else {
                 logger.info('Redis 클라이언트가 이미 연결되어 있습니다.');
             }
