@@ -1,0 +1,248 @@
+/* 대시보드 스타일 */
+.admin-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    background-color: var(--admin-color-background);
+    min-height: 100%;
+    padding-bottom: 32px;
+}
+
+/* 타이틀 스타일 */
+.admin-dashboard__title {
+    font-size: 30px;
+    font-weight: 600;
+    color: #1a202c;
+    padding-left: 12px;
+    border-left: 4px solid var(--admin-color-primary-dark);
+    margin: 12px 0 10px 0;
+}
+
+/* 통계 섹션 */
+.admin-dashboard__stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.admin-dashboard__stat {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-dashboard__stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.admin-dashboard__stat-title {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.admin-dashboard__stat-value {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0;
+}
+
+/* 레이아웃 행 구조 */
+.admin-dashboard__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* 섹션 공통 스타일 */
+.admin-dashboard__section {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.admin-dashboard__section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a202c;
+    margin-bottom: 20px;
+}
+
+/* 최근 활동 섹션 */
+.admin-dashboard__activities {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.admin-dashboard__activity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+}
+
+.admin-dashboard__activity i {
+    font-size: 16px;
+    color: #3b82f6;
+    width: 20px;
+    text-align: center;
+}
+
+.admin-dashboard__activity span {
+    flex: 1;
+    font-size: 14px;
+    color: #334155;
+}
+
+.admin-dashboard__activity small {
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* 공지사항 섹션 */
+.admin-dashboard__notices-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-dashboard__notice {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+}
+
+.admin-dashboard__notice.adminStatusInactive {
+    border-left: 3px solid #ef4444;
+    padding-left: 16px;
+}
+
+.admin-dashboard__notice h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a202c;
+    margin: 0;
+}
+
+.admin-dashboard__notice span {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* 작품 목록 섹션 */
+.admin-dashboard__artworks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 16px;
+}
+
+.admin-dashboard__artwork-item {
+    background-color: #f8fafc;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-dashboard__artwork-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.admin-dashboard__artwork-img {
+    height: 180px;
+    overflow: hidden;
+}
+
+.admin-dashboard__artwork-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.admin-dashboard__artwork-item:hover .admin-dashboard__artwork-img img {
+    transform: scale(1.05);
+}
+
+.admin-dashboard__artwork-info {
+    padding: 12px;
+}
+
+.admin-dashboard__artwork-info h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0 0 8px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-dashboard__artwork-artist,
+.admin-dashboard__artwork-affiliation {
+    font-size: 13px;
+    color: #64748b;
+    margin: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-dashboard__artwork-artist i,
+.admin-dashboard__artwork-affiliation i {
+    font-size: 12px;
+    color: #3b82f6;
+}
+
+.admin-dashboard__no-data {
+    text-align: center;
+    padding: 24px;
+    color: #64748b;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    grid-column: 1 / -1;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1400px) {
+    .admin-dashboard__stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .admin-dashboard__artworks-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .admin-dashboard__row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-dashboard {
+        gap: 24px;
+    }
+
+    .admin-dashboard__stats,
+    .admin-dashboard__artworks-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-dashboard__section {
+        padding: 16px;
+    }
+}

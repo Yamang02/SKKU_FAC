@@ -1,127 +1,159 @@
 <style ref="stylesheet">
-    @import url('/css/exhibition/ExhibitionList.css');
+  @import url('/css/exhibition/ExhibitionList.css');
 </style>
 <section class="container exhibition-container">
-    <header class="exhibition-header">
-        <h1 class="exhibition-title">전시회 목록</h1>
-    </header>
+  <header class="exhibition-header">
+    <h1 class="exhibition-title">전시회 목록</h1>
+  </header>
 
-    <h2 class="section-title--exhibition">전시회별 검색</h2>
-    <!-- 검색 섹션 -->
-    <section class="search-container exhibition-search-container">
-        <form class="search-form--exhibition" id="searchForm" method="get" action="">
-            <div class="search-layout">
-                <div class="search-column keyword-column">
-                    <div class="search-input-wrapper">
-                        <input type="text" id="keyword" name="keyword" class="search-input exhibition-search-input"
-                            placeholder="전시회명, 작가명, 키워드 등을 입력하세요">
-                    </div>
-                </div>
-
-                <div class="search-filters exhibition-search-filters">
-                    <div class="search-column">
-                        <label for="filter-type" class="form-label">전시회 유형</label>
-                        <select id="filter-type" name="type" class="form-select exhibition-form-select">
-                            <option value="all">모든 전시회</option>
-                            <option value="regular">정기 전시회</option>
-                            <option value="special">특별 전시회</option>
-                        </select>
-                    </div>
-
-                    <div class="search-column">
-                        <label for="filter-year" class="form-label">개최 연도</label>
-                        <input type="number" id="filter-year" name="year" min="1950" max="2100" step="1"
-                            placeholder="연도 입력" class="form-control exhibition-form-control">
-                    </div>
-
-                    <div class="search-column">
-                        <label for="filter-submission" class="form-label">출품 가능 여부</label>
-                        <select id="filter-submission" name="submission" class="form-select exhibition-form-select">
-                            <option value="all">모두 보기</option>
-                            <option value="open">출품 가능</option>
-                            <option value="closed">출품 불가</option>
-                        </select>
-                    </div>
-
-                    <div class="search-column">
-                        <label for="sort-option" class="form-label">정렬 기준</label>
-                        <select id="sort-option" name="sort" class="form-select exhibition-form-select">
-                            <option value="date-desc">최신순</option>
-                            <option value="date-asc">오래된순</option>
-                            <option value="title-asc">제목 오름차순</option>
-                            <option value="title-desc">제목 내림차순</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="search-buttons exhibition-search-buttons">
-                    <button type="submit" class="btn-search exhibition-btn-search">검색</button>
-                    <button type="reset" class="btn-reset exhibition-btn-reset">초기화</button>
-                </div>
-            </div>
-        </form>
-    </section>
-
-    <!-- 필터 태그 표시 영역 -->
-    <div id="active-filters" class="filter-list exhibition-filter-list">
-        <!-- 활성화된 필터가 여기에 표시됩니다 -->
-    </div>
-
-    <!-- 결과 카운트 -->
-    <div class="result-header exhibition-result-header">
-        <div class="result-count exhibition-result-count">
-            <p id="exhibition-count">총 <strong>0</strong>개의 전시회가 검색되었습니다.</p>
+  <h2 class="section-title--exhibition">전시회별 검색</h2>
+  <!-- 검색 섹션 -->
+  <section class="search-container exhibition-search-container">
+    <form class="search-form--exhibition" id="searchForm" method="get" action="">
+      <div class="search-layout">
+        <div class="search-column keyword-column">
+          <div class="search-input-wrapper">
+            <input
+              type="text"
+              id="keyword"
+              name="keyword"
+              class="search-input exhibition-search-input"
+              placeholder="전시회명, 작가명, 키워드 등을 입력하세요"
+            />
+          </div>
         </div>
-    </div>
 
-    <!-- 전시회 그리드 -->
-    <div class="exhibition-grid" id="exhibitions-container">
-        <!-- 전시회 목록이 자바스크립트로 동적 로딩됩니다 -->
-    </div>
+        <div class="search-filters exhibition-search-filters">
+          <div class="search-column">
+            <label for="filter-type" class="form-label">전시회 유형</label>
+            <select id="filter-type" name="type" class="form-select exhibition-form-select">
+              <option value="all">모든 전시회</option>
+              <option value="regular">정기 전시회</option>
+              <option value="special">특별 전시회</option>
+            </select>
+          </div>
 
-    <!-- 결과 없음 메시지 -->
-    <div id="no-results" class="no-result exhibition-no-result" style="display: none;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-            <path
-                d="M4.285 12.433a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5z" />
-        </svg>
-        <p>검색 결과가 없습니다.</p>
-        <button id="reset-search" class="reset-button exhibition-reset-button">검색 초기화</button>
-    </div>
+          <div class="search-column">
+            <label for="filter-year" class="form-label">개최 연도</label>
+            <input
+              type="number"
+              id="filter-year"
+              name="year"
+              min="1950"
+              max="2100"
+              step="1"
+              placeholder="연도 입력"
+              class="form-control exhibition-form-control"
+            />
+          </div>
 
-    <!-- 페이지네이션 -->
-    <div class="pagination-container exhibition-pagination-container" id="pagination">
-        <!-- 페이지네이션이 자바스크립트로 동적 로딩됩니다 -->
-    </div>
+          <div class="search-column">
+            <label for="filter-submission" class="form-label">출품 가능 여부</label>
+            <select
+              id="filter-submission"
+              name="submission"
+              class="form-select exhibition-form-select"
+            >
+              <option value="all">모두 보기</option>
+              <option value="open">출품 가능</option>
+              <option value="closed">출품 불가</option>
+            </select>
+          </div>
 
-    <!-- 로딩 인디케이터 -->
-    <div id="loading-indicator" class="loading-indicator exhibition-loading-indicator" style="display: none;">
-        <span>로딩 중...</span>
+          <div class="search-column">
+            <label for="sort-option" class="form-label">정렬 기준</label>
+            <select id="sort-option" name="sort" class="form-select exhibition-form-select">
+              <option value="date-desc">최신순</option>
+              <option value="date-asc">오래된순</option>
+              <option value="title-asc">제목 오름차순</option>
+              <option value="title-desc">제목 내림차순</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="search-buttons exhibition-search-buttons">
+          <button type="submit" class="btn-search exhibition-btn-search">검색</button>
+          <button type="reset" class="btn-reset exhibition-btn-reset">초기화</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- 필터 태그 표시 영역 -->
+  <div id="active-filters" class="filter-list exhibition-filter-list">
+    <!-- 활성화된 필터가 여기에 표시됩니다 -->
+  </div>
+
+  <!-- 결과 카운트 -->
+  <div class="result-header exhibition-result-header">
+    <div class="result-count exhibition-result-count">
+      <p id="exhibition-count">총 <strong>0</strong>개의 전시회가 검색되었습니다.</p>
     </div>
+  </div>
+
+  <!-- 전시회 그리드 -->
+  <div class="exhibition-grid" id="exhibitions-container">
+    <!-- 전시회 목록이 자바스크립트로 동적 로딩됩니다 -->
+  </div>
+
+  <!-- 결과 없음 메시지 -->
+  <div id="no-results" class="no-result exhibition-no-result" style="display: none">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="48"
+      height="48"
+      fill="currentColor"
+      viewBox="0 0 16 16"
+    >
+      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+      <path
+        d="M4.285 12.433a.5.5 0 0 0 .683-.183A3.498 3.498 0 0 1 8 10.5c1.295 0 2.426.703 3.032 1.75a.5.5 0 0 0 .866-.5A4.498 4.498 0 0 0 8 9.5a4.5 4.5 0 0 0-3.898 2.25.5.5 0 0 0 .183.683zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5z"
+      />
+    </svg>
+    <p>검색 결과가 없습니다.</p>
+    <button id="reset-search" class="reset-button exhibition-reset-button">검색 초기화</button>
+  </div>
+
+  <!-- 페이지네이션 -->
+  <div class="pagination-container exhibition-pagination-container" id="pagination">
+    <!-- 페이지네이션이 자바스크립트로 동적 로딩됩니다 -->
+  </div>
+
+  <!-- 로딩 인디케이터 -->
+  <div
+    id="loading-indicator"
+    class="loading-indicator exhibition-loading-indicator"
+    style="display: none"
+  >
+    <span>로딩 중...</span>
+  </div>
 </section>
 
 <!-- 전시회 상세 모달 -->
 <div id="exhibition-modal" class="modal exhibition-modal">
-    <div class="modal-content exhibition-modal-content">
-        <span class="close exhibition-modal-close" id="close-modal">&times;</span>
-        <div class="modal-body exhibition-modal-body">
-            <div class="modal-image-container exhibition-modal-image-container">
-                <img src="" alt="" class="modal-image exhibition-modal-image" id="modal-image">
-            </div>
-            <div class="modal-info modal-info--exhibition">
-                <h2 id="modal-title" class="exhibition-modal-title"></h2>
-                <div id="modal-badges" class="exhibition-badges"></div>
-                <p id="modal-date" class="modal-date--exhibition"></p>
-                <p id="modal-location" class="modal-location--exhibition"></p>
-                <p id="modal-description" class="modal-description--exhibition"></p>
-                <div class="modal-buttons--exhibition">
-                    <a id="modal-view-link" href="" class="btn btn-primary exhibition-btn-primary">작품 조회</a>
-                    <a id="modal-submit-link" href="" class="btn btn-secondary exhibition-btn-secondary">출품하기</a>
-                </div>
-            </div>
+  <div class="modal-content exhibition-modal-content">
+    <span class="close exhibition-modal-close" id="close-modal">&times;</span>
+    <div class="modal-body exhibition-modal-body">
+      <div class="modal-image-container exhibition-modal-image-container">
+        <img src="" alt="" class="modal-image exhibition-modal-image" id="modal-image" />
+      </div>
+      <div class="modal-info modal-info--exhibition">
+        <h2 id="modal-title" class="exhibition-modal-title"></h2>
+        <div id="modal-badges" class="exhibition-badges"></div>
+        <p id="modal-date" class="modal-date--exhibition"></p>
+        <p id="modal-location" class="modal-location--exhibition"></p>
+        <p id="modal-description" class="modal-description--exhibition"></p>
+        <div class="modal-buttons--exhibition">
+          <a id="modal-view-link" href="" class="btn btn-primary exhibition-btn-primary"
+            >작품 조회</a
+          >
+          <a id="modal-submit-link" href="" class="btn btn-secondary exhibition-btn-secondary"
+            >출품하기</a
+          >
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <script type="module" src="/js/page/exhibition/ExhibitionList.js"></script>

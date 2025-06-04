@@ -1,4 +1,3 @@
-
 /**
  * URL로부터 QR 코드 데이터 URL을 생성합니다.
  * @param {string} url - QR 코드로 변환할 URL
@@ -7,7 +6,6 @@
  */
 export async function generateQRCodeDataURL(url, options = {}) {
     try {
-
         // 전역 QRCode 객체 사용 (CDN에서 로드됨)
         if (typeof QRCode === 'undefined') {
             throw new Error('QRCode 라이브러리가 로드되지 않았습니다.');

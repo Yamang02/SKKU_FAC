@@ -55,7 +55,7 @@
 }
 
 .form-control-user:focus {
-    border-color: #4A90E2;
+    border-color: #4a90e2;
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
     outline: none;
 }
@@ -99,7 +99,7 @@
 }
 
 .btn-primary-user {
-    background-color: #4A90E2;
+    background-color: #4a90e2;
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -111,7 +111,7 @@
 }
 
 .btn-primary-user:hover {
-    background-color: #357ABD;
+    background-color: #357abd;
     transform: translateY(-1px);
 }
 
@@ -124,9 +124,9 @@
     padding: 1rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
-    background-color: #FFF3F3;
-    color: #E53935;
-    border: 1px solid #FFCDD2;
+    background-color: #fff3f3;
+    color: #e53935;
+    border: 1px solid #ffcdd2;
 }
 
 .form-links-user {
@@ -136,14 +136,14 @@
 }
 
 .link-user {
-    color: #4A90E2;
+    color: #4a90e2;
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s ease-in-out;
 }
 
 .link-user:hover {
-    color: #357ABD;
+    color: #357abd;
     text-decoration: underline;
 }
 

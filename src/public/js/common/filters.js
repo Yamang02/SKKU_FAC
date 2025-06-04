@@ -53,9 +53,4 @@ function resetFilters(filters) {
     }, {});
 }
 
-export {
-    ArtworkFilters,
-    createFilterParams,
-    cloneFilters,
-    resetFilters
-};
+export { ArtworkFilters, createFilterParams, cloneFilters, resetFilters };

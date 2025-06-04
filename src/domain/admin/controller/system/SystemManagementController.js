@@ -1,35 +1,45 @@
-import { ViewPath } from '../../../../common/constants/ViewPath.js';
 import ViewResolver from '../../../../common/utils/ViewResolver.js';
-import SystemManagementService from '../../service/system/SystemManagementService.js';
+import { ViewPath } from '../../../../common/constants/ViewPath.js';
+import BaseAdminController from '../BaseAdminController.js';
 
-export default class SystemManagementController {
-    constructor() {
-        this.adminService = new SystemManagementService();
+export default class SystemManagementController extends BaseAdminController {
+    // 의존성 주입을 위한 static dependencies 정의
+    static dependencies = ['SystemManagementService'];
+
+    constructor(systemManagementService = null) {
+        super('SystemManagementController');
+
+        // 의존성 주입 방식 (새로운 방식)
+        if (systemManagementService) {
+            this.systemManagementService = systemManagementService;
+        } else {
+            // 기존 방식 호환성 유지 (임시)
+            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
+            throw new Error('SystemManagementService가 주입되지 않았습니다.');
+        }
     }
 
     /**
      * 관리자 대시보드를 렌더링합니다.
      */
     async getDashboard(req, res) {
-        try {
-            const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 10;
+        return this.safeExecuteSSR(
+            async () => {
+                const dashboardData = await this.systemManagementService.getDashboardData();
 
-            // AdminService를 통해 대시보드 데이터 조회
-            const dashboardData = await this.adminService.getDashboardData({ page, limit });
-
-            ViewResolver.render(res, ViewPath.ADMIN.DASHBOARD, {
-                title: '관리자 대시보드',
-                breadcrumb: '대시보드',
-                currentPage: 'dashboard',
-                ...dashboardData
-            });
-        } catch (error) {
-            console.error('대시보드 렌더링 중 오류:', error);
-            ViewResolver.renderError(res, error);
-        }
+                return ViewResolver.render(res, ViewPath.ADMIN.DASHBOARD, {
+                    title: '관리자 대시보드',
+                    dashboardData,
+                    user: req.user
+                });
+            },
+            req,
+            res,
+            {
+                operationName: '대시보드 조회',
+                errorRedirectPath: '/admin',
+                errorMessage: '대시보드 데이터를 불러오는 중 오류가 발생했습니다.'
+            }
+        );
     }
-
 }
-
-

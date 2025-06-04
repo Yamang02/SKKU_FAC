@@ -1,134 +1,88 @@
 ﻿{
-    "env": {
-        "browser": true,
-        "es2021": true,
-        "node": true
-    },
-    "globals": {
-        "QRCode": "readonly",
-        "Kakao": "readonly",
-        "html2canvas": "readonly"
-    },
-    "extends": [
-        "eslint:recommended"
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "globals": {
+    "QRCode": "readonly",
+    "Kakao": "readonly",
+    "html2canvas": "readonly"
+  },
+  "extends": ["eslint:recommended"],
+  "plugins": ["html", "filenames", "folders"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "ignorePatterns": ["**/*.ejs", "node_modules/**", "dist/**", "build/**"],
+  "rules": {
+    "filenames/match-regex": [
+      "warn",
+      "^([a-z][a-zA-Z0-9]*|[A-Z][a-zA-Z0-9]*|.*(test|spec)\\.[jt]s)$", // test 또는 spec 파일 허용
+      true
     ],
-    "plugins": [
-        "html",
-        "filenames",
-        "folders"
+    "filenames/match-exported": ["error", ["camel", "pascal"]],
+    "filenames/no-index": "off",
+    "folders/match-regex": ["error", "^[a-z][a-zA-Z0-9]+$", true],
+    "camelcase": "off",
+    "id-match": "off",
+    "id-length": [
+      "warn",
+      {
+        "min": 1
+      }
     ],
-    "parserOptions": {
-        "ecmaVersion": "latest",
-        "sourceType": "module"
-    },
-    "ignorePatterns": [
-        "**/*.ejs",
-        "node_modules/**",
-        "dist/**",
-        "build/**"
+    "no-underscore-dangle": [
+      "error",
+      {
+        "allow": ["_id", "__dirname", "__filename"],
+        "allowAfterThis": true
+      }
     ],
-    "rules": {
-        "filenames/match-regex": [
-            "warn",
-            "^([a-z][a-zA-Z0-9]*|[A-Z][a-zA-Z0-9]*|.*(test|spec)\\.[jt]s)$", // test 또는 spec 파일 허용
-            true
-        ],
-        "filenames/match-exported": [
-            "error",
-            [
-                "camel",
-                "pascal"
-            ]
-        ],
-        "filenames/no-index": "off",
-        "folders/match-regex": [
-            "error",
-            "^[a-z][a-zA-Z0-9]+$",
-            true
-        ],
-        "camelcase": "off",
-        "id-match": "off",
-        "id-length": [
-            "warn",
-            {
-                "min": 1
-            }
-        ],
-        "no-underscore-dangle": [
-            "error",
-            {
-                "allow": [
-                    "_id",
-                    "__dirname",
-                    "__filename"
-                ],
-                "allowAfterThis": true
-            }
-        ],
-        "indent": [
-            "warn",
-            4
-        ],
-        "linebreak-style": "off",
-        "quotes": [
-            "warn",
-            "single"
-        ],
-        "semi": [
-            "warn",
-            "always"
-        ],
-        "max-len": "off",
-        "max-lines": "off",
-        "max-depth": "off",
-        "no-multiple-empty-lines": "warn",
-        "eol-last": "warn",
-        "comma-dangle": "warn",
-        "object-curly-spacing": [
-            "error",
-            "always"
-        ],
-        "array-bracket-spacing": [
-            "error",
-            "never"
-        ],
-        "space-in-parens": [
-            "error",
-            "never"
-        ],
-        "keyword-spacing": [
-            "error",
-            {
-                "before": true,
-                "after": true
-            }
-        ],
-        "space-before-blocks": [
-            "error",
-            "always"
-        ],
-        "space-before-function-paren": [
-            "error",
-            {
-                "anonymous": "always",
-                "named": "never",
-                "asyncArrow": "always"
-            }
-        ],
-        "no-var": "error",
-        "prefer-const": "error",
-        "no-unused-vars": [
-            "error",
-            {
-                "vars": "all",
-                "args": "after-used",
-                "ignoreRestSiblings": true,
-                "argsIgnorePattern": "^_",
-                "varsIgnorePattern": "^_"
-            }
-        ],
-        "no-console": "off",
-        "no-alert": "warn",
-        "no-debugger": "warn"
-    }
+    "indent": ["warn", 4],
+    "linebreak-style": "off",
+    "quotes": ["warn", "single"],
+    "semi": ["warn", "always"],
+    "max-len": "off",
+    "max-lines": "off",
+    "max-depth": "off",
+    "no-multiple-empty-lines": "warn",
+    "eol-last": "warn",
+    "comma-dangle": "warn",
+    "object-curly-spacing": ["error", "always"],
+    "array-bracket-spacing": ["error", "never"],
+    "space-in-parens": ["error", "never"],
+    "keyword-spacing": [
+      "error",
+      {
+        "before": true,
+        "after": true
+      }
+    ],
+    "space-before-blocks": ["error", "always"],
+    "space-before-function-paren": [
+      "error",
+      {
+        "anonymous": "always",
+        "named": "never",
+        "asyncArrow": "always"
+      }
+    ],
+    "no-var": "error",
+    "prefer-const": "error",
+    "no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": true,
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "no-console": "off",
+    "no-alert": "warn",
+    "no-debugger": "warn"
+  }
 }

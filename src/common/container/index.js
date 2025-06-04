@@ -48,5 +48,5 @@ export const DIContainer = {
      * @param {Function} ClassConstructor - 확인할 클래스
      * @returns {boolean}
      */
-    canAutoWire: (ClassConstructor) => defaultContainer.canAutoWire(ClassConstructor)
+    canAutoWire: ClassConstructor => defaultContainer.canAutoWire(ClassConstructor)
 };

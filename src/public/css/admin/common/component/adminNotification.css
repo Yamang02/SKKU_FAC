@@ -84,7 +84,6 @@
     outline: none; /* 포커스 시 아웃라인 제거 */
 }
 
-
 @keyframes spin {
     to {
         transform: translate(-50%, -50%) rotate(360deg);

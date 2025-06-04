@@ -32,7 +32,10 @@ class Config {
         this.sensitiveKeys = new Set([
             'database.password',
             'storage.apiSecret',
-            'session.secret'
+            'session.secret',
+            'email.pass',
+            'jwt.accessTokenSecret',
+            'jwt.refreshTokenSecret'
         ]);
 
         this.loadMasterKey();
@@ -70,11 +73,12 @@ class Config {
         return Joi.object({
             app: Joi.object({
                 name: Joi.string().min(1).max(100).required(),
-                version: Joi.string().pattern(/^\d+\.\d+\.\d+$/).required(),
+                version: Joi.string()
+                    .pattern(/^\d+\.\d+\.\d+$/)
+                    .required(),
                 port: Joi.number().integer().min(1).max(65535).required(),
                 environment: Joi.string().valid('development', 'test', 'staging', 'production').required(),
-                debug: Joi.boolean().optional(),
-                baseUrl: Joi.string().uri().optional()
+                debug: Joi.boolean().optional()
             }).required(),
 
             database: Joi.object({
@@ -90,7 +94,10 @@ class Config {
                     max: Joi.number().integer().min(1).required(),
                     min: Joi.number().integer().min(0).required(),
                     acquire: Joi.number().integer().min(1000).required(),
-                    idle: Joi.number().integer().min(1000).required()
+                    idle: Joi.number().integer().min(1000).required(),
+                    evict: Joi.number().integer().min(100).optional(),
+                    handleDisconnects: Joi.boolean().optional(),
+                    validate: Joi.function().optional()
                 }).required()
             }).required(),
 
@@ -119,11 +126,18 @@ class Config {
                 secret: Joi.string().min(32).required(),
                 resave: Joi.boolean().required(),
                 saveUninitialized: Joi.boolean().required(),
+                rolling: Joi.boolean().optional(),
+                unset: Joi.string().valid('destroy', 'keep').optional(),
+                name: Joi.string().optional(),
+                proxy: Joi.boolean().optional(),
+                genid: Joi.function().optional(),
                 cookie: Joi.object({
                     secure: Joi.boolean().required(),
                     maxAge: Joi.number().integer().min(60000).required(), // 최소 1분
                     httpOnly: Joi.boolean().optional(),
-                    sameSite: Joi.string().valid('strict', 'lax', 'none').optional()
+                    sameSite: Joi.string().valid('strict', 'lax', 'none').optional(),
+                    domain: Joi.string().optional(),
+                    path: Joi.string().optional()
                 }).required()
             }).required(),
 
@@ -143,14 +157,8 @@ class Config {
 
             rateLimit: Joi.object({
                 windowMs: Joi.number().integer().min(1000).required(), // 최소 1초
-                max: Joi.alternatives().try(
-                    Joi.number().integer().min(1),
-                    Joi.function()
-                ).required(),
-                message: Joi.alternatives().try(
-                    Joi.string(),
-                    Joi.function()
-                ).optional()
+                max: Joi.number().integer().min(1).required(),
+                skipPaths: Joi.array().items(Joi.string()).required()
             }).required(),
 
             // Redis 설정 (선택적)
@@ -160,6 +168,7 @@ class Config {
                 username: Joi.string().allow(null).optional(),
                 password: Joi.string().allow(null).optional(),
                 db: Joi.number().integer().min(0).max(15).optional(),
+                cacheDb: Joi.number().integer().min(0).max(15).optional(),
                 ttl: Joi.number().integer().min(1).optional(),
                 prefix: Joi.string().optional(),
                 useTestInstance: Joi.boolean().optional(),
@@ -200,6 +209,25 @@ class Config {
                 enableTestRoutes: Joi.boolean().optional(),
                 enableTestDatabase: Joi.boolean().optional(),
                 resetDatabaseOnStart: Joi.boolean().optional()
+            }).optional(),
+
+            // JWT 설정 추가
+            jwt: Joi.object({
+                accessTokenSecret: Joi.string().min(32).required(),
+                refreshTokenSecret: Joi.string().min(32).required(),
+                accessTokenExpiry: Joi.string().optional().default('15m'),
+                refreshTokenExpiry: Joi.string().optional().default('7d'),
+                issuer: Joi.string().optional().default('skku-fac-gallery'),
+                audience: Joi.string().optional().default('skku-fac-gallery-users')
+            }).required(),
+
+            // OAuth 설정 추가
+            oauth: Joi.object({
+                google: Joi.object({
+                    clientID: Joi.string().optional(),
+                    clientSecret: Joi.string().optional(),
+                    callbackURL: Joi.string().optional().default('/auth/google/callback')
+                }).optional()
             }).optional(),
 
             features: Joi.object({
@@ -278,12 +306,7 @@ class Config {
      * 환경 변수 로드 (개선된 버전)
      */
     loadEnvironmentVariables() {
-        const envFiles = [
-            '.env.local',
-            '.env',
-            `.env.${this.environment}`,
-            `.env.${this.environment}.local`
-        ];
+        const envFiles = ['.env.local', '.env', `.env.${this.environment}`, `.env.${this.environment}.local`];
 
         for (const envFile of envFiles) {
             try {
@@ -317,14 +340,6 @@ class Config {
             }
         }
 
-        // 이메일 관련 환경 변수 확인
-        console.log('📧 이메일 환경 변수 로딩 상태:', {
-            EMAIL_USER: process.env.EMAIL_USER ? `${process.env.EMAIL_USER.substring(0, 3)}***@${process.env.EMAIL_USER.split('@')[1] || 'unknown'}` : 'undefined',
-            EMAIL_PASS: process.env.EMAIL_PASS ? `설정됨 (${process.env.EMAIL_PASS.length}자)` : 'undefined',
-            EMAIL_FROM: process.env.EMAIL_FROM || 'undefined',
-            ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'undefined'
-        });
-
         // 로딩 결과 요약
         if (this.loadedEnvFiles.length === 0) {
             console.warn('⚠️ 로드된 환경 변수 파일이 없습니다. 시스템 환경 변수만 사용됩니다.');
@@ -339,27 +354,27 @@ class Config {
     validateCriticalEnvironmentVariables() {
         const criticalVars = {
             // 데이터베이스 관련
-            'DB_HOST': { required: this.environment !== 'production', type: 'string' },
-            'DB_USER': { required: this.environment !== 'production', type: 'string' },
-            'DB_PASSWORD': { required: this.environment !== 'production', type: 'string' },
-            'DB_NAME': { required: this.environment !== 'production', type: 'string' },
+            DB_HOST: { required: this.environment !== 'production', type: 'string' },
+            DB_USER: { required: this.environment !== 'production', type: 'string' },
+            DB_PASSWORD: { required: this.environment !== 'production', type: 'string' },
+            DB_NAME: { required: this.environment !== 'production', type: 'string' },
 
             // 프로덕션 환경 (Railway) 데이터베이스
-            'MYSQLHOST': { required: this.environment === 'production', type: 'string' },
-            'MYSQLUSER': { required: this.environment === 'production', type: 'string' },
-            'MYSQLPASSWORD': { required: this.environment === 'production', type: 'string' },
-            'MYSQL_DATABASE': { required: this.environment === 'production', type: 'string' },
+            MYSQLHOST: { required: this.environment === 'production', type: 'string' },
+            MYSQLUSER: { required: this.environment === 'production', type: 'string' },
+            MYSQLPASSWORD: { required: this.environment === 'production', type: 'string' },
+            MYSQL_DATABASE: { required: this.environment === 'production', type: 'string' },
 
             // Cloudinary 설정
-            'CLOUDINARY_CLOUD_NAME': { required: true, type: 'string' },
-            'CLOUDINARY_API_KEY': { required: true, type: 'string' },
-            'CLOUDINARY_API_SECRET': { required: true, type: 'string' },
+            CLOUDINARY_CLOUD_NAME: { required: true, type: 'string' },
+            CLOUDINARY_API_KEY: { required: true, type: 'string' },
+            CLOUDINARY_API_SECRET: { required: true, type: 'string' },
 
             // 세션 보안
-            'SESSION_SECRET': { required: true, type: 'string', minLength: 32 },
+            SESSION_SECRET: { required: true, type: 'string', minLength: 32 },
 
             // 포트 번호
-            'PORT': { required: false, type: 'number', min: 1, max: 65535 }
+            PORT: { required: false, type: 'number', min: 1, max: 65535 }
         };
 
         const validationErrors = [];
@@ -423,8 +438,8 @@ class Config {
 
             // 프로덕션 환경에서는 중요한 오류가 있으면 종료
             if (this.environment === 'production') {
-                const criticalErrors = validationErrors.filter(error =>
-                    error.includes('MYSQL') || error.includes('CLOUDINARY') || error.includes('SESSION_SECRET')
+                const criticalErrors = validationErrors.filter(
+                    error => error.includes('MYSQL') || error.includes('CLOUDINARY') || error.includes('SESSION_SECRET')
                 );
                 if (criticalErrors.length > 0) {
                     console.error('💥 프로덕션 환경에서 중요한 환경 변수 오류가 발견되어 애플리케이션을 종료합니다.');
@@ -446,8 +461,7 @@ class Config {
                 name: process.env.APP_NAME || 'SKKU Gallery',
                 version: process.env.APP_VERSION || '1.0.0',
                 port: parseInt(process.env.PORT, 10) || 3000,
-                environment: this.environment,
-                baseUrl: process.env.BASE_URL
+                environment: this.environment
             },
 
             // 데이터베이스 설정
@@ -492,40 +506,33 @@ class Config {
                 username: process.env.REDIS_USERNAME || null,
                 password: process.env.REDIS_PASSWORD || null,
                 db: parseInt(process.env.REDIS_DB, 10) || 0,
+                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 별도 DB
                 ttl: parseInt(process.env.REDIS_TTL, 10) || 86400 // 24시간
             },
 
             // Rate Limiting 설정
             rateLimit: {
                 windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000, // 15분
-                max: (req) => {
-                    // 헬스체크와 파비콘은 제외
-                    const alwaysSkip = ['/health', '/favicon.ico'];
-                    if (alwaysSkip.some(path => req.path === path)) {
-                        return 0; // 무제한
-                    }
+                max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 300, // IP당 최대 요청 수
+                skipPaths: ['/health', '/favicon.ico']
+            },
 
-                    // 정적파일 여부 확인
-                    const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
-                    const isStatic = staticPaths.some(path => req.path.startsWith(path));
+            // JWT 설정
+            jwt: {
+                accessTokenSecret: process.env.JWT_ACCESS_SECRET || 'default-access-secret-change-in-production',
+                refreshTokenSecret: process.env.JWT_REFRESH_SECRET || 'default-refresh-secret-change-in-production',
+                accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
+                refreshTokenExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
+                issuer: process.env.JWT_ISSUER || 'skku-fac-gallery',
+                audience: process.env.JWT_AUDIENCE || 'skku-fac-gallery-users'
+            },
 
-                    if (isStatic) {
-                        // 정적파일: 전시회 감상 시나리오 고려 (이미지 다수 로딩)
-                        return parseInt(process.env.RATE_LIMIT_STATIC_MAX, 10) || 1200;
-                    } else {
-                        // 일반 요청: 실제 사용 패턴 고려
-                        return parseInt(process.env.RATE_LIMIT_MAX, 10) || 200;
-                    }
-                },
-                message: (req) => {
-                    const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
-                    const isStatic = staticPaths.some(path => req.path.startsWith(path));
-
-                    if (isStatic) {
-                        return '정적파일 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-                    } else {
-                        return 'API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-                    }
+            // OAuth 설정
+            oauth: {
+                google: {
+                    clientID: process.env.GOOGLE_CLIENT_ID,
+                    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+                    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback'
                 }
             }
         };
@@ -536,63 +543,105 @@ class Config {
      * @returns {object} 데이터베이스 설정 객체
      */
     getDatabaseConfig() {
+        // 환경별 최적화된 연결 풀 설정
+        const getOptimizedPoolConfig = () => {
+            switch (this.environment) {
+            case 'production':
+                return {
+                    max: parseInt(process.env.DB_POOL_MAX, 10) || 20, // 운영: 더 많은 연결
+                    min: parseInt(process.env.DB_POOL_MIN, 10) || 5, // 운영: 최소 연결 유지
+                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 10000, // 10초
+                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 60000, // 60초
+                    evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000, // 1초마다 유휴 연결 확인
+                    handleDisconnects: true, // 연결 끊김 자동 처리
+                    validate: connection => {
+                        // 연결 유효성 검사 - 연결이 존재하고 활성 상태인지 확인
+                        return connection && connection.state !== 'disconnected';
+                    }
+                };
+
+            case 'test':
+                return {
+                    max: parseInt(process.env.DB_POOL_MAX, 10) || 5, // 테스트: 적은 연결
+                    min: parseInt(process.env.DB_POOL_MIN, 10) || 1, // 테스트: 최소 1개 유지
+                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 5000, // 5초
+                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 30000, // 30초
+                    evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
+                    handleDisconnects: true
+                };
+
+            case 'development':
+                return {
+                    max: parseInt(process.env.DB_POOL_MAX, 10) || 10, // 개발: 중간 수준
+                    min: parseInt(process.env.DB_POOL_MIN, 10) || 2, // 개발: 최소 2개 유지
+                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 8000, // 8초
+                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 45000, // 45초
+                    evict: parseInt(process.env.DB_POOL_EVICT, 10) || 1000,
+                    handleDisconnects: true
+                };
+
+            default:
+                return {
+                    max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+                    min: parseInt(process.env.DB_POOL_MIN, 10) || 0,
+                    acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 30000,
+                    idle: parseInt(process.env.DB_POOL_IDLE, 10) || 10000
+                };
+            }
+        };
+
         const baseConfig = {
             dialect: 'mysql',
             timezone: '+09:00',
             logging: this.environment === 'development' ? console.log : false,
-            pool: {
-                max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
-                min: parseInt(process.env.DB_POOL_MIN, 10) || 0,
-                acquire: parseInt(process.env.DB_POOL_ACQUIRE, 10) || 30000,
-                idle: parseInt(process.env.DB_POOL_IDLE, 10) || 10000
-            }
+            pool: getOptimizedPoolConfig()
         };
 
         // 환경별 설정을 먼저 생성하고, 나중에 get() 메서드로 password를 가져와서 복호화
         let envConfig;
         switch (this.environment) {
-            case 'production':
-                envConfig = {
-                    ...baseConfig,
-                    host: process.env.MYSQLHOST,
-                    user: process.env.MYSQLUSER,
-                    password: process.env.MYSQLPASSWORD,
-                    database: process.env.MYSQL_DATABASE,
-                    port: parseInt(process.env.MYSQLPORT, 10) || 3306
-                };
-                break;
+        case 'production':
+            envConfig = {
+                ...baseConfig,
+                host: process.env.MYSQLHOST,
+                user: process.env.MYSQLUSER,
+                password: process.env.MYSQLPASSWORD,
+                database: process.env.MYSQL_DATABASE,
+                port: parseInt(process.env.MYSQLPORT, 10) || 3306
+            };
+            break;
 
-            case 'test':
-                envConfig = {
-                    ...baseConfig,
-                    host: process.env.TEST_DB_HOST || process.env.DB_HOST,
-                    user: process.env.TEST_DB_USER || process.env.DB_USER,
-                    password: process.env.TEST_DB_PASSWORD || process.env.DB_PASSWORD,
-                    database: process.env.TEST_DB_NAME || process.env.DB_NAME,
-                    port: parseInt(process.env.TEST_DB_PORT || process.env.DB_PORT, 10) || 3306
-                };
-                break;
+        case 'test':
+            envConfig = {
+                ...baseConfig,
+                host: process.env.TEST_DB_HOST || process.env.DB_HOST,
+                user: process.env.TEST_DB_USER || process.env.DB_USER,
+                password: process.env.TEST_DB_PASSWORD || process.env.DB_PASSWORD,
+                database: process.env.TEST_DB_NAME || process.env.DB_NAME,
+                port: parseInt(process.env.TEST_DB_PORT || process.env.DB_PORT, 10) || 3306
+            };
+            break;
 
-            case 'development':
-                envConfig = {
-                    ...baseConfig,
-                    host: process.env.DEV_DB_HOST || process.env.DB_HOST,
-                    user: process.env.DEV_DB_USER || process.env.DB_USER,
-                    password: process.env.DEV_DB_PASSWORD || process.env.DB_PASSWORD,
-                    database: process.env.DEV_DB_NAME || process.env.DB_NAME,
-                    port: parseInt(process.env.DEV_DB_PORT || process.env.DB_PORT, 10) || 3306
-                };
-                break;
+        case 'development':
+            envConfig = {
+                ...baseConfig,
+                host: process.env.DEV_DB_HOST || process.env.DB_HOST,
+                user: process.env.DEV_DB_USER || process.env.DB_USER,
+                password: process.env.DEV_DB_PASSWORD || process.env.DB_PASSWORD,
+                database: process.env.DEV_DB_NAME || process.env.DB_NAME,
+                port: parseInt(process.env.DEV_DB_PORT || process.env.DB_PORT, 10) || 3306
+            };
+            break;
 
-            default:
-                envConfig = {
-                    ...baseConfig,
-                    host: process.env.DB_HOST,
-                    user: process.env.DB_USER,
-                    password: process.env.DB_PASSWORD,
-                    database: process.env.DB_NAME,
-                    port: parseInt(process.env.DB_PORT, 10) || 3306
-                };
+        default:
+            envConfig = {
+                ...baseConfig,
+                host: process.env.DB_HOST,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_NAME,
+                port: parseInt(process.env.DB_PORT, 10) || 3306
+            };
         }
 
         // 초기화가 완료된 후에는 get() 메서드를 사용하여 암호화된 비밀번호를 복호화
@@ -682,22 +731,10 @@ class Config {
                             'https://k.kakaocdn.net',
                             'https://cdn.jsdelivr.net'
                         ],
-                        frameSrc: [
-                            '\'self\'',
-                            'https://developers.kakao.com'
-                        ],
-                        objectSrc: [
-                            '\'self\'',
-                            'https://developers.kakao.com'
-                        ],
-                        formAction: [
-                            '\'self\'',
-                            'https://*.kakao.com'
-                        ],
-                        workerSrc: [
-                            '\'self\'',
-                            'blob:'
-                        ],
+                        frameSrc: ['\'self\'', 'https://developers.kakao.com'],
+                        objectSrc: ['\'self\'', 'https://developers.kakao.com'],
+                        formAction: ['\'self\'', 'https://*.kakao.com'],
+                        workerSrc: ['\'self\'', 'blob:'],
                         scriptSrcAttr: ['\'unsafe-inline\'']
                     }
                 },
@@ -971,7 +1008,8 @@ class Config {
 
             // 전체 길이 확인
             const totalLength = combined.length();
-            if (totalLength < 28) { // 최소 12(IV) + 16(tag) = 28바이트
+            if (totalLength < 28) {
+                // 최소 12(IV) + 16(tag) = 28바이트
                 throw new Error('암호화된 데이터가 너무 짧습니다.');
             }
 
@@ -1028,11 +1066,7 @@ class Config {
             return;
         }
 
-        const sensitiveKeysToProcess = [
-            'database.password',
-            'storage.apiSecret',
-            'session.secret'
-        ];
+        const sensitiveKeysToProcess = ['database.password', 'storage.apiSecret', 'session.secret', 'email.pass'];
 
         for (const key of sensitiveKeysToProcess) {
             const currentValue = this.getRawValue(key);
@@ -1241,7 +1275,9 @@ class Config {
      */
     async setEnvironment(newEnvironment) {
         if (!this.supportedEnvironments.includes(newEnvironment)) {
-            throw new Error(`지원되지 않는 환경입니다: ${newEnvironment}. 지원되는 환경: ${this.supportedEnvironments.join(', ')}`);
+            throw new Error(
+                `지원되지 않는 환경입니다: ${newEnvironment}. 지원되는 환경: ${this.supportedEnvironments.join(', ')}`
+            );
         }
 
         const oldEnvironment = this.environment;
@@ -1311,14 +1347,14 @@ class Config {
      * @returns {object} 이메일 설정 객체
      */
     getEmailConfig() {
-        // 이메일 비밀번호는 암호화하지 않고 직접 환경변수에서 가져옴
-        // Gmail 앱 비밀번호는 암호화 시 손상될 수 있음
-        return {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-            from: process.env.EMAIL_FROM,
-            adminEmail: process.env.ADMIN_EMAIL
-        };
+        return (
+            this.get('email') || {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+                from: process.env.EMAIL_FROM,
+                adminEmail: process.env.ADMIN_EMAIL
+            }
+        );
     }
 
     /**
@@ -1332,45 +1368,50 @@ class Config {
             username: process.env.REDIS_USERNAME || null,
             password: process.env.REDIS_PASSWORD || null,
             db: parseInt(process.env.REDIS_DB, 10) || 0,
+            cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 별도 DB
             ttl: parseInt(process.env.REDIS_TTL, 10) || 86400 // 24시간
         };
 
         // 환경별 Redis 설정 조정
         switch (this.environment) {
-            case 'production':
-                return {
-                    ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 0, // DB 0 사용
-                    ttl: parseInt(process.env.REDIS_TTL, 10) || 86400
-                };
+        case 'production':
+            return {
+                ...baseConfig,
+                db: parseInt(process.env.REDIS_DB, 10) || 0, // 세션용 DB 0
+                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 DB 1
+                ttl: parseInt(process.env.REDIS_TTL, 10) || 86400
+            };
 
-            case 'test':
-                return {
-                    ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 0, // DB 0 사용
-                    ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
-                    prefix: 'test:'
-                };
+        case 'test':
+            return {
+                ...baseConfig,
+                db: parseInt(process.env.REDIS_DB, 10) || 14, // 테스트 세션용 DB 14
+                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 15, // 테스트 캐시용 DB 15
+                ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
+                prefix: 'test:'
+            };
 
-            case 'development':
-                // 개발환경은 테스트와 동일한 설정 사용
-                return {
-                    ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 0, // DB 0 사용
-                    ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
-                    prefix: 'dev:' // 개발환경 전용 prefix
-                };
+        case 'development':
+            // 개발환경은 별도 DB 사용
+            return {
+                ...baseConfig,
+                db: parseInt(process.env.REDIS_DB, 10) || 0, // 개발 세션용 DB 0
+                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 개발 캐시용 DB 1
+                ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
+                prefix: 'dev:' // 개발환경 전용 prefix
+            };
 
-            case 'staging':
-                return {
-                    ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 0, // DB 0 사용
-                    ttl: parseInt(process.env.REDIS_TTL, 10) || 43200, // 12시간
-                    prefix: 'staging:'
-                };
+        case 'staging':
+            return {
+                ...baseConfig,
+                db: parseInt(process.env.REDIS_DB, 10) || 2, // 스테이징 세션용 DB 2
+                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 3, // 스테이징 캐시용 DB 3
+                ttl: parseInt(process.env.REDIS_TTL, 10) || 43200, // 12시간
+                prefix: 'staging:'
+            };
 
-            default:
-                return baseConfig;
+        default:
+            return baseConfig;
         }
     }
 
@@ -1379,13 +1420,15 @@ class Config {
      * @returns {object} 앱 설정 객체
      */
     getAppConfig() {
-        return this.get('app') || {
-            name: process.env.APP_NAME || 'SKKU Gallery',
-            version: process.env.APP_VERSION || '1.0.0',
-            port: parseInt(process.env.PORT, 10) || 3000,
-            environment: this.environment,
-            baseUrl: process.env.BASE_URL
-        };
+        return (
+            this.get('app') || {
+                name: process.env.APP_NAME || 'SKKU Gallery',
+                version: process.env.APP_VERSION || '1.0.0',
+                port: parseInt(process.env.PORT, 10) || 3000,
+                environment: this.environment,
+                baseUrl: process.env.BASE_URL
+            }
+        );
     }
 
     /**
@@ -1393,14 +1436,49 @@ class Config {
      * @returns {object} 세션 설정 객체
      */
     getSessionConfig() {
-        return this.get('session') || {
-            secret: process.env.SESSION_SECRET || 'default-secret-key',
-            resave: false,
-            saveUninitialized: false,
-            cookie: {
-                secure: this.environment === 'production',
-                maxAge: parseInt(process.env.SESSION_MAX_AGE, 10) || 24 * 60 * 60 * 1000 // 24시간
-            }
+        return this.get('session', {});
+    }
+
+    /**
+     * JWT 설정 가져오기
+     * @returns {Object} JWT 설정 객체
+     */
+    getJwtConfig() {
+        return this.get('jwt', {
+            accessTokenSecret: process.env.JWT_ACCESS_SECRET || 'default-access-secret-change-in-production',
+            refreshTokenSecret: process.env.JWT_REFRESH_SECRET || 'default-refresh-secret-change-in-production',
+            accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
+            refreshTokenExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
+            issuer: process.env.JWT_ISSUER || 'skku-fac-gallery',
+            audience: process.env.JWT_AUDIENCE || 'skku-fac-gallery-users'
+        });
+    }
+
+    /**
+     * JWT Access Token 설정 가져오기
+     * @returns {Object} Access Token 설정
+     */
+    getJwtAccessTokenConfig() {
+        const jwtConfig = this.getJwtConfig();
+        return {
+            secret: jwtConfig.accessTokenSecret,
+            expiry: jwtConfig.accessTokenExpiry,
+            issuer: jwtConfig.issuer,
+            audience: jwtConfig.audience
+        };
+    }
+
+    /**
+     * JWT Refresh Token 설정 가져오기
+     * @returns {Object} Refresh Token 설정
+     */
+    getJwtRefreshTokenConfig() {
+        const jwtConfig = this.getJwtConfig();
+        return {
+            secret: jwtConfig.refreshTokenSecret,
+            expiry: jwtConfig.refreshTokenExpiry,
+            issuer: jwtConfig.issuer,
+            audience: jwtConfig.audience
         };
     }
 }

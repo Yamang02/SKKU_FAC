@@ -6,8 +6,18 @@ import ArtworkService from '../service/ArtworkService.js';
  * 작품 관련 컨트롤러
  */
 export default class ArtworkController {
-    constructor() {
-        this.artworkService = new ArtworkService();
+    // 의존성 주입을 위한 static dependencies 정의
+    static dependencies = ['ArtworkService'];
+
+    constructor(artworkService = null) {
+        // 의존성 주입 방식 (새로운 방식)
+        if (artworkService) {
+            this.artworkService = artworkService;
+        } else {
+            // 기존 방식 호환성 유지 (임시)
+            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
+            this.artworkService = new ArtworkService();
+        }
     }
 
     // === 페이지 렌더링 ===
@@ -52,7 +62,6 @@ export default class ArtworkController {
         }
     }
 
-
     /**
      * 전시회별 작품 목록을 조회합니다.
      */
@@ -78,5 +87,4 @@ export default class ArtworkController {
             return ViewResolver.renderError(res, error);
         }
     }
-
 }

@@ -1,10 +1,10 @@
 :root {
     /* Colors */
     /* 통일된 색상 변수 */
-    --color-primary: #004C3F;
-    --color-primary-dark: #003D32;
-    --color-primary-light: #00684A;
-    --color-secondary: #465B63;
+    --color-primary: #004c3f;
+    --color-primary-dark: #003d32;
+    --color-primary-light: #00684a;
+    --color-secondary: #465b63;
     --color-background: #fff;
     --color-background-light: #f8f9fa;
     --color-text-primary: #333;

@@ -33,12 +33,11 @@
 
 .success-message {
     width: 90%;
-    color: #4CAF50;
+    color: #4caf50;
     margin: 1.5rem 0;
     font-size: 1.28rem;
     line-height: 1.6;
     white-space: nowrap;
-
 }
 
 .success-code {

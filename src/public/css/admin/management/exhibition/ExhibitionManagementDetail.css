@@ -120,9 +120,9 @@
 }
 
 /* 생성 모드에서의 입력 필드 스타일 */
-.form-grid[data-mode="create"] input:not([readonly]),
-.form-grid[data-mode="create"] select:not([disabled]),
-.form-grid[data-mode="create"] textarea:not([readonly]) {
+.form-grid[data-mode='create'] input:not([readonly]),
+.form-grid[data-mode='create'] select:not([disabled]),
+.form-grid[data-mode='create'] textarea:not([readonly]) {
     background-color: #fff;
 }
 
@@ -243,4 +243,3 @@
 .cancel-thumbnail:hover {
     text-decoration: underline;
 }
-

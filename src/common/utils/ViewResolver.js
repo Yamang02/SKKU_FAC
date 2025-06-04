@@ -60,29 +60,33 @@ export default class ViewResolver {
         const layout = this.determineLayout(ViewPath.ERROR);
 
         // 에러 페이지 HTML을 먼저 렌더링
-        res.render(ViewPath.ERROR, {
-            message: error.message || '페이지를 불러오는 중 오류가 발생했습니다.',
-            error: {
-                code: error.code || 500,
-                stack: error.stack
-            },
-            ViewPath,
-            currentPage: 'error'
-        }, (err, html) => {
-            if (err) {
-                console.error('Error page rendering failed:', err);
-                res.status(500).send('Internal Server Error');
-                return;
-            }
-
-            // 레이아웃과 함께 렌더링
-            res.render(layout, {
-                content: html,
+        res.render(
+            ViewPath.ERROR,
+            {
+                message: error.message || '페이지를 불러오는 중 오류가 발생했습니다.',
+                error: {
+                    code: error.code || 500,
+                    stack: error.stack
+                },
                 ViewPath,
-                layoutPath: layout,
                 currentPage: 'error'
-            });
-        });
+            },
+            (err, html) => {
+                if (err) {
+                    console.error('Error page rendering failed:', err);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                // 레이아웃과 함께 렌더링
+                res.render(layout, {
+                    content: html,
+                    ViewPath,
+                    layoutPath: layout,
+                    currentPage: 'error'
+                });
+            }
+        );
     }
 
     /**

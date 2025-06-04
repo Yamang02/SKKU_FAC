@@ -27,7 +27,7 @@ class ArtworkManagementList {
 
         // 정렬 버튼들에 이벤트 리스너 추가
         document.querySelectorAll('.sort-btn')?.forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', e => {
                 const field = e.currentTarget.getAttribute('data-sort');
                 this.handleSort(field);
             });
@@ -35,11 +35,13 @@ class ArtworkManagementList {
     }
 
     async deleteArtwork(id) {
-        const confirmed = await showConfirm('정말로 이 작품을 삭제하시겠습니까?\n\n' +
-            '⚠️ 경고: 이 작업은 되돌릴 수 없습니다.\n' +
-            '• 해당 작품의 모든 정보가 영구적으로 삭제됩니다.\n' +
-            '• 작품과 관련된 모든 데이터(이미지, 설명, 댓글 등)가 함께 삭제됩니다.\n' +
-            '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.');
+        const confirmed = await showConfirm(
+            '정말로 이 작품을 삭제하시겠습니까?\n\n' +
+                '⚠️ 경고: 이 작업은 되돌릴 수 없습니다.\n' +
+                '• 해당 작품의 모든 정보가 영구적으로 삭제됩니다.\n' +
+                '• 작품과 관련된 모든 데이터(이미지, 설명, 댓글 등)가 함께 삭제됩니다.\n' +
+                '• 이 작업은 되돌릴 수 없으므로 신중하게 결정해주세요.'
+        );
 
         if (confirmed) {
             try {
@@ -91,9 +93,7 @@ class ArtworkManagementList {
     applyFiltersAndSort() {
         const pageParams = this.pagination.toQueryParams();
         const filterParams = createFilterParams(this.filters);
-        const queryString = [pageParams, filterParams]
-            .filter(Boolean)
-            .join('&');
+        const queryString = [pageParams, filterParams].filter(Boolean).join('&');
 
         window.location.href = `${window.location.pathname}?${queryString}`;
     }

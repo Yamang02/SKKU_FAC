@@ -1,0 +1,38 @@
+/* 페이지 공통 스타일 */
+.page-container {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* 유저 도메인 특별 스타일 */
+.login-page,
+.register-page,
+.profile-page,
+.forgot-password-page {
+    background-color: #f8f9fa;
+}
+
+.page-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.page-card {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+@media (max-width: 480px) {
+    .page-card {
+        padding: 20px;
+    }
+}

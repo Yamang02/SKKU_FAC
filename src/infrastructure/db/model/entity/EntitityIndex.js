@@ -33,12 +33,22 @@ Artwork.belongsTo(UserAccount, {
     foreignKey: 'userId'
 });
 
+// Artwork와 ArtworkExhibitionRelationship 관계
 Artwork.hasMany(ArtworkExhibitionRelationship, {
     foreignKey: 'artworkId',
     as: 'ArtworkExhibitions'
 });
 ArtworkExhibitionRelationship.belongsTo(Artwork, {
     foreignKey: 'artworkId'
+});
+
+// Exhibition과 ArtworkExhibitionRelationship 관계
+Exhibition.hasMany(ArtworkExhibitionRelationship, {
+    foreignKey: 'exhibitionId',
+    as: 'ExhibitionArtworks'
+});
+ArtworkExhibitionRelationship.belongsTo(Exhibition, {
+    foreignKey: 'exhibitionId'
 });
 
 export {

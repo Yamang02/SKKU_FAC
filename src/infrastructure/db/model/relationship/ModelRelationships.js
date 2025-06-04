@@ -1,7 +1,13 @@
 import { db } from '../../adapter/MySQLDatabase.js';
-import { Artwork, Exhibition, Notice, UserAccount, SkkuUserProfile, ExternalUserProfile } from '../entity/EntitityIndex.js';
+import {
+    Artwork,
+    Exhibition,
+    Notice,
+    UserAccount,
+    SkkuUserProfile,
+    ExternalUserProfile
+} from '../entity/EntitityIndex.js';
 import ArtworkExhibitionRelationship from './ArtworkExhibitionRelationship.js';
-
 
 /**
  * 모델 간의 관계를 정의하고 설정합니다.
@@ -76,8 +82,6 @@ const setupModelRelationships = () => {
     Notice.belongsTo(UserAccount, {
         foreignKey: 'userId'
     });
-
-
 };
 
 // 모델 관계 즉시 설정

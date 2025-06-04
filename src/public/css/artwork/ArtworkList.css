@@ -398,7 +398,7 @@
 }
 
 .card--carousel .card__title {
-    color : #072B61;
+    color: #072b61;
     font-size: 1.25rem;
     margin: 0;
     font-weight: 600;
@@ -888,16 +888,21 @@
 }
 
 /* 작품 목록 섹션 */
-#cardView, #tableView {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+#cardView,
+#tableView {
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
 }
 
-#cardView.fade-out, #tableView.fade-out {
+#cardView.fade-out,
+#tableView.fade-out {
     opacity: 0;
     transform: translateY(10px);
 }
 
-#cardView.fade-in, #tableView.fade-in {
+#cardView.fade-in,
+#tableView.fade-in {
     opacity: 1;
     transform: translateY(0);
 }
@@ -956,7 +961,7 @@
 
 /* 로딩 관련 스타일 */
 .loading-artwork {
-    display: none;  /* 기본적으로 숨김 */
+    display: none; /* 기본적으로 숨김 */
     text-align: center;
     padding: 20px;
     color: #666;
@@ -1000,7 +1005,7 @@
     background-color: var(--color-primary);
     color: white;
     border-color: var(--color-primary);
-    width : auto;
+    width: auto;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 76, 63, 0.2);
 }
@@ -1012,4 +1017,3 @@
     margin: 0 15px;
     display: inline-block;
 }
-

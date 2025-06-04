@@ -6,7 +6,6 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('회원가입 절차 테스트', () => {
-
     test('SKKU 사용자 회원가입 - 실제 폼 동작 테스트', async ({ page }) => {
         console.log('🎓 SKKU 사용자 회원가입 테스트 시작');
 
@@ -23,7 +22,7 @@ test.describe('회원가입 절차 테스트', () => {
                     url: request.url(),
                     method: request.method(),
                     headers: request.headers(),
-                    postData: request.postData()
+                    postData: request.postData(),
                 });
                 console.log('📤 API 요청:', request.url());
             }
@@ -53,7 +52,7 @@ test.describe('회원가입 절차 테스트', () => {
             role: 'SKKU_MEMBER',
             department: '컴퓨터공학과',
             studentYear: '23', // 문자열로 입력 (EJS에서 text input)
-            isClubMember: true
+            isClubMember: true,
         };
 
         console.log('📝 SKKU 사용자 정보:', skkuUser);
@@ -82,13 +81,12 @@ test.describe('회원가입 절차 테스트', () => {
         // 폼 입력 완료 스크린샷
         await page.screenshot({
             path: `test-results/screenshots/skku-signup-form-${timestamp}.png`,
-            fullPage: true
+            fullPage: true,
         });
 
         // 폼 제출 및 API 응답 대기
-        const responsePromise = page.waitForResponse(response =>
-            response.url().includes('/user') &&
-            response.request().method() === 'POST'
+        const responsePromise = page.waitForResponse(
+            response => response.url().includes('/user') && response.request().method() === 'POST'
         );
 
         await page.click('button[type="submit"]');
@@ -116,8 +114,8 @@ test.describe('회원가입 절차 테스트', () => {
         const successNotification = page.locator('.notification--success');
         const errorNotification = page.locator('.notification--error');
 
-        const hasSuccess = await successNotification.count() > 0;
-        const hasError = await errorNotification.count() > 0;
+        const hasSuccess = (await successNotification.count()) > 0;
+        const hasError = (await errorNotification.count()) > 0;
 
         if (hasSuccess) {
             const successText = await successNotification.textContent();
@@ -132,7 +130,7 @@ test.describe('회원가입 절차 테스트', () => {
         // 결과 스크린샷
         await page.screenshot({
             path: `test-results/screenshots/skku-signup-result-${timestamp}.png`,
-            fullPage: true
+            fullPage: true,
         });
 
         console.log('📊 SKKU 회원가입 결과:', {
@@ -140,7 +138,7 @@ test.describe('회원가입 절차 테스트', () => {
             hasSuccessNotification: hasSuccess,
             hasErrorNotification: hasError,
             apiRequestCount: apiRequests.length,
-            currentUrl: page.url()
+            currentUrl: page.url(),
         });
 
         // 성공적인 응답이어야 함
@@ -182,7 +180,7 @@ test.describe('회원가입 절차 테스트', () => {
             email: `external${timestamp}@example.com`,
             password: 'Test123!@#',
             role: 'EXTERNAL_MEMBER',
-            affiliation: '외부 기관'
+            affiliation: '외부 기관',
         };
 
         console.log('📝 외부 사용자 정보:', externalUser);
@@ -206,13 +204,12 @@ test.describe('회원가입 절차 테스트', () => {
         // 폼 입력 완료 스크린샷
         await page.screenshot({
             path: `test-results/screenshots/external-signup-form-${timestamp}.png`,
-            fullPage: true
+            fullPage: true,
         });
 
         // 폼 제출 및 API 응답 대기
-        const responsePromise = page.waitForResponse(response =>
-            response.url().includes('/user') &&
-            response.request().method() === 'POST'
+        const responsePromise = page.waitForResponse(
+            response => response.url().includes('/user') && response.request().method() === 'POST'
         );
 
         await page.click('button[type="submit"]');
@@ -235,8 +232,8 @@ test.describe('회원가입 절차 테스트', () => {
         const successNotification = page.locator('.notification--success');
         const errorNotification = page.locator('.notification--error');
 
-        const hasSuccess = await successNotification.count() > 0;
-        const hasError = await errorNotification.count() > 0;
+        const hasSuccess = (await successNotification.count()) > 0;
+        const hasError = (await errorNotification.count()) > 0;
 
         if (hasSuccess) {
             const successText = await successNotification.textContent();
@@ -251,14 +248,14 @@ test.describe('회원가입 절차 테스트', () => {
         // 결과 스크린샷
         await page.screenshot({
             path: `test-results/screenshots/external-signup-result-${timestamp}.png`,
-            fullPage: true
+            fullPage: true,
         });
 
         console.log('📊 외부 회원가입 결과:', {
             responseStatus: response.status(),
             hasSuccessNotification: hasSuccess,
             hasErrorNotification: hasError,
-            currentUrl: page.url()
+            currentUrl: page.url(),
         });
 
         // 성공적인 응답이어야 함
@@ -319,7 +316,7 @@ test.describe('회원가입 절차 테스트', () => {
         await page.waitForTimeout(1000);
 
         const errorNotification = page.locator('.notification--error');
-        const hasError = await errorNotification.count() > 0;
+        const hasError = (await errorNotification.count()) > 0;
 
         if (hasError) {
             const errorText = await errorNotification.textContent();
@@ -362,7 +359,7 @@ test.describe('회원가입 절차 테스트', () => {
         } else {
             // 서버 사이드 검증 확인
             const errorNotification = page.locator('.notification--error');
-            const hasError = await errorNotification.count() > 0;
+            const hasError = (await errorNotification.count()) > 0;
 
             if (hasError) {
                 const errorText = await errorNotification.textContent();
@@ -389,9 +386,8 @@ test.describe('회원가입 절차 테스트', () => {
         await page.fill('#affiliation', '테스트 기관');
 
         // 폼 제출 및 응답 대기
-        const responsePromise = page.waitForResponse(response =>
-            response.url().includes('/user') &&
-            response.request().method() === 'POST'
+        const responsePromise = page.waitForResponse(
+            response => response.url().includes('/user') && response.request().method() === 'POST'
         );
 
         await page.click('button[type="submit"]');

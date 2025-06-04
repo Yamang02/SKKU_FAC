@@ -101,10 +101,11 @@ export class Container extends IContainer {
             let instance;
 
             // 클래스인지 확인
-            if (typeof registration.implementation === 'function' &&
+            if (
+                typeof registration.implementation === 'function' &&
                 registration.implementation.prototype &&
-                registration.implementation.prototype.constructor === registration.implementation) {
-
+                registration.implementation.prototype.constructor === registration.implementation
+            ) {
                 // 클래스의 경우 인스턴스 생성
                 instance = new registration.implementation();
             } else {
@@ -240,7 +241,7 @@ export class Container extends IContainer {
         }
 
         // 팩토리 함수로 등록하여 자동 와이어링 적용
-        const factory = (container) => {
+        const factory = container => {
             return container.autoWire(ClassConstructor);
         };
 
@@ -281,8 +282,10 @@ export class Container extends IContainer {
      * @returns {boolean} 자동 와이어링 지원 여부
      */
     canAutoWire(ClassConstructor) {
-        return typeof ClassConstructor === 'function' &&
+        return (
+            typeof ClassConstructor === 'function' &&
             ClassConstructor.dependencies &&
-            Array.isArray(ClassConstructor.dependencies);
+            Array.isArray(ClassConstructor.dependencies)
+        );
     }
 }

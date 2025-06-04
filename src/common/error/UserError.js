@@ -66,5 +66,3 @@ export class UserUnverifiedError extends Error {
         this.code = 'USER_UNVERIFIED_ERROR';
     }
 }
-
-

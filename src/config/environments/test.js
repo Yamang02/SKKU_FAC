@@ -66,40 +66,16 @@ export default {
 
     rateLimit: {
         windowMs: 15 * 60 * 1000, // 15분
-        max: (req) => {
-            // 헬스체크와 파비콘은 제외
-            const alwaysSkip = ['/health', '/favicon.ico'];
-            if (alwaysSkip.some(path => req.path === path)) {
-                return 0; // 무제한
-            }
+        max: 10000, // 테스트에서는 매우 관대한 제한
+        skipPaths: ['/health', '/favicon.ico', '/api/test']
+    },
 
-            // 테스트 API 경로 확인
-            if (req.path.startsWith('/test')) {
-                return 0; // 테스트 API는 무제한
-            }
-
-            // 정적파일 여부 확인
-            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
-            const isStatic = staticPaths.some(path => req.path.startsWith(path));
-
-            if (isStatic) {
-                // 정적파일: 테스트환경에서는 관대하게
-                return 1000;
-            } else {
-                // 일반 요청: 테스트환경에서는 적당히
-                return 200;
-            }
-        },
-        message: (req) => {
-            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
-            const isStatic = staticPaths.some(path => req.path.startsWith(path));
-
-            if (isStatic) {
-                return '정적파일 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-            } else {
-                return 'API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-            }
-        }
+    // JWT 설정 (테스트 환경 - 테스트 시나리오용)
+    jwt: {
+        accessTokenExpiry: '10m', // 10분 (테스트 시나리오용)
+        refreshTokenExpiry: '1h', // 1시간 (테스트 완료 후 빠른 만료)
+        issuer: 'skku-fac-gallery-test',
+        audience: 'skku-fac-gallery-test-users'
     },
 
     // 테스트 환경 전용 설정

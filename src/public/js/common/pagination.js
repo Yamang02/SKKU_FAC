@@ -196,7 +196,7 @@ class Pagination {
     attachEventHandlers(container) {
         const pageButtons = container.querySelectorAll('a.pagination__btn');
         pageButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
+            button.addEventListener('click', e => {
                 e.preventDefault();
                 const url = new URL(button.href);
                 const page = url.searchParams.get('page');

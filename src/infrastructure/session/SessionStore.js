@@ -32,31 +32,47 @@ class SessionStore {
             const sessionConfig = this.config.getSessionConfig();
             const environment = this.config.getEnvironment();
 
-            // 세션 설정
+            // 기본 세션 설정
             this.sessionConfig = {
                 store: this.store,
                 secret: sessionConfig.secret,
                 resave: false,
                 saveUninitialized: false,
-                rolling: true,
+                rolling: sessionConfig.rolling !== undefined ? sessionConfig.rolling : true,
+                unset: sessionConfig.unset || 'destroy',
+                name: sessionConfig.name || 'sessionId',
+                proxy: sessionConfig.proxy !== undefined ? sessionConfig.proxy : environment === 'production',
                 cookie: {
-                    secure: environment === 'production',
-                    httpOnly: true,
-                    maxAge: sessionConfig.maxAge,
-                    sameSite: 'strict'
-                },
-                name: 'sessionId'
+                    secure:
+                        sessionConfig.cookie.secure !== undefined
+                            ? sessionConfig.cookie.secure
+                            : environment === 'production',
+                    httpOnly: sessionConfig.cookie.httpOnly !== undefined ? sessionConfig.cookie.httpOnly : true,
+                    maxAge: sessionConfig.cookie.maxAge || 24 * 60 * 60 * 1000,
+                    sameSite: sessionConfig.cookie.sameSite || 'strict',
+                    domain: sessionConfig.cookie.domain || undefined,
+                    path: sessionConfig.cookie.path || '/'
+                }
             };
 
-            // 프로덕션 환경에서 추가 설정
-            if (environment === 'production') {
-                this.sessionConfig.cookie.secure = true;
-                this.sessionConfig.proxy = true; // nginx 등의 프록시 사용 시
+            // 커스텀 세션 ID 생성기가 있는 경우 사용
+            if (sessionConfig.genid && typeof sessionConfig.genid === 'function') {
+                this.sessionConfig.genid = sessionConfig.genid;
+            } else if (environment === 'production') {
+                // 프로덕션에서는 더 안전한 세션 ID 생성
+                const crypto = await import('crypto');
+                this.sessionConfig.genid = () => {
+                    return crypto.randomBytes(32).toString('hex');
+                };
             }
 
-            logger.success('Redis 세션 스토어가 초기화되었습니다.');
+            logger.success('Redis 세션 스토어가 초기화되었습니다.', {
+                environment,
+                secure: this.sessionConfig.cookie.secure,
+                sameSite: this.sessionConfig.cookie.sameSite,
+                sessionName: this.sessionConfig.name
+            });
             return this.sessionConfig;
-
         } catch (error) {
             logger.error('Redis 세션 스토어 초기화 실패', error);
 
@@ -70,15 +86,32 @@ class SessionStore {
                 secret: sessionConfig.secret,
                 resave: false,
                 saveUninitialized: false,
-                rolling: true,
+                rolling: sessionConfig.rolling !== undefined ? sessionConfig.rolling : true,
+                unset: sessionConfig.unset || 'destroy',
+                name: sessionConfig.name || 'sessionId',
+                proxy: sessionConfig.proxy !== undefined ? sessionConfig.proxy : environment === 'production',
                 cookie: {
-                    secure: environment === 'production',
-                    httpOnly: true,
-                    maxAge: sessionConfig.maxAge,
-                    sameSite: 'strict'
-                },
-                name: 'sessionId'
+                    secure:
+                        sessionConfig.cookie.secure !== undefined
+                            ? sessionConfig.cookie.secure
+                            : environment === 'production',
+                    httpOnly: sessionConfig.cookie.httpOnly !== undefined ? sessionConfig.cookie.httpOnly : true,
+                    maxAge: sessionConfig.cookie.maxAge || 24 * 60 * 60 * 1000,
+                    sameSite: sessionConfig.cookie.sameSite || 'strict',
+                    domain: sessionConfig.cookie.domain || undefined,
+                    path: sessionConfig.cookie.path || '/'
+                }
             };
+
+            // 메모리 스토어에서도 안전한 세션 ID 생성
+            if (sessionConfig.genid && typeof sessionConfig.genid === 'function') {
+                this.sessionConfig.genid = sessionConfig.genid;
+            } else if (environment === 'production') {
+                const crypto = await import('crypto');
+                this.sessionConfig.genid = () => {
+                    return crypto.randomBytes(32).toString('hex');
+                };
+            }
 
             return this.sessionConfig;
         }

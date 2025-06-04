@@ -14,7 +14,7 @@ export class ErrorReporter {
         this.config = Config.getInstance();
         this.projectName = options.projectName || 'SKKU Gallery';
         this.environment = this.config.getEnvironment();
-        this.notificationEnabled = options.enableNotifications ?? (this.environment === 'production');
+        this.notificationEnabled = options.enableNotifications ?? this.environment === 'production';
         this.emailConfig = options.emailConfig || null;
 
         // 에러 버퍼 (중복 방지)
@@ -129,19 +129,19 @@ export class ErrorReporter {
 
         // 심각도에 따른 로그 레벨 선택
         switch (severity) {
-            case ErrorSeverity.CRITICAL:
-                logger.error(`${logMessage} | CRITICAL`, logData);
-                break;
-            case ErrorSeverity.HIGH:
-                logger.error(`${logMessage} | HIGH`, logData);
-                break;
-            case ErrorSeverity.MEDIUM:
-                logger.warn(`${logMessage} | MEDIUM`, logData);
-                break;
-            case ErrorSeverity.LOW:
-            default:
-                logger.info(`${logMessage} | LOW`, logData);
-                break;
+        case ErrorSeverity.CRITICAL:
+            logger.error(`${logMessage} | CRITICAL`, logData);
+            break;
+        case ErrorSeverity.HIGH:
+            logger.error(`${logMessage} | HIGH`, logData);
+            break;
+        case ErrorSeverity.MEDIUM:
+            logger.warn(`${logMessage} | MEDIUM`, logData);
+            break;
+        case ErrorSeverity.LOW:
+        default:
+            logger.info(`${logMessage} | LOW`, logData);
+            break;
         }
 
         // 개발 환경에서는 스택 트레이스도 출력

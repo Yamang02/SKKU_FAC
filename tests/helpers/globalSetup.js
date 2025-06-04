@@ -26,7 +26,7 @@ async function globalSetup() {
         // 헬스체크 엔드포인트 확인
         const response = await page.goto(`${railwayUrl}/health`, {
             waitUntil: 'networkidle',
-            timeout: 60000
+            timeout: 60000,
         });
 
         if (!response.ok()) {
@@ -38,11 +38,10 @@ async function globalSetup() {
         // 기본 페이지 로드 테스트
         await page.goto(railwayUrl, {
             waitUntil: 'networkidle',
-            timeout: 60000
+            timeout: 60000,
         });
 
         console.log('✅ 기본 페이지 로드 성공');
-
     } catch (error) {
         console.error('❌ Railway 서버 상태 확인 실패:', error.message);
         throw error;

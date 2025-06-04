@@ -8,7 +8,7 @@ import {
     waitForPageLoad,
     expectSuccessMessage,
     expectErrorMessage,
-    captureScreenshot
+    captureScreenshot,
 } from '../helpers/test-helpers.js';
 
 /**
@@ -17,12 +17,10 @@ import {
  */
 
 test.describe('인증 관련 테스트 - 실제 구조 기반', () => {
-
     // ========================================
     // 2.1 회원가입 테스트 (U_70)
     // ========================================
     test.describe('회원가입 테스트 (U_70)', () => {
-
         test('성균관대생 회원가입 플로우', async ({ page }) => {
             const skkuUser = generateSKKUTestUser('skku-signup');
 
@@ -145,7 +143,6 @@ test.describe('인증 관련 테스트 - 실제 구조 기반', () => {
     // 2.2 로그인 테스트 (U_80)
     // ========================================
     test.describe('로그인 테스트 (U_80)', () => {
-
         test('정상 로그인', async ({ page }) => {
             // 로그인 페이지로 이동 (/user/login)
             await page.goto('/user/login');
@@ -216,7 +213,6 @@ test.describe('인증 관련 테스트 - 실제 구조 기반', () => {
     // 2.3 프로필 관리 테스트 (U_90)
     // ========================================
     test.describe('프로필 관리 테스트 (U_90)', () => {
-
         test('프로필 조회', async ({ page }) => {
             // 로그인 후 프로필 페이지 접근
             await loginUser(page, 'admin', 'admin123');
@@ -289,7 +285,6 @@ test.describe('인증 관련 테스트 - 실제 구조 기반', () => {
     // 2.4 세션 관리 테스트
     // ========================================
     test.describe('세션 관리 테스트', () => {
-
         test('세션 유지 확인', async ({ page }) => {
             await loginUser(page, 'admin', 'admin123');
 
@@ -319,7 +314,6 @@ test.describe('인증 관련 테스트 - 실제 구조 기반', () => {
     // 2.5 보안 테스트
     // ========================================
     test.describe('보안 테스트', () => {
-
         test('CSRF 보호 확인', async ({ page }) => {
             await page.goto('/user/new');
 

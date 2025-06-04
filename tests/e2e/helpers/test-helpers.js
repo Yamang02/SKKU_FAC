@@ -21,7 +21,7 @@ export function generateTestUser(prefix = 'test') {
         confirmPassword: 'Test123!@#',
         name: `${prefix} 테스트 사용자`,
         role: 'EXTERNAL_MEMBER',
-        affiliation: '테스트 기관'
+        affiliation: '테스트 기관',
     };
 }
 
@@ -38,7 +38,7 @@ export function generateSKKUTestUser(prefix = 'skku') {
         name: `${prefix} SKKU 사용자`,
         role: 'SKKU_MEMBER',
         department: '컴퓨터공학과',
-        studentYear: '23'
+        studentYear: '23',
     };
 }
 
@@ -54,7 +54,7 @@ export function generateExternalTestUser(prefix = 'external') {
         confirmPassword: 'Test123!@#',
         name: `${prefix} 외부 사용자`,
         role: 'EXTERNAL_MEMBER',
-        affiliation: '외부 기관'
+        affiliation: '외부 기관',
     };
 }
 
@@ -109,7 +109,7 @@ export async function registerUser(page, userData) {
  */
 export async function logoutUser(page) {
     const logoutButton = page.locator('a:has-text("로그아웃"), button:has-text("로그아웃"), .logout');
-    if (await logoutButton.count() > 0) {
+    if ((await logoutButton.count()) > 0) {
         await logoutButton.click();
         await waitForPageLoad(page);
     }
@@ -148,17 +148,12 @@ export async function waitForElementToDisappear(page, selector, timeout = 5000) 
  * 성공 메시지 확인
  */
 export async function expectSuccessMessage(page, message = null) {
-    const successSelectors = [
-        '.notification--success',
-        '.alert-success',
-        '.success-message',
-        '.toast-success'
-    ];
+    const successSelectors = ['.notification--success', '.alert-success', '.success-message', '.toast-success'];
 
     let found = false;
     for (const selector of successSelectors) {
         const element = page.locator(selector);
-        if (await element.count() > 0) {
+        if ((await element.count()) > 0) {
             await expect(element).toBeVisible();
             if (message) {
                 await expect(element).toContainText(message);
@@ -178,18 +173,12 @@ export async function expectSuccessMessage(page, message = null) {
  * 오류 메시지 확인
  */
 export async function expectErrorMessage(page, message = null) {
-    const errorSelectors = [
-        '.notification--error',
-        '.alert-error',
-        '.error-message',
-        '.toast-error',
-        '.alert-danger'
-    ];
+    const errorSelectors = ['.notification--error', '.alert-error', '.error-message', '.toast-error', '.alert-danger'];
 
     let found = false;
     for (const selector of errorSelectors) {
         const element = page.locator(selector);
-        if (await element.count() > 0) {
+        if ((await element.count()) > 0) {
             await expect(element).toBeVisible();
             if (message) {
                 await expect(element).toContainText(message);
@@ -209,17 +198,12 @@ export async function expectErrorMessage(page, message = null) {
  * 정보 메시지 확인
  */
 export async function expectInfoMessage(page, message = null) {
-    const infoSelectors = [
-        '.notification--info',
-        '.alert-info',
-        '.info-message',
-        '.toast-info'
-    ];
+    const infoSelectors = ['.notification--info', '.alert-info', '.info-message', '.toast-info'];
 
     let found = false;
     for (const selector of infoSelectors) {
         const element = page.locator(selector);
-        if (await element.count() > 0) {
+        if ((await element.count()) > 0) {
             await expect(element).toBeVisible();
             if (message) {
                 await expect(element).toContainText(message);
@@ -248,7 +232,7 @@ export async function captureScreenshot(page, name, options = {}) {
     await page.screenshot({
         path: `test-results/screenshots/${filename}`,
         fullPage: true,
-        ...options
+        ...options,
     });
 
     console.log(`📸 스크린샷 저장됨: ${filename}`);
@@ -284,7 +268,7 @@ export function startConsoleCapture(page) {
         logs.push({
             type: msg.type(),
             text: msg.text(),
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         });
     });
 
@@ -303,7 +287,7 @@ export async function fillForm(page, formData) {
         const selector = `#${field}, input[name="${field}"], select[name="${field}"], textarea[name="${field}"]`;
         const element = page.locator(selector);
 
-        if (await element.count() > 0) {
+        if ((await element.count()) > 0) {
             const tagName = await element.evaluate(el => el.tagName.toLowerCase());
 
             if (tagName === 'select') {
@@ -335,7 +319,7 @@ export async function waitForModal(page, timeout = 5000) {
 
     for (const selector of modalSelectors) {
         const modal = page.locator(selector);
-        if (await modal.count() > 0) {
+        if ((await modal.count()) > 0) {
             await modal.waitFor({ state: 'visible', timeout });
             return modal;
         }
@@ -353,12 +337,12 @@ export async function closeModal(page) {
         '.close-button',
         'button:has-text("닫기")',
         'button:has-text("Close")',
-        '[aria-label="Close"]'
+        '[aria-label="Close"]',
     ];
 
     for (const selector of closeSelectors) {
         const closeButton = page.locator(selector);
-        if (await closeButton.count() > 0) {
+        if ((await closeButton.count()) > 0) {
             await closeButton.click();
             return;
         }
@@ -391,7 +375,7 @@ export async function validateTableData(page, tableSelector, expectedData) {
 
             for (const [column, value] of Object.entries(rowData)) {
                 const cell = row.locator(`td:nth-child(${column}), td[data-column="${column}"]`);
-                if (await cell.count() > 0) {
+                if ((await cell.count()) > 0) {
                     await expect(cell).toContainText(value);
                 }
             }
@@ -421,7 +405,7 @@ export async function validateListItems(page, listSelector, expectedItems) {
             } else if (typeof expectedItem === 'object') {
                 for (const [selector, value] of Object.entries(expectedItem)) {
                     const element = item.locator(selector);
-                    if (await element.count() > 0) {
+                    if ((await element.count()) > 0) {
                         await expect(element).toContainText(value);
                     }
                 }
@@ -454,7 +438,7 @@ export async function validateApiResponse(response, expectedStatus = 200, expect
  */
 export async function makeAuthenticatedRequest(request, method, url, data = null, token = null) {
     const options = {
-        headers: {}
+        headers: {},
     };
 
     if (token) {

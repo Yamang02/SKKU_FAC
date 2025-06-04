@@ -22,6 +22,10 @@ export const ViewPath = {
                 LIST: 'admin/management/notice/NoticeManagementList.ejs',
                 DETAIL: 'admin/management/notice/NoticeManagementDetail.ejs'
             }
+        },
+        BATCH: {
+            LIST: 'admin/batch/BatchJobList.ejs',
+            DETAIL: 'admin/batch/BatchJobDetail.ejs'
         }
     },
     MAIN: {
@@ -53,5 +57,8 @@ export const ViewPath = {
     ERROR: 'common/error.ejs',
     COMMON: {
         PAGINATION: 'common/pagination.ejs'
-    }
+    },
+    // 편의를 위한 직접 접근 경로
+    ADMIN_BATCH_LIST: 'admin/batch/BatchJobList.ejs',
+    ADMIN_BATCH_DETAIL: 'admin/batch/BatchJobDetail.ejs'
 };

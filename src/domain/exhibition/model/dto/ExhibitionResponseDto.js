@@ -1,5 +1,5 @@
 import ExhibitionSimpleDto from './ExhibitionSimpleDto.js';
-import CloudinaryUrlOptimizer from '../../../../common/utils/CloudinaryUrlOptimizer.js';
+import CloudinaryUrlOptimizer from '#common/utils/CloudinaryUrlOptimizer.js';
 /**
  * 전시회 응답 DTO
  * 전시회 상세 정보 조회 시 사용되는 데이터 전송 객체

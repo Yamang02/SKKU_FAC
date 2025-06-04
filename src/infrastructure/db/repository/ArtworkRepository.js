@@ -2,21 +2,29 @@ import { Artwork, UserAccount } from '../model/entity/EntitityIndex.js';
 import { ArtworkError } from '../../../common/error/ArtworkError.js';
 import ArtworkExhibitionRelationship from '../model/relationship/ArtworkExhibitionRelationship.js';
 import { Op } from 'sequelize';
-import { db } from '../adapter/MySQLDatabase.js';
+import CachedRepository from '../../../common/cache/CachedRepository.js';
+import logger from '../../../common/utils/Logger.js';
 
-class ArtworkRepository {
+class ArtworkRepository extends CachedRepository {
     constructor() {
+        super(Artwork);
+    }
+
+    /**
+     * 기본 include 옵션 (작가 정보 포함)
+     */
+    getDefaultInclude() {
+        return [
+            {
+                model: UserAccount,
+                attributes: ['name']
+            }
+        ];
     }
 
     async createArtwork(artworkData, options = {}) {
-        const transaction = options.transaction || await db.transaction();
         try {
-            const artwork = await Artwork.create({
-                ...artworkData,
-                createdAt: new Date(),
-                updatedAt: new Date()
-            }, { transaction });
-            return artwork;
+            return await this.create(artworkData, options);
         } catch (error) {
             throw new ArtworkError('작품 생성 중 오류가 발생했습니다.', error);
         }
@@ -24,49 +32,39 @@ class ArtworkRepository {
 
     async updateArtwork(id, artworkData, isAdmin = false) {
         try {
-            const artwork = isAdmin ? await Artwork.scope('admin').findByPk(id) : await Artwork.findByPk(id);
+            const scope = isAdmin ? 'admin' : undefined;
+            const artwork = await this.findById(id, { scope });
+
             if (!artwork) {
                 throw new ArtworkError('작품을 찾을 수 없습니다.');
             }
 
-            await artwork.update({
-                ...artworkData,
-                updatedAt: new Date()
-            });
-            return artwork;
+            return await this.updateById(id, artworkData);
         } catch (error) {
             throw new ArtworkError('작품 수정 중 오류가 발생했습니다.', error);
         }
     }
 
     async updateArtworkDeleted(id) {
-        await Artwork.update({ status: 'DELETED' }, { where: { id } });
+        return await this.updateById(id, { status: 'DELETED' }, { returning: false });
     }
 
     async deleteArtwork(id) {
         try {
-            const artwork = await Artwork.findByPk(id);
-            if (!artwork) {
+            const result = await this.deleteById(id);
+            if (!result) {
                 throw new ArtworkError('작품을 찾을 수 없습니다.');
             }
-
-            await artwork.destroy();
             return true;
         } catch (error) {
             throw new ArtworkError('작품 삭제 중 오류가 발생했습니다.', error);
         }
     }
 
-
     async findArtworkById(id, isAdmin = false) {
         try {
-            if (isAdmin) {
-                const artwork = await Artwork.scope('admin').findByPk(id);
-                return artwork;
-            } else {
-                const artwork = await Artwork.findByPk(id);
-                return artwork;
-            }
+            const scope = isAdmin ? 'admin' : undefined;
+            return await this.findById(id, { scope });
         } catch (error) {
             throw new ArtworkError('작품 조회 중 오류가 발생했습니다.', error);
         }
@@ -74,17 +72,12 @@ class ArtworkRepository {
 
     async findArtworks(options = {}, isAdmin = false) {
         const where = {};
-        const include = [{
-            model: UserAccount,
-            attributes: ['name']
-        }];
+        const include = [...this.getDefaultInclude()];
 
         // 키워드 검색 조건이 있는 경우
         if (options.keyword) {
             // 작품명 검색만 먼저 설정
-            where[Op.or] = [
-                { title: { [Op.like]: `%${options.keyword}%` } }
-            ];
+            Object.assign(where, this.buildSearchCondition(options.keyword, ['title']));
         }
 
         // 상태 필터링
@@ -118,22 +111,24 @@ class ArtworkRepository {
         // 정렬 필드와 방향 설정
         const sortField = options.sortField || 'createdAt';
         const sortOrder = options.sortOrder || 'DESC';
+        const scope = isAdmin ? 'admin' : undefined;
 
-        // 일반 사용자는 defaultScope 사용 (승인된 작품만)
-        const queryOptions = this.buildQueryOptions(where, {
-            ...options,
+        const queryOptions = {
+            where,
             include,
-            sortField,
-            sortOrder
-        });
+            page: options.page || 1,
+            limit: options.limit || 12,
+            order: [[sortField, sortOrder.toUpperCase()]],
+            scope
+        };
 
         // 먼저 제목으로 검색한 결과 가져오기
-        const result = await this.executeQuery(queryOptions, isAdmin);
+        const result = await this.findAll(queryOptions);
 
         // 키워드 검색이 있는 경우 작가명으로도 검색 (작가 이름으로 검색)
         if (options.keyword) {
-            const artistQueryOptions = this.buildArtistSearchQueryOptions(options);
-            const artistResult = await this.executeQuery(artistQueryOptions, isAdmin);
+            const artistQueryOptions = this.buildArtistSearchQueryOptions(options, isAdmin);
+            const artistResult = await this.findAll(artistQueryOptions);
 
             // 중복 제거하여 두 결과 병합
             return this.mergeAndPaginateResults(result, artistResult, options, sortField, sortOrder);
@@ -142,34 +137,16 @@ class ArtworkRepository {
         return result;
     }
 
-    buildQueryOptions(where, options) {
-        const page = options.page || 1;
-        const limit = options.limit || 12;
-        const offset = (page - 1) * limit;
-        const sortField = options.sortField || 'createdAt';
-        const sortOrder = options.sortOrder || 'DESC';
-        const include = options.include || [{
-            model: UserAccount,
-            attributes: ['name']
-        }];
-
-        return {
-            where,
-            include,
-            limit,
-            offset,
-            order: [[sortField, sortOrder.toUpperCase()]]
-        };
-    }
-
-    buildArtistSearchQueryOptions(options) {
+    buildArtistSearchQueryOptions(options, isAdmin = false) {
         const artistWhere = {};
-        const artistInclude = [{
-            model: UserAccount,
-            where: { name: { [Op.like]: `%${options.keyword}%` } },
-            attributes: ['name'],
-            required: true
-        }];
+        const artistInclude = [
+            {
+                model: UserAccount,
+                where: { name: { [Op.like]: `%${options.keyword}%` } },
+                attributes: ['name'],
+                required: true
+            }
+        ];
 
         // 상태 필터링
         if (options.status) {
@@ -198,30 +175,16 @@ class ArtworkRepository {
             artistWhere.year = options.year;
         }
 
-        return this.buildQueryOptions(artistWhere, { ...options, include: artistInclude });
-    }
+        const scope = isAdmin ? 'admin' : undefined;
 
-    async executeQuery(queryOptions, isAdmin) {
-        try {
-            let result;
-            if (isAdmin) {
-                // 관리자는 admin scope 사용하여 모든 작품 조회
-                result = await Artwork.scope('admin').findAndCountAll(queryOptions);
-            } else {
-                // 일반 사용자는 defaultScope 사용하여 승인된 작품만 조회
-                result = await Artwork.findAndCountAll(queryOptions);
-            }
-
-            return {
-                items: result.rows,
-                total: result.count,
-                page: queryOptions.page || 1,
-                limit: queryOptions.limit || 12
-            };
-        } catch (error) {
-            console.error('작품 목록 조회 중 오류:', error);
-            throw error;
-        }
+        return {
+            where: artistWhere,
+            include: artistInclude,
+            page: options.page || 1,
+            limit: options.limit || 12,
+            order: [[options.sortField || 'createdAt', (options.sortOrder || 'DESC').toUpperCase()]],
+            scope
+        };
     }
 
     mergeAndPaginateResults(titleResult, artistResult, options, sortField, sortOrder) {
@@ -266,13 +229,16 @@ class ArtworkRepository {
             items: paginatedItems,
             total,
             page,
-            limit
+            limit,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page < Math.ceil(total / limit),
+            hasPrev: page > 1
         };
     }
 
     async findArtists() {
         try {
-            const artworks = await Artwork.findAll({
+            const artworks = await this.getModel().findAll({
                 attributes: ['artistName'],
                 group: ['artistName']
             });
@@ -287,12 +253,12 @@ class ArtworkRepository {
 
     async findFeaturedArtworks(limit) {
         try {
-            const featuredArtworks = await Artwork.findAll({
+            return await this.findAll({
                 where: { isFeatured: true },
                 order: [['createdAt', 'DESC']],
-                limit: limit
+                limit: limit,
+                pagination: false
             });
-            return featuredArtworks;
         } catch (error) {
             throw new ArtworkError('추천 작품 조회 중 오류가 발생했습니다.', error);
         }
@@ -300,15 +266,17 @@ class ArtworkRepository {
 
     async findByArtistId(artistId, limit, excludeId) {
         try {
-            const artworks = await Artwork.findAll({
-                where: {
-                    userId: artistId,
-                    id: { [Op.ne]: excludeId } // 제외할 작품 ID
-                },
+            const where = { userId: artistId };
+            if (excludeId) {
+                where.id = { [Op.ne]: excludeId };
+            }
+
+            return await this.findAll({
+                where,
                 limit: limit,
-                order: [['createdAt', 'DESC']]
+                order: [['createdAt', 'DESC']],
+                pagination: false
             });
-            return artworks;
         } catch (error) {
             throw new ArtworkError('작가의 작품 조회 중 오류가 발생했습니다.', error);
         }
@@ -316,15 +284,19 @@ class ArtworkRepository {
 
     async findByExhibitionId(exhibitionId, limit, excludeId) {
         try {
+            const where = { exhibitionId: exhibitionId };
+            if (excludeId) {
+                where.artworkId = { [Op.ne]: excludeId };
+            }
+
             const artworkExhibitionRelationships = await ArtworkExhibitionRelationship.findAll({
-                where: {
-                    exhibitionId: exhibitionId,
-                    artworkId: { [Op.ne]: excludeId }
-                },
-                include: [{
-                    model: Artwork,
-                    required: true
-                }],
+                where,
+                include: [
+                    {
+                        model: Artwork,
+                        required: true
+                    }
+                ],
                 limit: limit,
                 order: [['createdAt', 'DESC']]
             });
@@ -337,19 +309,259 @@ class ArtworkRepository {
 
     async findArtworkBySlug(slug) {
         try {
-            const artwork = await Artwork.findOne({
-                where: { slug: slug }
-            });
-
-            if (!artwork) {
-                return null;
-            }
-
-            return artwork;
+            return await this.findOne({ slug: slug });
         } catch (error) {
             console.error('작품 조회 오류:', error);
             throw error;
         }
+    }
+
+    /**
+     * 최적화된 키워드 검색 (UNION 쿼리 사용)
+     * @param {object} options - 검색 옵션
+     * @param {boolean} isAdmin - 관리자 여부
+     * @returns {Promise<object>} 검색 결과
+     */
+    async findArtworksOptimized(options = {}, isAdmin = false) {
+        if (!options.keyword) {
+            // 키워드가 없으면 기본 메서드 사용
+            return await this.findArtworks(options, isAdmin);
+        }
+
+        // UNION을 사용한 최적화된 검색 쿼리
+        const baseWhere = this.buildBaseWhereCondition(options);
+
+        const sql = `
+            SELECT DISTINCT a.*, u.name as user_name
+            FROM artworks a
+            LEFT JOIN user_accounts u ON a.user_id = u.id
+            WHERE (
+                (a.title LIKE :keyword OR u.name LIKE :keyword)
+                ${baseWhere.sql}
+            )
+            ${options.exhibition ? 'AND EXISTS (SELECT 1 FROM artwork_exhibition_relationships aer WHERE aer.artwork_id = a.id AND aer.exhibition_id = :exhibition)' : ''}
+            ORDER BY ${options.sortField || 'a.created_at'} ${(options.sortOrder || 'DESC').toUpperCase()}
+            LIMIT :limit OFFSET :offset
+        `;
+
+        const countSql = `
+            SELECT COUNT(DISTINCT a.id) as total
+            FROM artworks a
+            LEFT JOIN user_accounts u ON a.user_id = u.id
+            WHERE (
+                (a.title LIKE :keyword OR u.name LIKE :keyword)
+                ${baseWhere.sql}
+            )
+            ${options.exhibition ? 'AND EXISTS (SELECT 1 FROM artwork_exhibition_relationships aer WHERE aer.artwork_id = a.id AND aer.exhibition_id = :exhibition)' : ''}
+        `;
+
+        const page = parseInt(options.page) || 1;
+        const limit = parseInt(options.limit) || 12;
+        const offset = (page - 1) * limit;
+
+        const replacements = {
+            keyword: `%${options.keyword}%`,
+            limit,
+            offset,
+            ...baseWhere.replacements
+        };
+
+        if (options.exhibition) {
+            replacements.exhibition = options.exhibition;
+        }
+
+        try {
+            const [items, countResult] = await Promise.all([
+                this.executeRawQuery(sql, { replacements }),
+                this.executeRawQuery(countSql, { replacements })
+            ]);
+
+            const total = countResult[0]?.total || 0;
+            const totalPages = Math.ceil(total / limit);
+
+            return {
+                items,
+                total,
+                page,
+                limit,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrev: page > 1
+            };
+        } catch (error) {
+            logger.error('최적화된 작품 검색 실패:', error);
+            // 실패 시 기본 메서드로 폴백
+            return await this.findArtworks(options, isAdmin);
+        }
+    }
+
+    /**
+     * 기본 WHERE 조건 생성
+     * @param {object} options - 검색 옵션
+     * @returns {object} SQL 조건과 바인딩 파라미터
+     */
+    buildBaseWhereCondition(options) {
+        const conditions = [];
+        const replacements = {};
+
+        if (options.status) {
+            conditions.push('a.status = :status');
+            replacements.status = options.status;
+        }
+
+        if (options.isFeatured === true) {
+            conditions.push('a.is_featured = true');
+        } else if (options.isFeatured === false) {
+            conditions.push('a.is_featured = false');
+        }
+
+        if (options.year) {
+            conditions.push('a.year = :year');
+            replacements.year = options.year;
+        }
+
+        const sql = conditions.length > 0 ? ` AND ${conditions.join(' AND ')}` : '';
+
+        return { sql, replacements };
+    }
+
+    /**
+     * 전시회별 작품 조회 최적화 (배치 로딩)
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {object} options - 조회 옵션
+     * @returns {Promise<Array>} 작품 목록
+     */
+    async findArtworksByExhibitionOptimized(exhibitionId, options = {}) {
+        const { limit = 20, excludeId = null } = options;
+
+        // 1단계: 전시회-작품 관계 조회
+        const relationshipSql = `
+            SELECT artwork_id, display_order
+            FROM artwork_exhibition_relationships
+            WHERE exhibition_id = :exhibitionId
+            ${excludeId ? 'AND artwork_id != :excludeId' : ''}
+            ORDER BY display_order ASC, created_at DESC
+            LIMIT :limit
+        `;
+
+        const relationships = await this.executeRawQuery(relationshipSql, {
+            replacements: {
+                exhibitionId,
+                excludeId,
+                limit
+            }
+        });
+
+        if (relationships.length === 0) {
+            return [];
+        }
+
+        // 2단계: 작품 정보 배치 조회
+        const artworkIds = relationships.map(rel => rel.artwork_id);
+        const artworks = await this.findByIds(artworkIds, {
+            include: this.getDefaultInclude()
+        });
+
+        // 3단계: display_order에 따라 정렬
+        const orderMap = new Map(relationships.map(rel => [rel.artwork_id, rel.display_order]));
+
+        return artworks.sort((a, b) => {
+            const orderA = orderMap.get(a.id) || 999;
+            const orderB = orderMap.get(b.id) || 999;
+            return orderA - orderB;
+        });
+    }
+
+    /**
+     * 주요 작품 조회 최적화
+     * @param {number} limit - 조회 제한 수
+     * @returns {Promise<Array>} 주요 작품 목록
+     */
+    async findFeaturedArtworksOptimized(limit = 6) {
+        // 최적화된 쿼리로 주요 작품 조회
+        return await this.findAllOptimized({
+            where: { isFeatured: true, status: 'ACTIVE' },
+            includes: ['UserAccount'],
+            limit,
+            order: [['createdAt', 'DESC']],
+            pagination: false
+        });
+    }
+
+    /**
+     * 작가별 작품 통계 조회
+     * @param {string} artistId - 작가 ID (선택적)
+     * @returns {Promise<Array>} 작가별 작품 통계
+     */
+    async getArtworkStatsByArtist(artistId = null) {
+        const whereClause = artistId ? 'WHERE a.user_id = :artistId' : '';
+
+        const sql = `
+            SELECT
+                u.id as artist_id,
+                u.name as artist_name,
+                COUNT(a.id) as total_artworks,
+                COUNT(CASE WHEN a.is_featured = true THEN 1 END) as featured_count,
+                COUNT(CASE WHEN a.status = 'ACTIVE' THEN 1 END) as active_count,
+                MAX(a.created_at) as latest_artwork_date
+            FROM user_accounts u
+            LEFT JOIN artworks a ON u.id = a.user_id
+            ${whereClause}
+            GROUP BY u.id, u.name
+            HAVING total_artworks > 0
+            ORDER BY total_artworks DESC
+        `;
+
+        const replacements = artistId ? { artistId } : {};
+
+        return await this.executeRawQuery(sql, { replacements });
+    }
+
+    /**
+     * 연도별 작품 통계 조회
+     * @returns {Promise<Array>} 연도별 작품 통계
+     */
+    async getArtworkStatsByYear() {
+        return await this.aggregate({
+            field: 'id',
+            fn: 'COUNT',
+            where: { status: 'ACTIVE' },
+            group: ['year']
+        });
+    }
+
+    /**
+     * 관련 작품 추천 (같은 작가 또는 같은 전시회)
+     * @param {string} artworkId - 기준 작품 ID
+     * @param {number} limit - 추천 작품 수
+     * @returns {Promise<Array>} 추천 작품 목록
+     */
+    async findRelatedArtworks(artworkId, limit = 4) {
+        const sql = `
+            SELECT DISTINCT a.*, u.name as user_name,
+                   CASE
+                       WHEN a.user_id = (SELECT user_id FROM artworks WHERE id = :artworkId) THEN 1
+                       ELSE 2
+                   END as relevance_score
+            FROM artworks a
+            LEFT JOIN user_accounts u ON a.user_id = u.id
+            WHERE a.id != :artworkId
+              AND a.status = 'ACTIVE'
+              AND (
+                  a.user_id = (SELECT user_id FROM artworks WHERE id = :artworkId)
+                  OR EXISTS (
+                      SELECT 1 FROM artwork_exhibition_relationships aer1
+                      JOIN artwork_exhibition_relationships aer2 ON aer1.exhibition_id = aer2.exhibition_id
+                      WHERE aer1.artwork_id = a.id AND aer2.artwork_id = :artworkId
+                  )
+              )
+            ORDER BY relevance_score ASC, a.created_at DESC
+            LIMIT :limit
+        `;
+
+        return await this.executeRawQuery(sql, {
+            replacements: { artworkId, limit }
+        });
     }
 }
 

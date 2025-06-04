@@ -26,13 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function validateTokenOnLoad() {
         try {
             // 폼 비활성화
-            resetForm.querySelectorAll('input, button').forEach(el => el.disabled = true);
+            resetForm.querySelectorAll('input, button').forEach(el => (el.disabled = true));
 
             // 토큰 유효성 검사
             await AuthApi.validateToken(token, 'PASSWORD_RESET');
 
             // 폼 활성화
-            resetForm.querySelectorAll('input, button').forEach(el => el.disabled = false);
+            resetForm.querySelectorAll('input, button').forEach(el => (el.disabled = false));
         } catch (error) {
             // 토큰 만료 처리
             const errorResponse = error.response?.data;
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 비밀번호 재설정 폼 처리
     if (resetForm) {
-        resetForm.addEventListener('submit', async (e) => {
+        resetForm.addEventListener('submit', async e => {
             e.preventDefault();
 
             const newPassword = document.getElementById('new-password').value;
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 토큰 재발송 폼 처리
     if (resendForm) {
-        resendForm.addEventListener('submit', async (e) => {
+        resendForm.addEventListener('submit', async e => {
             e.preventDefault();
 
             const email = document.getElementById('email-for-resend').value;
@@ -123,7 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 3000);
             } catch (error) {
                 // 에러 객체에서 메시지 추출
-                const errorMessage = error.response?.data?.message || '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                const errorMessage =
+                    error.response?.data?.message || '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
                 showErrorMessage(errorMessage);
 
                 // 버튼 상태 복원

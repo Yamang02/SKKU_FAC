@@ -1,160 +1,164 @@
 <style ref="stylesheet">
-    @import url('/css/artwork/ArtworkDetail.css');
+  @import url('/css/artwork/ArtworkDetail.css');
 </style>
 <div class="artwork-detail-container">
-    <!-- 작품 이미지 섹션 -->
-    <section class="artwork-image-section">
-        <div class="artwork-image-wrapper">
-            <img src="/images/artwork-placeholder.svg" alt="작품 이미지" class="artwork-main-image"
-                onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';">
+  <!-- 작품 이미지 섹션 -->
+  <section class="artwork-image-section">
+    <div class="artwork-image-wrapper">
+      <img
+        src="/images/artwork-placeholder.svg"
+        alt="작품 이미지"
+        class="artwork-main-image"
+        onerror="this.onerror=null; this.src='/images/artwork-placeholder.svg';"
+      />
+    </div>
+  </section>
+
+  <!-- 작품 정보 섹션 -->
+  <section class="artwork-info-section">
+    <div class="artwork-detail-header">
+      <div class="title-container">
+        <h1 class="artwork-detail-title">로딩중...</h1>
+        <button id="shareByKakaoTalkBtn" class="share-by-kakao-talk-btn" style="display: none">
+          <i class="fas fa-comment"></i>
+          <span class="tooltip">카카오톡 공유하기</span>
+        </button>
+        <button id="generateQRBtn" class="generate-qr-btn" style="display: none">
+          <i class="fas fa-qrcode"></i>
+          <span class="tooltip">QR 코드 생성하기</span>
+        </button>
+        <button id="manageArtworkBtn" class="manage-artwork-btn" style="display: none">
+          <i class="fas fa-cog"></i>
+        </button>
+      </div>
+      <p class="artwork-detail-artist"></p>
+      <p class="artwork-detail-affiliation"></p>
+    </div>
+
+    <div class="artwork-details">
+      <div class="detail-group">
+        <h2><i class="fas fa-info-circle icon-margin"></i>작품 정보</h2>
+        <div class="detail-item">
+          <span class="label">제작 연도</span>
+          <span class="value year">-</span>
         </div>
-    </section>
-
-    <!-- 작품 정보 섹션 -->
-    <section class="artwork-info-section">
-        <div class="artwork-detail-header">
-            <div class="title-container">
-                <h1 class="artwork-detail-title">로딩중...</h1>
-                <button id="shareByKakaoTalkBtn" class="share-by-kakao-talk-btn" style="display:none;">
-                    <i class="fas fa-comment"></i>
-                    <span class="tooltip">카카오톡 공유하기</span>
-                </button>
-                <button id="generateQRBtn" class="generate-qr-btn" style="display:none;">
-                    <i class="fas fa-qrcode"></i>
-                    <span class="tooltip">QR 코드 생성하기</span>
-                </button>
-                <button id="manageArtworkBtn" class="manage-artwork-btn" style="display:none;">
-                    <i class="fas fa-cog"></i>
-                </button>
-            </div>
-            <p class="artwork-detail-artist"></p>
-            <p class="artwork-detail-affiliation"></p>
+        <div class="detail-item">
+          <span class="label">매체</span>
+          <span class="value medium">-</span>
         </div>
-
-        <div class="artwork-details">
-            <div class="detail-group">
-                <h2><i class="fas fa-info-circle icon-margin"></i>작품 정보</h2>
-                <div class="detail-item">
-                    <span class="label">제작 연도</span>
-                    <span class="value year">-</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">매체</span>
-                    <span class="value medium">-</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">크기</span>
-                    <span class="value size">-</span>
-                </div>
-            </div>
-
-            <div class="detail-group">
-                <h2><i class="fas fa-align-left icon-margin"></i>작품 설명</h2>
-                <p class="artwork-description">-</p>
-            </div>
-
-            <div class="detail-group">
-                <h2><i class="fas fa-calendar-alt icon-margin"></i>전시 정보</h2>
-                <p class="exhibition-info">-</p>
-            </div>
+        <div class="detail-item">
+          <span class="label">크기</span>
+          <span class="value size">-</span>
         </div>
-    </section>
+      </div>
+
+      <div class="detail-group">
+        <h2><i class="fas fa-align-left icon-margin"></i>작품 설명</h2>
+        <p class="artwork-description">-</p>
+      </div>
+
+      <div class="detail-group">
+        <h2><i class="fas fa-calendar-alt icon-margin"></i>전시 정보</h2>
+        <p class="exhibition-info">-</p>
+      </div>
+    </div>
+  </section>
 </div>
 
 <!-- 관련 작품 섹션 -->
 <div class="related-artworks-wrapper">
-    <div class="related-artworks">
-        <div class="related-artworks-container">
-            <div class="related-artworks-header">
-                <h2 class="related-artworks-title">다른 작품</h2>
-            </div>
-            <div class="related-artworks-list">
-                <!-- 관련 작품이 JavaScript로 로드됩니다 -->
-            </div>
-            <div class="list-action">
-                <div class="action-group">
-                    <button class="btn btn--round btn--scroll" aria-label="이전 작품">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <a href="/artwork" class="btn btn--round btn--list">
-                        <i class="fas fa-th-large"></i>
-                        <span>작품 목록</span>
-                    </a>
-                    <button class="btn btn--round btn--scroll" aria-label="다음 작품">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
+  <div class="related-artworks">
+    <div class="related-artworks-container">
+      <div class="related-artworks-header">
+        <h2 class="related-artworks-title">다른 작품</h2>
+      </div>
+      <div class="related-artworks-list">
+        <!-- 관련 작품이 JavaScript로 로드됩니다 -->
+      </div>
+      <div class="list-action">
+        <div class="action-group">
+          <button class="btn btn--round btn--scroll" aria-label="이전 작품">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <a href="/artwork" class="btn btn--round btn--list">
+            <i class="fas fa-th-large"></i>
+            <span>작품 목록</span>
+          </a>
+          <button class="btn btn--round btn--scroll" aria-label="다음 작품">
+            <i class="fas fa-chevron-right"></i>
+          </button>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- 작품 관리 모달 -->
 <div id="artworkManageModal" class="modal">
-    <div class="modal-content">
-        <span class="close"><i class="fas fa-times"></i></span>
-        <div class="modal-body artwork-edit-modal-body">
-            <div class="form-group">
-                <label for="editTitle">제목</label>
-                <input type="text" id="editTitle" class="form-control" readonly>
-            </div>
-            <div class="form-group">
-                <label for="editYear">제작 연도</label>
-                <input type="number" id="editYear" class="form-control" min="1900" max="2100" step="1">
-            </div>
-            <div class="form-group">
-                <label for="editMedium">매체</label>
-                <input type="text" id="editMedium" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="editSize">크기</label>
-                <input type="text" id="editSize" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="editDescription">작품 설명</label>
-                <textarea id="editDescription" class="form-control" rows="5"></textarea>
-            </div>
+  <div class="modal-content">
+    <span class="close"><i class="fas fa-times"></i></span>
+    <div class="modal-body artwork-edit-modal-body">
+      <div class="form-group">
+        <label for="editTitle">제목</label>
+        <input type="text" id="editTitle" class="form-control" readonly />
+      </div>
+      <div class="form-group">
+        <label for="editYear">제작 연도</label>
+        <input type="number" id="editYear" class="form-control" min="1900" max="2100" step="1" />
+      </div>
+      <div class="form-group">
+        <label for="editMedium">매체</label>
+        <input type="text" id="editMedium" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label for="editSize">크기</label>
+        <input type="text" id="editSize" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label for="editDescription">작품 설명</label>
+        <textarea id="editDescription" class="form-control" rows="5"></textarea>
+      </div>
 
-            <!-- 이미 출품된 전시회 섹션 -->
-            <div class="form-group">
-                <label for="submittedExhibitionList">출품된 전시회</label>
-                <ul id="submittedExhibitionList" class="exhibition-list form-control">
-                    <!-- 이미 출품된 전시회가 JavaScript로 로드됩니다 -->
-                </ul>
-            </div>
+      <!-- 이미 출품된 전시회 섹션 -->
+      <div class="form-group">
+        <label for="submittedExhibitionList">출품된 전시회</label>
+        <ul id="submittedExhibitionList" class="exhibition-list form-control">
+          <!-- 이미 출품된 전시회가 JavaScript로 로드됩니다 -->
+        </ul>
+      </div>
 
-            <!-- 출품 가능한 전시회 섹션 -->
-            <div class="form-group">
-                <label for="exhibitionSelect">출품 가능한 전시회</label>
-                <ul id="exhibitionList" class="exhibition-list form-control">
-                    <!-- 출품 가능한 전시회가 JavaScript로 로드됩니다 -->
-                </ul>
-            </div>
+      <!-- 출품 가능한 전시회 섹션 -->
+      <div class="form-group">
+        <label for="exhibitionSelect">출품 가능한 전시회</label>
+        <ul id="exhibitionList" class="exhibition-list form-control">
+          <!-- 출품 가능한 전시회가 JavaScript로 로드됩니다 -->
+        </ul>
+      </div>
 
-            <div class="modal-actions">
-                <button id="saveArtworkChanges" class="btn btn-primary">작품 정보 저장</button>
-                <button id="deleteArtwork" class="btn btn-danger">삭제</button>
-                <button class="btn btn-secondary close-btn">취소</button>
-            </div>
-        </div>
+      <div class="modal-actions">
+        <button id="saveArtworkChanges" class="btn btn-primary">작품 정보 저장</button>
+        <button id="deleteArtwork" class="btn btn-danger">삭제</button>
+        <button class="btn btn-secondary close-btn">취소</button>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- QR 코드 모달 -->
 <div id="qrCodeModal" class="modal">
-    <div class="modal-content qr-modal-content">
-        <div id="qrCodeContainer" class="qr-code-container">
-            <h2 class="qr-artwork-title"></h2>
-            <p class="qr-artist-name"></p>
-            <div class="qr-code-image-container">
-                <img id="qrCodeImage" alt="QR 코드">
-            </div>
-            <p class="qr-scan-text">QR 코드를 스캔하여 작품 정보를 확인하세요</p>
-        </div>
-        <div class="modal-actions">
-            <button id="downloadQRCode" class="btn btn-primary">이미지 다운로드</button>
-        </div>
+  <div class="modal-content qr-modal-content">
+    <div id="qrCodeContainer" class="qr-code-container">
+      <h2 class="qr-artwork-title"></h2>
+      <p class="qr-artist-name"></p>
+      <div class="qr-code-image-container">
+        <img id="qrCodeImage" alt="QR 코드" />
+      </div>
+      <p class="qr-scan-text">QR 코드를 스캔하여 작품 정보를 확인하세요</p>
     </div>
+    <div class="modal-actions">
+      <button id="downloadQRCode" class="btn btn-primary">이미지 다운로드</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
