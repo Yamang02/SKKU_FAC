@@ -1347,14 +1347,7 @@ class Config {
      * @returns {object} 이메일 설정 객체
      */
     getEmailConfig() {
-        // 먼저 config에서 이메일 설정 조회 (암호화된 값은 자동으로 복호화됨)
-        const storedEmailConfig = this.get('email');
-
-        if (storedEmailConfig && storedEmailConfig.user && storedEmailConfig.pass) {
-            return storedEmailConfig;
-        }
-
-        // config에 없으면 환경변수에서 직접 가져오기
+        // 암호화 문제를 피하기 위해 환경변수에서 직접 가져오기
         return {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
@@ -1368,7 +1361,8 @@ class Config {
      * @returns {object} Redis 설정 객체
      */
     getRedisConfig() {
-        const baseConfig = this.config.redis || {
+        // 암호화 문제를 피하기 위해 환경변수에서 직접 가져오기
+        const baseConfig = {
             host: process.env.REDIS_HOST || 'localhost',
             port: parseInt(process.env.REDIS_PORT, 10) || 6379,
             username: process.env.REDIS_USERNAME || null,
