@@ -491,11 +491,11 @@ class Config {
                 logDir: process.env.LOG_DIR || 'logs'
             },
 
-            // 이메일 설정 (Railway 환경변수 지원)
+            // 이메일 설정
             email: {
-                user: process.env.EMAIL_USER || process.env.GMAIL_USER,
-                pass: process.env.EMAIL_PASS || process.env.GMAIL_PASS,
-                from: process.env.EMAIL_FROM || process.env.GMAIL_USER || process.env.EMAIL_USER,
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+                from: process.env.EMAIL_FROM,
                 adminEmail: process.env.ADMIN_EMAIL
             },
 
@@ -1347,15 +1347,20 @@ class Config {
      * @returns {object} 이메일 설정 객체
      */
     getEmailConfig() {
-        return (
-            this.get('email') || {
-                // Railway 환경변수명과 애플리케이션 환경변수명 매핑
-                user: process.env.EMAIL_USER || process.env.GMAIL_USER,
-                pass: process.env.EMAIL_PASS || process.env.GMAIL_PASS,
-                from: process.env.EMAIL_FROM || process.env.GMAIL_USER || process.env.EMAIL_USER,
-                adminEmail: process.env.ADMIN_EMAIL
-            }
-        );
+        // 먼저 config에서 이메일 설정 조회 (암호화된 값은 자동으로 복호화됨)
+        const storedEmailConfig = this.get('email');
+
+        if (storedEmailConfig && storedEmailConfig.user && storedEmailConfig.pass) {
+            return storedEmailConfig;
+        }
+
+        // config에 없으면 환경변수에서 직접 가져오기
+        return {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+            from: process.env.EMAIL_FROM,
+            adminEmail: process.env.ADMIN_EMAIL
+        };
     }
 
     /**
