@@ -134,9 +134,24 @@ class MetricsCollector {
      * HTTP 요청 메트릭 기록
      */
     recordHttpRequest(req, res, responseTime) {
-        const route = this.sanitizeRoute(req.route?.path || req.path || 'unknown');
-        const method = req.method;
-        const statusCode = res.statusCode.toString();
+        // route 추출을 더 안전하게 처리
+        let routePath = 'unknown';
+        try {
+            if (req.route && typeof req.route.path === 'string') {
+                routePath = req.route.path;
+            } else if (typeof req.path === 'string') {
+                routePath = req.path;
+            } else if (typeof req.originalUrl === 'string') {
+                // 쿼리 파라미터 제거
+                routePath = req.originalUrl.split('?')[0];
+            }
+        } catch (error) {
+            logger.warn('HTTP 요청에서 route 추출 중 오류 발생', { error: error.message });
+        }
+
+        const route = this.sanitizeRoute(routePath);
+        const method = req.method || 'unknown';
+        const statusCode = (res.statusCode || 500).toString();
         const userRole = req.session?.user?.role || 'anonymous';
 
         // 요청 카운터 증가
@@ -312,14 +327,22 @@ class MetricsCollector {
      * 라우트 경로 정규화 (개인정보 제거)
      */
     sanitizeRoute(route) {
-        if (!route) return 'unknown';
+        // route가 문자열이 아닌 경우 안전하게 처리
+        if (!route || typeof route !== 'string') {
+            return 'unknown';
+        }
 
-        // ID 파라미터를 일반화
-        return route
-            .replace(/\/\d+/g, '/:id')
-            .replace(/\/[a-fA-F0-9]{24}/g, '/:id') // MongoDB ObjectId
-            .replace(/\/[a-fA-F0-9-]{36}/g, '/:uuid') // UUID
-            .toLowerCase();
+        try {
+            // ID 파라미터를 일반화
+            return route
+                .replace(/\/\d+/g, '/:id')
+                .replace(/\/[a-fA-F0-9]{24}/g, '/:id') // MongoDB ObjectId
+                .replace(/\/[a-fA-F0-9-]{36}/g, '/:uuid') // UUID
+                .toLowerCase();
+        } catch (error) {
+            logger.warn('라우트 정규화 중 오류 발생', { route, error: error.message });
+            return 'unknown';
+        }
     }
 
     /**

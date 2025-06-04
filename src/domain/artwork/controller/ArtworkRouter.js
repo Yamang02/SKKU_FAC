@@ -1,5 +1,6 @@
 import express from 'express';
 import ArtworkApiController from './api/ArtworkApiController.js';
+import CacheMiddleware from '../../../common/middleware/CacheMiddleware.js';
 import { imageUploadMiddleware } from '../../../common/middleware/imageUploadMiddleware.js';
 import { isAuthenticated } from '../../../common/middleware/auth.js';
 import { DomainSanitization } from '../../../common/middleware/sanitization.js';
@@ -16,6 +17,7 @@ export function createArtworkRouter(container) {
     // 의존성 주입된 컨트롤러들을 해결
     const artworkController = container.resolve('ArtworkController');
     const artworkApiController = new ArtworkApiController(); // 아직 의존성 주입 미적용
+    const cacheMiddleware = new CacheMiddleware();
 
     // === API 엔드포인트 ===
 
@@ -80,7 +82,12 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.post('/api/new', isAuthenticated, DomainSanitization.artwork.create, imageUploadMiddleware('artwork'), artworkApiController.createArtwork.bind(artworkApiController));
+    ArtworkRouter.post('/api/new', isAuthenticated, DomainSanitization.artwork.create, imageUploadMiddleware('artwork'), async (req, res) => {
+        const result = await artworkApiController.createArtwork(req, res);
+        // 작품 관련 캐시 무효화
+        await cacheMiddleware.invalidatePattern('artwork_*');
+        return result;
+    });
 
     /**
      * @swagger
@@ -136,7 +143,12 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.put('/api/:id', isAuthenticated, DomainSanitization.artwork.update, artworkApiController.updateArtwork.bind(artworkApiController));
+    ArtworkRouter.put('/api/:id', isAuthenticated, DomainSanitization.artwork.update, async (req, res) => {
+        const result = await artworkApiController.updateArtwork(req, res);
+        // 작품 관련 캐시 무효화
+        await cacheMiddleware.invalidatePattern('artwork_*');
+        return result;
+    });
 
     /**
      * @swagger
@@ -168,7 +180,12 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.delete('/api/:id', artworkApiController.deleteArtwork.bind(artworkApiController));
+    ArtworkRouter.delete('/api/:id', async (req, res) => {
+        const result = await artworkApiController.deleteArtwork(req, res);
+        // 작품 관련 캐시 무효화
+        await cacheMiddleware.invalidatePattern('artwork_*');
+        return result;
+    });
 
     // 작품 목록 조회 API
     /**
@@ -265,7 +282,7 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.get('/api/list', DomainSanitization.artwork.search, artworkApiController.getArtworkList.bind(artworkApiController));
+    ArtworkRouter.get('/api/list', DomainSanitization.artwork.search, cacheMiddleware.list({ ttl: 600, keyPrefix: 'artwork_list' }), (req, res) => artworkApiController.getArtworkList(req, res));
 
     /**
      * @swagger
@@ -291,7 +308,7 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.get('/api/featured', artworkApiController.getFeaturedArtworks.bind(artworkApiController));
+    ArtworkRouter.get('/api/featured', cacheMiddleware.static({ ttl: 1800, keyPrefix: 'artwork_featured' }), (req, res) => artworkApiController.getFeaturedArtworks(req, res));
 
     /**
      * @swagger
@@ -324,7 +341,7 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.get('/api/detail/:slug', artworkApiController.getArtworkDetail.bind(artworkApiController));
+    ArtworkRouter.get('/api/detail/:slug', cacheMiddleware.create({ ttl: 900, keyPrefix: 'artwork_detail' }), (req, res) => artworkApiController.getArtworkDetail(req, res));
 
     // 전시회 출품 및 취소하기
     /**
@@ -365,7 +382,13 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.post('/api/exhibiting', DomainSanitization.artwork.create, artworkApiController.submitArtwork.bind(artworkApiController));
+    ArtworkRouter.post('/api/exhibiting', DomainSanitization.artwork.create, async (req, res) => {
+        const result = await artworkApiController.submitArtwork(req, res);
+        // 작품 및 전시회 관련 캐시 무효화
+        await cacheMiddleware.invalidatePattern('artwork_*');
+        await cacheMiddleware.invalidatePattern('exhibition_*');
+        return result;
+    });
 
     /**
      * @swagger
@@ -403,7 +426,13 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.delete('/api/exhibiting/:artworkId/:exhibitionId', artworkApiController.cancelArtworkSubmission.bind(artworkApiController));
+    ArtworkRouter.delete('/api/exhibiting/:artworkId/:exhibitionId', async (req, res) => {
+        const result = await artworkApiController.cancelSubmission(req, res);
+        // 작품 및 전시회 관련 캐시 무효화
+        await cacheMiddleware.invalidatePattern('artwork_*');
+        await cacheMiddleware.invalidatePattern('exhibition_*');
+        return result;
+    });
 
     // === 페이지 라우트 ===
     // 작품 목록 페이지 (기본 경로)

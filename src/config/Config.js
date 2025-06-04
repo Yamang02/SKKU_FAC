@@ -166,6 +166,7 @@ class Config {
                 username: Joi.string().allow(null).optional(),
                 password: Joi.string().allow(null).optional(),
                 db: Joi.number().integer().min(0).max(15).optional(),
+                cacheDb: Joi.number().integer().min(0).max(15).optional(),
                 ttl: Joi.number().integer().min(1).optional(),
                 prefix: Joi.string().optional(),
                 useTestInstance: Joi.boolean().optional(),
@@ -508,6 +509,7 @@ class Config {
                 username: process.env.REDIS_USERNAME || null,
                 password: process.env.REDIS_PASSWORD || null,
                 db: parseInt(process.env.REDIS_DB, 10) || 0,
+                cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 별도 DB
                 ttl: parseInt(process.env.REDIS_TTL, 10) || 86400 // 24시간
             },
 
@@ -1381,6 +1383,7 @@ class Config {
             username: process.env.REDIS_USERNAME || null,
             password: process.env.REDIS_PASSWORD || null,
             db: parseInt(process.env.REDIS_DB, 10) || 0,
+            cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 별도 DB
             ttl: parseInt(process.env.REDIS_TTL, 10) || 86400 // 24시간
         };
 
@@ -1389,23 +1392,26 @@ class Config {
             case 'production':
                 return {
                     ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 0, // DB 0 사용
+                    db: parseInt(process.env.REDIS_DB, 10) || 0, // 세션용 DB 0
+                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 DB 1
                     ttl: parseInt(process.env.REDIS_TTL, 10) || 86400
                 };
 
             case 'test':
                 return {
                     ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 0, // DB 0 사용
+                    db: parseInt(process.env.REDIS_DB, 10) || 14, // 테스트 세션용 DB 14
+                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 15, // 테스트 캐시용 DB 15
                     ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
                     prefix: 'test:'
                 };
 
             case 'development':
-                // 개발환경은 테스트와 동일한 설정 사용
+                // 개발환경은 별도 DB 사용
                 return {
                     ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 0, // DB 0 사용
+                    db: parseInt(process.env.REDIS_DB, 10) || 0, // 개발 세션용 DB 0
+                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 개발 캐시용 DB 1
                     ttl: parseInt(process.env.REDIS_TTL, 10) || 3600, // 1시간
                     prefix: 'dev:' // 개발환경 전용 prefix
                 };
@@ -1413,7 +1419,8 @@ class Config {
             case 'staging':
                 return {
                     ...baseConfig,
-                    db: parseInt(process.env.REDIS_DB, 10) || 0, // DB 0 사용
+                    db: parseInt(process.env.REDIS_DB, 10) || 2, // 스테이징 세션용 DB 2
+                    cacheDb: parseInt(process.env.REDIS_CACHE_DB, 10) || 3, // 스테이징 캐시용 DB 3
                     ttl: parseInt(process.env.REDIS_TTL, 10) || 43200, // 12시간
                     prefix: 'staging:'
                 };

@@ -12,6 +12,9 @@ import AppInitializer from './common/utils/AppInitializer.js';
 import { setupBasicMiddleware } from './common/middleware/setupMiddleware.js';
 import Config from './config/Config.js';
 
+// 캐시 매니저
+import getCacheManager from './common/cache/getCacheManager.js';
+
 // 모니터링
 import { metricsMiddleware, metricsEndpoint } from './common/middleware/metricsMiddleware.js';
 
@@ -23,6 +26,9 @@ import flash from 'connect-flash';
 
 // Sentry 초기화
 const sentry = getSentry();
+
+// CacheManager 초기화 (import 시점에 싱글톤 생성됨)
+getCacheManager();
 
 // Swagger 문서 로드
 const swaggerDocument = JSON.parse(

@@ -1,276 +1,342 @@
-import CacheService from '../../infrastructure/cache/CacheService.js';
-import logger from '../utils/Logger.js';
-
 /**
- * Express 캐시 미들웨어
- * HTTP 응답을 Redis에 캐싱하여 성능을 향상시킵니다.
+ * API 응답 캐싱 미들웨어
+ * Express 응답을 Redis에 캐싱하여 성능 향상
  */
-export default class CacheMiddleware {
+
+import getCacheManager from '../cache/getCacheManager.js';
+import logger from '../utils/Logger.js';
+import Config from '../../config/Config.js';
+
+class CacheMiddleware {
     constructor() {
-        this.cacheService = new CacheService();
+        this.cache = getCacheManager();
+        this.config = Config.getInstance();
+        this.defaultTTL = 300; // 5분
     }
 
     /**
-     * 캐시 미들웨어 생성
-     * @param {Object} options - 캐시 옵션
-     * @param {string} options.namespace - 캐시 네임스페이스
-     * @param {number} options.ttl - TTL (초 단위)
-     * @param {Function} options.keyGenerator - 캐시 키 생성 함수
-     * @param {Function} options.condition - 캐시 조건 함수
-     * @returns {Function} Express 미들웨어 함수
+     * API 응답 캐싱 미들웨어 생성
+     * @param {object} options - 캐싱 옵션
+     * @param {number} options.ttl - TTL (초)
+     * @param {string} options.keyPrefix - 캐시 키 접두사
+     * @param {function} options.condition - 캐싱 조건 함수
+     * @param {Array} options.excludeMethods - 제외할 HTTP 메서드
+     * @param {Array} options.includePaths - 포함할 경로 패턴
+     * @param {Array} options.excludePaths - 제외할 경로 패턴
+     * @param {boolean} options.varyOnUser - 사용자별 캐시 분리
+     * @returns {function} Express 미들웨어 함수
      */
     create(options = {}) {
         const {
-            namespace = 'api',
-            ttl = 300, // 기본 5분
-            keyGenerator = this.defaultKeyGenerator,
-            condition = this.defaultCondition
+            ttl = this.defaultTTL,
+            keyPrefix = 'api',
+            condition = null,
+            excludeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'],
+            includePaths = [],
+            excludePaths = ['/admin', '/auth', '/health', '/metrics'],
+            varyOnUser = false
         } = options;
 
         return async (req, res, next) => {
             try {
-                // 캐시 조건 확인
-                if (!condition(req)) {
+                // HTTP 메서드 확인
+                if (excludeMethods.includes(req.method)) {
+                    return next();
+                }
+
+                // 경로 필터링
+                if (!this.shouldCachePath(req.path, includePaths, excludePaths)) {
+                    return next();
+                }
+
+                // 사용자 정의 조건 확인
+                if (condition && !condition(req, res)) {
                     return next();
                 }
 
                 // 캐시 키 생성
-                const cacheKey = keyGenerator(req);
+                const cacheKey = this.generateCacheKey(req, keyPrefix, varyOnUser);
 
-                // 캐시에서 데이터 조회
-                const cachedData = await this.cacheService.get(namespace, cacheKey);
+                // 캐시에서 조회
+                const cachedResponse = await this.cache.get(cacheKey);
+                if (cachedResponse) {
+                    logger.debug('API 응답 캐시 히트', {
+                        method: req.method,
+                        path: req.path,
+                        cacheKey,
+                        userAgent: req.get('User-Agent')?.substring(0, 50)
+                    });
 
-                if (cachedData) {
-                    logger.debug(`캐시 응답: ${namespace}:${cacheKey}`);
-                    return res.json(cachedData);
+                    // 캐시된 응답 반환
+                    res.set(cachedResponse.headers);
+                    res.set('X-Cache', 'HIT');
+                    res.set('X-Cache-Key', cacheKey);
+                    return res.status(cachedResponse.statusCode).json(cachedResponse.data);
                 }
 
-                // 원본 res.json 메서드 저장
-                const originalJson = res.json.bind(res);
+                // 응답 캐싱을 위한 래퍼 설정
+                this.wrapResponse(req, res, next, cacheKey, ttl);
 
-                // res.json 메서드 오버라이드
-                res.json = (data) => {
-                    // 성공적인 응답만 캐싱 (2xx 상태 코드)
-                    if (res.statusCode >= 200 && res.statusCode < 300) {
-                        // 비동기로 캐시 저장 (응답 속도에 영향 없음)
-                        this.cacheService.set(namespace, cacheKey, data, ttl)
-                            .catch(error => {
-                                logger.error('캐시 저장 실패:', error);
-                            });
-                    }
-
-                    return originalJson(data);
-                };
-
-                next();
             } catch (error) {
-                logger.error('캐시 미들웨어 오류:', error);
-                next(); // 캐시 오류가 있어도 요청은 계속 처리
+                logger.warn('캐시 미들웨어 오류', {
+                    error: error.message,
+                    path: req.path,
+                    method: req.method
+                });
+                next();
             }
         };
     }
 
     /**
-     * 기본 캐시 키 생성 함수
-     * @param {Object} req - Express 요청 객체
+     * 정적 캐싱 미들웨어 (긴 TTL)
+     * 거의 변경되지 않는 데이터용
+     */
+    static(options = {}) {
+        return this.create({
+            ttl: 3600, // 1시간
+            keyPrefix: 'static',
+            ...options
+        });
+    }
+
+    /**
+     * 동적 캐싱 미들웨어 (짧은 TTL)
+     * 자주 변경되는 데이터용
+     */
+    dynamic(options = {}) {
+        return this.create({
+            ttl: 60, // 1분
+            keyPrefix: 'dynamic',
+            ...options
+        });
+    }
+
+    /**
+     * 사용자별 캐싱 미들웨어
+     * 인증된 사용자별로 다른 캐시
+     */
+    userSpecific(options = {}) {
+        return this.create({
+            ttl: 300, // 5분
+            keyPrefix: 'user',
+            varyOnUser: true,
+            condition: (req) => req.user?.id, // 인증된 사용자만
+            ...options
+        });
+    }
+
+    /**
+     * 목록 전용 캐싱 미들웨어
+     * 페이지네이션된 목록용
+     */
+    list(options = {}) {
+        return this.create({
+            ttl: 120, // 2분
+            keyPrefix: 'list',
+            condition: (req) => {
+                // 첫 페이지만 캐시 (성능상 이유)
+                const page = parseInt(req.query.page) || 1;
+                return page === 1;
+            },
+            ...options
+        });
+    }
+
+    /**
+     * 캐시 키 생성
+     * @param {object} req - Express 요청 객체
+     * @param {string} keyPrefix - 키 접두사
+     * @param {boolean} varyOnUser - 사용자별 캐시 분리
      * @returns {string} 캐시 키
      */
-    defaultKeyGenerator(req) {
-        const { method, originalUrl, query, user } = req;
-        const userId = user?.id || 'anonymous';
-        const queryString = Object.keys(query).length > 0 ? JSON.stringify(query) : '';
+    generateCacheKey(req, keyPrefix, varyOnUser) {
+        const parts = [keyPrefix];
 
-        return `${method}:${originalUrl}:${userId}:${queryString}`;
+        // 경로 추가
+        parts.push(req.path.replace(/\//g, '_'));
+
+        // 쿼리 파라미터 추가 (정렬된 순서로)
+        const queryKeys = Object.keys(req.query).sort();
+        if (queryKeys.length > 0) {
+            const queryString = queryKeys
+                .map(key => `${key}=${req.query[key]}`)
+                .join('&');
+            parts.push(`query_${queryString}`);
+        }
+
+        // 사용자 ID 추가 (사용자별 캐시인 경우)
+        if (varyOnUser && req.user?.id) {
+            parts.push(`user_${req.user.id}`);
+        }
+
+        // Accept 헤더 고려 (JSON vs HTML)
+        const acceptHeader = req.get('Accept') || '';
+        if (acceptHeader.includes('application/json')) {
+            parts.push('json');
+        } else if (acceptHeader.includes('text/html')) {
+            parts.push('html');
+        }
+
+        return this.cache.createKey(...parts);
     }
 
     /**
-     * 기본 캐시 조건 함수
-     * @param {Object} req - Express 요청 객체
-     * @returns {boolean} 캐시 여부
+     * 경로 캐싱 여부 확인
+     * @param {string} path - 요청 경로
+     * @param {Array} includePaths - 포함할 경로 패턴
+     * @param {Array} excludePaths - 제외할 경로 패턴
+     * @returns {boolean} 캐싱 여부
      */
-    defaultCondition(req) {
-        // GET 요청만 캐싱
-        return req.method === 'GET';
-    }
-
-    /**
-     * 전시회 목록 캐시 미들웨어
-     * @param {number} ttl - TTL (초 단위)
-     * @returns {Function} Express 미들웨어
-     */
-    exhibitionList(ttl = 600) { // 10분
-        return this.create({
-            namespace: 'exhibition_list',
-            ttl,
-            keyGenerator: (req) => {
-                const { page, limit, type, year, status, search, sort } = req.query;
-                return `page:${page || 1}_limit:${limit || 10}_type:${type || 'all'}_year:${year || 'all'}_status:${status || 'all'}_search:${search || ''}_sort:${sort || 'latest'}`;
+    shouldCachePath(path, includePaths, excludePaths) {
+        // 제외 경로 확인
+        for (const excludePath of excludePaths) {
+            if (path.startsWith(excludePath)) {
+                return false;
             }
-        });
+        }
+
+        // 포함 경로가 명시된 경우 해당 경로만 캐시
+        if (includePaths.length > 0) {
+            return includePaths.some(includePath => path.startsWith(includePath));
+        }
+
+        return true;
     }
 
     /**
-     * 주요 전시회 캐시 미들웨어
-     * @param {number} ttl - TTL (초 단위)
-     * @returns {Function} Express 미들웨어
+     * 응답 래핑 및 캐싱
+     * @param {object} req - Express 요청 객체
+     * @param {object} res - Express 응답 객체
+     * @param {function} next - 다음 미들웨어 함수
+     * @param {string} cacheKey - 캐시 키
+     * @param {number} ttl - TTL (초)
      */
-    featuredExhibitions(ttl = 1800) { // 30분
-        return this.create({
-            namespace: 'featured_exhibitions',
-            ttl,
-            keyGenerator: (req) => {
-                const { limit } = req.query;
-                return `limit:${limit || 5}`;
-            }
-        });
-    }
+    wrapResponse(req, res, next, cacheKey, ttl) {
+        const originalJson = res.json;
+        const originalSend = res.send;
+        const self = this;
 
-    /**
-     * 작품 목록 캐시 미들웨어
-     * @param {number} ttl - TTL (초 단위)
-     * @returns {Function} Express 미들웨어
-     */
-    artworkList(ttl = 600) { // 10분
-        return this.create({
-            namespace: 'artwork_list',
-            ttl,
-            keyGenerator: (req) => {
-                const { page, limit, exhibition, year, search, sort } = req.query;
-                return `page:${page || 1}_limit:${limit || 12}_exhibition:${exhibition || 'all'}_year:${year || 'all'}_search:${search || ''}_sort:${sort || 'latest'}`;
-            }
-        });
-    }
-
-    /**
-     * 주요 작품 캐시 미들웨어
-     * @param {number} ttl - TTL (초 단위)
-     * @returns {Function} Express 미들웨어
-     */
-    featuredArtworks(ttl = 1800) { // 30분
-        return this.create({
-            namespace: 'featured_artworks',
-            ttl,
-            keyGenerator: (req) => {
-                const { limit } = req.query;
-                return `limit:${limit || 6}`;
-            }
-        });
-    }
-
-    /**
-     * 전시회 상세 캐시 미들웨어
-     * @param {number} ttl - TTL (초 단위)
-     * @returns {Function} Express 미들웨어
-     */
-    exhibitionDetail(ttl = 900) { // 15분
-        return this.create({
-            namespace: 'exhibition_detail',
-            ttl,
-            keyGenerator: (req) => {
-                const { id } = req.params;
-                return `id:${id}`;
-            }
-        });
-    }
-
-    /**
-     * 작품 상세 캐시 미들웨어
-     * @param {number} ttl - TTL (초 단위)
-     * @returns {Function} Express 미들웨어
-     */
-    artworkDetail(ttl = 900) { // 15분
-        return this.create({
-            namespace: 'artwork_detail',
-            ttl,
-            keyGenerator: (req) => {
-                const { id, slug } = req.params;
-                return `id:${id || slug}`;
-            }
-        });
-    }
-
-    /**
-     * 공지사항 목록 캐시 미들웨어
-     * @param {number} ttl - TTL (초 단위)
-     * @returns {Function} Express 미들웨어
-     */
-    noticeList(ttl = 1200) { // 20분
-        return this.create({
-            namespace: 'notice_list',
-            ttl,
-            keyGenerator: (req) => {
-                const { page, limit, important } = req.query;
-                return `page:${page || 1}_limit:${limit || 10}_important:${important || 'all'}`;
-            }
-        });
-    }
-
-    /**
-     * 캐시 무효화 미들웨어
-     * 데이터 변경 시 관련 캐시를 무효화합니다.
-     * @param {string} type - 무효화할 캐시 타입
-     * @returns {Function} Express 미들웨어
-     */
-    invalidate(type) {
-        return async (req, res, next) => {
-            // 원본 응답 메서드들 저장
-            const originalJson = res.json.bind(res);
-            const originalSend = res.send.bind(res);
-
-            // 응답 후 캐시 무효화 처리
-            const invalidateCache = async () => {
-                try {
-                    switch (type) {
-                        case 'exhibition': {
-                            const exhibitionId = req.params.id;
-                            await this.cacheService.invalidateExhibitionCache(exhibitionId);
-                            break;
-                        }
-                        case 'artwork': {
-                            const artworkId = req.params.id;
-                            await this.cacheService.invalidateArtworkCache(artworkId);
-                            break;
-                        }
-                        case 'user': {
-                            const userId = req.params.id || req.user?.id;
-                            await this.cacheService.invalidateUserCache(userId);
-                            break;
-                        }
-                        case 'notice':
-                            await this.cacheService.invalidateNoticeCache();
-                            break;
-                        default:
-                            logger.warn(`알 수 없는 캐시 무효화 타입: ${type}`);
-                    }
-                } catch (error) {
-                    logger.error('캐시 무효화 오류:', error);
-                }
-            };
-
-            // 응답 메서드 오버라이드
-            res.json = (data) => {
-                const result = originalJson(data);
-                // 성공적인 응답 후 캐시 무효화
-                if (res.statusCode >= 200 && res.statusCode < 300) {
-                    setImmediate(invalidateCache);
-                }
-                return result;
-            };
-
-            res.send = (data) => {
-                const result = originalSend(data);
-                // 성공적인 응답 후 캐시 무효화
-                if (res.statusCode >= 200 && res.statusCode < 300) {
-                    setImmediate(invalidateCache);
-                }
-                return result;
-            };
-
-            next();
+        // JSON 응답 래핑
+        res.json = function (data) {
+            res.cacheResponse(data, this.statusCode, this.getHeaders(), cacheKey, ttl);
+            return originalJson.call(this, data);
         };
+
+        // 일반 응답 래핑
+        res.send = function (data) {
+            if (this.get('Content-Type')?.includes('application/json')) {
+                try {
+                    const jsonData = typeof data === 'string' ? JSON.parse(data) : data;
+                    res.cacheResponse(jsonData, this.statusCode, this.getHeaders(), cacheKey, ttl);
+                } catch (e) {
+                    // JSON 파싱 실패 시 캐싱하지 않음
+                }
+            }
+            return originalSend.call(this, data);
+        };
+
+        // 캐싱 함수 추가
+        res.cacheResponse = async (data, statusCode, headers, cacheKey, ttl) => {
+            try {
+                // 성공 응답만 캐시
+                if (statusCode >= 200 && statusCode < 300) {
+                    const cacheData = {
+                        data,
+                        statusCode,
+                        headers: self.getSerializableHeaders(headers),
+                        timestamp: new Date().toISOString()
+                    };
+
+                    await self.cache.set(cacheKey, cacheData, ttl * 1000); // 밀리초로 변환
+
+                    logger.debug('API 응답 캐시 저장', {
+                        method: req.method,
+                        path: req.path,
+                        cacheKey,
+                        ttl,
+                        statusCode
+                    });
+
+                    // 캐시 헤더 추가
+                    res.set('X-Cache', 'MISS');
+                    res.set('X-Cache-Key', cacheKey);
+                }
+            } catch (error) {
+                logger.warn('응답 캐싱 실패', {
+                    error: error.message,
+                    cacheKey
+                });
+            }
+        };
+
+        next();
+    }
+
+    /**
+     * 직렬화 가능한 헤더 추출
+     * @param {object} headers - 응답 헤더
+     * @returns {object} 직렬화 가능한 헤더
+     */
+    getSerializableHeaders(headers) {
+        const serializable = {};
+
+        // 함수가 아닌 헤더만 추출
+        for (const [key, value] of Object.entries(headers)) {
+            if (typeof value !== 'function') {
+                serializable[key] = value;
+            }
+        }
+
+        // 중요한 헤더 제외
+        delete serializable['set-cookie'];
+        delete serializable['authorization'];
+        delete serializable['x-cache'];
+        delete serializable['x-cache-key'];
+
+        return serializable;
+    }
+
+    /**
+     * 패턴으로 캐시 무효화
+     * @param {string} pattern - 캐시 키 패턴 (glob 스타일)
+     * @returns {Promise<number>} 삭제된 키 개수
+     */
+    async invalidatePattern(pattern) {
+        try {
+            const deletedCount = await this.cache.delByPattern(pattern);
+            logger.info('패턴 기반 캐시 무효화', {
+                pattern,
+                deletedCount
+            });
+            return deletedCount;
+        } catch (error) {
+            logger.error('캐시 무효화 실패', {
+                pattern,
+                error: error.message
+            });
+            return 0;
+        }
+    }
+
+    /**
+     * 모든 캐시 무효화
+     * @returns {Promise<boolean>} 성공 여부
+     */
+    async invalidateAll() {
+        try {
+            await this.cache.reset();
+            logger.info('전체 캐시 무효화 완료');
+            return true;
+        } catch (error) {
+            logger.error('전체 캐시 무효화 실패', {
+                error: error.message
+            });
+            return false;
+        }
     }
 }
 
-// 싱글톤 인스턴스 생성
-const cacheMiddleware = new CacheMiddleware();
-export { cacheMiddleware };
+// 클래스와 기본 인스턴스를 모두 export
+export { CacheMiddleware };
+export default CacheMiddleware;

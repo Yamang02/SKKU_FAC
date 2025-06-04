@@ -3,10 +3,10 @@ import { Op } from 'sequelize';
 import { ArtworkExhibitionRelationship } from '../model/entity/EntitityIndex.js';
 import { Sequelize } from 'sequelize';
 import { ExhibitionError, ExhibitionNotFoundError } from '../../../common/error/ExhibitionError.js';
-import BaseRepository from './BaseRepository.js';
+import CachedRepository from '../../../common/cache/CachedRepository.js';
 import logger from '../../../common/utils/Logger.js';
 
-export default class ExhibitionRepository extends BaseRepository {
+export default class ExhibitionRepository extends CachedRepository {
     constructor() {
         super(Exhibition);
     }

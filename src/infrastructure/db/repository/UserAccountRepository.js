@@ -1,8 +1,8 @@
 import { UserAccount, SkkuUserProfile, ExternalUserProfile, Artwork } from '../model/entity/EntitityIndex.js';
-import BaseRepository from './BaseRepository.js';
+import CachedRepository from '../../../common/cache/CachedRepository.js';
 import TransactionManager from '../transaction/TransactionManager.js';
 
-export default class UserAccountRepository extends BaseRepository {
+export default class UserAccountRepository extends CachedRepository {
     constructor() {
         super(UserAccount);
     }

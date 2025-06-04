@@ -2,10 +2,10 @@ import { Artwork, UserAccount } from '../model/entity/EntitityIndex.js';
 import { ArtworkError } from '../../../common/error/ArtworkError.js';
 import ArtworkExhibitionRelationship from '../model/relationship/ArtworkExhibitionRelationship.js';
 import { Op } from 'sequelize';
-import BaseRepository from './BaseRepository.js';
+import CachedRepository from '../../../common/cache/CachedRepository.js';
 import logger from '../../../common/utils/Logger.js';
 
-class ArtworkRepository extends BaseRepository {
+class ArtworkRepository extends CachedRepository {
     constructor() {
         super(Artwork);
     }

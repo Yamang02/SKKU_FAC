@@ -4,6 +4,7 @@ import { isAuthenticated, isNotAuthenticated } from '../../../common/middleware/
 import { UserValidation } from '../../../common/middleware/domainValidation.js';
 // 새로운 포괄적인 sanitization 미들웨어
 import { DomainSanitization } from '../../../common/middleware/sanitization.js';
+import CacheMiddleware from '../../../common/middleware/CacheMiddleware.js';
 
 /**
  * UserRouter 팩토리 함수
@@ -14,6 +15,7 @@ import { DomainSanitization } from '../../../common/middleware/sanitization.js';
  */
 export function createUserRouter(userController, userApiController) {
     const UserRouter = express.Router();
+    const cacheMiddleware = new CacheMiddleware();
 
     // === API 엔드포인트 ===
 
@@ -67,7 +69,12 @@ export function createUserRouter(userController, userApiController) {
      *       500:
      *         description: 서버 오류
      */
-    UserRouter.post('/', isNotAuthenticated, DomainSanitization.user.register, UserValidation.validateRegister, (req, res) => userApiController.registerUser(req, res));
+    UserRouter.post('/', isNotAuthenticated, DomainSanitization.user.register, UserValidation.validateRegister, async (req, res) => {
+        const result = await userApiController.registerUser(req, res);
+        // 사용자 관련 캐시 무효화 (필요시)
+        await cacheMiddleware.invalidatePattern('user_*');
+        return result;
+    });
 
     // 로그인/로그아웃 API
     /**
@@ -128,7 +135,7 @@ export function createUserRouter(userController, userApiController) {
      */
     UserRouter.get('/logout', (req, res) => userApiController.logoutUser(req, res));
 
-    // 현재 사용자 프로필 정보 조회 API
+    // 현재 사용자 프로필 정보 조회 API (개인정보이므로 캐싱 안함)
     /**
      * @swagger
      * /api/me:
@@ -155,7 +162,7 @@ export function createUserRouter(userController, userApiController) {
      */
     UserRouter.get('/api/me', isAuthenticated, (req, res) => userApiController.getUserProfile(req, res));
 
-    // 현재 사용자 세션 정보 조회 API
+    // 현재 사용자 세션 정보 조회 API (개인정보이므로 캐싱 안함)
     /**
      * @swagger
      * /api/session:
@@ -201,13 +208,11 @@ export function createUserRouter(userController, userApiController) {
      *                 type: integer
      *               affiliation:
      *                 type: string
-     *               newPassword:
-     *                 type: string
-     *               confirmPassword:
-     *                 type: string
+     *               isClubMember:
+     *                 type: boolean
      *     responses:
      *       200:
-     *         description: 사용자 프로필 수정 성공
+     *         description: 프로필 수정 성공
      *         content:
      *           application/json:
      *             schema:
@@ -218,13 +223,20 @@ export function createUserRouter(userController, userApiController) {
      *                 data:
      *                   type: object
      *                   properties:
-     *                    updateUserProfile : 레포지토리에서 역할에 따른 하위 정보와 엮어서 받아온 수정된 사용자 정보 속성들
+     *                     userDetailDto // 사용자 정보 속성들
      *       400:
      *         description: 유효성 검사 오류
+     *       404:
+     *         description: 사용자 없음
      *       500:
      *         description: 서버 오류
      */
-    UserRouter.put('/me', isAuthenticated, DomainSanitization.user.updateProfile, UserValidation.validateUpdateProfile, (req, res) => userApiController.updateUserProfile(req, res));
+    UserRouter.put('/me', isAuthenticated, DomainSanitization.user.updateProfile, UserValidation.validateUpdateProfile, async (req, res) => {
+        const result = await userApiController.updateProfile(req, res);
+        // 사용자 관련 캐시 무효화
+        await cacheMiddleware.invalidatePattern('user_*');
+        return result;
+    });
 
     // 현재 사용자 삭제 API
     /**

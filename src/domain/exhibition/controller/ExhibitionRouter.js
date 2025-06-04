@@ -1,12 +1,13 @@
 import express from 'express';
 import ExhibitionController from './ExhibitionController.js';
 import ExhibitionApiController from './api/ExhibitionApiController.js';
-import { cacheMiddleware } from '../../../common/middleware/CacheMiddleware.js';
+import CacheMiddleware from '../../../common/middleware/CacheMiddleware.js';
 import { DomainSanitization } from '../../../common/middleware/sanitization.js';
 
 const ExhibitionRouter = express.Router();
 const exhibitionController = new ExhibitionController();
 const exhibitionApiController = new ExhibitionApiController();
+const cacheMiddleware = new CacheMiddleware();
 
 // API 라우트
 
@@ -116,7 +117,7 @@ const exhibitionApiController = new ExhibitionApiController();
         *       500:
         *         description: 서버 오류
         */
-ExhibitionRouter.get('/api/list', DomainSanitization.exhibition.search, cacheMiddleware.exhibitionList(), (req, res) => exhibitionApiController.getExhibitionList(req, res));
+ExhibitionRouter.get('/api/list', DomainSanitization.exhibition.search, cacheMiddleware.list({ ttl: 600, keyPrefix: 'exhibition_list' }), (req, res) => exhibitionApiController.getExhibitionList(req, res));
 
 /**
  * @swagger
@@ -150,7 +151,7 @@ ExhibitionRouter.get('/api/list', DomainSanitization.exhibition.search, cacheMid
  *       500:
  *         description: 서버 오류
  */
-ExhibitionRouter.get('/api/status/:status', cacheMiddleware.exhibitionList(300), (req, res) => exhibitionController.getExhibitionsByStatus(req, res));
+ExhibitionRouter.get('/api/status/:status', cacheMiddleware.dynamic({ ttl: 300, keyPrefix: 'exhibition_status' }), (req, res) => exhibitionController.getExhibitionsByStatus(req, res));
 
 /**
  * @swagger
@@ -176,7 +177,7 @@ ExhibitionRouter.get('/api/status/:status', cacheMiddleware.exhibitionList(300),
  *       500:
  *         description: 서버 오류
  */
-ExhibitionRouter.get('/api/submittable', cacheMiddleware.featuredExhibitions(900), (req, res) => exhibitionApiController.findSubmittableExhibitions(req, res));
+ExhibitionRouter.get('/api/submittable', cacheMiddleware.static({ ttl: 900, keyPrefix: 'exhibition_submittable' }), (req, res) => exhibitionApiController.findSubmittableExhibitions(req, res));
 
 /**
  * @swagger
@@ -209,7 +210,7 @@ ExhibitionRouter.get('/api/submittable', cacheMiddleware.featuredExhibitions(900
  *       500:
  *         description: 서버 오류
  */
-ExhibitionRouter.get('/api/featured', cacheMiddleware.featuredExhibitions(), (req, res) => exhibitionApiController.getFeaturedExhibitions(req, res));
+ExhibitionRouter.get('/api/featured', cacheMiddleware.static({ ttl: 1800, keyPrefix: 'exhibition_featured' }), (req, res) => exhibitionApiController.getFeaturedExhibitions(req, res));
 
 // 관리자용 전시회 관리 API 라우트
 /**
@@ -235,7 +236,7 @@ ExhibitionRouter.get('/api/featured', cacheMiddleware.featuredExhibitions(), (re
  *       200:
  *         description: 전시회 목록 조회 성공
  */
-ExhibitionRouter.get('/api/admin/list', cacheMiddleware.exhibitionList(180), (req, res) => exhibitionController.getExhibitions(req, res));
+ExhibitionRouter.get('/api/admin/list', cacheMiddleware.dynamic({ ttl: 180, keyPrefix: 'exhibition_admin_list' }), (req, res) => exhibitionController.getExhibitions(req, res));
 
 /**
  * @swagger
@@ -254,7 +255,7 @@ ExhibitionRouter.get('/api/admin/list', cacheMiddleware.exhibitionList(180), (re
  *       404:
  *         description: 전시회를 찾을 수 없음
  */
-ExhibitionRouter.get('/api/admin/:id', cacheMiddleware.exhibitionDetail(), (req, res) => exhibitionController.getExhibition(req, res));
+ExhibitionRouter.get('/api/admin/:id', cacheMiddleware.create({ ttl: 900, keyPrefix: 'exhibition_detail' }), (req, res) => exhibitionController.getExhibition(req, res));
 
 /**
  * @swagger
@@ -273,7 +274,7 @@ ExhibitionRouter.get('/api/admin/:id', cacheMiddleware.exhibitionDetail(), (req,
  *       404:
  *         description: 전시회를 찾을 수 없음
  */
-ExhibitionRouter.get('/api/admin/:id/status', cacheMiddleware.exhibitionDetail(600), (req, res) => exhibitionController.getExhibitionWithStatus(req, res));
+ExhibitionRouter.get('/api/admin/:id/status', cacheMiddleware.create({ ttl: 600, keyPrefix: 'exhibition_status' }), (req, res) => exhibitionController.getExhibitionWithStatus(req, res));
 
 /**
  * @swagger
@@ -292,7 +293,12 @@ ExhibitionRouter.get('/api/admin/:id/status', cacheMiddleware.exhibitionDetail(6
  *       400:
  *         description: 잘못된 요청
  */
-ExhibitionRouter.post('/api/admin', cacheMiddleware.invalidate('exhibition'), (req, res) => exhibitionController.createExhibition(req, res));
+ExhibitionRouter.post('/api/admin', async (req, res) => {
+    const result = await exhibitionController.createExhibition(req, res);
+    // 전시회 관련 캐시 무효화
+    await cacheMiddleware.invalidatePattern('exhibition_*');
+    return result;
+});
 
 /**
  * @swagger
@@ -317,7 +323,12 @@ ExhibitionRouter.post('/api/admin', cacheMiddleware.invalidate('exhibition'), (r
  *       404:
  *         description: 전시회를 찾을 수 없음
  */
-ExhibitionRouter.put('/api/admin/:id', cacheMiddleware.invalidate('exhibition'), (req, res) => exhibitionController.updateExhibition(req, res));
+ExhibitionRouter.put('/api/admin/:id', async (req, res) => {
+    const result = await exhibitionController.updateExhibition(req, res);
+    // 전시회 관련 캐시 무효화
+    await cacheMiddleware.invalidatePattern('exhibition_*');
+    return result;
+});
 
 /**
  * @swagger
@@ -336,7 +347,12 @@ ExhibitionRouter.put('/api/admin/:id', cacheMiddleware.invalidate('exhibition'),
  *       404:
  *         description: 전시회를 찾을 수 없음
  */
-ExhibitionRouter.delete('/api/admin/:id', cacheMiddleware.invalidate('exhibition'), (req, res) => exhibitionController.deleteExhibition(req, res));
+ExhibitionRouter.delete('/api/admin/:id', async (req, res) => {
+    const result = await exhibitionController.deleteExhibition(req, res);
+    // 전시회 관련 캐시 무효화
+    await cacheMiddleware.invalidatePattern('exhibition_*');
+    return result;
+});
 
 // 상태 관리 API 라우트
 /**
