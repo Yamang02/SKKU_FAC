@@ -6,6 +6,13 @@ import logger from '../../common/utils/Logger.js';
 console.log('🔄 [REDIS] RedisClient.js 모듈이 로드되었습니다');
 logger.info('🔄 [REDIS] RedisClient.js 모듈이 로드되었습니다');
 
+// 환경변수 즉시 확인
+console.log('🔍 [REDIS] 환경변수 즉시 확인:', {
+    REDIS_HOST: process.env.REDIS_HOST ? '설정됨' : '설정안됨',
+    REDIS_PORT: process.env.REDIS_PORT ? '설정됨' : '설정안됨',
+    REDIS_PASSWORD: process.env.REDIS_PASSWORD ? '설정됨' : '설정안됨'
+});
+
 // Redis 설정을 환경변수에서 직접 가져오기 (암호화 우회)
 // Redis Cloud의 경우 호스트명에 포트가 포함될 수 있음
 const rawHost = process.env.REDIS_HOST || 'localhost';
@@ -23,24 +30,24 @@ const redisConfig = {
 
 const environment = infrastructureConfig.environment;
 
-// Redis 연결 설정 로깅 (상세 디버깅 정보 포함)
-logger.info('=== Redis 연결 설정 (상세 디버깅) ===');
-logger.info(`환경: ${environment}`);
-logger.info(`원본 REDIS_HOST: "${process.env.REDIS_HOST || 'undefined'}"`);
-logger.info(`원본 REDIS_PORT: "${process.env.REDIS_PORT || 'undefined'}"`);
-logger.info(`원본 REDIS_USERNAME: "${process.env.REDIS_USERNAME || 'undefined'}"`);
-logger.info(`원본 REDIS_PASSWORD: ${process.env.REDIS_PASSWORD ? `설정됨 (${process.env.REDIS_PASSWORD.length}자)` : '설정되지 않음'}`);
-logger.info(`원본 REDIS_DB: "${process.env.REDIS_DB || 'undefined'}"`);
-logger.info(`원본 REDIS_URL: ${process.env.REDIS_URL ? `설정됨 (${process.env.REDIS_URL.length}자)` : '설정되지 않음'}`);
-logger.info('--- 파싱된 설정 ---');
-logger.info(`파싱된 호스트: "${redisConfig.host}"`);
-logger.info(`파싱된 포트: ${redisConfig.port} (타입: ${typeof redisConfig.port})`);
-logger.info(`파싱된 사용자명: "${redisConfig.username}"`);
-logger.info(`파싱된 패스워드: ${redisConfig.password ? `설정됨 (${redisConfig.password.length}자)` : '설정되지 않음'}`);
-logger.info(`파싱된 데이터베이스: ${redisConfig.db} (타입: ${typeof redisConfig.db})`);
-logger.info(`추출된 포트 (호스트명에서): ${extractedPort || 'N/A'}`);
-logger.info(`Redis Cloud 감지: ${rawHost.includes('.redis-cloud.com')}`);
-logger.info('====================================');
+// Redis 연결 설정 로깅 (console.log로 강제 출력)
+console.log('=== Redis 연결 설정 (상세 디버깅) ===');
+console.log(`환경: ${environment}`);
+console.log(`원본 REDIS_HOST: "${process.env.REDIS_HOST || 'undefined'}"`);
+console.log(`원본 REDIS_PORT: "${process.env.REDIS_PORT || 'undefined'}"`);
+console.log(`원본 REDIS_USERNAME: "${process.env.REDIS_USERNAME || 'undefined'}"`);
+console.log(`원본 REDIS_PASSWORD: ${process.env.REDIS_PASSWORD ? `설정됨 (${process.env.REDIS_PASSWORD.length}자)` : '설정되지 않음'}`);
+console.log(`원본 REDIS_DB: "${process.env.REDIS_DB || 'undefined'}"`);
+console.log(`원본 REDIS_URL: ${process.env.REDIS_URL ? `설정됨 (${process.env.REDIS_URL.length}자)` : '설정되지 않음'}`);
+console.log('--- 파싱된 설정 ---');
+console.log(`파싱된 호스트: "${redisConfig.host}"`);
+console.log(`파싱된 포트: ${redisConfig.port} (타입: ${typeof redisConfig.port})`);
+console.log(`파싱된 사용자명: "${redisConfig.username}"`);
+console.log(`파싱된 패스워드: ${redisConfig.password ? `설정됨 (${redisConfig.password.length}자)` : '설정되지 않음'}`);
+console.log(`파싱된 데이터베이스: ${redisConfig.db} (타입: ${typeof redisConfig.db})`);
+console.log(`추출된 포트 (호스트명에서): ${extractedPort || 'N/A'}`);
+console.log(`Redis Cloud 감지: ${rawHost.includes('.redis-cloud.com')}`);
+console.log('====================================');
 
 class RedisClient {
     constructor() {
@@ -84,9 +91,14 @@ class RedisClient {
             let redisUrl = process.env.REDIS_URL;
 
             if (!redisUrl) {
-                // Redis Cloud는 TLS를 사용하므로 rediss:// 프로토콜 사용
+                // Redis Cloud 감지 및 프로토콜 결정
                 const isRedisCloud = redisConfig.host.includes('.redis-cloud.com');
-                const protocol = isRedisCloud ? 'rediss://' : 'redis://';
+
+                // SSL 오류 해결을 위해 일단 TLS 비활성화 시도
+                const shouldUseTLS = false; // 임시로 TLS 완전 비활성화
+                const protocol = shouldUseTLS ? 'rediss://' : 'redis://';
+
+                logger.info(`프로토콜 결정 로직: isRedisCloud=${isRedisCloud}, port=${redisConfig.port}, shouldUseTLS=${shouldUseTLS}`);
 
                 redisUrl = protocol;
 
@@ -122,8 +134,11 @@ class RedisClient {
                 socket: {
                     connectTimeout: 20000, // 20초로 증가 (Redis Cloud는 느릴 수 있음)
                     lazyConnect: true,
-                    tls: isTLS,
-                    rejectUnauthorized: !isRedisCloud, // Redis Cloud는 인증서 검증 문제가 있을 수 있음
+                    tls: isTLS ? {
+                        // Redis Cloud 단순화된 TLS 설정
+                        rejectUnauthorized: false, // 인증서 검증 비활성화
+                        checkServerIdentity: () => undefined // 호스트명 검증 비활성화
+                    } : false,
                     reconnectStrategy: retries => {
                         if (retries > 3) { // 재시도 횟수 줄임
                             logger.error(`[${environment.toUpperCase()}] Redis 연결 재시도 횟수 초과 (${retries})`);
@@ -137,10 +152,14 @@ class RedisClient {
             };
 
             logger.info('--- 클라이언트 옵션 ---');
-            logger.info(`TLS 활성화: ${clientOptions.socket.tls}`);
+            logger.info(`TLS 활성화: ${!!clientOptions.socket.tls}`);
+            logger.info(`TLS 설정: ${clientOptions.socket.tls ? JSON.stringify({
+                rejectUnauthorized: clientOptions.socket.tls.rejectUnauthorized,
+                servername: clientOptions.socket.tls.servername,
+                secureProtocol: clientOptions.socket.tls.secureProtocol
+            }) : 'false'}`);
             logger.info(`연결 타임아웃: ${clientOptions.socket.connectTimeout}ms`);
             logger.info(`Lazy Connect: ${clientOptions.socket.lazyConnect}`);
-            logger.info(`인증서 검증: ${clientOptions.socket.rejectUnauthorized}`);
             logger.info(`Redis Cloud 최적화: ${isRedisCloud}`);
             logger.info('=========================');
 
