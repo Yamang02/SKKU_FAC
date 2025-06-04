@@ -2,8 +2,15 @@ import { createClient } from 'redis';
 import { infrastructureConfig } from '../../config/infrastructureConfig.js';
 import logger from '../../common/utils/Logger.js';
 
-// Redis 설정 가져오기
-const redisConfig = infrastructureConfig.redis.config;
+// Redis 설정을 환경변수에서 직접 가져오기 (암호화 우회)
+const redisConfig = {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+    username: process.env.REDIS_USERNAME || null,
+    password: process.env.REDIS_PASSWORD || null,
+    db: parseInt(process.env.REDIS_DB, 10) || 0
+};
+
 const environment = infrastructureConfig.environment;
 
 // Redis 연결 설정 로깅
@@ -11,6 +18,8 @@ logger.info('=== Redis 연결 설정 ===');
 logger.info(`환경: ${environment}`);
 logger.info(`호스트: ${redisConfig.host}`);
 logger.info(`포트: ${redisConfig.port}`);
+logger.info(`사용자명: ${redisConfig.username || 'N/A'}`);
+logger.info(`패스워드 길이: ${redisConfig.password ? redisConfig.password.length : 0}자`);
 logger.info(`데이터베이스: ${redisConfig.db}`);
 if (process.env.REDIS_URL) {
     logger.info(`Redis URL: ${process.env.REDIS_URL.replace(/:[^@]*@/, ':***@')}`); // 패스워드 마스킹
@@ -73,11 +82,13 @@ class RedisClient {
 
             logger.info(`Redis 연결 시도: ${redisUrl.replace(/:[^@]*@/, ':***@')}`);
 
-            this.client = createClient({
+            // Redis Cloud는 TLS가 필요할 수 있음
+            const clientOptions = {
                 url: redisUrl,
                 socket: {
-                    connectTimeout: 10000, // 10초
+                    connectTimeout: 15000, // 15초로 증가
                     lazyConnect: true,
+                    tls: redisConfig.host.includes('.redis-cloud.com'), // Redis Cloud 감지시 TLS 활성화
                     reconnectStrategy: retries => {
                         if (retries > 5) {
                             logger.error(`[${environment.toUpperCase()}] Redis 연결 재시도 횟수 초과 (${retries})`);
@@ -88,14 +99,23 @@ class RedisClient {
                         return delay;
                     }
                 }
-            });
+            };
+
+            logger.info(`Redis 클라이언트 옵션: TLS=${clientOptions.socket.tls}, Timeout=${clientOptions.socket.connectTimeout}ms`);
+
+            this.client = createClient(clientOptions);
 
             // 에러 핸들링
             this.client.on('error', err => {
                 logger.error(`[${environment.toUpperCase()}] Redis 클라이언트 오류`, {
-                    error: err.message,
+                    error: err.message || 'Unknown error',
                     code: err.code,
-                    errno: err.errno
+                    errno: err.errno,
+                    name: err.name,
+                    stack: err.stack ? err.stack.split('\n')[0] : 'No stack trace',
+                    host: redisConfig.host,
+                    port: redisConfig.port,
+                    hasTLS: clientOptions.socket.tls
                 });
                 this.isConnected = false;
             });
