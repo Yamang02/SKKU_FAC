@@ -327,3 +327,183 @@
         padding: 16px;
     }
 }
+
+/* 계정 삭제 처리 중 페이지 비활성화 */
+body.account-deletion-processing {
+    pointer-events: none;
+    position: relative;
+}
+
+body.account-deletion-processing::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 9998;
+    pointer-events: none;
+}
+
+body.account-deletion-processing .profile-button--danger.btn-loading {
+    pointer-events: auto;
+    z-index: 9999;
+    position: relative;
+}
+
+/* 계정 삭제 버튼 로딩 상태 */
+.profile-button--danger:disabled,
+.profile-button--danger.btn-loading {
+    opacity: 0.8;
+    cursor: not-allowed;
+    position: relative;
+}
+
+.profile-button--danger.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: account-deletion-spinner 1s ease infinite;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+}
+
+@keyframes account-deletion-spinner {
+    from {
+        transform: translateY(-50%) rotate(0turn);
+    }
+    to {
+        transform: translateY(-50%) rotate(1turn);
+    }
+}
+
+/* 계정 삭제 처리 중 다른 버튼들 비활성화 */
+body.account-deletion-processing .profile-button:not(.btn-loading) {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* 계정 삭제 처리 중 모달 비활성화 */
+body.account-deletion-processing .modal {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* 계정 삭제 처리 중 입력 필드 비활성화 */
+body.account-deletion-processing input,
+body.account-deletion-processing select,
+body.account-deletion-processing textarea,
+body.account-deletion-processing button:not(.btn-loading) {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* 계정 삭제 성공 후 페이지 차단 스타일 */
+.account-deletion-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(2px);
+    cursor: not-allowed;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.account-deletion-overlay.hidden {
+    display: none;
+}
+
+.deletion-success-message {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-align: center;
+    font-size: 16px;
+    color: #28a745;
+    border: 2px solid #28a745;
+    animation: slideUp 0.5s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.deletion-success-message .success-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.deletion-success-message .success-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.deletion-success-message .success-subtitle {
+    color: #666;
+    font-size: 14px;
+}
+
+.deletion-success-message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 2s infinite;
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* 숨김 클래스 */
+.hidden {
+    display: none !important;
+}
+
+/* 계정 삭제 처리 중 전체 페이지 비활성화 */
+body.account-deletion-processing {
+    pointer-events: none;
+    overflow: hidden;
+}

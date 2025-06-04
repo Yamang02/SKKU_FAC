@@ -129,8 +129,40 @@ export default {
 
     rateLimit: {
         windowMs: 15 * 60 * 1000, // 15분
-        max: 1000, // 개발 환경에서는 더 관대한 제한
-        skipPaths: ['/health', '/favicon.ico', '/api/dev']
+        max: (req) => {
+            // 헬스체크와 파비콘은 제외
+            const alwaysSkip = ['/health', '/favicon.ico'];
+            if (alwaysSkip.some(path => req.path === path)) {
+                return 0; // 무제한
+            }
+
+            // 개발 API 경로 확인
+            if (req.path.startsWith('/api/dev')) {
+                return 0; // 개발 API는 무제한
+            }
+
+            // 정적파일 여부 확인
+            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
+            const isStatic = staticPaths.some(path => req.path.startsWith(path));
+
+            if (isStatic) {
+                // 정적파일: 개발환경에서는 매우 관대하게
+                return 2000;
+            } else {
+                // 일반 요청: 개발환경에서는 관대하게
+                return 500;
+            }
+        },
+        message: (req) => {
+            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
+            const isStatic = staticPaths.some(path => req.path.startsWith(path));
+
+            if (isStatic) {
+                return '정적파일 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+            } else {
+                return 'API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+            }
+        }
     },
 
     // JWT 설정 (개발 환경 - 편의성 우선)

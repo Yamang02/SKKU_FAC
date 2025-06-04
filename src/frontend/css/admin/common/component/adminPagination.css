@@ -1,0 +1,31 @@
+/* 페이지네이션 스타일 */
+.admin-pagination {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.admin-pagination__button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #e1e1e1;
+    background-color: #fff;
+    color: #666;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.admin-pagination__button:hover {
+    background-color: #f5f5f5;
+}
+
+.admin-pagination__button--active {
+    background-color: #1976d2;
+    color: white;
+    border-color: #1976d2;
+}

@@ -1,0 +1,72 @@
+/* 관리자 레이아웃 스타일 */
+:root {
+    --sidebar-width: 290px;
+    --header-height: 80px;
+    --content-max-width: 1400px;
+    --content-padding: 32px;
+}
+
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--admin-color-background);
+}
+
+.admin-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin-left: var(--sidebar-width);
+    padding: var(--content-padding) calc((100% - var(--content-max-width)) / 2);
+}
+
+.admin-main {
+    flex: 1;
+    width: 100%;
+    max-width: calc(var(--content-max-width) - var(--content-padding) * 2);
+    margin: 24px auto 0;
+    background-color: var(--admin-color-background);
+    border-radius: 16px;
+    min-height: calc(100vh - 60px); /* 헤더 높이(60px)를 뺀 나머지 공간 */
+}
+
+.admin-management {
+    padding: 20px;
+}
+
+.admin-management__content {
+    margin-top: 20px;
+}
+
+.admin-back-button-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+/* 반응형 디자인 */
+@media (max-width: 1600px) {
+    :root {
+        --content-max-width: 1200px;
+        --content-padding: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --content-max-width: 100%;
+        --content-padding: 16px;
+    }
+
+    .admin-content {
+        height: 100%;
+        min-height: 100%;
+        margin-left: 0;
+        padding: var(--content-padding);
+    }
+
+    .admin-main {
+        max-width: 100%;
+        margin-top: 16px;
+    }
+}
