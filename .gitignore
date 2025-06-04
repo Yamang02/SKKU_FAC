@@ -83,6 +83,7 @@ web_modules/
 .env.test.local
 .env.production.local
 .env.local
+.env.docker
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -267,3 +268,4 @@ playwright-*.log
 .test-session-*
 .playwright-*
 .test-cache/
+
