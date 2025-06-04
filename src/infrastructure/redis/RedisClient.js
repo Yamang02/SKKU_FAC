@@ -2,6 +2,10 @@ import { createClient } from 'redis';
 import { infrastructureConfig } from '../../config/infrastructureConfig.js';
 import logger from '../../common/utils/Logger.js';
 
+// 모듈 로드 시점 디버깅
+console.log('🔄 [REDIS] RedisClient.js 모듈이 로드되었습니다');
+logger.info('🔄 [REDIS] RedisClient.js 모듈이 로드되었습니다');
+
 // Redis 설정을 환경변수에서 직접 가져오기 (암호화 우회)
 // Redis Cloud의 경우 호스트명에 포트가 포함될 수 있음
 const rawHost = process.env.REDIS_HOST || 'localhost';

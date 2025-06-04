@@ -5,6 +5,10 @@ import { createClient } from 'redis';
 import logger from '../utils/Logger.js';
 import Config from '../../config/Config.js';
 
+// 모듈 로드 시점 디버깅
+console.log('🔄 [RATE_LIMIT] rateLimiting.js 모듈이 로드되었습니다');
+logger.info('🔄 [RATE_LIMIT] rateLimiting.js 모듈이 로드되었습니다');
+
 const config = Config.getInstance();
 
 /**

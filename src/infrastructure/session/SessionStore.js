@@ -4,6 +4,10 @@ import redisClient from '../redis/RedisClient.js';
 import Config from '../../config/Config.js';
 import logger from '../../common/utils/Logger.js';
 
+// 모듈 로드 시점 디버깅
+console.log('🔄 [SESSION] SessionStore.js 모듈이 로드되었습니다');
+logger.info('🔄 [SESSION] SessionStore.js 모듈이 로드되었습니다');
+
 class SessionStore {
     constructor() {
         this.store = null;

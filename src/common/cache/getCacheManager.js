@@ -9,6 +9,10 @@ import Config from '../../config/Config.js';
 import logger from '../utils/Logger.js';
 import redisClient from '../../infrastructure/redis/RedisClient.js';
 
+// 모듈 로드 시점 디버깅
+console.log('🔄 [CACHE] getCacheManager.js 모듈이 로드되었습니다');
+logger.info('🔄 [CACHE] getCacheManager.js 모듈이 로드되었습니다');
+
 class CacheManager {
     constructor() {
         this.config = Config.getInstance();
