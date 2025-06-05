@@ -33,7 +33,7 @@ export default {
     },
 
     logging: {
-        level: 'debug',
+        level: 'info',
         enableFileLogging: true,
         enableConsoleLogging: true,
         logDir: 'logs'

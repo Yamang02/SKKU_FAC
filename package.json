@@ -17,7 +17,7 @@
     },
     "scripts": {
         "// === DEVELOPMENT ===": "",
-        "dev": "cross-env NODE_ENV=development nodemon ./src/server.js",
+        "dev": "cross-env NODE_ENV=development npx nodemon ./src/server.js",
         "dev:setup": "npm install && npm run test:install && echo '개발 환경 설정이 완료되었습니다.'",
         "dev:db": "cross-env NODE_ENV=development nodemon modelsync.js",
         "// === PRODUCTION ===": "",
