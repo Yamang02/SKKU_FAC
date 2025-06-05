@@ -63,9 +63,15 @@ export function setupCSRFProtection(app) {
             return next();
         }
 
-        // JWT 인증을 사용하는 API 엔드포인트는 제외 (별도의 보안 메커니즘 사용)
-        if (req.path.startsWith('/api/') && req.headers.authorization) {
-            return next();
+        // API 엔드포인트 처리 전략
+        if (req.path.startsWith('/api/')) {
+            // JWT 토큰이 있는 경우 CSRF 검증 생략 (프론트엔드 프레임워크 대비)
+            if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+                return next();
+            }
+
+            // API 요청이지만 JWT가 없는 경우 (현재 방식 유지)
+            // 추후 프론트엔드 분리 시 점진적 마이그레이션 가능
         }
 
         // CSRF 토큰 추출

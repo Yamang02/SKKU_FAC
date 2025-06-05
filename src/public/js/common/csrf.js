@@ -110,7 +110,9 @@ window.addCSRFToken = function (form) {
 
 // CSRF 토큰 갱신 함수 (필요한 경우)
 window.refreshCSRFToken = function () {
-    return fetch('/csrf-token')
+    return fetch('/csrf-token', {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -129,4 +131,39 @@ window.refreshCSRFToken = function () {
             }
             throw new Error('Failed to refresh CSRF token');
         });
+};
+
+// 전역 CSRF 매니저 객체 추가 (새로운 API와 호환성을 위해)
+window.csrfManager = {
+    getToken: function () {
+        return getCSRFToken();
+    },
+
+    refreshToken: function () {
+        return window.refreshCSRFToken();
+    },
+
+    addToHeaders: function (headers = {}) {
+        const token = getCSRFToken();
+        if (token) {
+            headers['X-CSRF-Token'] = token;
+        }
+        return Promise.resolve(headers);
+    },
+
+    addToData: function (data = {}) {
+        const token = getCSRFToken();
+        if (token) {
+            data._csrf = token;
+        }
+        return Promise.resolve(data);
+    },
+
+    addToFormData: function (formData) {
+        const token = getCSRFToken();
+        if (token) {
+            formData.append('_csrf', token);
+        }
+        return Promise.resolve(formData);
+    }
 };

@@ -16,8 +16,9 @@ services:
       - DB_PASSWORD=devpassword
       - DB_NAME=skku_sfa_gallery
     volumes:
-      - .:/app
+      - .:/app:cached
       - /app/node_modules
+      - /app/logs
     depends_on:
       mysql:
         condition: service_healthy
@@ -34,11 +35,11 @@ services:
       MYSQL_CHARACTER_SET_SERVER: utf8mb4
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
     ports:
-      - "3307:3306"  # 로컬 3306 충돌 피해서 3307로 매핑
+      - "3307:3306" # 로컬 3306 충돌 피해서 3307로 매핑
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pdevpassword"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pdevpassword" ]
       timeout: 20s
       retries: 10
       interval: 30s
@@ -48,6 +49,7 @@ services:
 
 volumes:
   mysql_data:
+
 
 networks:
   gallery_network:
