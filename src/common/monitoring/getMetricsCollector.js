@@ -168,13 +168,7 @@ class MetricsCollector {
             responseTime / 1000 // milliseconds to seconds
         );
 
-        logger.debug('📊 HTTP 메트릭 기록', {
-            method,
-            route,
-            statusCode,
-            responseTime,
-            userRole
-        });
+        // HTTP 메트릭 기록 로그 제거 (너무 빈번함)
     }
 
     /**
@@ -186,12 +180,7 @@ class MetricsCollector {
             duration / 1000 // milliseconds to seconds
         );
 
-        logger.debug('📊 DB 쿼리 메트릭 기록', {
-            queryType,
-            table,
-            duration,
-            status
-        });
+        // DB 쿼리 메트릭 기록 로그 제거 (너무 빈번함)
     }
 
     /**
@@ -252,16 +241,16 @@ class MetricsCollector {
      * 시스템 메트릭 수집 시작
      */
     startSystemMetricsCollection() {
-        // 15초마다 시스템 메트릭 수집
+        // 60초마다 시스템 메트릭 수집 (기존 15초에서 60초로 증가)
         this.systemMetricsInterval = setInterval(async () => {
             try {
                 await this.collectSystemMetrics();
             } catch (error) {
                 logger.error('시스템 메트릭 수집 중 에러 발생', error);
             }
-        }, 15000);
+        }, 60000);
 
-        logger.info('🔄 시스템 메트릭 수집 시작 (15초 간격)');
+        logger.info('🔄 시스템 메트릭 수집 시작 (60초 간격)');
     }
 
     /**
@@ -282,11 +271,7 @@ class MetricsCollector {
             this.systemMemoryUsage.set({ type: 'heap_total' }, memoryUsage.heapTotal);
             this.systemMemoryUsage.set({ type: 'external' }, memoryUsage.external);
 
-            logger.debug('📊 시스템 메트릭 수집 완료', {
-                cpu: stats.cpu,
-                memory: stats.memory,
-                memoryUsage
-            });
+            // 시스템 메트릭 수집 로그를 debug에서 제거 (너무 빈번함)
         } catch (error) {
             logger.error('시스템 메트릭 수집 실패', error);
         }
@@ -299,19 +284,15 @@ class MetricsCollector {
         const status = isConnected ? 1 : 0;
 
         switch (service) {
-        case 'redis':
-            this.redisConnectionStatus.set(status);
-            break;
-        case 'database':
-            this.dbConnectionStatus.set(status);
-            break;
+            case 'redis':
+                this.redisConnectionStatus.set(status);
+                break;
+            case 'database':
+                this.dbConnectionStatus.set(status);
+                break;
         }
 
-        logger.debug('📊 연결 상태 메트릭 업데이트', {
-            service,
-            isConnected,
-            status
-        });
+        // 연결 상태 메트릭 업데이트 로그 제거 (너무 빈번함)
     }
 
     /**
@@ -320,7 +301,7 @@ class MetricsCollector {
     updateActiveExhibitions(count) {
         this.exhibitionMetrics.set(count);
 
-        logger.debug('📊 활성 전시회 메트릭 업데이트', { count });
+        // 활성 전시회 메트릭 업데이트 로그 제거 (너무 빈번함)
     }
 
     /**

@@ -1,13 +1,11 @@
 version: '3.8'
 
 services:
-  # 🚀 SKKU Fine Art Club Gallery Application
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: skku_gallery_app
-    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
@@ -17,115 +15,39 @@ services:
       - DB_USER=root
       - DB_PASSWORD=devpassword
       - DB_NAME=skku_sfa_gallery
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    env_file:
-      - .env.docker
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - gallery_network
     volumes:
       - .:/app
       - /app/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy
     command: npm run dev
+    networks:
+      - gallery_network
 
-  # 🗄️ MySQL Database
   mysql:
     image: mysql:8.0
     container_name: skku_gallery_mysql
-    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: devpassword
       MYSQL_DATABASE: skku_sfa_gallery
       MYSQL_CHARACTER_SET_SERVER: utf8mb4
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
     ports:
-      - "3306:3306"  # 개발환경에서는 표준 포트 사용
-    networks:
-      - gallery_network
+      - "3307:3306"  # 로컬 3306 충돌 피해서 3307로 매핑
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./config/mysql:/etc/mysql/conf.d
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pdevpassword"]
       timeout: 20s
       retries: 10
       interval: 30s
       start_period: 30s
-
-  # 📡 Redis Cache
-  redis:
-    image: redis:7-alpine
-    container_name: skku_gallery_redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"  # 개발환경에서는 표준 포트 사용
     networks:
       - gallery_network
-    volumes:
-      - redis_data:/data
-      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      timeout: 3s
-      retries: 5
-      interval: 30s
-      start_period: 10s
 
-  # 🧪 Integration Test Environment
-  mysql_test:
-    image: mysql:8.0
-    container_name: skku_gallery_mysql_test
-    restart: "no"
-    environment:
-      MYSQL_ROOT_PASSWORD: testpassword
-      MYSQL_DATABASE: skku_sfa_gallery_test
-    ports:
-      - "3307:3306"  # 테스트용 별도 포트
-    networks:
-      - test_network
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptestpassword"]
-      timeout: 10s
-      retries: 5
-    profiles:
-      - test
-
-  redis_test:
-    image: redis:7-alpine
-    container_name: skku_gallery_redis_test
-    restart: "no"
-    ports:
-      - "6380:6379"  # 테스트용 별도 포트
-    networks:
-      - test_network
-    command: redis-server --save "" --appendonly no
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      timeout: 3s
-      retries: 3
-    profiles:
-      - test
-
-# 💾 Data Persistence
 volumes:
   mysql_data:
-    driver: local
-  redis_data:
-    driver: local
 
-# 🌐 Networks
 networks:
   gallery_network:
-    driver: bridge
-    name: skku_gallery_network
-  test_network:
-    driver: bridge
-    name: skku_gallery_test_network
