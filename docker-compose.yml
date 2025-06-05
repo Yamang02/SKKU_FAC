@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 🚀 SKKU Fine Art Club Gallery Application
   app:
@@ -9,34 +7,43 @@ services:
     container_name: skku_gallery_app
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:${PORT:-3000}"
     environment:
-      - NODE_ENV=development
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=devpassword
-      - DB_NAME=skku_sfa_gallery
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - NODE_ENV=${NODE_ENV:-development}
+      # 로컬 개발: MySQL 컨테이너, Railway: MySQL 내부 인스턴스
+      - DB_HOST=${DB_HOST:-mysql}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-devpassword}
+      - DB_NAME=${DB_NAME:-skku_sfa_gallery}
+      # 외부 Redis 서비스 사용 (로컬 개발 시에도 실제 외부 서비스)
+      - REDIS_URL=${REDIS_URL}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      # Cloudinary 외부 서비스 (로컬 개발 시에도 실제 외부 서비스)
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      # 기타 환경 변수
+      - JWT_SECRET=${JWT_SECRET:-local_development_secret}
+      - SESSION_SECRET=${SESSION_SECRET:-local_session_secret}
     env_file:
-      - .env.docker
+      - .env
     depends_on:
       mysql:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     networks:
       - gallery_network
     volumes:
       - .:/app
       - /app/node_modules
-    command: npm run dev
+    command: ${DOCKER_COMMAND:-npm run dev}
 
-  # 🗄️ MySQL Database
+  # 🗄️ MySQL Database (로컬 개발용 - Railway에서는 내부 인스턴스 사용)
   mysql:
     image: mysql:8.0
-    container_name: skku_gallery_mysql
+    container_name: skku_gallery_mysql_dev
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: devpassword
@@ -44,7 +51,7 @@ services:
       MYSQL_CHARACTER_SET_SERVER: utf8mb4
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
     ports:
-      - "3306:3306"  # 개발환경에서는 표준 포트 사용
+      - "3306:3306"
     networks:
       - gallery_network
     volumes:
@@ -57,26 +64,6 @@ services:
       retries: 10
       interval: 30s
       start_period: 30s
-
-  # 📡 Redis Cache
-  redis:
-    image: redis:7-alpine
-    container_name: skku_gallery_redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"  # 개발환경에서는 표준 포트 사용
-    networks:
-      - gallery_network
-    volumes:
-      - redis_data:/data
-      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      timeout: 3s
-      retries: 5
-      interval: 30s
-      start_period: 10s
 
   # 🧪 Integration Test Environment
   mysql_test:
@@ -114,11 +101,9 @@ services:
     profiles:
       - test
 
-# 💾 Data Persistence
+# 💾 Data Persistence (로컬 개발용)
 volumes:
   mysql_data:
-    driver: local
-  redis_data:
     driver: local
 
 # 🌐 Networks

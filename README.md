@@ -29,6 +29,7 @@ SKKU 미술동아리 갤러리는 성균관대학교 순수 미술 동아리 전
 - **캐싱**: Redis (세션 스토어 및 캐싱)
 - **CDN**: jsDelivr, Google Fonts, Cloudflare (외부 라이브러리 및 폰트)
 - **배포 환경**: Railway
+- **컨테이너화**: Docker & Docker Compose
 
 ### 2.4 보안
 
@@ -316,6 +317,105 @@ CUSTOM_RECOVERY_SUGGESTIONS='{"PAYMENT":["결제 설정을 확인하세요"]}'
 - **html2canvas**: 화면 캡처 기능 (jsDelivr CDN)
 - **Google Fonts**: 웹 폰트
 - **Cloudflare CDN**: 기타 외부 리소스
+
+## Docker 환경 설정
+
+이 프로젝트는 Railway 배포와 로컬 개발을 위한 다중 Docker 환경을 지원합니다.
+
+### Docker 설정 구조
+
+- **Railway 배포**: MySQL 내부 인스턴스, Redis/Cloudinary 외부 서비스
+- **로컬 개발**: MySQL Docker 컨테이너, Redis/Cloudinary 외부 서비스 연결
+- **테스트 환경**: 별도의 MySQL/Redis 포트 사용
+
+### Railway 배포용 Docker
+
+Railway에서는 MySQL은 내부 인스턴스를, Redis와 Cloudinary는 외부 서비스를 사용합니다.
+
+```bash
+# Railway 배포용 (앱만 컨테이너로 실행)
+npm run docker:railway
+
+# 환경 변수 설정 필요 (.env 파일)
+NODE_ENV=production
+DB_HOST=mysql.railway.internal
+DB_PORT=3306
+REDIS_URL=redis://external-redis-service
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+```
+
+### 로컬 개발용 Docker
+
+```bash
+# 로컬 개발 환경 시작 (MySQL 컨테이너 + App, 외부 Redis/Cloudinary 연결)
+npm run docker:dev
+
+# 빌드와 함께 시작
+npm run docker:dev:build
+
+# MySQL만 시작 (앱은 로컬에서 직접 실행 시)
+npm run docker:mysql
+
+# 개발 환경용 로그 확인
+npm run docker:logs
+
+# 개발 환경 중지
+npm run docker:down
+```
+
+### 테스트용 Docker
+
+```bash
+# 로컬 전체 테스트 (MySQL + Redis)
+npm run docker:test:local
+
+# Railway 테스트 (MySQL만, 외부 Redis 사용)
+npm run docker:test:railway
+
+# 테스트 환경 중지
+npm run docker:test:down
+```
+
+### 환경 변수 설정
+
+#### 로컬 개발용 (.env)
+```bash
+NODE_ENV=development
+# MySQL (Docker 컨테이너)
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=devpassword
+DB_NAME=skku_sfa_gallery
+
+# Redis (외부 서비스 - Redis Labs, Upstash 등)
+REDIS_URL=redis://your-redis-host:port
+REDIS_HOST=your-redis-host
+REDIS_PORT=6379
+REDIS_PASSWORD=your_redis_password
+
+# Cloudinary (외부 서비스)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# JWT & Session
+JWT_SECRET=local_development_secret
+SESSION_SECRET=local_session_secret
+```
+
+#### Railway 배포용 (Railway Variables)
+```bash
+NODE_ENV=production
+PORT=3000
+DB_HOST=${MYSQL_HOST}
+DB_PORT=${MYSQL_PORT}
+DB_USER=${MYSQL_USER}
+DB_PASSWORD=${MYSQL_PASSWORD}
+DB_NAME=${MYSQL_DATABASE}
+REDIS_URL=${REDIS_URL}
+CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+```
 
 ## 코드 품질 관리
 

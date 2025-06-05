@@ -1,51 +1,54 @@
-version: '3.8'
-
-# 임시 테스트용 - MySQL과 Redis만 실행
-# 사용법: docker-compose -f docker-compose.test.yml --env-file .env.docker up
-
-env_file:
-  - .env.docker
+# 🧪 테스트 전용 환경 - 로컬 MySQL과 Redis 실행
+# Railway 테스트: 외부 Redis 사용, 로컬 MySQL만 실행
+# 로컬 테스트: MySQL과 Redis 모두 로컬 실행
+#
+# 사용법:
+# - 로컬 전체 테스트: docker-compose -f docker-compose.test.yml up
+# - Railway 테스트: docker-compose -f docker-compose.test.yml up mysql
 
 services:
-  # MySQL 데이터베이스
+  # 🗄️ 테스트용 MySQL 데이터베이스
   mysql:
     image: mysql:8.0
     container_name: skku_gallery_mysql_test
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASS:-your_password}
-      MYSQL_DATABASE: ${DB_NAME:-skku_gallery}
-      MYSQL_USER: ${DB_USER:-root}
-      MYSQL_PASSWORD: ${DB_PASS:-your_password}
+      MYSQL_ROOT_PASSWORD: testpassword
+      MYSQL_DATABASE: skku_sfa_gallery_test
+      MYSQL_USER: root
+      MYSQL_PASSWORD: testpassword
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "3307:3306"  # 기본 MySQL과 충돌 방지
     volumes:
       - mysql_test_data:/var/lib/mysql
     networks:
       - gallery_test_network
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASS:-your_password}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptestpassword"]
       timeout: 20s
       retries: 10
 
-  # Redis 캐시
+  # 📡 테스트용 Redis (로컬 테스트만)
   redis:
     image: redis:7-alpine
     container_name: skku_gallery_redis_test
     restart: unless-stopped
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "6380:6379"  # 기본 Redis와 충돌 방지
     volumes:
       - redis_test_data:/data
-      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
     networks:
       - gallery_test_network
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command: redis-server --save "" --appendonly no
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       timeout: 3s
       retries: 5
+    profiles:
+      - local-only
 
 volumes:
   mysql_test_data:
