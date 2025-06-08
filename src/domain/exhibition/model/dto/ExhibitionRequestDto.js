@@ -74,7 +74,9 @@ export default class ExhibitionRequestDto extends BaseDto {
             isFeatured: Joi.boolean().default(false).optional(),
 
             // 선택적 필드들
-            id: Joi.number().integer().positive().optional(),
+            id: Joi.string().pattern(/^EXHIBITION_[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i).optional().messages({
+                'string.pattern.base': 'ID는 EXHIBITION_uuid 형식이어야 합니다'
+            }),
             imageUrl: Joi.string().uri().allow(null).optional(),
             imagePublicId: Joi.string().allow(null).optional()
         });
@@ -137,14 +139,14 @@ export default class ExhibitionRequestDto extends BaseDto {
         let schema;
 
         switch (schemaType) {
-        case 'create':
-            schema = ExhibitionRequestDto.getCreateSchema();
-            break;
-        case 'update':
-            schema = ExhibitionRequestDto.getUpdateSchema();
-            break;
-        default:
-            schema = this.getValidationSchema();
+            case 'create':
+                schema = ExhibitionRequestDto.getCreateSchema();
+                break;
+            case 'update':
+                schema = ExhibitionRequestDto.getUpdateSchema();
+                break;
+            default:
+                schema = this.getValidationSchema();
         }
 
         const { error, value } = schema.validate(this.toPlainObject(), {

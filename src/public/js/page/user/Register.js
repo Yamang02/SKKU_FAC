@@ -292,8 +292,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 최종 검증 (이중 안전장치)
-        const formData = new FormData(form);
-        const userData = Object.fromEntries(formData.entries());
+        // 역할에 따라 활성화된 필드만 수집
+        const userData = {};
+        const selectedRole = roleSelect.value;
+
+        // 기본 필드는 항상 수집
+        const basicFields = ['username', 'email', 'password', 'confirmPassword', 'name', 'role'];
+        basicFields.forEach(fieldName => {
+            const field = form.querySelector(`[name="${fieldName}"]`);
+            if (field && field.value) {
+                userData[fieldName] = field.value;
+            }
+        });
+
+        // 역할별 필드 수집
+        if (selectedRole === 'SKKU_MEMBER' || selectedRole === 'ADMIN') {
+            // SKKU 필드만 수집
+            const departmentField = form.querySelector('[name="department"]');
+            const studentYearField = form.querySelector('[name="studentYear"]');
+            const isClubMemberField = form.querySelector('[name="isClubMember"]');
+
+            if (departmentField && departmentField.value) {
+                userData.department = departmentField.value;
+            }
+            if (studentYearField && studentYearField.value) {
+                userData.studentYear = studentYearField.value;
+            }
+            if (isClubMemberField) {
+                userData.isClubMember = isClubMemberField.checked;
+            }
+
+            // affiliation은 선택적으로 포함
+            const affiliationField = form.querySelector('[name="affiliation"]');
+            if (affiliationField && affiliationField.value) {
+                userData.affiliation = affiliationField.value;
+            }
+        } else if (selectedRole === 'EXTERNAL_MEMBER') {
+            // 외부 사용자는 affiliation만 수집 (SKKU 관련 필드는 완전히 제외)
+            const affiliationField = form.querySelector('[name="affiliation"]');
+            if (affiliationField) {
+                userData.affiliation = affiliationField.value || '';
+            }
+            // isClubMember, department, studentYear 필드는 아예 포함하지 않음
+        }
 
         // 비밀번호 확인 (이중 안전장치)
         if (passwordInput.value !== confirmPasswordInput.value) {
@@ -306,55 +347,30 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.textContent = '처리 중...';
         submitButton.classList.add('btn-loading');
 
-        // 역할에 따른 데이터 정리
-        const selectedRole = roleSelect.value;
-        if (selectedRole === 'EXTERNAL_MEMBER') {
-            // 외부 사용자는 SKKU 관련 필드 제거
-            delete userData.department;
-            delete userData.studentYear;
-            delete userData.isClubMember;
-        } else if (selectedRole === 'SKKU_MEMBER') {
-            // SKKU 사용자는 외부 관련 필드 제거 (affiliation은 선택적이므로 유지)
-            if (!userData.affiliation) {
-                delete userData.affiliation;
-            }
-        }
-
-        // 체크박스 값 변환 (SKKU 멤버인 경우에만)
-        if (selectedRole === 'SKKU_MEMBER' || selectedRole === 'ADMIN') {
-            userData.isClubMember = userData.isClubMember === 'on';
-        }
-
-        // 빈 문자열을 null로 변환
+        // 빈 문자열을 null로 변환 (단, 외부 사용자의 affiliation은 제외)
         Object.keys(userData).forEach(key => {
             if (userData[key] === '') {
+                // 외부 사용자의 affiliation 필드는 빈 문자열 그대로 유지 (검증을 위해)
+                if (selectedRole === 'EXTERNAL_MEMBER' && key === 'affiliation') {
+                    return; // 변환하지 않음
+                }
                 userData[key] = null;
             }
         });
 
-        // DTO 생성 - 역할에 따라 필요한 필드만 포함
-        const userDto = {
-            username: userData.username,
-            name: userData.name,
-            email: userData.email,
-            password: userData.password,
-            confirmPassword: userData.confirmPassword,
-            role: userData.role
-        };
-
-        // 역할별 추가 필드
-        if (selectedRole === 'SKKU_MEMBER' || selectedRole === 'ADMIN') {
-            if (userData.department) userDto.department = userData.department;
-            if (userData.studentYear) userDto.studentYear = userData.studentYear;
-            if (userData.isClubMember !== undefined) userDto.isClubMember = userData.isClubMember;
-            if (userData.affiliation) userDto.affiliation = userData.affiliation;
-        } else if (selectedRole === 'EXTERNAL_MEMBER') {
-            if (userData.affiliation) userDto.affiliation = userData.affiliation;
-        }
+        // DTO 생성 - 이미 필요한 필드만 수집했으므로 그대로 사용
+        const userDto = { ...userData };
 
         showLoading(true);
         // 페이지 이탈 방지 활성화
         preventPageUnload();
+
+        // 디버깅: 전송할 데이터 확인
+        console.log('🔍 회원가입 데이터 전송:', {
+            selectedRole,
+            userDto: JSON.stringify(userDto, null, 2),
+            originalUserData: JSON.stringify(userData, null, 2)
+        });
 
         try {
             // API 호출

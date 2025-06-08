@@ -118,9 +118,13 @@ function createRateLimitOptions(options = {}) {
         attackType = null
     } = options;
 
+    // 개발환경에서는 Rate Limiting 비활성화 (매우 높은 제한값 설정)
+    const isDevelopment = !config.isProduction();
+    const effectiveMax = isDevelopment ? 999999 : (config.isProduction() ? max : max * 3);
+
     return {
         windowMs,
-        max: config.isProduction() ? max : max * 3, // 개발환경에서는 3배 여유
+        max: effectiveMax,
         message: {
             error: message,
             retryAfter: Math.ceil(windowMs / 1000),
@@ -132,6 +136,11 @@ function createRateLimitOptions(options = {}) {
         skipSuccessfulRequests,
         skipFailedRequests,
         skip: req => {
+            // 개발환경에서는 모든 요청 허용
+            if (isDevelopment) {
+                return true;
+            }
+
             // 건강 체크 및 지정된 경로 제외
             const shouldSkip = skipPaths.some(path => req.path.startsWith(path));
             if (shouldSkip) return true;
@@ -240,7 +249,7 @@ export const authRateLimit = rateLimit(
 export const passwordResetRateLimit = rateLimit(
     createRateLimitOptions({
         windowMs: 60 * 60 * 1000, // 1시간
-        max: 3, // 시간당 3회만
+        max: 5, // 시간당 5회로 증가 (기존 3회에서)
         message: 'Too many password reset attempts from this IP, please try again in 1 hour.',
         attackType: 'bruteForce'
     })
@@ -445,13 +454,20 @@ export const DomainRateLimits = {
         registration: rateLimit(
             createRateLimitOptions({
                 windowMs: 60 * 60 * 1000, // 1시간
-                max: 3,
+                max: 10, // 1시간에 10회로 증가 (정상 사용자 고려)
                 message: 'Too many registration attempts. Please try again in 1 hour.',
                 attackType: 'bruteForce'
             })
         ),
 
-        passwordReset: passwordResetRateLimit,
+        passwordReset: rateLimit(
+            createRateLimitOptions({
+                windowMs: 60 * 60 * 1000, // 1시간
+                max: 5, // 시간당 5회로 증가 (기존 3회에서)
+                message: 'Too many password reset attempts from this IP, please try again in 1 hour.',
+                attackType: 'bruteForce'
+            })
+        ),
 
         profile: rateLimit(
             createRateLimitOptions({
@@ -530,6 +546,15 @@ export const DomainRateLimits = {
  * 통합 Rate Limiting 설정 함수
  */
 export function setupAdvancedRateLimiting(app) {
+    // 개발환경에서는 Rate Limiting 비활성화
+    if (!config.isProduction()) {
+        logger.info('🚫 개발환경: Rate Limiting이 비활성화되었습니다');
+        console.log('🚫 [RATE_LIMIT] 개발환경에서 Rate Limiting 비활성화');
+        return;
+    }
+
+    logger.info('🛡️ 프로덕션 환경: Rate Limiting 활성화');
+
     // 1. 기본 보호 계층
     app.use(generalRateLimit);
 
@@ -553,7 +578,7 @@ export function setupAdvancedRateLimiting(app) {
     // 7. 도메인별 특화 제한 적용
     // 사용자 인증 관련
     app.use(['/user/login', '/auth/login'], DomainRateLimits.user.login);
-    app.use(['/user/', '/auth/register'], DomainRateLimits.user.registration);
+    app.use(['/user/register', '/user/new', '/user', '/auth/register'], DomainRateLimits.user.registration);
     app.use(['/user/password/reset', '/auth/forgot-password'], DomainRateLimits.user.passwordReset);
 
     // 작품 관련

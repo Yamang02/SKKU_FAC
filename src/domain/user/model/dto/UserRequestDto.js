@@ -12,7 +12,10 @@ export default class UserRequestDto extends BaseDto {
         // 기본값 설정
         this.id = this.id || null;
         this.role = this.role || 'SKKU_MEMBER';
-        this.isClubMember = this.isClubMember || false;
+        // isClubMember는 SKKU_MEMBER나 ADMIN인 경우에만 설정
+        if ((data.role === 'SKKU_MEMBER' || data.role === 'ADMIN') && Object.prototype.hasOwnProperty.call(data, 'isClubMember')) {
+            this.isClubMember = data.isClubMember || false;
+        }
         this.emailVerified = this.emailVerified || false;
         this.skkuUserId = this.skkuUserId || null;
         this.externalUserId = this.externalUserId || null;
@@ -112,18 +115,15 @@ export default class UserRequestDto extends BaseDto {
                     })
                 }),
 
-            isClubMember: Joi.boolean()
-                .default(false)
-                .when('role', {
-                    is: Joi.valid('SKKU_MEMBER', 'ADMIN'),
-                    then: Joi.boolean().optional(),
-                    otherwise: Joi.forbidden().messages({
-                        'any.unknown': '외부 사용자는 동아리 회원 정보를 설정할 수 없습니다'
-                    })
-                }),
+            isClubMember: Joi.when('role', {
+                is: Joi.valid('SKKU_MEMBER', 'ADMIN'),
+                then: Joi.boolean().default(false).optional(),
+                otherwise: Joi.forbidden().messages({
+                    'any.unknown': '외부 사용자는 동아리 회원 정보를 설정할 수 없습니다'
+                })
+            }),
 
-            // 선택적 필드들
-            id: Joi.number().integer().positive().optional(),
+            // 선택적 필드들 - id 필드 제거 (회원가입 시 서버에서 자동 생성)
             skkuUserId: Joi.number().integer().positive().allow(null).optional(),
             externalUserId: Joi.number().integer().positive().allow(null).optional(),
             emailVerified: Joi.boolean().default(false).optional(),
@@ -237,23 +237,23 @@ export default class UserRequestDto extends BaseDto {
         } else if (typeof schemaOrType === 'string') {
             // 문자열인 경우 기존 로직 사용
             switch (schemaOrType) {
-            case 'register':
-                schema = UserRequestDto.getRegisterSchema();
-                break;
-            case 'login':
-                schema = UserRequestDto.getLoginSchema();
-                break;
-            case 'updateProfile':
-                schema = UserRequestDto.getUpdateProfileSchema();
-                break;
-            case 'email':
-                schema = UserRequestDto.getEmailSchema();
-                break;
-            case 'resetPassword':
-                schema = UserRequestDto.getResetPasswordSchema();
-                break;
-            default:
-                schema = this.getValidationSchema();
+                case 'register':
+                    schema = UserRequestDto.getRegisterSchema();
+                    break;
+                case 'login':
+                    schema = UserRequestDto.getLoginSchema();
+                    break;
+                case 'updateProfile':
+                    schema = UserRequestDto.getUpdateProfileSchema();
+                    break;
+                case 'email':
+                    schema = UserRequestDto.getEmailSchema();
+                    break;
+                case 'resetPassword':
+                    schema = UserRequestDto.getResetPasswordSchema();
+                    break;
+                default:
+                    schema = this.getValidationSchema();
             }
         } else {
             // 기본값

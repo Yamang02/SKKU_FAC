@@ -74,7 +74,7 @@ export default class UserService {
             externalUserId,
             password: hashedPassword,
             emailVerified: false,
-            status: 'PENDING'
+            status: 'UNVERIFIED'
         });
 
         const createdUser = await this.userRepository.createUser(userDto);
