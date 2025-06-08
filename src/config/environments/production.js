@@ -78,11 +78,11 @@ export default {
             const isStatic = staticPaths.some(path => req.path.startsWith(path));
 
             if (isStatic) {
-                // 정적파일: 프로덕션에서도 강제새로고침 고려하여 관대하게
-                return 200;
+                // 정적파일: 대폭 증가 (200 → 1000)
+                return 1000;
             } else {
-                // 일반 요청: 엄격한 제한
-                return 50;
+                // 일반 요청: 6배 증가 (50 → 300) - 작품 등록 과정의 다중 API 호출 고려
+                return 300;
             }
         },
         message: (req) => {
