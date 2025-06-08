@@ -267,3 +267,6 @@ playwright-*.log
 .test-session-*
 .playwright-*
 .test-cache/
+.env.docker
+.env.test
+*.sql
