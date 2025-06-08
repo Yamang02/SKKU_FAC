@@ -1,5 +1,5 @@
 /**
- * 🎭 Playwright 설정 - Docker 기반 통합 테스트
+ * 🎭 Playwright E2E 테스트 설정
  */
 import { defineConfig, devices } from '@playwright/test';
 
@@ -24,17 +24,17 @@ const config = {
 };
 
 export default defineConfig({
-    // 테스트 디렉토리
-    testDir: './tests/integration',
+    // E2E 테스트 디렉토리
+    testDir: './tests/e2e',
 
     // 테스트 파일 패턴
-    testMatch: '**/*.test.js',
+    testMatch: '**/*.spec.js',
 
     // 전역 설정
-    fullyParallel: false, // Docker 환경에서는 순차 실행이 안전
+    fullyParallel: false, // E2E 테스트는 순차 실행
     forbidOnly: !!process.env.CI, // CI에서는 .only() 금지
     retries: process.env.CI ? 2 : 0, // CI에서만 재시도
-    workers: process.env.CI ? 1 : 1, // Docker 환경에서는 단일 워커 사용
+    workers: process.env.CI ? 1 : 1, // 단일 워커 사용
 
     // 리포터 설정
     reporter: [
@@ -57,11 +57,8 @@ export default defineConfig({
         // 비디오 (실패 시에만)
         video: 'retain-on-failure',
 
-        // API 테스트 설정
-        extraHTTPHeaders: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-        },
+        // 브라우저 설정
+        headless: process.env.CI ? true : false,
 
         // 타임아웃 설정
         actionTimeout: 30000,
@@ -71,39 +68,27 @@ export default defineConfig({
     // 프로젝트별 설정
     projects: [
         {
-            name: 'api-tests',
-            testDir: './tests/integration/api',
-            use: {
-                ...devices['Desktop Chrome'],
-                // API 테스트는 헤드리스 모드
-                headless: true
-            }
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'] }
         },
         {
-            name: 'e2e-tests',
-            testDir: './tests/e2e',
-            testMatch: '**/*.spec.js',
-            use: {
-                ...devices['Desktop Chrome'],
-                // E2E 테스트는 브라우저 필요
-                headless: process.env.CI ? true : false
-            },
-            dependencies: ['api-tests'] // API 테스트 후 E2E 실행
+            name: 'firefox',
+            use: { ...devices['Desktop Firefox'] }
+        },
+        {
+            name: 'webkit',
+            use: { ...devices['Desktop Safari'] }
         }
     ],
 
-    // 전역 설정 (webServer 제거 - 수동으로 서버 실행)
-    globalSetup: './tests/integration/helpers/globalSetup.js',
-    globalTeardown: './tests/integration/helpers/globalTeardown.js',
-
     // 테스트 타임아웃
-    timeout: 60000, // 60초
+    timeout: 120000, // 120초
     expect: {
         timeout: 10000 // expect 타임아웃 10초
     },
 
     // 출력 디렉토리
-    outputDir: 'test-results/artifacts',
+    outputDir: 'test-results/e2e-artifacts',
 
     // 환경 변수 전달
     metadata: {

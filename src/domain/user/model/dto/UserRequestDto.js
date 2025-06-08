@@ -122,8 +122,7 @@ export default class UserRequestDto extends BaseDto {
                     })
                 }),
 
-            // 선택적 필드들
-            id: Joi.number().integer().positive().optional(),
+            // 선택적 필드들 - id 필드 제거 (회원가입 시 서버에서 자동 생성)
             skkuUserId: Joi.number().integer().positive().allow(null).optional(),
             externalUserId: Joi.number().integer().positive().allow(null).optional(),
             emailVerified: Joi.boolean().default(false).optional(),
@@ -237,23 +236,23 @@ export default class UserRequestDto extends BaseDto {
         } else if (typeof schemaOrType === 'string') {
             // 문자열인 경우 기존 로직 사용
             switch (schemaOrType) {
-            case 'register':
-                schema = UserRequestDto.getRegisterSchema();
-                break;
-            case 'login':
-                schema = UserRequestDto.getLoginSchema();
-                break;
-            case 'updateProfile':
-                schema = UserRequestDto.getUpdateProfileSchema();
-                break;
-            case 'email':
-                schema = UserRequestDto.getEmailSchema();
-                break;
-            case 'resetPassword':
-                schema = UserRequestDto.getResetPasswordSchema();
-                break;
-            default:
-                schema = this.getValidationSchema();
+                case 'register':
+                    schema = UserRequestDto.getRegisterSchema();
+                    break;
+                case 'login':
+                    schema = UserRequestDto.getLoginSchema();
+                    break;
+                case 'updateProfile':
+                    schema = UserRequestDto.getUpdateProfileSchema();
+                    break;
+                case 'email':
+                    schema = UserRequestDto.getEmailSchema();
+                    break;
+                case 'resetPassword':
+                    schema = UserRequestDto.getResetPasswordSchema();
+                    break;
+                default:
+                    schema = this.getValidationSchema();
             }
         } else {
             // 기본값

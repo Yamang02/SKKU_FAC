@@ -318,16 +318,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!userData.affiliation) {
                 delete userData.affiliation;
             }
-        }
-
-        // 체크박스 값 변환 (SKKU 멤버인 경우에만)
-        if (selectedRole === 'SKKU_MEMBER' || selectedRole === 'ADMIN') {
+            // 체크박스 값 변환 (SKKU 멤버인 경우에만)
+            userData.isClubMember = userData.isClubMember === 'on';
+        } else if (selectedRole === 'ADMIN') {
+            // 관리자의 경우 체크박스 값 변환
             userData.isClubMember = userData.isClubMember === 'on';
         }
 
-        // 빈 문자열을 null로 변환
+        // 빈 문자열을 null로 변환 (단, 외부 사용자의 affiliation은 제외)
         Object.keys(userData).forEach(key => {
             if (userData[key] === '') {
+                // 외부 사용자의 affiliation 필드는 빈 문자열 그대로 유지 (검증을 위해)
+                if (selectedRole === 'EXTERNAL_MEMBER' && key === 'affiliation') {
+                    return; // 변환하지 않음
+                }
                 userData[key] = null;
             }
         });
@@ -349,12 +353,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (userData.isClubMember !== undefined) userDto.isClubMember = userData.isClubMember;
             if (userData.affiliation) userDto.affiliation = userData.affiliation;
         } else if (selectedRole === 'EXTERNAL_MEMBER') {
-            if (userData.affiliation) userDto.affiliation = userData.affiliation;
+            // 외부 사용자는 affiliation 필드를 항상 포함 (빈 값이어도 검증을 위해)
+            userDto.affiliation = userData.affiliation || '';
         }
 
         showLoading(true);
         // 페이지 이탈 방지 활성화
         preventPageUnload();
+
+        // 디버깅: 전송할 데이터 확인
+        console.log('🔍 회원가입 데이터 전송:', {
+            selectedRole,
+            userDto,
+            originalUserData: userData
+        });
 
         try {
             // API 호출

@@ -120,8 +120,8 @@ test.describe('간단한 회원가입 테스트', () => {
         await page.waitForTimeout(2000);
         await captureScreenshot(page, 'external-signup-error');
 
-        // notification.js에서 생성하는 오류 알림 확인
-        const errorNotification = await page.locator('.notification--error').textContent();
+        // notification.js에서 생성하는 오류 알림 확인 (.notification.notification--error)
+        const errorNotification = await page.locator('.notification.notification--error').textContent();
         expect(errorNotification).toBeTruthy();
         expect(errorNotification).toContain('소속');
     });
@@ -174,7 +174,7 @@ test.describe('간단한 회원가입 테스트', () => {
         console.log('All notifications:', allNotifications);
 
         // notification.js에서 생성하는 오류 알림 확인
-        const errorNotification = await page.locator('.notification--error').textContent();
+        const errorNotification = await page.locator('.notification.notification--error').textContent();
         console.log('Error notification:', errorNotification);
 
         expect(errorNotification).toBeTruthy();

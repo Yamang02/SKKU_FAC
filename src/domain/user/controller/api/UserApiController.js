@@ -35,6 +35,12 @@ export default class UserApiController {
      */
     async registerUser(req, res) {
         try {
+            // 디버깅: 받은 데이터 확인
+            console.log('🔍 회원가입 요청 데이터:', {
+                body: req.body,
+                userDto: req.userDto
+            });
+
             // 새로운 DTO 검증 미들웨어에서 제공하는 검증된 DTO 인스턴스 사용
             const userDto = req.userDto;
 

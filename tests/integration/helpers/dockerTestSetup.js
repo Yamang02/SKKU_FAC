@@ -21,19 +21,55 @@ class DockerTestSetup {
                 port: 3307, // 테스트용 포트
                 user: 'root',
                 password: 'testpassword',
-                database: 'skku_sfa_gallery_test',
+                database: 'skku_sfa_gallery_test'
             },
             redis: {
-                url: 'redis://localhost:6380', // 테스트용 포트
+                url: 'redis://localhost:6380' // 테스트용 포트
             },
             app: {
-                url: 'http://localhost:3000',
-            },
+                url: 'http://localhost:3000'
+            }
         };
 
         this.mysqlConnection = null;
         this.redisClient = null;
         this.isInitialized = false;
+    }
+
+    /**
+     * 🔍 테스트 환경 확인 및 설정 (로컬/Docker 모두 지원)
+     */
+    async ensureTestEnvironment() {
+        console.log('🔍 테스트 환경 확인 중...');
+
+        try {
+            // 먼저 로컬 환경에서 실제 연결 시도
+            const actualStatus = await this.checkActualConnections();
+
+            if (actualStatus.mysqlConnected && actualStatus.redisConnected) {
+                console.log('✅ 로컬 테스트 환경 사용 가능');
+                await this.initializeTestDatabase();
+                return;
+            }
+
+            // 로컬 연결 실패 시 Docker 환경 시작 시도
+            console.log('⚠️ 로컬 환경 연결 실패, Docker 환경 시작 시도...');
+            await this.startTestEnvironment();
+
+        } catch (error) {
+            console.error('❌ 테스트 환경 설정 실패:', error.message);
+            console.log('💡 해결 방법:');
+            console.log('  1. 로컬 MySQL(포트 3307)과 Redis(포트 6380) 실행');
+            console.log('  2. 또는 Docker 테스트 환경 실행: npm run docker:test:up');
+
+            // 로컬에서 테스트하는 경우 환경 확인을 건너뛸 수 있는 옵션 제공
+            if (process.env.SKIP_TEST_ENV_CHECK === 'true') {
+                console.log('⚠️ SKIP_TEST_ENV_CHECK=true로 설정되어 환경 확인을 건너뜁니다.');
+                return;
+            }
+
+            throw error;
+        }
     }
 
     /**
@@ -46,7 +82,7 @@ class DockerTestSetup {
             // Docker 컨테이너 시작
             execSync('docker-compose --profile test up -d mysql_test redis_test', {
                 stdio: 'inherit',
-                cwd: path.resolve(__dirname, '../../../'),
+                cwd: path.resolve(__dirname, '../../../')
             });
 
             // 컨테이너 준비 대기
@@ -72,7 +108,7 @@ class DockerTestSetup {
                     host: this.testConfig.mysql.host,
                     port: this.testConfig.mysql.port,
                     user: this.testConfig.mysql.user,
-                    password: this.testConfig.mysql.password,
+                    password: this.testConfig.mysql.password
                 });
                 await mysqlConnection.ping();
                 await mysqlConnection.end();
@@ -106,7 +142,7 @@ class DockerTestSetup {
                 host: this.testConfig.mysql.host,
                 port: this.testConfig.mysql.port,
                 user: this.testConfig.mysql.user,
-                password: this.testConfig.mysql.password,
+                password: this.testConfig.mysql.password
             });
 
             // 테스트 데이터베이스 생성 (존재하지 않는 경우)
@@ -234,7 +270,7 @@ class DockerTestSetup {
                 INDEX idx_artwork_user (user_id),
                 INDEX idx_artwork_slug (slug),
                 INDEX idx_artwork_status (status)
-            )`,
+            )`
         ];
 
         for (const tableSQL of tables) {
@@ -259,7 +295,7 @@ class DockerTestSetup {
                 name: 'Test User',
                 role: 'SKKU_MEMBER',
                 status: 'ACTIVE',
-                email_verified: true,
+                email_verified: true
             },
             {
                 id: 'USER_test-admin-001',
@@ -269,7 +305,7 @@ class DockerTestSetup {
                 name: 'Test Admin',
                 role: 'ADMIN',
                 status: 'ACTIVE',
-                email_verified: true,
+                email_verified: true
             },
             {
                 id: 'USER_test-external-001',
@@ -279,8 +315,8 @@ class DockerTestSetup {
                 name: 'External User',
                 role: 'EXTERNAL_MEMBER',
                 status: 'ACTIVE',
-                email_verified: true,
-            },
+                email_verified: true
+            }
         ];
 
         for (const user of testUsers) {
@@ -294,7 +330,7 @@ class DockerTestSetup {
                     user.name,
                     user.role,
                     user.status,
-                    user.email_verified,
+                    user.email_verified
                 ]
             );
         }
@@ -306,15 +342,15 @@ class DockerTestSetup {
                 user_id: 'USER_test-user-001',
                 department: 'Fine Art',
                 student_year: '2024',
-                is_club_member: true,
+                is_club_member: true
             },
             {
                 id: 'SKKU_PROFILE_test-002',
                 user_id: 'USER_test-admin-001',
                 department: 'Art Administration',
                 student_year: '2023',
-                is_club_member: true,
-            },
+                is_club_member: true
+            }
         ];
 
         for (const profile of skkuProfiles) {
@@ -374,7 +410,7 @@ class DockerTestSetup {
             // Docker 컨테이너 정리
             execSync('npm run docker:test:down', {
                 stdio: 'inherit',
-                cwd: path.resolve(__dirname, '../../../'),
+                cwd: path.resolve(__dirname, '../../../')
             });
 
             this.isInitialized = false;
@@ -392,8 +428,48 @@ class DockerTestSetup {
             dockerRunning: this.isInitialized,
             mysqlConnected: !!this.mysqlConnection,
             redisConnected: !!this.redisClient,
-            config: this.testConfig,
+            config: this.testConfig
         };
+    }
+
+    /**
+     * 🔍 실제 연결 상태 확인 (비동기)
+     */
+    async checkActualConnections() {
+        const status = {
+            mysqlConnected: false,
+            redisConnected: false
+        };
+
+        // MySQL 연결 테스트
+        try {
+            const mysql = require('mysql2/promise');
+            const testConnection = await mysql.createConnection({
+                host: this.testConfig.mysql.host,
+                port: this.testConfig.mysql.port,
+                user: this.testConfig.mysql.user,
+                password: this.testConfig.mysql.password
+            });
+            await testConnection.ping();
+            await testConnection.end();
+            status.mysqlConnected = true;
+        } catch (error) {
+            console.log('MySQL 연결 실패:', error.message);
+        }
+
+        // Redis 연결 테스트
+        try {
+            const { createClient } = require('redis');
+            const testClient = createClient({ url: this.testConfig.redis.url });
+            await testClient.connect();
+            await testClient.ping();
+            await testClient.disconnect();
+            status.redisConnected = true;
+        } catch (error) {
+            console.log('Redis 연결 실패:', error.message);
+        }
+
+        return status;
     }
 
     /**

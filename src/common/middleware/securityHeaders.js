@@ -131,11 +131,16 @@ export function advancedCSP() {
             res.setHeader('Content-Security-Policy-Report-Only', cspString);
         }
 
-        logger.debug('CSP 헤더 설정', {
-            environment,
-            policy: cspString.substring(0, 100) + '...',
-            path: req.path
-        });
+        // 정적 파일에 대해서는 CSP 로그 출력하지 않음
+        const isStaticFile = /\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/i.test(req.path);
+
+        if (!isStaticFile) {
+            logger.debug('CSP 헤더 설정', {
+                environment,
+                policy: cspString.substring(0, 100) + '...',
+                path: req.path
+            });
+        }
 
         next();
     };
