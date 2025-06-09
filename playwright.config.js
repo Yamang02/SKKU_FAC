@@ -1,21 +1,24 @@
 /**
- * 🎭 Playwright 설정 - 로컬 개발환경용 사용자 행동 테스트
+ * 🎭 Playwright 설정 - Docker 기반 개발환경용 E2E 테스트
  */
 import { defineConfig, devices } from '@playwright/test';
 
+// 환경 감지
+const isRailway = process.env.PUBLIC_DOMAIN;
+const isHeadless = process.env.HEADLESS !== 'false';
+
 export default defineConfig({
-    // 테스트 디렉토리 - 사용자 행동 테스트만
-    testDir: './tests/e2e/auth',
+    // 테스트 디렉토리 - 전체 E2E 테스트
+    testDir: './tests/e2e',
 
     // 테스트 파일 패턴
     testMatch: '**/*.spec.js',
 
     // 전역 설정
-    fullyParallel: false, // 사용자 행동 테스트는 순차 실행이 안전
-    forbidOnly: !!process.env.CI, // CI에서는 .only() 금지
-    retries: process.env.CI ? 1 : 0, // CI에서만 재시도
+    fullyParallel: false, // Docker/Railway 환경에서는 순차 실행이 안전
+    forbidOnly: !!process.env.CI,
+    retries: isRailway ? 2 : (process.env.CI ? 1 : 0),
     workers: 1, // 단일 워커로 안정적 실행
-
 
     // 리포터 설정
     reporter: [
@@ -26,10 +29,12 @@ export default defineConfig({
 
     // 전역 설정
     use: {
-        // 기본 URL - 로컬 개발 서버
-        baseURL: 'http://localhost:3000',
+        // URL 자동 감지: Railway > Docker > Local
+        baseURL: isRailway
+            ? `https://${process.env.PUBLIC_DOMAIN}`
+            : 'http://localhost:3000',
 
-        // 추적 설정 (실패 시에만)
+        // 추적 설정
         trace: 'on-first-retry',
 
         // 스크린샷 (실패 시에만)
@@ -38,12 +43,12 @@ export default defineConfig({
         // 비디오 (실패 시에만)
         video: 'retain-on-failure',
 
-        // 로컬 개발환경에서는 브라우저 UI 표시
-        headless: process.env.CI ? true : false,
+        // 헤드리스 모드 설정
+        headless: isHeadless,
 
-        // 타임아웃 설정
-        actionTimeout: 30000,
-        navigationTimeout: 30000,
+        // 환경별 타임아웃 설정
+        actionTimeout: isRailway ? 45000 : 30000,
+        navigationTimeout: isRailway ? 45000 : 30000,
 
         // 로케일 설정
         locale: 'ko-KR',
@@ -63,16 +68,16 @@ export default defineConfig({
             name: 'chromium',
             use: {
                 ...devices['Desktop Chrome'],
-                // Chrome 개발자 도구 사용 가능
+                // 환경별 Chrome 설정
                 launchOptions: {
                     args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-dev-shm-usage',
                         '--disable-web-security',
                         '--disable-features=VizDisplayCompositor',
-                        '--disable-background-timer-throttling',
-                        '--disable-backgrounding-occluded-windows',
-                        '--disable-renderer-backgrounding',
                         '--no-first-run',
-                        '--disable-extensions'
+                        ...(isRailway ? ['--disable-gpu'] : ['--disable-extensions'])
                     ]
                 },
                 // 브라우저 컨텍스트 초기화
@@ -88,10 +93,10 @@ export default defineConfig({
         }
     ],
 
-    // 테스트 타임아웃
-    timeout: 60000, // 60초
+    // 환경별 타임아웃
+    timeout: isRailway ? 90000 : 60000,
     expect: {
-        timeout: 10000 // expect 타임아웃 10초
+        timeout: isRailway ? 15000 : 10000
     },
 
     // 출력 디렉토리

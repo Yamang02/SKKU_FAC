@@ -1,5 +1,4 @@
 import logger from '../../../common/utils/Logger.js';
-import { AuditLogType, AuditSeverity } from '../../../common/middleware/auditLogger.js';
 
 /**
  * Admin 도메인 전용 에러 처리 미들웨어
@@ -69,20 +68,20 @@ function detectErrorType(error) {
  */
 function determineErrorSeverity(errorType, error) {
     switch (errorType) {
-    case AdminErrorType.VALIDATION:
-        return AdminErrorSeverity.LOW;
-    case AdminErrorType.NOT_FOUND:
-        return AdminErrorSeverity.LOW;
-    case AdminErrorType.AUTHORIZATION:
-        return AdminErrorSeverity.MEDIUM;
-    case AdminErrorType.DATABASE:
-        return AdminErrorSeverity.HIGH;
-    case AdminErrorType.EXTERNAL_SERVICE:
-        return AdminErrorSeverity.MEDIUM;
-    case AdminErrorType.SYSTEM:
-        return error.stack ? AdminErrorSeverity.HIGH : AdminErrorSeverity.MEDIUM;
-    default:
-        return AdminErrorSeverity.MEDIUM;
+        case AdminErrorType.VALIDATION:
+            return AdminErrorSeverity.LOW;
+        case AdminErrorType.NOT_FOUND:
+            return AdminErrorSeverity.LOW;
+        case AdminErrorType.AUTHORIZATION:
+            return AdminErrorSeverity.MEDIUM;
+        case AdminErrorType.DATABASE:
+            return AdminErrorSeverity.HIGH;
+        case AdminErrorType.EXTERNAL_SERVICE:
+            return AdminErrorSeverity.MEDIUM;
+        case AdminErrorType.SYSTEM:
+            return error.stack ? AdminErrorSeverity.HIGH : AdminErrorSeverity.MEDIUM;
+        default:
+            return AdminErrorSeverity.MEDIUM;
     }
 }
 
@@ -91,19 +90,19 @@ function determineErrorSeverity(errorType, error) {
  */
 function createUserFriendlyMessage(errorType, _error) {
     switch (errorType) {
-    case AdminErrorType.VALIDATION:
-        return '입력된 정보에 오류가 있습니다. 다시 확인해주세요.';
-    case AdminErrorType.AUTHORIZATION:
-        return '이 작업을 수행할 권한이 없습니다.';
-    case AdminErrorType.NOT_FOUND:
-        return '요청한 리소스를 찾을 수 없습니다.';
-    case AdminErrorType.DATABASE:
-        return '데이터베이스 처리 중 오류가 발생했습니다.';
-    case AdminErrorType.EXTERNAL_SERVICE:
-        return '외부 서비스 연동 중 오류가 발생했습니다.';
-    case AdminErrorType.SYSTEM:
-    default:
-        return '시스템 오류가 발생했습니다. 관리자에게 문의해주세요.';
+        case AdminErrorType.VALIDATION:
+            return '입력된 정보에 오류가 있습니다. 다시 확인해주세요.';
+        case AdminErrorType.AUTHORIZATION:
+            return '이 작업을 수행할 권한이 없습니다.';
+        case AdminErrorType.NOT_FOUND:
+            return '요청한 리소스를 찾을 수 없습니다.';
+        case AdminErrorType.DATABASE:
+            return '데이터베이스 처리 중 오류가 발생했습니다.';
+        case AdminErrorType.EXTERNAL_SERVICE:
+            return '외부 서비스 연동 중 오류가 발생했습니다.';
+        case AdminErrorType.SYSTEM:
+        default:
+            return '시스템 오류가 발생했습니다. 관리자에게 문의해주세요.';
     }
 }
 
@@ -132,36 +131,29 @@ function logAdminError(error, req, errorType, severity) {
 
     // 심각도에 따른 로그 레벨 결정
     switch (severity) {
-    case AdminErrorSeverity.LOW:
-        logger.warn('Admin 도메인 경고', logData);
-        break;
-    case AdminErrorSeverity.MEDIUM:
-        logger.error('Admin 도메인 에러', logData);
-        break;
-    case AdminErrorSeverity.HIGH:
-        logger.error('Admin 도메인 심각한 에러', logData);
-        break;
-    case AdminErrorSeverity.CRITICAL:
-        logger.error('Admin 도메인 치명적 에러', logData);
-        // 추가적인 알림 로직 (예: 슬랙, 이메일 등)
-        break;
+        case AdminErrorSeverity.LOW:
+            logger.warn('Admin 도메인 경고', logData);
+            break;
+        case AdminErrorSeverity.MEDIUM:
+            logger.error('Admin 도메인 에러', logData);
+            break;
+        case AdminErrorSeverity.HIGH:
+            logger.error('Admin 도메인 심각한 에러', logData);
+            break;
+        case AdminErrorSeverity.CRITICAL:
+            logger.error('Admin 도메인 치명적 에러', logData);
+            // 추가적인 알림 로직 (예: 슬랙, 이메일 등)
+            break;
     }
 
-    // 감사 로그 기록 (높은 심각도의 경우)
+    // 높은 심각도의 경우 추가 로깅
     if (severity === AdminErrorSeverity.HIGH || severity === AdminErrorSeverity.CRITICAL) {
-        // 감사 로그는 별도로 기록
-        logger.audit('Admin 에러 발생', {
-            type: AuditLogType.SYSTEM_ERROR,
-            severity: AuditSeverity.HIGH,
-            user: req.user,
-            action: 'ERROR_OCCURRED',
-            resource: req.originalUrl,
-            details: {
-                errorType,
-                message: error.message,
-                userAgent: req.get('User-Agent'),
-                ip: req.ip
-            }
+        logger.error('Admin 높은 심각도 에러', {
+            errorType,
+            message: error.message,
+            userAgent: req.get('User-Agent'),
+            ip: req.ip,
+            user: req.user
         });
     }
 }
@@ -203,17 +195,17 @@ export function adminErrorHandler(error, req, res, _next) {
  */
 function getStatusCodeForErrorType(errorType) {
     switch (errorType) {
-    case AdminErrorType.VALIDATION:
-        return 400;
-    case AdminErrorType.AUTHORIZATION:
-        return 403;
-    case AdminErrorType.NOT_FOUND:
-        return 404;
-    case AdminErrorType.DATABASE:
-    case AdminErrorType.EXTERNAL_SERVICE:
-    case AdminErrorType.SYSTEM:
-    default:
-        return 500;
+        case AdminErrorType.VALIDATION:
+            return 400;
+        case AdminErrorType.AUTHORIZATION:
+            return 403;
+        case AdminErrorType.NOT_FOUND:
+            return 404;
+        case AdminErrorType.DATABASE:
+        case AdminErrorType.EXTERNAL_SERVICE:
+        case AdminErrorType.SYSTEM:
+        default:
+            return 500;
     }
 }
 

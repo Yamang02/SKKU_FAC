@@ -3,7 +3,6 @@ import { ViewPath } from '../constants/ViewPath.js';
 import { UserRole } from '../constants/UserRole.js';
 import RBACService from '../../domain/auth/service/rbacService.js';
 import { extractUserFromToken } from './jwtAuth.js';
-import { logUnauthorizedAccess } from './auditLogger.js';
 
 const rbacService = new RBACService();
 
@@ -14,7 +13,7 @@ const rbacService = new RBACService();
 // 사용자 정보 추출 (세션 또는 JWT)
 export const extractUser = async (req, res, next) => {
     // JWT 토큰에서 사용자 정보 추출
-    await extractUserFromToken(req, res, () => {});
+    await extractUserFromToken(req, res, () => { });
 
     // 통합된 사용자 정보 설정
     const sessionUser = req.session?.user;
@@ -37,12 +36,9 @@ export const extractUser = async (req, res, next) => {
 // 로그인 필요 여부 확인 (하이브리드)
 export const isAuthenticated = async (req, res, next) => {
     // 사용자 정보 추출
-    await extractUser(req, res, () => {});
+    await extractUser(req, res, () => { });
 
     if (!req.user) {
-        // 감사 로그 기록
-        logUnauthorizedAccess(req);
-
         if (req.xhr || req.headers.accept?.includes('application/json')) {
             return res.status(401).json({
                 success: false,
@@ -79,7 +75,7 @@ export const isAuthenticated = async (req, res, next) => {
 
 // 관리자 권한 확인
 export const isAdmin = async (req, res, next) => {
-    await extractUser(req, res, () => {});
+    await extractUser(req, res, () => { });
 
     if (!req.user || req.user.role !== UserRole.ADMIN) {
         if (req.xhr || req.headers.accept?.includes('application/json')) {
@@ -98,7 +94,7 @@ export const isAdmin = async (req, res, next) => {
 
 // SKKU 회원 권한 확인
 export const isSkkuMember = async (req, res, next) => {
-    await extractUser(req, res, () => {});
+    await extractUser(req, res, () => { });
 
     if (!req.user || (req.user.role !== UserRole.SKKU_MEMBER && req.user.role !== UserRole.ADMIN)) {
         if (req.xhr || req.headers.accept?.includes('application/json')) {
@@ -118,7 +114,7 @@ export const isSkkuMember = async (req, res, next) => {
 // 특정 역할 확인
 export const hasRole = role => {
     return async (req, res, next) => {
-        await extractUser(req, res, () => {});
+        await extractUser(req, res, () => { });
 
         if (!req.user || req.user.role !== role) {
             if (req.xhr || req.headers.accept?.includes('application/json')) {
@@ -138,7 +134,7 @@ export const hasRole = role => {
 
 // 로그인 상태가 아닐 때만 접근 가능
 export const isNotAuthenticated = async (req, res, next) => {
-    await extractUser(req, res, () => {});
+    await extractUser(req, res, () => { });
 
     if (req.user) {
         return res.redirect('/');

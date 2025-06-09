@@ -25,9 +25,21 @@ class CacheManager {
 
     async init() {
         try {
-            // Redis 설정이 없으면 메모리 캐시 사용
-            if (!process.env.REDIS_HOST) {
-                logger.warn('Redis 설정이 없어 메모리 캐시 사용');
+            // 로컬 개발 환경이나 테스트 환경에서는 메모리 캐시 사용
+            const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'testing';
+            const isLocalDevelopment = process.env.NODE_ENV === 'development' && !process.env.RAILWAY_ENVIRONMENT;
+            const shouldUseMemoryCache = isTestEnvironment || isLocalDevelopment || !process.env.REDIS_HOST;
+
+            if (shouldUseMemoryCache) {
+                let reason = 'Redis 설정이 없어';
+                if (isTestEnvironment) reason = '테스트 환경이므로';
+                else if (isLocalDevelopment) reason = '로컬 개발 환경이므로';
+
+                logger.info(`${reason} 메모리 캐시 사용`, {
+                    nodeEnv: process.env.NODE_ENV,
+                    railwayEnv: process.env.RAILWAY_ENVIRONMENT,
+                    hasRedisHost: !!process.env.REDIS_HOST
+                });
                 this.cache = createCache({
                     store: 'memory',
                     max: 500,

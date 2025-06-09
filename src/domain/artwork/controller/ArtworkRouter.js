@@ -3,7 +3,6 @@ import ArtworkApiController from './api/ArtworkApiController.js';
 import CacheMiddleware from '../../../common/middleware/CacheMiddleware.js';
 import { imageUploadMiddleware } from '../../../common/middleware/imageUploadMiddleware.js';
 import { isAuthenticated } from '../../../common/middleware/auth.js';
-import { DomainSanitization } from '../../../common/middleware/sanitization.js';
 
 /**
  * 작품 라우터 팩토리 함수
@@ -85,7 +84,6 @@ export function createArtworkRouter(container) {
     ArtworkRouter.post(
         '/api/new',
         isAuthenticated,
-        DomainSanitization.artwork.create,
         imageUploadMiddleware('artwork'),
         async (req, res) => {
             const result = await artworkApiController.createArtwork(req, res);
@@ -149,7 +147,7 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.put('/api/:id', isAuthenticated, DomainSanitization.artwork.update, async (req, res) => {
+    ArtworkRouter.put('/api/:id', isAuthenticated, async (req, res) => {
         const result = await artworkApiController.updateArtwork(req, res);
         // 작품 관련 캐시 무효화
         await cacheMiddleware.invalidatePattern('artwork_*');
@@ -290,7 +288,6 @@ export function createArtworkRouter(container) {
      */
     ArtworkRouter.get(
         '/api/list',
-        DomainSanitization.artwork.search,
         cacheMiddleware.list({ ttl: 600, keyPrefix: 'artwork_list' }),
         (req, res) => artworkApiController.getArtworkList(req, res)
     );
@@ -401,7 +398,7 @@ export function createArtworkRouter(container) {
      *       500:
      *         description: 서버 오류
      */
-    ArtworkRouter.post('/api/exhibiting', DomainSanitization.artwork.create, async (req, res) => {
+    ArtworkRouter.post('/api/exhibiting', async (req, res) => {
         const result = await artworkApiController.submitArtwork(req, res);
         // 작품 및 전시회 관련 캐시 무효화
         await cacheMiddleware.invalidatePattern('artwork_*');

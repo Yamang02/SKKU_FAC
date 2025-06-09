@@ -1,6 +1,4 @@
 import logger from '../utils/Logger.js';
-import { AuditLogType, AuditSeverity } from '../middleware/auditLogger.js';
-import auditLogger from '../middleware/auditLogger.js';
 
 /**
  * 배치 작업 상태
@@ -106,20 +104,14 @@ export default class BatchProcessingService {
 
         this.jobQueue.set(jobId, job);
 
-        // 감사 로그 기록
-        auditLogger.log({
-            type: AuditLogType.BULK_OPERATION,
-            severity: AuditSeverity.MEDIUM,
-            user,
-            resource: `batch-job/${jobId}`,
-            action: 'CREATE_BATCH_JOB',
-            details: {
-                jobType: type,
-                jobId,
-                description,
-                dataCount: Array.isArray(data) ? data.length : 1,
-                priority
-            }
+        // 배치 작업 생성 로그
+        logger.info('배치 작업 생성 요청', {
+            jobId,
+            jobType: type,
+            description,
+            dataCount: Array.isArray(data) ? data.length : 1,
+            priority,
+            user: user?.username
         });
 
         logger.info('배치 작업 생성됨', {
@@ -189,19 +181,12 @@ export default class BatchProcessingService {
             return false; // 이미 완료되었거나 취소된 작업
         }
 
-        // 감사 로그 기록
-        auditLogger.log({
-            type: AuditLogType.BULK_OPERATION,
-            severity: AuditSeverity.MEDIUM,
-            user,
-            resource: `batch-job/${jobId}`,
-            action: 'CANCEL_BATCH_JOB',
-            details: {
-                jobType: job.type,
-                jobId,
-                cancelledBy: user?.username,
-                originalUser: job.user?.username
-            }
+        // 배치 작업 취소 로그
+        logger.info('배치 작업 취소 요청', {
+            jobId,
+            jobType: job.type,
+            cancelledBy: user?.username,
+            originalUser: job.user?.username
         });
 
         logger.info('배치 작업 취소됨', {
@@ -269,21 +254,15 @@ export default class BatchProcessingService {
             job.result = result;
             job.completedAt = new Date();
 
-            // 감사 로그 기록
-            auditLogger.log({
-                type: AuditLogType.BULK_OPERATION,
-                severity: AuditSeverity.MEDIUM,
-                user: job.user,
-                resource: `batch-job/${job.id}`,
-                action: 'COMPLETE_BATCH_JOB',
-                details: {
-                    jobType: job.type,
-                    jobId: job.id,
-                    duration: job.completedAt - job.startedAt,
-                    processed: job.progress.processed,
-                    successful: job.progress.successful,
-                    failed: job.progress.failed
-                }
+            // 배치 작업 완료 로그
+            logger.info('배치 작업 완료 처리', {
+                jobId: job.id,
+                jobType: job.type,
+                duration: job.completedAt - job.startedAt,
+                processed: job.progress.processed,
+                successful: job.progress.successful,
+                failed: job.progress.failed,
+                user: job.user?.username
             });
 
             logger.info('배치 작업 완료', {
@@ -328,20 +307,14 @@ export default class BatchProcessingService {
             job.status = BatchJobStatus.FAILED;
             job.completedAt = new Date();
 
-            // 감사 로그 기록
-            auditLogger.log({
-                type: AuditLogType.BULK_OPERATION,
-                severity: AuditSeverity.HIGH,
-                user: job.user,
-                resource: `batch-job/${job.id}`,
-                action: 'FAIL_BATCH_JOB',
-                details: {
-                    jobType: job.type,
-                    jobId: job.id,
-                    error: error.message,
-                    retryCount: job.retryCount,
-                    duration: job.completedAt - job.startedAt
-                }
+            // 배치 작업 실패 로그
+            logger.error('배치 작업 실패 처리', {
+                jobId: job.id,
+                jobType: job.type,
+                error: error.message,
+                retryCount: job.retryCount,
+                duration: job.completedAt - job.startedAt,
+                user: job.user?.username
             });
 
             logger.error('배치 작업 실패', error, {
@@ -363,205 +336,211 @@ export default class BatchProcessingService {
      */
     async processJobByType(job) {
         switch (job.type) {
-        case BatchJobType.BULK_DELETE_USERS:
-            return await this.processBulkDeleteUsers(job);
-        case BatchJobType.BULK_UPDATE_USERS:
-            return await this.processBulkUpdateUsers(job);
-        case BatchJobType.BULK_DELETE_ARTWORKS:
-            return await this.processBulkDeleteArtworks(job);
-        case BatchJobType.BULK_UPDATE_ARTWORKS:
-            return await this.processBulkUpdateArtworks(job);
-        case BatchJobType.BULK_DELETE_EXHIBITIONS:
-            return await this.processBulkDeleteExhibitions(job);
-        case BatchJobType.BULK_UPDATE_EXHIBITIONS:
-            return await this.processBulkUpdateExhibitions(job);
-        case BatchJobType.BULK_FEATURE_TOGGLE:
-            return await this.processBulkFeatureToggle(job);
-        case BatchJobType.BULK_STATUS_CHANGE:
-            return await this.processBulkStatusChange(job);
-        default:
-            throw new Error(`지원하지 않는 배치 작업 타입: ${job.type}`);
+            case BatchJobType.BULK_DELETE_USERS:
+                return await this.processBulkDeleteUsers(job);
+            case BatchJobType.BULK_UPDATE_USERS:
+                return await this.processBulkUpdateUsers(job);
+            case BatchJobType.BULK_DELETE_ARTWORKS:
+                return await this.processBulkDeleteArtworks(job);
+            case BatchJobType.BULK_UPDATE_ARTWORKS:
+                return await this.processBulkUpdateArtworks(job);
+            case BatchJobType.BULK_DELETE_EXHIBITIONS:
+                return await this.processBulkDeleteExhibitions(job);
+            case BatchJobType.BULK_UPDATE_EXHIBITIONS:
+                return await this.processBulkUpdateExhibitions(job);
+            case BatchJobType.BULK_FEATURE_TOGGLE:
+                return await this.processBulkFeatureToggle(job);
+            case BatchJobType.BULK_STATUS_CHANGE:
+                return await this.processBulkStatusChange(job);
+            default:
+                throw new Error(`지원하지 않는 배치 작업 타입: ${job.type}`);
         }
     }
 
     /**
-     * 대량 사용자 삭제 처리
+     * 사용자 일괄 삭제 처리
+     * @param {Object} job - 작업 객체
+     * @returns {Object} 처리 결과
      */
     async processBulkDeleteUsers(job) {
-        const { data: userIds } = job;
+        const userIds = job.data.userIds || [];
         job.progress.total = userIds.length;
 
-        try {
-            // 의존성 주입된 서비스 사용
-            const userManagementService = this.container?.resolve('UserManagementService');
-            if (!userManagementService) {
-                throw new Error('UserManagementService를 찾을 수 없습니다.');
-            }
+        const UserRepository = this.container.resolve('UserAccountRepository');
+        const results = [];
 
-            const results = await userManagementService.bulkDeleteUsers(userIds);
+        for (let i = 0; i < userIds.length; i += job.options.batchSize) {
+            if (job.cancelled) break;
 
-            // 진행률 업데이트
-            job.progress.processed = userIds.length;
-            job.progress.successful = results.deleted.length;
-            job.progress.failed = results.failed.length;
+            const batch = userIds.slice(i, i + job.options.batchSize);
 
-            return results;
-        } catch (error) {
-            logger.error('대량 사용자 삭제 처리 실패', error);
-            throw error;
-        }
-    }
-
-    /**
-     * 대량 사용자 업데이트 처리
-     */
-    async processBulkUpdateUsers(job) {
-        const { data: updates } = job;
-        job.progress.total = updates.length;
-
-        try {
-            const userManagementService = this.container?.resolve('UserManagementService');
-            if (!userManagementService) {
-                throw new Error('UserManagementService를 찾을 수 없습니다.');
-            }
-
-            const results = await userManagementService.bulkUpdateUsers(updates);
-
-            // 진행률 업데이트
-            job.progress.processed = updates.length;
-            job.progress.successful = results.updated.length;
-            job.progress.failed = results.failed.length;
-
-            return results;
-        } catch (error) {
-            logger.error('대량 사용자 업데이트 처리 실패', error);
-            throw error;
-        }
-    }
-
-    /**
-     * 대량 작품 삭제 처리
-     */
-    async processBulkDeleteArtworks(job) {
-        const { data: artworkIds } = job;
-        job.progress.total = artworkIds.length;
-
-        try {
-            const artworkManagementService = this.container?.resolve('ArtworkManagementService');
-            if (!artworkManagementService) {
-                throw new Error('ArtworkManagementService를 찾을 수 없습니다.');
-            }
-
-            // 임시로 개별 삭제 처리 (향후 bulkDeleteArtworks 메서드 구현 필요)
-            const results = {
-                deleted: [],
-                failed: []
-            };
-
-            for (const artworkId of artworkIds) {
+            for (const userId of batch) {
                 try {
-                    // 개별 작품 삭제 (실제 메서드명은 확인 필요)
-                    await artworkManagementService.deleteArtwork?.(artworkId);
-                    results.deleted.push(artworkId);
+                    await UserRepository.deleteUser(userId);
                     job.progress.successful++;
+                    results.push({ userId, status: 'success' });
                 } catch (error) {
-                    results.failed.push({ artworkId, error: error.message });
                     job.progress.failed++;
+                    job.progress.errors.push({
+                        userId,
+                        error: error.message,
+                        timestamp: new Date()
+                    });
+                    results.push({ userId, status: 'failed', error: error.message });
                 }
                 job.progress.processed++;
             }
-
-            return results;
-        } catch (error) {
-            logger.error('대량 작품 삭제 처리 실패', error);
-            throw error;
         }
+
+        return { results, summary: job.progress };
     }
 
     /**
-     * 대량 작품 업데이트 처리
+     * 사용자 일괄 업데이트 처리
+     * @param {Object} job - 작업 객체
+     * @returns {Object} 처리 결과
+     */
+    async processBulkUpdateUsers(_job) {
+        // 구현 예정
+        throw new Error('사용자 일괄 업데이트는 아직 구현되지 않았습니다.');
+    }
+
+    /**
+     * 작품 일괄 삭제 처리
+     * @param {Object} job - 작업 객체
+     * @returns {Object} 처리 결과
+     */
+    async processBulkDeleteArtworks(job) {
+        const artworkIds = job.data.artworkIds || [];
+        job.progress.total = artworkIds.length;
+
+        const ArtworkRepository = this.container.resolve('ArtworkRepository');
+        const results = [];
+
+        for (let i = 0; i < artworkIds.length; i += job.options.batchSize) {
+            if (job.cancelled) break;
+
+            const batch = artworkIds.slice(i, i + job.options.batchSize);
+
+            for (const artworkId of batch) {
+                try {
+                    await ArtworkRepository.deleteArtwork(artworkId);
+                    job.progress.successful++;
+                    results.push({ artworkId, status: 'success' });
+                } catch (error) {
+                    job.progress.failed++;
+                    job.progress.errors.push({
+                        artworkId,
+                        error: error.message,
+                        timestamp: new Date()
+                    });
+                    results.push({ artworkId, status: 'failed', error: error.message });
+                }
+                job.progress.processed++;
+            }
+        }
+
+        return { results, summary: job.progress };
+    }
+
+    /**
+     * 작품 일괄 업데이트 처리
+     * @param {Object} _job - 작업 객체
+     * @returns {Object} 처리 결과
      */
     async processBulkUpdateArtworks(_job) {
-        // 구현 로직은 processBulkUpdateUsers와 유사
-        return { updated: [], failed: [] };
+        // 구현 예정
+        throw new Error('작품 일괄 업데이트는 아직 구현되지 않았습니다.');
     }
 
     /**
-     * 대량 전시회 삭제 처리
+     * 전시회 일괄 삭제 처리
+     * @param {Object} _job - 작업 객체
+     * @returns {Object} 처리 결과
      */
     async processBulkDeleteExhibitions(_job) {
-        // 구현 로직은 processBulkDeleteArtworks와 유사
-        return { deleted: [], failed: [] };
+        // 구현 예정
+        throw new Error('전시회 일괄 삭제는 아직 구현되지 않았습니다.');
     }
 
     /**
-     * 대량 전시회 업데이트 처리
+     * 전시회 일괄 업데이트 처리
+     * @param {Object} _job - 작업 객체
+     * @returns {Object} 처리 결과
      */
     async processBulkUpdateExhibitions(_job) {
-        // 구현 로직은 processBulkUpdateUsers와 유사
-        return { updated: [], failed: [] };
+        // 구현 예정
+        throw new Error('전시회 일괄 업데이트는 아직 구현되지 않았습니다.');
     }
 
     /**
-     * 대량 추천 토글 처리
+     * 피처 상태 일괄 토글 처리
+     * @param {Object} job - 작업 객체
+     * @returns {Object} 처리 결과
      */
     async processBulkFeatureToggle(job) {
-        const {
-            data: items,
-            options: { featured: _featured }
-        } = job;
-        job.progress.total = items.length;
+        const { resourceType, resourceIds, featured } = job.data;
+        job.progress.total = resourceIds.length;
 
-        const results = {
-            updated: [],
-            failed: []
-        };
+        const results = [];
 
-        for (const item of items) {
+        for (const resourceId of resourceIds) {
+            if (job.cancelled) break;
+
             try {
-                // 실제 추천 토글 로직
-                results.updated.push(item.id);
-                job.progress.successful++;
-            } catch (error) {
-                results.failed.push({ id: item.id, error: error.message });
-                job.progress.failed++;
-            }
+                if (resourceType === 'artwork') {
+                    const ArtworkRepository = this.container.resolve('ArtworkRepository');
+                    await ArtworkRepository.updateArtwork(resourceId, { featured });
+                } else if (resourceType === 'exhibition') {
+                    const ExhibitionRepository = this.container.resolve('ExhibitionRepository');
+                    await ExhibitionRepository.updateExhibition(resourceId, { featured });
+                }
 
+                job.progress.successful++;
+                results.push({ resourceId, status: 'success' });
+            } catch (error) {
+                job.progress.failed++;
+                results.push({ resourceId, status: 'failed', error: error.message });
+            }
             job.progress.processed++;
         }
 
-        return results;
+        return { results, summary: job.progress };
     }
 
     /**
-     * 대량 상태 변경 처리
+     * 상태 일괄 변경 처리
+     * @param {Object} job - 작업 객체
+     * @returns {Object} 처리 결과
      */
     async processBulkStatusChange(job) {
-        const {
-            data: items,
-            options: { status: _status }
-        } = job;
-        job.progress.total = items.length;
+        const { resourceType, resourceIds, status } = job.data;
+        job.progress.total = resourceIds.length;
 
-        const results = {
-            updated: [],
-            failed: []
-        };
+        const results = [];
 
-        for (const item of items) {
+        for (const resourceId of resourceIds) {
+            if (job.cancelled) break;
+
             try {
-                // 실제 상태 변경 로직
-                results.updated.push(item.id);
-                job.progress.successful++;
-            } catch (error) {
-                results.failed.push({ id: item.id, error: error.message });
-                job.progress.failed++;
-            }
+                if (resourceType === 'artwork') {
+                    const ArtworkRepository = this.container.resolve('ArtworkRepository');
+                    await ArtworkRepository.updateArtwork(resourceId, { status });
+                } else if (resourceType === 'exhibition') {
+                    const ExhibitionRepository = this.container.resolve('ExhibitionRepository');
+                    await ExhibitionRepository.updateExhibition(resourceId, { status });
+                }
 
+                job.progress.successful++;
+                results.push({ resourceId, status: 'success' });
+            } catch (error) {
+                job.progress.failed++;
+                results.push({ resourceId, status: 'failed', error: error.message });
+            }
             job.progress.processed++;
         }
 
-        return results;
+        return { results, summary: job.progress };
     }
 
     /**
@@ -572,22 +551,26 @@ export default class BatchProcessingService {
             return;
         }
 
-        // 오래된 작업부터 제거
-        const jobs = Array.from(this.completedJobs.values()).sort((a, b) => a.completedAt - b.completedAt);
+        // 완료 시간 기준으로 정렬하여 오래된 작업 제거
+        const jobs = Array.from(this.completedJobs.values())
+            .sort((a, b) => b.completedAt - a.completedAt);
 
-        const toRemove = jobs.slice(0, jobs.length - this.maxCompletedJobs);
-        toRemove.forEach(job => {
-            this.completedJobs.delete(job.id);
+        const jobsToKeep = jobs.slice(0, this.maxCompletedJobs);
+        this.completedJobs.clear();
+
+        jobsToKeep.forEach(job => {
+            this.completedJobs.set(job.id, job);
         });
 
-        logger.debug('완료된 배치 작업 정리', {
-            removed: toRemove.length,
-            remaining: this.completedJobs.size
+        logger.info('완료된 배치 작업 정리 완료', {
+            kept: jobsToKeep.length,
+            removed: jobs.length - jobsToKeep.length
         });
     }
 
     /**
      * 작업 ID 생성
+     * @returns {string} 고유한 작업 ID
      */
     generateJobId() {
         return `batch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -603,11 +586,6 @@ export default class BatchProcessingService {
         if (this.cleanupInterval) {
             clearInterval(this.cleanupInterval);
         }
-
-        logger.info('배치 처리 서비스 종료', {
-            pendingJobs: this.jobQueue.size,
-            runningJobs: this.runningJobs.size,
-            completedJobs: this.completedJobs.size
-        });
+        logger.info('배치 처리 서비스 종료됨');
     }
 }

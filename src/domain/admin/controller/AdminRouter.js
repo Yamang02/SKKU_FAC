@@ -17,16 +17,7 @@ import {
     canFeatureExhibitions,
     isReadOnlyAdmin
 } from '../../../common/middleware/auth.js';
-import {
-    auditAdminAccess,
-    auditUserManagement,
-    auditContentManagement,
-    AuditLogType
-} from '../../../common/middleware/auditLogger.js';
-import { getRateLimitStats } from '../../../common/middleware/rateLimiting.js';
-import { getHttpsStats } from '../../../common/middleware/httpsEnforcement.js';
-import { getSecurityHeadersStats } from '../../../common/middleware/securityHeaders.js';
-import { getSecurityDashboard } from '../../../common/middleware/securityMonitoring.js';
+
 
 /**
  * 관리자 라우터 팩토리 함수
@@ -37,9 +28,8 @@ import { getSecurityDashboard } from '../../../common/middleware/securityMonitor
 export function createAdminRouter(container) {
     const AdminRouter = express.Router();
 
-    // 모든 admin 라우트에 기본 admin 패널 접근 권한 체크 및 감사 로깅
+    // 모든 admin 라우트에 기본 admin 패널 접근 권한 체크
     AdminRouter.use(canAccessAdminPanel());
-    AdminRouter.use(auditAdminAccess);
 
     // 의존성 주입된 컨트롤러들을 해결
     const adminController = container.resolve('SystemManagementController');
@@ -86,20 +76,18 @@ export function createAdminRouter(container) {
     AdminRouter.get(['/', '/dashboard'], canViewAdminDashboard(), (req, res) => adminController.getDashboard(req, res));
 
     // 사용자 관리 라우트
-    AdminRouter.get('/management/user', canReadUsers(), auditUserManagement(AuditLogType.USER_VIEW), (req, res) =>
+    AdminRouter.get('/management/user', canReadUsers(), (req, res) =>
         userManagementController.getManagementUserList(req, res)
     );
     AdminRouter.get(
         '/management/user/:id',
         canManageUserDetails(),
-        auditUserManagement(AuditLogType.USER_VIEW),
         (req, res) => userManagementController.getManagementUserDetail(req, res)
     );
     AdminRouter.put(
         '/management/user/:id',
         canWriteUsers(),
         preventReadOnlyActions,
-        auditUserManagement(AuditLogType.USER_UPDATE),
         (req, res) => userManagementController.updateManagementUser(req, res)
     );
     AdminRouter.delete(
@@ -107,14 +95,12 @@ export function createAdminRouter(container) {
         canDeleteUsers(),
         preventReadOnlyActions,
         deleteTimeoutMiddleware,
-        auditUserManagement(AuditLogType.USER_DELETE),
         (req, res) => userManagementController.deleteManagementUser(req, res)
     );
     AdminRouter.post(
         '/management/user/:id/reset-password',
         canResetUserPassword(),
         preventReadOnlyActions,
-        auditUserManagement(AuditLogType.USER_PASSWORD_RESET),
         (req, res) => userManagementController.resetManagementUserPassword(req, res)
     );
 
@@ -122,7 +108,6 @@ export function createAdminRouter(container) {
     AdminRouter.get(
         '/management/exhibition',
         canReadContent(),
-        auditContentManagement(AuditLogType.EXHIBITION_VIEW),
         (req, res) => exhibitionManagementController.getManagementExhibitionListPage(req, res)
     );
     AdminRouter.get('/management/exhibition/new', canWriteContent(), (req, res) =>
@@ -133,20 +118,17 @@ export function createAdminRouter(container) {
         canWriteContent(),
         preventReadOnlyActions,
         imageUploadMiddleware('exhibition'),
-        auditContentManagement(AuditLogType.EXHIBITION_CREATE),
         (req, res) => exhibitionManagementController.createManagementExhibition(req, res)
     );
     AdminRouter.get(
         '/management/exhibition/:id',
         canViewExhibitionDetails(),
-        auditContentManagement(AuditLogType.EXHIBITION_VIEW),
         (req, res) => exhibitionManagementController.getManagementExhibitionDetailPage(req, res)
     );
     AdminRouter.put(
         '/management/exhibition/:id',
         canWriteContent(),
         preventReadOnlyActions,
-        auditContentManagement(AuditLogType.EXHIBITION_UPDATE),
         (req, res) => exhibitionManagementController.updateManagementExhibition(req, res)
     );
     AdminRouter.delete(
@@ -154,14 +136,12 @@ export function createAdminRouter(container) {
         canDeleteContent(),
         preventReadOnlyActions,
         deleteTimeoutMiddleware,
-        auditContentManagement(AuditLogType.EXHIBITION_DELETE),
         (req, res) => exhibitionManagementController.deleteManagementExhibition(req, res)
     );
     AdminRouter.post(
         '/management/exhibition/:id/featured',
         canFeatureExhibitions(),
         preventReadOnlyActions,
-        auditContentManagement(AuditLogType.EXHIBITION_FEATURE),
         (req, res) => exhibitionManagementController.toggleFeatured(req, res)
     );
 
@@ -169,20 +149,17 @@ export function createAdminRouter(container) {
     AdminRouter.get(
         '/management/artwork',
         canReadContent(),
-        auditContentManagement(AuditLogType.ARTWORK_VIEW),
         (req, res) => artworkManagementController.getManagementArtworkListPage(req, res)
     );
     AdminRouter.get(
         '/management/artwork/:id',
         canViewArtworkDetails(),
-        auditContentManagement(AuditLogType.ARTWORK_VIEW),
         (req, res) => artworkManagementController.getManagementArtworkDetailPage(req, res)
     );
     AdminRouter.put(
         '/management/artwork/:id',
         canWriteContent(),
         preventReadOnlyActions,
-        auditContentManagement(AuditLogType.ARTWORK_UPDATE),
         (req, res) => artworkManagementController.updateManagementArtwork(req, res)
     );
     AdminRouter.delete(
@@ -190,14 +167,12 @@ export function createAdminRouter(container) {
         canDeleteContent(),
         preventReadOnlyActions,
         deleteTimeoutMiddleware,
-        auditContentManagement(AuditLogType.ARTWORK_DELETE),
         (req, res) => artworkManagementController.deleteManagementArtwork(req, res)
     );
     AdminRouter.post(
         '/management/artwork/:id/featured',
         canFeatureArtworks(),
         preventReadOnlyActions,
-        auditContentManagement(AuditLogType.ARTWORK_FEATURE),
         (req, res) => artworkManagementController.toggleFeatured(req, res)
     );
 
@@ -228,21 +203,6 @@ export function createAdminRouter(container) {
     );
     AdminRouter.get('/api/batch/stats', canReadContent(), (req, res) => batchController.getBatchJobStatsAPI(req, res));
 
-    // Rate Limiting 통계 API (보안 모니터링용)
-    AdminRouter.get('/api/security/rate-limit-stats', canViewAdminDashboard(), (req, res) =>
-        getRateLimitStats(req, res)
-    );
-
-    // HTTPS Enforcement 통계 API (보안 모니터링용)
-    AdminRouter.get('/api/security/https-stats', canViewAdminDashboard(), (req, res) => getHttpsStats(req, res));
-
-    // Security Headers 통계 API (보안 모니터링용)
-    AdminRouter.get('/api/security/headers-stats', canViewAdminDashboard(), (req, res) =>
-        getSecurityHeadersStats(req, res)
-    );
-
-    // 통합 보안 대시보드 API
-    AdminRouter.get('/api/security/dashboard', canViewAdminDashboard(), (req, res) => getSecurityDashboard(req, res));
 
     return AdminRouter;
 }

@@ -2,7 +2,6 @@ import express from 'express';
 import ExhibitionController from './ExhibitionController.js';
 import ExhibitionApiController from './api/ExhibitionApiController.js';
 import CacheMiddleware from '../../../common/middleware/CacheMiddleware.js';
-import { DomainSanitization } from '../../../common/middleware/sanitization.js';
 
 const ExhibitionRouter = express.Router();
 const exhibitionController = new ExhibitionController();
@@ -119,7 +118,6 @@ const cacheMiddleware = new CacheMiddleware();
  */
 ExhibitionRouter.get(
     '/api/list',
-    DomainSanitization.exhibition.search,
     cacheMiddleware.list({ ttl: 600, keyPrefix: 'exhibition_list' }),
     (req, res) => exhibitionApiController.getExhibitionList(req, res)
 );

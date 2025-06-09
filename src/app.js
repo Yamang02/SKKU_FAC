@@ -1,10 +1,8 @@
 import express from 'express';
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// 모니터링 시스템 (최우선 로드)
-import getSentry from './common/monitoring/getSentry.js';
+// Railway에서 모니터링 제공
 
 // 유틸리티 및 설정
 import logger from './common/utils/Logger.js';
@@ -15,23 +13,18 @@ import Config from './config/Config.js';
 // 캐시 매니저
 import getCacheManager from './common/cache/getCacheManager.js';
 
-// 모니터링
-import { metricsMiddleware, metricsEndpoint } from './common/middleware/metricsMiddleware.js';
-
 // 라우터
 import { createRouters } from './routeIndex.js';
-import { pageTracker } from './common/middleware/PageTracker.js';
 import { isAdmin } from './common/middleware/auth.js';
 import flash from 'connect-flash';
 
-// Sentry 초기화
-const sentry = getSentry();
+// Railway에서 모니터링 제공하므로 Sentry 제거
 
 // CacheManager 초기화 (import 시점에 싱글톤 생성됨)
 getCacheManager();
 
-// Swagger 문서 로드
-const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve('./src/swagger.json'), 'utf8'));
+// Swagger 문서 로드 (현재 사용 안함)
+// const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve('./src/swagger.json'), 'utf8'));
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -41,22 +34,14 @@ const __dirname = path.dirname(__filename);
 const config = Config.getInstance();
 app.set('config', config);
 
-// Sentry 요청 추적 (가장 먼저)
-app.use(sentry.getRequestHandler());
-app.use(sentry.getTracingHandler());
-
-// 메트릭 엔드포인트
-app.get('/metrics', metricsEndpoint);
+// Railway에서 모니터링 제공하므로 제거됨
 
 // 헬스체크 엔드포인트
 import CommonRouter from './domain/common/controller/CommonRouter.js';
 app.use('/', CommonRouter);
 
-// 메트릭 수집 미들웨어 추가
-app.use(metricsMiddleware);
-
-// 기본 미들웨어 설정
-setupBasicMiddleware(app, swaggerDocument);
+// 기본 미들웨어 설정 (극도로 최소화)
+setupBasicMiddleware(app);
 
 // 애플리케이션 초기화
 const appInitializer = new AppInitializer(app);
@@ -80,10 +65,8 @@ appInitializer.getMiddlewareSetupFunctions = () => ({
         app.set('views', path.join(__dirname, 'views'));
     },
     setupGlobalMiddleware: app => {
-        app.use(pageTracker);
         app.use((req, res, next) => {
             res.locals.user = req.session?.user || null;
-            res.setHeader('X-XSS-Protection', '1; mode=block');
             next();
         });
     },
@@ -112,7 +95,6 @@ appInitializer.getMiddleware = () => ({
 // 애플리케이션 초기화 실행
 appInitializer.initialize();
 
-// Sentry 에러 핸들러 (가장 마지막에 추가)
-app.use(sentry.getErrorHandler());
+// Railway에서 에러 처리 제공
 
 export default app;

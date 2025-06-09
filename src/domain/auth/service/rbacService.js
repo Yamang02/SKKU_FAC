@@ -1,6 +1,5 @@
 import { UserRole } from '../../../common/constants/UserRole.js';
 import logger from '../../../common/utils/Logger.js';
-import { logPermissionDenied, logUnauthorizedAccess } from '../../../common/middleware/auditLogger.js';
 
 /**
  * 역할 기반 접근 제어(RBAC) 서비스
@@ -314,9 +313,6 @@ export default class RBACService {
                     requiredPermissions
                 });
 
-                // 감사 로그 기록
-                logUnauthorizedAccess(req);
-
                 return res.status(401).json({
                     success: false,
                     error: '인증이 필요합니다.'
@@ -336,9 +332,6 @@ export default class RBACService {
                     requiredPermissions: permissions,
                     requireAll
                 });
-
-                // 감사 로그 기록
-                logPermissionDenied(req, permissions);
 
                 return res.status(403).json({
                     success: false,

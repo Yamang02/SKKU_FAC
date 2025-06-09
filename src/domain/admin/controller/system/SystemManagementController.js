@@ -14,7 +14,7 @@ export default class SystemManagementController extends BaseAdminController {
             this.systemManagementService = systemManagementService;
         } else {
             // 기존 방식 호환성 유지 (임시)
-            // TODO: 모든 도메인 리팩토링 완료 후 제거 예정
+
             throw new Error('SystemManagementService가 주입되지 않았습니다.');
         }
     }

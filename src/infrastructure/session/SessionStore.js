@@ -13,10 +13,62 @@ class SessionStore {
         this.store = null;
         this.sessionConfig = null;
         this.config = Config.getInstance();
+        this.isInitialized = false;
     }
 
     async initialize() {
         try {
+            // 로컬 개발 환경이나 테스트 환경에서는 메모리 세션 사용
+            const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'testing';
+            const isLocalDevelopment = process.env.NODE_ENV === 'development' && !process.env.RAILWAY_ENVIRONMENT;
+            const shouldUseMemorySession = isTestEnvironment || isLocalDevelopment || !process.env.REDIS_HOST;
+
+            if (shouldUseMemorySession) {
+                let reason = 'Redis 설정이 없어';
+                if (isTestEnvironment) reason = '테스트 환경이므로';
+                else if (isLocalDevelopment) reason = '로컬 개발 환경이므로';
+
+                logger.info(`${reason} 메모리 세션 사용`, {
+                    nodeEnv: process.env.NODE_ENV,
+                    railwayEnv: process.env.RAILWAY_ENVIRONMENT,
+                    hasRedisHost: !!process.env.REDIS_HOST
+                });
+
+                // 메모리 스토어 사용 (기본 동작)
+                this.store = null; // express-session이 메모리 스토어를 기본으로 사용
+
+                // 메모리 세션을 위한 기본 설정 생성
+                const sessionConfig = this.config.getSessionConfig();
+                const environment = this.config.getEnvironment();
+
+                this.sessionConfig = {
+                    secret: sessionConfig.secret,
+                    resave: false,
+                    saveUninitialized: false,
+                    rolling: sessionConfig.rolling !== undefined ? sessionConfig.rolling : true,
+                    unset: sessionConfig.unset || 'destroy',
+                    name: sessionConfig.name || 'sessionId',
+                    proxy: sessionConfig.proxy !== undefined ? sessionConfig.proxy : environment === 'production',
+                    cookie: {
+                        secure: sessionConfig.cookie.secure !== undefined ? sessionConfig.cookie.secure : environment === 'production',
+                        httpOnly: sessionConfig.cookie.httpOnly !== undefined ? sessionConfig.cookie.httpOnly : true,
+                        maxAge: sessionConfig.cookie.maxAge || 24 * 60 * 60 * 1000,
+                        sameSite: sessionConfig.cookie.sameSite || 'strict',
+                        domain: sessionConfig.cookie.domain || undefined,
+                        path: sessionConfig.cookie.path || '/'
+                    }
+                };
+
+                this.isInitialized = true;
+                logger.success('메모리 세션 스토어가 초기화되었습니다.', {
+                    environment,
+                    secure: this.sessionConfig.cookie.secure,
+                    sameSite: this.sessionConfig.cookie.sameSite,
+                    sessionName: this.sessionConfig.name
+                });
+                return this.sessionConfig;
+            }
+
             // Redis 클라이언트 연결 시도 (타임아웃 적용)
             if (!redisClient.isClientConnected()) {
                 logger.info('Redis 클라이언트 연결 시도 중...');
@@ -84,6 +136,7 @@ class SessionStore {
                 };
             }
 
+            this.isInitialized = true;
             logger.success('Redis 세션 스토어가 초기화되었습니다.', {
                 environment,
                 secure: this.sessionConfig.cookie.secure,
@@ -131,12 +184,13 @@ class SessionStore {
                 };
             }
 
+            this.isInitialized = true;
             return this.sessionConfig;
         }
     }
 
     getSessionMiddleware() {
-        if (!this.sessionConfig) {
+        if (!this.isInitialized || !this.sessionConfig) {
             throw new Error('세션 스토어가 초기화되지 않았습니다. initialize()를 먼저 호출하세요.');
         }
         return session(this.sessionConfig);

@@ -20,7 +20,29 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    command: npm run dev
+    command: npx nodemon src/server.js
+    networks:
+      - gallery_network
+
+  test-env:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: skku_gallery_test
+    environment:
+      - NODE_ENV=test
+      - DB_HOST=mysql-test
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=testpassword
+      - DB_NAME=skku_sfa_gallery_test
+    volumes:
+      - .:/app:cached
+      - /app/node_modules
+      - /app/logs
+    depends_on:
+      mysql-test:
+        condition: service_healthy
     networks:
       - gallery_network
 
@@ -45,8 +67,30 @@ services:
     networks:
       - gallery_network
 
+  mysql-test:
+    image: mysql:8.0
+    container_name: skku_gallery_mysql_test
+    environment:
+      MYSQL_ROOT_PASSWORD: testpassword
+      MYSQL_DATABASE: skku_sfa_gallery_test
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3308:3306" # 테스트용 포트
+    volumes:
+      - mysql_test_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptestpassword" ]
+      timeout: 20s
+      retries: 10
+      interval: 30s
+      start_period: 30s
+    networks:
+      - gallery_network
+
 volumes:
   mysql_data:
+  mysql_test_data:
 
 
 networks:

@@ -1,9 +1,5 @@
 import express from 'express';
 import { isAuthenticated, isNotAuthenticated } from '../../../common/middleware/auth.js';
-// 새로운 DTO 기반 검증 미들웨어
-import { UserValidation } from '../../../common/middleware/domainValidation.js';
-// 새로운 포괄적인 sanitization 미들웨어
-import { DomainSanitization } from '../../../common/middleware/sanitization.js';
 import CacheMiddleware from '../../../common/middleware/CacheMiddleware.js';
 
 /**
@@ -72,8 +68,6 @@ export function createUserRouter(userController, userApiController) {
     UserRouter.post(
         '/',
         isNotAuthenticated,
-        DomainSanitization.user.register,
-        UserValidation.validateRegister,
         async (req, res) => {
             const result = await userApiController.registerUser(req, res);
             // 사용자 관련 캐시 무효화 (필요시)
@@ -121,8 +115,6 @@ export function createUserRouter(userController, userApiController) {
     UserRouter.post(
         '/login',
         isNotAuthenticated,
-        DomainSanitization.user.register,
-        UserValidation.validateLogin,
         (req, res) => userApiController.loginUser(req, res)
     );
     /**
@@ -246,8 +238,6 @@ export function createUserRouter(userController, userApiController) {
     UserRouter.put(
         '/me',
         isAuthenticated,
-        DomainSanitization.user.updateProfile,
-        UserValidation.validateUpdateProfile,
         async (req, res) => {
             const result = await userApiController.updateProfile(req, res);
             // 사용자 관련 캐시 무효화
@@ -316,8 +306,6 @@ export function createUserRouter(userController, userApiController) {
      */
     UserRouter.get(
         '/api/find-username',
-        DomainSanitization.user.register,
-        UserValidation.validateEmailQuery,
         (req, res) => userApiController.findUsername(req, res)
     );
 
@@ -357,8 +345,6 @@ export function createUserRouter(userController, userApiController) {
     UserRouter.post(
         '/password/reset',
         isNotAuthenticated,
-        DomainSanitization.user.register,
-        UserValidation.validateResetPassword,
         (req, res) => userApiController.resetPassword(req, res)
     );
 

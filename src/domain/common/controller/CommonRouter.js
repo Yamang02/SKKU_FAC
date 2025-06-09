@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import HealthController from './HealthController.js';
 import DashboardController from './DashboardController.js';
-import { getMiddlewareStats, resetMiddlewareStats } from '../../../common/middleware/setupMiddleware.js';
+// 미들웨어 통계 기능은 개발환경에서 비활성화
+// import { getMiddlewareStats, resetMiddlewareStats } from '../../../common/middleware/setupMiddleware.js';
 import { csrfTokenEndpoint, csrfDebugEndpoint } from '../../../common/middleware/csrfProtection.js';
 
 const CommonRouter = Router();
@@ -18,58 +19,15 @@ CommonRouter.get('/csrf-token', csrfTokenEndpoint);
 // CSRF 디버그 정보 (개발 환경에서만)
 CommonRouter.get('/csrf-debug', csrfDebugEndpoint);
 
-// 미들웨어 성능 통계 조회 (개발/테스트 환경에서만)
+// 미들웨어 성능 통계 기능은 개발환경에서 비활성화됨
+/*
 CommonRouter.get('/middleware-stats', (req, res) => {
-    const config = req.app.get('config');
-
-    // 프로덕션 환경에서는 접근 제한
-    if (config && config.isProduction()) {
-        return res.status(403).json({
-            error: 'Access denied in production environment'
-        });
-    }
-
-    try {
-        const stats = getMiddlewareStats();
-        res.json({
-            success: true,
-            data: stats,
-            timestamp: new Date().toISOString()
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: 'Failed to retrieve middleware stats',
-            message: error.message
-        });
-    }
+    res.status(404).json({ error: 'Middleware stats disabled in development' });
 });
 
-// 미들웨어 성능 통계 초기화 (개발/테스트 환경에서만)
 CommonRouter.post('/middleware-stats/reset', (req, res) => {
-    const config = req.app.get('config');
-
-    // 프로덕션 환경에서는 접근 제한
-    if (config && config.isProduction()) {
-        return res.status(403).json({
-            error: 'Access denied in production environment'
-        });
-    }
-
-    try {
-        resetMiddlewareStats();
-        res.json({
-            success: true,
-            message: 'Middleware stats reset successfully',
-            timestamp: new Date().toISOString()
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: 'Failed to reset middleware stats',
-            message: error.message
-        });
-    }
+    res.status(404).json({ error: 'Middleware stats disabled in development' });
 });
+*/
 
 export default CommonRouter;
