@@ -60,6 +60,8 @@
         "test:report": "playwright show-report",
         "// === SIGNUP BEHAVIOR TESTS ===": "",
         "test:signup": "playwright test detailed-signup-behavior-test.spec.js",
+        "test:login": "playwright test login-examples.spec.js",
+        "test:auth": "playwright test tests/e2e/auth",
         "test:signup:headed": "playwright test detailed-signup-behavior-test.spec.js --headed",
         "test:signup:debug": "playwright test detailed-signup-behavior-test.spec.js --debug",
         "test:signup:step1": "playwright test detailed-signup-behavior-test.spec.js -g \"1단계\"",

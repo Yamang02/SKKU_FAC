@@ -16,6 +16,7 @@ export default defineConfig({
     retries: process.env.CI ? 1 : 0, // CI에서만 재시도
     workers: 1, // 단일 워커로 안정적 실행
 
+
     // 리포터 설정
     reporter: [
         ['html', { outputFolder: 'playwright-report', open: 'never' }],
