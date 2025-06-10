@@ -1,7 +1,6 @@
 import logger from './Logger.js';
 import sessionStore from '../../infrastructure/session/SessionStore.js';
 import ErrorHandler from '../middleware/ErrorHandler.js';
-import { railwayErrorHandlerConfig } from '../../config/railwayMonitoringConfig.js';
 import Config from '../../config/Config.js';
 import serviceRegistry from '../container/ServiceRegistry.js';
 import { setupSessionMiddleware } from '../middleware/setupMiddleware.js';
@@ -125,10 +124,10 @@ class AppInitializer {
      * 에러 핸들러 설정
      */
     setupErrorHandlers() {
-        // Railway 최적화 설정을 적용한 ErrorHandler 생성
-        const { errorHandler, notFoundHandler, handler } = ErrorHandler.create(railwayErrorHandlerConfig);
+        // 기본 에러 핸들러 생성
+        const { errorHandler, notFoundHandler, handler } = ErrorHandler.create();
 
-        // 핸들러 인스턴스를 앱에 저장 (동적 설정 변경을 위해)
+        // 핸들러 인스턴스를 앱에 저장
         this.app.set('errorHandler', handler);
 
         // 404 에러 처리
@@ -137,13 +136,9 @@ class AppInitializer {
         // 전체 에러 처리
         this.app.use(errorHandler);
 
-        logger.success('Railway 최적화 에러 핸들러 설정 완료');
+        logger.success('에러 핸들러 설정 완료');
         logger.debug('에러 핸들러 설정', {
-            environment: this.config.getEnvironment(),
-            customHandlers: Object.keys(railwayErrorHandlerConfig.customHandlers || {}).length,
-            filterRules: Object.keys(railwayErrorHandlerConfig.filterRules || {}).length,
-            transformRules: Object.keys(railwayErrorHandlerConfig.transformRules || {}).length,
-            errorReporter: !!railwayErrorHandlerConfig.errorReporter
+            environment: this.config.getEnvironment()
         });
     }
 

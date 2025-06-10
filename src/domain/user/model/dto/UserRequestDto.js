@@ -237,23 +237,23 @@ export default class UserRequestDto extends BaseDto {
         } else if (typeof schemaOrType === 'string') {
             // 문자열인 경우 기존 로직 사용
             switch (schemaOrType) {
-                case 'register':
-                    schema = UserRequestDto.getRegisterSchema();
-                    break;
-                case 'login':
-                    schema = UserRequestDto.getLoginSchema();
-                    break;
-                case 'updateProfile':
-                    schema = UserRequestDto.getUpdateProfileSchema();
-                    break;
-                case 'email':
-                    schema = UserRequestDto.getEmailSchema();
-                    break;
-                case 'resetPassword':
-                    schema = UserRequestDto.getResetPasswordSchema();
-                    break;
-                default:
-                    schema = this.getValidationSchema();
+            case 'register':
+                schema = UserRequestDto.getRegisterSchema();
+                break;
+            case 'login':
+                schema = UserRequestDto.getLoginSchema();
+                break;
+            case 'updateProfile':
+                schema = UserRequestDto.getUpdateProfileSchema();
+                break;
+            case 'email':
+                schema = UserRequestDto.getEmailSchema();
+                break;
+            case 'resetPassword':
+                schema = UserRequestDto.getResetPasswordSchema();
+                break;
+            default:
+                schema = this.getValidationSchema();
             }
         } else {
             // 기본값

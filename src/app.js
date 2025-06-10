@@ -23,8 +23,10 @@ import flash from 'connect-flash';
 // CacheManager 초기화 (import 시점에 싱글톤 생성됨)
 getCacheManager();
 
-// Swagger 문서 로드 (현재 사용 안함)
-// const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve('./src/swagger.json'), 'utf8'));
+// Swagger 문서 로드
+import fs from 'fs';
+import swaggerUi from 'swagger-ui-express';
+const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve('./src/swagger.json'), 'utf8'));
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -94,6 +96,9 @@ appInitializer.getMiddleware = () => ({
 
 // 애플리케이션 초기화 실행
 appInitializer.initialize();
+
+// Swagger UI 설정
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Railway에서 에러 처리 제공
 

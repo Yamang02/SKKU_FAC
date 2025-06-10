@@ -4,8 +4,19 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // 환경 감지
-const isRailway = process.env.PUBLIC_DOMAIN;
+const isRailway = process.env.RAILWAY_ENVIRONMENT === 'production';
 const isHeadless = process.env.HEADLESS !== 'false';
+
+// 디버깅을 위한 URL 결정
+const baseURL = isRailway
+    ? `https://${process.env.PUBLIC_DOMAIN}`
+    : 'http://localhost:3001'; // 로컬 테스트 환경용 포트 (test-env 컨테이너)
+
+console.log('🔍 Playwright 환경 설정:');
+console.log('  - isRailway:', isRailway);
+console.log('  - PUBLIC_DOMAIN:', process.env.PUBLIC_DOMAIN);
+console.log('  - RAILWAY_ENVIRONMENT:', process.env.RAILWAY_ENVIRONMENT);
+console.log('  - baseURL:', baseURL);
 
 export default defineConfig({
     // 테스트 디렉토리 - 전체 E2E 테스트
@@ -13,6 +24,9 @@ export default defineConfig({
 
     // 테스트 파일 패턴
     testMatch: '**/*.spec.js',
+
+    // 글로벌 설정
+    globalSetup: './tests/globalSetup.js',
 
     // 전역 설정
     fullyParallel: false, // Docker/Railway 환경에서는 순차 실행이 안전
@@ -29,10 +43,8 @@ export default defineConfig({
 
     // 전역 설정
     use: {
-        // URL 자동 감지: Railway > Docker > Local
-        baseURL: isRailway
-            ? `https://${process.env.PUBLIC_DOMAIN}`
-            : 'http://localhost:3000',
+        // URL 자동 감지: Railway > Local Test
+        baseURL: baseURL,
 
         // 추적 설정
         trace: 'on-first-retry',

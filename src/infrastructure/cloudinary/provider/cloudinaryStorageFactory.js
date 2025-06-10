@@ -1,18 +1,18 @@
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
-import { infrastructureConfig } from '../../../config/infrastructureConfig.js';
+import config from '../../../config/index.js';
 
 // Cloudinary 설정
-const cloudConfig = infrastructureConfig.storage.config;
+const storageConfig = config.getStorageConfig();
 
 cloudinary.config({
-    cloud_name: cloudConfig.cloudName,
-    api_key: cloudConfig.apiKey,
-    api_secret: cloudConfig.apiSecret
+    cloud_name: storageConfig.cloudinary.cloudName,
+    api_key: storageConfig.cloudinary.apiKey,
+    api_secret: storageConfig.cloudinary.apiSecret
 });
 
 // 현재 환경 가져오기
-const currentEnvironment = cloudConfig.environment || infrastructureConfig.environment || 'development';
+const currentEnvironment = config.getEnvironment();
 
 // 폴더 매핑
 const folderMap = {

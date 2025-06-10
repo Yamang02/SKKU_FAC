@@ -1,14 +1,13 @@
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
-import { infrastructureConfig } from '../../config/infrastructureConfig.js';
-import Config from '../../config/Config.js';
+import config from '../../config/index.js';
 import fs from 'fs';
 import path from 'path';
 
 class WinstonLogger {
     constructor() {
-        this.config = Config.getInstance();
-        this.environment = infrastructureConfig.environment;
+        this.config = config;
+        this.environment = config.getEnvironment();
         this.isDevelopment = this.environment === 'development' || this.environment === 'local';
         this.isTest = this.environment === 'test';
         this.isStaging = this.environment === 'staging';
@@ -978,8 +977,9 @@ HTTP: ${stats.http}개
      * 환경 정보 로그
      */
     logEnvironmentInfo() {
-        // test 환경에서는 환경 정보 로그 출력하지 않음
-        if (this.isTest) {
+        // test 환경(Railway)에서는 환경 정보 로그 출력하지 않음
+        // local-test 환경에서는 디버깅을 위해 출력
+        if (this.isTest && this.environment !== 'local-test') {
             return;
         }
 
@@ -995,7 +995,7 @@ HTTP: ${stats.http}개
         this.info(`PORT 환경변수 있음: ${process.env.PORT ? 'Yes' : 'No'}`);
         this.info(`프로덕션 환경: ${this.isProduction ? 'Yes' : 'No'}`);
         this.info(`테스트 환경: ${this.isTest ? 'Yes' : 'No'}`);
-        this.info(`스테이징 환경: ${this.isStaging ? 'Yes' : 'No'}`);
+        this.info(`로컬 테스트 환경: ${this.environment === 'local-test' ? 'Yes' : 'No'}`);
         this.info('=====================');
     }
 
@@ -1262,435 +1262,25 @@ HTTP: ${stats.http}개
             timeWindow,
             threshold,
             isAnomalous,
-            anomalyLevel: isAnomalous ? (frequency > threshold * 2 ? 'HIGH' : 'MEDIUM') : 'NORMAL'
+            severity: isAnomalous ? 'HIGH' : 'LOW'
         });
     }
 
     /**
-     * 에러 트렌드 분석 로깅
-     */
-    logErrorTrend(trendData, analysis) {
-        this.info('📊 에러 트렌드 분석', {
-            period: trendData.period,
-            totalErrors: trendData.totalErrors,
-            trend: analysis.trend, // 'increasing', 'decreasing', 'stable'
-            changePercentage: analysis.changePercentage,
-            categories: trendData.categories,
-            recommendations: analysis.recommendations
-        });
-    }
-
-    /**
-     * 에러 컨텍스트 강화 로깅
-     */
-    logEnhancedError(error, context = {}) {
-        const errorId = this.generateErrorId();
-        const severity = this.getErrorSeverity(error);
-        const category = this.categorizeError(error);
-
-        // 시스템 상태 정보 수집
-        const systemContext = {
-            memory: process.memoryUsage(),
-            uptime: process.uptime(),
-            platform: process.platform,
-            nodeVersion: process.version
-        };
-
-        // 요청 컨텍스트 정보
-        const requestContext = context.req
-            ? {
-                method: context.req.method,
-                url: context.req.originalUrl,
-                headers: this.sanitizeLogData(context.req.headers),
-                body: this.sanitizeLogData(context.req.body),
-                query: context.req.query,
-                params: context.req.params
-            }
-            : {};
-
-        this.error(`🔍 강화된 에러 분석 - ${errorId}`, {
-            errorId,
-            error: {
-                message: error.message,
-                name: error.name,
-                code: error.code,
-                stack: this.isDevelopment ? error.stack : undefined
-            },
-            analysis: {
-                severity,
-                category,
-                suggestions: this.generateRecoverySuggestion(error)
-            },
-            context: {
-                ...context,
-                system: systemContext,
-                request: requestContext
-            }
-        });
-
-        return errorId;
-    }
-
-    // ==================== 성능 모니터링 로깅 시스템 ====================
-
-    /**
-     * 성능 메트릭 수집 및 로깅
-     */
-    logPerformanceMetrics(operation, metrics = {}) {
-        const performanceId = this.generatePerformanceId();
-
-        // 기본 시스템 메트릭 수집
-        const systemMetrics = this.collectSystemMetrics();
-
-        // 성능 임계값 체크
-        const alerts = this.checkPerformanceThresholds(metrics, systemMetrics);
-
-        const level = alerts.length > 0 ? 'warn' : 'info';
-        const emoji = alerts.length > 0 ? '⚠️' : '📊';
-
-        this[level](`${emoji} 성능 메트릭 - ${performanceId}`, {
-            performanceId,
-            operation,
-            timestamp: new Date().toISOString(),
-            metrics: {
-                ...metrics,
-                system: systemMetrics
-            },
-            alerts,
-            environment: this.environment
-        });
-
-        // Railway 환경에서 일별 로그 버퍼에 추가
-        this.addToDailyLogBuffer(level, `성능 메트릭 - ${operation}`, {
-            performanceId,
-            metrics,
-            alerts
-        });
-
-        return performanceId;
-    }
-
-    /**
-     * 성능 ID 생성
-     */
-    generatePerformanceId() {
-        const timestamp = Date.now().toString(36);
-        const random = Math.random().toString(36).substr(2, 5);
-        return `PERF_${timestamp}_${random}`.toUpperCase();
-    }
-
-    /**
-     * 시스템 메트릭 수집
-     */
-    collectSystemMetrics() {
-        const memory = process.memoryUsage();
-        const cpuUsage = process.cpuUsage();
-
-        return {
-            memory: {
-                rss: Math.round(memory.rss / 1024 / 1024), // MB
-                heapTotal: Math.round(memory.heapTotal / 1024 / 1024), // MB
-                heapUsed: Math.round(memory.heapUsed / 1024 / 1024), // MB
-                external: Math.round(memory.external / 1024 / 1024), // MB
-                heapUsagePercentage: Math.round((memory.heapUsed / memory.heapTotal) * 100)
-            },
-            cpu: {
-                user: cpuUsage.user,
-                system: cpuUsage.system
-            },
-            uptime: Math.round(process.uptime()),
-            loadAverage: process.platform !== 'win32' ? require('os').loadavg() : [0, 0, 0],
-            timestamp: Date.now()
-        };
-    }
-
-    /**
-     * 성능 임계값 체크
-     */
-    checkPerformanceThresholds(metrics, systemMetrics) {
-        const alerts = [];
-
-        // 메모리 사용량 체크
-        if (systemMetrics.memory.heapUsagePercentage > 85) {
-            alerts.push({
-                type: 'MEMORY_HIGH',
-                severity: systemMetrics.memory.heapUsagePercentage > 95 ? 'CRITICAL' : 'HIGH',
-                message: `힙 메모리 사용량이 ${systemMetrics.memory.heapUsagePercentage}%입니다`,
-                threshold: '85%',
-                current: `${systemMetrics.memory.heapUsagePercentage}%`
-            });
-        }
-
-        // 응답 시간 체크
-        if (metrics.responseTime && metrics.responseTime > 1000) {
-            alerts.push({
-                type: 'RESPONSE_TIME_HIGH',
-                severity: metrics.responseTime > 5000 ? 'CRITICAL' : 'HIGH',
-                message: `응답 시간이 ${metrics.responseTime}ms입니다`,
-                threshold: '1000ms',
-                current: `${metrics.responseTime}ms`
-            });
-        }
-
-        // 데이터베이스 쿼리 시간 체크
-        if (metrics.dbQueryTime && metrics.dbQueryTime > 500) {
-            alerts.push({
-                type: 'DB_QUERY_SLOW',
-                severity: metrics.dbQueryTime > 2000 ? 'CRITICAL' : 'MEDIUM',
-                message: `DB 쿼리 시간이 ${metrics.dbQueryTime}ms입니다`,
-                threshold: '500ms',
-                current: `${metrics.dbQueryTime}ms`
-            });
-        }
-
-        // 동시 연결 수 체크
-        if (metrics.activeConnections && metrics.activeConnections > 100) {
-            alerts.push({
-                type: 'HIGH_CONNECTIONS',
-                severity: metrics.activeConnections > 200 ? 'HIGH' : 'MEDIUM',
-                message: `활성 연결 수가 ${metrics.activeConnections}개입니다`,
-                threshold: '100',
-                current: `${metrics.activeConnections}`
-            });
-        }
-
-        return alerts;
-    }
-
-    /**
-     * API 엔드포인트 성능 로깅
-     */
-    logApiPerformance(req, res, responseTime, additionalMetrics = {}) {
-        const endpoint = `${req.method} ${req.route?.path || req.originalUrl}`;
-
-        const metrics = {
-            responseTime,
-            statusCode: res.statusCode,
-            contentLength: res.get('content-length') || 0,
-            userAgent: req.get('User-Agent'),
-            ip: req.ip,
-            ...additionalMetrics
-        };
-
-        // 사용자 정보 추가
-        const userInfo = this.extractUserInfo(req);
-        if (userInfo) {
-            metrics.user = userInfo;
-        }
-
-        return this.logPerformanceMetrics(`API ${endpoint}`, metrics);
-    }
-
-    /**
-     * 데이터베이스 쿼리 성능 로깅
-     */
-    logDatabasePerformance(operation, queryTime, queryType = 'SELECT', additionalMetrics = {}) {
-        const metrics = {
-            dbQueryTime: queryTime,
-            queryType,
-            ...additionalMetrics
-        };
-
-        return this.logPerformanceMetrics(`DB ${operation}`, metrics);
-    }
-
-    /**
-     * 파일 I/O 성능 로깅
-     */
-    logFileIOPerformance(operation, duration, fileSize = 0, additionalMetrics = {}) {
-        const metrics = {
-            ioTime: duration,
-            fileSize: Math.round(fileSize / 1024), // KB
-            throughput: fileSize > 0 ? Math.round(fileSize / duration) : 0, // bytes/ms
-            ...additionalMetrics
-        };
-
-        return this.logPerformanceMetrics(`File I/O ${operation}`, metrics);
-    }
-
-    /**
-     * 외부 API 호출 성능 로깅
-     */
-    logExternalApiPerformance(apiName, duration, statusCode, additionalMetrics = {}) {
-        const metrics = {
-            apiCallTime: duration,
-            statusCode,
-            ...additionalMetrics
-        };
-
-        return this.logPerformanceMetrics(`External API ${apiName}`, metrics);
-    }
-
-    /**
-     * 캐시 성능 로깅
-     */
-    logCachePerformance(operation, hitRate, responseTime, additionalMetrics = {}) {
-        const metrics = {
-            cacheHitRate: hitRate,
-            cacheResponseTime: responseTime,
-            ...additionalMetrics
-        };
-
-        return this.logPerformanceMetrics(`Cache ${operation}`, metrics);
-    }
-
-    /**
-     * 성능 트렌드 분석 로깅
-     */
-    logPerformanceTrend(operation, currentMetrics, historicalAverage, trendAnalysis = {}) {
-        const performanceChange =
-            currentMetrics.responseTime && historicalAverage.responseTime
-                ? ((currentMetrics.responseTime - historicalAverage.responseTime) / historicalAverage.responseTime) *
-                100
-                : 0;
-
-        const level = Math.abs(performanceChange) > 20 ? 'warn' : 'info';
-        const emoji = performanceChange > 20 ? '📈' : performanceChange < -20 ? '📉' : '📊';
-
-        this[level](`${emoji} 성능 트렌드 분석 - ${operation}`, {
-            operation,
-            current: currentMetrics,
-            historical: historicalAverage,
-            trend: {
-                performanceChange: `${performanceChange.toFixed(1)}%`,
-                direction: performanceChange > 5 ? 'degrading' : performanceChange < -5 ? 'improving' : 'stable',
-                ...trendAnalysis
-            },
-            timestamp: new Date().toISOString()
-        });
-    }
-
-    /**
-     * 성능 임계값 위반 알림
-     */
-    logPerformanceAlert(alertType, severity, metrics, threshold, recommendations = []) {
-        const alertId = this.generatePerformanceId();
-
-        this.warn(`🚨 성능 알림 - ${alertId}`, {
-            alertId,
-            alertType,
-            severity,
-            metrics,
-            threshold,
-            recommendations,
-            timestamp: new Date().toISOString(),
-            environment: this.environment
-        });
-
-        // 중요한 성능 알림은 즉시 이메일 전송 고려
-        if (severity === 'CRITICAL' && this.isRailway) {
-            this.addToCriticalLogBuffer('warn', `성능 알림 - ${alertType}`, {
-                alertId,
-                severity,
-                metrics,
-                threshold
-            });
-        }
-
-        return alertId;
-    }
-
-    /**
-     * 성능 최적화 제안 로깅
-     */
-    logPerformanceOptimization(operation, currentMetrics, optimizationSuggestions = []) {
-        this.info(`💡 성능 최적화 제안 - ${operation}`, {
-            operation,
-            currentMetrics,
-            suggestions: optimizationSuggestions,
-            timestamp: new Date().toISOString()
-        });
-    }
-
-    /**
-     * 리소스 사용량 모니터링
-     */
-    logResourceUsage(resourceType = 'system', customMetrics = {}) {
-        const systemMetrics = this.collectSystemMetrics();
-
-        const resourceData = {
-            type: resourceType,
-            system: systemMetrics,
-            custom: customMetrics,
-            timestamp: new Date().toISOString()
-        };
-
-        // 리소스 사용량이 높으면 경고
-        const alerts = this.checkPerformanceThresholds({}, systemMetrics);
-        const level = alerts.length > 0 ? 'warn' : 'debug';
-
-        this[level]('📊 리소스 사용량 모니터링', resourceData);
-
-        return resourceData;
-    }
-
-    /**
-     * 성능 벤치마크 로깅
-     */
-    logPerformanceBenchmark(operation, iterations, totalTime, averageTime, additionalMetrics = {}) {
-        const throughput = iterations / (totalTime / 1000); // operations per second
-
-        this.info(`🏁 성능 벤치마크 - ${operation}`, {
-            operation,
-            iterations,
-            totalTime: `${totalTime}ms`,
-            averageTime: `${averageTime.toFixed(2)}ms`,
-            throughput: `${throughput.toFixed(2)} ops/sec`,
-            ...additionalMetrics,
-            timestamp: new Date().toISOString()
-        });
-    }
-
-    /**
-     * 성능 회귀 감지 로깅
-     */
-    logPerformanceRegression(operation, baselineMetrics, currentMetrics, regressionThreshold = 20) {
-        const regressionPercentage =
-            ((currentMetrics.responseTime - baselineMetrics.responseTime) / baselineMetrics.responseTime) * 100;
-
-        if (regressionPercentage > regressionThreshold) {
-            this.warn(`📉 성능 회귀 감지 - ${operation}`, {
-                operation,
-                baseline: baselineMetrics,
-                current: currentMetrics,
-                regression: {
-                    percentage: `${regressionPercentage.toFixed(1)}%`,
-                    threshold: `${regressionThreshold}%`,
-                    severity: regressionPercentage > 50 ? 'HIGH' : 'MEDIUM'
-                },
-                timestamp: new Date().toISOString()
-            });
-        }
-    }
-
-    /**
-     * 성능 대시보드 데이터 로깅
-     */
-    logPerformanceDashboard(dashboardData) {
-        this.info('📊 성능 대시보드 업데이트', {
-            dashboard: dashboardData,
-            timestamp: new Date().toISOString()
-        });
-    }
-
-    /**
-     * 현재 로그 설정 상태 출력 (디버깅용)
+     * 현재 로거 설정 로깅
      */
     logCurrentSettings() {
-        console.log('=== Logger 설정 상태 ===');
-        console.log(`환경: ${this.environment}`);
-        console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
-        console.log(`LOG_LEVEL 환경변수: ${process.env.LOG_LEVEL || 'undefined'}`);
-        console.log(`현재 로그 레벨: ${this.getLogLevel()}`);
-        console.log(`isDevelopment: ${this.isDevelopment}`);
-        console.log(`isTest: ${this.isTest}`);
-        console.log(`isProduction: ${this.isProduction}`);
-        console.log(`isRailway: ${this.isRailway}`);
-        console.log('========================');
+        this.info('📋 Logger 설정 정보', {
+            environment: this.environment,
+            logLevel: this.getLogLevel(),
+            emailLogging: !!this.config?.email?.user,
+            fileLogging: true,
+            consoleLogging: true
+        });
     }
 }
 
-// 싱글톤 인스턴스
+// 싱글톤 인스턴스 생성
 const logger = new WinstonLogger();
 
 export default logger;

@@ -1,36 +1,26 @@
+/**
+ * 🔧 설정 관리 진입점
+ */
 import Config from './Config.js';
 
 // Config 인스턴스 생성
 const config = Config.getInstance();
 
-// 환경별 설정을 비동기적으로 로드
-if (config.hasEnvironmentConfig) {
-    config.loadEnvironmentOverridesAsync().catch(error => {
-        console.error('환경별 설정 로드 실패:', error.message);
-    });
-}
+console.log(`✅ 설정 로드 완료 (환경: ${config.getEnvironment()})`);
 
-// 설정 유효성 검사
-if (!config.isValid()) {
-    console.error('❌ Config 설정이 유효하지 않습니다!');
-    if (config.getEnvironment() === 'production') {
-        process.exit(1);
-    }
-}
-
-// 개발 환경에서 설정 정보 출력
-if (config.getEnvironment() === 'development') {
+// 개발 환경에서만 설정 정보 출력
+if (config.isDevelopment()) {
     config.logConfigInfo();
 }
 
-// 개별 설정 내보내기 (기존 코드와의 호환성)
-export const databaseConfig = config.get('database');
-export const storageConfig = config.get('storage');
-export const securityConfig = config.get('security');
-export const sessionConfig = config.get('session');
-export const loggingConfig = config.get('logging');
-export const emailConfig = config.get('email');
-export const rateLimitConfig = config.get('rateLimit');
+// 개별 설정 내보내기
+export const databaseConfig = config.getDatabaseConfig();
+export const storageConfig = config.getStorageConfig();
+export const sessionConfig = config.getSessionConfig();
+export const emailConfig = config.getEmailConfig();
+export const redisConfig = config.getRedisConfig();
+export const jwtConfig = config.getJwtConfig();
+export const appConfig = config.getAppConfig();
 
 // 기본 내보내기
 export default config;

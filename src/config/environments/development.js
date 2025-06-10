@@ -1,7 +1,9 @@
 /**
- * 개발 환경 전용 설정 (로컬 환경, Cloudinary/Redis는 테스트와 공유)
+ * 개발 환경 전용 설정 (간소화됨)
  */
-export default {
+import { baseConfig, mergeConfig } from './base.js';
+
+const developmentOverrides = {
     app: {
         debug: true,
         port: 3000
@@ -17,178 +19,59 @@ export default {
         }
     },
 
-    // Cloudinary 설정 (테스트 환경과 동일)
-    storage: {
-        // 테스트 환경과 동일한 Cloudinary 설정 사용
-        environment: 'test', // 테스트 환경 폴더 사용
-        uploadDir: 'test' // 테스트와 동일한 업로드 디렉토리
-    },
-
-    // Redis 설정 (테스트 환경과 동일)
-    redis: {
-        // 테스트 환경과 동일한 Redis 인스턴스 사용
-        useTestInstance: true,
-        keyPrefix: 'test:', // 테스트와 동일한 키 프리픽스
-        database: 0 // 테스트와 동일한 DB 번호
-    },
-
     logging: {
         level: 'info',
         enableFileLogging: true,
-        enableConsoleLogging: true,
-        logDir: 'logs'
+        enableConsoleLogging: true
     },
 
     security: {
         csp: {
             contentSecurityPolicy: {
                 directives: {
-                    // 개발 환경에서는 더 관대한 CSP 정책
-                    defaultSrc: ['\'self\''],
+                    // 개발 환경 추가 허용
                     scriptSrc: [
                         '\'self\'',
                         '\'unsafe-inline\'',
-                        '\'unsafe-eval\'', // 개발 도구를 위해 허용
-                        'https://developers.kakao.com',
-                        'https://t1.kakaocdn.net',
-                        'https://k.kakaocdn.net',
+                        '\'unsafe-eval\'', // 개발 도구용
                         'https://cdn.jsdelivr.net',
                         'blob:'
-                    ],
-                    styleSrc: [
-                        '\'self\'',
-                        '\'unsafe-inline\'', // 개발 환경에서 인라인 스타일 허용
-                        'https://cdnjs.cloudflare.com',
-                        'https://fonts.googleapis.com'
-                    ],
-                    fontSrc: [
-                        '\'self\'',
-                        'https://fonts.googleapis.com',
-                        'https://fonts.gstatic.com',
-                        'https://cdnjs.cloudflare.com'
-                    ],
-                    imgSrc: [
-                        '\'self\'',
-                        'data:', // Base64 이미지 허용
-                        'blob:', // Blob URL 허용
-                        'https://res.cloudinary.com', // Cloudinary 이미지
-                        'https://*.cloudinary.com'
                     ],
                     connectSrc: [
                         '\'self\'',
                         'https://api.cloudinary.com',
                         'https://res.cloudinary.com',
-                        'ws://localhost:*', // 개발 서버 웹소켓
+                        'ws://localhost:*', // 개발 웹소켓
                         'wss://localhost:*'
-                    ],
-                    frameSrc: ['\'none\''], // iframe 금지
-                    objectSrc: ['\'none\''], // object 요소 금지
-                    baseUri: ['\'self\''], // base 태그 제한
-                    formAction: ['\'self\''], // form action 제한
-                    frameAncestors: ['\'none\''], // 외부 사이트에서 iframe 금지
-                    manifestSrc: ['\'self\''],
-                    mediaSrc: ['\'self\'', 'https://res.cloudinary.com'],
-                    workerSrc: ['\'self\'', 'blob:'],
-                    childSrc: ['\'self\'']
-                }
-            },
-            crossOriginEmbedderPolicy: false // 개발 환경에서는 비활성화
-        },
-        additionalHeaders: {
-            'X-Development-Mode': 'true',
-            'X-Debug-Info': 'enabled'
-        },
-        staticFiles: {
-            setHeaders: (res, filePath) => {
-                // 개발 환경에서는 캐시 비활성화
-                res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-                res.setHeader('Pragma', 'no-cache');
-                res.setHeader('Expires', '0');
-
-                // 정적 파일별 보안 헤더
-                if (filePath.includes('.js')) {
-                    res.setHeader('X-Content-Type-Options', 'nosniff');
+                    ]
                 }
             }
+        },
+        additionalHeaders: {
+            'X-Development-Mode': 'true'
         }
     },
 
     session: {
         cookie: {
-            secure: false, // HTTP에서도 작동
-            maxAge: 24 * 60 * 60 * 1000, // 24시간
-            httpOnly: true,
-            sameSite: 'lax', // 개발 환경에서는 lax 모드
-            path: '/'
+            secure: false,
+            maxAge: 24 * 60 * 60 * 1000 // 24시간
         },
-        name: 'dev_gallery_sid', // 개발 환경 세션명
-        rolling: true,
-        unset: 'destroy',
-        proxy: false // 개발 환경에서는 프록시 없음
+        name: 'dev_gallery_sid'
     },
 
     rateLimit: {
-        windowMs: 15 * 60 * 1000, // 15분
-        max: (req) => {
-            // 헬스체크와 파비콘은 제외
-            const alwaysSkip = ['/health', '/favicon.ico'];
-            if (alwaysSkip.some(path => req.path === path)) {
-                return 0; // 무제한
-            }
-
-            // 개발 API 경로 확인
-            if (req.path.startsWith('/api/dev')) {
-                return 0; // 개발 API는 무제한
-            }
-
-            // 정적파일 여부 확인
-            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
-            const isStatic = staticPaths.some(path => req.path.startsWith(path));
-
-            if (isStatic) {
-                // 정적파일: 개발환경에서는 매우 관대하게
-                return 2000;
-            } else {
-                // 일반 요청: 개발환경에서는 관대하게
-                return 500;
-            }
-        },
-        message: (req) => {
-            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
-            const isStatic = staticPaths.some(path => req.path.startsWith(path));
-
-            if (isStatic) {
-                return '정적파일 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-            } else {
-                return 'API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-            }
-        }
+        windowMs: 15 * 60 * 1000,
+        max: 500, // 개발환경은 관대하게
+        message: 'API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.'
     },
 
-    // JWT 설정 (개발 환경 - 편의성 우선)
     jwt: {
-        accessTokenExpiry: '1h', // 1시간 (개발 시 자주 만료되면 불편)
-        refreshTokenExpiry: '30d', // 30일 (개발 편의성)
+        accessTokenExpiry: '1h',
+        refreshTokenExpiry: '30d',
         issuer: 'skku-fac-gallery-dev',
         audience: 'skku-fac-gallery-dev-users'
-    },
-
-    // 개발 환경 전용 설정
-    devTools: {
-        enableHotReload: true,
-        enableSourceMaps: true,
-        enableDebugRoutes: true
-    },
-
-    // 외부 서비스 공유 설정
-    externalServices: {
-        cloudinary: {
-            shareWithTest: true, // 테스트 환경과 Cloudinary 공유
-            useTestFolder: true
-        },
-        redis: {
-            shareWithTest: true, // 테스트 환경과 Redis 공유
-            useTestDatabase: true
-        }
     }
 };
+
+export default mergeConfig(baseConfig, developmentOverrides);

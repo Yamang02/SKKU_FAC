@@ -1,5 +1,5 @@
 import { createClient } from 'redis';
-import { infrastructureConfig } from '../../config/infrastructureConfig.js';
+import config from '../../config/index.js';
 import logger from '../../common/utils/Logger.js';
 
 // 모듈 로드 시점 디버깅
@@ -28,7 +28,7 @@ const redisConfig = {
     db: parseInt(process.env.REDIS_DB, 10) || 0
 };
 
-const environment = infrastructureConfig.environment;
+const environment = config.environment;
 
 // Redis 연결 설정 로깅 (console.log로 강제 출력)
 console.log('=== Redis 연결 설정 (상세 디버깅) ===');

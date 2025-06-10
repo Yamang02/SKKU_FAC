@@ -6,13 +6,12 @@ services:
     container_name: skku_gallery_app
     ports:
       - "3000:3000"
+    env_file:
+      - .env.docker
     environment:
       - NODE_ENV=development
       - DB_HOST=mysql
       - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=devpassword
-      - DB_NAME=skku_sfa_gallery
     volumes:
       - .:/app:cached
       - /app/node_modules
@@ -29,13 +28,14 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     container_name: skku_gallery_test
+    ports:
+      - "3001:3000" # 테스트용 포트 (개발용과 분리)
+    env_file:
+      - .env.docker
     environment:
-      - NODE_ENV=test
+      - NODE_ENV=local-test
       - DB_HOST=mysql-test
       - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=testpassword
-      - DB_NAME=skku_sfa_gallery_test
     volumes:
       - .:/app:cached
       - /app/node_modules
@@ -43,6 +43,7 @@ services:
     depends_on:
       mysql-test:
         condition: service_healthy
+    command: npx nodemon src/server.js
     networks:
       - gallery_network
 
@@ -77,8 +78,7 @@ services:
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
     ports:
       - "3308:3306" # 테스트용 포트
-    volumes:
-      - mysql_test_data:/var/lib/mysql
+    # 볼륨 제거 - 매번 깨끗한 테스트 환경
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptestpassword" ]
       timeout: 20s
@@ -90,7 +90,6 @@ services:
 
 volumes:
   mysql_data:
-  mysql_test_data:
 
 
 networks:

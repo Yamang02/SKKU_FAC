@@ -13,13 +13,13 @@ const environment = config.getEnvironment();
 logger.info('=== 데이터베이스 연결 설정 ===');
 logger.info(`환경: ${environment}`);
 logger.info(`호스트: ${dbConfig.host}`);
-logger.info(`사용자: ${dbConfig.user}`);
+logger.info(`사용자: ${dbConfig.username}`);
 logger.info(`데이터베이스: ${dbConfig.database}`);
 logger.info(`포트: ${dbConfig.port}`);
 logger.info('===========================');
 
 // Sequelize 인스턴스 생성
-const db = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
+const db = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {
     host: dbConfig.host,
     dialect: 'mysql',
     port: dbConfig.port,

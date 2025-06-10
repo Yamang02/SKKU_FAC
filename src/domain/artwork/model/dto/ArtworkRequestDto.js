@@ -144,14 +144,14 @@ export default class ArtworkRequestDto extends BaseDto {
         let schema;
 
         switch (schemaType) {
-            case 'create':
-                schema = ArtworkRequestDto.getCreateSchema();
-                break;
-            case 'update':
-                schema = ArtworkRequestDto.getUpdateSchema();
-                break;
-            default:
-                schema = this.getValidationSchema();
+        case 'create':
+            schema = ArtworkRequestDto.getCreateSchema();
+            break;
+        case 'update':
+            schema = ArtworkRequestDto.getUpdateSchema();
+            break;
+        default:
+            schema = this.getValidationSchema();
         }
 
         const { error, value } = schema.validate(this.toPlainObject(), {

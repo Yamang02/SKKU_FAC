@@ -2,19 +2,12 @@
     "watch": [
         "src/**/*"
     ],
-    "ext": "js,json,ejs,css,html",
+    "ext": "js,json,ejs",
     "ignore": [
         "node_modules/**/*",
-        "public/**/*",
         "logs/**/*",
-        "*.log",
-        "*.test.js",
-        "coverage/**/*"
+        "*.test.js"
     ],
-    "legacyWatch": true,
-    "polling": true,
-    "pollingInterval": 1000,
-    "verbose": true,
     "env": {
         "NODE_ENV": "development"
     },

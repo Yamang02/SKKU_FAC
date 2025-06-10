@@ -21,15 +21,7 @@ AuthRouter.get('/login', isNotAuthenticated, authPageController.renderLoginPage.
  */
 AuthRouter.post('/login', isNotAuthenticated, authPageController.handleLocalLogin.bind(authPageController));
 
-/**
- * Google 로그인 시작
- */
-AuthRouter.get('/google', isNotAuthenticated, authPageController.initiateGoogleLogin.bind(authPageController));
-
-/**
- * Google 로그인 콜백
- */
-AuthRouter.get('/google/callback', authPageController.handleGoogleCallback.bind(authPageController));
+// Google OAuth 라우트 제거됨
 
 /**
  * 로그아웃
