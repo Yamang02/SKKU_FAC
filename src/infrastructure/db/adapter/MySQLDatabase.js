@@ -73,16 +73,19 @@ const getConnectionPoolStats = () => {
             };
         }
 
+        // 안전한 접근을 위한 기본값 설정
+        const poolConfig = dbConfig.pool || {};
+
         return {
             available: true,
-            size: pool.size || 0, // 현재 연결 수
-            availableConnections: pool.available || 0, // 사용 가능한 연결 수
-            using: pool.using || 0, // 사용 중인 연결 수
-            waiting: pool.waiting || 0, // 대기 중인 요청 수
-            max: dbConfig.pool.max, // 최대 연결 수
-            min: dbConfig.pool.min, // 최소 연결 수
-            acquireTimeout: dbConfig.pool.acquire, // 연결 획득 타임아웃
-            idleTimeout: dbConfig.pool.idle, // 유휴 타임아웃
+            size: pool.size || 0,
+            availableConnections: pool.available || 0,
+            using: pool.using || 0,
+            waiting: pool.waiting || 0,
+            max: poolConfig.max || 10, // 기본값 설정
+            min: poolConfig.min || 0,
+            acquireTimeout: poolConfig.acquire || 30000,
+            idleTimeout: poolConfig.idle || 10000,
             environment: environment
         };
     } catch (error) {

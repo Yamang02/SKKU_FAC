@@ -12,9 +12,9 @@ class SessionUtil {
             };
 
             // 세션 저장
-            req.session.save(err => {
+            req.session.save((err) => {
                 if (err) {
-                    console.error('세션 저장 중 오류:', err);
+                    console.error('세션 저장 실패:', err);
                     reject(err);
                 } else {
                     resolve();

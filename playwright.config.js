@@ -10,7 +10,7 @@ const isHeadless = process.env.HEADLESS !== 'false';
 // 디버깅을 위한 URL 결정
 const baseURL = isRailway
     ? `https://${process.env.PUBLIC_DOMAIN}`
-    : 'http://localhost:3001'; // 로컬 테스트 환경용 포트 (test-env 컨테이너)
+    : process.env.TEST_BASE_URL || 'http://localhost:3001'; // 로컬 테스트 환경용 포트 (test-env 컨테이너)
 
 console.log('🔍 Playwright 환경 설정:');
 console.log('  - isRailway:', isRailway);

@@ -150,7 +150,13 @@ class Config {
                 port: parseInt(process.env.DB_PORT, 10) || 3306,
                 database: process.env.DB_NAME || 'skku_sfa_gallery',
                 username: process.env.DB_USER || 'root',
-                password: process.env.DB_PASSWORD || ''
+                password: process.env.DB_PASSWORD || '',
+                pool: {
+                    max: 10,
+                    min: 0,
+                    acquire: 30000,
+                    idle: 10000
+                }
             },
             session: {
                 secret: process.env.SESSION_SECRET || 'default-session-secret',
@@ -201,23 +207,16 @@ class Config {
 
     loadEnvironmentSpecificConfig() {
         try {
-            // 환경별 설정 파일 존재 여부 확인
-            this.hasEnvironmentConfig = true;
-            console.log(`✅ ${this.environment} 환경 설정 준비 완료`);
-        } catch (error) {
-            console.warn(`⚠️ 환경별 설정 파일을 찾을 수 없습니다: ${this.environment}`);
-            this.hasEnvironmentConfig = false;
-        }
-    }
-
-    async loadEnvironmentSpecificConfigAsync() {
-        try {
+            // 환경별 설정을 동기적으로 로드
             const envConfigPath = path.join(__dirname, 'environments', `${this.environment}.js`);
-            const envConfigModule = await import(envConfigPath);
-            const envConfig = envConfigModule.default;
-
-            this.config = this.deepMerge(this.config, envConfig);
-            console.log(`✅ ${this.environment} 환경 설정 로드 완료`);
+            import(envConfigPath).then(envConfigModule => {
+                const envConfig = envConfigModule.default;
+                this.config = this.deepMerge(this.config, envConfig);
+                console.log(`✅ ${this.environment} 환경 설정 로드 완료`);
+            }).catch(error => {
+                console.warn(`⚠️ 환경별 설정 파일을 찾을 수 없습니다: ${this.environment}`);
+                this.hasEnvironmentConfig = false;
+            });
         } catch (error) {
             console.warn(`⚠️ 환경별 설정 파일을 찾을 수 없습니다: ${this.environment}`);
             this.hasEnvironmentConfig = false;
