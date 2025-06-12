@@ -1,5 +1,5 @@
 import { createClient } from 'redis';
-import config from '../../config/index.js';
+import config from '../../config/Config.js';
 import logger from '../../common/utils/Logger.js';
 
 // 모듈 로드 시점 디버깅

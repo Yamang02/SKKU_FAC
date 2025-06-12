@@ -5,12 +5,12 @@
 
 import getCacheManager from '../cache/getCacheManager.js';
 import logger from '../utils/Logger.js';
-import Config from '../../config/Config.js';
+import config from '../../config/Config.js';
 
 class CacheMiddleware {
     constructor() {
         this.cache = getCacheManager();
-        this.config = Config.getInstance();
+        this.config = config;
         this.defaultTTL = 300; // 5분
     }
 

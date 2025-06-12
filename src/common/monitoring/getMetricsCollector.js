@@ -6,11 +6,11 @@
 import client from 'prom-client';
 import pidusage from 'pidusage';
 import logger from '../utils/Logger.js';
-import Config from '../../config/Config.js';
+import config from '../../config/Config.js';
 
 class MetricsCollector {
     constructor() {
-        this.config = Config.getInstance();
+        this.config = config;
         this.environment = this.config.getEnvironment();
         this.isProduction = this.environment === 'production';
 
@@ -284,12 +284,12 @@ class MetricsCollector {
         const status = isConnected ? 1 : 0;
 
         switch (service) {
-        case 'redis':
-            this.redisConnectionStatus.set(status);
-            break;
-        case 'database':
-            this.dbConnectionStatus.set(status);
-            break;
+            case 'redis':
+                this.redisConnectionStatus.set(status);
+                break;
+            case 'database':
+                this.dbConnectionStatus.set(status);
+                break;
         }
 
         // 연결 상태 메트릭 업데이트 로그 제거 (너무 빈번함)

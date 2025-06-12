@@ -1,6 +1,6 @@
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
-import config from '../../../config/index.js';
+import config from '../../../config/Config.js';
 
 // Cloudinary 설정
 const storageConfig = config.getStorageConfig();

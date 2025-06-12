@@ -1,18 +1,19 @@
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
-import config from '../../config/index.js';
+import config from '../../config/Config.js';
 import fs from 'fs';
 import path from 'path';
 
 class WinstonLogger {
     constructor() {
         this.config = config;
-        this.environment = config.getEnvironment();
-        this.isDevelopment = this.environment === 'development' || this.environment === 'local';
-        this.isTest = this.environment === 'test';
+        this.environmentManager = config.getEnvironmentManager();
+        this.environment = this.environmentManager.getEnvironment();
+        this.isDevelopment = this.environmentManager.is('isDevelopment');
+        this.isTest = this.environmentManager.is('isTest');
         this.isStaging = this.environment === 'staging';
-        this.isProduction = this.config.getEnvironment() === 'production';
-        this.isRailway = this.detectRailwayEnvironment();
+        this.isProduction = this.environmentManager.is('isProduction');
+        this.isRailway = this.environmentManager.is('isRailwayDeployment');
         this.logDir = path.join(process.cwd(), 'logs');
 
         // Railway가 아닌 환경에서만 로그 디렉토리 생성 시도
@@ -46,7 +47,12 @@ class WinstonLogger {
                 new winston.transports.Console({
                     format: this.getTestFormat(),
                     level: this.getLogLevel(),
-                    silent: process.env.TEST_SILENT === 'true' // TEST_SILENT=true면 완전히 조용
+                    silent: this.environmentManager.getEnvironmentValue({
+                        test: true,
+                        'local-test': true,
+                        development: false,
+                        production: false
+                    }) // 테스트 환경에서는 조용
                 })
             );
         } else {
@@ -117,16 +123,33 @@ class WinstonLogger {
         return winston.format.combine(
             winston.format.timestamp(),
             winston.format.errors({ stack: true }),
-            winston.format.printf(({ timestamp, level, message, stack, ...meta }) => {
+            winston.format.printf(({ timestamp, level, message, stack, error, ...meta }) => {
                 const prefix = this.getPrefix(level);
 
-                // 스택 트레이스가 있으면 별도 처리
-                if (stack) {
-                    const metaStr = Object.keys(meta).length ? `\n메타데이터: ${JSON.stringify(meta, null, 2)}` : '';
-                    return `[${timestamp}] ${prefix} ${message}\n스택 트레이스:\n${stack}${metaStr}`;
+                // 스택 트레이스 처리 - error 객체에서 직접 가져오거나 stack 속성 사용
+                let stackTrace = null;
+                if (this.environmentManager.is('enableStackTrace')) {
+                    if (stack && typeof stack === 'string') {
+                        stackTrace = stack;
+                    } else if (error && error.stack && typeof error.stack === 'string') {
+                        stackTrace = error.stack;
+                    } else if (meta.error && meta.error.stack && typeof meta.error.stack === 'string') {
+                        stackTrace = meta.error.stack;
+                    }
                 }
 
-                const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
+                // 메타데이터에서 error.stack 제거 (중복 방지)
+                const cleanMeta = { ...meta };
+                if (cleanMeta.error && cleanMeta.error.stack) {
+                    delete cleanMeta.error.stack;
+                }
+
+                const metaStr = Object.keys(cleanMeta).length ? ` ${JSON.stringify(cleanMeta)}` : '';
+
+                if (stackTrace) {
+                    return `[${timestamp}] ${prefix} ${message}${metaStr}\n🔍 Stack trace for ${cleanMeta.errorAnalysis?.id || 'error'}:\n${stackTrace}`;
+                }
+
                 return `[${timestamp}] ${prefix} ${message}${metaStr}`;
             })
         );
@@ -230,17 +253,6 @@ class WinstonLogger {
         return checkLevel <= currentLevel;
     }
 
-    /**
-     * Railway 환경 감지 (Railway에서 자동으로 제공하는 환경변수들)
-     */
-    detectRailwayEnvironment() {
-        // Railway 환경 변수를 직접 확인
-        return !!(
-            process.env.RAILWAY_PROJECT_NAME ||
-            process.env.RAILWAY_ENVIRONMENT ||
-            process.env.RAILWAY_SERVICE_NAME
-        );
-    }
 
     /**
      * Railway 환경에서 이메일 로깅 초기화
@@ -379,7 +391,7 @@ class WinstonLogger {
                 ...meta,
                 error: {
                     message: error.message,
-                    stack: this.isDevelopment ? error.stack : undefined,
+                    stack: this.environmentManager.is('enableStackTrace') ? error.stack : undefined,
                     name: error.name,
                     code: error.code,
                     statusCode: error.statusCode
@@ -539,12 +551,14 @@ class WinstonLogger {
      * 일별 로그 파일 이메일 전송
      */
     async sendDailyLogEmail() {
-        if (!this.isRailway || this.dailyLogBuffer.length === 0) {
+        // 개발환경에서는 일별 로그 이메일도 비활성화
+        if (!this.shouldSendCriticalEmail() || this.dailyLogBuffer.length === 0) {
             return;
         }
 
         // SMTP 설정이 완전하지 않으면 이메일 전송 건너뛰기
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        const emailConfig = this.environmentManager.getEmailConfig();
+        if (!emailConfig.user || !emailConfig.pass) {
             console.log('📧 EMAIL 설정이 완전하지 않아 일별 로그 이메일 전송을 건너뜁니다.');
             return;
         }
@@ -566,7 +580,7 @@ class WinstonLogger {
             const subject = `📋 [SKKU Gallery] 일별 로그 파일 - ${today}`;
 
             await sendDailyLogFileEmail(
-                process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
+                emailConfig.user, // 관리자 이메일이 별도로 설정되어 있지 않으면 발신자 이메일 사용
                 subject,
                 logContent,
                 `skku-gallery-logs-${today}.txt`
@@ -588,12 +602,14 @@ class WinstonLogger {
      * 중요 로그 즉시 이메일 전송 (에러 5개 이상 누적 시)
      */
     async sendCriticalLogEmail() {
-        if (!this.isRailway || this.criticalLogBuffer.length === 0) {
+        // 이메일 전송 조건 재확인
+        if (!this.shouldSendCriticalEmail() || this.criticalLogBuffer.length === 0) {
             return;
         }
 
         // SMTP 설정이 완전하지 않으면 이메일 전송 건너뛰기
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        const emailConfig = this.environmentManager.getEmailConfig();
+        if (!emailConfig.user || !emailConfig.pass) {
             console.log('📧 EMAIL 설정이 완전하지 않아 긴급 로그 이메일 전송을 건너뜁니다.');
             return;
         }
@@ -605,7 +621,7 @@ class WinstonLogger {
             const subject = `🚨 [SKKU Gallery] 긴급 로그 알림 - ${new Date().toLocaleString('ko-KR')}`;
             const htmlContent = this.generateCriticalLogEmailHTML(this.criticalLogBuffer);
 
-            await sendLogNotificationEmail(process.env.ADMIN_EMAIL || process.env.EMAIL_USER, subject, htmlContent);
+            await sendLogNotificationEmail(emailConfig.user, subject, htmlContent);
 
             // 전송 후 중요 로그 버퍼 초기화
             this.criticalLogBuffer = [];
@@ -618,6 +634,20 @@ class WinstonLogger {
     }
 
     /**
+     * 긴급 로그 이메일 전송 여부 체크
+     */
+    shouldSendCriticalEmail() {
+        // 개발환경, 로컬 테스트 환경에서는 이메일 전송 비활성화
+        if (this.environmentManager.is('isDevelopment') || this.environmentManager.is('isTest')) {
+            return false;
+        }
+
+        // Railway 환경이고 프로덕션 또는 스테이징 환경에서만 활성화
+        return this.environmentManager.is('isRailwayDeployment') &&
+            (this.environmentManager.is('isProduction') || this.environment === 'staging');
+    }
+
+    /**
      * 로그 파일 내용 생성 (텍스트 형식)
      */
     generateLogFileContent(logs, date) {
@@ -627,7 +657,7 @@ SKKU Gallery 일별 로그 파일
 =================================================================
 날짜: ${date}
 환경: ${this.environment}
-Railway 프로젝트: ${process.env.RAILWAY_PROJECT_NAME || 'Unknown'}
+Railway 프로젝트: ${this.environmentManager.is('isRailwayDeployment') ? 'Railway Deployment' : 'Local/Other'}
 총 로그 수: ${logs.length}개
 생성 시간: ${new Date().toLocaleString('ko-KR')}
 =================================================================
@@ -752,7 +782,8 @@ HTTP: ${stats.http}개
      * 중요 로그 버퍼에 추가 (즉시 전송용)
      */
     addToCriticalLogBuffer(level, message, meta = {}) {
-        if (!this.isRailway || !this.criticalLogBuffer) return;
+        // 개발환경, 로컬 테스트 환경에서는 긴급 로그 이메일 전송 비활성화
+        if (!this.shouldSendCriticalEmail() || !this.criticalLogBuffer) return;
 
         // 에러 레벨만 중요 로그 버퍼에 추가
         if (level === 'error') {
@@ -803,7 +834,7 @@ HTTP: ${stats.http}개
                 name: error.name,
                 code: error.code,
                 statusCode: error.statusCode,
-                stack: this.isDevelopment ? error.stack : undefined
+                stack: this.environmentManager.is('enableStackTrace') ? error.stack : undefined
             }
         };
 
@@ -977,25 +1008,20 @@ HTTP: ${stats.http}개
      * 환경 정보 로그
      */
     logEnvironmentInfo() {
-        // test 환경(Railway)에서는 환경 정보 로그 출력하지 않음
-        // local-test 환경에서는 디버깅을 위해 출력
-        if (this.isTest && this.environment !== 'local-test') {
+        // test 환경에서는 환경 정보 로그 출력하지 않음
+        if (this.environmentManager.is('isTest') && this.environment !== 'local-test') {
             return;
         }
 
         this.info('==== 환경 설정 정보 ====');
-        this.info(`NODE_ENV: ${process.env.NODE_ENV || 'undefined'}`);
         this.info(`현재 환경: ${this.environment}`);
         this.info(`로그 레벨: ${this.getLogLevel()}`);
-        this.info(`LOG_LEVEL 오버라이드: ${process.env.LOG_LEVEL || 'None'}`);
-        this.info(`DB_HOST: ${process.env.DB_HOST}`);
-        this.info(`DB_NAME: ${process.env.DB_NAME}`);
-        this.info(`DB_PORT: ${process.env.DB_PORT}`);
-        this.info(`BASE_URL: ${process.env.BASE_URL}`);
-        this.info(`PORT 환경변수 있음: ${process.env.PORT ? 'Yes' : 'No'}`);
-        this.info(`프로덕션 환경: ${this.isProduction ? 'Yes' : 'No'}`);
-        this.info(`테스트 환경: ${this.isTest ? 'Yes' : 'No'}`);
-        this.info(`로컬 테스트 환경: ${this.environment === 'local-test' ? 'Yes' : 'No'}`);
+        this.info(`프로덕션 환경: ${this.environmentManager.is('isProduction') ? 'Yes' : 'No'}`);
+        this.info(`개발 환경: ${this.environmentManager.is('isDevelopment') ? 'Yes' : 'No'}`);
+        this.info(`테스트 환경: ${this.environmentManager.is('isTest') ? 'Yes' : 'No'}`);
+        this.info(`Railway 배포: ${this.environmentManager.is('isRailwayDeployment') ? 'Yes' : 'No'}`);
+        this.info(`스택 트레이스 활성화: ${this.environmentManager.is('enableStackTrace') ? 'Yes' : 'No'}`);
+        this.info(`디버그 모드: ${this.environmentManager.is('enableDebugMode') ? 'Yes' : 'No'}`);
         this.info('=====================');
     }
 
@@ -1004,12 +1030,12 @@ HTTP: ${stats.http}개
      */
     logServerStart(port) {
         // test 환경에서는 서버 시작 로그 출력하지 않음
-        if (this.isTest) {
+        if (this.environmentManager.is('isTest')) {
             return;
         }
 
         this.success(`서버가 포트 ${port}에서 실행 중입니다.`);
-        this.info(`환경: ${process.env.NODE_ENV || 'development'}`);
+        this.info(`환경: ${this.environment}`);
         this.info(`헬스체크 URL: http://localhost:${port}/health`);
     }
 
@@ -1079,7 +1105,7 @@ HTTP: ${stats.http}개
             message,
             environment: this.environment,
             service: 'skku-gallery',
-            version: process.env.APP_VERSION || '1.0.0',
+            version: '1.0.0',
             ...meta
         };
     }

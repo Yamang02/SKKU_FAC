@@ -1,5 +1,6 @@
 import ResponseBuilder from './ResponseBuilder.js';
 import { getErrorStatusCode, getErrorCategory } from '../../../common/error/BaseError.js';
+import environmentManager from '../../../config/EnvironmentManager.js';
 
 /**
  * 표준화된 에러 응답을 생성하는 클래스
@@ -15,7 +16,7 @@ export default class StandardizedErrorResponse {
      * @returns {ResponseBuilder} ResponseBuilder 인스턴스
      */
     static fromError(error, options = {}) {
-        const { includeStack = process.env.NODE_ENV === 'development', metadata = {} } = options;
+        const { includeStack = environmentManager.is('enableStackTrace'), metadata = {} } = options;
 
         // 에러 정보 추출
         const statusCode = getErrorStatusCode(error);

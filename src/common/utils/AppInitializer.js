@@ -1,7 +1,7 @@
 import logger from './Logger.js';
 import sessionStore from '../../infrastructure/session/SessionStore.js';
 import ErrorHandler from '../middleware/ErrorHandler.js';
-import Config from '../../config/Config.js';
+import config from '../../config/Config.js';
 import serviceRegistry from '../container/ServiceRegistry.js';
 import { setupSessionMiddleware } from '../middleware/setupMiddleware.js';
 
@@ -9,7 +9,7 @@ class AppInitializer {
     constructor(app) {
         this.app = app;
         this.initialized = false;
-        this.config = Config.getInstance();
+        this.config = config;
         this.container = null;
     }
 

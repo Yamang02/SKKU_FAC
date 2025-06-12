@@ -3,7 +3,7 @@ import TokenRepository from '../../../infrastructure/db/repository/TokenReposito
 import { sendVerificationEmail, sendPasswordResetEmail } from '../../../common/utils/emailSender.js';
 import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
 import UserAccountRepository from '../../../infrastructure/db/repository/UserAccountRepository.js';
-import config from '../../../config/index.js';
+import config from '../../../config/Config.js';
 
 export default class AuthService {
     // 의존성 주입을 위한 static dependencies 정의

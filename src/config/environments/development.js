@@ -19,6 +19,17 @@ const developmentOverrides = {
         }
     },
 
+    redis: {
+        host: process.env.REDIS_HOST || 'redis', // Docker 컨테이너 이름
+        port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+        password: process.env.REDIS_PASSWORD || 'devredispass', // 개발용 비밀번호
+        db: 0,
+        maxRetriesPerRequest: 3,
+        retryDelayOnFailover: 100,
+        connectTimeout: 10000,
+        lazyConnect: true
+    },
+
     logging: {
         level: 'info',
         enableFileLogging: true,

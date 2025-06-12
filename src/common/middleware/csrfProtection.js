@@ -1,6 +1,6 @@
 import csrf from 'csrf';
 import logger from '../utils/Logger.js';
-import Config from '../../config/Config.js';
+import config from '../../config/Config.js';
 
 // CSRF 토큰 생성기 인스턴스
 const tokens = new csrf();
@@ -9,7 +9,6 @@ const tokens = new csrf();
  * CSRF 보호 미들웨어 설정
  */
 export function setupCSRFProtection(app) {
-    const config = Config.getInstance();
 
     // CSRF 보호가 비활성화된 경우 (테스트 환경 등)
     if (config.get('security.csrf.disabled', false)) {
@@ -18,8 +17,7 @@ export function setupCSRFProtection(app) {
     }
 
     // CSRF 시크릿 키 설정
-    const secret =
-        config.get('security.csrf.secret') || process.env.CSRF_SECRET || 'default-csrf-secret-change-in-production';
+    const secret = config.get('security.csrf.secret') || 'default-csrf-secret-change-in-production';
 
     if (secret === 'default-csrf-secret-change-in-production' && config.isProduction()) {
         logger.error('프로덕션 환경에서 기본 CSRF 시크릿을 사용하고 있습니다. 보안상 위험합니다.');
@@ -160,7 +158,6 @@ export function csrfTokenEndpoint(req, res) {
  * 개발용 CSRF 토큰 정보 조회 엔드포인트
  */
 export function csrfDebugEndpoint(req, res) {
-    const config = Config.getInstance();
 
     if (config.isProduction()) {
         return res.status(404).json({

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 import logger from './common/utils/Logger.js';
 import AppInitializer from './common/utils/AppInitializer.js';
 import { setupBasicMiddleware } from './common/middleware/setupMiddleware.js';
-import Config from './config/Config.js';
+import config from './config/Config.js';
 
 // 캐시 매니저
 import getCacheManager from './common/cache/getCacheManager.js';
@@ -33,7 +33,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Config 인스턴스를 앱에 저장
-const config = Config.getInstance();
 app.set('config', config);
 
 // Railway에서 모니터링 제공하므로 제거됨

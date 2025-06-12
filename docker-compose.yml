@@ -10,14 +10,19 @@ services:
       - .env.docker
     environment:
       - NODE_ENV=development
+      - PORT=3000
       - DB_HOST=mysql
       - DB_PORT=3306
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     volumes:
       - .:/app:cached
       - /app/node_modules
       - /app/logs
     depends_on:
       mysql:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     command: npx nodemon src/server.js
     networks:
@@ -29,19 +34,24 @@ services:
       dockerfile: Dockerfile.dev
     container_name: skku_gallery_test
     ports:
-      - "3001:3000" # 테스트용 포트 (개발용과 분리)
+      - "3001:3001" # 내부/외부 포트 일치
     env_file:
-      - .env.docker
+      - .env.test
     environment:
       - NODE_ENV=local-test
+      - PORT=3001 # 테스트 앱이 3001 포트에서 실행
       - DB_HOST=mysql-test
       - DB_PORT=3306
+      - REDIS_HOST=redis-test
+      - REDIS_PORT=6379
     volumes:
       - .:/app:cached
       - /app/node_modules
       - /app/logs
     depends_on:
       mysql-test:
+        condition: service_healthy
+      redis-test:
         condition: service_healthy
     command: npx nodemon src/server.js
     networks:
@@ -78,7 +88,9 @@ services:
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
     ports:
       - "3308:3306" # 테스트용 포트
-    # 볼륨 제거 - 매번 깨끗한 테스트 환경
+    volumes:
+      # 테스트 DB 초기화 스크립트 자동 로드
+      - ./scripts/sql/db/test-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptestpassword" ]
       timeout: 20s
@@ -88,8 +100,44 @@ services:
     networks:
       - gallery_network
 
+  redis:
+    image: redis:7-alpine
+    container_name: skku_gallery_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass devredispass
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "devredispass", "ping" ]
+      timeout: 3s
+      retries: 5
+      interval: 10s
+      start_period: 10s
+    networks:
+      - gallery_network
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: skku_gallery_redis_test
+    ports:
+      - "6380:6379" # 테스트용 포트
+    command: redis-server --appendonly yes --requirepass testredispass
+    volumes:
+      - redis_test_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "testredispass", "ping" ]
+      timeout: 3s
+      retries: 5
+      interval: 10s
+      start_period: 10s
+    networks:
+      - gallery_network
+
 volumes:
   mysql_data:
+  redis_data:
+  redis_test_data:
 
 
 networks:

@@ -1,9 +1,6 @@
 import { Sequelize } from 'sequelize';
-import Config from '../../../config/Config.js';
+import config from '../../../config/Config.js';
 import logger from '../../../common/utils/Logger.js';
-
-// Config 인스턴스 가져오기
-const config = Config.getInstance();
 
 // 데이터베이스 설정 가져오기
 const dbConfig = config.getDatabaseConfig();

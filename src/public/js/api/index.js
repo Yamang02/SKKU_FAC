@@ -2,8 +2,8 @@
  * API 공통 설정
  */
 
-// API 기본 URL
-const API_BASE_URL = '';
+// API 기본 URL - 현재 페이지의 origin 사용 (포트 포함)
+const API_BASE_URL = window.location.origin;
 
 // CSRF 매니저 (전역 객체 사용)
 const csrfManager = window.csrfManager || {

@@ -1,6 +1,6 @@
 import redisClient from '../redis/RedisClient.js';
 import logger from '../../common/utils/Logger.js';
-import Config from '../../config/Config.js';
+import config from '../../config/Config.js';
 
 /**
  * Redis 기반 캐싱 서비스
@@ -8,7 +8,7 @@ import Config from '../../config/Config.js';
  */
 export default class CacheService {
     constructor() {
-        this.config = Config.getInstance();
+        this.config = config;
         this.redisConfig = this.config.getRedisConfig();
         this.defaultTTL = this.redisConfig.ttl || 3600; // 기본 1시간
         this.keyPrefix = this.redisConfig.prefix || 'cache:';

@@ -1,7 +1,7 @@
 import session from 'express-session';
 import { RedisStore } from 'connect-redis';
 import redisClient from '../redis/RedisClient.js';
-import Config from '../../config/Config.js';
+import config from '../../config/Config.js';
 import logger from '../../common/utils/Logger.js';
 
 // 모듈 로드 시점 디버깅
@@ -12,26 +12,25 @@ class SessionStore {
     constructor() {
         this.store = null;
         this.sessionConfig = null;
-        this.config = Config.getInstance();
+        this.config = config;
+        this.environmentManager = config.getEnvironmentManager();
         this.isInitialized = false;
     }
 
     async initialize() {
         try {
             // 로컬 개발 환경이나 테스트 환경에서는 메모리 세션 사용
-            const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'testing';
-            const isLocalDevelopment = process.env.NODE_ENV === 'development' && !process.env.RAILWAY_ENVIRONMENT;
-            const shouldUseMemorySession = isTestEnvironment || isLocalDevelopment || !process.env.REDIS_HOST;
+            const shouldUseMemorySession = this.environmentManager.is('useMemorySession');
 
             if (shouldUseMemorySession) {
                 let reason = 'Redis 설정이 없어';
-                if (isTestEnvironment) reason = '테스트 환경이므로';
-                else if (isLocalDevelopment) reason = '로컬 개발 환경이므로';
+                if (this.environmentManager.is('isTest')) reason = '테스트 환경이므로';
+                else if (this.environmentManager.is('isLocalDevelopment')) reason = '로컬 개발 환경이므로';
 
                 logger.info(`${reason} 메모리 세션 사용`, {
-                    nodeEnv: process.env.NODE_ENV,
-                    railwayEnv: process.env.RAILWAY_ENVIRONMENT,
-                    hasRedisHost: !!process.env.REDIS_HOST
+                    environment: this.environmentManager.getEnvironment(),
+                    isRailwayDeployment: this.environmentManager.is('isRailwayDeployment'),
+                    useRedisCache: this.environmentManager.is('useRedisCache')
                 });
 
                 // 메모리 스토어 사용 (기본 동작)
@@ -84,16 +83,11 @@ class SessionStore {
                 logger.info('Redis 클라이언트가 이미 연결되어 있습니다.');
             }
 
-            // Redis 설정을 환경변수에서 직접 가져오기 (암호화 우회)
-            const redisConfig = {
-                ttl: parseInt(process.env.REDIS_TTL, 10) || 86400 // 24시간
-            };
-
             // Redis 스토어 생성
             this.store = new RedisStore({
                 client: redisClient.getClient(),
                 prefix: 'sess:',
-                ttl: redisConfig.ttl, // 세션 만료 시간 (초)
+                ttl: 86400, // 24시간 (초)
                 disableTouch: false,
                 disableTTL: false
             });
