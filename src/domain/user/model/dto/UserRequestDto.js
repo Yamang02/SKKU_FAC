@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import BaseDto from '../../../common/model/BaseDto.js';
+import BaseDto from '#domain/common/model/BaseDto.js';
 
 /**
  * 사용자 요청 DTO

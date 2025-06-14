@@ -33,7 +33,7 @@ export function createAdminRouter(container) {
 
     // 의존성 주입된 컨트롤러들을 해결
     const adminController = container.resolve('SystemManagementController');
-    const userManagementController = container.resolve('UserManagementController');
+    const userAdminController = container.resolve('UserAdminController');
     const exhibitionManagementController = container.resolve('ExhibitionManagementController');
     const artworkManagementController = container.resolve('ArtworkManagementController');
     const batchController = container.resolve('BatchController');
@@ -77,31 +77,31 @@ export function createAdminRouter(container) {
 
     // 사용자 관리 라우트
     AdminRouter.get('/management/user', canReadUsers(), (req, res) =>
-        userManagementController.getManagementUserList(req, res)
+        userAdminController.getManagementUserList(req, res)
     );
     AdminRouter.get(
         '/management/user/:id',
         canManageUserDetails(),
-        (req, res) => userManagementController.getManagementUserDetail(req, res)
+        (req, res) => userAdminController.getManagementUserDetail(req, res)
     );
     AdminRouter.put(
         '/management/user/:id',
         canWriteUsers(),
         preventReadOnlyActions,
-        (req, res) => userManagementController.updateManagementUser(req, res)
+        (req, res) => userAdminController.updateManagementUser(req, res)
     );
     AdminRouter.delete(
         '/management/user/:id',
         canDeleteUsers(),
         preventReadOnlyActions,
         deleteTimeoutMiddleware,
-        (req, res) => userManagementController.deleteManagementUser(req, res)
+        (req, res) => userAdminController.deleteManagementUser(req, res)
     );
     AdminRouter.post(
         '/management/user/:id/reset-password',
         canResetUserPassword(),
         preventReadOnlyActions,
-        (req, res) => userManagementController.resetManagementUserPassword(req, res)
+        (req, res) => userAdminController.resetManagementUserPassword(req, res)
     );
 
     // 전시회 관리 라우트

@@ -1,4 +1,4 @@
-import UserService from '../../../user/service/UserService.js';
+import UserAdminService from '../../../user/admin/service/UserAdminService.js';
 import ArtworkService from '../../../artwork/service/ArtworkService.js';
 import TimeFormatter from '../../../../common/utils/TimeFormatter.js';
 import Page from '../../../common/model/Page.js';
@@ -10,19 +10,18 @@ import BaseAdminService from '../BaseAdminService.js';
  */
 export default class SystemManagementService extends BaseAdminService {
     // 의존성 주입을 위한 static dependencies 정의
-    static dependencies = ['UserService', 'ArtworkService'];
+    static dependencies = ['UserAdminService', 'ArtworkService'];
 
-    constructor(userService = null, artworkService = null) {
+    constructor(userAdminService = null, artworkService = null) {
         super('SystemManagementService');
 
         // 의존성 주입 방식 (새로운 방식)
-        if (userService && artworkService) {
-            this.userService = userService;
+        if (userAdminService && artworkService) {
+            this.userAdminService = userAdminService;
             this.artworkService = artworkService;
         } else {
             // 기존 방식 호환성 유지 (임시)
-
-            this.userService = new UserService();
+            this.userAdminService = new UserAdminService();
             this.artworkService = new ArtworkService();
         }
     }
@@ -42,7 +41,7 @@ export default class SystemManagementService extends BaseAdminService {
                 const artworkOptions = { page, limit };
 
                 const [users, artworks] = await Promise.all([
-                    this.userService.getUserList(userOptions),
+                    this.userAdminService.getUserList(userOptions),
                     this.artworkService.getArtworkListWithDetails(artworkOptions)
                 ]);
 

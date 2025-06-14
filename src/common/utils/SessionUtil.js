@@ -8,6 +8,7 @@ class SessionUtil {
                 name: user.name,
                 role: user.role,
                 status: user.status,
+                isActive: user.status === 'ACTIVE',
                 isAdmin: user.role === 'ADMIN'
             };
 

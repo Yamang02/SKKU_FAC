@@ -1,6 +1,6 @@
 import express from 'express';
-import { isAuthenticated, isNotAuthenticated } from '../../../common/middleware/auth.js';
-import CacheMiddleware from '../../../common/middleware/CacheMiddleware.js';
+import { isAuthenticated, isNotAuthenticated } from '#common/middleware/auth.js';
+import CacheMiddleware from '#common/middleware/CacheMiddleware.js';
 
 /**
  * UserRouter 팩토리 함수

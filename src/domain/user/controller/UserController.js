@@ -1,7 +1,7 @@
-import ViewResolver from '../../../common/utils/ViewResolver.js';
-import { ViewPath } from '../../../common/constants/ViewPath.js';
-import { UserNotFoundError, UserValidationError } from '../../../common/error/UserError.js';
-import logger from '../../../common/utils/Logger.js';
+import ViewResolver from '#common/utils/ViewResolver.js';
+import { ViewPath } from '#common/constants/ViewPath.js';
+import { UserNotFoundError, UserValidationError } from '#common/error/UserError.js';
+import logger from '#common/utils/Logger.js';
 
 export default class UserController {
     /**

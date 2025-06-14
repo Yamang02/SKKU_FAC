@@ -30,6 +30,10 @@ export default class SystemManagementController extends BaseAdminController {
                 return ViewResolver.render(res, ViewPath.ADMIN.DASHBOARD, {
                     title: '관리자 대시보드',
                     dashboardData,
+                    stats: dashboardData.stats,
+                    recentActivities: dashboardData.recentActivities,
+                    recentNotices: dashboardData.recentNotices,
+                    featuredArtworks: dashboardData.featuredArtworks,
                     user: req.user
                 });
             },

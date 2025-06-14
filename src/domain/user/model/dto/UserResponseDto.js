@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import BaseDto from '../../../common/model/BaseDto.js';
+import BaseDto from '#domain/common/model/BaseDto.js';
 
 /**
  * 사용자 응답 DTO
@@ -115,17 +115,17 @@ export default class UserResponseDto extends BaseDto {
         let schema;
 
         switch (schemaType) {
-        case 'response':
-            schema = UserResponseDto.getResponseSchema();
-            break;
-        case 'publicProfile':
-            schema = UserResponseDto.getPublicProfileSchema();
-            break;
-        case 'adminDetail':
-            schema = UserResponseDto.getAdminDetailSchema();
-            break;
-        default:
-            schema = this.getValidationSchema();
+            case 'response':
+                schema = UserResponseDto.getResponseSchema();
+                break;
+            case 'publicProfile':
+                schema = UserResponseDto.getPublicProfileSchema();
+                break;
+            case 'adminDetail':
+                schema = UserResponseDto.getAdminDetailSchema();
+                break;
+            default:
+                schema = this.getValidationSchema();
         }
 
         const { error, value } = schema.validate(this.toPlainObject(), {

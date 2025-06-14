@@ -1,6 +1,6 @@
-import UserRequestDto from '../model/dto/UserRequestDto.js';
-import UserSimpleDto from '../model/dto/UserSimpleDto.js';
-import UserDetailDto from '../model/dto/UserDetailDto.js';
+import UserRequestDto from '#domain/user/model/dto/UserRequestDto.js';
+import UserSimpleDto from '#domain/user/model/dto/UserSimpleDto.js';
+import UserDetailDto from '#domain/user/model/dto/UserDetailDto.js';
 import {
     UserNotFoundError,
     UserEmailDuplicateError,
@@ -10,15 +10,13 @@ import {
     UserBlockedError,
     UserAuthError,
     UserValidationError
-} from '../../../common/error/UserError.js';
-import { generateDomainUUID, DOMAINS } from '../../../common/utils/uuid.js';
+} from '#common/error/UserError.js';
+import { generateDomainUUID, DOMAINS } from '#common/utils/uuid.js';
 import bcrypt from 'bcrypt';
-import Page from '../../common/model/Page.js';
-import UserListManagementDto from '../../admin/model/dto/user/UserListManagementDto.js';
-import UserManagementDto from '../../admin/model/dto/user/UserManagementDto.js';
-import logger from '../../../common/utils/Logger.js';
-import UserAccountRepository from '../../../infrastructure/db/repository/UserAccountRepository.js';
-import AuthService from '../../auth/service/AuthService.js';
+import Page from '#domain/common/model/Page.js';
+import logger from '#common/utils/Logger.js';
+import UserAccountRepository from '#infrastructure/db/repository/UserAccountRepository.js';
+import AuthService from '#domain/auth/service/AuthService.js';
 
 /**
  * 사용자 서비스
@@ -276,6 +274,27 @@ export default class UserService {
     }
 
     /**
+     * 관리자가 사용자를 삭제합니다.
+     * @param {string} userId - 사용자 ID
+     * @returns {Promise<boolean>} 성공 여부
+     */
+    async deleteUserByAdmin(userId) {
+        const user = await this._findUserOrThrow(userId);
+
+        // 관리자 계정 삭제 방지
+        if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+            throw new UserValidationError('관리자 계정은 삭제할 수 없습니다.');
+        }
+
+        const success = await this.userRepository.deleteUser(userId);
+        if (!success) {
+            throw new UserValidationError('사용자 삭제에 실패했습니다.');
+        }
+
+        return true;
+    }
+
+    /**
      * 로그인을 처리합니다.
      */
     async authenticate(username, password) {
@@ -318,76 +337,6 @@ export default class UserService {
         return user;
     }
 
-    /**
-     * 관리자용 작업의 공통 에러 처리
-     * @private
-     */
-    _handleManagementError(error, operation) {
-        logger.error(`${operation} 중 오류:`, error);
-        throw new UserValidationError(`${operation}에 실패했습니다.`);
-    }
-
-    /**
-     * 관리자용 사용자 목록을 조회합니다.
-     * @param {Object} options - 조회 옵션
-     * @returns {Promise<UserListManagementDto>} 사용자 목록 DTO
-     */
-    async getManagementUserList(options = {}) {
-        try {
-            const userListData = await this.getUserList(options);
-            return new UserListManagementDto({
-                items: userListData.items || [],
-                total: userListData.total || 0,
-                page: userListData.page,
-                filters: options.filters || {}
-            });
-        } catch (error) {
-            this._handleManagementError(error, '사용자 목록 조회');
-        }
-    }
-
-    /**
-     * 관리자용 사용자 상세 정보를 조회합니다.
-     * @param {string} userId - 사용자 ID
-     * @returns {Promise<UserManagementDto>} 사용자 DTO
-     */
-    async getManagementUserDetail(userId) {
-        try {
-            const userDetail = await this.getUserDetail(userId);
-            return new UserManagementDto(userDetail);
-        } catch (error) {
-            this._handleManagementError(error, '사용자 상세 정보 조회');
-        }
-    }
-
-    /**
-     * 관리자용 사용자 정보를 수정합니다.
-     * @param {string} userId - 사용자 ID
-     * @param {Object} userData - 수정할 사용자 정보
-     * @returns {Promise<Object>} 수정 결과
-     */
-    async updateManagementUser(userId, userData) {
-        try {
-            await this.updateUser(userId, userData);
-            return { success: true, message: '회원 정보가 저장되었습니다.' };
-        } catch (error) {
-            this._handleManagementError(error, '사용자 정보 수정');
-        }
-    }
-
-    /**
-     * 관리자용 사용자를 삭제합니다.
-     * @param {string} userId - 사용자 ID
-     * @returns {Promise<Object>} 삭제 결과
-     */
-    async deleteManagementUser(userId) {
-        try {
-            await this.deleteUserAccount(userId);
-            return { success: true, message: '회원이 삭제되었습니다.' };
-        } catch (error) {
-            this._handleManagementError(error, '사용자 삭제');
-        }
-    }
 
     /**
      * 사용자 프로필 정보를 매핑합니다.
@@ -422,5 +371,31 @@ export default class UserService {
             logger.error('이메일 전송 실패:', emailError);
             throw new UserValidationError('인증 이메일 전송에 실패했습니다. 관리자에게 문의하세요');
         }
+    }
+
+    /**
+     * 관리자가 사용자 비밀번호를 초기화합니다.
+     * @param {string} userId - 사용자 ID
+     * @returns {Promise<Object>} 초기화 결과와 임시 비밀번호
+     */
+    async resetUserPassword(userId) {
+        await this._findUserOrThrow(userId);
+
+        // 임시 비밀번호 생성 (8자리 랜덤)
+        const temporaryPassword = Math.random().toString(36).slice(-8);
+        const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+
+        // 비밀번호 업데이트
+        await this.userRepository.updateUser(userId, {
+            password: hashedPassword,
+            // 다음 로그인 시 비밀번호 변경 강제 (필요시)
+            mustChangePassword: true
+        });
+
+        return {
+            success: true,
+            temporaryPassword,
+            message: '비밀번호가 초기화되었습니다.'
+        };
     }
 }

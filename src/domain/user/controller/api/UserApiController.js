@@ -1,8 +1,8 @@
-import SessionUtil from '../../../../common/utils/SessionUtil.js';
-import { Message } from '../../../../common/constants/Message.js';
-import { ApiResponse } from '../../../common/model/ApiResponse.js';
-import UserRequestDto from '../../model/dto/UserRequestDto.js';
-import UserResponseDto from '../../model/dto/UserResponseDto.js';
+import SessionUtil from '#common/utils/SessionUtil.js';
+import { Message } from '#common/constants/Message.js';
+import { ApiResponse } from '#domain/common/model/ApiResponse.js';
+import UserRequestDto from '#domain/user/model/dto/UserRequestDto.js';
+import UserResponseDto from '#domain/user/model/dto/UserResponseDto.js';
 import {
     UserNotFoundError,
     UserValidationError,
@@ -12,8 +12,8 @@ import {
     UserUnverifiedError,
     UserBlockedError,
     UserAuthError
-} from '../../../../common/error/UserError.js';
-import logger from '../../../../common/utils/Logger.js';
+} from '#common/error/UserError.js';
+import logger from '#common/utils/Logger.js';
 
 export default class UserApiController {
     /**

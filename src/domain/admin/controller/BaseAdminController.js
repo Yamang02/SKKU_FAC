@@ -1,6 +1,6 @@
-import logger from '../../../common/utils/Logger.js';
-import ViewResolver from '../../../common/utils/ViewResolver.js';
-import { ViewPath } from '../../../common/constants/ViewPath.js';
+import logger from '#common/utils/Logger.js';
+import ViewResolver from '#common/utils/ViewResolver.js';
+import { ViewPath } from '#common/constants/ViewPath.js';
 
 /**
  * Admin 컨트롤러들의 기본 클래스
