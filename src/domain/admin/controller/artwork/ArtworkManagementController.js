@@ -50,7 +50,8 @@ export default class ArtworkManagementController extends BaseAdminController {
                 return ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.LIST, {
                     title: '작품 관리',
                     artworks: artworkListData.artworks,
-                    pagination,
+                    total: artworkListData.total,
+                    page: pagination,
                     filters: { keyword, status, isFeatured },
                     sort,
                     order

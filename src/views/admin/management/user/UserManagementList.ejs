@@ -117,7 +117,7 @@
 
                         <!-- 페이지네이션 섹션 -->
                         <div class="admin-pagination">
-                            <% if (page && page.totalPages> 0) { %>
+                            <% if (typeof page !=='undefined' && page && page.totalPages> 0) { %>
                                 <a class="admin-pagination__button"
                                     href="?page=1<%= filters?.status ? `&status=${filters.status}` : '' %><%= filters?.role ? `&role=${filters.role}` : '' %><%= filters?.keyword ? `&keyword=${filters.keyword}` : '' %>"
                                     <%=page.currentPage===1 ? 'disabled' : '' %>>
@@ -147,7 +147,11 @@
                                             <%=page.currentPage===page.totalPages ? 'disabled' : '' %>>
                                             <i class="fas fa-angle-double-right"></i>
                                         </a>
-                                        <% } %>
+                                        <% } else { %>
+                                            <div class="admin-pagination__empty">
+                                                페이지네이션 정보가 없습니다.
+                                            </div>
+                                            <% } %>
                         </div>
                     </div>
 </div>
