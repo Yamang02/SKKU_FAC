@@ -170,3 +170,16 @@ quality-report/
 # *.test.js
 # *.spec.js
 
+# Added by Task Master AI
+# Logs
+logs
+# Dependency directories
+# Environment variables
+.env
+# Editor directories and files
+.idea
+.vscode
+# OS specific
+# Task files
+tasks.json
+tasks/ 
