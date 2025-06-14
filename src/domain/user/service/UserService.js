@@ -280,11 +280,13 @@ export default class UserService {
      */
     async authenticate(username, password) {
         const user = await this.userRepository.findUserByUsername(username);
-        logger.auth('로그인 처리', { username: user.username });
 
         if (!user) {
+            logger.auth('로그인 시도 - 사용자 없음', { username });
             throw new UserNotFoundError('아이디 또는 비밀번호가 일치하지 않습니다.');
         }
+
+        logger.auth('로그인 처리', { username: user.username });
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {

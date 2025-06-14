@@ -107,9 +107,9 @@ export default class UserApiController {
         } catch (error) {
             logger.withContext(req).error('로그인 처리 중 오류', error);
             if (error instanceof UserNotFoundError) {
-                return res.status(404).json(ApiResponse.error(Message.USER.NOT_FOUND));
+                return res.status(401).json(ApiResponse.error('아이디 또는 비밀번호가 일치하지 않습니다.'));
             } else if (error instanceof UserAuthError) {
-                return res.status(401).json(ApiResponse.error(Message.USER.AUTH_ERROR));
+                return res.status(401).json(ApiResponse.error('아이디 또는 비밀번호가 일치하지 않습니다.'));
             } else if (error instanceof UserInactiveError) {
                 return res.status(401).json(ApiResponse.error(Message.USER.INACTIVE_ERROR));
             } else if (error instanceof UserUnverifiedError) {
@@ -117,7 +117,7 @@ export default class UserApiController {
             } else if (error instanceof UserBlockedError) {
                 return res.status(401).json(ApiResponse.error(Message.USER.BLOCKED_ERROR));
             }
-            return res.status(500).json(ApiResponse.error(error.message));
+            return res.status(500).json(ApiResponse.error('로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'));
         }
     }
 
