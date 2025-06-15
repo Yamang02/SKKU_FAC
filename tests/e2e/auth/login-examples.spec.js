@@ -24,7 +24,7 @@ test.describe('로그인 기능 테스트', () => {
         await loginAsAdmin(page);
 
         // 관리자 페이지 접근 가능한지 확인
-        await page.goto('http://localhost:3000/admin');
+        await page.goto('http://localhost:3001/admin');
         await page.waitForLoadState('networkidle');
 
         // 관리자 페이지가 로드되었는지 확인 (403이나 리다이렉트 없이)
@@ -62,7 +62,7 @@ test.describe('로그인 기능 테스트', () => {
             await clearSession(page);
 
             // 로그인 페이지로 이동
-            await page.goto('http://localhost:3000/user/login');
+            await page.goto('http://localhost:3001/user/login');
             await page.waitForLoadState('networkidle');
 
             // 로그인 정보 입력
@@ -86,7 +86,7 @@ test.describe('로그인 기능 테스트', () => {
         // 관리자 전용 기능
         await clearSession(page);
         await loginForFeature(page, 'admin_panel');
-        await page.goto('http://localhost:3000/admin');
+        await page.goto('http://localhost:3001/admin');
         expect(page.url()).toContain('/admin');
 
         // SKKU 멤버 기능

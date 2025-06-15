@@ -103,3 +103,172 @@ WHERE username LIKE 'skkutest%'
 ```
 
 **활성화 후 로그인 가능**: 모든 계정 비밀번호 `1234`
+
+## 테스트 가이드
+
+이 디렉토리는 Playwright를 사용한 End-to-End 테스트를 포함합니다.
+
+## 테스트 구조
+
+### 디렉토리 구성
+- `auth/` - 인증 관련 테스트
+  - `login-examples.spec.js` - 기본 로그인 테스트
+  - `detailed-signup-behavior-test.spec.js` - 회원가입 상세 테스트
+  - `profile-access-flow-test.spec.js` - 프로필 접근 플로우 테스트
+  - `user-modification-test.spec.js` - 사용자 수정/삭제 테스트 ⭐ **NEW**
+- `helpers/` - 테스트 헬퍼 함수
+  - `simple-login.js` - 로그인/로그아웃 헬퍼
+- `fixtures/` - 테스트 데이터
+  - `login-users.js` - 테스트용 사용자 정보
+
+## 새로 추가된 테스트: 사용자 수정/삭제
+
+### 테스트 파일: `auth/user-modification-test.spec.js`
+
+이 테스트는 사용자 프로필 수정 및 계정 삭제 기능을 검증합니다.
+
+#### 테스트 시나리오
+
+**1. 프로필 수정 테스트**
+- SKKU 멤버 프로필 수정 (이름, 학과, 학번, 동아리 회원 여부)
+- 외부 멤버 프로필 수정 (이름, 소속 기관)
+
+**2. 계정 삭제 테스트**
+- SKKU 멤버 계정 삭제 및 재로그인 실패 확인
+- 외부 멤버 계정 삭제 및 재로그인 실패 확인
+
+#### 테스트 데이터 요구사항
+
+테스트 실행 전 다음 사용자들이 데이터베이스에 존재해야 합니다:
+
+**수정 테스트용 사용자:**
+- `skku2` (SKKU 멤버) - 비밀번호: `1234`
+- `external2` (외부 멤버) - 비밀번호: `1234`
+
+**삭제 테스트용 사용자:**
+- `skku1` (SKKU 멤버) - 비밀번호: `1234`
+- `external1` (외부 멤버) - 비밀번호: `1234`
+
+#### 데이터베이스 초기화
+
+테스트 실행 전 다음 SQL 스크립트를 실행하세요:
+
+```bash
+# 기본 테스트 데이터 로드
+mysql -u root -p skku_sfa_gallery_test < scripts/sql/db/test-init/00.dump_default_data.sql
+
+# 수정/삭제 테스트용 추가 데이터 로드
+mysql -u root -p skku_sfa_gallery_test < scripts/sql/db/test-init/01.user_modification_test_data.sql
+```
+
+## 테스트 실행
+
+### 1. 테스트 환경 시작
+```bash
+# 테스트 서버 및 DB 시작
+docker-compose up test-env mysql-test -d
+
+# 테스트 데이터 초기화
+docker exec -i skku_gallery_mysql_test mysql -u root -ptestpassword skku_sfa_gallery_test < scripts/sql/db/test-init/00.dump_default_data.sql
+docker exec -i skku_gallery_mysql_test mysql -u root -ptestpassword skku_sfa_gallery_test < scripts/sql/db/test-init/01.user_modification_test_data.sql
+```
+
+### 2. E2E 테스트 실행
+```bash
+# 전체 인증 테스트 실행
+npm run test:auth
+
+# 사용자 수정/삭제 테스트만 실행
+npx playwright test tests/e2e/auth/user-modification-test.spec.js
+
+# 기존 인증 테스트들
+npx playwright test tests/e2e/auth/login-examples.spec.js
+npx playwright test tests/e2e/auth/profile-access-flow-test.spec.js
+```
+
+### 헤드리스 모드 해제 (브라우저 UI 보기)
+```bash
+npx playwright test --headed tests/e2e/auth/user-modification-test.spec.js
+```
+
+### 디버그 모드
+```bash
+npx playwright test --debug tests/e2e/auth/user-modification-test.spec.js
+```
+
+## 환경 설정
+
+### Docker 환경
+이 프로젝트는 Docker Compose를 사용하여 테스트 환경을 구성합니다:
+
+```bash
+# 테스트 환경 시작 (포트 3001에서 실행)
+docker-compose up test-env -d
+
+# 테스트 DB는 포트 3308에서 접근 가능
+# 환경 변수는 docker-compose.yml에서 자동 설정됨
+```
+
+### Playwright 설정
+`playwright.config.js` 파일에서 다음 설정을 확인하세요:
+- 브라우저 설정 (Chrome, Firefox, Safari)
+- 테스트 타임아웃 설정
+- 스크린샷 및 비디오 녹화 설정
+
+## 주의사항
+
+### 테스트 환경
+1. **Docker 기반**: `docker-compose up test-env -d`로 테스트 서버 시작
+2. **포트 구성**: 테스트 서버는 `http://localhost:3001`, 테스트 DB는 `localhost:3308`
+3. **데이터 초기화**: 각 테스트 실행 전 테스트 데이터를 초기화하는 것을 권장
+
+### 사용자 수정/삭제 테스트 특이사항
+1. **삭제 테스트**: 계정 삭제 테스트는 실제로 사용자를 삭제하므로 테스트 후 해당 계정은 복구되지 않음
+2. **수정 테스트**: 프로필 수정 테스트는 실제 데이터를 변경하므로 테스트 후 원본 데이터로 복구 필요
+3. **테스트 순서**: 삭제 테스트는 마지막에 실행하는 것을 권장
+
+### 트러블슈팅
+
+**로그인 실패**
+- 테스트 사용자 계정이 데이터베이스에 존재하는지 확인
+- 비밀번호가 올바른지 확인 (`1234`)
+- 사용자 상태가 `ACTIVE`인지 확인
+
+**요소를 찾을 수 없음**
+- 프로필 페이지의 HTML 구조가 변경되었는지 확인
+- CSS 선택자나 ID가 올바른지 확인
+- 페이지 로딩이 완료되었는지 확인 (`waitForLoadState`)
+
+**계정 삭제 버튼을 찾을 수 없음**
+- 프로필 페이지에 계정 삭제 기능이 구현되어 있는지 확인
+- 버튼의 텍스트나 클래스명이 테스트 코드와 일치하는지 확인
+
+## 테스트 결과 확인
+
+### 콘솔 출력
+테스트 실행 시 각 단계별 진행 상황이 콘솔에 출력됩니다:
+- 🔄 프로필 수정 테스트 진행 상황
+- 🗑️ 계정 삭제 테스트 진행 상황
+- ✅ 성공 메시지
+- ❌ 실패 메시지
+
+### 스크린샷 및 비디오
+테스트 실패 시 자동으로 스크린샷과 비디오가 `test-results/` 디렉토리에 저장됩니다.
+
+### 데이터베이스 확인
+테스트 후 데이터베이스에서 직접 결과를 확인할 수 있습니다:
+
+```sql
+-- 수정된 사용자 확인
+SELECT ua.username, ua.name,
+       CASE WHEN ua.role = 'SKKU_MEMBER' THEN sup.department
+            ELSE eup.affiliation END as profile_info
+FROM user_accounts ua
+LEFT JOIN skku_user_profiles sup ON ua.id = sup.user_id
+LEFT JOIN external_user_profiles eup ON ua.id = eup.user_id
+WHERE ua.username IN ('skku2', 'external2');
+
+-- 삭제된 사용자 확인 (결과가 없어야 함)
+SELECT * FROM user_accounts
+WHERE username IN ('skku1', 'external1');
+```

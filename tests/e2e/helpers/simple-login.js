@@ -11,7 +11,7 @@ import { getUserByRole, getUserForFeature } from '../fixtures/login-users.js';
 export async function loginAs(page, userCredentials) {
     console.log(`🔑 로그인: ${userCredentials.username} (${userCredentials.role})`);
 
-    await page.goto('http://localhost:3000/user/login');
+    await page.goto('http://localhost:3001/user/login');
     await page.waitForLoadState('networkidle');
 
     // 로그인 정보 입력

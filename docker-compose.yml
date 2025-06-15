@@ -6,13 +6,8 @@ services:
     container_name: skku_gallery_app
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=devpassword
-      - DB_NAME=skku_sfa_gallery
+    env_file:
+      - .env.docker
     volumes:
       - .:/app:cached
       - /app/node_modules
@@ -29,13 +24,10 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     container_name: skku_gallery_test
-    environment:
-      - NODE_ENV=test
-      - DB_HOST=mysql-test
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=testpassword
-      - DB_NAME=skku_sfa_gallery_test
+    ports:
+      - "3001:3000" # 호스트 3001 포트 → 컨테이너 3000 포트
+    env_file:
+      - .env.test
     volumes:
       - .:/app:cached
       - /app/node_modules
@@ -43,6 +35,7 @@ services:
     depends_on:
       mysql-test:
         condition: service_healthy
+    command: npx nodemon src/server.js
     networks:
       - gallery_network
 
