@@ -23,7 +23,7 @@ export function createAdminRouter(container) {
     // 의존성 주입된 컨트롤러들을 해결
     const adminController = container.resolve('SystemManagementController');
     const userAdminController = container.resolve('UserAdminController');
-    const exhibitionManagementController = container.resolve('ExhibitionManagementController');
+    const exhibitionAdminController = container.resolve('ExhibitionAdminController');
     const artworkAdminController = container.resolve('ArtworkAdminController');
     const batchController = container.resolve('BatchController');
 
@@ -97,41 +97,41 @@ export function createAdminRouter(container) {
     AdminRouter.get(
         '/management/exhibition',
         requireContentManagement(),
-        (req, res) => exhibitionManagementController.getManagementExhibitionListPage(req, res)
+        (req, res) => exhibitionAdminController.getManagementExhibitionListPage(req, res)
     );
     AdminRouter.get('/management/exhibition/new', requireContentManagement(), (req, res) =>
-        exhibitionManagementController.getManagementExhibitionCreatePage(req, res)
+        exhibitionAdminController.getManagementExhibitionCreatePage(req, res)
     );
     AdminRouter.post(
         '/management/exhibition/new',
         requireContentManagement(),
         preventReadOnlyActions,
         imageUploadMiddleware('exhibition'),
-        (req, res) => exhibitionManagementController.createManagementExhibition(req, res)
+        (req, res) => exhibitionAdminController.createManagementExhibition(req, res)
     );
     AdminRouter.get(
         '/management/exhibition/:id',
         requireContentManagement(),
-        (req, res) => exhibitionManagementController.getManagementExhibitionDetailPage(req, res)
+        (req, res) => exhibitionAdminController.getManagementExhibitionDetailPage(req, res)
     );
     AdminRouter.put(
         '/management/exhibition/:id',
         requireContentManagement(),
         preventReadOnlyActions,
-        (req, res) => exhibitionManagementController.updateManagementExhibition(req, res)
+        (req, res) => exhibitionAdminController.updateManagementExhibition(req, res)
     );
     AdminRouter.delete(
         '/management/exhibition/:id',
         requireContentManagement(),
         preventReadOnlyActions,
         deleteTimeoutMiddleware,
-        (req, res) => exhibitionManagementController.deleteManagementExhibition(req, res)
+        (req, res) => exhibitionAdminController.deleteManagementExhibition(req, res)
     );
     AdminRouter.post(
         '/management/exhibition/:id/featured',
         requireContentManagement(),
         preventReadOnlyActions,
-        (req, res) => exhibitionManagementController.toggleFeatured(req, res)
+        (req, res) => exhibitionAdminController.toggleFeatured(req, res)
     );
 
     // 작품 관리 라우트

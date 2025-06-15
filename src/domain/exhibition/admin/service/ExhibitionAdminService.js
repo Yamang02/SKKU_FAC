@@ -1,24 +1,23 @@
-import ExhibitionService from '../../../exhibition/service/ExhibitionService.js';
-import ExhibitionManagementDto from '../../model/dto/exhibition/ExhibitionManagementDto.js';
-import ExhibitionListManagementDto from '../../model/dto/exhibition/ExhibitionListManagementDto.js';
-import ExhibitionListManagementDataDto from '../../model/dto/exhibition/ExhibitionListManagementDataDto.js';
-import { generateDomainUUID, DOMAINS } from '../../../../common/utils/uuid.js';
-import BaseAdminService from '../BaseAdminService.js';
+import ExhibitionService from '#domain/exhibition/service/ExhibitionService.js';
+import ExhibitionManagementDto from '#domain/admin/model/dto/exhibition/ExhibitionManagementDto.js';
+import ExhibitionListManagementDto from '#domain/admin/model/dto/exhibition/ExhibitionListManagementDto.js';
+import ExhibitionListManagementDataDto from '#domain/admin/model/dto/exhibition/ExhibitionListManagementDataDto.js';
+import { generateDomainUUID, DOMAINS } from '#common/utils/uuid.js';
+import BaseAdminService from '#domain/admin/service/BaseAdminService.js';
 
-export default class ExhibitionManagementService extends BaseAdminService {
+export default class ExhibitionAdminService extends BaseAdminService {
     // 의존성 주입을 위한 static dependencies 정의
     static dependencies = ['ExhibitionService'];
 
     constructor(exhibitionService = null) {
-        super('ExhibitionManagementService');
+        super('ExhibitionAdminService');
 
         // 의존성 주입 방식 (새로운 방식)
         if (exhibitionService) {
             this.exhibitionService = exhibitionService;
         } else {
             // 기존 방식 호환성 유지 (임시)
-
-            this.exhibitionService = new ExhibitionService();
+            throw new Error('ExhibitionService가 주입되지 않았습니다.');
         }
     }
 
@@ -93,7 +92,8 @@ export default class ExhibitionManagementService extends BaseAdminService {
     /**
      * 새 전시회를 생성합니다.
      * @param {Object} exhibitionData - 전시회 데이터
-     * @returns {Promise<string>} 생성된 전시회 ID
+     * @param {Object} exhibitionImage - 전시회 이미지 정보
+     * @returns {Promise<Object>} 생성된 전시회 객체
      */
     async createExhibition(exhibitionData, exhibitionImage) {
         return this.safeExecute(
@@ -175,6 +175,67 @@ export default class ExhibitionManagementService extends BaseAdminService {
             },
             '전시회 주요 전시 설정',
             { exhibitionId }
+        );
+    }
+
+    /**
+     * 전시회 상태를 변경합니다. (ExhibitionService의 changeExhibitionStatus 활용)
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {string} newStatus - 새로운 상태
+     * @param {Object} options - 추가 옵션
+     * @returns {Promise<Object>} 상태 변경된 전시회 정보
+     */
+    async changeExhibitionStatus(exhibitionId, newStatus, options = {}) {
+        return this.safeExecute(
+            async () => {
+                // ExhibitionService의 상태 변경 메서드 활용 (중복 제거)
+                return await this.exhibitionService.changeExhibitionStatus(exhibitionId, newStatus, options);
+            },
+            '전시회 상태 변경',
+            { exhibitionId, newStatus, options }
+        );
+    }
+
+    /**
+     * 전시회 제출 상태를 업데이트합니다. (ExhibitionService의 updateSubmissionStatus 활용)
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {boolean} isOpen - 제출 열림 여부
+     * @returns {Promise<Object>} 업데이트된 전시회 정보
+     */
+    async updateSubmissionStatus(exhibitionId, isOpen) {
+        return this.safeExecute(
+            async () => {
+                // ExhibitionService의 제출 상태 업데이트 메서드 활용 (중복 제거)
+                return await this.exhibitionService.updateSubmissionStatus(exhibitionId, isOpen);
+            },
+            '전시회 제출 상태 업데이트',
+            { exhibitionId, isOpen }
+        );
+    }
+
+    /**
+     * 상태별 전시회 목록을 조회합니다. (ExhibitionService의 getExhibitionsByStatus 활용)
+     * @param {string} status - 전시회 상태
+     * @param {Object} options - 페이지네이션 옵션
+     * @returns {Promise<Object>} 상태별 전시회 목록
+     */
+    async getExhibitionsByStatus(status, options = {}) {
+        return this.safeExecute(
+            async () => {
+                // ExhibitionService의 상태별 조회 메서드 활용 (중복 제거)
+                const result = await this.exhibitionService.getExhibitionsByStatus(status, options);
+
+                // DTO 변환
+                const exhibitions = result.items || [];
+                const exhibitionDtos = exhibitions.map(exhibition => new ExhibitionListManagementDto(exhibition));
+
+                return {
+                    ...result,
+                    items: exhibitionDtos
+                };
+            },
+            '상태별 전시회 목록 조회',
+            { status, options }
         );
     }
 }

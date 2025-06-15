@@ -11,7 +11,7 @@ import ImageService from '../../domain/image/service/ImageService.js';
 import ExhibitionService from '../../domain/exhibition/service/ExhibitionService.js';
 import SystemManagementService from '../../domain/admin/service/system/SystemManagementService.js';
 import UserAdminService from '../../domain/user/admin/service/UserAdminService.js';
-import ExhibitionManagementService from '../../domain/admin/service/exhibition/ExhibitionManagementService.js';
+import ExhibitionAdminService from '#domain/exhibition/admin/service/ExhibitionAdminService.js';
 import ArtworkAdminService from '#domain/artwork/admin/service/ArtworkAdminService.js';
 import BatchProcessingService from '../service/BatchProcessingService.js';
 import UserController from '../../domain/user/controller/UserController.js';
@@ -19,7 +19,7 @@ import UserApiController from '../../domain/user/controller/api/UserApiControlle
 import ArtworkController from '../../domain/artwork/controller/ArtworkController.js';
 import SystemManagementController from '../../domain/admin/controller/system/SystemManagementController.js';
 import UserAdminController from '../../domain/user/admin/controller/UserAdminController.js';
-import ExhibitionManagementController from '../../domain/admin/controller/exhibition/ExhibitionManagementController.js';
+import ExhibitionAdminController from '#domain/exhibition/admin/controller/ExhibitionAdminController.js';
 import ArtworkAdminController from '#domain/artwork/admin/controller/ArtworkAdminController.js';
 import BatchController from '../../domain/admin/controller/BatchController.js';
 import logger from '../utils/Logger.js';
@@ -65,7 +65,7 @@ export class ServiceRegistry {
             this.container.registerAutoWired('ArtworkService', ArtworkService, 'singleton');
             this.container.registerAutoWired('SystemManagementService', SystemManagementService, 'singleton');
             this.container.registerAutoWired('UserAdminService', UserAdminService, 'singleton');
-            this.container.registerAutoWired('ExhibitionManagementService', ExhibitionManagementService, 'singleton');
+            this.container.registerAutoWired('ExhibitionAdminService', ExhibitionAdminService, 'singleton');
             this.container.registerAutoWired('ArtworkAdminService', ArtworkAdminService, 'singleton');
 
             // 배치 처리 서비스 - 컨테이너 자체를 주입
@@ -86,8 +86,8 @@ export class ServiceRegistry {
             this.container.registerAutoWired('SystemManagementController', SystemManagementController, 'transient');
             this.container.registerAutoWired('UserAdminController', UserAdminController, 'transient');
             this.container.registerAutoWired(
-                'ExhibitionManagementController',
-                ExhibitionManagementController,
+                'ExhibitionAdminController',
+                ExhibitionAdminController,
                 'transient'
             );
             this.container.registerAutoWired('ArtworkAdminController', ArtworkAdminController, 'transient');

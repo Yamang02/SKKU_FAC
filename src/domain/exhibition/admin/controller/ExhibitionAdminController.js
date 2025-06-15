@@ -1,21 +1,20 @@
-import { ViewPath } from '../../../../common/constants/ViewPath.js';
-import ViewResolver from '../../../../common/utils/ViewResolver.js';
-import BaseAdminController from '../BaseAdminController.js';
+import { ViewPath } from '#common/constants/ViewPath.js';
+import ViewResolver from '#common/utils/ViewResolver.js';
+import BaseAdminController from '#domain/admin/controller/BaseAdminController.js';
 
-export default class ExhibitionManagementController extends BaseAdminController {
+export default class ExhibitionAdminController extends BaseAdminController {
     // 의존성 주입을 위한 static dependencies 정의
-    static dependencies = ['ExhibitionManagementService'];
+    static dependencies = ['ExhibitionAdminService'];
 
-    constructor(exhibitionManagementService = null) {
-        super('ExhibitionManagementController');
+    constructor(exhibitionAdminService = null) {
+        super('ExhibitionAdminController');
 
         // 의존성 주입 방식 (새로운 방식)
-        if (exhibitionManagementService) {
-            this.exhibitionManagementService = exhibitionManagementService;
+        if (exhibitionAdminService) {
+            this.exhibitionAdminService = exhibitionAdminService;
         } else {
             // 기존 방식 호환성 유지 (임시)
-
-            throw new Error('ExhibitionManagementService가 주입되지 않았습니다.');
+            throw new Error('ExhibitionAdminService가 주입되지 않았습니다.');
         }
     }
 
@@ -34,7 +33,7 @@ export default class ExhibitionManagementController extends BaseAdminController 
                     keyword
                 };
 
-                const exhibitionListData = await this.exhibitionManagementService.getExhibitionList({
+                const exhibitionListData = await this.exhibitionAdminService.getExhibitionList({
                     page: parseInt(page),
                     limit: parseInt(limit),
                     ...filters
@@ -88,7 +87,7 @@ export default class ExhibitionManagementController extends BaseAdminController 
         return this.safeExecuteSSR(
             async () => {
                 const exhibitionId = req.params.id;
-                const exhibition = await this.exhibitionManagementService.getExhibitionDetail(exhibitionId);
+                const exhibition = await this.exhibitionAdminService.getExhibitionDetail(exhibitionId);
 
                 if (!exhibition) {
                     throw new Error('전시회를 찾을 수 없습니다.');
@@ -127,7 +126,7 @@ export default class ExhibitionManagementController extends BaseAdminController 
                     };
                 }
 
-                const createdExhibition = await this.exhibitionManagementService.createExhibition(
+                const createdExhibition = await this.exhibitionAdminService.createExhibition(
                     exhibitionData,
                     exhibitionImage
                 );
@@ -154,7 +153,7 @@ export default class ExhibitionManagementController extends BaseAdminController 
                 const exhibitionId = req.params.id;
                 const exhibitionData = req.body;
 
-                const result = await this.exhibitionManagementService.updateExhibition(exhibitionId, exhibitionData);
+                const result = await this.exhibitionAdminService.updateExhibition(exhibitionId, exhibitionData);
 
                 if (!result) {
                     throw new Error('전시회를 찾을 수 없습니다.');
@@ -181,7 +180,7 @@ export default class ExhibitionManagementController extends BaseAdminController 
         return this.safeExecuteSSR(
             async () => {
                 const exhibitionId = req.params.id;
-                const result = await this.exhibitionManagementService.deleteExhibition(exhibitionId);
+                const result = await this.exhibitionAdminService.deleteExhibition(exhibitionId);
 
                 if (!result) {
                     throw new Error('전시회를 찾을 수 없습니다.');
@@ -208,7 +207,7 @@ export default class ExhibitionManagementController extends BaseAdminController 
         return this.safeExecuteSSR(
             async () => {
                 const exhibitionId = req.params.id;
-                const updatedExhibition = await this.exhibitionManagementService.toggleFeatured(exhibitionId);
+                const updatedExhibition = await this.exhibitionAdminService.toggleFeatured(exhibitionId);
 
                 const message = `전시회가 ${updatedExhibition.isFeatured ? '주요 전시로 설정' : '일반 전시로 변경'}되었습니다.`;
                 req.flash('success', message);
