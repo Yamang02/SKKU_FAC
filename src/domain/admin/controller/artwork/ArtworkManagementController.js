@@ -51,7 +51,6 @@ export default class ArtworkManagementController extends BaseAdminController {
                     title: '작품 관리',
                     artworks: artworkListData.artworks,
                     total: artworkListData.total,
-                    pagination,
                     page: pagination,
                     filters: { keyword, status, isFeatured },
                     sort,

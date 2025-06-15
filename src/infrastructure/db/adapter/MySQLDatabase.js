@@ -1,9 +1,6 @@
 import { Sequelize } from 'sequelize';
-import Config from '../../../config/Config.js';
+import config from '../../../config/Config.js';
 import logger from '../../../common/utils/Logger.js';
-
-// Config 인스턴스 가져오기
-const config = Config.getInstance();
 
 // 데이터베이스 설정 가져오기
 const dbConfig = config.getDatabaseConfig();
@@ -13,13 +10,13 @@ const environment = config.getEnvironment();
 logger.info('=== 데이터베이스 연결 설정 ===');
 logger.info(`환경: ${environment}`);
 logger.info(`호스트: ${dbConfig.host}`);
-logger.info(`사용자: ${dbConfig.user}`);
+logger.info(`사용자: ${dbConfig.username}`);
 logger.info(`데이터베이스: ${dbConfig.database}`);
 logger.info(`포트: ${dbConfig.port}`);
 logger.info('===========================');
 
 // Sequelize 인스턴스 생성
-const db = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
+const db = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {
     host: dbConfig.host,
     dialect: 'mysql',
     port: dbConfig.port,
@@ -73,16 +70,19 @@ const getConnectionPoolStats = () => {
             };
         }
 
+        // 안전한 접근을 위한 기본값 설정
+        const poolConfig = dbConfig.pool || {};
+
         return {
             available: true,
-            size: pool.size || 0, // 현재 연결 수
-            availableConnections: pool.available || 0, // 사용 가능한 연결 수
-            using: pool.using || 0, // 사용 중인 연결 수
-            waiting: pool.waiting || 0, // 대기 중인 요청 수
-            max: dbConfig.pool.max, // 최대 연결 수
-            min: dbConfig.pool.min, // 최소 연결 수
-            acquireTimeout: dbConfig.pool.acquire, // 연결 획득 타임아웃
-            idleTimeout: dbConfig.pool.idle, // 유휴 타임아웃
+            size: pool.size || 0,
+            availableConnections: pool.available || 0,
+            using: pool.using || 0,
+            waiting: pool.waiting || 0,
+            max: poolConfig.max || 10, // 기본값 설정
+            min: poolConfig.min || 0,
+            acquireTimeout: poolConfig.acquire || 30000,
+            idleTimeout: poolConfig.idle || 10000,
             environment: environment
         };
     } catch (error) {

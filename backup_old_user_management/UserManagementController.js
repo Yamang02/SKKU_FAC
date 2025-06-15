@@ -38,13 +38,18 @@ export default class UserManagementController extends BaseAdminController {
                     filters
                 });
 
-                const pagination = this.createPaginationInfo(page, limit, result.total);
+                // 안전한 데이터 추출
+                const users = result?.users || result?.items || [];
+                const total = result?.total || 0;
+
+                const pagination = this.createPaginationInfo(page, limit, total);
 
                 return ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.USER.LIST, {
                     title: '사용자 관리',
-                    users: result.users,
-                    pagination,
-                    filters,
+                    users: users,
+                    total: total,
+                    page: pagination,
+                    filters: filters || {},
                     currentPage: parseInt(page)
                 });
             },

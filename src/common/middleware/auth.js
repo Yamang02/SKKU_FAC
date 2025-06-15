@@ -39,10 +39,11 @@ export const isAuthenticated = async (req, res, next) => {
     await extractUser(req, res, () => { });
 
     if (!req.user) {
+        // API 요청이 아닌 경우 에러 페이지 렌더링
         if (req.xhr || req.headers.accept?.includes('application/json')) {
             return res.status(401).json({
                 success: false,
-                error: '로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.'
+                error: '로그인이 필요합니다.'
             });
         }
         req.session.returnTo = req.originalUrl;
@@ -50,23 +51,7 @@ export const isAuthenticated = async (req, res, next) => {
             title: '로그인 필요',
             error: '로그인이 필요한 서비스입니다.',
             message: '로그인 후 이용해주세요.',
-            returnTo: req.originalUrl,
-            redirectUrl: '/auth/login'
-        });
-    }
-
-    // 사용자가 활성 상태인지 확인
-    if (!req.user.isActive) {
-        if (req.xhr || req.headers.accept?.includes('application/json')) {
-            return res.status(403).json({
-                success: false,
-                error: '비활성화된 계정입니다.'
-            });
-        }
-        return ViewResolver.render(res, ViewPath.ERROR, {
-            title: '계정 비활성화',
-            error: '비활성화된 계정입니다.',
-            message: '관리자에게 문의하세요.'
+            status: 401
         });
     }
 

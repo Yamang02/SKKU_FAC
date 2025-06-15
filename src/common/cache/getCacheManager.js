@@ -5,7 +5,7 @@
 
 import { createCache } from 'cache-manager';
 import redisStore from 'cache-manager-redis-store';
-import Config from '../../config/Config.js';
+import config from '../../config/Config.js';
 import logger from '../utils/Logger.js';
 import redisClient from '../../infrastructure/redis/RedisClient.js';
 
@@ -15,7 +15,8 @@ logger.info('🔄 [CACHE] getCacheManager.js 모듈이 로드되었습니다');
 
 class CacheManager {
     constructor() {
-        this.config = Config.getInstance();
+        this.config = config;
+        this.environmentManager = config.getEnvironmentManager();
         this.cache = null;
         this.isInitialized = false;
         this.defaultTTL = 300; // 5분 기본 TTL
@@ -26,19 +27,17 @@ class CacheManager {
     async init() {
         try {
             // 로컬 개발 환경이나 테스트 환경에서는 메모리 캐시 사용
-            const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'testing';
-            const isLocalDevelopment = process.env.NODE_ENV === 'development' && !process.env.RAILWAY_ENVIRONMENT;
-            const shouldUseMemoryCache = isTestEnvironment || isLocalDevelopment || !process.env.REDIS_HOST;
+            const shouldUseMemoryCache = !this.environmentManager.is('useRedisCache');
 
             if (shouldUseMemoryCache) {
                 let reason = 'Redis 설정이 없어';
-                if (isTestEnvironment) reason = '테스트 환경이므로';
-                else if (isLocalDevelopment) reason = '로컬 개발 환경이므로';
+                if (this.environmentManager.is('isTest')) reason = '테스트 환경이므로';
+                else if (this.environmentManager.is('isLocalDevelopment')) reason = '로컬 개발 환경이므로';
 
                 logger.info(`${reason} 메모리 캐시 사용`, {
-                    nodeEnv: process.env.NODE_ENV,
-                    railwayEnv: process.env.RAILWAY_ENVIRONMENT,
-                    hasRedisHost: !!process.env.REDIS_HOST
+                    environment: this.environmentManager.getEnvironment(),
+                    isRailwayDeployment: this.environmentManager.is('isRailwayDeployment'),
+                    useRedisCache: this.environmentManager.is('useRedisCache')
                 });
                 this.cache = createCache({
                     store: 'memory',
@@ -51,13 +50,14 @@ class CacheManager {
                     await redisClient.connect();
                 }
 
-                // Redis 설정을 환경변수에서 직접 가져오기 (암호화 우회)
+                // Redis 설정을 EnvironmentManager에서 가져오기
+                const redisSettings = this.environmentManager.getRedisConfig();
                 const redisConfig = {
                     store: redisStore,
-                    host: process.env.REDIS_HOST,
-                    port: parseInt(process.env.REDIS_PORT, 10),
-                    password: process.env.REDIS_PASSWORD,
-                    db: parseInt(process.env.REDIS_CACHE_DB, 10) || 1, // 캐시용 별도 DB 사용
+                    host: redisSettings.host,
+                    port: redisSettings.port,
+                    password: redisSettings.password,
+                    db: redisSettings.db + 1, // 캐시용 별도 DB 사용 (기본 DB + 1)
                     ttl: this.defaultTTL,
                     max: 1000, // 최대 캐시 아이템 수
                     prefix: 'cache:', // 캐시 키 접두사
@@ -70,10 +70,8 @@ class CacheManager {
 
             this.isInitialized = true;
             logger.info('✅ CacheManager 초기화 완료', {
-                backend: process.env.REDIS_HOST ? 'Redis' : 'Memory',
-                host: process.env.REDIS_HOST || 'N/A',
-                port: process.env.REDIS_PORT || 'N/A',
-                passwordLength: process.env.REDIS_PASSWORD ? process.env.REDIS_PASSWORD.length : 0,
+                backend: this.environmentManager.is('useRedisCache') ? 'Redis' : 'Memory',
+                environment: this.environmentManager.getEnvironment(),
                 defaultTTL: this.defaultTTL,
                 prefix: 'cache:'
             });

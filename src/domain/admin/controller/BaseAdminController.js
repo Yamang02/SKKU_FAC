@@ -119,7 +119,7 @@ export default class BaseAdminController {
             return res.status(statusCode || errorStatus).json({
                 success: false,
                 error: userErrorMessage,
-                ...(process.env.NODE_ENV === 'development' && {
+                ...(this.config.getEnvironmentManager().is('enableDebugMode') && {
                     details: error.message,
                     stack: error.stack
                 })
@@ -141,7 +141,7 @@ export default class BaseAdminController {
         return ViewResolver.render(res.status(statusCode), ViewPath.ERROR, {
             title,
             error: userErrorMessage,
-            ...(process.env.NODE_ENV === 'development' && {
+            ...(this.config.getEnvironmentManager().is('enableDebugMode') && {
                 details: error.message,
                 stack: error.stack
             })

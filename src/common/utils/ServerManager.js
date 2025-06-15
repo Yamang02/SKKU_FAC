@@ -1,6 +1,6 @@
 import logger from './Logger.js';
 import sessionStore from '../../infrastructure/session/SessionStore.js';
-import Config from '../../config/Config.js';
+import config from '../../config/Config.js';
 
 class ServerManager {
     constructor(app) {
@@ -8,7 +8,7 @@ class ServerManager {
         this.server = null;
         this.isShuttingDown = false;
         this.handlersSetup = false;
-        this.config = Config.getInstance();
+        this.config = config;
     }
 
     /**

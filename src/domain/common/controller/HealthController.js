@@ -1,6 +1,6 @@
 import { db } from '../../../infrastructure/db/adapter/MySQLDatabase.js';
 import redisClient from '../../../infrastructure/redis/RedisClient.js';
-import Config from '../../../config/Config.js';
+import config from '../../../config/Config.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
  */
 class HealthController {
     constructor() {
-        this.config = Config.getInstance();
+        this.config = config;
         this.redisClient = redisClient;
         this.startTime = Date.now();
         this.metricsCollector = getMetricsCollector();
@@ -29,7 +29,7 @@ class HealthController {
                 status: 'OK',
                 timestamp: new Date().toISOString(),
                 uptime: Math.floor((Date.now() - this.startTime) / 1000),
-                environment: this.config.get('app.environment') || process.env.NODE_ENV || 'unknown',
+                environment: this.config.getEnvironment(),
                 version: this.getVersion(),
                 services: {
                     app: 'healthy'
@@ -71,7 +71,7 @@ class HealthController {
                 status: 'ERROR',
                 timestamp: new Date().toISOString(),
                 uptime: Math.floor((Date.now() - this.startTime) / 1000),
-                environment: this.config.get('app.environment') || process.env.NODE_ENV || 'unknown',
+                environment: this.config.getEnvironment(),
                 version: this.getVersion(),
                 error: error.message
             });

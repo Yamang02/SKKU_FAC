@@ -1,9 +1,8 @@
 import nodemailer from 'nodemailer';
-import Config from '../../config/Config.js';
+import config from '../../config/Config.js';
 import logger from './Logger.js';
 
-// Config 인스턴스 가져오기
-const config = Config.getInstance();
+
 const emailConfig = config.getEmailConfig();
 const appConfig = config.getAppConfig();
 

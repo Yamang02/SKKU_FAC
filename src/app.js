@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 import logger from './common/utils/Logger.js';
 import AppInitializer from './common/utils/AppInitializer.js';
 import { setupBasicMiddleware } from './common/middleware/setupMiddleware.js';
-import Config from './config/Config.js';
+import config from './config/Config.js';
 
 // 캐시 매니저
 import getCacheManager from './common/cache/getCacheManager.js';
@@ -23,15 +23,16 @@ import flash from 'connect-flash';
 // CacheManager 초기화 (import 시점에 싱글톤 생성됨)
 getCacheManager();
 
-// Swagger 문서 로드 (현재 사용 안함)
-// const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve('./src/swagger.json'), 'utf8'));
+// Swagger 문서 로드
+import fs from 'fs';
+import swaggerUi from 'swagger-ui-express';
+const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve('./src/swagger.json'), 'utf8'));
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Config 인스턴스를 앱에 저장
-const config = Config.getInstance();
 app.set('config', config);
 
 // Railway에서 모니터링 제공하므로 제거됨
@@ -94,6 +95,9 @@ appInitializer.getMiddleware = () => ({
 
 // 애플리케이션 초기화 실행
 appInitializer.initialize();
+
+// Swagger UI 설정
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Railway에서 에러 처리 제공
 

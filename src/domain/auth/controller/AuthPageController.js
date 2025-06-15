@@ -42,24 +42,7 @@ export default class AuthPageController {
         return this.passportService.authenticateLocal(req, res, next);
     }
 
-    /**
-     * Google 로그인 시작
-     */
-    async initiateGoogleLogin(req, res, next) {
-        // returnTo URL을 세션에 저장
-        if (req.query.returnTo) {
-            req.session.returnTo = req.query.returnTo;
-        }
-
-        return this.passportService.authenticateGoogle()(req, res, next);
-    }
-
-    /**
-     * Google 로그인 콜백 처리
-     */
-    async handleGoogleCallback(req, res, next) {
-        return this.passportService.authenticateGoogleCallback(req, res, next);
-    }
+    // Google OAuth 메서드 제거됨
 
     /**
      * 로그아웃 처리

@@ -6,11 +6,11 @@
 import client from 'prom-client';
 import pidusage from 'pidusage';
 import logger from '../utils/Logger.js';
-import Config from '../../config/Config.js';
+import config from '../../config/Config.js';
 
 class MetricsCollector {
     constructor() {
-        this.config = Config.getInstance();
+        this.config = config;
         this.environment = this.config.getEnvironment();
         this.isProduction = this.environment === 'production';
 

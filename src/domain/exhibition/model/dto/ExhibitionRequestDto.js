@@ -139,14 +139,14 @@ export default class ExhibitionRequestDto extends BaseDto {
         let schema;
 
         switch (schemaType) {
-            case 'create':
-                schema = ExhibitionRequestDto.getCreateSchema();
-                break;
-            case 'update':
-                schema = ExhibitionRequestDto.getUpdateSchema();
-                break;
-            default:
-                schema = this.getValidationSchema();
+        case 'create':
+            schema = ExhibitionRequestDto.getCreateSchema();
+            break;
+        case 'update':
+            schema = ExhibitionRequestDto.getUpdateSchema();
+            break;
+        default:
+            schema = this.getValidationSchema();
         }
 
         const { error, value } = schema.validate(this.toPlainObject(), {

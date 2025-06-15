@@ -1,16 +1,18 @@
 /**
- * 테스트 환경 전용 설정 (Railway 배포 환경)
+ * Railway 테스트 환경 전용 설정 (간소화됨)
  */
-export default {
+import { baseConfig, mergeConfig } from './base.js';
+
+const testOverrides = {
     app: {
         debug: false,
-        port: parseInt(process.env.PORT, 10) || 3000 // Railway 포트 사용
+        port: parseInt(process.env.PORT, 10) || 3000
     },
 
     database: {
-        logging: false, // Railway에서는 로깅 비활성화
+        logging: false,
         pool: {
-            max: 10, // Railway 환경에 맞는 풀 크기
+            max: 10,
             min: 2,
             acquire: 30000,
             idle: 30000
@@ -18,92 +20,30 @@ export default {
     },
 
     logging: {
-        level: 'info', // Railway 로그에서 확인 가능한 레벨
-        enableFileLogging: false, // Railway에서는 파일 로깅 비활성화
-        enableConsoleLogging: true, // Railway 콘솔 로그 활성화
-        logDir: 'logs'
-    },
-
-    security: {
-        csp: {
-            contentSecurityPolicy: {
-                directives: {
-                    // 테스트 환경에서도 적절한 보안 정책
-                    defaultSrc: ['\'self\''],
-                    scriptSrc: [
-                        '\'self\'',
-                        'https://developers.kakao.com',
-                        'https://t1.kakaocdn.net',
-                        'https://k.kakaocdn.net',
-                        'https://cdn.jsdelivr.net',
-                        'blob:'
-                    ],
-                    styleSrc: [
-                        '\'self\'',
-                        'https://cdnjs.cloudflare.com',
-                        'https://fonts.googleapis.com',
-                        '\'unsafe-inline\''
-                    ],
-                    fontSrc: [
-                        '\'self\'',
-                        'https://fonts.googleapis.com',
-                        'https://cdnjs.cloudflare.com',
-                        'https://fonts.gstatic.com'
-                    ]
-                }
-            }
-        }
+        level: 'info',
+        enableFileLogging: false, // Railway에서는 불필요
+        enableConsoleLogging: true
     },
 
     session: {
         cookie: {
             secure: true, // Railway HTTPS 환경
-            maxAge: 24 * 60 * 60 * 1000, // 24시간
-            httpOnly: true,
-            sameSite: 'strict'
+            maxAge: 24 * 60 * 60 * 1000 // 24시간
         }
     },
 
     rateLimit: {
-        windowMs: 15 * 60 * 1000, // 15분
-        max: 10000, // 테스트에서는 매우 관대한 제한
-        skipPaths: ['/health', '/favicon.ico', '/api/test']
+        windowMs: 15 * 60 * 1000,
+        max: 10000, // 테스트는 매우 관대하게
+        message: '테스트 환경에서 요청 제한에 도달했습니다.'
     },
 
-    // JWT 설정 (테스트 환경 - 테스트 시나리오용)
     jwt: {
-        accessTokenExpiry: '10m', // 10분 (테스트 시나리오용)
-        refreshTokenExpiry: '1h', // 1시간 (테스트 완료 후 빠른 만료)
+        accessTokenExpiry: '10m',
+        refreshTokenExpiry: '1h',
         issuer: 'skku-fac-gallery',
         audience: 'skku-fac-gallery-users'
-    },
-
-    // 테스트 환경 전용 설정
-    testing: {
-        enableMocking: false, // Railway 환경에서는 실제 서비스 테스트
-        enableTestRoutes: true,
-        enableTestDatabase: false, // 실제 DB 사용
-        resetDatabaseOnStart: false
-    },
-
-    // 테스트용 기능들
-    features: {
-        enableBetaFeatures: true, // 베타 기능 테스트
-        enableA11yTesting: true,
-        enablePerformanceTesting: true
-    },
-
-    // 모니터링 (프로덕션보다 상세)
-    monitoring: {
-        enableHealthCheck: true,
-        enableMetrics: true,
-        enableErrorReporting: true,
-        enableDetailedLogging: true
-    },
-
-    // Redis 설정 (Railway 환경)
-    redis: {
-        keyPrefix: 'test:',
-        database: 0 // 환경변수와 일치
     }
 };
+
+export default mergeConfig(baseConfig, testOverrides);

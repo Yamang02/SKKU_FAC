@@ -1,3 +1,5 @@
+import environmentManager from '../../../config/EnvironmentManager.js';
+
 /**
  * 표준화된 API 응답을 생성하는 ResponseBuilder 클래스
  * 일관된 응답 형식을 보장하고 메타데이터를 지원합니다.
@@ -48,7 +50,7 @@ export default class ResponseBuilder {
             builder.response.data = {
                 errorCode: errorCode || error.name,
                 details: error.details || null,
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+                stack: environmentManager.is('enableStackTrace') ? error.stack : undefined
             };
         } else {
             builder.response.message = error;

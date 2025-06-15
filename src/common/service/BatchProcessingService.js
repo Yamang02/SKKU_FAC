@@ -336,24 +336,24 @@ export default class BatchProcessingService {
      */
     async processJobByType(job) {
         switch (job.type) {
-            case BatchJobType.BULK_DELETE_USERS:
-                return await this.processBulkDeleteUsers(job);
-            case BatchJobType.BULK_UPDATE_USERS:
-                return await this.processBulkUpdateUsers(job);
-            case BatchJobType.BULK_DELETE_ARTWORKS:
-                return await this.processBulkDeleteArtworks(job);
-            case BatchJobType.BULK_UPDATE_ARTWORKS:
-                return await this.processBulkUpdateArtworks(job);
-            case BatchJobType.BULK_DELETE_EXHIBITIONS:
-                return await this.processBulkDeleteExhibitions(job);
-            case BatchJobType.BULK_UPDATE_EXHIBITIONS:
-                return await this.processBulkUpdateExhibitions(job);
-            case BatchJobType.BULK_FEATURE_TOGGLE:
-                return await this.processBulkFeatureToggle(job);
-            case BatchJobType.BULK_STATUS_CHANGE:
-                return await this.processBulkStatusChange(job);
-            default:
-                throw new Error(`지원하지 않는 배치 작업 타입: ${job.type}`);
+        case BatchJobType.BULK_DELETE_USERS:
+            return await this.processBulkDeleteUsers(job);
+        case BatchJobType.BULK_UPDATE_USERS:
+            return await this.processBulkUpdateUsers(job);
+        case BatchJobType.BULK_DELETE_ARTWORKS:
+            return await this.processBulkDeleteArtworks(job);
+        case BatchJobType.BULK_UPDATE_ARTWORKS:
+            return await this.processBulkUpdateArtworks(job);
+        case BatchJobType.BULK_DELETE_EXHIBITIONS:
+            return await this.processBulkDeleteExhibitions(job);
+        case BatchJobType.BULK_UPDATE_EXHIBITIONS:
+            return await this.processBulkUpdateExhibitions(job);
+        case BatchJobType.BULK_FEATURE_TOGGLE:
+            return await this.processBulkFeatureToggle(job);
+        case BatchJobType.BULK_STATUS_CHANGE:
+            return await this.processBulkStatusChange(job);
+        default:
+            throw new Error(`지원하지 않는 배치 작업 타입: ${job.type}`);
         }
     }
 
