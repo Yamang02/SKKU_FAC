@@ -14,6 +14,7 @@ import {
     UserAuthError
 } from '#common/error/UserError.js';
 import logger from '#common/utils/Logger.js';
+import RBACService from '#domain/auth/service/rbacService.js';
 
 export default class UserApiController {
     /**
@@ -27,13 +28,14 @@ export default class UserApiController {
      */
     constructor(userService) {
         this.userService = userService;
+        this.rbacService = new RBACService();
     }
 
     // === API 엔드포인트 ===
     /**
      * 사용자를 등록합니다.
      */
-    async registerUser(req, res) {
+    async register(req, res) {
         try {
             // 디버깅: 받은 데이터 확인
             console.log('🔍 회원가입 요청 데이터:', {
@@ -93,7 +95,7 @@ export default class UserApiController {
     /**
      * 사용자 로그인을 처리합니다.
      */
-    async loginUser(req, res) {
+    async login(req, res) {
         try {
             // 새로운 DTO 검증 미들웨어에서 제공하는 검증된 데이터 사용
             const { username, password } = req.userDto ? req.userDto.toPlainObject() : req.body;
@@ -121,7 +123,7 @@ export default class UserApiController {
         }
     }
 
-    async getSessionUser(req, res) {
+    async getSession(req, res) {
         const user = req.session.user;
         return res.json(ApiResponse.success(user));
     }
@@ -129,7 +131,7 @@ export default class UserApiController {
     /**
      * 사용자 로그아웃을 처리합니다.
      */
-    async logoutUser(req, res) {
+    async logout(req, res) {
         try {
             await SessionUtil.destroySession(req);
             return res.json(ApiResponse.success(null, Message.USER.LOGOUT_SUCCESS));
@@ -142,7 +144,7 @@ export default class UserApiController {
     /**
      * 사용자 프로필을 조회합니다.
      */
-    async getUserProfile(req, res) {
+    async getProfile(req, res) {
         const userId = req.session.user.id;
 
         try {
@@ -160,13 +162,20 @@ export default class UserApiController {
     /**
      * 사용자 프로필을 수정합니다.
      */
-    async updateUserProfile(req, res) {
+    async updateProfile(req, res) {
         try {
+            const currentUser = req.session.user;
+            const targetUserId = req.params.id || currentUser.id; // 관리자는 다른 사용자 수정 가능
+
+            // 소유권 체크: 본인이거나 관리자 권한 필요
+            if (!this.canModifyUser(currentUser, targetUserId)) {
+                return res.status(403).json(ApiResponse.error('해당 사용자를 수정할 권한이 없습니다.'));
+            }
+
             // 새로운 DTO 검증 미들웨어에서 제공하는 검증된 데이터 사용
             const profileData = req.userDto ? req.userDto.toPlainObject() : req.body;
-            const userId = req.session.user.id;
 
-            const updatedUser = await this.userService.updateUserProfile(userId, profileData);
+            const updatedUser = await this.userService.updateProfile(targetUserId, profileData, currentUser);
             return res.json(ApiResponse.success(updatedUser, Message.USER.UPDATE_SUCCESS));
         } catch (error) {
             logger.withContext(req).error('사용자 프로필 수정 중 오류:', error);
@@ -177,6 +186,19 @@ export default class UserApiController {
             }
             return res.status(500).json(ApiResponse.error(Message.USER.UPDATE_ERROR));
         }
+    }
+
+    /**
+     * 사용자 수정 권한 체크
+     */
+    canModifyUser(currentUser, targetUserId) {
+        // 본인 수정은 항상 허용 (USER_UPDATE 권한 필요)
+        if (currentUser.id === targetUserId) {
+            return this.rbacService.hasPermission(currentUser.role, 'user:update');
+        }
+
+        // 다른 사용자 수정은 관리자 권한 필요
+        return this.rbacService.hasPermission(currentUser.role, 'admin:users');
     }
 
     /**
@@ -203,7 +225,7 @@ export default class UserApiController {
     /**
      * 사용자 계정을 삭제합니다.
      */
-    async deleteUserAccount(req, res) {
+    async deleteAccount(req, res) {
         try {
             const userId = req.session.user.id;
             await this.userService.deleteUserAccount(userId);

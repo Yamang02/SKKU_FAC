@@ -1,5 +1,11 @@
 import express from 'express';
-import { isAuthenticated, isNotAuthenticated } from '#common/middleware/auth.js';
+import {
+    isAuthenticated,
+    isNotAuthenticated,
+    requireMemberAccess,
+    canUpdateUser,
+    canDeleteUser
+} from '#common/middleware/auth.js';
 import CacheMiddleware from '#common/middleware/CacheMiddleware.js';
 
 /**
@@ -69,7 +75,7 @@ export function createUserRouter(userController, userApiController) {
         '/',
         isNotAuthenticated,
         async (req, res) => {
-            const result = await userApiController.registerUser(req, res);
+            const result = await userApiController.register(req, res);
             // 사용자 관련 캐시 무효화 (필요시)
             await cacheMiddleware.invalidatePattern('user_*');
             return result;
@@ -115,7 +121,7 @@ export function createUserRouter(userController, userApiController) {
     UserRouter.post(
         '/login',
         isNotAuthenticated,
-        (req, res) => userApiController.loginUser(req, res)
+        (req, res) => userApiController.login(req, res)
     );
     /**
      * @swagger
@@ -137,7 +143,7 @@ export function createUserRouter(userController, userApiController) {
      *       500:
      *         description: 서버 오류
      */
-    UserRouter.get('/logout', (req, res) => userApiController.logoutUser(req, res));
+    UserRouter.get('/logout', (req, res) => userApiController.logout(req, res));
 
     // 현재 사용자 프로필 정보 조회 API (개인정보이므로 캐싱 안함)
     /**
@@ -164,7 +170,11 @@ export function createUserRouter(userController, userApiController) {
      *       500:
      *         description: 서버 오류
      */
-    UserRouter.get('/api/me', isAuthenticated, (req, res) => userApiController.getUserProfile(req, res));
+    UserRouter.get('/api/me',
+        isAuthenticated,
+        requireMemberAccess(), // 기본 회원 권한 필요
+        (req, res) => userApiController.getProfile(req, res)
+    );
 
     // 현재 사용자 세션 정보 조회 API (개인정보이므로 캐싱 안함)
     /**
@@ -189,7 +199,7 @@ export function createUserRouter(userController, userApiController) {
      *       500:
      *         description: 서버 오류
      */
-    UserRouter.get('/api/session', isAuthenticated, (req, res) => userApiController.getSessionUser(req, res));
+    UserRouter.get('/api/session', isAuthenticated, (req, res) => userApiController.getSession(req, res));
 
     // 현재 사용자 프로필 수정 API
     /**
@@ -238,6 +248,7 @@ export function createUserRouter(userController, userApiController) {
     UserRouter.put(
         '/me',
         isAuthenticated,
+        canUpdateUser(),
         async (req, res) => {
             const result = await userApiController.updateProfile(req, res);
             // 사용자 관련 캐시 무효화
@@ -267,7 +278,11 @@ export function createUserRouter(userController, userApiController) {
      *       500:
      *         description: 서버 오류
      */
-    UserRouter.delete('/me', isAuthenticated, (req, res) => userApiController.deleteUserAccount(req, res));
+    UserRouter.delete('/me',
+        isAuthenticated,
+        canDeleteUser(),
+        (req, res) => userApiController.deleteAccount(req, res)
+    );
 
     // 아이디 찾기 API
     /**

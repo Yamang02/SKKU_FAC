@@ -1,20 +1,9 @@
 import express from 'express';
 import { imageUploadMiddleware } from '../../../common/middleware/imageUploadMiddleware.js';
 import {
-    canAccessAdminPanel,
-    canViewAdminDashboard,
-    canReadUsers,
-    canWriteUsers,
-    canManageUserDetails,
-    canResetUserPassword,
-    canDeleteUsers,
-    canReadContent,
-    canWriteContent,
-    canDeleteContent,
-    canViewArtworkDetails,
-    canFeatureArtworks,
-    canViewExhibitionDetails,
-    canFeatureExhibitions,
+    requireAdminAccess,
+    requireUserManagement,
+    requireContentManagement,
     isReadOnlyAdmin
 } from '../../../common/middleware/auth.js';
 
@@ -29,7 +18,7 @@ export function createAdminRouter(container) {
     const AdminRouter = express.Router();
 
     // 모든 admin 라우트에 기본 admin 패널 접근 권한 체크
-    AdminRouter.use(canAccessAdminPanel());
+    AdminRouter.use(requireAdminAccess());
 
     // 의존성 주입된 컨트롤러들을 해결
     const adminController = container.resolve('SystemManagementController');
@@ -73,33 +62,33 @@ export function createAdminRouter(container) {
     };
 
     // 관리자 대시보드
-    AdminRouter.get(['/', '/dashboard'], canViewAdminDashboard(), (req, res) => adminController.getDashboard(req, res));
+    AdminRouter.get(['/', '/dashboard'], requireUserManagement(), (req, res) => adminController.getDashboard(req, res));
 
     // 사용자 관리 라우트
-    AdminRouter.get('/management/user', canReadUsers(), (req, res) =>
+    AdminRouter.get('/management/user', requireUserManagement(), (req, res) =>
         userAdminController.getManagementUserList(req, res)
     );
     AdminRouter.get(
         '/management/user/:id',
-        canManageUserDetails(),
+        requireUserManagement(),
         (req, res) => userAdminController.getManagementUserDetail(req, res)
     );
     AdminRouter.put(
         '/management/user/:id',
-        canWriteUsers(),
+        requireUserManagement(),
         preventReadOnlyActions,
         (req, res) => userAdminController.updateManagementUser(req, res)
     );
     AdminRouter.delete(
         '/management/user/:id',
-        canDeleteUsers(),
+        requireUserManagement(),
         preventReadOnlyActions,
         deleteTimeoutMiddleware,
         (req, res) => userAdminController.deleteManagementUser(req, res)
     );
     AdminRouter.post(
         '/management/user/:id/reset-password',
-        canResetUserPassword(),
+        requireUserManagement(),
         preventReadOnlyActions,
         (req, res) => userAdminController.resetManagementUserPassword(req, res)
     );
@@ -107,40 +96,40 @@ export function createAdminRouter(container) {
     // 전시회 관리 라우트
     AdminRouter.get(
         '/management/exhibition',
-        canReadContent(),
+        requireContentManagement(),
         (req, res) => exhibitionManagementController.getManagementExhibitionListPage(req, res)
     );
-    AdminRouter.get('/management/exhibition/new', canWriteContent(), (req, res) =>
+    AdminRouter.get('/management/exhibition/new', requireContentManagement(), (req, res) =>
         exhibitionManagementController.getManagementExhibitionCreatePage(req, res)
     );
     AdminRouter.post(
         '/management/exhibition/new',
-        canWriteContent(),
+        requireContentManagement(),
         preventReadOnlyActions,
         imageUploadMiddleware('exhibition'),
         (req, res) => exhibitionManagementController.createManagementExhibition(req, res)
     );
     AdminRouter.get(
         '/management/exhibition/:id',
-        canViewExhibitionDetails(),
+        requireContentManagement(),
         (req, res) => exhibitionManagementController.getManagementExhibitionDetailPage(req, res)
     );
     AdminRouter.put(
         '/management/exhibition/:id',
-        canWriteContent(),
+        requireContentManagement(),
         preventReadOnlyActions,
         (req, res) => exhibitionManagementController.updateManagementExhibition(req, res)
     );
     AdminRouter.delete(
         '/management/exhibition/:id',
-        canDeleteContent(),
+        requireContentManagement(),
         preventReadOnlyActions,
         deleteTimeoutMiddleware,
         (req, res) => exhibitionManagementController.deleteManagementExhibition(req, res)
     );
     AdminRouter.post(
         '/management/exhibition/:id/featured',
-        canFeatureExhibitions(),
+        requireContentManagement(),
         preventReadOnlyActions,
         (req, res) => exhibitionManagementController.toggleFeatured(req, res)
     );
@@ -148,60 +137,60 @@ export function createAdminRouter(container) {
     // 작품 관리 라우트
     AdminRouter.get(
         '/management/artwork',
-        canReadContent(),
+        requireContentManagement(),
         (req, res) => artworkManagementController.getManagementArtworkListPage(req, res)
     );
     AdminRouter.get(
         '/management/artwork/:id',
-        canViewArtworkDetails(),
+        requireContentManagement(),
         (req, res) => artworkManagementController.getManagementArtworkDetailPage(req, res)
     );
     AdminRouter.put(
         '/management/artwork/:id',
-        canWriteContent(),
+        requireContentManagement(),
         preventReadOnlyActions,
         (req, res) => artworkManagementController.updateManagementArtwork(req, res)
     );
     AdminRouter.delete(
         '/management/artwork/:id',
-        canDeleteContent(),
+        requireContentManagement(),
         preventReadOnlyActions,
         deleteTimeoutMiddleware,
         (req, res) => artworkManagementController.deleteManagementArtwork(req, res)
     );
     AdminRouter.post(
         '/management/artwork/:id/featured',
-        canFeatureArtworks(),
+        requireContentManagement(),
         preventReadOnlyActions,
         (req, res) => artworkManagementController.toggleFeatured(req, res)
     );
 
     // 배치 처리 라우트
-    AdminRouter.get('/batch', canWriteContent(), (req, res) => batchController.getBatchJobListPage(req, res));
-    AdminRouter.get('/batch/:jobId', canWriteContent(), (req, res) => batchController.getBatchJobDetailPage(req, res));
-    AdminRouter.post('/batch/:jobId/cancel', canWriteContent(), preventReadOnlyActions, (req, res) =>
+    AdminRouter.get('/batch', requireContentManagement(), (req, res) => batchController.getBatchJobListPage(req, res));
+    AdminRouter.get('/batch/:jobId', requireContentManagement(), (req, res) => batchController.getBatchJobDetailPage(req, res));
+    AdminRouter.post('/batch/:jobId/cancel', requireContentManagement(), preventReadOnlyActions, (req, res) =>
         batchController.cancelBatchJob(req, res)
     );
 
     // 배치 작업 생성 라우트
-    AdminRouter.post('/batch/bulk-delete-users', canDeleteUsers(), preventReadOnlyActions, (req, res) =>
+    AdminRouter.post('/batch/bulk-delete-users', requireUserManagement(), preventReadOnlyActions, (req, res) =>
         batchController.createBulkDeleteUsersJob(req, res)
     );
-    AdminRouter.post('/batch/bulk-delete-artworks', canDeleteContent(), preventReadOnlyActions, (req, res) =>
+    AdminRouter.post('/batch/bulk-delete-artworks', requireContentManagement(), preventReadOnlyActions, (req, res) =>
         batchController.createBulkDeleteArtworksJob(req, res)
     );
-    AdminRouter.post('/batch/bulk-delete-exhibitions', canDeleteContent(), preventReadOnlyActions, (req, res) =>
+    AdminRouter.post('/batch/bulk-delete-exhibitions', requireContentManagement(), preventReadOnlyActions, (req, res) =>
         batchController.createBulkDeleteExhibitionsJob(req, res)
     );
-    AdminRouter.post('/batch/bulk-feature-toggle', canWriteContent(), preventReadOnlyActions, (req, res) =>
+    AdminRouter.post('/batch/bulk-feature-toggle', requireContentManagement(), preventReadOnlyActions, (req, res) =>
         batchController.createBulkFeatureToggleJob(req, res)
     );
 
     // 배치 작업 API 라우트 (AJAX용)
-    AdminRouter.get('/api/batch/:jobId/status', canReadContent(), (req, res) =>
+    AdminRouter.get('/api/batch/:jobId/status', requireContentManagement(), (req, res) =>
         batchController.getBatchJobStatusAPI(req, res)
     );
-    AdminRouter.get('/api/batch/stats', canReadContent(), (req, res) => batchController.getBatchJobStatsAPI(req, res));
+    AdminRouter.get('/api/batch/stats', requireContentManagement(), (req, res) => batchController.getBatchJobStatsAPI(req, res));
 
 
     return AdminRouter;

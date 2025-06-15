@@ -19,7 +19,9 @@ export default {
 
     // Cloudinary 설정 (테스트 환경과 동일)
     storage: {
-        // 테스트 환경과 동일한 Cloudinary 설정 사용
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME || 'test-cloud',
+        apiKey: process.env.CLOUDINARY_API_KEY || 'test-key',
+        apiSecret: process.env.CLOUDINARY_API_SECRET || 'test-secret',
         environment: 'test', // 테스트 환경 폴더 사용
         uploadDir: 'test' // 테스트와 동일한 업로드 디렉토리
     },
@@ -94,10 +96,7 @@ export default {
             },
             crossOriginEmbedderPolicy: false // 개발 환경에서는 비활성화
         },
-        additionalHeaders: {
-            'X-Development-Mode': 'true',
-            'X-Debug-Info': 'enabled'
-        },
+
         staticFiles: {
             setHeaders: (res, filePath) => {
                 // 개발 환경에서는 캐시 비활성화
@@ -114,6 +113,9 @@ export default {
     },
 
     session: {
+        secret: process.env.SESSION_SECRET || 'dev-session-secret-key-minimum-32-chars',
+        resave: false,
+        saveUninitialized: false,
         cookie: {
             secure: false, // HTTP에서도 작동
             maxAge: 24 * 60 * 60 * 1000, // 24시간
@@ -129,44 +131,14 @@ export default {
 
     rateLimit: {
         windowMs: 15 * 60 * 1000, // 15분
-        max: (req) => {
-            // 헬스체크와 파비콘은 제외
-            const alwaysSkip = ['/health', '/favicon.ico'];
-            if (alwaysSkip.some(path => req.path === path)) {
-                return 0; // 무제한
-            }
-
-            // 개발 API 경로 확인
-            if (req.path.startsWith('/api/dev')) {
-                return 0; // 개발 API는 무제한
-            }
-
-            // 정적파일 여부 확인
-            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
-            const isStatic = staticPaths.some(path => req.path.startsWith(path));
-
-            if (isStatic) {
-                // 정적파일: 개발환경에서는 매우 관대하게
-                return 2000;
-            } else {
-                // 일반 요청: 개발환경에서는 관대하게
-                return 500;
-            }
-        },
-        message: (req) => {
-            const staticPaths = ['/css/', '/js/', '/images/', '/assets/', '/uploads/'];
-            const isStatic = staticPaths.some(path => req.path.startsWith(path));
-
-            if (isStatic) {
-                return '정적파일 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-            } else {
-                return 'API 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-            }
-        }
+        max: 1000, // 개발 환경에서는 관대한 제한
+        skipPaths: ['/health', '/favicon.ico', '/api/dev', '/css/', '/js/', '/images/', '/assets/', '/uploads/']
     },
 
     // JWT 설정 (개발 환경 - 편의성 우선)
     jwt: {
+        accessTokenSecret: process.env.JWT_ACCESS_SECRET || 'dev-access-token-secret-key-minimum-32-chars',
+        refreshTokenSecret: process.env.JWT_REFRESH_SECRET || 'dev-refresh-token-secret-key-minimum-32-chars',
         accessTokenExpiry: '1h', // 1시간 (개발 시 자주 만료되면 불편)
         refreshTokenExpiry: '30d', // 30일 (개발 편의성)
         issuer: 'skku-fac-gallery-dev',

@@ -73,7 +73,97 @@ export const isAuthenticated = async (req, res, next) => {
     next();
 };
 
-// 관리자 권한 확인
+// RBAC 기반 권한 확인 미들웨어 (하위 호환성을 위해 유지)
+export const hasPermission = permission => {
+    return rbacService.createPermissionMiddleware(permission);
+};
+
+// RBAC 기반 여러 권한 중 하나 확인
+export const hasAnyPermission = permissions => {
+    return rbacService.createPermissionMiddleware(permissions, false);
+};
+
+// RBAC 기반 모든 권한 확인
+export const hasAllPermissions = permissions => {
+    return rbacService.createPermissionMiddleware(permissions, true);
+};
+
+// 리소스 소유권 기반 권한 확인
+export const hasOwnership = (permission, getResourceFn) => {
+    return rbacService.createOwnershipMiddleware(permission, getResourceFn);
+};
+
+// 사용자 수정 권한 (소유권 + 권한 체크)
+export const canUpdateUser = () => {
+    return async (req, res, next) => {
+        await extractUser(req, res, () => { });
+
+        if (!req.user) {
+            return res.status(401).json({ error: 'Authentication required' });
+        }
+
+        const targetUserId = req.params.id || req.user.id;
+        const currentUser = req.user;
+
+        // 본인 수정 또는 관리자 권한 체크
+        if (currentUser.id === targetUserId) {
+            // 본인 프로필 수정 권한 체크
+            if (rbacService.hasPermissionGroup(currentUser.role, 'MEMBER_BASIC')) {
+                return next();
+            }
+        } else {
+            // 다른 사용자 수정 - 관리자 권한 필요
+            if (rbacService.hasPermissionGroup(currentUser.role, 'USER_MANAGEMENT')) {
+                return next();
+            }
+        }
+
+        return res.status(403).json({ error: 'Insufficient permissions' });
+    };
+};
+
+// 사용자 삭제 권한 (소유권 + 권한 체크)
+export const canDeleteUser = () => {
+    return async (req, res, next) => {
+        await extractUser(req, res, () => { });
+
+        if (!req.user) {
+            return res.status(401).json({ error: 'Authentication required' });
+        }
+
+        const targetUserId = req.params.id || req.user.id;
+        const currentUser = req.user;
+
+        // 본인 삭제 또는 관리자 권한 체크
+        if (currentUser.id === targetUserId) {
+            // 본인 계정 삭제 권한 체크
+            if (rbacService.hasPermissionGroup(currentUser.role, 'MEMBER_BASIC')) {
+                return next();
+            }
+        } else {
+            // 다른 사용자 삭제 - 관리자 권한 필요
+            if (rbacService.hasPermissionGroup(currentUser.role, 'USER_MANAGEMENT')) {
+                return next();
+            }
+        }
+
+        return res.status(403).json({ error: 'Insufficient permissions' });
+    };
+};
+
+// 로그인 상태가 아닐 때만 접근 가능
+export const isNotAuthenticated = async (req, res, next) => {
+    await extractUser(req, res, () => { });
+
+    if (req.user) {
+        return res.redirect('/');
+    }
+    next();
+};
+
+// ========== 하위 호환성을 위한 기존 미들웨어 (Deprecated) ==========
+
+// 관리자 권한 확인 (Deprecated: requireAdminAccess() 사용 권장)
 export const isAdmin = async (req, res, next) => {
     await extractUser(req, res, () => { });
 
@@ -92,7 +182,7 @@ export const isAdmin = async (req, res, next) => {
     next();
 };
 
-// SKKU 회원 권한 확인
+// SKKU 회원 권한 확인 (Deprecated: requireMemberAccess() 사용 권장)
 export const isSkkuMember = async (req, res, next) => {
     await extractUser(req, res, () => { });
 
@@ -111,7 +201,7 @@ export const isSkkuMember = async (req, res, next) => {
     next();
 };
 
-// 특정 역할 확인
+// 특정 역할 확인 (Deprecated: 권한 그룹 미들웨어 사용 권장)
 export const hasRole = role => {
     return async (req, res, next) => {
         await extractUser(req, res, () => { });
@@ -132,83 +222,56 @@ export const hasRole = role => {
     };
 };
 
-// 로그인 상태가 아닐 때만 접근 가능
-export const isNotAuthenticated = async (req, res, next) => {
-    await extractUser(req, res, () => { });
+// 읽기 전용 관리자 체크 (특수 목적으로 유지)
+export const isReadOnlyAdmin = () => hasPermission(rbacService.permissions.ADMIN_READ_ONLY);
 
-    if (req.user) {
-        return res.redirect('/');
-    }
-    next();
+// ========== 권한 그룹 기반 미들웨어 ==========
+
+// 권한 그룹 확인 미들웨어
+export const hasPermissionGroup = groupKey => {
+    return rbacService.createPermissionGroupMiddleware(groupKey);
 };
 
-// RBAC 기반 권한 확인 미들웨어
-export const hasPermission = permission => {
-    return rbacService.createPermissionMiddleware(permission);
+// 여러 권한 그룹 중 하나 확인
+export const hasAnyPermissionGroup = groupKeys => {
+    return rbacService.createPermissionGroupMiddleware(groupKeys, false);
 };
 
-// RBAC 기반 여러 권한 중 하나 확인
-export const hasAnyPermission = permissions => {
-    return rbacService.createPermissionMiddleware(permissions, false);
+// 모든 권한 그룹 확인
+export const hasAllPermissionGroups = groupKeys => {
+    return rbacService.createPermissionGroupMiddleware(groupKeys, true);
 };
 
-// RBAC 기반 모든 권한 확인
-export const hasAllPermissions = permissions => {
-    return rbacService.createPermissionMiddleware(permissions, true);
-};
+// ========== 편의 미들웨어 - 실제 프로젝트 구조에 맞게 단순화 ==========
 
-// 리소스 소유권 기반 권한 확인
-export const hasOwnership = (permission, getResourceFn) => {
-    return rbacService.createOwnershipMiddleware(permission, getResourceFn);
-};
+// 공개 접근 (비로그인 사용자도 가능)
+export const allowPublicAccess = () => hasPermissionGroup('PUBLIC_ACCESS');
 
-// 편의 메서드들 - 자주 사용되는 권한 조합
-export const canCreateArtwork = () => hasPermission(rbacService.permissions.ARTWORK_CREATE);
-export const canUpdateArtwork = () => hasPermission(rbacService.permissions.ARTWORK_UPDATE);
-export const canDeleteArtwork = () => hasPermission(rbacService.permissions.ARTWORK_DELETE);
-export const canManageUsers = () => hasPermission(rbacService.permissions.ADMIN_USERS);
-export const canAccessAdminPanel = () => hasPermission(rbacService.permissions.ADMIN_PANEL);
+// 기본 회원 권한 (SKKU_MEMBER, EXTERNAL_MEMBER)
+export const requireMemberAccess = () => hasPermissionGroup('MEMBER_BASIC');
 
-// 새로운 세밀한 권한 체크 미들웨어들
-export const canViewAdminDashboard = () => hasPermission(rbacService.permissions.ADMIN_DASHBOARD);
+// 관리자 권한
+export const requireAdminAccess = () => hasPermissionGroup('ADMIN_BASIC');
 
 // 사용자 관리 권한
-export const canReadUsers = () => hasPermission(rbacService.permissions.ADMIN_USER_READ);
-export const canWriteUsers = () => hasPermission(rbacService.permissions.ADMIN_USER_WRITE);
-export const canManageUserDetails = () => hasPermission(rbacService.permissions.USER_VIEW_DETAILS);
-export const canResetUserPassword = () => hasPermission(rbacService.permissions.USER_RESET_PASSWORD);
-export const canDeleteUsers = () => hasPermission(rbacService.permissions.USER_DELETE);
+export const requireUserManagement = () => hasPermissionGroup('USER_MANAGEMENT');
 
 // 컨텐츠 관리 권한
-export const canReadContent = () => hasPermission(rbacService.permissions.ADMIN_CONTENT_READ);
-export const canWriteContent = () => hasPermission(rbacService.permissions.ADMIN_CONTENT_WRITE);
-export const canDeleteContent = () => hasPermission(rbacService.permissions.ADMIN_CONTENT_DELETE);
+export const requireContentManagement = () => hasPermissionGroup('CONTENT_MANAGEMENT');
 
-// 작품 관리 권한
-export const canManageArtworks = () => hasPermission(rbacService.permissions.ADMIN_ARTWORK_MANAGEMENT);
-export const canViewArtworkDetails = () => hasPermission(rbacService.permissions.ARTWORK_VIEW_DETAILS);
-export const canModerateArtworks = () => hasPermission(rbacService.permissions.ARTWORK_MODERATE);
-export const canFeatureArtworks = () => hasPermission(rbacService.permissions.ARTWORK_FEATURE);
+// 시스템 관리 권한
+export const requireSystemManagement = () => hasPermissionGroup('SYSTEM_MANAGEMENT');
 
-// 전시회 관리 권한
-export const canManageExhibitions = () => hasPermission(rbacService.permissions.ADMIN_EXHIBITION_MANAGEMENT);
-export const canViewExhibitionDetails = () => hasPermission(rbacService.permissions.EXHIBITION_VIEW_DETAILS);
-export const canModerateExhibitions = () => hasPermission(rbacService.permissions.EXHIBITION_MODERATE);
-export const canFeatureExhibitions = () => hasPermission(rbacService.permissions.EXHIBITION_FEATURE);
+// ========== 조합 미들웨어 ==========
 
-// 복합 권한 체크
-export const canManageUserManagement = () =>
-    hasAllPermissions([
-        rbacService.permissions.ADMIN_USER_MANAGEMENT,
-        rbacService.permissions.ADMIN_USER_READ,
-        rbacService.permissions.ADMIN_USER_WRITE
-    ]);
+// 작품 관련 - 공개 조회 또는 회원 생성
+export const artworkAccess = () => hasAnyPermissionGroup(['PUBLIC_ACCESS', 'MEMBER_BASIC']);
 
-export const canManageContentManagement = () =>
-    hasAllPermissions([rbacService.permissions.ADMIN_CONTENT_READ, rbacService.permissions.ADMIN_CONTENT_WRITE]);
+// 전시회 관련 - 공개 조회 또는 회원 출품
+export const exhibitionAccess = () => hasAnyPermissionGroup(['PUBLIC_ACCESS', 'MEMBER_BASIC']);
 
-// 읽기 전용 체크
-export const isReadOnlyAdmin = () => hasPermission(rbacService.permissions.ADMIN_READ_ONLY);
+// 관리자 또는 컨텐츠 관리자
+export const adminOrContentManager = () => hasAnyPermissionGroup(['ADMIN_BASIC', 'CONTENT_MANAGEMENT']);
 
 // RBAC 서비스 인스턴스 내보내기
 export { rbacService };

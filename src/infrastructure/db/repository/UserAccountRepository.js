@@ -119,7 +119,7 @@ export default class UserAccountRepository extends CachedRepository {
     /**
      * 사용자 정보를 수정합니다.
      */
-    async updateUserProfile(userData) {
+    async updateProfile(userData) {
         return await TransactionManager.executeInTransaction(async transaction => {
             userData.updatedAt = new Date();
             await userData.save({ transaction });

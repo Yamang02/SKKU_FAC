@@ -1,172 +1,379 @@
-import { UserRole } from '../../../common/constants/UserRole.js';
-import logger from '../../../common/utils/Logger.js';
+import { UserRole } from '#common/constants/UserRole.js';
+import logger from '#common/utils/Logger.js';
 
 /**
- * 역할 기반 접근 제어(RBAC) 서비스
+ * RBAC (Role-Based Access Control) 서비스
+ * 역할 기반 접근 제어를 관리합니다.
  */
 export default class RBACService {
     constructor() {
-        // 권한 정의
-        this.permissions = {
+        // 권한 그룹 정의 - 실제 프로젝트 구조에 맞게 재설계
+        this.permissionGroups = {
+            // 공개 접근 권한 (비로그인 사용자도 가능)
+            PUBLIC_ACCESS: {
+                name: '공개 접근 권한',
+                permissions: [
+                    'artwork:read',
+                    'artwork:view_details',
+                    'exhibition:read',
+                    'exhibition:view_details'
+                ]
+            },
+
+            // 기본 회원 권한 (SKKU_MEMBER, EXTERNAL_MEMBER 공통)
+            MEMBER_BASIC: {
+                name: '기본 회원 권한',
+                permissions: [
+                    'user:read',
+                    'user:update_own', // 본인 프로필 수정
+                    'artwork:create',
+                    'artwork:update_own', // 본인 작품 수정
+                    'artwork:delete_own', // 본인 작품 삭제
+                    'exhibition:submit_artwork' // 전시회에 작품 출품
+                ]
+            },
+
+            // 관리자 기본 권한
+            ADMIN_BASIC: {
+                name: '관리자 기본 권한',
+                permissions: [
+                    'admin:panel',
+                    'admin:dashboard',
+                    'admin:reports'
+                ]
+            },
+
             // 사용자 관리 권한
-            USER_CREATE: 'user:create',
-            USER_READ: 'user:read',
-            USER_UPDATE: 'user:update',
-            USER_DELETE: 'user:delete',
-            USER_ACTIVATE: 'user:activate',
-            USER_DEACTIVATE: 'user:deactivate',
-            USER_RESET_PASSWORD: 'user:reset_password',
-            USER_VIEW_DETAILS: 'user:view_details',
+            USER_MANAGEMENT: {
+                name: '사용자 관리 권한',
+                permissions: [
+                    'user:read',
+                    'user:view_details',
+                    'user:create',
+                    'user:update',
+                    'user:delete',
+                    'user:activate',
+                    'user:deactivate',
+                    'user:reset_password'
+                ]
+            },
 
-            // 작품 관리 권한
-            ARTWORK_CREATE: 'artwork:create',
-            ARTWORK_READ: 'artwork:read',
-            ARTWORK_UPDATE: 'artwork:update',
-            ARTWORK_DELETE: 'artwork:delete',
-            ARTWORK_PUBLISH: 'artwork:publish',
-            ARTWORK_FEATURE: 'artwork:feature',
-            ARTWORK_MODERATE: 'artwork:moderate',
-            ARTWORK_VIEW_DETAILS: 'artwork:view_details',
+            // 컨텐츠 관리 권한
+            CONTENT_MANAGEMENT: {
+                name: '컨텐츠 관리 권한',
+                permissions: [
+                    'artwork:update', // 모든 작품 수정
+                    'artwork:delete', // 모든 작품 삭제
+                    'artwork:publish',
+                    'artwork:feature',
+                    'artwork:moderate',
+                    'exhibition:create',
+                    'exhibition:update',
+                    'exhibition:delete',
+                    'exhibition:publish',
+                    'exhibition:feature',
+                    'exhibition:moderate'
+                ]
+            },
 
-            // 전시회 관리 권한
-            EXHIBITION_CREATE: 'exhibition:create',
-            EXHIBITION_READ: 'exhibition:read',
-            EXHIBITION_UPDATE: 'exhibition:update',
-            EXHIBITION_DELETE: 'exhibition:delete',
-            EXHIBITION_PUBLISH: 'exhibition:publish',
-            EXHIBITION_FEATURE: 'exhibition:feature',
-            EXHIBITION_MODERATE: 'exhibition:moderate',
-            EXHIBITION_VIEW_DETAILS: 'exhibition:view_details',
-
-            // 관리자 권한 - 더 세밀한 분류
-            ADMIN_PANEL: 'admin:panel',
-            ADMIN_DASHBOARD: 'admin:dashboard',
-            ADMIN_SETTINGS: 'admin:settings',
-            ADMIN_USERS: 'admin:users',
-            ADMIN_CONTENT: 'admin:content',
-            ADMIN_REPORTS: 'admin:reports',
-            ADMIN_USER_MANAGEMENT: 'admin:user_management',
-            ADMIN_EXHIBITION_MANAGEMENT: 'admin:exhibition_management',
-            ADMIN_ARTWORK_MANAGEMENT: 'admin:artwork_management',
-
-            // 시스템 권한
-            SYSTEM_CONFIG: 'system:config',
-            SYSTEM_LOGS: 'system:logs',
-            SYSTEM_MAINTENANCE: 'system:maintenance',
-            SYSTEM_BACKUP: 'system:backup',
-
-            // 새로운 세밀한 권한들
-            ADMIN_READ_ONLY: 'admin:read_only',
-            ADMIN_USER_READ: 'admin:user_read',
-            ADMIN_USER_WRITE: 'admin:user_write',
-            ADMIN_CONTENT_READ: 'admin:content_read',
-            ADMIN_CONTENT_WRITE: 'admin:content_write',
-            ADMIN_CONTENT_DELETE: 'admin:content_delete',
-            ADMIN_SYSTEM_READ: 'admin:system_read',
-            ADMIN_SYSTEM_WRITE: 'admin:system_write'
+            // 시스템 관리 권한
+            SYSTEM_MANAGEMENT: {
+                name: '시스템 관리 권한',
+                permissions: [
+                    'system:config',
+                    'system:logs',
+                    'system:maintenance',
+                    'system:backup'
+                ]
+            }
         };
 
-        // 역할별 권한 매핑
-        this.rolePermissions = {
-            // 외부 회원 - 기본적인 조회 권한만
+        // 개별 권한 정의 (하위 호환성을 위해 유지)
+        this.permissions = this._generatePermissionsFromGroups();
+
+        // 역할별 권한 그룹 매핑 - 실제 3개 역할에 맞게 단순화
+        this.rolePermissionGroups = {
+            // 외부 회원 - 기본 회원 권한 + 공개 접근
             [UserRole.EXTERNAL_MEMBER]: [
-                this.permissions.ARTWORK_READ,
-                this.permissions.EXHIBITION_READ,
-                this.permissions.USER_READ,
-                this.permissions.USER_UPDATE // 자신의 프로필만
+                'PUBLIC_ACCESS',
+                'MEMBER_BASIC'
             ],
-            // SKKU 회원 - 작품 등록 및 기본 권한
+
+            // SKKU 회원 - 외부 회원과 동일한 권한
             [UserRole.SKKU_MEMBER]: [
-                this.permissions.ARTWORK_READ,
-                this.permissions.ARTWORK_CREATE,
-                this.permissions.ARTWORK_UPDATE, // 자신의 작품만
-                this.permissions.EXHIBITION_READ,
-                this.permissions.USER_READ,
-                this.permissions.USER_UPDATE // 자신의 프로필만
+                'PUBLIC_ACCESS',
+                'MEMBER_BASIC'
             ],
-            // 읽기 전용 관리자 - 모든 데이터 조회만 가능
-            [UserRole.ADMIN_READ_ONLY]: [
-                this.permissions.ADMIN_PANEL,
-                this.permissions.ADMIN_DASHBOARD,
-                this.permissions.ADMIN_READ_ONLY,
-                this.permissions.ADMIN_USER_READ,
-                this.permissions.ADMIN_CONTENT_READ,
-                this.permissions.ADMIN_SYSTEM_READ,
-                this.permissions.USER_READ,
-                this.permissions.USER_VIEW_DETAILS,
-                this.permissions.ARTWORK_READ,
-                this.permissions.ARTWORK_VIEW_DETAILS,
-                this.permissions.EXHIBITION_READ,
-                this.permissions.EXHIBITION_VIEW_DETAILS,
-                this.permissions.ADMIN_REPORTS
-            ],
-            // 사용자 관리자 - 사용자 관련 모든 권한
-            [UserRole.ADMIN_USER_MANAGER]: [
-                this.permissions.ADMIN_PANEL,
-                this.permissions.ADMIN_DASHBOARD,
-                this.permissions.ADMIN_USER_MANAGEMENT,
-                this.permissions.ADMIN_USER_READ,
-                this.permissions.ADMIN_USER_WRITE,
-                this.permissions.USER_CREATE,
-                this.permissions.USER_READ,
-                this.permissions.USER_UPDATE,
-                this.permissions.USER_DELETE,
-                this.permissions.USER_ACTIVATE,
-                this.permissions.USER_DEACTIVATE,
-                this.permissions.USER_RESET_PASSWORD,
-                this.permissions.USER_VIEW_DETAILS,
-                this.permissions.ADMIN_USERS,
-                this.permissions.ADMIN_REPORTS,
-                // 컨텐츠는 읽기만 가능
-                this.permissions.ARTWORK_READ,
-                this.permissions.ARTWORK_VIEW_DETAILS,
-                this.permissions.EXHIBITION_READ,
-                this.permissions.EXHIBITION_VIEW_DETAILS
-            ],
-            // 컨텐츠 관리자 - 작품/전시회 관련 모든 권한
-            [UserRole.ADMIN_CONTENT_MANAGER]: [
-                this.permissions.ADMIN_PANEL,
-                this.permissions.ADMIN_DASHBOARD,
-                this.permissions.ADMIN_EXHIBITION_MANAGEMENT,
-                this.permissions.ADMIN_ARTWORK_MANAGEMENT,
-                this.permissions.ADMIN_CONTENT_READ,
-                this.permissions.ADMIN_CONTENT_WRITE,
-                this.permissions.ADMIN_CONTENT_DELETE,
-                this.permissions.ARTWORK_CREATE,
-                this.permissions.ARTWORK_READ,
-                this.permissions.ARTWORK_UPDATE,
-                this.permissions.ARTWORK_DELETE,
-                this.permissions.ARTWORK_PUBLISH,
-                this.permissions.ARTWORK_FEATURE,
-                this.permissions.ARTWORK_MODERATE,
-                this.permissions.ARTWORK_VIEW_DETAILS,
-                this.permissions.EXHIBITION_CREATE,
-                this.permissions.EXHIBITION_READ,
-                this.permissions.EXHIBITION_UPDATE,
-                this.permissions.EXHIBITION_DELETE,
-                this.permissions.EXHIBITION_PUBLISH,
-                this.permissions.EXHIBITION_FEATURE,
-                this.permissions.EXHIBITION_MODERATE,
-                this.permissions.EXHIBITION_VIEW_DETAILS,
-                this.permissions.ADMIN_CONTENT,
-                this.permissions.ADMIN_REPORTS,
-                // 사용자는 읽기만 가능
-                this.permissions.USER_READ,
-                this.permissions.USER_VIEW_DETAILS
-            ],
+
             // 관리자 - 모든 권한
             [UserRole.ADMIN]: [
-                // 모든 권한
-                ...Object.values(this.permissions)
+                'PUBLIC_ACCESS',
+                'MEMBER_BASIC',
+                'ADMIN_BASIC',
+                'USER_MANAGEMENT',
+                'CONTENT_MANAGEMENT',
+                'SYSTEM_MANAGEMENT'
             ]
         };
 
+        // 역할별 권한 매핑 (기존 방식과 호환성 유지)
+        this.rolePermissions = this._generateRolePermissionsFromGroups();
+
         // 리소스 소유권 체크가 필요한 권한들
         this.ownershipRequiredPermissions = new Set([
-            this.permissions.ARTWORK_UPDATE,
-            this.permissions.ARTWORK_DELETE,
-            this.permissions.USER_UPDATE
+            'artwork:update_own',
+            'artwork:delete_own',
+            'user:update_own'
         ]);
+    }
+
+    /**
+     * 권한 그룹에서 개별 권한 객체 생성
+     * @private
+     */
+    _generatePermissionsFromGroups() {
+        const permissions = {};
+
+        Object.entries(this.permissionGroups).forEach(([_groupKey, group]) => {
+            group.permissions.forEach(permission => {
+                // permission 문자열을 상수명으로 변환 (예: 'user:read' -> 'USER_READ')
+                const constantName = permission.toUpperCase().replace(':', '_');
+                permissions[constantName] = permission;
+            });
+        });
+
+        return permissions;
+    }
+
+    /**
+     * 권한 그룹에서 역할별 권한 배열 생성
+     * @private
+     */
+    _generateRolePermissionsFromGroups() {
+        const rolePermissions = {};
+
+        Object.entries(this.rolePermissionGroups).forEach(([role, groupKeys]) => {
+            const permissions = new Set();
+
+            groupKeys.forEach(groupKey => {
+                const group = this.permissionGroups[groupKey];
+                if (group) {
+                    group.permissions.forEach(permission => {
+                        permissions.add(permission);
+                    });
+                }
+            });
+
+            rolePermissions[role] = Array.from(permissions);
+        });
+
+        return rolePermissions;
+    }
+
+    /**
+     * 특정 권한 그룹의 권한들을 가져오기
+     * @param {string} groupKey - 권한 그룹 키
+     * @returns {string[]} 권한 배열
+     */
+    getPermissionGroup(groupKey) {
+        const group = this.permissionGroups[groupKey];
+        return group ? [...group.permissions] : [];
+    }
+
+    /**
+     * 사용자 역할의 권한 그룹들을 가져오기
+     * @param {string} userRole - 사용자 역할
+     * @returns {string[]} 권한 그룹 키 배열
+     */
+    getUserPermissionGroups(userRole) {
+        return this.rolePermissionGroups[userRole] || [];
+    }
+
+    /**
+     * 권한 그룹 정보 조회
+     * @param {string} groupKey - 권한 그룹 키
+     * @returns {Object|null} 권한 그룹 정보
+     */
+    getPermissionGroupInfo(groupKey) {
+        return this.permissionGroups[groupKey] || null;
+    }
+
+    /**
+     * 모든 권한 그룹 목록 조회
+     * @returns {Object} 권한 그룹 목록
+     */
+    getAllPermissionGroups() {
+        return { ...this.permissionGroups };
+    }
+
+    /**
+     * 공개 접근 가능한 권한인지 확인
+     * @param {string} permission - 확인할 권한
+     * @returns {boolean} 공개 접근 가능 여부
+     */
+    isPublicPermission(permission) {
+        const publicGroup = this.permissionGroups.PUBLIC_ACCESS;
+        return publicGroup ? publicGroup.permissions.includes(permission) : false;
+    }
+
+    /**
+     * 사용자가 특정 권한 그룹을 가지고 있는지 확인
+     * @param {string} userRole - 사용자 역할
+     * @param {string} groupKey - 권한 그룹 키
+     * @param {Object} context - 로깅을 위한 컨텍스트 정보
+     * @returns {boolean} 권한 그룹 보유 여부
+     */
+    hasPermissionGroup(userRole, groupKey, context = {}) {
+        if (!groupKey) {
+            logger.warn('RBAC 권한 그룹 체크 실패 - 잘못된 매개변수', {
+                userRole,
+                groupKey,
+                context
+            });
+            return false;
+        }
+
+        // 공개 접근 권한은 모든 사용자(비로그인 포함)가 가짐
+        if (groupKey === 'PUBLIC_ACCESS') {
+            logger.debug('RBAC 권한 그룹 체크 성공 - 공개 접근', {
+                userRole: userRole || 'anonymous',
+                groupKey,
+                context
+            });
+            return true;
+        }
+
+        // 로그인이 필요한 권한의 경우 userRole 확인
+        if (!userRole) {
+            logger.warn('RBAC 권한 그룹 체크 실패 - 로그인 필요', {
+                userRole,
+                groupKey,
+                context
+            });
+            return false;
+        }
+
+        // ADMIN은 모든 권한 그룹을 가짐
+        if (userRole === UserRole.ADMIN) {
+            logger.debug('RBAC 권한 그룹 체크 성공 - 관리자', {
+                userRole,
+                groupKey,
+                context
+            });
+            return true;
+        }
+
+        const userGroups = this.rolePermissionGroups[userRole] || [];
+        const hasGroup = userGroups.includes(groupKey);
+
+        if (hasGroup) {
+            logger.debug('RBAC 권한 그룹 체크 성공', {
+                userRole,
+                groupKey,
+                context
+            });
+        } else {
+            logger.warn('RBAC 권한 그룹 체크 실패 - 권한 그룹 없음', {
+                userRole,
+                groupKey,
+                availableGroups: userGroups,
+                context
+            });
+        }
+
+        return hasGroup;
+    }
+
+    /**
+     * 사용자가 여러 권한 그룹 중 하나라도 가지고 있는지 확인
+     * @param {string} userRole - 사용자 역할
+     * @param {string[]} groupKeys - 확인할 권한 그룹 키 목록
+     * @param {Object} context - 로깅을 위한 컨텍스트 정보
+     * @returns {boolean} 권한 그룹 보유 여부
+     */
+    hasAnyPermissionGroup(userRole, groupKeys, context = {}) {
+        if (!Array.isArray(groupKeys)) {
+            return false;
+        }
+
+        return groupKeys.some(groupKey => this.hasPermissionGroup(userRole, groupKey, context));
+    }
+
+    /**
+     * 사용자가 모든 권한 그룹을 가지고 있는지 확인
+     * @param {string} userRole - 사용자 역할
+     * @param {string[]} groupKeys - 확인할 권한 그룹 키 목록
+     * @param {Object} context - 로깅을 위한 컨텍스트 정보
+     * @returns {boolean} 모든 권한 그룹 보유 여부
+     */
+    hasAllPermissionGroups(userRole, groupKeys, context = {}) {
+        if (!Array.isArray(groupKeys)) {
+            return false;
+        }
+
+        return groupKeys.every(groupKey => this.hasPermissionGroup(userRole, groupKey, context));
+    }
+
+    /**
+     * 권한 그룹 기반 미들웨어 생성
+     * @param {string|string[]} requiredGroups - 필요한 권한 그룹(들)
+     * @param {boolean} requireAll - 모든 그룹이 필요한지 여부 (기본값: false)
+     * @returns {Function} Express 미들웨어 함수
+     */
+    createPermissionGroupMiddleware(requiredGroups, requireAll = false) {
+        return (req, res, next) => {
+            const groups = Array.isArray(requiredGroups) ? requiredGroups : [requiredGroups];
+            const context = {
+                url: req.originalUrl,
+                method: req.method,
+                userId: req.user?.id
+            };
+
+            // 공개 접근 권한만 필요한 경우 바로 통과
+            if (groups.length === 1 && groups[0] === 'PUBLIC_ACCESS') {
+                logger.debug('RBAC 권한 그룹 미들웨어 - 공개 접근 허용', {
+                    requiredGroups: groups,
+                    context
+                });
+                return next();
+            }
+
+            // 로그인이 필요한 권한의 경우 인증 확인
+            const needsAuth = groups.some(group => group !== 'PUBLIC_ACCESS');
+            if (needsAuth && (!req.user || !req.user.role)) {
+                logger.warn('RBAC 권한 그룹 미들웨어 - 인증되지 않은 사용자', {
+                    url: req.originalUrl,
+                    method: req.method,
+                    requiredGroups: groups
+                });
+                return res.status(401).json({
+                    error: 'Authentication required',
+                    code: 'AUTH_REQUIRED'
+                });
+            }
+
+            let hasAccess;
+            if (requireAll) {
+                hasAccess = this.hasAllPermissionGroups(req.user?.role, groups, context);
+            } else {
+                hasAccess = this.hasAnyPermissionGroup(req.user?.role, groups, context);
+            }
+
+            if (hasAccess) {
+                next();
+            } else {
+                logger.warn('RBAC 권한 그룹 미들웨어 - 접근 거부', {
+                    userRole: req.user?.role,
+                    requiredGroups: groups,
+                    requireAll,
+                    context
+                });
+                res.status(403).json({
+                    error: 'Insufficient permissions',
+                    code: 'PERMISSION_DENIED'
+                });
+            }
+        };
     }
 
     /**

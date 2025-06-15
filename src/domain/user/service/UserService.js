@@ -191,39 +191,82 @@ export default class UserService {
     /**
      * 사용자 프로필 정보를 수정합니다.
      */
-    async updateUserProfile(userId, userData) {
+    async updateProfile(userId, userData, currentUser = null) {
         const user = await this.userRepository.findUserById(userId);
         if (!user) {
             throw new UserNotFoundError();
         }
 
-        // 이름 업데이트
-        if (userData.name) {
+        // 권한 기반 필드 업데이트
+        const allowedFields = this.getAllowedUpdateFields(currentUser, userId === currentUser?.id);
+
+        // 이름 업데이트 (모든 사용자 허용)
+        if (userData.name && allowedFields.includes('name')) {
             user.name = userData.name;
         }
 
-        // 비밀번호 업데이트 (새 비밀번호가 있고 확인 비밀번호와 일치할 때만)
-        if (userData.newPassword && userData.newPassword === userData.confirmPassword) {
+        // 비밀번호 업데이트 (본인만 허용)
+        if (userData.newPassword && userData.newPassword === userData.confirmPassword && allowedFields.includes('password')) {
             const hashedPassword = await bcrypt.hash(userData.newPassword, 10);
             user.password = hashedPassword;
         }
 
-        // 역할에 따른 프로필 정보 수정
+        // 이메일 업데이트 (관리자만 허용)
+        if (userData.email && allowedFields.includes('email')) {
+            user.email = userData.email;
+        }
+
+        // 역할에 따른 프로필 정보 수정 (권한 체크 포함)
         if (user.role === 'SKKU_MEMBER' && user.SkkuUserProfile) {
-            if (userData.department) user.SkkuUserProfile.department = userData.department;
-            if (userData.studentYear) user.SkkuUserProfile.studentYear = userData.studentYear;
+            if (userData.department && allowedFields.includes('department')) {
+                user.SkkuUserProfile.department = userData.department;
+            }
+            if (userData.studentYear && allowedFields.includes('studentYear')) {
+                user.SkkuUserProfile.studentYear = userData.studentYear;
+            }
         } else if (user.role === 'EXTERNAL_MEMBER' && user.ExternalUserProfile) {
-            if (userData.affiliation) user.ExternalUserProfile.affiliation = userData.affiliation;
+            if (userData.affiliation && allowedFields.includes('affiliation')) {
+                user.ExternalUserProfile.affiliation = userData.affiliation;
+            }
         }
 
         try {
             // 사용자 정보 업데이트
-            const updatedUser = await this.userRepository.updateUserProfile(user);
+            const updatedUser = await this.userRepository.updateProfile(user);
             return updatedUser;
         } catch (error) {
             logger.error('사용자 정보 업데이트 실패:', error);
             throw new UserValidationError('사용자 정보 업데이트에 실패했습니다.');
         }
+    }
+
+    /**
+     * 역할별 수정 가능한 필드 반환
+     */
+    getAllowedUpdateFields(currentUser, isOwner) {
+        if (!currentUser) return ['name']; // 기본 필드만
+
+        const baseFields = ['name'];
+
+        // 본인 데이터 수정 시
+        if (isOwner) {
+            baseFields.push('password'); // 본인은 비밀번호 변경 가능
+
+            // 역할별 프로필 필드 추가
+            if (currentUser.role === 'SKKU_MEMBER') {
+                baseFields.push('department', 'studentYear');
+            } else if (currentUser.role === 'EXTERNAL_MEMBER') {
+                baseFields.push('affiliation');
+            }
+        }
+
+        // 관리자 권한이 있는 경우 - 모든 필드 수정 가능
+        if (currentUser.role === 'ADMIN' ||
+            currentUser.role === 'ADMIN_USER_MANAGER') {
+            baseFields.push('role', 'status', 'isActive', 'email', 'department', 'studentYear', 'affiliation');
+        }
+
+        return baseFields;
     }
 
     /**
