@@ -24,7 +24,7 @@ export function createAdminRouter(container) {
     const adminController = container.resolve('SystemManagementController');
     const userAdminController = container.resolve('UserAdminController');
     const exhibitionManagementController = container.resolve('ExhibitionManagementController');
-    const artworkManagementController = container.resolve('ArtworkManagementController');
+    const artworkAdminController = container.resolve('ArtworkAdminController');
     const batchController = container.resolve('BatchController');
 
     // 타임아웃 미들웨어 (삭제 작업용)
@@ -138,31 +138,31 @@ export function createAdminRouter(container) {
     AdminRouter.get(
         '/management/artwork',
         requireContentManagement(),
-        (req, res) => artworkManagementController.getManagementArtworkListPage(req, res)
+        (req, res) => artworkAdminController.getManagementArtworkListPage(req, res)
     );
     AdminRouter.get(
         '/management/artwork/:id',
         requireContentManagement(),
-        (req, res) => artworkManagementController.getManagementArtworkDetailPage(req, res)
+        (req, res) => artworkAdminController.getManagementArtworkDetailPage(req, res)
     );
     AdminRouter.put(
         '/management/artwork/:id',
         requireContentManagement(),
         preventReadOnlyActions,
-        (req, res) => artworkManagementController.updateManagementArtwork(req, res)
+        (req, res) => artworkAdminController.updateManagementArtwork(req, res)
     );
     AdminRouter.delete(
         '/management/artwork/:id',
         requireContentManagement(),
         preventReadOnlyActions,
         deleteTimeoutMiddleware,
-        (req, res) => artworkManagementController.deleteManagementArtwork(req, res)
+        (req, res) => artworkAdminController.deleteManagementArtwork(req, res)
     );
     AdminRouter.post(
         '/management/artwork/:id/featured',
         requireContentManagement(),
         preventReadOnlyActions,
-        (req, res) => artworkManagementController.toggleFeatured(req, res)
+        (req, res) => artworkAdminController.toggleFeatured(req, res)
     );
 
     // 배치 처리 라우트

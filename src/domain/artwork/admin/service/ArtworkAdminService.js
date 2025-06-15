@@ -1,13 +1,9 @@
-import ArtworkService from '#domain/artwork/service/ArtworkService.js';
-import ArtworkManagementDto from '../../model/dto/artwork/ArtworkManagementDto.js';
-import ArtworkListManagementDto from '../../model/dto/artwork/ArtworkListManagementDto.js';
-import ArtworkRepository from '#infrastructure/db/repository/ArtworkRepository.js';
-import ExhibitionRepository from '#infrastructure/db/repository/ExhibitionRepository.js';
-import UserAccountRepository from '#infrastructure/db/repository/UserAccountRepository.js';
+import ArtworkManagementDto from '#domain/admin/model/dto/artwork/ArtworkManagementDto.js';
+import ArtworkListManagementDto from '#domain/admin/model/dto/artwork/ArtworkListManagementDto.js';
 import { ArtworkNotFoundError } from '#common/error/ArtworkError.js';
-import BaseAdminService from '../BaseAdminService.js';
+import BaseAdminService from '#domain/admin/service/BaseAdminService.js';
 
-export default class ArtworkManagementService extends BaseAdminService {
+export default class ArtworkAdminService extends BaseAdminService {
     // 의존성 주입을 위한 static dependencies 정의
     static dependencies = ['ArtworkService', 'ArtworkRepository', 'ExhibitionRepository', 'UserAccountRepository'];
 
@@ -17,13 +13,17 @@ export default class ArtworkManagementService extends BaseAdminService {
         exhibitionRepository = null,
         userAccountRepository = null
     ) {
-        super('ArtworkManagementService');
+        super('ArtworkAdminService');
 
-        // 의존성 주입이 되지 않은 경우 기본 인스턴스 생성 (하위 호환성)
-        this.artworkService = artworkService || new ArtworkService();
-        this.artworkRepository = artworkRepository || new ArtworkRepository();
-        this.exhibitionRepository = exhibitionRepository || new ExhibitionRepository();
-        this.userAccountRepository = userAccountRepository || new UserAccountRepository();
+        // 의존성 주입 확인
+        if (!artworkService || !artworkRepository || !exhibitionRepository || !userAccountRepository) {
+            throw new Error('ArtworkAdminService: 모든 의존성이 주입되어야 합니다.');
+        }
+
+        this.artworkService = artworkService;
+        this.artworkRepository = artworkRepository;
+        this.exhibitionRepository = exhibitionRepository;
+        this.userAccountRepository = userAccountRepository;
     }
 
     /**

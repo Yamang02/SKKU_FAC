@@ -5,4 +5,4 @@ export { default as BaseAdminService } from './BaseAdminService.js';
 export { default as SystemManagementService } from './system/SystemManagementService.js';
 export { default as UserAdminService } from '../../user/admin/service/UserAdminService.js';
 export { default as ExhibitionManagementService } from './exhibition/ExhibitionManagementService.js';
-export { default as ArtworkManagementService } from './artwork/ArtworkManagementService.js';
+export { default as ArtworkAdminService } from '#domain/artwork/admin/service/ArtworkAdminService.js';

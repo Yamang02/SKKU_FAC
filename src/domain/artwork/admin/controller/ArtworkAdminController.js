@@ -1,21 +1,21 @@
-import { ViewPath } from '../../../../common/constants/ViewPath.js';
-import ViewResolver from '../../../../common/utils/ViewResolver.js';
-import BaseAdminController from '../BaseAdminController.js';
+import { ViewPath } from '#common/constants/ViewPath.js';
+import ViewResolver from '#common/utils/ViewResolver.js';
+import BaseAdminController from '#domain/admin/controller/BaseAdminController.js';
 
-export default class ArtworkManagementController extends BaseAdminController {
+export default class ArtworkAdminController extends BaseAdminController {
     // 의존성 주입을 위한 static dependencies 정의
-    static dependencies = ['ArtworkManagementService'];
+    static dependencies = ['ArtworkAdminService'];
 
-    constructor(artworkManagementService = null) {
-        super('ArtworkManagementController');
+    constructor(artworkAdminService = null) {
+        super('ArtworkAdminController');
 
         // 의존성 주입 방식 (새로운 방식)
-        if (artworkManagementService) {
-            this.artworkManagementService = artworkManagementService;
+        if (artworkAdminService) {
+            this.artworkAdminService = artworkAdminService;
         } else {
             // 기존 방식 호환성 유지 (임시)
 
-            throw new Error('ArtworkManagementService가 주입되지 않았습니다.');
+            throw new Error('ArtworkAdminService가 주입되지 않았습니다.');
         }
     }
 
@@ -35,7 +35,7 @@ export default class ArtworkManagementController extends BaseAdminController {
                     order = 'desc'
                 } = req.query;
 
-                const artworkListData = await this.artworkManagementService.getArtworkList({
+                const artworkListData = await this.artworkAdminService.getArtworkList({
                     page: parseInt(page),
                     limit: parseInt(limit),
                     keyword,
@@ -74,7 +74,7 @@ export default class ArtworkManagementController extends BaseAdminController {
         return this.safeExecuteSSR(
             async () => {
                 const artworkId = req.params.id;
-                const artworkData = await this.artworkManagementService.getArtworkDetail(artworkId);
+                const artworkData = await this.artworkAdminService.getArtworkDetail(artworkId);
 
                 if (!artworkData) {
                     throw new Error('작품을 찾을 수 없습니다.');
@@ -104,7 +104,7 @@ export default class ArtworkManagementController extends BaseAdminController {
                 const artworkId = req.params.id;
                 const artworkData = req.body;
 
-                await this.artworkManagementService.updateArtwork(artworkId, artworkData);
+                await this.artworkAdminService.updateArtwork(artworkId, artworkData);
 
                 return null; // safeExecuteSSR에서 리다이렉트 처리
             },
@@ -127,7 +127,7 @@ export default class ArtworkManagementController extends BaseAdminController {
         return this.safeExecuteSSR(
             async () => {
                 const artworkId = req.params.id;
-                await this.artworkManagementService.deleteArtwork(artworkId);
+                await this.artworkAdminService.deleteArtwork(artworkId);
 
                 return null; // safeExecuteSSR에서 리다이렉트 처리
             },
@@ -152,7 +152,7 @@ export default class ArtworkManagementController extends BaseAdminController {
                 const artworkId = req.params.id;
                 const { status } = req.body;
 
-                await this.artworkManagementService.updateArtworkStatus(artworkId, status);
+                await this.artworkAdminService.updateArtworkStatus(artworkId, status);
 
                 return null; // safeExecuteSSR에서 리다이렉트 처리
             },
@@ -175,7 +175,7 @@ export default class ArtworkManagementController extends BaseAdminController {
         return this.safeExecuteSSR(
             async () => {
                 const artworkId = req.params.id;
-                const updatedArtwork = await this.artworkManagementService.toggleFeatured(artworkId);
+                const updatedArtwork = await this.artworkAdminService.toggleFeatured(artworkId);
 
                 // 성공 메시지 설정
                 const message = `작품이 ${updatedArtwork.isFeatured ? '주요 작품으로 설정' : '일반 작품으로 변경'}되었습니다.`;
@@ -202,7 +202,7 @@ export default class ArtworkManagementController extends BaseAdminController {
         return this.safeExecuteSSR(
             async () => {
                 // 작가 및 전시회 목록 조회
-                const { artists, exhibitions } = await this.artworkManagementService.getArtworkFormData();
+                const { artists, exhibitions } = await this.artworkAdminService.getArtworkFormData();
 
                 return ViewResolver.render(res, ViewPath.ADMIN.MANAGEMENT.ARTWORK.CREATE, {
                     title: '작품 추가',
@@ -233,7 +233,7 @@ export default class ArtworkManagementController extends BaseAdminController {
                     throw new Error('이미지는 필수입니다.');
                 }
 
-                const newArtwork = await this.artworkManagementService.createArtwork(artworkData, file);
+                const newArtwork = await this.artworkAdminService.createArtwork(artworkData, file);
 
                 // 생성된 작품 ID를 사용하여 리다이렉트
                 req.flash('success', '작품이 성공적으로 추가되었습니다.');
