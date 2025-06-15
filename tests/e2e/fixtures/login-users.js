@@ -4,39 +4,97 @@
  */
 
 /**
- * 대표 사용자 계정 정보
+ * 인증 테스트용 포괄적 사용자 계정 정보
  * 비밀번호는 모두 '1234'로 통일됨
+ */
+export const AUTHENTICATION_TEST_USERS = {
+    // 관리자 계정
+    ADMIN: {
+        username: 'admin',
+        email: 'skkfnrtclbdmnstrtn@gmail.com',
+        password: '1234',
+        role: 'ADMIN',
+        name: '성미회 관리자',
+        status: 'ACTIVE',
+        description: '관리자 권한 테스트용'
+    },
+
+    // SKKU 멤버 계정들
+    SKKU_MEMBER_1: {
+        username: 'skku1',
+        email: 'skkutest1749612967060@skku.edu',
+        password: '1234',
+        role: 'SKKU_MEMBER',
+        name: '성균관대 테스트 사용자1',
+        status: 'ACTIVE',
+        description: 'SKKU 멤버 권한 테스트용 1'
+    },
+
+    SKKU_MEMBER_2: {
+        username: 'skku2',
+        email: 'skkutest1749612897486@skku.edu',
+        password: '1234',
+        role: 'SKKU_MEMBER',
+        name: '성균관대 테스트 사용자2',
+        status: 'ACTIVE',
+        description: 'SKKU 멤버 권한 테스트용 2'
+    },
+
+    SKKU_MEMBER_UNVERIFIED: {
+        username: 'skku3_unverified',
+        email: 'skkutest1749613032897@skku.edu',
+        password: '1234',
+        role: 'SKKU_MEMBER',
+        name: '성균관대 테스트 사용자(미인증)',
+        status: 'ACTIVE',
+        description: 'SKKU 멤버 미인증 계정 테스트용'
+    },
+
+    // 외부 멤버 계정들
+    EXTERNAL_MEMBER_1: {
+        username: 'external1',
+        email: 'external1749612974850@example.com',
+        password: '1234',
+        role: 'EXTERNAL_MEMBER',
+        name: '외부 테스트 사용자1',
+        status: 'ACTIVE',
+        description: '외부 멤버 권한 테스트용 1'
+    },
+
+    EXTERNAL_MEMBER_2: {
+        username: 'external2',
+        email: 'external1749612770942@example.com',
+        password: '1234',
+        role: 'EXTERNAL_MEMBER',
+        name: '외부 테스트 사용자2',
+        status: 'ACTIVE',
+        description: '외부 멤버 권한 테스트용 2'
+    },
+
+    EXTERNAL_MEMBER_UNVERIFIED: {
+        username: 'external3_unverified',
+        email: 'external1749612906372@example.com',
+        password: '1234',
+        role: 'EXTERNAL_MEMBER',
+        name: '외부 테스트 사용자(미인증)',
+        status: 'ACTIVE',
+        description: '외부 멤버 미인증 계정 테스트용'
+    }
+};
+
+/**
+ * 기존 호환성을 위한 대표 사용자 계정 정보
+ * @deprecated AUTHENTICATION_TEST_USERS 사용 권장
  */
 export const LOGIN_TEST_USERS = {
     // 관리자 계정
-    ADMIN: {
-        username: 'skkfntclbdmnsttrt',
-        email: 'skkfntclbdmnsttrt@gmail.com',
-        password: '1234',
-        role: 'ADMIN',
-        name: '성미화 관리자',
-        description: '시스템 관리자 권한 테스트용'
-    },
+    ADMIN: AUTHENTICATION_TEST_USERS.ADMIN,
 
-    // SKKU 멤버 계정
-    SKKU_MEMBER: {
-        username: 'duplicate1749455784069',
-        email: 'duplicate1749455784069@skku.edu',
-        password: '1234',
-        role: 'SKKU_MEMBER',
-        name: '성균관대 테스트 사용자',
-        description: 'SKKU 멤버 권한 테스트용'
-    },
+    // SKKU 멤버 계정 (기본)
+    SKKU_MEMBER: AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1,
 
-    // 외부 멤버 계정
-    EXTERNAL_MEMBER: {
-        username: 'external1749455846376',
-        email: 'external1749455846376@example.com',
-        password: '1234',
-        role: 'EXTERNAL_MEMBER',
-        name: '외부 테스트 사용자',
-        description: '외부 멤버 권한 테스트용'
-    }
+    // 외부 멤버 계정 (기본)
+    EXTERNAL_MEMBER: AUTHENTICATION_TEST_USERS.EXTERNAL_MEMBER_1
 };
 
 /**
@@ -102,17 +160,51 @@ export const USER_MODIFICATION_TEST_USERS = {
 };
 
 /**
- * 역할별 사용자 가져오기
+ * 역할별 사용자 가져오기 (기존 호환성)
+ * @deprecated 직접 AUTHENTICATION_TEST_USERS 사용 권장
  */
 export function getUserByRole(role) {
     return LOGIN_TEST_USERS[role];
 }
 
 /**
- * 모든 테스트 사용자 가져오기
+ * 인증 테스트용 역할별 사용자 가져오기
+ */
+export function getAuthenticationUserByRole(role) {
+    const roleMapping = {
+        'ADMIN': AUTHENTICATION_TEST_USERS.ADMIN,
+        'SKKU_MEMBER': AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1,
+        'EXTERNAL_MEMBER': AUTHENTICATION_TEST_USERS.EXTERNAL_MEMBER_1
+    };
+    return roleMapping[role];
+}
+
+/**
+ * 모든 인증 테스트 사용자 가져오기
+ */
+export function getAllAuthenticationTestUsers() {
+    return Object.values(AUTHENTICATION_TEST_USERS);
+}
+
+/**
+ * 모든 테스트 사용자 가져오기 (기존 호환성)
+ * @deprecated getAllAuthenticationTestUsers 사용 권장
  */
 export function getAllTestUsers() {
     return Object.values(LOGIN_TEST_USERS);
+}
+
+/**
+ * 인증 테스트용 활성 사용자들만 가져오기 (미인증 사용자 제외)
+ */
+export function getActiveAuthenticationUsers() {
+    return [
+        AUTHENTICATION_TEST_USERS.ADMIN,
+        AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1,
+        AUTHENTICATION_TEST_USERS.SKKU_MEMBER_2,
+        AUTHENTICATION_TEST_USERS.EXTERNAL_MEMBER_1,
+        AUTHENTICATION_TEST_USERS.EXTERNAL_MEMBER_2
+    ];
 }
 
 /**
@@ -150,32 +242,32 @@ export function getDeleteTestUser(userType) {
 export function getUserForFeature(featureType) {
     const featureUserMapping = {
         // 관리자만 접근 가능한 기능들
-        'admin_panel': LOGIN_TEST_USERS.ADMIN,
-        'user_management': LOGIN_TEST_USERS.ADMIN,
-        'system_settings': LOGIN_TEST_USERS.ADMIN,
-        'artwork_approval': LOGIN_TEST_USERS.ADMIN,
+        'admin_panel': AUTHENTICATION_TEST_USERS.ADMIN,
+        'user_management': AUTHENTICATION_TEST_USERS.ADMIN,
+        'system_settings': AUTHENTICATION_TEST_USERS.ADMIN,
+        'artwork_approval': AUTHENTICATION_TEST_USERS.ADMIN,
 
         // SKKU 멤버 전용 기능들
-        'skku_artwork_upload': LOGIN_TEST_USERS.SKKU_MEMBER,
-        'skku_exhibition_create': LOGIN_TEST_USERS.SKKU_MEMBER,
-        'club_features': LOGIN_TEST_USERS.SKKU_MEMBER,
+        'skku_artwork_upload': AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1,
+        'skku_exhibition_create': AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1,
+        'club_features': AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1,
 
         // 외부 멤버 접근 가능한 기능들
-        'external_artwork_upload': LOGIN_TEST_USERS.EXTERNAL_MEMBER,
-        'public_exhibition_view': LOGIN_TEST_USERS.EXTERNAL_MEMBER,
+        'external_artwork_upload': AUTHENTICATION_TEST_USERS.EXTERNAL_MEMBER_1,
+        'public_exhibition_view': AUTHENTICATION_TEST_USERS.EXTERNAL_MEMBER_1,
 
         // 모든 로그인 사용자 접근 가능한 기능들 (기본적으로 SKKU 멤버 사용)
-        'profile_edit': LOGIN_TEST_USERS.SKKU_MEMBER,
-        'artwork_view': LOGIN_TEST_USERS.SKKU_MEMBER,
-        'exhibition_view': LOGIN_TEST_USERS.SKKU_MEMBER,
-        'comment_write': LOGIN_TEST_USERS.SKKU_MEMBER,
+        'profile_edit': AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1,
+        'artwork_view': AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1,
+        'exhibition_view': AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1,
+        'comment_write': AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1,
 
         // 사용자 수정/삭제 테스트 기능들
         'profile_modification': USER_MODIFICATION_TEST_USERS.MODIFY_SKKU,
         'account_deletion': USER_MODIFICATION_TEST_USERS.DELETE_SKKU
     };
 
-    return featureUserMapping[featureType] || LOGIN_TEST_USERS.SKKU_MEMBER;
+    return featureUserMapping[featureType] || AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1;
 }
 
 /**
@@ -183,8 +275,8 @@ export function getUserForFeature(featureType) {
  */
 export function getUsersByPermissionLevel() {
     return {
-        highest: LOGIN_TEST_USERS.ADMIN,           // 최고 권한
-        medium: LOGIN_TEST_USERS.SKKU_MEMBER,      // 중간 권한
-        basic: LOGIN_TEST_USERS.EXTERNAL_MEMBER    // 기본 권한
+        highest: AUTHENTICATION_TEST_USERS.ADMIN,           // 최고 권한
+        medium: AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1,    // 중간 권한
+        basic: AUTHENTICATION_TEST_USERS.EXTERNAL_MEMBER_1  // 기본 권한
     };
 }

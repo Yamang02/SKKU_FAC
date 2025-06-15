@@ -16,12 +16,15 @@
         "node": ">=14.0.0"
     },
     "scripts": {
-        "dev": "docker-compose up -d app mysql",
+        "dev": "docker-compose up -d app mysql redis",
         "dev:logs": "docker-compose logs -f app",
         "dev:stop": "docker-compose down",
         "dev:clean": "docker-compose down -v",
-        "test": "chcp 65001 && docker-compose rm -sf mysql-test test-env && docker-compose up -d mysql-test test-env && timeout /t 20 /nobreak > nul && playwright test",
-        "test:auth": "chcp 65001 && playwright test tests/e2e/auth/ --project=chromium",
+        "test": "chcp 65001 && docker-compose rm -sf mysql-test test-env redis-test && docker-compose up -d mysql-test test-env redis-test && timeout /t 20 /nobreak > nul && playwright test",
+        "test:auth": "chcp 65001 && docker-compose rm -sf mysql-test test-env redis-test && docker-compose up -d mysql-test test-env redis-test && timeout /t 20 /nobreak > nul && playwright test tests/e2e/auth/authentication.spec.js --project=chromium",
+        "test:user": "chcp 65001 && docker-compose rm -sf mysql-test test-env redis-test && docker-compose up -d mysql-test test-env redis-test && timeout /t 20 /nobreak > nul && playwright test tests/e2e/user/ --project=chromium",
+        "test:init-data": "docker exec -i skku_gallery_mysql_test mysql -u root -ptestpassword skku_sfa_gallery_test < scripts/sql/db/test-init/00.dump_default_data.sql && docker exec -i skku_gallery_mysql_test mysql -u root -ptestpassword skku_sfa_gallery_test < scripts/sql/db/test-init/01.user_modification_test_data.sql",
+        "test:profile": "npm run test:init-data && npx playwright test tests/e2e/user/profile-management.spec.js",
         "test:ui": "npm run test -- --ui",
         "test:headed": "npm run test -- --headed",
         "build": "docker-compose build",

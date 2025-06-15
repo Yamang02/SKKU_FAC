@@ -325,8 +325,8 @@ CUSTOM_RECOVERY_SUGGESTIONS='{"PAYMENT":["결제 설정을 확인하세요"]}'
 ### Docker 설정 구조
 
 - **Railway 배포**: MySQL 내부 인스턴스, Redis/Cloudinary 외부 서비스
-- **로컬 개발**: MySQL Docker 컨테이너, Redis/Cloudinary 외부 서비스 연결
-- **테스트 환경**: 별도의 MySQL/Redis 포트 사용
+- **로컬 개발**: MySQL + Redis Docker 컨테이너, Cloudinary 외부 서비스 연결
+- **테스트 환경**: 별도의 MySQL/Redis Docker 컨테이너 (포트 분리)
 
 ### Railway 배포용 Docker
 
@@ -347,52 +347,55 @@ CLOUDINARY_CLOUD_NAME=your_cloud_name
 ### 로컬 개발용 Docker
 
 ```bash
-# 로컬 개발 환경 시작 (MySQL 컨테이너 + App, 외부 Redis/Cloudinary 연결)
-npm run docker:dev
-
-# 빌드와 함께 시작
-npm run docker:dev:build
-
-# MySQL만 시작 (앱은 로컬에서 직접 실행 시)
-npm run docker:mysql
+# 로컬 개발 환경 시작 (MySQL + Redis + App)
+npm run dev
 
 # 개발 환경용 로그 확인
-npm run docker:logs
+npm run dev:logs
 
 # 개발 환경 중지
-npm run docker:down
+npm run dev:stop
+
+# 개발 환경 완전 정리 (볼륨 포함)
+npm run dev:clean
 ```
 
 ### 테스트용 Docker
 
 ```bash
-# 로컬 전체 테스트 (MySQL + Redis)
-npm run docker:test:local
+# 전체 E2E 테스트 실행 (MySQL + Redis + App)
+npm run test
 
-# Railway 테스트 (MySQL만, 외부 Redis 사용)
-npm run docker:test:railway
+# 인증 테스트만 실행
+npm run test:auth
 
-# 테스트 환경 중지
-npm run docker:test:down
+# 사용자 관리 테스트만 실행
+npm run test:user
+
+# 프로필 관리 테스트만 실행 (데이터 초기화 포함)
+npm run test:profile
 ```
 
 ### 환경 변수 설정
 
-#### 로컬 개발용 (.env)
+#### 로컬 개발용 (.env.docker)
 ```bash
 NODE_ENV=development
+PORT=3000
+HOST=0.0.0.0
+
 # MySQL (Docker 컨테이너)
-DB_HOST=localhost
+DB_HOST=mysql
 DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=devpassword
 DB_NAME=skku_sfa_gallery
 
-# Redis (외부 서비스 - Redis Labs, Upstash 등)
-REDIS_URL=redis://your-redis-host:port
-REDIS_HOST=your-redis-host
+# Redis (Docker 컨테이너)
+REDIS_HOST=redis
 REDIS_PORT=6379
-REDIS_PASSWORD=your_redis_password
+REDIS_PASSWORD=devredispass
+REDIS_DB=0
 
 # Cloudinary (외부 서비스)
 CLOUDINARY_CLOUD_NAME=your_cloud_name
@@ -400,8 +403,32 @@ CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 
 # JWT & Session
-JWT_SECRET=local_development_secret
-SESSION_SECRET=local_session_secret
+JWT_SECRET=dev_jwt_secret_key_change_in_production
+SESSION_SECRET=dev_session_secret_key_change_in_production
+```
+
+#### 테스트용 (.env.test)
+```bash
+NODE_ENV=test
+PORT=3001
+HOST=0.0.0.0
+
+# MySQL (Docker 컨테이너)
+DB_HOST=mysql-test
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=testpassword
+DB_NAME=skku_sfa_gallery_test
+
+# Redis (Docker 컨테이너)
+REDIS_HOST=redis-test
+REDIS_PORT=6379
+REDIS_PASSWORD=testredispass
+REDIS_DB=0
+
+# 테스트 전용 설정
+TEST_MODE=true
+DISABLE_EMAIL_SENDING=true
 ```
 
 #### Railway 배포용 (Railway Variables)
@@ -416,6 +443,41 @@ DB_NAME=${MYSQL_DATABASE}
 REDIS_URL=${REDIS_URL}
 CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
 ```
+
+### 환경 설정 가이드
+
+1. **환경 파일 생성**:
+   ```bash
+   # 개발 환경용
+   cp config/env.docker.example .env.docker
+
+   # 테스트 환경용
+   cp config/env.test.example .env.test
+   ```
+
+2. **환경 파일 수정**: 각 환경 파일에서 Cloudinary 설정 등을 실제 값으로 변경
+
+3. **개발 환경 시작**:
+   ```bash
+   npm run dev
+   ```
+
+4. **테스트 실행**:
+   ```bash
+   npm run test:auth
+   ```
+
+### 포트 구성
+
+- **개발 환경**:
+  - App: `localhost:3000`
+  - MySQL: `localhost:3307`
+  - Redis: `localhost:6379`
+
+- **테스트 환경**:
+  - App: `localhost:3001`
+  - MySQL: `localhost:3308`
+  - Redis: `localhost:6380`
 
 ## 코드 품질 관리
 

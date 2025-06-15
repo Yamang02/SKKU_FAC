@@ -1,74 +1,17 @@
 /**
- * 로그인-로그아웃 종합 테스트
+ * 인증 기능 종합 테스트
  * 데이터베이스의 실제 사용자 계정들을 활용한 완전한 인증 플로우 테스트
+ * - 개별 사용자 로그인 테스트
+ * - 로그인-로그아웃 사이클 테스트
+ * - 순차적 다중 사용자 테스트
+ * - 에러 케이스 테스트
+ * - 세션 지속성 테스트
  */
 import { test, expect } from '@playwright/test';
-
-const TEST_USERS = {
-    ADMIN: {
-        username: 'admin',
-        email: 'skkfnrtclbdmnstrtn@gmail.com',
-        password: '1234',
-        role: 'ADMIN',
-        name: '성미회 관리자',
-        status: 'ACTIVE',
-        description: '관리자 권한 테스트용'
-    },
-    SKKU_MEMBER_1: {
-        username: 'skku1',
-        email: 'skkutest1749612967060@skku.edu',
-        password: '1234',
-        role: 'SKKU_MEMBER',
-        name: '성균관대 테스트 사용자1',
-        status: 'ACTIVE',
-        description: 'SKKU 멤버 권한 테스트용 1'
-    },
-    SKKU_MEMBER_2: {
-        username: 'skku2',
-        email: 'skkutest1749612897486@skku.edu',
-        password: '1234',
-        role: 'SKKU_MEMBER',
-        name: '성균관대 테스트 사용자2',
-        status: 'ACTIVE',
-        description: 'SKKU 멤버 권한 테스트용 2'
-    },
-    SKKU_MEMBER_UNVERIFIED: {
-        username: 'skku3_unverified',
-        email: 'skkutest1749613032897@skku.edu',
-        password: '1234',
-        role: 'SKKU_MEMBER',
-        name: '성균관대 테스트 사용자(미인증)',
-        status: 'ACTIVE',
-        description: 'SKKU 멤버 미인증 계정 테스트용'
-    },
-    EXTERNAL_MEMBER_1: {
-        username: 'external1',
-        email: 'external1749612974850@example.com',
-        password: '1234',
-        role: 'EXTERNAL_MEMBER',
-        name: '외부 테스트 사용자1',
-        status: 'ACTIVE',
-        description: '외부 멤버 권한 테스트용 1'
-    },
-    EXTERNAL_MEMBER_2: {
-        username: 'external2',
-        email: 'external1749612770942@example.com',
-        password: '1234',
-        role: 'EXTERNAL_MEMBER',
-        name: '외부 테스트 사용자2',
-        status: 'ACTIVE',
-        description: '외부 멤버 권한 테스트용 2'
-    },
-    EXTERNAL_MEMBER_UNVERIFIED: {
-        username: 'external3_unverified',
-        email: 'external1749612906372@example.com',
-        password: '1234',
-        role: 'EXTERNAL_MEMBER',
-        name: '외부 테스트 사용자(미인증)',
-        status: 'ACTIVE',
-        description: '외부 멤버 미인증 계정 테스트용'
-    }
-};
+import {
+    AUTHENTICATION_TEST_USERS,
+    getActiveAuthenticationUsers
+} from '../fixtures/login-users.js';
 
 /**
  * 헬퍼 함수들
@@ -279,7 +222,7 @@ async function accessProfilePage(page, user) {
     console.log(`✅ 프로필 페이지 접근 성공: ${user.username}`);
 }
 
-test.describe('로그인-로그아웃 종합 테스트', () => {
+test.describe('인증 기능 종합 테스트', () => {
 
     test.beforeEach(async ({ page }) => {
         // 각 테스트 전에 세션 초기화
@@ -303,7 +246,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
     test.describe('개별 사용자 로그인 테스트', () => {
 
         test('관리자 로그인 및 관리자 페이지 접근', async ({ page }) => {
-            const user = TEST_USERS.ADMIN;
+            const user = AUTHENTICATION_TEST_USERS.ADMIN;
 
             // 로그인
             await loginUser(page, user);
@@ -321,7 +264,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
         });
 
         test('SKKU 멤버 1 로그인 및 프로필 접근', async ({ page }) => {
-            const user = TEST_USERS.SKKU_MEMBER_1;
+            const user = AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1;
 
             // 로그인
             await loginUser(page, user);
@@ -332,7 +275,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
         });
 
         test('SKKU 멤버 2 로그인 및 프로필 접근', async ({ page }) => {
-            const user = TEST_USERS.SKKU_MEMBER_2;
+            const user = AUTHENTICATION_TEST_USERS.SKKU_MEMBER_2;
 
             // 로그인
             await loginUser(page, user);
@@ -343,7 +286,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
         });
 
         test('외부 멤버 1 로그인 및 프로필 접근', async ({ page }) => {
-            const user = TEST_USERS.EXTERNAL_MEMBER_1;
+            const user = AUTHENTICATION_TEST_USERS.EXTERNAL_MEMBER_1;
 
             // 로그인
             await loginUser(page, user);
@@ -354,7 +297,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
         });
 
         test('외부 멤버 2 로그인 및 프로필 접근', async ({ page }) => {
-            const user = TEST_USERS.EXTERNAL_MEMBER_2;
+            const user = AUTHENTICATION_TEST_USERS.EXTERNAL_MEMBER_2;
 
             // 로그인
             await loginUser(page, user);
@@ -368,7 +311,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
     test.describe('로그인-로그아웃 사이클 테스트', () => {
 
         test('관리자 로그인-프로필접근-로그아웃 전체 플로우', async ({ page }) => {
-            const user = TEST_USERS.ADMIN;
+            const user = AUTHENTICATION_TEST_USERS.ADMIN;
 
             // 1. 로그인
             await loginUser(page, user);
@@ -418,7 +361,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
         });
 
         test('SKKU 멤버 로그인-프로필접근-로그아웃 전체 플로우', async ({ page }) => {
-            const user = TEST_USERS.SKKU_MEMBER_1;
+            const user = AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1;
 
             // 1. 로그인
             await loginUser(page, user);
@@ -461,7 +404,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
         });
 
         test('외부 멤버 로그인-프로필접근-로그아웃 전체 플로우', async ({ page }) => {
-            const user = TEST_USERS.EXTERNAL_MEMBER_1;
+            const user = AUTHENTICATION_TEST_USERS.EXTERNAL_MEMBER_1;
 
             // 1. 로그인
             await loginUser(page, user);
@@ -507,13 +450,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
     test.describe('순차적 다중 사용자 테스트', () => {
 
         test('모든 사용자 순차 로그인-로그아웃 테스트', async ({ page }) => {
-            const users = [
-                TEST_USERS.ADMIN,
-                TEST_USERS.SKKU_MEMBER_1,
-                TEST_USERS.SKKU_MEMBER_2,
-                TEST_USERS.EXTERNAL_MEMBER_1,
-                TEST_USERS.EXTERNAL_MEMBER_2
-            ];
+            const users = getActiveAuthenticationUsers();
 
             for (const user of users) {
                 console.log(`\n🔄 테스트 중: ${user.role} - ${user.username}`);
@@ -542,7 +479,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
     test.describe('에러 케이스 테스트', () => {
 
         test('잘못된 비밀번호로 로그인 시도', async ({ page }) => {
-            const user = { ...TEST_USERS.ADMIN, password: 'wrongpassword' };
+            const user = { ...AUTHENTICATION_TEST_USERS.ADMIN, password: 'wrongpassword' };
 
             await page.goto('http://localhost:3001/user/login');
             await page.waitForLoadState('networkidle');
@@ -609,7 +546,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
     test.describe('세션 지속성 테스트', () => {
 
         test('로그인 후 페이지 새로고침 시 세션 유지', async ({ page }) => {
-            const user = TEST_USERS.SKKU_MEMBER_1;
+            const user = AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1;
 
             // 로그인
             await loginUser(page, user);
@@ -630,7 +567,7 @@ test.describe('로그인-로그아웃 종합 테스트', () => {
         });
 
         test('로그인 후 다른 페이지 이동 시 세션 유지', async ({ page }) => {
-            const user = TEST_USERS.SKKU_MEMBER_1;
+            const user = AUTHENTICATION_TEST_USERS.SKKU_MEMBER_1;
 
             // 로그인
             await loginUser(page, user);

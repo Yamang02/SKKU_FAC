@@ -1,12 +1,12 @@
 /**
- * 사용자 데이터 수정/삭제 테스트
+ * 사용자 프로필 관리 테스트
  * 사용자 프로필 수정 및 계정 삭제 기능을 검증합니다
  */
 import { test, expect } from '@playwright/test';
 import { loginAs, logout, clearSession } from '../helpers/simple-login.js';
 import { getModifyTestUser, getDeleteTestUser } from '../fixtures/login-users.js';
 
-test.describe('사용자 데이터 수정/삭제 테스트', () => {
+test.describe('사용자 프로필 관리 테스트', () => {
 
     test.beforeEach(async ({ page }) => {
         // 각 테스트 전 세션 초기화

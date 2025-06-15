@@ -6,7 +6,9 @@
 tests/e2e/
 ├── auth/
 │   ├── detailed-signup-behavior-test.spec.js  # 회원가입 테스트
-│   └── login-examples.spec.js                 # 로그인 테스트 예시
+│   └── authentication.spec.js                 # 인증 기능 종합 테스트 (로그인/로그아웃)
+├── user/
+│   └── profile-management.spec.js             # 사용자 프로필 관리 테스트
 ├── fixtures/
 │   └── login-users.js                         # 대표 사용자 데이터
 ├── helpers/
@@ -20,8 +22,8 @@ tests/e2e/
 # 회원가입 테스트 실행
 npm run test:signup
 
-# 로그인 테스트 실행
-npx playwright test login-examples --headed
+# 인증 기능 테스트 실행 (로그인/로그아웃)
+npm run test:auth
 
 # 모든 인증 테스트 실행
 npx playwright test tests/e2e/auth --headed
@@ -39,7 +41,7 @@ npx playwright test tests/e2e/auth --headed
 
 ## 📚 사용법
 
-### 기본 로그인
+### 기본 로그인 (헬퍼 함수 사용)
 ```javascript
 import { loginAsAdmin, loginAsSkkuMember, loginAsExternalMember } from '../helpers/simple-login.js';
 
@@ -51,6 +53,18 @@ await loginAsSkkuMember(page);
 
 // 외부 멤버로 로그인
 await loginAsExternalMember(page);
+```
+
+### 직접 사용자 데이터 사용
+```javascript
+import { AUTHENTICATION_TEST_USERS } from '../fixtures/login-users.js';
+
+// 특정 사용자로 로그인
+const user = AUTHENTICATION_TEST_USERS.ADMIN;
+await page.goto('http://localhost:3001/user/login');
+await page.fill('#username', user.username);
+await page.fill('#password', user.password);
+await page.locator('button[type="submit"]').click();
 ```
 
 ### 기능별 로그인
@@ -69,12 +83,20 @@ await loginForFeature(page, 'public_exhibition_view');
 
 ### 권한 테스트
 ```javascript
-import { getUsersByPermissionLevel } from '../fixtures/login-users.js';
+import { getUsersByPermissionLevel, getActiveAuthenticationUsers } from '../fixtures/login-users.js';
 
+// 권한 레벨별 테스트
 const users = getUsersByPermissionLevel();
 await loginAs(page, users.highest);  // 관리자
 await loginAs(page, users.medium);   // SKKU 멤버
 await loginAs(page, users.basic);    // 외부 멤버
+
+// 모든 활성 사용자 순차 테스트
+const allUsers = getActiveAuthenticationUsers();
+for (const user of allUsers) {
+    await loginAs(page, user);
+    // 테스트 수행
+}
 ```
 
 ## 📊 생성되는 테스트 데이터 (회원가입 테스트)
@@ -112,18 +134,18 @@ WHERE username LIKE 'skkutest%'
 
 ### 디렉토리 구성
 - `auth/` - 인증 관련 테스트
-  - `login-examples.spec.js` - 기본 로그인 테스트
-  - `detailed-signup-behavior-test.spec.js` - 회원가입 상세 테스트
-  - `profile-access-flow-test.spec.js` - 프로필 접근 플로우 테스트
-  - `user-modification-test.spec.js` - 사용자 수정/삭제 테스트 ⭐ **NEW**
+  - `detailed-signup-behavior-test.spec.js` - 회원가입 테스트
+  - `authentication.spec.js` - 인증 기능 종합 테스트 (로그인/로그아웃/세션 관리)
+- `user/` - 사용자 관리 테스트
+  - `profile-management.spec.js` - 프로필 수정/계정 삭제 테스트
 - `helpers/` - 테스트 헬퍼 함수
   - `simple-login.js` - 로그인/로그아웃 헬퍼
 - `fixtures/` - 테스트 데이터
   - `login-users.js` - 테스트용 사용자 정보
 
-## 새로 추가된 테스트: 사용자 수정/삭제
+## 사용자 프로필 관리 테스트
 
-### 테스트 파일: `auth/user-modification-test.spec.js`
+### 테스트 파일: `user/profile-management.spec.js`
 
 이 테스트는 사용자 프로필 수정 및 계정 삭제 기능을 검증합니다.
 
@@ -163,37 +185,39 @@ mysql -u root -p skku_sfa_gallery_test < scripts/sql/db/test-init/01.user_modifi
 
 ## 테스트 실행
 
-### 1. 테스트 환경 시작
+### 간단한 테스트 실행 (권장)
 ```bash
-# 테스트 서버 및 DB 시작
-docker-compose up test-env mysql-test -d
-
-# 테스트 데이터 초기화
-docker exec -i skku_gallery_mysql_test mysql -u root -ptestpassword skku_sfa_gallery_test < scripts/sql/db/test-init/00.dump_default_data.sql
-docker exec -i skku_gallery_mysql_test mysql -u root -ptestpassword skku_sfa_gallery_test < scripts/sql/db/test-init/01.user_modification_test_data.sql
-```
-
-### 2. E2E 테스트 실행
-```bash
-# 전체 인증 테스트 실행
+# 인증 관련 테스트 (로그인, 회원가입, 로그아웃)
 npm run test:auth
 
-# 사용자 수정/삭제 테스트만 실행
-npx playwright test tests/e2e/auth/user-modification-test.spec.js
+# 사용자 관리 테스트 (프로필 수정, 계정 삭제)
+npm run test:user
 
-# 기존 인증 테스트들
-npx playwright test tests/e2e/auth/login-examples.spec.js
-npx playwright test tests/e2e/auth/profile-access-flow-test.spec.js
+# 프로필 관리 테스트만 실행 (데이터 초기화 포함)
+npm run test:profile
+```
+
+### 수동 테스트 실행
+```bash
+# 1. 테스트 환경 시작 (개발 환경과 완전 분리)
+docker-compose up test-env mysql-test -d
+
+# 2. 테스트 데이터 초기화
+npm run test:init-data
+
+# 3. 특정 테스트 실행
+npx playwright test tests/e2e/user/profile-management.spec.js
+npx playwright test tests/e2e/auth/authentication.spec.js
 ```
 
 ### 헤드리스 모드 해제 (브라우저 UI 보기)
 ```bash
-npx playwright test --headed tests/e2e/auth/user-modification-test.spec.js
+npx playwright test --headed tests/e2e/user/profile-management.spec.js
 ```
 
 ### 디버그 모드
 ```bash
-npx playwright test --debug tests/e2e/auth/user-modification-test.spec.js
+npx playwright test --debug tests/e2e/user/profile-management.spec.js
 ```
 
 ## 환경 설정
