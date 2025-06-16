@@ -1,17 +1,37 @@
 {
+    "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "name": "Debug React Native Web",
+            "type": "reactnativedirect",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/server.js",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "run",
-                "dev"
-            ],
-            "envFile": "${workspaceFolder}/src/.env",
-            "internalConsoleOptions": "neverOpen"
+            "platform": "web",
+            "webRoot": "${workspaceFolder}/frontend/src",
+            "url": "http://localhost:3003",
+            "sourceMaps": true,
+            "sourceMapPathOverrides": {
+                "webpack:///./src/*": "${webRoot}/*"
+            }
+        },
+        {
+            "name": "Attach to React Native Web",
+            "type": "reactnativedirect",
+            "request": "attach",
+            "platform": "web",
+            "webRoot": "${workspaceFolder}/frontend/src",
+            "url": "http://localhost:3003",
+            "sourceMaps": true
+        },
+        {
+            "name": "Debug Chrome",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3003",
+            "webRoot": "${workspaceFolder}/frontend/src",
+            "sourceMaps": true,
+            "sourceMapPathOverrides": {
+                "webpack:///./src/*": "${webRoot}/*"
+            }
         }
     ]
 }

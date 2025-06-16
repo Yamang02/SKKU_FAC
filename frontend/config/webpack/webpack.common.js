@@ -48,6 +48,10 @@ export default {
                 generator: {
                     filename: 'fonts/[name].[hash][ext]'
                 }
+            },
+            {
+                test: /\.css$/i,
+                use: ['style-loader', 'css-loader']
             }
         ]
     },
