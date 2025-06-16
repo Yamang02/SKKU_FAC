@@ -1,8 +1,8 @@
 /**
  * 인증 관련 API - React Native Web 버전
  */
-import api from '../utils/api';
-import { showErrorMessage, showSuccessMessage } from '../utils/notification';
+import api from '../utils/api.js';
+import { showErrorMessage, showSuccessMessage } from '../utils/notification.js';
 
 export default class AuthApi {
     // 로그인

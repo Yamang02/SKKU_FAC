@@ -2,8 +2,12 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { View, Text, StyleSheet } from 'react-native';
 import './styles/global.css';
-import SimpleTest from './components/SimpleTest';
-import LiveDemo from './components/LiveDemo';
+import SimpleTest from './components/SimpleTest.jsx';
+import LiveDemo from './components/LiveDemo.jsx';
+
+// Task30: React Native Web을 사용한 Admin 페이지들 (공통 레이아웃 적용)
+import UserManagementList from './components/admin/UserManagementList.jsx';
+import UserManagementDetail from './components/admin/UserManagementDetail.jsx';
 
 // 페이지 컴포넌트들 - React Native Web 패턴 유지
 const HomePage = () => (
@@ -79,36 +83,17 @@ const NotFound = () => (
     </View>
 );
 
-// 네비게이션 컴포넌트
-const Navigation = () => (
-    <View style={styles.navigation}>
-        <Text style={styles.navTitle}>관리자 메뉴</Text>
-        <View style={styles.navLinks}>
-            <Link to="/" style={styles.navLink}>
-                <Text style={styles.navLinkText}>홈</Text>
-            </Link>
-            <Link to="/admin/users" style={styles.navLink}>
-                <Text style={styles.navLinkText}>사용자 관리</Text>
-            </Link>
-            <Link to="/admin/artworks" style={styles.navLink}>
-                <Text style={styles.navLinkText}>작품 관리</Text>
-            </Link>
-            <Link to="/admin/exhibitions" style={styles.navLink}>
-                <Text style={styles.navLinkText}>전시 관리</Text>
-            </Link>
-        </View>
-    </View>
-);
+
 
 const App = () => {
     return (
         <Router>
             <View style={styles.container}>
-                <Navigation />
                 <View style={styles.content}>
                     <Routes>
                         <Route path="/" element={<HomePage />} />
-                        <Route path="/admin/users" element={<AdminUsers />} />
+                        <Route path="/admin/users" element={<UserManagementList />} />
+                        <Route path="/admin/users/:id" element={<UserManagementDetail />} />
                         <Route path="/admin/artworks" element={<AdminArtworks />} />
                         <Route path="/admin/exhibitions" element={<AdminExhibitions />} />
                         <Route path="*" element={<NotFound />} />
@@ -125,44 +110,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f9fa',
         minHeight: '100vh',
     },
-    navigation: {
-        backgroundColor: '#2c3e50',
-        padding: 20,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    navTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: 'white',
-        marginBottom: 16,
-        textAlign: 'center',
-    },
-    navLinks: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        gap: 20,
-    },
-    navLink: {
-        textDecoration: 'none',
-    },
-    navLinkText: {
-        color: '#ecf0f1',
-        fontSize: 16,
-        fontWeight: '500',
-        padding: 8,
-        borderRadius: 4,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        textAlign: 'center',
-        minWidth: 100,
-    },
+
     content: {
         flex: 1,
         padding: 24,

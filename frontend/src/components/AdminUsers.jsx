@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
-import UserApi from '../api/UserApi';
-import { showErrorMessage, showSuccessMessage, showConfirm } from '../utils/notification';
+import UserApi from '../api/UserApi.js';
+import { showErrorMessage, showSuccessMessage, showConfirm } from '../utils/notification.js';
 
 const AdminUsers = () => {
     const [users, setUsers] = useState([]);
@@ -156,7 +156,7 @@ const AdminUsers = () => {
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
-                                    style={[styles.actionButton, styles.statusButton]}
+                                    style={{ ...styles.actionButton, ...styles.statusButton }}
                                     onPress={() => handleUserStatusChange(user.id, 'inactive')}
                                 >
                                     <Text style={styles.actionButtonText}>상태변경</Text>
@@ -170,7 +170,10 @@ const AdminUsers = () => {
             {/* 페이지네이션 */}
             <View style={styles.pagination}>
                 <TouchableOpacity
-                    style={[styles.pageButton, pagination.page === 1 && styles.pageButtonDisabled]}
+                    style={{
+                        ...styles.pageButton,
+                        ...(pagination.page === 1 && styles.pageButtonDisabled)
+                    }}
                     onPress={() => handlePageChange(pagination.page - 1)}
                     disabled={pagination.page === 1}
                 >
@@ -183,7 +186,10 @@ const AdminUsers = () => {
                 </Text>
 
                 <TouchableOpacity
-                    style={[styles.pageButton, pagination.page === pagination.totalPages && styles.pageButtonDisabled]}
+                    style={{
+                        ...styles.pageButton,
+                        ...(pagination.page === pagination.totalPages && styles.pageButtonDisabled)
+                    }}
                     onPress={() => handlePageChange(pagination.page + 1)}
                     disabled={pagination.page === pagination.totalPages}
                 >

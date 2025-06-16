@@ -1,8 +1,8 @@
 /**
  * 사용자 관련 API - React Native Web 버전
  */
-import api from '../utils/api';
-import { showErrorMessage } from '../utils/notification';
+import api from '../utils/api.js';
+import { showErrorMessage } from '../utils/notification.js';
 
 export default class UserApi {
     // 회원가입

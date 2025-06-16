@@ -2,7 +2,7 @@
  * API 유틸리티 - React Native Web 버전
  * Legacy API 완전 포팅: CSRF, 에러 처리, 재시도 로직 포함
  */
-import csrfManager from './csrfManager';
+import csrfManager from './csrfManager.js';
 
 // API 기본 URL
 const API_BASE_URL = '';

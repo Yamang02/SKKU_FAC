@@ -14,7 +14,7 @@ const SimpleTest = () => {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: bgColor }]}>
+        <View style={{ ...styles.container, backgroundColor: bgColor }}>
             <Text style={styles.title}>🎨 실시간 테스트</Text>
 
             <View style={styles.counterSection}>
