@@ -25,13 +25,7 @@ export default {
                 development: process.env.NODE_ENV === 'development'
             }
         ],
-        [
-            '@babel/preset-typescript',
-            {
-                allowDeclareFields: true,
-                onlyRemoveTypeImports: true
-            }
-        ]
+
     ],
     plugins: [],
     env: {
@@ -44,8 +38,7 @@ export default {
         test: {
             presets: [
                 ['@babel/preset-env', { targets: { node: 'current' } }],
-                '@babel/preset-react',
-                '@babel/preset-typescript'
+                '@babel/preset-react'
             ]
         }
     }

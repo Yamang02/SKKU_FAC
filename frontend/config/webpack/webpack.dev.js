@@ -6,7 +6,7 @@ export default merge(common, {
     devtool: 'eval-source-map',
 
     devServer: {
-        port: 3002,
+        port: 3003,
         hot: true,
         open: true,
         historyApiFallback: true,
