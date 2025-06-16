@@ -154,7 +154,7 @@ window.csrfManager = {
     addToData: function (data = {}) {
         const token = getCSRFToken();
         if (token) {
-            data._csrf = token;
+            data['_csrf'] = token;
         }
         return Promise.resolve(data);
     },

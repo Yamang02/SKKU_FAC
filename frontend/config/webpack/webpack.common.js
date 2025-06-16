@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,7 +20,15 @@ export default {
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
         alias: {
             'react-native': 'react-native-web',
-            '@': resolve(__dirname, '../../src')
+            '@': resolve(__dirname, '../../src'),
+            '@components': resolve(__dirname, '../../src/components'),
+            '@screens': resolve(__dirname, '../../src/screens'),
+            '@constants': resolve(__dirname, '../../src/constants'),
+            '@utils': resolve(__dirname, '../../src/utils'),
+            '@hooks': resolve(__dirname, '../../src/hooks'),
+            '@api': resolve(__dirname, '../../src/api'),
+            '@admin': resolve(__dirname, '../../src/components/admin'),
+            '@common': resolve(__dirname, '../../src/components/common'),
         }
     },
 
@@ -57,6 +66,10 @@ export default {
     },
 
     plugins: [
+        new webpack.DefinePlugin({
+            // React Native Web의 __DEV__ 플래그 설정
+            '__DEV__': JSON.stringify(process.env.NODE_ENV === 'development')
+        }),
         new HtmlWebpackPlugin({
             template: resolve(__dirname, '../../public/index.html'),
             filename: 'index.html',

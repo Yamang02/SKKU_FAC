@@ -401,17 +401,17 @@ export class ErrorHandler {
         } else {
             // 일반 에러는 기본 로깅 사용
             switch (errorInfo.severity) {
-                case ErrorSeverity.MEDIUM:
-                    logger.warn('⚠️ MEDIUM SEVERITY ERROR', { error: err, request: sanitizedLogData }, userInfo);
-                    break;
-                case ErrorSeverity.LOW:
-                default:
-                    if (errorInfo.statusCode === 404) {
-                        logger.debug(`📄 404 Error - ${req.originalUrl}`, { request: sanitizedLogData }, userInfo);
-                    } else {
-                        logger.info('ℹ️ CLIENT ERROR', { error: err, request: sanitizedLogData }, userInfo);
-                    }
-                    break;
+            case ErrorSeverity.MEDIUM:
+                logger.warn('⚠️ MEDIUM SEVERITY ERROR', { error: err, request: sanitizedLogData }, userInfo);
+                break;
+            case ErrorSeverity.LOW:
+            default:
+                if (errorInfo.statusCode === 404) {
+                    logger.debug(`📄 404 Error - ${req.originalUrl}`, { request: sanitizedLogData }, userInfo);
+                } else {
+                    logger.info('ℹ️ CLIENT ERROR', { error: err, request: sanitizedLogData }, userInfo);
+                }
+                break;
             }
         }
 
@@ -445,15 +445,15 @@ export class ErrorHandler {
      */
     getErrorMessage(severity) {
         switch (severity) {
-            case ErrorSeverity.CRITICAL:
-                return '🚨 시스템 중요 에러 발생';
-            case ErrorSeverity.HIGH:
-                return '🔥 높은 심각도 에러 발생';
-            case ErrorSeverity.MEDIUM:
-                return '⚠️ 중간 심각도 에러 발생';
-            case ErrorSeverity.LOW:
-            default:
-                return 'ℹ️ 클라이언트 에러 발생';
+        case ErrorSeverity.CRITICAL:
+            return '🚨 시스템 중요 에러 발생';
+        case ErrorSeverity.HIGH:
+            return '🔥 높은 심각도 에러 발생';
+        case ErrorSeverity.MEDIUM:
+            return '⚠️ 중간 심각도 에러 발생';
+        case ErrorSeverity.LOW:
+        default:
+            return 'ℹ️ 클라이언트 에러 발생';
         }
     }
 

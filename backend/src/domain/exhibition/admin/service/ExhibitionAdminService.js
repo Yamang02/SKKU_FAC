@@ -1,4 +1,4 @@
-import ExhibitionService from '#src/domain/exhibition/service/ExhibitionService.js';
+
 import ExhibitionManagementDto from '#src/domain/admin/model/dto/exhibition/ExhibitionManagementDto.js';
 import ExhibitionListManagementDto from '#src/domain/admin/model/dto/exhibition/ExhibitionListManagementDto.js';
 import ExhibitionListManagementDataDto from '#src/domain/admin/model/dto/exhibition/ExhibitionListManagementDataDto.js';

@@ -22,6 +22,7 @@
     "scripts": {
         "dev:backend": "npm run dev --workspace=backend",
         "dev:frontend": "npm run dev --workspace=frontend",
+        "build": "npm run build:backend && npm run build:frontend",
         "build:backend": "npm run build --workspace=backend",
         "build:frontend": "npm run build --workspace=frontend",
         "start:backend": "npm run start --workspace=backend",
@@ -30,6 +31,9 @@
         "lint:frontend": "npm run lint --workspace=frontend",
         "format:backend": "npm run format --workspace=backend",
         "format:frontend": "npm run format --workspace=frontend",
+        "deploy:prod": "npm run deploy:prod --workspace=backend",
+        "deploy:stop": "npm run deploy:stop --workspace=backend",
+        "deploy:logs": "npm run deploy:logs --workspace=backend",
         "setup": "npm install && npm run setup --workspace=backend"
     },
     "dependencies": {

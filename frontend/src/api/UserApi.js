@@ -154,6 +154,26 @@ export default class UserApi {
         }
     }
 
+    // getUsers 별칭 - useUsers 훅에서 사용
+    static async getUsers(params = {}) {
+        try {
+            const queryParams = new URLSearchParams();
+
+            // 파라미터 처리
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined && value !== null && value !== '') {
+                    queryParams.set(key, value);
+                }
+            });
+
+            const queryString = queryParams.toString();
+            return await api.get(`/admin/management/user/list?${queryString}`);
+        } catch (error) {
+            console.error('사용자 목록 조회 중 오류 발생:', error);
+            throw error;
+        }
+    }
+
     // 관리자용 - 사용자 상세 조회
     static async getUserDetail(userId) {
         try {
@@ -161,6 +181,28 @@ export default class UserApi {
         } catch (error) {
             console.error(`사용자 상세 정보(ID: ${userId}) 조회 중 오류 발생:`, error);
             showErrorMessage('사용자 정보를 불러오는데 실패했습니다.');
+            throw error;
+        }
+    }
+
+    // 관리자용 - 사용자 정보 수정
+    static async updateUser(userId, updateData) {
+        try {
+            return await api.put(`/admin/management/user/${userId}`, updateData);
+        } catch (error) {
+            console.error(`사용자 정보 수정(ID: ${userId}) 중 오류 발생:`, error);
+            showErrorMessage('사용자 정보 수정에 실패했습니다.');
+            throw error;
+        }
+    }
+
+    // 관리자용 - 사용자 삭제
+    static async deleteUser(userId) {
+        try {
+            return await api.delete(`/admin/management/user/${userId}`);
+        } catch (error) {
+            console.error(`사용자 삭제(ID: ${userId}) 중 오류 발생:`, error);
+            showErrorMessage('사용자 삭제에 실패했습니다.');
             throw error;
         }
     }

@@ -3,14 +3,13 @@ import { View, StyleSheet } from 'react-native';
 import AdminSidebar from './AdminSidebar.jsx';
 import AdminHeader from './AdminHeader.jsx';
 
-const AdminLayout = ({ title, subtitle, currentPage, children }) => {
+const AdminLayout = ({ children, title = "관리자 대시보드" }) => {
     return (
-        <View style={styles.adminContainer}>
-            <AdminSidebar currentPage={currentPage} />
-            <View style={styles.adminContent}>
-                <AdminHeader title={title} subtitle={subtitle} />
-                {/* 알림 컨테이너는 나중에 notification 시스템과 함께 구현 */}
-                <View style={styles.adminMain}>
+        <View style={styles.container}>
+            <AdminSidebar />
+            <View style={styles.content}>
+                <AdminHeader title={title} />
+                <View style={styles.main}>
                     {children}
                 </View>
             </View>
@@ -19,20 +18,29 @@ const AdminLayout = ({ title, subtitle, currentPage, children }) => {
 };
 
 const styles = StyleSheet.create({
-    adminContainer: {
+    container: {
+        display: 'flex',
         flexDirection: 'row',
         minHeight: '100vh',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: '#f5f6fa',
     },
-    adminContent: {
+    content: {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
+        minHeight: '100vh',
+        marginLeft: 200, // 사이드바 너비
+        padding: 32,
     },
-    adminMain: {
+    main: {
         flex: 1,
-        padding: 20,
-        backgroundColor: '#f8f9fa',
+        width: '100%',
+        maxWidth: 1200,
+        marginTop: 24,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        backgroundColor: '#f5f6fa',
+        borderRadius: 16,
     },
 });
 

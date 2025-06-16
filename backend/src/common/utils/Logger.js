@@ -739,16 +739,16 @@ HTTP: ${stats.http}개
                 </div>
 
                 ${logs
-                .map(
-                    log => `
+        .map(
+            log => `
                     <div class="log-item">
                         <div class="timestamp">${new Date(log.timestamp).toLocaleString('ko-KR')}</div>
                         <div class="message">${log.message}</div>
                         ${log.meta && Object.keys(log.meta).length > 0 ? `<div class="meta">${JSON.stringify(log.meta, null, 2)}</div>` : ''}
                     </div>
                 `
-                )
-                .join('')}
+        )
+        .join('')}
 
                 <div style="margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 8px;">
                     <p><small>즉시 확인이 필요한 중요 로그입니다.</small></p>

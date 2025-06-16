@@ -1,135 +1,155 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Link, useLocation } from 'react-router-dom';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const AdminSidebar = ({ currentPage }) => {
+const AdminSidebar = () => {
+    const navigate = useNavigate();
     const location = useLocation();
-
-    // Admin 라우트 정의
-    const ADMIN_ROUTES = {
-        dashboard: '/admin/dashboard',
-        users: '/admin/users',
-        exhibitions: '/admin/exhibitions',
-        artworks: '/admin/artworks'
-    };
-
-    // 현재 경로에 따른 active 상태 결정 (URL 기반 자동 판단)
-    const getActiveState = (page) => {
-        const path = location.pathname;
-        const routePath = ADMIN_ROUTES[page];
-
-        if (!routePath) return false;
-
-        // 정확한 매치 또는 하위 경로 매치
-        return path === routePath || path.startsWith(routePath + '/');
-    };
 
     const menuItems = [
         {
-            id: 'dashboard',
+            path: '/admin/dashboard',
+            icon: 'fas fa-home',
             label: '대시보드',
-            icon: '🏠',
-            path: '/admin/dashboard'
+            key: 'dashboard'
         },
         {
-            id: 'users',
+            path: '/admin/users',
+            icon: 'fas fa-users',
             label: '회원 관리',
-            icon: '👥',
-            path: '/admin/users'
+            key: 'users'
         },
         {
-            id: 'exhibitions',
+            path: '/admin/exhibitions',
+            icon: 'fas fa-image',
             label: '전시 관리',
-            icon: '🖼️',
-            path: '/admin/exhibitions'
+            key: 'exhibitions'
         },
         {
-            id: 'artworks',
+            path: '/admin/artworks',
+            icon: 'fas fa-palette',
             label: '작품 관리',
-            icon: '🎨',
-            path: '/admin/artworks'
+            key: 'artworks'
         },
     ];
 
+    const handleMenuClick = (path) => {
+        navigate(path);
+    };
+
+    const isActive = (path) => {
+        return location.pathname === path || location.pathname.startsWith(path + '/');
+    };
+
+    // React Native Web에서 HTML 요소 직접 사용
+    const FontAwesomeIcon = ({ className, style }) => {
+        return React.createElement('i', {
+            className: className,
+            style: style
+        });
+    };
+
     return (
-        <View style={styles.adminSidebar}>
+        <View style={styles.sidebar}>
             <View style={styles.logo}>
                 <Text style={styles.logoText}>SKKU Gallery</Text>
             </View>
             <View style={styles.nav}>
-                {menuItems.map(item => (
-                    <Link
-                        key={item.id}
-                        to={item.path}
-                        style={{
-                            ...styles.navItem,
-                            ...(getActiveState(item.id) && styles.navItemActive)
-                        }}
-                    >
-                        <Text style={styles.navIcon}>{item.icon}</Text>
-                        <Text style={{
-                            ...styles.navText,
-                            ...(getActiveState(item.id) && styles.navTextActive)
-                        }}>
-                            {item.label}
-                        </Text>
-                    </Link>
-                ))}
+                {menuItems.map((item) => {
+                    const active = isActive(item.path);
+                    return (
+                        <Pressable
+                            key={item.key}
+                            style={active ? styles.navItemActive : styles.navItem}
+                            onPress={() => handleMenuClick(item.path)}
+                        >
+                            <View style={styles.iconContainer}>
+                                <FontAwesomeIcon
+                                    className={item.icon}
+                                    style={{
+                                        color: active ? '#fff' : '#ecf0f1',
+                                        fontSize: '16px'
+                                    }}
+                                />
+                            </View>
+                            <Text style={active ? styles.navLabelActive : styles.navLabel}>
+                                {item.label}
+                            </Text>
+                        </Pressable>
+                    );
+                })}
             </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    adminSidebar: {
-        width: 280,
+    sidebar: {
+        width: 200,
+        height: '100vh',
+        position: 'fixed',
+        left: 0,
+        top: 0,
         backgroundColor: '#2c3e50',
-        minHeight: '100vh',
         paddingTop: 20,
+        paddingBottom: 20,
+        paddingLeft: 0,
+        paddingRight: 0,
+        shadowColor: '#000',
+        shadowOffset: { width: 2, height: 0 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 5,
+        display: 'flex',
+        flexDirection: 'column',
+        overflowY: 'auto',
     },
     logo: {
         paddingHorizontal: 20,
-        paddingVertical: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#34495e',
-        marginBottom: 20,
+        marginBottom: 30,
+        backgroundColor: '#2c3e50',
+        zIndex: 1,
     },
     logoText: {
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: 'bold',
-        color: '#ffffff',
-        textAlign: 'center',
+        color: '#fff',
     },
     nav: {
-        paddingHorizontal: 10,
+        flex: 1,
+        overflowY: 'auto',
     },
     navItem: {
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        cursor: 'pointer',
+        display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-        marginBottom: 5,
-        borderRadius: 8,
-        textDecoration: 'none',
-        backgroundColor: 'transparent',
     },
     navItemActive: {
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: '#3498db',
     },
-    navIcon: {
-        fontSize: 18,
-        marginRight: 12,
+    iconContainer: {
         width: 20,
-        textAlign: 'center',
+        marginRight: 10,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    navText: {
-        fontSize: 16,
-        color: '#bdc3c7',
-        fontWeight: '500',
+    navLabel: {
+        fontSize: 14,
+        color: '#ecf0f1',
     },
-    navTextActive: {
-        color: '#ffffff',
-        fontWeight: '600',
+    navLabelActive: {
+        fontSize: 14,
+        color: '#fff',
     },
 });
 

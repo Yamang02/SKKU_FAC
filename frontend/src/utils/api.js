@@ -3,9 +3,10 @@
  * Legacy API 완전 포팅: CSRF, 에러 처리, 재시도 로직 포함
  */
 import csrfManager from './csrfManager.js';
+import { API_CONFIG, IS_DEVELOPMENT } from '@/constants/env.js';
 
-// API 기본 URL
-const API_BASE_URL = '';
+// API 기본 URL (설정에서 가져오기)
+const API_BASE_URL = IS_DEVELOPMENT ? '' : API_CONFIG.BASE_URL;
 
 /**
  * API 응답 처리 함수

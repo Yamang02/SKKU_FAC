@@ -20,6 +20,10 @@ import flash from 'connect-flash';
 
 // Railway에서 모니터링 제공하므로 Sentry 제거
 
+// ES 모듈에서 __dirname 정의
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // CacheManager 초기화 (import 시점에 싱글톤 생성됨)
 getCacheManager();
 
@@ -29,8 +33,6 @@ import swaggerUi from 'swagger-ui-express';
 const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'swagger.json'), 'utf8'));
 
 const app = express();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Config 인스턴스를 앱에 저장
 app.set('config', config);

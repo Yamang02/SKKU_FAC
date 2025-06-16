@@ -1,93 +1,43 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Link, useLocation } from 'react-router-dom';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 
-const AdminHeader = ({ title, subtitle }) => {
-    const location = useLocation();
-
-    // URL 기반 자동 페이지 정보 판단
-    const getPageInfo = () => {
-        const path = location.pathname;
-
-        if (path.includes('/admin/users')) {
-            // RESTful 패턴: /admin/users/:id
-            if (path.match(/\/admin\/users\/\d+/)) {
-                const userId = path.split('/').pop();
-                return {
-                    title: title || '회원 상세',
-                    breadcrumb: ['관리자', '회원 관리', `사용자 ${userId}`]
-                };
-            }
-            return {
-                title: title || '회원 관리',
-                breadcrumb: ['관리자', '회원 관리']
-            };
-        }
-
-        if (path.includes('/admin/exhibitions')) {
-            return {
-                title: title || '전시 관리',
-                breadcrumb: ['관리자', '전시 관리']
-            };
-        }
-
-        if (path.includes('/admin/artworks')) {
-            return {
-                title: title || '작품 관리',
-                breadcrumb: ['관리자', '작품 관리']
-            };
-        }
-
-        if (path.includes('/admin/dashboard')) {
-            return {
-                title: title || '대시보드',
-                breadcrumb: ['관리자', '대시보드']
-            };
-        }
-
-        // 기본값
-        return {
-            title: title || '관리자 페이지',
-            breadcrumb: ['관리자']
-        };
+const AdminHeader = ({ title = "관리자 대시보드" }) => {
+    const handleHomeClick = () => {
+        window.location.href = '/';
     };
 
-    const pageInfo = getPageInfo();
+    // React Native Web에서 HTML 요소 직접 사용
+    const FontAwesomeIcon = ({ className, style }) => {
+        return React.createElement('i', {
+            className: className,
+            style: style
+        });
+    };
 
     return (
-        <View style={styles.adminHeader}>
+        <View style={styles.header}>
             <View style={styles.headerTop}>
                 <View style={styles.titleSection}>
-                    <Text style={styles.title}>{pageInfo.title}</Text>
-                    {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+                    <Text style={styles.title}>{title}</Text>
                     <View style={styles.breadcrumb}>
-                        {pageInfo.breadcrumb.map((crumb, index) => (
-                            <React.Fragment key={index}>
-                                <Text style={styles.breadcrumbText}>{crumb}</Text>
-                                {index < pageInfo.breadcrumb.length - 1 && (
-                                    <Text style={styles.breadcrumbSeparator}>/</Text>
-                                )}
-                            </React.Fragment>
-                        ))}
+                        <Text style={styles.breadcrumbText}>관리자</Text>
+                        <Text style={styles.breadcrumbSeparator}>/</Text>
                     </View>
                 </View>
-
-                {/* 검색 기능은 나중에 구현 예정
-                <View style={styles.searchSection}>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="검색어를 입력하세요"
-                    />
-                    <TouchableOpacity style={styles.searchButton}>
-                        <Text style={styles.searchButtonText}>🔍 검색</Text>
-                    </TouchableOpacity>
-                </View>
-                */}
-
                 <View style={styles.homeSection}>
-                    <Link to="/" style={styles.homeButton}>
-                        <Text style={styles.homeIcon}>🏠</Text>
-                    </Link>
+                    <Pressable
+                        style={styles.homeButton}
+                        onPress={handleHomeClick}
+                        title="홈으로"
+                    >
+                        <FontAwesomeIcon
+                            className="fas fa-home"
+                            style={{
+                                fontSize: '16px',
+                                color: '#666'
+                            }}
+                        />
+                    </Pressable>
                 </View>
             </View>
         </View>
@@ -95,84 +45,58 @@ const AdminHeader = ({ title, subtitle }) => {
 };
 
 const styles = StyleSheet.create({
-    adminHeader: {
-        backgroundColor: '#ffffff',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e9ecef',
-        paddingHorizontal: 20,
-        paddingVertical: 15,
+    header: {
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+        marginBottom: 24,
     },
     headerTop: {
+        display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        padding: 20,
     },
     titleSection: {
         flex: 1,
     },
     title: {
         fontSize: 24,
-        fontWeight: '600',
+        fontWeight: 'bold',
         color: '#2c3e50',
-        marginBottom: 5,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#6c757d',
-        marginBottom: 5,
+        marginBottom: 4,
     },
     breadcrumb: {
+        display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
     },
     breadcrumbText: {
         fontSize: 14,
-        color: '#6c757d',
+        color: '#666',
     },
     breadcrumbSeparator: {
         fontSize: 14,
-        color: '#6c757d',
+        color: '#666',
         marginHorizontal: 8,
     },
-    searchSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-        justifyContent: 'center',
-        maxWidth: 400,
-    },
-    searchInput: {
-        flex: 1,
-        padding: 10,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 4,
-        marginRight: 10,
-        backgroundColor: '#f8f9fa',
-    },
-    searchButton: {
-        backgroundColor: '#3498db',
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        borderRadius: 4,
-    },
-    searchButtonText: {
-        color: '#ffffff',
-        fontWeight: '500',
-    },
     homeSection: {
-        marginLeft: 20,
+        display: 'flex',
+        alignItems: 'center',
     },
     homeButton: {
-        backgroundColor: '#28a745',
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        borderRadius: 6,
-        textDecoration: 'none',
-    },
-    homeIcon: {
-        fontSize: 18,
-        color: '#ffffff',
+        padding: 8,
+        borderRadius: 4,
+        backgroundColor: '#f8f9fa',
+        cursor: 'pointer',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 
