@@ -3,6 +3,7 @@ import UserService from '../../user/service/UserService.js';
 import ViewResolver from '../../../common/utils/ViewResolver.js';
 import { ViewPath } from '../../../common/constants/ViewPath.js';
 import { ApiResponse } from '../../common/model/ApiResponse.js';
+import logger from '../../../common/utils/Logger.js';
 
 export default class AuthApiController {
     // 의존성 주입을 위한 static dependencies 정의
@@ -19,6 +20,32 @@ export default class AuthApiController {
             this.authService = new AuthService();
             this.userService = new UserService();
         }
+    }
+
+    /**
+     * Authorization 헤더에서 JWT 토큰 추출
+     * @param {string} authHeader - Authorization 헤더 값
+     * @returns {string|null} 추출된 토큰 또는 null
+     */
+    extractTokenFromHeader(authHeader) {
+        return authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    }
+
+    /**
+     * 보안 이벤트 로깅
+     * @param {string} event - 이벤트 타입
+     * @param {Object} req - Express request 객체
+     * @param {string} details - 추가 상세 정보
+     */
+    logSecurityEvent(event, req, details = '') {
+        logger.warn(`JWT API 보안 이벤트: ${event}`, {
+            ip: req.ip,
+            userAgent: req.get('User-Agent'),
+            endpoint: req.originalUrl,
+            method: req.method,
+            details,
+            timestamp: new Date().toISOString()
+        });
     }
 
     /**
@@ -242,6 +269,7 @@ export default class AuthApiController {
             const { email, password } = req.body;
 
             if (!email || !password) {
+                this.logSecurityEvent('JWT 로그인 - 필수 정보 누락', req);
                 return res.status(400).json(ApiResponse.error('이메일과 비밀번호를 입력해주세요.'));
             }
 
@@ -250,6 +278,13 @@ export default class AuthApiController {
 
             // JWT 토큰 생성
             const tokens = await this.authService.authenticateAndGenerateTokens(user);
+
+            logger.info('JWT 로그인 성공', {
+                userId: user.id,
+                email: user.email,
+                ip: req.ip,
+                userAgent: req.get('User-Agent')
+            });
 
             return res.json(
                 ApiResponse.success(
@@ -262,6 +297,7 @@ export default class AuthApiController {
                 )
             );
         } catch (error) {
+            this.logSecurityEvent('JWT 로그인 실패', req, `${req.body?.email || 'unknown'}: ${error.message}`);
             console.error('JWT 로그인 오류:', error);
             return res.status(401).json(ApiResponse.error(error.message || '로그인에 실패했습니다.'));
         }
@@ -275,11 +311,18 @@ export default class AuthApiController {
             const { refreshToken } = req.body;
 
             if (!refreshToken) {
+                this.logSecurityEvent('토큰 갱신 - 리프레시 토큰 누락', req);
                 return res.status(400).json(ApiResponse.error('리프레시 토큰이 필요합니다.'));
             }
 
             // 토큰 갱신
             const tokens = await this.authService.refreshTokens(refreshToken);
+
+            logger.info('JWT 토큰 갱신 성공', {
+                userId: tokens.user.id,
+                ip: req.ip,
+                userAgent: req.get('User-Agent')
+            });
 
             return res.json(
                 ApiResponse.success(
@@ -292,6 +335,7 @@ export default class AuthApiController {
                 )
             );
         } catch (error) {
+            this.logSecurityEvent('토큰 갱신 실패', req, error.message);
             console.error('JWT 토큰 갱신 오류:', error);
             return res.status(401).json(ApiResponse.error(error.message || '토큰 갱신에 실패했습니다.'));
         }
@@ -303,9 +347,10 @@ export default class AuthApiController {
     async verifyJWTToken(req, res) {
         try {
             const authHeader = req.headers.authorization;
-            const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
+            const token = this.extractTokenFromHeader(authHeader);
 
             if (!token) {
+                this.logSecurityEvent('토큰 검증 API - 토큰 누락', req);
                 return res.status(400).json(ApiResponse.error('토큰이 필요합니다.'));
             }
 
@@ -328,6 +373,7 @@ export default class AuthApiController {
                 )
             );
         } catch (error) {
+            this.logSecurityEvent('토큰 검증 API - 검증 실패', req, error.message);
             console.error('JWT 토큰 검증 오류:', error);
             return res
                 .status(401)
