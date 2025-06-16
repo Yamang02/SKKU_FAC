@@ -115,6 +115,7 @@ class AppInitializer {
         this.app.use('/artwork', routers.ArtworkRouter);
         this.app.use('/user', routers.UserRouter);
         this.app.use('/admin', isAdmin, routers.AdminRouter);
+        this.app.use('/api/admin', isAdmin, routers.AdminApiRouter);
         this.app.use('/auth', routers.AuthRouter);
 
         logger.success('라우터 설정 완료');

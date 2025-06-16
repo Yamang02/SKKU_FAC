@@ -21,6 +21,9 @@ import SystemManagementController from '../../domain/admin/controller/system/Sys
 import UserAdminController from '../../domain/user/admin/controller/UserAdminController.js';
 import ExhibitionAdminController from '#domain/exhibition/admin/controller/ExhibitionAdminController.js';
 import ArtworkAdminController from '#domain/artwork/admin/controller/ArtworkAdminController.js';
+import UserAdminApiController from '#domain/user/controller/api/UserAdminApiController.js';
+import ArtworkAdminApiController from '#domain/artwork/controller/api/ArtworkAdminApiController.js';
+import ExhibitionAdminApiController from '#domain/exhibition/controller/api/ExhibitionAdminApiController.js';
 import BatchController from '../../domain/admin/controller/BatchController.js';
 import logger from '../utils/Logger.js';
 
@@ -91,6 +94,9 @@ export class ServiceRegistry {
                 'transient'
             );
             this.container.registerAutoWired('ArtworkAdminController', ArtworkAdminController, 'transient');
+            this.container.registerAutoWired('UserAdminApiController', UserAdminApiController, 'transient');
+            this.container.registerAutoWired('ArtworkAdminApiController', ArtworkAdminApiController, 'transient');
+            this.container.registerAutoWired('ExhibitionAdminApiController', ExhibitionAdminApiController, 'transient');
             this.container.registerAutoWired('BatchController', BatchController, 'transient');
 
             this.isRegistered = true;

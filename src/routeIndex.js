@@ -3,6 +3,7 @@ import ExhibitionRouter from './domain/exhibition/controller/ExhibitionRouter.js
 import { createArtworkRouter } from './domain/artwork/controller/ArtworkRouter.js';
 import { createUserRouter } from './domain/user/controller/UserRouter.js';
 import { createAdminRouter } from './domain/admin/controller/AdminRouter.js';
+import { createAdminApiRouter } from './domain/admin/controller/api/AdminApiRouter.js';
 import AuthRouter from './domain/auth/controller/AuthRouter.js';
 import CommonRouter from './domain/common/controller/CommonRouter.js';
 
@@ -21,6 +22,7 @@ export function createRouters(container) {
     const UserRouter = createUserRouter(userController, userApiController);
     const ArtworkRouter = createArtworkRouter(container);
     const AdminRouter = createAdminRouter(container);
+    const AdminApiRouter = createAdminApiRouter(container);
 
     return {
         HomeRouter,
@@ -28,6 +30,7 @@ export function createRouters(container) {
         ArtworkRouter,
         UserRouter,
         AdminRouter,
+        AdminApiRouter,
         AuthRouter,
         CommonRouter
     };
