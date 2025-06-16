@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="성균관대학교 순수미술동아리 갤러리">
+        <meta name="keywords" content="SKKU, 성균관대학교, 순수미술, 동아리, 갤러리, 전시">
+        <meta name="author" content="SKKU 순수미술동아리">
+
+        <!-- Open Graph Meta Tags -->
+        <meta property="og:title" content="SKKU 순수미술동아리 갤러리">
+        <meta property="og:description" content="성균관대학교 순수미술동아리의 창작 활동과 작품들을 만나보세요">
+        <meta property="og:type" content="website">
+        <meta property="og:locale" content="ko_KR">
+
+        <!-- Twitter Card Meta Tags -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="SKKU 순수미술동아리 갤러리">
+        <meta name="twitter:description" content="성균관대학교 순수미술동아리의 창작 활동과 작품들을 만나보세요">
+
+        <title>SKKU 순수미술동아리 갤러리</title>
+
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                    sans-serif;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                background-color: #f8f9fa;
+            }
+
+            #root {
+                min-height: 100vh;
+            }
+
+            .loading {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                font-size: 18px;
+                color: #2c3e50;
+            }
+
+            .loading::after {
+                content: '';
+                width: 20px;
+                height: 20px;
+                margin-left: 10px;
+                border: 2px solid #f3f3f3;
+                border-top: 2px solid #2c3e50;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <noscript>
+            <div style="text-align: center; padding: 50px; font-size: 18px; color: #e74c3c;">
+                JavaScript를 활성화해주세요. 이 애플리케이션은 JavaScript가 필요합니다.
+            </div>
+        </noscript>
+
+        <div id="root">
+            <div class="loading">로딩 중</div>
+        </div>
+    </body>
+
+</html>
