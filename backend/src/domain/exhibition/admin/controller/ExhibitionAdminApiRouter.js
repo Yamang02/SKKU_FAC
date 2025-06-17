@@ -20,5 +20,10 @@ export function createExhibitionAdminApiRouter(container) {
     router.put('/exhibitions/:id/submission-status', exhibitionAdminApiController.updateSubmissionStatus.bind(exhibitionAdminApiController));
     router.get('/exhibitions/by-status/:status', exhibitionAdminApiController.getExhibitionsByStatus.bind(exhibitionAdminApiController));
 
+    // 전시회 작품 관리 API 라우트
+    router.get('/exhibitions/:id/artworks', exhibitionAdminApiController.getExhibitionArtworks.bind(exhibitionAdminApiController));
+    router.post('/exhibitions/:id/artworks', exhibitionAdminApiController.addArtworkToExhibition.bind(exhibitionAdminApiController));
+    router.delete('/exhibitions/:id/artworks/:artworkId', exhibitionAdminApiController.removeArtworkFromExhibition.bind(exhibitionAdminApiController));
+
     return router;
 }

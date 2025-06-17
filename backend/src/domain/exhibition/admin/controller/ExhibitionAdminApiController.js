@@ -299,4 +299,110 @@ export default class ExhibitionAdminApiController {
             );
         }
     }
+
+    /**
+     * 전시회 작품 목록 조회 API
+     * GET /api/admin/exhibitions/:id/artworks
+     */
+    async getExhibitionArtworks(req, res) {
+        try {
+            const { id } = req.params;
+            const { page = 1, limit = 20 } = req.query;
+
+            const options = {
+                page: parseInt(page),
+                limit: parseInt(limit)
+            };
+
+            const result = await this.exhibitionAdminService.getExhibitionArtworks(id, options);
+
+            return res.status(200).json(
+                ApiResponse.success('전시회 작품 목록을 성공적으로 조회했습니다.', result)
+            );
+        } catch (error) {
+            if (error instanceof ExhibitionNotFoundError) {
+                return res.status(404).json(
+                    ApiResponse.error('전시회를 찾을 수 없습니다.', error.message)
+                );
+            }
+
+            logger.error('전시회 작품 목록 조회 실패:', error);
+            return res.status(500).json(
+                ApiResponse.error('전시회 작품 목록 조회에 실패했습니다.', error.message)
+            );
+        }
+    }
+
+    /**
+     * 전시회에 작품 추가 API
+     * POST /api/admin/exhibitions/:id/artworks
+     */
+    async addArtworkToExhibition(req, res) {
+        try {
+            const { id } = req.params;
+            const { artworkId } = req.body;
+
+            if (!artworkId) {
+                return res.status(400).json(
+                    ApiResponse.error('작품 ID가 필요합니다.')
+                );
+            }
+
+            const success = await this.exhibitionAdminService.addArtworkToExhibition(id, artworkId);
+
+            if (success) {
+                return res.status(200).json(
+                    ApiResponse.success('작품이 전시회에 성공적으로 추가되었습니다.')
+                );
+            } else {
+                return res.status(400).json(
+                    ApiResponse.error('작품을 전시회에 추가하는데 실패했습니다.')
+                );
+            }
+        } catch (error) {
+            if (error instanceof ExhibitionNotFoundError) {
+                return res.status(404).json(
+                    ApiResponse.error('전시회를 찾을 수 없습니다.', error.message)
+                );
+            }
+
+            logger.error('전시회에 작품 추가 실패:', error);
+            return res.status(500).json(
+                ApiResponse.error('작품을 전시회에 추가하는데 실패했습니다.', error.message)
+            );
+        }
+    }
+
+    /**
+     * 전시회에서 작품 제거 API
+     * DELETE /api/admin/exhibitions/:id/artworks/:artworkId
+     */
+    async removeArtworkFromExhibition(req, res) {
+        try {
+            const { id, artworkId } = req.params;
+
+            const success = await this.exhibitionAdminService.removeArtworkFromExhibition(id, artworkId);
+
+            if (success) {
+                return res.status(200).json(
+                    ApiResponse.success('작품이 전시회에서 성공적으로 제거되었습니다.')
+                );
+            } else {
+                return res.status(400).json(
+                    ApiResponse.error('작품을 전시회에서 제거하는데 실패했습니다.')
+                );
+            }
+        } catch (error) {
+            if (error instanceof ExhibitionNotFoundError) {
+                return res.status(404).json(
+                    ApiResponse.error('전시회를 찾을 수 없습니다.', error.message)
+                );
+            }
+
+            logger.error('전시회에서 작품 제거 실패:', error);
+            return res.status(500).json(
+                ApiResponse.error('작품을 전시회에서 제거하는데 실패했습니다.', error.message)
+            );
+        }
+    }
 }

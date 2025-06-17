@@ -127,7 +127,7 @@ export default class UserApi {
         }
     }
 
-    // 관리자용 - 사용자 목록 조회
+    // 관리자용 - 사용자 목록 조회 (새로운 RESTful API 사용)
     static async getUserList(pagination, filters = {}) {
         try {
             const params = new URLSearchParams();
@@ -146,7 +146,7 @@ export default class UserApi {
             });
 
             const queryString = params.toString();
-            return await api.get(`/admin/management/user/list?${queryString}`);
+            return await api.get(`/api/admin/users?${queryString}`);
         } catch (error) {
             console.error('관리자용 사용자 목록 조회 중 오류 발생:', error);
             showErrorMessage('사용자 목록을 불러오는데 실패했습니다.');
@@ -154,7 +154,7 @@ export default class UserApi {
         }
     }
 
-    // getUsers 별칭 - useUsers 훅에서 사용
+    // getUsers 별칭 - useUsers 훅에서 사용 (새로운 RESTful API 사용)
     static async getUsers(params = {}) {
         try {
             const queryParams = new URLSearchParams();
@@ -168,7 +168,7 @@ export default class UserApi {
 
             const queryString = queryParams.toString();
 
-            // API 엔드포인트 변경: RESTful API 사용
+            // RESTful API 사용
             return await api.get(`/api/admin/users?${queryString}`);
         } catch (error) {
             console.error('사용자 목록 조회 중 오류 발생:', error);
@@ -185,10 +185,10 @@ export default class UserApi {
         }
     }
 
-    // 관리자용 - 사용자 상세 조회
+    // 관리자용 - 사용자 상세 조회 (새로운 RESTful API 사용)
     static async getUserDetail(userId) {
         try {
-            return await api.get(`/admin/management/user/${userId}`);
+            return await api.get(`/api/admin/users/${userId}`);
         } catch (error) {
             console.error(`사용자 상세 정보(ID: ${userId}) 조회 중 오류 발생:`, error);
             showErrorMessage('사용자 정보를 불러오는데 실패했습니다.');
@@ -196,10 +196,10 @@ export default class UserApi {
         }
     }
 
-    // 관리자용 - 사용자 정보 수정
+    // 관리자용 - 사용자 정보 수정 (새로운 RESTful API 사용)
     static async updateUser(userId, updateData) {
         try {
-            return await api.put(`/admin/management/user/${userId}`, updateData);
+            return await api.put(`/api/admin/users/${userId}`, updateData);
         } catch (error) {
             console.error(`사용자 정보 수정(ID: ${userId}) 중 오류 발생:`, error);
             showErrorMessage('사용자 정보 수정에 실패했습니다.');
@@ -207,10 +207,10 @@ export default class UserApi {
         }
     }
 
-    // 관리자용 - 사용자 삭제
+    // 관리자용 - 사용자 삭제 (새로운 RESTful API 사용)
     static async deleteUser(userId) {
         try {
-            return await api.delete(`/admin/management/user/${userId}`);
+            return await api.delete(`/api/admin/users/${userId}`);
         } catch (error) {
             console.error(`사용자 삭제(ID: ${userId}) 중 오류 발생:`, error);
             showErrorMessage('사용자 삭제에 실패했습니다.');

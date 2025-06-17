@@ -5,7 +5,7 @@ import api from '../utils/api.js';
 import { showErrorMessage, showSuccessMessage } from '../utils/notification.js';
 
 export default class ExhibitionApi {
-    // 관리자용 - 전시 목록 조회
+    // 관리자용 - 전시 목록 조회 (새로운 RESTful API 사용)
     static async getExhibitionList(pagination, filters = {}) {
         try {
             const params = new URLSearchParams();
@@ -24,7 +24,7 @@ export default class ExhibitionApi {
             });
 
             const queryString = params.toString();
-            return await api.get(`/admin/management/exhibition/list?${queryString}`);
+            return await api.get(`/api/admin/exhibitions?${queryString}`);
         } catch (error) {
             console.error('관리자용 전시 목록 조회 중 오류 발생:', error);
             showErrorMessage('전시 목록을 불러오는데 실패했습니다.');
@@ -32,10 +32,10 @@ export default class ExhibitionApi {
         }
     }
 
-    // 관리자용 - 전시 상세 조회
+    // 관리자용 - 전시 상세 조회 (새로운 RESTful API 사용)
     static async getExhibitionDetail(exhibitionId) {
         try {
-            return await api.get(`/admin/management/exhibition/${exhibitionId}`);
+            return await api.get(`/api/admin/exhibitions/${exhibitionId}`);
         } catch (error) {
             console.error(`전시 상세 정보(ID: ${exhibitionId}) 조회 중 오류 발생:`, error);
             showErrorMessage('전시 정보를 불러오는데 실패했습니다.');
@@ -43,10 +43,10 @@ export default class ExhibitionApi {
         }
     }
 
-    // 관리자용 - 전시 등록
+    // 관리자용 - 전시 등록 (새로운 RESTful API 사용)
     static async registerExhibition(exhibitionData) {
         try {
-            const response = await api.post('/admin/management/exhibition/register', exhibitionData);
+            const response = await api.post('/api/admin/exhibitions', exhibitionData);
             showSuccessMessage('전시가 성공적으로 등록되었습니다.');
             return response;
         } catch (error) {
@@ -64,10 +64,10 @@ export default class ExhibitionApi {
         }
     }
 
-    // 관리자용 - 전시 수정
+    // 관리자용 - 전시 수정 (새로운 RESTful API 사용)
     static async updateExhibition(exhibitionId, exhibitionData) {
         try {
-            const response = await api.put(`/admin/management/exhibition/${exhibitionId}`, exhibitionData);
+            const response = await api.put(`/api/admin/exhibitions/${exhibitionId}`, exhibitionData);
             showSuccessMessage('전시 정보가 성공적으로 수정되었습니다.');
             return response;
         } catch (error) {
@@ -85,10 +85,10 @@ export default class ExhibitionApi {
         }
     }
 
-    // 관리자용 - 전시 삭제
+    // 관리자용 - 전시 삭제 (새로운 RESTful API 사용)
     static async deleteExhibition(exhibitionId) {
         try {
-            const response = await api.delete(`/admin/management/exhibition/${exhibitionId}`);
+            const response = await api.delete(`/api/admin/exhibitions/${exhibitionId}`);
             showSuccessMessage('전시가 성공적으로 삭제되었습니다.');
             return response;
         } catch (error) {
@@ -98,10 +98,10 @@ export default class ExhibitionApi {
         }
     }
 
-    // 관리자용 - 전시 상태 변경
+    // 관리자용 - 전시 상태 변경 (새로운 RESTful API 사용)
     static async updateExhibitionStatus(exhibitionId, status) {
         try {
-            const response = await api.put(`/admin/management/exhibition/${exhibitionId}/status`, { status });
+            const response = await api.put(`/api/admin/exhibitions/${exhibitionId}/status`, { status });
             showSuccessMessage(`전시 상태가 ${status}로 변경되었습니다.`);
             return response;
         } catch (error) {
@@ -149,10 +149,10 @@ export default class ExhibitionApi {
         }
     }
 
-    // 관리자용 - 전시에 작품 추가
+    // 관리자용 - 전시에 작품 추가 (새로운 RESTful API 사용)
     static async addArtworkToExhibition(exhibitionId, artworkId) {
         try {
-            const response = await api.post(`/admin/management/exhibition/${exhibitionId}/artwork`, {
+            const response = await api.post(`/api/admin/exhibitions/${exhibitionId}/artworks`, {
                 artworkId: artworkId
             });
             showSuccessMessage('작품이 전시에 성공적으로 추가되었습니다.');
@@ -164,10 +164,10 @@ export default class ExhibitionApi {
         }
     }
 
-    // 관리자용 - 전시에서 작품 제거
+    // 관리자용 - 전시에서 작품 제거 (새로운 RESTful API 사용)
     static async removeArtworkFromExhibition(exhibitionId, artworkId) {
         try {
-            const response = await api.delete(`/admin/management/exhibition/${exhibitionId}/artwork/${artworkId}`);
+            const response = await api.delete(`/api/admin/exhibitions/${exhibitionId}/artworks/${artworkId}`);
             showSuccessMessage('작품이 전시에서 성공적으로 제거되었습니다.');
             return response;
         } catch (error) {
@@ -196,11 +196,11 @@ export default class ExhibitionApi {
         return formData;
     }
 
-    // FormData를 사용한 전시 등록 (포스터 이미지 포함)
+    // FormData를 사용한 전시 등록 (포스터 이미지 포함, 새로운 RESTful API 사용)
     static async registerExhibitionWithPoster(exhibitionData, posterFile) {
         try {
             const formData = this.createFormDataForExhibition(exhibitionData, posterFile);
-            const response = await api.post('/admin/management/exhibition/register', formData);
+            const response = await api.post('/api/admin/exhibitions', formData);
             showSuccessMessage('전시가 성공적으로 등록되었습니다.');
             return response;
         } catch (error) {
@@ -210,11 +210,11 @@ export default class ExhibitionApi {
         }
     }
 
-    // FormData를 사용한 전시 수정 (포스터 이미지 포함)
+    // FormData를 사용한 전시 수정 (포스터 이미지 포함, 새로운 RESTful API 사용)
     static async updateExhibitionWithPoster(exhibitionId, exhibitionData, posterFile = null) {
         try {
             const formData = this.createFormDataForExhibition(exhibitionData, posterFile);
-            const response = await api.put(`/admin/management/exhibition/${exhibitionId}`, formData);
+            const response = await api.put(`/api/admin/exhibitions/${exhibitionId}`, formData);
             showSuccessMessage('전시가 성공적으로 수정되었습니다.');
             return response;
         } catch (error) {

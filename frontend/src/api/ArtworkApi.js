@@ -5,7 +5,7 @@ import api from '../utils/api.js';
 import { showErrorMessage, showSuccessMessage } from '../utils/notification.js';
 
 export default class ArtworkApi {
-    // 관리자용 - 작품 목록 조회
+    // 관리자용 - 작품 목록 조회 (새로운 RESTful API 사용)
     static async getArtworkList(pagination, filters = {}) {
         try {
             const params = new URLSearchParams();
@@ -24,7 +24,7 @@ export default class ArtworkApi {
             });
 
             const queryString = params.toString();
-            return await api.get(`/admin/management/artwork/list?${queryString}`);
+            return await api.get(`/api/admin/artworks?${queryString}`);
         } catch (error) {
             console.error('관리자용 작품 목록 조회 중 오류 발생:', error);
             showErrorMessage('작품 목록을 불러오는데 실패했습니다.');
@@ -32,10 +32,10 @@ export default class ArtworkApi {
         }
     }
 
-    // 관리자용 - 작품 상세 조회
+    // 관리자용 - 작품 상세 조회 (새로운 RESTful API 사용)
     static async getArtworkDetail(artworkId) {
         try {
-            return await api.get(`/admin/management/artwork/${artworkId}`);
+            return await api.get(`/api/admin/artworks/${artworkId}`);
         } catch (error) {
             console.error(`작품 상세 정보(ID: ${artworkId}) 조회 중 오류 발생:`, error);
             showErrorMessage('작품 정보를 불러오는데 실패했습니다.');
@@ -43,10 +43,10 @@ export default class ArtworkApi {
         }
     }
 
-    // 관리자용 - 작품 등록
+    // 관리자용 - 작품 등록 (새로운 RESTful API 사용)
     static async registerArtwork(artworkData) {
         try {
-            const response = await api.post('/admin/management/artwork/register', artworkData);
+            const response = await api.post('/api/admin/artworks', artworkData);
             showSuccessMessage('작품이 성공적으로 등록되었습니다.');
             return response;
         } catch (error) {
@@ -64,10 +64,10 @@ export default class ArtworkApi {
         }
     }
 
-    // 관리자용 - 작품 수정
+    // 관리자용 - 작품 수정 (새로운 RESTful API 사용)
     static async updateArtwork(artworkId, artworkData) {
         try {
-            const response = await api.put(`/admin/management/artwork/${artworkId}`, artworkData);
+            const response = await api.put(`/api/admin/artworks/${artworkId}`, artworkData);
             showSuccessMessage('작품 정보가 성공적으로 수정되었습니다.');
             return response;
         } catch (error) {
@@ -85,10 +85,10 @@ export default class ArtworkApi {
         }
     }
 
-    // 관리자용 - 작품 삭제
+    // 관리자용 - 작품 삭제 (새로운 RESTful API 사용)
     static async deleteArtwork(artworkId) {
         try {
-            const response = await api.delete(`/admin/management/artwork/${artworkId}`);
+            const response = await api.delete(`/api/admin/artworks/${artworkId}`);
             showSuccessMessage('작품이 성공적으로 삭제되었습니다.');
             return response;
         } catch (error) {
@@ -98,10 +98,10 @@ export default class ArtworkApi {
         }
     }
 
-    // 관리자용 - 작품 상태 변경
+    // 관리자용 - 작품 상태 변경 (새로운 RESTful API 사용)
     static async updateArtworkStatus(artworkId, status) {
         try {
-            const response = await api.put(`/admin/management/artwork/${artworkId}/status`, { status });
+            const response = await api.put(`/api/admin/artworks/${artworkId}/status`, { status });
             showSuccessMessage(`작품 상태가 ${status}로 변경되었습니다.`);
             return response;
         } catch (error) {
@@ -168,11 +168,11 @@ export default class ArtworkApi {
         return formData;
     }
 
-    // FormData를 사용한 작품 등록 (이미지 포함)
+    // FormData를 사용한 작품 등록 (이미지 포함, 새로운 RESTful API 사용)
     static async registerArtworkWithImage(artworkData, imageFile) {
         try {
             const formData = this.createFormDataForArtwork(artworkData, imageFile);
-            const response = await api.post('/admin/management/artwork/register', formData);
+            const response = await api.post('/api/admin/artworks', formData);
             showSuccessMessage('작품이 성공적으로 등록되었습니다.');
             return response;
         } catch (error) {
@@ -182,11 +182,11 @@ export default class ArtworkApi {
         }
     }
 
-    // FormData를 사용한 작품 수정 (이미지 포함)
+    // FormData를 사용한 작품 수정 (이미지 포함, 새로운 RESTful API 사용)
     static async updateArtworkWithImage(artworkId, artworkData, imageFile = null) {
         try {
             const formData = this.createFormDataForArtwork(artworkData, imageFile);
-            const response = await api.put(`/admin/management/artwork/${artworkId}`, formData);
+            const response = await api.put(`/api/admin/artworks/${artworkId}`, formData);
             showSuccessMessage('작품이 성공적으로 수정되었습니다.');
             return response;
         } catch (error) {

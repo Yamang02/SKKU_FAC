@@ -1,16 +1,13 @@
 import express from 'express';
-import { imageUploadMiddleware } from '../../../common/middleware/imageUploadMiddleware.js';
 import {
     requireAdminAccess,
     requireUserManagement,
-    requireContentManagement,
-    isReadOnlyAdmin
+    requireContentManagement
 } from '../../../common/middleware/auth.js';
 
-
 /**
- * 관리자 라우터 팩토리 함수
- * 의존성 주입 컨테이너를 받아서 라우터를 생성합니다.
+ * 관리자 메인 라우터 팩토리 함수
+ * 각 도메인별 admin 라우터들을 마운트하여 통합 관리합니다.
  * @param {Container} container - 의존성 주입 컨테이너
  * @returns {express.Router} 생성된 라우터
  */
@@ -21,177 +18,156 @@ export function createAdminRouter(container) {
     AdminRouter.use(requireAdminAccess());
 
     // 의존성 주입된 컨트롤러들을 해결
-    const adminController = container.resolve('SystemManagementController');
-    const userAdminController = container.resolve('UserAdminController');
-    const exhibitionAdminController = container.resolve('ExhibitionAdminController');
-    const artworkAdminController = container.resolve('ArtworkAdminController');
-    const batchController = container.resolve('BatchController');
+    const systemManagementController = container.resolve('SystemManagementController');
 
-    // 타임아웃 미들웨어 (삭제 작업용)
-    const deleteTimeoutMiddleware = (req, res, next) => {
-        // 삭제 작업에 대해 30초 타임아웃 설정
-        req.setTimeout(30000, () => {
-            console.log('요청 타임아웃 발생 - 30초 초과');
-            if (!res.headersSent) {
-                res.status(408).json({
-                    success: false,
-                    message: '요청 처리 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.'
-                });
-            }
-        });
-        next();
-    };
-
-    // 읽기 전용 관리자 체크 미들웨어
-    const preventReadOnlyActions = (req, res, next) => {
-        // GET 요청은 허용
-        if (req.method === 'GET') {
-            return next();
-        }
-
-        // 읽기 전용 관리자인 경우 쓰기 작업 차단
-        isReadOnlyAdmin()(req, res, err => {
-            if (err) return next(err);
-
-            // 읽기 전용 관리자라면 403 반환
-            return res.status(403).json({
-                success: false,
-                error: '읽기 전용 관리자는 수정 작업을 수행할 수 없습니다.'
-            });
-        });
-    };
-
-    // 관리자 대시보드
-    AdminRouter.get(['/', '/dashboard'], requireUserManagement(), (req, res) => adminController.getDashboard(req, res));
-
-    // 사용자 관리 라우트
-    AdminRouter.get('/management/user', requireUserManagement(), (req, res) =>
-        userAdminController.getManagementUserList(req, res)
-    );
-    AdminRouter.get(
-        '/management/user/:id',
-        requireUserManagement(),
-        (req, res) => userAdminController.getManagementUserDetail(req, res)
-    );
-    AdminRouter.put(
-        '/management/user/:id',
-        requireUserManagement(),
-        preventReadOnlyActions,
-        (req, res) => userAdminController.updateManagementUser(req, res)
-    );
-    AdminRouter.delete(
-        '/management/user/:id',
-        requireUserManagement(),
-        preventReadOnlyActions,
-        deleteTimeoutMiddleware,
-        (req, res) => userAdminController.deleteManagementUser(req, res)
-    );
-    AdminRouter.post(
-        '/management/user/:id/reset-password',
-        requireUserManagement(),
-        preventReadOnlyActions,
-        (req, res) => userAdminController.resetManagementUserPassword(req, res)
+    // ==================== 대시보드 (전 도메인 커버) ==================== //
+    AdminRouter.get(['/', '/dashboard'], requireUserManagement(), (req, res) =>
+        systemManagementController.getDashboard(req, res)
     );
 
-    // 전시회 관리 라우트
-    AdminRouter.get(
-        '/management/exhibition',
-        requireContentManagement(),
-        (req, res) => exhibitionAdminController.getManagementExhibitionListPage(req, res)
-    );
-    AdminRouter.get('/management/exhibition/new', requireContentManagement(), (req, res) =>
-        exhibitionAdminController.getManagementExhibitionCreatePage(req, res)
-    );
-    AdminRouter.post(
-        '/management/exhibition/new',
-        requireContentManagement(),
-        preventReadOnlyActions,
-        imageUploadMiddleware('exhibition'),
-        (req, res) => exhibitionAdminController.createManagementExhibition(req, res)
-    );
-    AdminRouter.get(
-        '/management/exhibition/:id',
-        requireContentManagement(),
-        (req, res) => exhibitionAdminController.getManagementExhibitionDetailPage(req, res)
-    );
-    AdminRouter.put(
-        '/management/exhibition/:id',
-        requireContentManagement(),
-        preventReadOnlyActions,
-        (req, res) => exhibitionAdminController.updateManagementExhibition(req, res)
-    );
-    AdminRouter.delete(
-        '/management/exhibition/:id',
-        requireContentManagement(),
-        preventReadOnlyActions,
-        deleteTimeoutMiddleware,
-        (req, res) => exhibitionAdminController.deleteManagementExhibition(req, res)
-    );
-    AdminRouter.post(
-        '/management/exhibition/:id/featured',
-        requireContentManagement(),
-        preventReadOnlyActions,
-        (req, res) => exhibitionAdminController.toggleFeatured(req, res)
+    // ==================== 시스템 관리 (전 도메인 커버) ==================== //
+    AdminRouter.get('/system', requireUserManagement(), (req, res) =>
+        systemManagementController.getSystemInfo(req, res)
     );
 
-    // 작품 관리 라우트
-    AdminRouter.get(
-        '/management/artwork',
-        requireContentManagement(),
-        (req, res) => artworkAdminController.getManagementArtworkListPage(req, res)
-    );
-    AdminRouter.get(
-        '/management/artwork/:id',
-        requireContentManagement(),
-        (req, res) => artworkAdminController.getManagementArtworkDetailPage(req, res)
-    );
-    AdminRouter.put(
-        '/management/artwork/:id',
-        requireContentManagement(),
-        preventReadOnlyActions,
-        (req, res) => artworkAdminController.updateManagementArtwork(req, res)
-    );
-    AdminRouter.delete(
-        '/management/artwork/:id',
-        requireContentManagement(),
-        preventReadOnlyActions,
-        deleteTimeoutMiddleware,
-        (req, res) => artworkAdminController.deleteManagementArtwork(req, res)
-    );
-    AdminRouter.post(
-        '/management/artwork/:id/featured',
-        requireContentManagement(),
-        preventReadOnlyActions,
-        (req, res) => artworkAdminController.toggleFeatured(req, res)
+    AdminRouter.get('/system/health', requireUserManagement(), (req, res) =>
+        systemManagementController.getSystemHealth(req, res)
     );
 
-    // 배치 처리 라우트
-    AdminRouter.get('/batch', requireContentManagement(), (req, res) => batchController.getBatchJobListPage(req, res));
-    AdminRouter.get('/batch/:jobId', requireContentManagement(), (req, res) => batchController.getBatchJobDetailPage(req, res));
-    AdminRouter.post('/batch/:jobId/cancel', requireContentManagement(), preventReadOnlyActions, (req, res) =>
-        batchController.cancelBatchJob(req, res)
+    AdminRouter.get('/system/stats', requireUserManagement(), (req, res) =>
+        systemManagementController.getSystemStats(req, res)
     );
 
-    // 배치 작업 생성 라우트
-    AdminRouter.post('/batch/bulk-delete-users', requireUserManagement(), preventReadOnlyActions, (req, res) =>
-        batchController.createBulkDeleteUsersJob(req, res)
+    // ==================== 도메인별 Admin 라우터 마운트 ==================== //
+
+    // 사용자 관리 라우터 마운트
+    const userAdminApiController = container.resolve('UserAdminApiController');
+    const userAdminRouter = express.Router();
+
+    // User Admin Routes
+    userAdminRouter.get('/', requireUserManagement(), (req, res) =>
+        userAdminApiController.getUsers(req, res)
     );
-    AdminRouter.post('/batch/bulk-delete-artworks', requireContentManagement(), preventReadOnlyActions, (req, res) =>
-        batchController.createBulkDeleteArtworksJob(req, res)
+    userAdminRouter.get('/:id', requireUserManagement(), (req, res) =>
+        userAdminApiController.getUser(req, res)
     );
-    AdminRouter.post('/batch/bulk-delete-exhibitions', requireContentManagement(), preventReadOnlyActions, (req, res) =>
-        batchController.createBulkDeleteExhibitionsJob(req, res)
+    userAdminRouter.post('/', requireUserManagement(), (req, res) =>
+        userAdminApiController.createUser(req, res)
     );
-    AdminRouter.post('/batch/bulk-feature-toggle', requireContentManagement(), preventReadOnlyActions, (req, res) =>
-        batchController.createBulkFeatureToggleJob(req, res)
+    userAdminRouter.put('/:id', requireUserManagement(), (req, res) =>
+        userAdminApiController.updateUser(req, res)
+    );
+    userAdminRouter.delete('/:id', requireUserManagement(), (req, res) =>
+        userAdminApiController.deleteUser(req, res)
+    );
+    userAdminRouter.put('/:id/role', requireUserManagement(), (req, res) =>
+        userAdminApiController.updateUserRole(req, res)
+    );
+    userAdminRouter.post('/:id/reset-password', requireUserManagement(), (req, res) =>
+        userAdminApiController.resetUserPassword(req, res)
+    );
+    userAdminRouter.get('/stats', requireUserManagement(), (req, res) =>
+        userAdminApiController.getUserStats(req, res)
     );
 
-    // 배치 작업 API 라우트 (AJAX용)
-    AdminRouter.get('/api/batch/:jobId/status', requireContentManagement(), (req, res) =>
-        batchController.getBatchJobStatusAPI(req, res)
-    );
-    AdminRouter.get('/api/batch/stats', requireContentManagement(), (req, res) => batchController.getBatchJobStatsAPI(req, res));
+    AdminRouter.use('/users', userAdminRouter);
 
+    // 전시회 관리 라우터 마운트
+    const exhibitionAdminApiController = container.resolve('ExhibitionAdminApiController');
+    const exhibitionAdminRouter = express.Router();
+
+    // Exhibition Admin Routes
+    exhibitionAdminRouter.get('/', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.getExhibitionList(req, res)
+    );
+    exhibitionAdminRouter.get('/:id', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.getExhibitionDetail(req, res)
+    );
+    exhibitionAdminRouter.post('/', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.createExhibition(req, res)
+    );
+    exhibitionAdminRouter.put('/:id', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.updateExhibition(req, res)
+    );
+    exhibitionAdminRouter.delete('/:id', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.deleteExhibition(req, res)
+    );
+    exhibitionAdminRouter.post('/:id/toggle-featured', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.toggleFeatured(req, res)
+    );
+    exhibitionAdminRouter.put('/:id/status', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.changeExhibitionStatus(req, res)
+    );
+    exhibitionAdminRouter.put('/:id/submission-status', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.updateSubmissionStatus(req, res)
+    );
+    exhibitionAdminRouter.get('/by-status/:status', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.getExhibitionsByStatus(req, res)
+    );
+    exhibitionAdminRouter.get('/:id/artworks', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.getExhibitionArtworks(req, res)
+    );
+    exhibitionAdminRouter.post('/:id/artworks', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.addArtworkToExhibition(req, res)
+    );
+    exhibitionAdminRouter.delete('/:id/artworks/:artworkId', requireContentManagement(), (req, res) =>
+        exhibitionAdminApiController.removeArtworkFromExhibition(req, res)
+    );
+
+    AdminRouter.use('/exhibitions', exhibitionAdminRouter);
+
+    // 작품 관리 라우터 마운트
+    const artworkAdminApiController = container.resolve('ArtworkAdminApiController');
+    const artworkAdminRouter = express.Router();
+
+    // Artwork Admin Routes
+    artworkAdminRouter.get('/', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.getArtworkList(req, res)
+    );
+    artworkAdminRouter.get('/:id', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.getArtworkDetail(req, res)
+    );
+    artworkAdminRouter.post('/', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.createArtwork(req, res)
+    );
+    artworkAdminRouter.put('/:id', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.updateArtwork(req, res)
+    );
+    artworkAdminRouter.delete('/:id', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.deleteArtwork(req, res)
+    );
+    artworkAdminRouter.put('/:id/approve', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.approveArtwork(req, res)
+    );
+    artworkAdminRouter.put('/:id/reject', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.rejectArtwork(req, res)
+    );
+    artworkAdminRouter.get('/stats', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.getArtworkStats(req, res)
+    );
+    artworkAdminRouter.post('/:id/upload-image', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.uploadArtworkImage(req, res)
+    );
+    artworkAdminRouter.put('/:id/status', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.updateArtworkStatus(req, res)
+    );
+    artworkAdminRouter.post('/:id/toggle-featured', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.toggleFeatured(req, res)
+    );
+    artworkAdminRouter.get('/form-data', requireContentManagement(), (req, res) =>
+        artworkAdminApiController.getArtworkFormData(req, res)
+    );
+
+    AdminRouter.use('/artworks', artworkAdminRouter);
+
+    // ==================== 기존 EJS 라우트 리다이렉션 (하위 호환성) ==================== //
+    // 기존 management 경로를 새로운 RESTful 경로로 리다이렉트
+    AdminRouter.get('/management/user', (req, res) => res.redirect(301, '/admin/users'));
+    AdminRouter.get('/management/user/:id', (req, res) => res.redirect(301, `/admin/users/${req.params.id}`));
+    AdminRouter.get('/management/exhibition', (req, res) => res.redirect(301, '/admin/exhibitions'));
+    AdminRouter.get('/management/exhibition/:id', (req, res) => res.redirect(301, `/admin/exhibitions/${req.params.id}`));
+    AdminRouter.get('/management/artwork', (req, res) => res.redirect(301, '/admin/artworks'));
+    AdminRouter.get('/management/artwork/:id', (req, res) => res.redirect(301, `/admin/artworks/${req.params.id}`));
 
     return AdminRouter;
 }

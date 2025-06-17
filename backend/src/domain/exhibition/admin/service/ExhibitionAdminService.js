@@ -1,4 +1,3 @@
-
 import ExhibitionManagementDto from '#src/domain/admin/model/dto/exhibition/ExhibitionManagementDto.js';
 import ExhibitionListManagementDto from '#src/domain/admin/model/dto/exhibition/ExhibitionListManagementDto.js';
 import ExhibitionListManagementDataDto from '#src/domain/admin/model/dto/exhibition/ExhibitionListManagementDataDto.js';
@@ -236,6 +235,58 @@ export default class ExhibitionAdminService extends BaseAdminService {
             },
             '상태별 전시회 목록 조회',
             { status, options }
+        );
+    }
+
+    /**
+     * 전시회의 작품 목록을 조회합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {Object} options - 페이지네이션 옵션
+     * @returns {Promise<Object>} 전시회 작품 목록
+     */
+    async getExhibitionArtworks(exhibitionId, options = {}) {
+        return this.safeExecute(
+            async () => {
+                // ExhibitionService를 통해 전시회 작품 목록 조회
+                const result = await this.exhibitionService.getExhibitionArtworks(exhibitionId, options);
+                return result;
+            },
+            '전시회 작품 목록 조회',
+            { exhibitionId, options }
+        );
+    }
+
+    /**
+     * 전시회에 작품을 추가합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {string} artworkId - 작품 ID
+     * @returns {Promise<boolean>} 성공 여부
+     */
+    async addArtworkToExhibition(exhibitionId, artworkId) {
+        return this.safeExecute(
+            async () => {
+                // ExhibitionService를 통해 작품을 전시회에 추가
+                return await this.exhibitionService.addArtworkToExhibition(exhibitionId, artworkId);
+            },
+            '전시회에 작품 추가',
+            { exhibitionId, artworkId }
+        );
+    }
+
+    /**
+     * 전시회에서 작품을 제거합니다.
+     * @param {string} exhibitionId - 전시회 ID
+     * @param {string} artworkId - 작품 ID
+     * @returns {Promise<boolean>} 성공 여부
+     */
+    async removeArtworkFromExhibition(exhibitionId, artworkId) {
+        return this.safeExecute(
+            async () => {
+                // ExhibitionService를 통해 전시회에서 작품 제거
+                return await this.exhibitionService.removeArtworkFromExhibition(exhibitionId, artworkId);
+            },
+            '전시회에서 작품 제거',
+            { exhibitionId, artworkId }
         );
     }
 }

@@ -1,46 +1,43 @@
-import ViewResolver from '../../../../common/utils/ViewResolver.js';
-import { ViewPath } from '../../../../common/constants/ViewPath.js';
-import BaseAdminController from '../BaseAdminController.js';
+import { ApiResponse } from '../../../common/model/ApiResponse.js';
+import logger from '../../../../common/utils/Logger.js';
 
-export default class SystemManagementController extends BaseAdminController {
+export default class SystemManagementController {
     // 의존성 주입을 위한 static dependencies 정의
     static dependencies = ['SystemManagementService'];
 
     constructor(systemManagementService = null) {
-        super('SystemManagementController');
-
-        // 의존성 주입 방식 (새로운 방식)
-        if (systemManagementService) {
-            this.systemManagementService = systemManagementService;
-        } else {
-            // 기존 방식 호환성 유지 (임시)
-
+        // 의존성 주입 확인
+        if (!systemManagementService) {
             throw new Error('SystemManagementService가 주입되지 않았습니다.');
         }
+
+        this.systemManagementService = systemManagementService;
     }
 
     /**
-     * 관리자 대시보드를 렌더링합니다.
+     * 관리자 대시보드 데이터를 JSON으로 반환합니다.
+     * GET /admin/dashboard
      */
     async getDashboard(req, res) {
-        return this.safeExecuteSSR(
-            async () => {
-                const dashboardData = await this.systemManagementService.getDashboardData();
+        try {
+            const dashboardData = await this.systemManagementService.getDashboardData();
 
-                return ViewResolver.render(res, ViewPath.ADMIN.DASHBOARD, {
-                    title: '관리자 대시보드',
-                    user: req.user,
-                    // dashboardData 객체를 풀어서 전달
+            return res.status(200).json(
+                ApiResponse.success('대시보드 데이터를 성공적으로 조회했습니다.', {
+                    user: {
+                        id: req.user?.id,
+                        name: req.user?.name,
+                        email: req.user?.email,
+                        role: req.user?.role
+                    },
                     ...dashboardData
-                });
-            },
-            req,
-            res,
-            {
-                operationName: '대시보드 조회',
-                errorRedirectPath: '/admin',
-                errorMessage: '대시보드 데이터를 불러오는 중 오류가 발생했습니다.'
-            }
-        );
+                })
+            );
+        } catch (error) {
+            logger.error('대시보드 데이터 조회 실패:', error);
+            return res.status(500).json(
+                ApiResponse.error('대시보드 데이터를 불러오는 중 오류가 발생했습니다.', error.message)
+            );
+        }
     }
 }
