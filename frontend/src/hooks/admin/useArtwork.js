@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import ArtworkApi from '../../api/ArtworkApi.js';
+import AdminArtworkApi from '../../api/admin/AdminArtworkApi.js';
 
 export const useArtwork = () => {
     const { id } = useParams();
@@ -28,7 +28,7 @@ export const useArtwork = () => {
             setLoading(true);
             setError(null);
 
-            const response = await ArtworkApi.getArtworkDetail(id);
+            const response = await AdminArtworkApi.getArtworkDetail(id);
 
             if (response.success) {
                 const artworkData = response.data;
@@ -83,7 +83,7 @@ export const useArtwork = () => {
                 tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : []
             };
 
-            const response = await ArtworkApi.updateArtwork(id, updateData);
+            const response = await AdminArtworkApi.updateArtwork(id, updateData);
 
             if (response.success) {
                 await loadArtwork(); // 최신 데이터로 새로고침
@@ -109,7 +109,7 @@ export const useArtwork = () => {
             setLoading(true);
             setError(null);
 
-            const response = await ArtworkApi.deleteArtwork(id);
+            const response = await AdminArtworkApi.deleteArtwork(id);
 
             if (response.success) {
                 return { success: true, message: '작품이 성공적으로 삭제되었습니다.' };
@@ -134,7 +134,7 @@ export const useArtwork = () => {
             setLoading(true);
             setError(null);
 
-            const response = await ArtworkApi.updateArtworkStatus(id, newStatus);
+            const response = await AdminArtworkApi.updateArtworkStatus(id, newStatus);
 
             if (response.success) {
                 await loadArtwork(); // 최신 데이터로 새로고침

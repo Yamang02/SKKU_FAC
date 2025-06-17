@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import UserApi from '../../api/UserApi.js';
+import { AdminUserApi } from '../../api/index.js';
 
-export const useUsers = () => {
+export const useAdminUsers = () => {
     const [users, setUsers] = useState([]); // 빈 배열로 초기화
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -24,20 +24,21 @@ export const useUsers = () => {
                 ...newFilters,
             };
 
-            const response = await UserApi.getUsers(params);
+            const response = await AdminUserApi.getUserList(params);
 
             if (response.success) {
-                setUsers(response.data.users || []);
+                // 백엔드는 { items: [], total: 0, page: {} } 구조로 응답
+                setUsers(response.data.items || []);
                 setTotal(response.data.total || 0);
             } else {
                 setError(response.error || response.message || '사용자 목록을 불러오는 데 실패했습니다.');
-                setUsers(response.data?.users || []);
+                setUsers(response.data?.items || []);
                 setTotal(response.data?.total || 0);
             }
-        } catch (err) {
-            console.error('사용자 목록 조회 오류:', err);
-            setError('네트워크 오류가 발생했습니다.');
-            setUsers([]);  // 빈 배열로 초기화
+        } catch (error) {
+            console.error('사용자 목록 로드 중 오류:', error);
+            setError('사용자 목록을 불러오는 중 오류가 발생했습니다.');
+            setUsers([]);
             setTotal(0);
         } finally {
             setLoading(false);
@@ -47,7 +48,7 @@ export const useUsers = () => {
     const updateUser = useCallback(async (userId, updateData) => {
         try {
             setLoading(true);
-            const response = await UserApi.updateUser(userId, updateData);
+            const response = await AdminUserApi.updateUser(userId, updateData);
 
             if (response.success) {
                 // 목록 새로고침
@@ -67,7 +68,7 @@ export const useUsers = () => {
     const deleteUser = useCallback(async (userId) => {
         try {
             setLoading(true);
-            const response = await UserApi.deleteUser(userId);
+            const response = await AdminUserApi.deleteUser(userId);
 
             if (response.success) {
                 // 목록 새로고침
@@ -84,44 +85,46 @@ export const useUsers = () => {
         }
     }, [loadUsers]);
 
-    const handleFilterChange = useCallback((field, value) => {
-        const newFilters = { ...filters, [field]: value };
+    const handleFilterChange = useCallback((newFilters) => {
         setFilters(newFilters);
         setPage(1); // 필터 변경 시 첫 페이지로
-    }, [filters]);
+        loadUsers(newFilters, 1);
+    }, [loadUsers]);
 
     const handlePageChange = useCallback((newPage) => {
         setPage(newPage);
-    }, []);
+        loadUsers(filters, newPage);
+    }, [filters, loadUsers]);
 
     const resetFilters = useCallback(() => {
-        const resetFilters = { status: '', role: '', keyword: '' };
-        setFilters(resetFilters);
+        const defaultFilters = {
+            status: '',
+            role: '',
+            keyword: '',
+        };
+        setFilters(defaultFilters);
         setPage(1);
+        loadUsers(defaultFilters, 1);
+    }, [loadUsers]);
+
+    useEffect(() => {
+        loadUsers();
     }, []);
 
-    // 초기 로드
-    useEffect(() => {
-        loadUsers(filters, page);
-    }, [filters, page]);
-
     return {
-        // State
         users,
         loading,
         error,
         total,
         page,
         filters,
-
-        // Actions
-        loadUsers,
-        updateUser,
-        deleteUser,
         handleFilterChange,
         handlePageChange,
         resetFilters,
+        reload: () => loadUsers(filters, page),
+        updateUser,
+        deleteUser,
     };
 };
 
-export default useUsers;
+export default useAdminUsers;

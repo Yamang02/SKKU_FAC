@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 
 import AdminLayout from '../../components/admin/AdminLayout';
 import { Card, Button, Icon } from '../../components/common';
-import { useUser } from '../../hooks';
+import { useAdminUser } from '../../hooks';
 import { adminColors, sizes } from '../../constants';
 
 const UserDetailScreen = () => {
@@ -18,129 +18,94 @@ const UserDetailScreen = () => {
         deleteUser,
         handleFormChange,
         resetForm,
-    } = useUser();
+        reload,
+    } = useAdminUser();
 
     const [isEditing, setIsEditing] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
 
-    // Select 컴포넌트
-    const Select = ({ value, onChange, disabled, children, style }) => (
-        <select
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            disabled={disabled}
-            style={Object.assign({}, styles.select, disabled && styles.selectDisabled, style)}
-        >
-            {children}
-        </select>
-    );
+    // 사용자 정보 수정
+    const handleUpdate = async () => {
+        try {
+            setIsUpdating(true);
+            const result = await updateUser(formData);
 
-    // 배지 컴포넌트
-    const Badge = ({ type, value, displayValue }) => {
-        let badgeStyle = styles.badge;
-
-        if (type === 'role') {
-            switch (value?.toLowerCase()) {
-                case 'admin': badgeStyle = Object.assign({}, styles.badge, styles.badgeAdmin); break;
-                case 'skku_member': badgeStyle = Object.assign({}, styles.badge, styles.badgeSkku); break;
-                case 'external_member': badgeStyle = Object.assign({}, styles.badge, styles.badgeExternal); break;
-                default: badgeStyle = styles.badge;
+            if (result.success) {
+                setIsEditing(false);
+                Alert.alert('성공', '사용자 정보가 성공적으로 수정되었습니다.');
+            } else {
+                Alert.alert('오류', result.error || '사용자 정보 수정에 실패했습니다.');
             }
-        } else if (type === 'status') {
-            switch (value?.toLowerCase()) {
-                case 'active': badgeStyle = Object.assign({}, styles.badge, styles.badgeActive); break;
-                case 'inactive': badgeStyle = Object.assign({}, styles.badge, styles.badgeInactive); break;
-                case 'blocked': badgeStyle = Object.assign({}, styles.badge, styles.badgeBlocked); break;
-                case 'unverified': badgeStyle = Object.assign({}, styles.badge, styles.badgeUnverified); break;
-                default: badgeStyle = styles.badge;
-            }
-        }
-
-        return (
-            <View style={badgeStyle}>
-                <Text style={styles.badgeText}>{displayValue}</Text>
-            </View>
-        );
-    };
-
-    const handleSave = async () => {
-        const result = await updateUser();
-        if (result.success) {
-            Alert.alert('성공', result.message);
-            setIsEditing(false);
-        } else {
-            Alert.alert('오류', result.message);
+        } catch (error) {
+            Alert.alert('오류', '사용자 정보 수정 중 오류가 발생했습니다.');
+        } finally {
+            setIsUpdating(false);
         }
     };
 
+    // 사용자 삭제
     const handleDelete = () => {
         Alert.alert(
             '사용자 삭제',
-            '정말로 이 사용자를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+            '이 사용자를 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
             [
-                { text: '취소', style: 'cancel' },
+                {
+                    text: '취소',
+                    style: 'cancel',
+                },
                 {
                     text: '삭제',
                     style: 'destructive',
                     onPress: async () => {
-                        const result = await deleteUser();
-                        if (result.success) {
-                            Alert.alert('성공', result.message);
-                            navigate('/admin/users');
-                        } else {
-                            Alert.alert('오류', result.message);
+                        try {
+                            const result = await deleteUser();
+                            if (result.success) {
+                                Alert.alert('성공', '사용자가 삭제되었습니다.', [
+                                    {
+                                        text: '확인',
+                                        onPress: () => navigate('/admin/users'),
+                                    },
+                                ]);
+                            } else {
+                                Alert.alert('오류', result.error || '사용자 삭제에 실패했습니다.');
+                            }
+                        } catch (error) {
+                            Alert.alert('오류', '사용자 삭제 중 오류가 발생했습니다.');
                         }
-                    }
-                }
+                    },
+                },
             ]
         );
     };
 
-    const handleCancel = () => {
+    // 편집 취소
+    const handleCancelEdit = () => {
         resetForm();
         setIsEditing(false);
     };
 
     if (loading && !user) {
         return (
-            <AdminLayout currentPage="users">
+            <AdminLayout>
                 <View style={styles.container}>
-                    <View style={styles.header}>
-                        <Text style={styles.title}>회원 상세 정보</Text>
-                        <Text style={styles.subtitle}>회원의 상세 정보를 확인하고 관리할 수 있습니다</Text>
+                    <View style={styles.loadingContainer}>
+                        <Text style={styles.loadingText}>사용자 정보를 불러오는 중...</Text>
                     </View>
-                    <Card>
-                        <View style={styles.loadingContainer}>
-                            <Icon name="user" size={48} color="#9ca3af" />
-                            <Text style={styles.loadingText}>사용자 정보를 불러오는 중...</Text>
-                        </View>
-                    </Card>
                 </View>
             </AdminLayout>
         );
     }
 
-    if (error || !user) {
+    if (error && !user) {
         return (
-            <AdminLayout currentPage="users">
+            <AdminLayout>
                 <View style={styles.container}>
-                    <View style={styles.header}>
-                        <Text style={styles.title}>회원 상세 정보</Text>
-                        <Text style={styles.subtitle}>회원의 상세 정보를 확인하고 관리할 수 있습니다</Text>
-                    </View>
                     <Card style={styles.errorCard}>
-                        <View style={styles.errorContent}>
-                            <Icon name="warning" size={24} color="#ef4444" />
-                            <Text style={styles.errorText}>
-                                {error || '사용자를 찾을 수 없습니다.'}
-                            </Text>
-                        </View>
+                        <Text style={styles.errorText}>{error}</Text>
                         <View style={styles.errorActions}>
-                            <Link to="/admin/users" style={styles.linkStyle}>
-                                <Button
-                                    title="목록으로 돌아가기"
-                                    icon="back"
-                                    variant="primary"
-                                />
+                            <Button title="다시 시도" onPress={reload} />
+                            <Link to="/admin/users" style={styles.backLink}>
+                                <Button title="목록으로" variant="outline" />
                             </Link>
                         </View>
                     </Card>
@@ -150,345 +115,371 @@ const UserDetailScreen = () => {
     }
 
     return (
-        <AdminLayout currentPage="users">
+        <AdminLayout>
             <View style={styles.container}>
+                {/* 헤더 */}
                 <View style={styles.header}>
                     <View style={styles.headerLeft}>
-                        <Text style={styles.title}>회원 상세 정보</Text>
-                        <Text style={styles.subtitle}>회원의 상세 정보를 확인하고 관리할 수 있습니다</Text>
+                        <Link to="/admin/users" style={styles.backLink}>
+                            <Button
+                                title="← 목록으로"
+                                variant="outline"
+                                style={styles.backButton}
+                            />
+                        </Link>
+                        <View style={styles.titleContainer}>
+                            <Text style={styles.title}>사용자 상세 정보</Text>
+                            <Text style={styles.subtitle}>
+                                {user?.name || '사용자'}의 정보를 확인하고 관리할 수 있습니다.
+                            </Text>
+                        </View>
                     </View>
 
                     <View style={styles.headerActions}>
-                        <Link to="/admin/users" style={styles.linkStyle}>
-                            <Button
-                                title="목록으로"
-                                icon="back"
-                                variant="secondary"
-                            />
-                        </Link>
-
                         {!isEditing ? (
-                            <Button
-                                title="수정"
-                                icon="edit"
-                                onPress={() => setIsEditing(true)}
-                                variant="primary"
-                            />
+                            <>
+                                <Button
+                                    title="정보 수정"
+                                    onPress={() => setIsEditing(true)}
+                                />
+                                <Button
+                                    title="사용자 삭제"
+                                    variant="danger"
+                                    onPress={handleDelete}
+                                />
+                            </>
                         ) : (
                             <>
                                 <Button
                                     title="취소"
-                                    icon="close"
-                                    onPress={handleCancel}
-                                    variant="secondary"
+                                    variant="outline"
+                                    onPress={handleCancelEdit}
                                 />
                                 <Button
-                                    title="저장"
-                                    icon="save"
-                                    onPress={handleSave}
-                                    variant="primary"
-                                    loading={loading}
+                                    title={isUpdating ? "저장 중..." : "저장"}
+                                    onPress={handleUpdate}
+                                    disabled={isUpdating}
                                 />
                             </>
                         )}
                     </View>
                 </View>
 
-                <ScrollView showsVerticalScrollIndicator={false}>
+                <ScrollView style={styles.content}>
                     {/* 기본 정보 */}
-                    <Card>
-                        <View style={styles.sectionHeader}>
-                            <Icon name="user" size={20} color="#3b82f6" />
-                            <Text style={styles.sectionTitle}>기본 정보</Text>
-                        </View>
+                    <Card style={styles.infoCard}>
+                        <Text style={styles.cardTitle}>기본 정보</Text>
 
                         <View style={styles.infoGrid}>
                             <View style={styles.infoItem}>
-                                <Text style={styles.infoLabel}>아이디</Text>
-                                <Text style={styles.infoValue}>{user.username}</Text>
-                            </View>
-
-                            <View style={styles.infoItem}>
                                 <Text style={styles.infoLabel}>이름</Text>
-                                <Text style={styles.infoValue}>{user.name}</Text>
+                                <Text style={styles.infoValue}>{user?.name || '-'}</Text>
                             </View>
 
                             <View style={styles.infoItem}>
                                 <Text style={styles.infoLabel}>이메일</Text>
-                                <Text style={styles.infoValue}>{user.email}</Text>
+                                <Text style={styles.infoValue}>{user?.email || '-'}</Text>
                             </View>
 
                             <View style={styles.infoItem}>
-                                <Text style={styles.infoLabel}>가입일</Text>
-                                <Text style={styles.infoValue}>{user.createdAtFormatted}</Text>
+                                <Text style={styles.infoLabel}>사용자명</Text>
+                                <Text style={styles.infoValue}>{user?.username || '-'}</Text>
+                            </View>
+
+                            <View style={styles.infoItem}>
+                                <Text style={styles.infoLabel}>전화번호</Text>
+                                <Text style={styles.infoValue}>{user?.phone || '-'}</Text>
                             </View>
                         </View>
                     </Card>
 
-                    {/* 역할 및 권한 */}
-                    <Card>
-                        <View style={styles.sectionHeader}>
-                            <Icon name="settings" size={20} color="#3b82f6" />
-                            <Text style={styles.sectionTitle}>역할 및 권한</Text>
-                        </View>
+                    {/* 권한 및 상태 관리 */}
+                    <Card style={styles.infoCard}>
+                        <Text style={styles.cardTitle}>권한 및 상태 관리</Text>
 
                         <View style={styles.infoGrid}>
                             <View style={styles.infoItem}>
                                 <Text style={styles.infoLabel}>현재 역할</Text>
                                 {!isEditing ? (
-                                    <Badge type="role" value={user.role} displayValue={user.roleDisplayName} />
+                                    <View style={[
+                                        styles.badge,
+                                        user?.role === 'ADMIN' ? styles.adminBadge : styles.userBadge
+                                    ]}>
+                                        <Text style={styles.badgeText}>
+                                            {user?.role === 'ADMIN' ? '관리자' : '사용자'}
+                                        </Text>
+                                    </View>
                                 ) : (
-                                    <Select
-                                        value={formData.role}
-                                        onChange={(value) => handleFormChange('role', value)}
-                                    >
-                                        <option value="ADMIN">관리자</option>
-                                        <option value="SKKU_MEMBER">성균관대 구성원</option>
-                                        <option value="EXTERNAL_MEMBER">외부인</option>
-                                    </Select>
+                                    <View style={styles.editGroup}>
+                                        <Button
+                                            title="사용자"
+                                            variant={formData.role === 'USER' ? 'primary' : 'outline'}
+                                            onPress={() => handleFormChange('role', 'USER')}
+                                            style={styles.roleButton}
+                                        />
+                                        <Button
+                                            title="관리자"
+                                            variant={formData.role === 'ADMIN' ? 'primary' : 'outline'}
+                                            onPress={() => handleFormChange('role', 'ADMIN')}
+                                            style={styles.roleButton}
+                                        />
+                                    </View>
                                 )}
                             </View>
 
                             <View style={styles.infoItem}>
                                 <Text style={styles.infoLabel}>계정 상태</Text>
                                 {!isEditing ? (
-                                    <Badge type="status" value={user.status} displayValue={user.statusDisplayName} />
+                                    <View style={[
+                                        styles.badge,
+                                        user?.status === 'ACTIVE' ? styles.activeBadge : styles.inactiveBadge
+                                    ]}>
+                                        <Text style={styles.badgeText}>
+                                            {user?.status === 'ACTIVE' ? '활성' : '비활성'}
+                                        </Text>
+                                    </View>
                                 ) : (
-                                    <Select
-                                        value={formData.status}
-                                        onChange={(value) => handleFormChange('status', value)}
-                                    >
-                                        <option value="ACTIVE">활성</option>
-                                        <option value="INACTIVE">비활성</option>
-                                        <option value="BLOCKED">차단</option>
-                                        <option value="UNVERIFIED">미인증</option>
-                                    </Select>
+                                    <View style={styles.editGroup}>
+                                        <Button
+                                            title="활성"
+                                            variant={formData.status === 'ACTIVE' ? 'primary' : 'outline'}
+                                            onPress={() => handleFormChange('status', 'ACTIVE')}
+                                            style={styles.statusButton}
+                                        />
+                                        <Button
+                                            title="비활성"
+                                            variant={formData.status === 'INACTIVE' ? 'primary' : 'outline'}
+                                            onPress={() => handleFormChange('status', 'INACTIVE')}
+                                            style={styles.statusButton}
+                                        />
+                                    </View>
                                 )}
                             </View>
                         </View>
                     </Card>
 
-                    {/* 프로필 정보 */}
-                    {user.profile && (
-                        <Card>
-                            <View style={styles.sectionHeader}>
-                                <Icon name="info" size={20} color="#3b82f6" />
-                                <Text style={styles.sectionTitle}>프로필 정보</Text>
+                    {/* 계정 정보 */}
+                    <Card style={styles.infoCard}>
+                        <Text style={styles.cardTitle}>계정 정보</Text>
+
+                        <View style={styles.infoGrid}>
+                            <View style={styles.infoItem}>
+                                <Text style={styles.infoLabel}>가입일</Text>
+                                <Text style={styles.infoValue}>
+                                    {user?.createdAt ? new Date(user.createdAt).toLocaleString() : '-'}
+                                </Text>
                             </View>
 
+                            <View style={styles.infoItem}>
+                                <Text style={styles.infoLabel}>최종 수정일</Text>
+                                <Text style={styles.infoValue}>
+                                    {user?.updatedAt ? new Date(user.updatedAt).toLocaleString() : '-'}
+                                </Text>
+                            </View>
+
+                            <View style={styles.infoItem}>
+                                <Text style={styles.infoLabel}>이메일 인증</Text>
+                                <View style={[
+                                    styles.badge,
+                                    user?.emailVerified ? styles.verifiedBadge : styles.unverifiedBadge
+                                ]}>
+                                    <Text style={styles.badgeText}>
+                                        {user?.emailVerified ? '인증됨' : '미인증'}
+                                    </Text>
+                                </View>
+                            </View>
+
+                            <View style={styles.infoItem}>
+                                <Text style={styles.infoLabel}>사용자 ID</Text>
+                                <Text style={styles.infoValue}>{user?.id || '-'}</Text>
+                            </View>
+                        </View>
+                    </Card>
+
+                    {/* 추가 정보 */}
+                    {user?.profile && (
+                        <Card style={styles.infoCard}>
+                            <Text style={styles.cardTitle}>추가 정보</Text>
+
                             <View style={styles.infoGrid}>
-                                {user.profile.affiliation && (
-                                    <View style={styles.infoItem}>
-                                        <Text style={styles.infoLabel}>소속</Text>
-                                        <Text style={styles.infoValue}>{user.profile.affiliation}</Text>
-                                    </View>
-                                )}
+                                <View style={styles.infoItem}>
+                                    <Text style={styles.infoLabel}>소속</Text>
+                                    <Text style={styles.infoValue}>{user.profile.department || '-'}</Text>
+                                </View>
 
-                                {user.profile.position && (
-                                    <View style={styles.infoItem}>
-                                        <Text style={styles.infoLabel}>직책</Text>
-                                        <Text style={styles.infoValue}>{user.profile.position}</Text>
-                                    </View>
-                                )}
+                                <View style={styles.infoItem}>
+                                    <Text style={styles.infoLabel}>직책</Text>
+                                    <Text style={styles.infoValue}>{user.profile.position || '-'}</Text>
+                                </View>
 
-                                {user.profile.department && (
-                                    <View style={styles.infoItem}>
-                                        <Text style={styles.infoLabel}>부서</Text>
-                                        <Text style={styles.infoValue}>{user.profile.department}</Text>
-                                    </View>
-                                )}
-
-                                {user.profile.phoneNumber && (
-                                    <View style={styles.infoItem}>
-                                        <Text style={styles.infoLabel}>연락처</Text>
-                                        <Text style={styles.infoValue}>{user.profile.phoneNumber}</Text>
-                                    </View>
-                                )}
+                                <View style={styles.infoItem}>
+                                    <Text style={styles.infoLabel}>자기소개</Text>
+                                    <Text style={styles.infoValue}>
+                                        {user.profile.bio || '자기소개가 없습니다.'}
+                                    </Text>
+                                </View>
                             </View>
                         </Card>
                     )}
-
-                    {/* 위험 구역 */}
-                    <Card style={styles.dangerZone}>
-                        <View style={styles.sectionHeader}>
-                            <Icon name="warning" size={20} color="#ef4444" />
-                            <Text style={Object.assign({}, styles.sectionTitle, { color: '#ef4444' })}>위험 구역</Text>
-                        </View>
-
-                        <Text style={styles.dangerText}>
-                            이 작업들은 되돌릴 수 없습니다. 신중하게 결정해주세요.
-                        </Text>
-
-                        <View style={styles.dangerActions}>
-                            <Button
-                                title="사용자 삭제"
-                                icon="trash"
-                                onPress={handleDelete}
-                                variant="danger"
-                                loading={loading}
-                            />
-                        </View>
-                    </Card>
                 </ScrollView>
+
+                {/* 로딩 오버레이 */}
+                {loading && (
+                    <View style={styles.loadingOverlay}>
+                        <Text style={styles.loadingText}>처리 중...</Text>
+                    </View>
+                )}
             </View>
         </AdminLayout>
     );
 };
 
-// 상수 적용한 스타일
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: sizes.spacing.lg,
         backgroundColor: adminColors.background,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: sizes.spacing.lg,
+        padding: sizes.padding,
+        borderBottomWidth: 1,
+        borderBottomColor: adminColors.border,
+        backgroundColor: '#fff',
     },
     headerLeft: {
         flex: 1,
     },
-    headerActions: {
-        flexDirection: 'row',
-        gap: sizes.spacing.sm,
+    backLink: {
+        textDecoration: 'none',
+        marginBottom: sizes.margin,
     },
-    title: {
-        fontSize: sizes.fontSize.title,
-        fontWeight: 'bold',
-        color: adminColors.textPrimary,
-        marginBottom: sizes.spacing.sm,
-    },
-    subtitle: {
-        fontSize: sizes.fontSize.md,
-        color: adminColors.textSecondary,
-    },
-    loadingContainer: {
-        alignItems: 'center',
-        padding: sizes.spacing.xxl,
-    },
-    loadingText: {
-        fontSize: sizes.fontSize.md,
-        color: adminColors.textSecondary,
-        marginTop: sizes.spacing.md,
-    },
-    errorCard: {
-        backgroundColor: adminColors.badge.blockedBackground,
-        borderColor: adminColors.badge.blocked,
-    },
-    errorContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: sizes.spacing.md,
-    },
-    errorText: {
-        fontSize: sizes.fontSize.md,
-        color: adminColors.badge.blocked,
-        marginLeft: sizes.spacing.sm,
-        flex: 1,
-    },
-    errorActions: {
-        alignItems: 'flex-start',
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: sizes.spacing.md,
-    },
-    sectionTitle: {
-        fontSize: sizes.fontSize.lg,
-        fontWeight: '600',
-        color: adminColors.textPrimary,
-        marginLeft: sizes.spacing.sm,
-    },
-    infoGrid: {
-        gap: sizes.spacing.md,
-    },
-    infoItem: {
-        gap: sizes.spacing.xs,
-    },
-    infoLabel: {
-        fontSize: sizes.fontSize.sm,
-        color: adminColors.textSecondary,
-        fontWeight: '500',
-    },
-    infoValue: {
-        fontSize: sizes.fontSize.md,
-        color: adminColors.textPrimary,
-        fontWeight: '400',
-    },
-    select: {
-        borderWidth: 1,
-        borderColor: adminColors.border,
-        borderRadius: sizes.borderRadius.md,
-        paddingHorizontal: sizes.spacing.sm,
-        paddingVertical: sizes.spacing.sm,
-        fontSize: sizes.fontSize.md,
-        backgroundColor: adminColors.white,
-        minHeight: 40,
-    },
-    selectDisabled: {
-        backgroundColor: adminColors.gray100,
-        color: adminColors.textDisabled,
-    },
-    badge: {
-        paddingHorizontal: sizes.spacing.sm,
-        paddingVertical: sizes.spacing.xs,
-        borderRadius: sizes.borderRadius.sm,
-        backgroundColor: adminColors.gray100,
-        borderWidth: 1,
-        borderColor: adminColors.border,
+    backButton: {
         alignSelf: 'flex-start',
     },
-    badgeText: {
-        fontSize: sizes.fontSize.xs,
-        fontWeight: '500',
-        textAlign: 'center',
+    titleContainer: {
+        gap: 4,
     },
-    badgeAdmin: {
-        backgroundColor: adminColors.badge.adminBackground,
-        borderColor: adminColors.badge.admin,
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: adminColors.text,
     },
-    badgeSkku: {
-        backgroundColor: adminColors.badge.skkuBackground,
-        borderColor: adminColors.badge.skku,
-    },
-    badgeExternal: {
-        backgroundColor: adminColors.badge.externalBackground,
-        borderColor: adminColors.badge.external,
-    },
-    badgeActive: {
-        backgroundColor: adminColors.badge.activeBackground,
-        borderColor: adminColors.badge.active,
-    },
-    badgeInactive: {
-        backgroundColor: adminColors.badge.inactiveBackground,
-        borderColor: adminColors.badge.inactive,
-    },
-    badgeBlocked: {
-        backgroundColor: adminColors.badge.blockedBackground,
-        borderColor: adminColors.badge.blocked,
-    },
-    badgeUnverified: {
-        backgroundColor: adminColors.badge.unverifiedBackground,
-        borderColor: adminColors.badge.unverified,
-    },
-    dangerZone: {
-        borderColor: adminColors.error,
-        backgroundColor: '#fef2f2',
-    },
-    dangerText: {
-        fontSize: sizes.fontSize.sm,
+    subtitle: {
+        fontSize: 14,
         color: adminColors.textSecondary,
-        marginBottom: sizes.spacing.md,
     },
-    dangerActions: {
-        alignItems: 'flex-start',
+    headerActions: {
+        flexDirection: 'row',
+        gap: sizes.margin,
     },
-    linkStyle: {
-        // textDecoration은 React Native Web에서 지원하지 않음
+    content: {
+        flex: 1,
+        padding: sizes.padding,
+    },
+    infoCard: {
+        marginBottom: sizes.padding,
+        padding: sizes.padding,
+    },
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: adminColors.text,
+        marginBottom: sizes.padding,
+        borderBottomWidth: 1,
+        borderBottomColor: adminColors.border,
+        paddingBottom: sizes.margin,
+    },
+    infoGrid: {
+        gap: sizes.padding,
+    },
+    infoItem: {
+        gap: 8,
+    },
+    infoLabel: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: adminColors.textSecondary,
+    },
+    infoValue: {
+        fontSize: 16,
+        color: adminColors.text,
+    },
+    badge: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+        alignSelf: 'flex-start',
+    },
+    adminBadge: {
+        backgroundColor: '#e8f2ff',
+    },
+    userBadge: {
+        backgroundColor: '#f8f9fa',
+    },
+    activeBadge: {
+        backgroundColor: '#e8f5e8',
+    },
+    inactiveBadge: {
+        backgroundColor: '#fee',
+    },
+    verifiedBadge: {
+        backgroundColor: '#e8f5e8',
+    },
+    unverifiedBadge: {
+        backgroundColor: '#fff3cd',
+    },
+    badgeText: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: adminColors.text,
+    },
+    editGroup: {
+        flexDirection: 'row',
+        gap: 8,
+        flexWrap: 'wrap',
+    },
+    roleButton: {
+        minWidth: 80,
+    },
+    statusButton: {
+        minWidth: 80,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: sizes.padding * 2,
+    },
+    loadingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        fontSize: 16,
+        color: adminColors.textSecondary,
+    },
+    errorCard: {
+        backgroundColor: '#fee',
+        borderColor: '#fcc',
+        margin: sizes.padding,
+        padding: sizes.padding,
+    },
+    errorText: {
+        color: '#c33',
+        fontSize: 16,
+        marginBottom: sizes.padding,
+    },
+    errorActions: {
+        flexDirection: 'row',
+        gap: sizes.margin,
     },
 });
 

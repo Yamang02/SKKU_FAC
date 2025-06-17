@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import ExhibitionApi from '../../api/ExhibitionApi.js';
+import AdminExhibitionApi from '../../api/admin/AdminExhibitionApi.js';
 
 export const useExhibitions = () => {
     const [exhibitions, setExhibitions] = useState([]);
@@ -28,7 +28,7 @@ export const useExhibitions = () => {
             setError(null);
 
             const pagination = { page: pageNum, limit: 10 };
-            const response = await ExhibitionApi.getExhibitionList(pagination, currentFilters);
+            const response = await AdminExhibitionApi.getExhibitionList(pagination, currentFilters);
 
             if (response.success) {
                 setExhibitions(response.data.exhibitions || []);

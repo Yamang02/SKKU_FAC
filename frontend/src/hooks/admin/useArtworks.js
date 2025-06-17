@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import ArtworkApi from '../../api/ArtworkApi.js';
+import AdminArtworkApi from '../../api/admin/AdminArtworkApi.js';
 
 export const useArtworks = () => {
     const [artworks, setArtworks] = useState([]);
@@ -29,7 +29,7 @@ export const useArtworks = () => {
             setError(null);
 
             const pagination = { page: pageNum, limit: 10 };
-            const response = await ArtworkApi.getArtworkList(pagination, currentFilters);
+            const response = await AdminArtworkApi.getArtworkList(pagination, currentFilters);
 
             if (response.success) {
                 setArtworks(response.data.artworks || []);
@@ -102,7 +102,7 @@ export const useArtworks = () => {
     const updateArtworkStatus = useCallback(async (artworkId, status) => {
         try {
             setLoading(true);
-            const response = await ArtworkApi.updateArtworkStatus(artworkId, status);
+            const response = await AdminArtworkApi.updateArtworkStatus(artworkId, status);
 
             if (response.success) {
                 // 목록 새로고침

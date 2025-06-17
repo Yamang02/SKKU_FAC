@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import UserApi from '../../api/UserApi.js';
+import { AdminUserApi } from '../../api/index.js';
 
-export const useUser = (userId = null) => {
+export const useAdminUser = (userId = null) => {
     const params = useParams();
     const id = userId || params.id;
 
@@ -21,7 +21,7 @@ export const useUser = (userId = null) => {
             setLoading(true);
             setError(null);
 
-            const response = await UserApi.getUserById(id);
+            const response = await AdminUserApi.getUserDetail(id);
 
             if (response.success && response.data) {
                 const userData = response.data;
@@ -31,53 +31,47 @@ export const useUser = (userId = null) => {
                     status: userData.status || '',
                 });
             } else {
-                setError(response.message || '사용자를 찾을 수 없습니다.');
+                setError(response.error || '사용자 정보를 불러오는데 실패했습니다.');
             }
-        } catch (err) {
-            console.error('사용자 조회 오류:', err);
-            setError('네트워크 오류가 발생했습니다.');
+        } catch (error) {
+            console.error('사용자 정보 로드 중 오류:', error);
+            setError('사용자 정보를 불러오는 중 오류가 발생했습니다.');
         } finally {
             setLoading(false);
         }
     }, [id]);
 
-    const updateUser = useCallback(async (updateData = formData) => {
-        if (!id) return { success: false, message: '사용자 ID가 없습니다.' };
+    const updateUser = useCallback(async (updateData) => {
+        if (!id) return { success: false, error: '사용자 ID가 없습니다.' };
 
         try {
             setLoading(true);
-            const response = await UserApi.updateUser(id, updateData);
+            const response = await AdminUserApi.updateUser(id, updateData);
 
             if (response.success) {
-                // 사용자 정보 새로고침
+                // 성공 시 사용자 정보 다시 로드
                 await loadUser();
-                return { success: true, message: '사용자 정보가 업데이트되었습니다.' };
-            } else {
-                return { success: false, message: response.message || '업데이트에 실패했습니다.' };
             }
-        } catch (err) {
-            console.error('사용자 업데이트 오류:', err);
-            return { success: false, message: '네트워크 오류가 발생했습니다.' };
+
+            return response;
+        } catch (error) {
+            console.error('사용자 정보 수정 중 오류:', error);
+            return { success: false, error: '사용자 정보 수정에 실패했습니다.' };
         } finally {
             setLoading(false);
         }
-    }, [id, formData, loadUser]);
+    }, [id, loadUser]);
 
     const deleteUser = useCallback(async () => {
-        if (!id) return { success: false, message: '사용자 ID가 없습니다.' };
+        if (!id) return { success: false, error: '사용자 ID가 없습니다.' };
 
         try {
             setLoading(true);
-            const response = await UserApi.deleteUser(id);
-
-            if (response.success) {
-                return { success: true, message: '사용자가 삭제되었습니다.' };
-            } else {
-                return { success: false, message: response.message || '삭제에 실패했습니다.' };
-            }
-        } catch (err) {
-            console.error('사용자 삭제 오류:', err);
-            return { success: false, message: '네트워크 오류가 발생했습니다.' };
+            const response = await AdminUserApi.deleteUser(id);
+            return response;
+        } catch (error) {
+            console.error('사용자 삭제 중 오류:', error);
+            return { success: false, error: '사용자 삭제에 실패했습니다.' };
         } finally {
             setLoading(false);
         }
@@ -99,25 +93,21 @@ export const useUser = (userId = null) => {
         }
     }, [user]);
 
-    // 초기 로드
     useEffect(() => {
         loadUser();
     }, [loadUser]);
 
     return {
-        // State
         user,
         loading,
         error,
         formData,
-
-        // Actions
-        loadUser,
         updateUser,
         deleteUser,
         handleFormChange,
         resetForm,
+        reload: loadUser,
     };
 };
 
-export default useUser;
+export default useAdminUser;

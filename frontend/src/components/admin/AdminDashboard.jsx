@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useUsers } from '../../hooks/useUsers';
+import { useAdminUsers } from '../../hooks/admin/useAdminUsers.js';
 
 const AdminDashboard = () => {
-    const { users, loading, error } = useUsers();
+    const { users, loading, error } = useAdminUsers();
 
     // React Native Web에서 HTML 요소 직접 사용
     const FontAwesomeIcon = ({ className, style }) => {

@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { Link } from 'react-router-dom';
 
-import AdminLayout from '../../components/admin/AdminLayout';
-import { Card, Button, Icon } from '../../components/common';
-import { useExhibitions } from '../../hooks';
-import { adminColors, sizes } from '../../constants';
+import AdminLayout from '../../../components/admin/AdminLayout';
+import { Card, Button, Icon } from '../../../components/common';
+import { useAdminExhibitions } from '../../../hooks';
+import { adminColors, sizes } from '../../../constants';
 
 const ExhibitionListScreen = () => {
     const {
@@ -19,7 +19,7 @@ const ExhibitionListScreen = () => {
         handlePageChange,
         resetFilters,
         toggleFeatured,
-    } = useExhibitions();
+    } = useAdminExhibitions();
 
     // Select 컴포넌트
     const Select = ({ value, onChange, children, style }) => (

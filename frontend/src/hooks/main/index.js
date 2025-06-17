@@ -1,14 +1,15 @@
-// Main 도메인 hooks (향후 구현 예정)
+// Main 도메인 hooks (일반 사용자용)
 
-// 갤러리 관련
-// export { useGallery } from './useGallery.js';
-// export { useExhibitions } from './useExhibitions.js';
-// export { useArtwork } from './useArtwork.js';
+// 사용자 관련
+export { useUsers } from './useUsers.js';
 
-// 사용자 인증
+// 인증 관련
 // export { useAuth } from './useAuth.js';
-// export { useProfile } from './useProfile.js';
 
-// 기타
-// export { useSearch } from './useSearch.js';
-// export { useFilters } from './useFilters.js';
+// 향후 Main 도메인 hooks 확장 예정:
+// export { useProfile } from './useProfile.js';
+// export { useExhibitions } from './useExhibitions.js';
+// export { useExhibition } from './useExhibition.js';
+// export { useArtworks } from './useArtworks.js';
+// export { useArtwork } from './useArtwork.js';
+// export { useNotifications } from './useNotifications.js';

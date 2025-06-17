@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, TextInput } from 'react-native';
 import { useNavigate, Link } from 'react-router-dom';
 
-import AdminLayout from '../../components/admin/AdminLayout';
-import { Card, Button, Icon } from '../../components/common';
-import { useExhibition } from '../../hooks';
-import { adminColors, sizes } from '../../constants';
+import AdminLayout from '../../../components/admin/AdminLayout';
+import { Card, Button, Icon } from '../../../components/common';
+import { useAdminExhibition } from '../../../hooks';
+import { adminColors, sizes } from '../../../constants';
 
 const ExhibitionDetailScreen = () => {
     const navigate = useNavigate();
@@ -18,7 +18,7 @@ const ExhibitionDetailScreen = () => {
         deleteExhibition,
         handleFormChange,
         resetForm,
-    } = useExhibition();
+    } = useAdminExhibition();
 
     const [isEditing, setIsEditing] = useState(false);
 

@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { Link } from 'react-router-dom';
 
-import AdminLayout from '../../components/admin/AdminLayout';
-import { Card, Button, Icon } from '../../components/common';
-import { useArtworks } from '../../hooks';
-import { adminColors, sizes } from '../../constants';
+import AdminLayout from '../../../components/admin/AdminLayout';
+import { Card, Button, Icon } from '../../../components/common';
+import { useAdminArtworks } from '../../../hooks';
+import { adminColors, sizes } from '../../../constants';
 
 const ArtworkListScreen = () => {
     const {
@@ -20,7 +20,7 @@ const ArtworkListScreen = () => {
         resetFilters,
         toggleFeatured,
         updateArtworkStatus,
-    } = useArtworks();
+    } = useAdminArtworks();
 
     // Select 컴포넌트
     const Select = ({ value, onChange, children, style }) => (

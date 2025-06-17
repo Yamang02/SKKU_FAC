@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import ExhibitionApi from '../../api/ExhibitionApi.js';
+import AdminExhibitionApi from '../../api/admin/AdminExhibitionApi.js';
 
 export const useExhibition = () => {
     const { id } = useParams();
@@ -29,7 +29,7 @@ export const useExhibition = () => {
             setLoading(true);
             setError(null);
 
-            const response = await ExhibitionApi.getExhibitionDetail(id);
+            const response = await AdminExhibitionApi.getExhibitionDetail(id);
 
             if (response.success) {
                 const exhibitionData = response.data;
@@ -81,7 +81,7 @@ export const useExhibition = () => {
             setLoading(true);
             setError(null);
 
-            const response = await ExhibitionApi.updateExhibition(id, formData);
+            const response = await AdminExhibitionApi.updateExhibition(id, formData);
 
             if (response.success) {
                 await loadExhibition(); // 최신 데이터로 새로고침
@@ -107,7 +107,7 @@ export const useExhibition = () => {
             setLoading(true);
             setError(null);
 
-            const response = await ExhibitionApi.deleteExhibition(id);
+            const response = await AdminExhibitionApi.deleteExhibition(id);
 
             if (response.success) {
                 return { success: true, message: '전시가 성공적으로 삭제되었습니다.' };
