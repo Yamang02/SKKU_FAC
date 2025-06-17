@@ -14,7 +14,7 @@ export const APP_VERSION = '1.0.0'; // deprecated: use APP_CONFIG.VERSION
 export { default as commonColors } from './common/colors.js';
 
 // 도메인별 색상
-export { default as adminColors } from './admin/colors.js';
+export { default as adminColors } from './adminColors.js';
 export { default as mainColors } from './main/colors.js';
 
 // 도메인별 상수들

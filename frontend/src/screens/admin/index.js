@@ -11,3 +11,11 @@ export { default as UserDetailScreen } from './UserDetailScreen.jsx';
 // export { default as ExhibitionDetailScreen } from './ExhibitionDetailScreen.jsx';
 // export { default as ArtworkListScreen } from './ArtworkListScreen.jsx';
 // export { default as ArtworkDetailScreen } from './ArtworkDetailScreen.jsx';
+
+// Exhibition Management
+export { default as ExhibitionListScreen } from './ExhibitionListScreen.jsx';
+export { default as ExhibitionDetailScreen } from './ExhibitionDetailScreen.jsx';
+
+// Artwork Management
+export { default as ArtworkListScreen } from './ArtworkListScreen.jsx';
+

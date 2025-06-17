@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { Card, Button, Icon } from '../../components/common';
 import { useUsers } from '../../hooks';
-import { colors, sizes } from '../../constants';
+import { adminColors, sizes } from '../../constants';
 
 const UserListScreen = () => {
     const {
@@ -35,15 +35,19 @@ const UserListScreen = () => {
     const Badge = ({ type, value, displayValue }) => {
         let badgeStyle = styles.badge;
 
+        // 안전한 value 처리
+        const safeValue = value || '';
+        const safeDisplayValue = displayValue || value || '-';
+
         if (type === 'role') {
-            switch (value?.toLowerCase()) {
+            switch (safeValue.toLowerCase()) {
                 case 'admin': badgeStyle = Object.assign({}, styles.badge, styles.badgeAdmin); break;
                 case 'skku_member': badgeStyle = Object.assign({}, styles.badge, styles.badgeSkku); break;
                 case 'external_member': badgeStyle = Object.assign({}, styles.badge, styles.badgeExternal); break;
                 default: badgeStyle = styles.badge;
             }
         } else if (type === 'status') {
-            switch (value?.toLowerCase()) {
+            switch (safeValue.toLowerCase()) {
                 case 'active': badgeStyle = Object.assign({}, styles.badge, styles.badgeActive); break;
                 case 'inactive': badgeStyle = Object.assign({}, styles.badge, styles.badgeInactive); break;
                 case 'blocked': badgeStyle = Object.assign({}, styles.badge, styles.badgeBlocked); break;
@@ -54,7 +58,7 @@ const UserListScreen = () => {
 
         return (
             <View style={badgeStyle}>
-                <Text style={styles.badgeText}>{displayValue}</Text>
+                <Text style={styles.badgeText}>{safeDisplayValue}</Text>
             </View>
         );
     };
@@ -104,12 +108,12 @@ const UserListScreen = () => {
                         </View>
                         <View style={styles.statDivider} />
                         <View style={styles.statItem}>
-                            <Text style={styles.statNumber}>{users.filter(u => u.status === 'ACTIVE').length}</Text>
+                            <Text style={styles.statNumber}>{(users || []).filter(u => u && u.id && u.status === 'ACTIVE').length}</Text>
                             <Text style={styles.statLabel}>활성 회원</Text>
                         </View>
                         <View style={styles.statDivider} />
                         <View style={styles.statItem}>
-                            <Text style={styles.statNumber}>{users.filter(u => u.role === 'ADMIN').length}</Text>
+                            <Text style={styles.statNumber}>{(users || []).filter(u => u && u.id && u.role === 'ADMIN').length}</Text>
                             <Text style={styles.statLabel}>관리자</Text>
                         </View>
                     </View>
@@ -173,7 +177,7 @@ const UserListScreen = () => {
                 <Card padding={0}>
                     <View style={styles.tableHeader}>
                         <Text style={styles.tableTitle}>회원 목록</Text>
-                        <Text style={styles.tableCount}>총 {users.length}개 항목</Text>
+                        <Text style={styles.tableCount}>총 {(users || []).length}개 항목</Text>
                     </View>
 
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -190,32 +194,40 @@ const UserListScreen = () => {
                             </View>
 
                             <ScrollView style={styles.tableBody}>
-                                {users.length > 0 ? (
-                                    users.map(user => (
-                                        <View key={user.id} style={styles.tableRow}>
-                                            <Text style={Object.assign({}, styles.tableCell, { width: 120 })}>{user.username}</Text>
-                                            <View style={Object.assign({}, styles.tableCell, { width: 100 })}>
-                                                <Badge type="role" value={user.role} displayValue={user.roleDisplayName} />
+                                {(users || []).length > 0 ? (
+                                    (users || []).filter(user => user && user.id).map(user => {
+                                        // 추가 방어 코드: user 객체와 필수 속성들 체크
+                                        if (!user || !user.id) {
+                                            console.warn('Invalid user data:', user);
+                                            return null;
+                                        }
+
+                                        return (
+                                            <View key={user.id} style={styles.tableRow}>
+                                                <Text style={Object.assign({}, styles.tableCell, { width: 120 })}>{user.username || '-'}</Text>
+                                                <View style={Object.assign({}, styles.tableCell, { width: 100 })}>
+                                                    <Badge type="role" value={user.role || ''} displayValue={user.roleDisplayName || user.role || '-'} />
+                                                </View>
+                                                <Text style={Object.assign({}, styles.tableCell, { width: 100 })}>{user.name || '-'}</Text>
+                                                <Text style={Object.assign({}, styles.tableCell, { width: 200 })}>{user.email || '-'}</Text>
+                                                <Text style={Object.assign({}, styles.tableCell, { width: 150 })}>{user.profileSummary || '-'}</Text>
+                                                <Text style={Object.assign({}, styles.tableCell, { width: 120 })}>{user.createdAtFormatted || '-'}</Text>
+                                                <View style={Object.assign({}, styles.tableCell, { width: 100 })}>
+                                                    <Badge type="status" value={user.status || ''} displayValue={user.statusDisplayName || user.status || '-'} />
+                                                </View>
+                                                <View style={Object.assign({}, styles.tableCell, { width: 80 })}>
+                                                    <Link to={`/admin/users/${user.id}`} style={styles.linkStyle}>
+                                                        <Button
+                                                            title=""
+                                                            icon="edit"
+                                                            variant="primary"
+                                                            size="small"
+                                                        />
+                                                    </Link>
+                                                </View>
                                             </View>
-                                            <Text style={Object.assign({}, styles.tableCell, { width: 100 })}>{user.name}</Text>
-                                            <Text style={Object.assign({}, styles.tableCell, { width: 200 })}>{user.email}</Text>
-                                            <Text style={Object.assign({}, styles.tableCell, { width: 150 })}>{user.profileSummary}</Text>
-                                            <Text style={Object.assign({}, styles.tableCell, { width: 120 })}>{user.createdAtFormatted}</Text>
-                                            <View style={Object.assign({}, styles.tableCell, { width: 100 })}>
-                                                <Badge type="status" value={user.status} displayValue={user.statusDisplayName} />
-                                            </View>
-                                            <View style={Object.assign({}, styles.tableCell, { width: 80 })}>
-                                                <Link to={`/admin/users/${user.id}`} style={styles.linkStyle}>
-                                                    <Button
-                                                        title=""
-                                                        icon="edit"
-                                                        variant="primary"
-                                                        size="small"
-                                                    />
-                                                </Link>
-                                            </View>
-                                        </View>
-                                    ))
+                                        );
+                                    })
                                 ) : (
                                     <View style={styles.emptyState}>
                                         <Icon name="users" size={48} color="#9ca3af" />
@@ -236,7 +248,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: sizes.spacing.lg,
-        backgroundColor: colors.background,
+        backgroundColor: adminColors.background,
     },
     header: {
         marginBottom: sizes.spacing.lg,
@@ -244,12 +256,12 @@ const styles = StyleSheet.create({
     title: {
         fontSize: sizes.fontSize.title,
         fontWeight: 'bold',
-        color: colors.textPrimary,
+        color: adminColors.textPrimary,
         marginBottom: sizes.spacing.sm,
     },
     subtitle: {
         fontSize: sizes.fontSize.md,
-        color: colors.textSecondary,
+        color: adminColors.textSecondary,
     },
     // ... 나머지 스타일들은 기존과 동일하되 colors/sizes 상수 적용
     loadingContainer: {
@@ -258,12 +270,12 @@ const styles = StyleSheet.create({
     },
     loadingText: {
         fontSize: sizes.fontSize.md,
-        color: colors.textSecondary,
+        color: adminColors.textSecondary,
         marginTop: sizes.spacing.md,
     },
     errorCard: {
-        backgroundColor: colors.badge.blockedBackground,
-        borderColor: colors.badge.blocked,
+        backgroundColor: adminColors.badge.blockedBackground,
+        borderColor: adminColors.badge.blocked,
     },
     errorContent: {
         flexDirection: 'row',
@@ -271,7 +283,7 @@ const styles = StyleSheet.create({
     },
     errorText: {
         fontSize: sizes.fontSize.md,
-        color: colors.badge.blocked,
+        color: adminColors.badge.blocked,
         marginLeft: sizes.spacing.sm,
         flex: 1,
     },
@@ -286,21 +298,21 @@ const styles = StyleSheet.create({
     statNumber: {
         fontSize: sizes.fontSize.xxl,
         fontWeight: 'bold',
-        color: colors.primary,
+        color: adminColors.primary,
         marginBottom: sizes.spacing.xs,
     },
     statLabel: {
         fontSize: sizes.fontSize.sm,
-        color: colors.textSecondary,
+        color: adminColors.textSecondary,
     },
     statDivider: {
         width: 1,
-        backgroundColor: colors.border,
+        backgroundColor: adminColors.border,
     },
     sectionTitle: {
         fontSize: sizes.fontSize.lg,
         fontWeight: '600',
-        color: colors.textPrimary,
+        color: adminColors.textPrimary,
         marginBottom: sizes.spacing.md,
     },
     filterContainer: {
@@ -317,7 +329,7 @@ const styles = StyleSheet.create({
     },
     filterLabel: {
         fontSize: sizes.fontSize.sm,
-        color: colors.textSecondary,
+        color: adminColors.textSecondary,
         marginBottom: sizes.spacing.xs,
         fontWeight: '500',
     },
@@ -328,22 +340,22 @@ const styles = StyleSheet.create({
     },
     select: {
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: adminColors.border,
         borderRadius: sizes.borderRadius.md,
         paddingHorizontal: sizes.spacing.sm,
         paddingVertical: sizes.spacing.sm,
         fontSize: sizes.fontSize.sm,
-        backgroundColor: colors.white,
+        backgroundColor: adminColors.white,
         minHeight: 40,
     },
     searchInput: {
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: adminColors.border,
         borderRadius: sizes.borderRadius.md,
         paddingHorizontal: sizes.spacing.sm,
         paddingVertical: sizes.spacing.sm,
         fontSize: sizes.fontSize.sm,
-        backgroundColor: colors.white,
+        backgroundColor: adminColors.white,
         minHeight: 40,
     },
     tableHeader: {
@@ -353,29 +365,29 @@ const styles = StyleSheet.create({
         paddingHorizontal: sizes.spacing.lg,
         paddingVertical: sizes.spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        borderBottomColor: adminColors.border,
     },
     tableTitle: {
         fontSize: sizes.fontSize.lg,
         fontWeight: '600',
-        color: colors.textPrimary,
+        color: adminColors.textPrimary,
     },
     tableCount: {
         fontSize: sizes.fontSize.sm,
-        color: colors.textSecondary,
+        color: adminColors.textSecondary,
     },
     table: {
         minWidth: 1000,
     },
     tableHeaderRow: {
         flexDirection: 'row',
-        backgroundColor: colors.gray50,
+        backgroundColor: adminColors.gray50,
         paddingVertical: sizes.spacing.sm,
     },
     tableHeaderCell: {
         fontSize: sizes.fontSize.sm,
         fontWeight: '600',
-        color: colors.textPrimary,
+        color: adminColors.textPrimary,
         paddingHorizontal: sizes.spacing.sm,
         textAlign: 'center',
     },
@@ -385,12 +397,12 @@ const styles = StyleSheet.create({
     tableRow: {
         flexDirection: 'row',
         borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
+        borderBottomColor: adminColors.borderLight,
         paddingVertical: sizes.spacing.sm,
     },
     tableCell: {
         fontSize: sizes.fontSize.sm,
-        color: colors.textPrimary,
+        color: adminColors.textPrimary,
         paddingHorizontal: sizes.spacing.sm,
         justifyContent: 'center',
         alignItems: 'center',
@@ -400,9 +412,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: sizes.spacing.sm,
         paddingVertical: sizes.spacing.xs,
         borderRadius: sizes.borderRadius.sm,
-        backgroundColor: colors.gray100,
+        backgroundColor: adminColors.gray100,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: adminColors.border,
     },
     badgeText: {
         fontSize: sizes.fontSize.xs,
@@ -410,35 +422,35 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     badgeAdmin: {
-        backgroundColor: colors.badge.adminBackground,
-        borderColor: colors.badge.admin,
+        backgroundColor: adminColors.badge.adminBackground,
+        borderColor: adminColors.badge.admin,
     },
     badgeSkku: {
-        backgroundColor: colors.badge.skkuBackground,
-        borderColor: colors.badge.skku,
+        backgroundColor: adminColors.badge.skkuBackground,
+        borderColor: adminColors.badge.skku,
     },
     badgeExternal: {
-        backgroundColor: colors.badge.externalBackground,
-        borderColor: colors.badge.external,
+        backgroundColor: adminColors.badge.externalBackground,
+        borderColor: adminColors.badge.external,
     },
     badgeActive: {
-        backgroundColor: colors.badge.activeBackground,
-        borderColor: colors.badge.active,
+        backgroundColor: adminColors.badge.activeBackground,
+        borderColor: adminColors.badge.active,
     },
     badgeInactive: {
-        backgroundColor: colors.badge.inactiveBackground,
-        borderColor: colors.badge.inactive,
+        backgroundColor: adminColors.badge.inactiveBackground,
+        borderColor: adminColors.badge.inactive,
     },
     badgeBlocked: {
-        backgroundColor: colors.badge.blockedBackground,
-        borderColor: colors.badge.blocked,
+        backgroundColor: adminColors.badge.blockedBackground,
+        borderColor: adminColors.badge.blocked,
     },
     badgeUnverified: {
-        backgroundColor: colors.badge.unverifiedBackground,
-        borderColor: colors.badge.unverified,
+        backgroundColor: adminColors.badge.unverifiedBackground,
+        borderColor: adminColors.badge.unverified,
     },
     linkStyle: {
-        textDecorationLine: 'none',
+        // textDecoration은 React Native Web에서 지원하지 않음
     },
     emptyState: {
         alignItems: 'center',
@@ -446,7 +458,7 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: sizes.fontSize.md,
-        color: colors.textSecondary,
+        color: adminColors.textSecondary,
         marginTop: sizes.spacing.md,
     },
 });

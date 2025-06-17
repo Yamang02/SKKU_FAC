@@ -5,7 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { Card, Button, Icon } from '../../components/common';
 import { useUser } from '../../hooks';
-import { colors, sizes } from '../../constants';
+import { adminColors, sizes } from '../../constants';
 
 const UserDetailScreen = () => {
     const navigate = useNavigate();
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: sizes.spacing.lg,
-        backgroundColor: colors.background,
+        backgroundColor: adminColors.background,
     },
     header: {
         flexDirection: 'row',
@@ -358,12 +358,12 @@ const styles = StyleSheet.create({
     title: {
         fontSize: sizes.fontSize.title,
         fontWeight: 'bold',
-        color: colors.textPrimary,
+        color: adminColors.textPrimary,
         marginBottom: sizes.spacing.sm,
     },
     subtitle: {
         fontSize: sizes.fontSize.md,
-        color: colors.textSecondary,
+        color: adminColors.textSecondary,
     },
     loadingContainer: {
         alignItems: 'center',
@@ -371,12 +371,12 @@ const styles = StyleSheet.create({
     },
     loadingText: {
         fontSize: sizes.fontSize.md,
-        color: colors.textSecondary,
+        color: adminColors.textSecondary,
         marginTop: sizes.spacing.md,
     },
     errorCard: {
-        backgroundColor: colors.badge.blockedBackground,
-        borderColor: colors.badge.blocked,
+        backgroundColor: adminColors.badge.blockedBackground,
+        borderColor: adminColors.badge.blocked,
     },
     errorContent: {
         flexDirection: 'row',
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     },
     errorText: {
         fontSize: sizes.fontSize.md,
-        color: colors.badge.blocked,
+        color: adminColors.badge.blocked,
         marginLeft: sizes.spacing.sm,
         flex: 1,
     },
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: sizes.fontSize.lg,
         fontWeight: '600',
-        color: colors.textPrimary,
+        color: adminColors.textPrimary,
         marginLeft: sizes.spacing.sm,
     },
     infoGrid: {
@@ -411,35 +411,35 @@ const styles = StyleSheet.create({
     },
     infoLabel: {
         fontSize: sizes.fontSize.sm,
-        color: colors.textSecondary,
+        color: adminColors.textSecondary,
         fontWeight: '500',
     },
     infoValue: {
         fontSize: sizes.fontSize.md,
-        color: colors.textPrimary,
+        color: adminColors.textPrimary,
         fontWeight: '400',
     },
     select: {
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: adminColors.border,
         borderRadius: sizes.borderRadius.md,
         paddingHorizontal: sizes.spacing.sm,
         paddingVertical: sizes.spacing.sm,
         fontSize: sizes.fontSize.md,
-        backgroundColor: colors.white,
+        backgroundColor: adminColors.white,
         minHeight: 40,
     },
     selectDisabled: {
-        backgroundColor: colors.gray100,
-        color: colors.textDisabled,
+        backgroundColor: adminColors.gray100,
+        color: adminColors.textDisabled,
     },
     badge: {
         paddingHorizontal: sizes.spacing.sm,
         paddingVertical: sizes.spacing.xs,
         borderRadius: sizes.borderRadius.sm,
-        backgroundColor: colors.gray100,
+        backgroundColor: adminColors.gray100,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: adminColors.border,
         alignSelf: 'flex-start',
     },
     badgeText: {
@@ -448,47 +448,47 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     badgeAdmin: {
-        backgroundColor: colors.badge.adminBackground,
-        borderColor: colors.badge.admin,
+        backgroundColor: adminColors.badge.adminBackground,
+        borderColor: adminColors.badge.admin,
     },
     badgeSkku: {
-        backgroundColor: colors.badge.skkuBackground,
-        borderColor: colors.badge.skku,
+        backgroundColor: adminColors.badge.skkuBackground,
+        borderColor: adminColors.badge.skku,
     },
     badgeExternal: {
-        backgroundColor: colors.badge.externalBackground,
-        borderColor: colors.badge.external,
+        backgroundColor: adminColors.badge.externalBackground,
+        borderColor: adminColors.badge.external,
     },
     badgeActive: {
-        backgroundColor: colors.badge.activeBackground,
-        borderColor: colors.badge.active,
+        backgroundColor: adminColors.badge.activeBackground,
+        borderColor: adminColors.badge.active,
     },
     badgeInactive: {
-        backgroundColor: colors.badge.inactiveBackground,
-        borderColor: colors.badge.inactive,
+        backgroundColor: adminColors.badge.inactiveBackground,
+        borderColor: adminColors.badge.inactive,
     },
     badgeBlocked: {
-        backgroundColor: colors.badge.blockedBackground,
-        borderColor: colors.badge.blocked,
+        backgroundColor: adminColors.badge.blockedBackground,
+        borderColor: adminColors.badge.blocked,
     },
     badgeUnverified: {
-        backgroundColor: colors.badge.unverifiedBackground,
-        borderColor: colors.badge.unverified,
+        backgroundColor: adminColors.badge.unverifiedBackground,
+        borderColor: adminColors.badge.unverified,
     },
     dangerZone: {
-        borderColor: colors.error,
+        borderColor: adminColors.error,
         backgroundColor: '#fef2f2',
     },
     dangerText: {
         fontSize: sizes.fontSize.sm,
-        color: colors.textSecondary,
+        color: adminColors.textSecondary,
         marginBottom: sizes.spacing.md,
     },
     dangerActions: {
         alignItems: 'flex-start',
     },
     linkStyle: {
-        textDecorationLine: 'none',
+        // textDecoration은 React Native Web에서 지원하지 않음
     },
 });
 

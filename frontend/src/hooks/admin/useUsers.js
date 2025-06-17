@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import UserApi from '../../api/UserApi.js';
 
 export const useUsers = () => {
-    const [users, setUsers] = useState([]);
+    const [users, setUsers] = useState([]); // 빈 배열로 초기화
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [total, setTotal] = useState(0);
@@ -30,11 +30,15 @@ export const useUsers = () => {
                 setUsers(response.data.users || []);
                 setTotal(response.data.total || 0);
             } else {
-                setError(response.message || '사용자 목록을 불러오는 데 실패했습니다.');
+                setError(response.error || response.message || '사용자 목록을 불러오는 데 실패했습니다.');
+                setUsers(response.data?.users || []);
+                setTotal(response.data?.total || 0);
             }
         } catch (err) {
             console.error('사용자 목록 조회 오류:', err);
             setError('네트워크 오류가 발생했습니다.');
+            setUsers([]);  // 빈 배열로 초기화
+            setTotal(0);
         } finally {
             setLoading(false);
         }

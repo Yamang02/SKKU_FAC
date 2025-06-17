@@ -167,10 +167,21 @@ export default class UserApi {
             });
 
             const queryString = queryParams.toString();
-            return await api.get(`/admin/management/user/list?${queryString}`);
+
+            // API 엔드포인트 변경: RESTful API 사용
+            return await api.get(`/api/admin/users?${queryString}`);
         } catch (error) {
             console.error('사용자 목록 조회 중 오류 발생:', error);
-            throw error;
+
+            // 오류 발생 시 안전한 응답 반환
+            return {
+                success: false,
+                error: '사용자 목록을 불러오는 중 오류가 발생했습니다.',
+                data: {
+                    users: [],
+                    total: 0
+                }
+            };
         }
     }
 
