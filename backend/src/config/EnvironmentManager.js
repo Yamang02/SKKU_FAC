@@ -212,22 +212,30 @@ class EnvironmentManager {
             accessTokenSecret: process.env.JWT_ACCESS_SECRET || this.getEnvironmentValue({
                 development: 'dev-access-secret',
                 test: 'test-access-secret',
-                production: 'REQUIRED'
+                'local-test': 'test-access-secret',
+                production: 'REQUIRED',
+                default: 'default-access-secret'
             }),
             refreshTokenSecret: process.env.JWT_REFRESH_SECRET || this.getEnvironmentValue({
                 development: 'dev-refresh-secret',
                 test: 'test-refresh-secret',
-                production: 'REQUIRED'
+                'local-test': 'test-refresh-secret',
+                production: 'REQUIRED',
+                default: 'default-refresh-secret'
             }),
             accessTokenExpiresIn: this.getEnvironmentValue({
                 development: '1h',
                 production: '15m',
-                test: '15m'
+                test: '15m',
+                'local-test': '15m',
+                default: '15m'
             }),
             refreshTokenExpiresIn: this.getEnvironmentValue({
                 development: '30d',
                 production: '7d',
-                test: '1d'
+                test: '1d',
+                'local-test': '1d',
+                default: '7d'
             }),
             issuer: `skku-fac-gallery-${this.environment}`,
             audience: `skku-fac-gallery-${this.environment}-users`

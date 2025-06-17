@@ -338,17 +338,25 @@ export default class UserService {
     }
 
     /**
-     * 로그인을 처리합니다.
+     * 로그인을 처리합니다. (이메일 또는 사용자명 지원)
      */
-    async authenticate(username, password) {
-        const user = await this.userRepository.findUserByUsername(username);
+    async authenticate(emailOrUsername, password) {
+        // 이메일 형식인지 확인 (@ 포함 여부로 간단 판별)
+        const isEmail = emailOrUsername.includes('@');
+
+        let user;
+        if (isEmail) {
+            user = await this.userRepository.findUserByEmail(emailOrUsername);
+        } else {
+            user = await this.userRepository.findUserByUsername(emailOrUsername);
+        }
 
         if (!user) {
-            logger.auth('로그인 시도 - 사용자 없음', { username });
+            logger.auth('로그인 시도 - 사용자 없음', { emailOrUsername });
             throw new UserNotFoundError('아이디 또는 비밀번호가 일치하지 않습니다.');
         }
 
-        logger.auth('로그인 처리', { username: user.username });
+        logger.auth('로그인 처리', { username: user.username, email: user.email });
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
@@ -376,6 +384,9 @@ export default class UserService {
         await this.userRepository.updateUser(user.id, {
             lastLoginAt: new Date()
         });
+
+        // AuthService와 호환성을 위해 isActive 필드 추가
+        user.isActive = user.status === 'ACTIVE';
 
         return user;
     }

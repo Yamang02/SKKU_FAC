@@ -273,8 +273,8 @@ export default class AuthApiController {
                 return res.status(400).json(ApiResponse.error('이메일과 비밀번호를 입력해주세요.'));
             }
 
-            // 사용자 인증
-            const user = await this.userService.authenticateUser(email, password);
+            // 사용자 인증 - UserService의 authenticate 메서드 사용
+            const user = await this.userService.authenticate(email, password);
 
             // JWT 토큰 생성
             const tokens = await this.authService.authenticateAndGenerateTokens(user);

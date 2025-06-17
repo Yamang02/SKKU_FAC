@@ -1,9 +1,24 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useAuth } from '../../contexts/AuthContext';
+import { showSuccessMessage } from '../../utils/notification';
 
 const AdminHeader = ({ title = "관리자 대시보드" }) => {
+    const { logout } = useAuth();
+
     const handleHomeClick = () => {
         window.location.href = '/';
+    };
+
+    const handleLogoutClick = async () => {
+        try {
+            await logout();
+            showSuccessMessage('로그아웃되었습니다.');
+            // 로그인 페이지로 리다이렉트
+            window.location.href = '/admin/login';
+        } catch (error) {
+            console.error('로그아웃 오류:', error);
+        }
     };
 
     // React Native Web에서 HTML 요소 직접 사용
@@ -24,9 +39,9 @@ const AdminHeader = ({ title = "관리자 대시보드" }) => {
                         <Text style={styles.breadcrumbSeparator}>/</Text>
                     </View>
                 </View>
-                <View style={styles.homeSection}>
+                <View style={styles.actionSection}>
                     <Pressable
-                        style={styles.homeButton}
+                        style={styles.actionButton}
                         onPress={handleHomeClick}
                         title="홈으로"
                     >
@@ -37,6 +52,21 @@ const AdminHeader = ({ title = "관리자 대시보드" }) => {
                                 color: '#666'
                             }}
                         />
+                        <Text style={styles.buttonText}>홈</Text>
+                    </Pressable>
+                    <Pressable
+                        style={[styles.actionButton, styles.logoutButton]}
+                        onPress={handleLogoutClick}
+                        title="로그아웃"
+                    >
+                        <FontAwesomeIcon
+                            className="fas fa-sign-out-alt"
+                            style={{
+                                fontSize: '16px',
+                                color: '#dc3545'
+                            }}
+                        />
+                        <Text style={[styles.buttonText, styles.logoutText]}>로그아웃</Text>
                     </Pressable>
                 </View>
             </View>
@@ -85,18 +115,39 @@ const styles = StyleSheet.create({
         color: '#666',
         marginHorizontal: 8,
     },
-    homeSection: {
+    actionSection: {
         display: 'flex',
+        flexDirection: 'row',
         alignItems: 'center',
+        gap: 12,
     },
-    homeButton: {
+    actionButton: {
         padding: 8,
-        borderRadius: 4,
+        paddingHorizontal: 12,
+        borderRadius: 6,
         backgroundColor: '#f8f9fa',
         cursor: 'pointer',
         display: 'flex',
+        flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
+        gap: 6,
+        minWidth: 80,
+        transition: 'all 0.2s ease',
+    },
+    logoutButton: {
+        backgroundColor: '#fff2f2',
+        borderWidth: 1,
+        borderColor: '#dc3545',
+        borderStyle: 'solid',
+    },
+    buttonText: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '500',
+    },
+    logoutText: {
+        color: '#dc3545',
     },
 });
 

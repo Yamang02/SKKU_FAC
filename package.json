@@ -22,6 +22,12 @@
     "scripts": {
         "dev:backend": "npm run dev --workspace=backend",
         "dev:frontend": "npm run dev --workspace=frontend",
+        "dev:rebuild": "cd backend && docker-compose down && docker-compose build --no-cache && docker-compose up -d",
+        "dev:rebuild:full": "cd backend && docker-compose down -v && docker system prune -f && docker-compose build --no-cache && docker-compose up -d",
+        "dev:restart": "cd backend && docker-compose restart app",
+        "dev:reset": "cd backend && docker-compose down -v --remove-orphans && docker-compose build --no-cache && docker-compose up -d",
+        "dev:logs": "cd backend && docker-compose logs -f app",
+        "dev:stop": "cd backend && docker-compose down",
         "build": "npm run build:backend && npm run build:frontend",
         "build:backend": "npm run build --workspace=backend",
         "build:frontend": "npm run build --workspace=frontend",

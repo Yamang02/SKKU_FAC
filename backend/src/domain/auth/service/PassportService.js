@@ -46,7 +46,7 @@ export default class PassportService {
                 async (req, email, password, done) => {
                     try {
                         // 사용자 인증
-                        const user = await this.userService.authenticateUser(email, password);
+                        const user = await this.userService.authenticate(email, password);
 
                         if (!user) {
                             return done(null, false, {

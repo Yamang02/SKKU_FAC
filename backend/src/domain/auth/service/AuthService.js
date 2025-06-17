@@ -18,6 +18,10 @@ export default class AuthService {
     // JWT 액세스 토큰 생성
     generateAccessToken(user) {
         const jwtConfig = config.getJwtAccessTokenConfig();
+
+        // 디버깅을 위한 로그 추가
+        console.log('🔍 JWT Access Token Config:', jwtConfig);
+
         const payload = {
             id: user.id,
             username: user.username,
@@ -28,7 +32,7 @@ export default class AuthService {
         };
 
         return jwt.sign(payload, jwtConfig.secret, {
-            expiresIn: jwtConfig.expiry,
+            expiresIn: jwtConfig.expiresIn,
             issuer: jwtConfig.issuer,
             audience: jwtConfig.audience,
             subject: user.id.toString()
@@ -44,7 +48,7 @@ export default class AuthService {
         };
 
         return jwt.sign(payload, jwtConfig.secret, {
-            expiresIn: jwtConfig.expiry,
+            expiresIn: jwtConfig.expiresIn,
             issuer: jwtConfig.issuer,
             audience: jwtConfig.audience,
             subject: user.id.toString()

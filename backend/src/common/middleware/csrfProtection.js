@@ -54,8 +54,13 @@ export function setupCSRFProtection(app) {
             return next();
         }
 
-        // 제외할 경로들 (API 문서, 건강 체크 등)
-        const excludePaths = config.get('security.csrf.excludePaths', ['/api-docs', '/health', '/favicon.ico']);
+        // 제외할 경로들 (API 문서, 건강 체크, JWT API 등)
+        const excludePaths = config.get('security.csrf.excludePaths', [
+            '/api-docs',
+            '/health',
+            '/favicon.ico',
+            '/auth/jwt'  // JWT API 경로 제외
+        ]);
 
         if (excludePaths.some(path => req.path.startsWith(path))) {
             return next();
