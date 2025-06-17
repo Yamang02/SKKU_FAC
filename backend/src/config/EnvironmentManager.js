@@ -278,8 +278,8 @@ class EnvironmentManager {
 
         return {
             origin: this.getEnvironmentValue({
-                development: ['http://localhost:3000', 'http://localhost:3001'],
-                'local-test': ['http://localhost:3001'],
+                development: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3003'],
+                'local-test': ['http://localhost:3001', 'http://localhost:3003'],
                 production: process.env.ALLOWED_ORIGINS?.split(',') || false
             }),
             credentials: true,

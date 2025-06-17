@@ -2,8 +2,9 @@
  * 공통 API 기본 클래스
  * 모든 API 클래스의 기본 기능을 제공합니다.
  */
-import api from '../api.js';
-import { showErrorMessage, showSuccessMessage } from '../../utils/message.js';
+import api from '../../utils/api.js';
+import { showErrorMessage, showSuccessMessage } from '../../utils/notification.js';
+import { API_BASE_URL } from '../../constants/api.js';
 
 export default class BaseApi {
     // AuthContext 인스턴스를 저장할 정적 변수
@@ -144,7 +145,7 @@ export default class BaseApi {
      */
     static async get(endpoint, params = {}) {
         const queryString = this.buildQueryString(params);
-        const url = `http://localhost:3000${endpoint}${queryString ? `?${queryString}` : ''}`;
+        const url = `${API_BASE_URL}${endpoint}${queryString ? `?${queryString}` : ''}`;
 
         if (this.authContext && this.authContext.authenticatedFetch) {
             const response = await this.authContext.authenticatedFetch(url);
@@ -163,7 +164,7 @@ export default class BaseApi {
      * @returns {Promise} API 응답
      */
     static async post(endpoint, data = {}) {
-        const url = `http://localhost:3000${endpoint}`;
+        const url = `${API_BASE_URL}${endpoint}`;
 
         if (this.authContext && this.authContext.authenticatedFetch) {
             const response = await this.authContext.authenticatedFetch(url, {
@@ -184,7 +185,7 @@ export default class BaseApi {
      * @returns {Promise} API 응답
      */
     static async put(endpoint, data = {}) {
-        const url = `http://localhost:3000${endpoint}`;
+        const url = `${API_BASE_URL}${endpoint}`;
 
         if (this.authContext && this.authContext.authenticatedFetch) {
             const response = await this.authContext.authenticatedFetch(url, {
@@ -205,7 +206,7 @@ export default class BaseApi {
      * @returns {Promise} API 응답
      */
     static async patch(endpoint, data = {}) {
-        const url = `http://localhost:3000${endpoint}`;
+        const url = `${API_BASE_URL}${endpoint}`;
 
         if (this.authContext && this.authContext.authenticatedFetch) {
             const response = await this.authContext.authenticatedFetch(url, {
@@ -225,7 +226,7 @@ export default class BaseApi {
      * @returns {Promise} API 응답
      */
     static async delete(endpoint) {
-        const url = `http://localhost:3000${endpoint}`;
+        const url = `${API_BASE_URL}${endpoint}`;
 
         if (this.authContext && this.authContext.authenticatedFetch) {
             const response = await this.authContext.authenticatedFetch(url, {
@@ -245,7 +246,7 @@ export default class BaseApi {
      * @returns {Promise} API 응답
      */
     static async postFormData(endpoint, formData) {
-        const url = `http://localhost:3000${endpoint}`;
+        const url = `${API_BASE_URL}${endpoint}`;
 
         if (this.authContext && this.authContext.authenticatedFetch) {
             const headers = { ...this.authContext.getAuthHeaders() };

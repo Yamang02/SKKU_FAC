@@ -6,12 +6,6 @@ export { default as DashboardScreen } from './systemManagement/DashboardScreen.j
 export { default as UserListScreen } from './user/UserListScreen.jsx';
 export { default as UserDetailScreen } from './user/UserDetailScreen.jsx';
 
-// 향후 Admin 도메인 확장 예정:
-// export { default as ExhibitionListScreen } from './ExhibitionListScreen.jsx';
-// export { default as ExhibitionDetailScreen } from './ExhibitionDetailScreen.jsx';
-// export { default as ArtworkListScreen } from './ArtworkListScreen.jsx';
-// export { default as ArtworkDetailScreen } from './ArtworkDetailScreen.jsx';
-
 // Exhibition Management
 export { default as ExhibitionListScreen } from './exhibition/ExhibitionListScreen.jsx';
 export { default as ExhibitionDetailScreen } from './exhibition/ExhibitionDetailScreen.jsx';

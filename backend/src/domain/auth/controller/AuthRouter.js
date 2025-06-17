@@ -221,6 +221,24 @@ AuthRouter.get('/jwt/verify', authApiController.verifyJWTToken.bind(authApiContr
 
 /**
  * @swagger
+ * /jwt/verify-admin:
+ *   get:
+ *     summary: JWT 관리자 토큰 검증
+ *     tags: [JWT Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 유효한 관리자 토큰
+ *       401:
+ *         description: 유효하지 않은 토큰
+ *       403:
+ *         description: 관리자 권한 없음
+ */
+AuthRouter.get('/jwt/verify-admin', authApiController.verifyAdminJWTToken.bind(authApiController));
+
+/**
+ * @swagger
  * /jwt/logout:
  *   post:
  *     summary: JWT 로그아웃

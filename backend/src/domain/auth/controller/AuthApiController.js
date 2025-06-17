@@ -342,6 +342,59 @@ export default class AuthApiController {
     }
 
     /**
+     * JWT 관리자 토큰 검증
+     */
+    async verifyAdminJWTToken(req, res) {
+        try {
+            const authHeader = req.headers.authorization;
+            const token = this.extractTokenFromHeader(authHeader);
+
+            if (!token) {
+                this.logSecurityEvent('관리자 토큰 검증 API - 토큰 누락', req);
+                return res.status(400).json(ApiResponse.error('토큰이 필요합니다.'));
+            }
+
+            // 토큰 검증
+            const decoded = this.authService.verifyAccessToken(token);
+
+            // 관리자 권한 확인
+            if (decoded.role !== 'ADMIN') {
+                this.logSecurityEvent('관리자 토큰 검증 API - 권한 부족', req, `사용자 역할: ${decoded.role}`);
+                return res.status(403).json(ApiResponse.error('관리자 권한이 필요합니다.', { valid: false, isAdmin: false }));
+            }
+
+            // 활성 상태 확인
+            if (!decoded.isActive) {
+                this.logSecurityEvent('관리자 토큰 검증 API - 비활성 계정', req, `사용자 ID: ${decoded.id}`);
+                return res.status(403).json(ApiResponse.error('비활성화된 계정입니다.', { valid: false, isAdmin: false }));
+            }
+
+            return res.json(
+                ApiResponse.success(
+                    {
+                        valid: true,
+                        isAdmin: true,
+                        user: {
+                            id: decoded.id,
+                            username: decoded.username,
+                            email: decoded.email,
+                            role: decoded.role,
+                            isActive: decoded.isActive
+                        }
+                    },
+                    '유효한 관리자 토큰입니다.'
+                )
+            );
+        } catch (error) {
+            this.logSecurityEvent('관리자 토큰 검증 API - 검증 실패', req, error.message);
+            console.error('JWT 관리자 토큰 검증 오류:', error);
+            return res
+                .status(401)
+                .json(ApiResponse.error(error.message || '유효하지 않은 토큰입니다.', { valid: false, isAdmin: false }));
+        }
+    }
+
+    /**
      * JWT 토큰 검증
      */
     async verifyJWTToken(req, res) {

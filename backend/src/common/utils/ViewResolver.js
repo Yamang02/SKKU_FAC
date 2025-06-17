@@ -91,13 +91,12 @@ export default class ViewResolver {
 
     /**
      * 뷰 경로에 따른 레이아웃을 결정합니다.
-     * @param {string} viewPath - 뷰 경로
+     * @param {string} _viewPath - 뷰 경로 (현재 미사용)
      * @returns {string} 레이아웃 경로
      */
-    static determineLayout(viewPath) {
-        // 관리자 페이지 체크
-        const isAdminView = viewPath.startsWith('admin/');
-        return isAdminView ? ViewPath.ADMIN.LAYOUT : ViewPath.MAIN.LAYOUT;
+    static determineLayout(_viewPath) {
+        // Admin VIEW는 더 이상 존재하지 않으므로 메인 레이아웃만 사용
+        return ViewPath.MAIN.LAYOUT;
     }
 
     /**
@@ -106,11 +105,14 @@ export default class ViewResolver {
      * @returns {string} 현재 페이지 식별자
      */
     static determineCurrentPage(viewPath) {
-        if (viewPath === ViewPath.ADMIN.DASHBOARD) return 'dashboard';
-        if (viewPath === ViewPath.ADMIN.MANAGEMENT.USER.LIST) return 'user';
-        if (viewPath === ViewPath.ADMIN.MANAGEMENT.EXHIBITION.LIST) return 'exhibition';
-        if (viewPath === ViewPath.ADMIN.MANAGEMENT.ARTWORK.LIST) return 'artwork';
-        if (viewPath === ViewPath.ADMIN.MANAGEMENT.NOTICE.LIST) return 'notice';
+        // Admin 관련 페이지는 더 이상 존재하지 않으므로 제거
+        if (viewPath === ViewPath.MAIN.HOME) return 'home';
+        if (viewPath === ViewPath.MAIN.ABOUT) return 'about';
+        if (viewPath === ViewPath.MAIN.EXHIBITION.LIST) return 'exhibition';
+        if (viewPath === ViewPath.MAIN.ARTWORK.LIST) return 'artwork';
+        if (viewPath === ViewPath.MAIN.USER.LOGIN) return 'login';
+        if (viewPath === ViewPath.MAIN.USER.REGISTER) return 'register';
+        if (viewPath === ViewPath.ERROR) return 'error';
         return '';
     }
 }

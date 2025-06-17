@@ -16,6 +16,7 @@ import getCacheManager from './common/cache/getCacheManager.js';
 // 라우터
 import { createRouters } from './routeIndex.js';
 import { isAdmin } from './common/middleware/auth.js';
+import { requireAdminAuth } from './common/middleware/jwtAuth.js';
 import flash from 'connect-flash';
 
 // Railway에서 모니터링 제공하므로 Sentry 제거
@@ -92,7 +93,8 @@ appInitializer.getRouterFactory = () => ({
 
 // 미들웨어들을 AppInitializer에 주입
 appInitializer.getMiddleware = () => ({
-    isAdmin
+    isAdmin,
+    requireAdminAuth
 });
 
 // 애플리케이션 초기화 실행

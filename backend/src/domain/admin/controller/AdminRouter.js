@@ -20,10 +20,30 @@ export function createAdminRouter(container) {
     // 의존성 주입된 컨트롤러들을 해결
     const systemManagementController = container.resolve('SystemManagementController');
 
-    // ==================== 대시보드 (전 도메인 커버) ==================== //
-    AdminRouter.get(['/', '/dashboard'], requireUserManagement(), (req, res) =>
-        systemManagementController.getDashboard(req, res)
-    );
+    // ==================== Admin 페이지 → 프론트엔드 리다이렉션 ==================== //
+    // Admin 페이지 접근 시 프론트엔드로 리다이렉션 (API는 별도 처리)
+    AdminRouter.get(['/', '/dashboard'], (req, res) => {
+        // Admin 페이지는 프론트엔드에서 처리
+        res.redirect('http://localhost:3003/admin');
+    });
+
+    // Admin 사용자 관리 페이지들 → 프론트엔드 리다이렉션
+    AdminRouter.get(['/users', '/users/:id'], (req, res) => {
+        const userId = req.params.id ? `/${req.params.id}` : '';
+        res.redirect(`http://localhost:3003/admin/users${userId}`);
+    });
+
+    // Admin 전시 관리 페이지들 → 프론트엔드 리다이렉션
+    AdminRouter.get(['/exhibitions', '/exhibitions/:id'], (req, res) => {
+        const exhibitionId = req.params.id ? `/${req.params.id}` : '';
+        res.redirect(`http://localhost:3003/admin/exhibitions${exhibitionId}`);
+    });
+
+    // Admin 작품 관리 페이지들 → 프론트엔드 리다이렉션
+    AdminRouter.get(['/artworks', '/artworks/:id'], (req, res) => {
+        const artworkId = req.params.id ? `/${req.params.id}` : '';
+        res.redirect(`http://localhost:3003/admin/artworks${artworkId}`);
+    });
 
     // ==================== 시스템 관리 (전 도메인 커버) ==================== //
     AdminRouter.get('/system', requireUserManagement(), (req, res) =>
