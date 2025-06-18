@@ -59,7 +59,7 @@ export const extractUserFromToken = async (req, res, next) => {
     }
 };
 
-// JWT 인증 필수 미들웨어
+// JWT 인증 필수 미들웨어 (하이브리드 - HTML/JSON 응답)
 export const requireJwtAuth = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
@@ -114,7 +114,38 @@ export const requireJwtAuth = async (req, res, next) => {
     }
 };
 
-// JWT 기반 관리자 권한 확인
+// Admin API 전용 JWT 인증 미들웨어 (JSON 응답만)
+export const requireJwtAuthApi = async (req, res, next) => {
+    try {
+        const authHeader = req.headers.authorization;
+        const token = extractTokenFromHeader(authHeader);
+
+        if (!token) {
+            logSecurityEvent('API 토큰 누락', req);
+            return res.status(401).json(ApiResponse.error('인증 토큰이 필요합니다.'));
+        }
+
+        try {
+            const decoded = authService.verifyAccessToken(token);
+            req.jwtUser = decoded;
+
+            // 사용자가 활성 상태인지 확인
+            if (!decoded.isActive) {
+                logSecurityEvent('API 비활성 계정 접근 시도', req, `사용자 ID: ${decoded.id}`);
+                return res.status(403).json(ApiResponse.error('비활성화된 계정입니다.'));
+            }
+
+            next();
+        } catch (error) {
+            logSecurityEvent('API 토큰 검증 실패', req, error.message);
+            return res.status(401).json(ApiResponse.error(error.message || '유효하지 않은 토큰입니다.'));
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+// JWT 기반 관리자 권한 확인 (하이브리드 - HTML/JSON 응답)
 export const requireJwtAdmin = (req, res, next) => {
     if (!req.jwtUser || req.jwtUser.role !== UserRole.ADMIN) {
         logSecurityEvent('관리자 권한 없는 접근 시도', req, `사용자 역할: ${req.jwtUser?.role || 'none'}`);
@@ -127,6 +158,15 @@ export const requireJwtAdmin = (req, res, next) => {
             error: '관리자 권한이 필요합니다.',
             message: '접근 권한이 없습니다.'
         });
+    }
+    next();
+};
+
+// Admin API 전용 JWT 관리자 권한 확인 미들웨어 (JSON 응답만)
+export const requireJwtAdminApi = (req, res, next) => {
+    if (!req.jwtUser || req.jwtUser.role !== UserRole.ADMIN) {
+        logSecurityEvent('API 관리자 권한 없는 접근 시도', req, `사용자 역할: ${req.jwtUser?.role || 'none'}`);
+        return res.status(403).json(ApiResponse.error('관리자 권한이 필요합니다.'));
     }
     next();
 };

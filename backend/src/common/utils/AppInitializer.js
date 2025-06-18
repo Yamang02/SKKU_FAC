@@ -108,16 +108,18 @@ class AppInitializer {
         const { createRouters } = this.getRouterFactory();
         const routers = createRouters(this.container);
 
-        const { isAdmin, requireAdminAuth } = this.getMiddleware();
+        // 미들웨어는 필요시에만 로드
 
         this.app.use('/', routers.HomeRouter);
         this.app.use('/exhibition', routers.ExhibitionRouter);
         this.app.use('/artwork', routers.ArtworkRouter);
         this.app.use('/user', routers.UserRouter);
-        this.app.use('/admin', isAdmin, routers.AdminRouter);
 
-        // 🔥 JWT 하이브리드 인증으로 변경 - 세션과 JWT 모두 지원
-        this.app.use('/api/admin', requireAdminAuth, routers.AdminApiRouter);
+        // 🔥 API 라우터를 먼저 마운트 (더 구체적인 경로가 우선)
+        this.app.use('/api/admin', routers.AdminApiRouter);
+
+        // 🔥 Admin 페이지 라우터 (리다이렉션만 담당, 인증 없음)
+        this.app.use('/admin', routers.AdminRouter);
 
         this.app.use('/auth', routers.AuthRouter);
 
