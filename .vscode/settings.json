@@ -21,7 +21,9 @@
     "html.format.wrapLineLength": 120,
     "html.format.indentInnerHtml": true,
     "files.associations": {
-        "*.ejs": "html"
+        "*.ejs": "html",
+        "*.jsx": "javascriptreact",
+        "*.tsx": "typescriptreact"
     },
     "search.exclude": {
         "**/node_modules": true,
@@ -50,5 +52,23 @@
             "interface",
             "presentation"
         ]
-    }
+    },
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "typescript.suggest.autoImports": true,
+    "javascript.suggest.autoImports": true,
+    "emmet.includeLanguages": {
+        "javascript": "javascriptreact",
+        "typescript": "typescriptreact"
+    },
+    "emmet.triggerExpansionOnTab": true,
+    "reactNativeTools.showUserTips": true,
+    "reactNativeTools.projectRoot": "./frontend",
+    "css.validate": true,
+    "scss.validate": true,
+    "less.validate": true,
+    "editor.quickSuggestions": {
+        "strings": true
+    },
+    "css.completion.triggerPropertyValueCompletion": true,
+    "css.completion.completePropertyWithSemicolon": true
 }
