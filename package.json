@@ -45,6 +45,7 @@
     "dependencies": {
         "@sentry/node": "^9.25.1",
         "@sentry/profiling-node": "^9.25.1",
+        "@tanstack/react-query": "^5.80.7",
         "audit-ci": "^7.1.0",
         "bcrypt": "^5.1.1",
         "body-parser": "^1.20.2",
@@ -93,6 +94,7 @@
         "react-dom": "18.2.0",
         "react-native": "0.73.0",
         "react-native-web": "^0.19.12",
+        "react-router-dom": "^7.6.2",
         "redis": "^5.1.0",
         "sequelize": "^6.37.7",
         "sharp": "^0.33.5",
@@ -101,7 +103,8 @@
         "task-master-ai": "^0.16.0",
         "uuid": "^11.1.0",
         "winston": "^3.8.2",
-        "winston-daily-rotate-file": "^5.0.0"
+        "winston-daily-rotate-file": "^5.0.0",
+        "zustand": "^5.0.5"
     },
     "devDependencies": {
         "@babel/core": "^7.23.0",
@@ -111,6 +114,7 @@
         "@eslint/js": "^9.21.0",
         "@faker-js/faker": "^9.8.0",
         "@playwright/test": "^1.52.0",
+        "@types/node": "^24.0.3",
         "@types/react": "^18.2.0",
         "@types/react-dom": "^18.2.0",
         "@types/react-native": "^0.73.0",
