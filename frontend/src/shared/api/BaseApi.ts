@@ -2,29 +2,11 @@
  * 공통 API 기본 클래스
  */
 
-import { api, ApiResponse } from '../utils/api';
+import { api } from '../utils/api';
+import type { ApiResponse } from '../utils/api';
+import type { PaginationParams, FilterParams, ListResponse } from './types';
 import { showErrorMessage, showSuccessMessage } from '../utils/notification';
 import { API_CONFIG } from '../config/api.config';
-
-// 페이지네이션 타입
-export interface PaginationParams {
-    page?: number;
-    limit?: number;
-}
-
-// 필터 타입
-export interface FilterParams {
-    [key: string]: string | number | boolean | null | undefined;
-}
-
-// 리스트 응답 타입
-export interface ListResponse<T> {
-    items: T[];
-    total: number;
-    page: number | null;
-    totalPages?: number;
-    limit?: number;
-}
 
 // AuthContext 타입 (나중에 구현될 예정)
 interface AuthContextType {
@@ -177,7 +159,7 @@ export default class BaseApi {
     /**
      * 인증된 POST 요청
      */
-    static async post<T>(endpoint: string, data: Record<string, unknown> = {}): Promise<ApiResponse<T>> {
+    static async post<T>(endpoint: string, data: object = {}): Promise<ApiResponse<T>> {
         const url = `${API_CONFIG.BASE_URL}${endpoint}`;
 
         if (this.authContext && this.authContext.authenticatedFetch) {
@@ -195,7 +177,7 @@ export default class BaseApi {
     /**
      * 인증된 PUT 요청
      */
-    static async put<T>(endpoint: string, data: Record<string, unknown> = {}): Promise<ApiResponse<T>> {
+    static async put<T>(endpoint: string, data: object = {}): Promise<ApiResponse<T>> {
         const url = `${API_CONFIG.BASE_URL}${endpoint}`;
 
         if (this.authContext && this.authContext.authenticatedFetch) {
@@ -213,7 +195,7 @@ export default class BaseApi {
     /**
      * 인증된 PATCH 요청
      */
-    static async patch<T>(endpoint: string, data: Record<string, unknown> = {}): Promise<ApiResponse<T>> {
+    static async patch<T>(endpoint: string, data: object = {}): Promise<ApiResponse<T>> {
         const url = `${API_CONFIG.BASE_URL}${endpoint}`;
 
         if (this.authContext && this.authContext.authenticatedFetch) {

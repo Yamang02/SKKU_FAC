@@ -1,0 +1,705 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+    Table,
+    Button,
+    Input,
+    Select,
+    Breadcrumb,
+    Tooltip,
+    Modal,
+    Form,
+    Pagination,
+    Card,
+    Space,
+    Typography,
+    Tag,
+    Checkbox,
+    message,
+} from "antd";
+import {
+    SearchOutlined,
+    EditOutlined,
+    PlusOutlined,
+    FilterOutlined,
+    DeleteOutlined,
+    KeyOutlined,
+    ExclamationCircleOutlined,
+} from "@ant-design/icons";
+import { UserAdminApi } from '../../api/UserAdminApi';
+import type {
+    AdminUserDetail,
+    AdminCreateUserRequest,
+    AdminUpdateUserRequest,
+    AdminUserSearchParams
+} from '../../types/user.types';
+
+const { Option } = Select;
+const { Title, Text } = Typography;
+
+export const UserManagement: React.FC = () => {
+    const [users, setUsers] = useState<AdminUserDetail[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [total, setTotal] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
+
+    // 필터 상태 - 이전 버전과 동일한 방식
+    const [searchText, setSearchText] = useState("");
+    const [statusFilter, setStatusFilter] = useState("전체");
+    const [roleFilter, setRoleFilter] = useState("전체");
+
+    // 모달 상태
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [editingUser, setEditingUser] = useState<AdminUserDetail | null>(null);
+    const [form] = Form.useForm();
+
+
+
+    // 사용자 목록 조회
+    const fetchUsers = useCallback(async () => {
+        setLoading(true);
+        try {
+            const params: AdminUserSearchParams = {
+                page: currentPage,
+                limit: pageSize,
+                sortBy: 'id',
+                sortOrder: 'desc',
+                ...(searchText && { search: searchText }),
+                ...(roleFilter !== '전체' && { role: roleFilter as 'ADMIN' | 'SKKU_MEMBER' | 'EXTERNAL_MEMBER' }),
+                ...(statusFilter !== '전체' && { status: statusFilter })
+            };
+
+            const response = await UserAdminApi.getUsers(params);
+
+            if (response.success && response.data) {
+                setUsers(response.data.items);
+                setTotal(response.data.total);
+            } else {
+                message.error('사용자 목록을 불러올 수 없습니다.');
+            }
+        } catch (error) {
+            console.error('사용자 목록 조회 실패:', error);
+            message.error('사용자 목록을 불러오는 중 오류가 발생했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    }, [currentPage, pageSize, searchText, statusFilter, roleFilter]);
+
+    // 초기 데이터 로드
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
+
+    const showModal = (user?: AdminUserDetail) => {
+        if (user) {
+            setEditingUser(user);
+            form.setFieldsValue({
+                username: user.username,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                department: user.department,
+                affiliation: user.affiliation,
+                studentYear: user.studentYear,
+                isClubMember: user.isClubMember,
+                emailVerified: user.emailVerified
+            });
+        } else {
+            setEditingUser(null);
+            form.resetFields();
+        }
+        setIsModalVisible(true);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+        form.resetFields();
+    };
+
+    const handleOk = () => {
+        form.validateFields().then(async (values) => {
+            setLoading(true);
+            try {
+                if (editingUser) {
+                    // 수정 모드
+                    const updateData: AdminUpdateUserRequest = {
+                        name: values.name,
+                        email: values.email,
+                        role: values.role,
+                        department: values.department,
+                        affiliation: values.affiliation,
+                        studentYear: values.studentYear,
+                        isClubMember: values.isClubMember,
+                        emailVerified: values.emailVerified
+                    };
+
+                    const response = await UserAdminApi.updateUser(editingUser.id, updateData);
+
+                    if (response.success) {
+                        message.success('사용자 정보가 성공적으로 수정되었습니다.');
+                        setIsModalVisible(false);
+                        form.resetFields();
+                        fetchUsers();
+                    } else {
+                        message.error(response.error || '사용자 정보 수정에 실패했습니다.');
+                    }
+                } else {
+                    // 생성 모드
+                    const createData: AdminCreateUserRequest = {
+                        username: values.username,
+                        name: values.name,
+                        email: values.email,
+                        password: values.password,
+                        confirmPassword: values.confirmPassword,
+                        role: values.role,
+                        department: values.department,
+                        affiliation: values.affiliation,
+                        studentYear: values.studentYear,
+                        isClubMember: values.isClubMember || false
+                    };
+
+                    const response = await UserAdminApi.createUser(createData);
+
+                    if (response.success) {
+                        message.success('사용자가 성공적으로 생성되었습니다.');
+                        setIsModalVisible(false);
+                        form.resetFields();
+                        fetchUsers();
+                    } else {
+                        message.error(response.error || '사용자 생성에 실패했습니다.');
+                    }
+                }
+            } catch (error) {
+                console.error('사용자 처리 실패:', error);
+                message.error('작업 중 오류가 발생했습니다.');
+            } finally {
+                setLoading(false);
+            }
+        });
+    };
+
+    // 회원 삭제 함수
+    const handleDeleteUser = () => {
+        if (!editingUser) return;
+
+        Modal.confirm({
+            title: '회원 삭제',
+            icon: <ExclamationCircleOutlined />,
+            content: `"${editingUser.name}" 회원을 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`,
+            okText: '삭제',
+            okType: 'danger',
+            cancelText: '취소',
+            async onOk() {
+                try {
+                    const response = await UserAdminApi.deleteUser(editingUser.id);
+
+                    if (response.success) {
+                        message.success(`"${editingUser.name}" 회원이 삭제되었습니다.`);
+                        setIsModalVisible(false);
+                        form.resetFields();
+                        fetchUsers();
+                    } else {
+                        message.error(response.error || '사용자 삭제에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('사용자 삭제 실패:', error);
+                    message.error('사용자 삭제 중 오류가 발생했습니다.');
+                }
+            },
+        });
+    };
+
+    // 비밀번호 리셋 함수
+    const handleResetPassword = () => {
+        if (!editingUser) return;
+
+        Modal.confirm({
+            title: '비밀번호 초기화',
+            icon: <KeyOutlined />,
+            content: `"${editingUser.name}" 회원의 비밀번호를 초기화하시겠습니까? 임시 비밀번호가 생성됩니다.`,
+            okText: '초기화',
+            cancelText: '취소',
+            async onOk() {
+                try {
+                    const response = await UserAdminApi.resetPassword(editingUser.id);
+
+                    if (response.success && response.data) {
+                        const tempPassword = response.data.tempPassword;
+
+                        Modal.success({
+                            title: '비밀번호 초기화 완료',
+                            content: (
+                                <div>
+                                    <p>"{editingUser.name}" 회원의 비밀번호가 초기화되었습니다.</p>
+                                    <p><strong>임시 비밀번호: {tempPassword}</strong></p>
+                                    <p style={{ color: '#666', fontSize: '12px' }}>
+                                        회원에게 임시 비밀번호를 전달하고 로그인 후 변경하도록 안내해주세요.
+                                    </p>
+                                </div>
+                            ),
+                            width: 400,
+                        });
+                    } else {
+                        message.error(response.error || '비밀번호 초기화에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('비밀번호 초기화 실패:', error);
+                    message.error('비밀번호 초기화 중 오류가 발생했습니다.');
+                }
+            },
+        });
+    };
+
+    const columns = [
+        {
+            title: "사용자명",
+            dataIndex: "username",
+            key: "username",
+            width: 120,
+        },
+        {
+            title: "이름",
+            dataIndex: "name",
+            key: "name",
+            width: 100,
+        },
+        {
+            title: "이메일",
+            dataIndex: "email",
+            key: "email",
+            width: 200,
+            render: (email: string, record: AdminUserDetail) => (
+                <span>
+                    {email}
+                    {record.emailVerified && (
+                        <Tag color="green" style={{ marginLeft: 8 }}>
+                            인증됨
+                        </Tag>
+                    )}
+                </span>
+            ),
+        },
+        {
+            title: "역할",
+            dataIndex: "role",
+            key: "role",
+            width: 120,
+            render: (role: string) => {
+                const roleInfo: { [key: string]: { text: string; color: string } } = {
+                    'SKKU_MEMBER': { text: 'SKKU 회원', color: 'green' },
+                    'EXTERNAL_MEMBER': { text: '외부 회원', color: 'blue' },
+                    'ADMIN': { text: '관리자', color: 'red' }
+                };
+                const info = roleInfo[role] || { text: role, color: 'default' };
+                return <Tag color={info.color}>{info.text}</Tag>;
+            },
+        },
+        {
+            title: "소속정보",
+            key: "department",
+            width: 150,
+            render: (_: unknown, record: AdminUserDetail) => {
+                if (record.role === 'EXTERNAL_MEMBER') {
+                    return record.affiliation || '-';
+                }
+                return record.department || '-';
+            },
+        },
+        {
+            title: "학번",
+            dataIndex: "studentYear",
+            key: "studentYear",
+            width: 80,
+            render: (studentYear: number, record: AdminUserDetail) => {
+                return (record.role === 'SKKU_MEMBER' || record.role === 'ADMIN')
+                    ? (studentYear ? `${studentYear}` : '-')
+                    : '-';
+            },
+        },
+        {
+            title: "가입일",
+            dataIndex: "createdAt",
+            key: "createdAt",
+            width: 120,
+            render: (date: string) => new Date(date).toLocaleDateString('ko-KR'),
+        },
+        {
+            title: "동아리 회원",
+            dataIndex: "isClubMember",
+            key: "isClubMember",
+            width: 100,
+            align: 'center' as const,
+            render: (isClubMember: boolean) => (
+                <Tag color={isClubMember ? 'blue' : 'default'}>
+                    {isClubMember ? '회원' : '비회원'}
+                </Tag>
+            ),
+        },
+        {
+            title: "작업",
+            key: "action",
+            width: 80,
+            render: (_: unknown, record: AdminUserDetail) => (
+                <Tooltip title="회원정보 수정">
+                    <Button
+                        type="text"
+                        icon={<EditOutlined />}
+                        onClick={() => showModal(record)}
+                        style={{ color: '#1890ff' }}
+                    />
+                </Tooltip>
+            ),
+        },
+    ];
+
+    // 페이지네이션 처리된 데이터
+    const paginatedData = users.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize,
+    );
+
+    return (
+        <Card style={{ marginBottom: '24px' }}>
+            <div style={{ marginBottom: '16px' }}>
+                <Breadcrumb
+                    items={[{ title: "관리자" }, { title: "회원 관리" }]}
+                    style={{ marginBottom: '16px' }}
+                />
+
+                <div style={{
+                    borderLeft: '4px solid #1890ff',
+                    paddingLeft: '12px',
+                    marginBottom: '8px'
+                }}>
+                    <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
+                        회원목록
+                    </Title>
+                </div>
+                <Text type="secondary">
+                    총 {total}명의 회원
+                </Text>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+                <Space wrap>
+                    <Select
+                        placeholder="회원 상태"
+                        style={{ width: 140 }}
+                        value={statusFilter}
+                        onChange={setStatusFilter}
+                    >
+                        <Option value="전체">전체 상태</Option>
+                        <Option value="ACTIVE">활성</Option>
+                        <Option value="INACTIVE">비활성</Option>
+                        <Option value="BLOCKED">차단</Option>
+                        <Option value="UNVERIFIED">미인증</Option>
+                    </Select>
+
+                    <Select
+                        placeholder="회원 역할"
+                        style={{ width: 180 }}
+                        value={roleFilter}
+                        onChange={setRoleFilter}
+                    >
+                        <Option value="전체">전체 역할</Option>
+                        <Option value="SKKU_MEMBER">SKKU 회원</Option>
+                        <Option value="EXTERNAL_MEMBER">외부 회원</Option>
+                        <Option value="ADMIN">관리자</Option>
+                    </Select>
+
+                    <Input
+                        placeholder="이름, 아이디, 이메일 검색"
+                        prefix={<SearchOutlined />}
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        style={{ width: 300 }}
+                    />
+
+                    <Button
+                        type="primary"
+                        icon={<FilterOutlined />}
+                        onClick={fetchUsers}
+                    >
+                        필터 적용
+                    </Button>
+
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => showModal()}
+                        style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+                    >
+                        회원 추가
+                    </Button>
+                </Space>
+            </div>
+
+            <Table
+                columns={columns}
+                dataSource={paginatedData}
+                rowKey="id"
+                loading={loading}
+                pagination={false}
+                scroll={{ x: 1000 }}
+                style={{ marginBottom: '24px' }}
+            />
+
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <Pagination
+                    current={currentPage}
+                    onChange={setCurrentPage}
+                    total={total}
+                    pageSize={pageSize}
+                    showSizeChanger={false}
+                    showQuickJumper={false}
+                />
+            </div>
+
+            <Modal
+                title={editingUser ? "회원 정보 수정" : "새 회원 추가"}
+                open={isModalVisible}
+                onCancel={handleCancel}
+                width={600}
+                maskClosable={false}
+                destroyOnClose={true}
+                footer={[
+                    <Button key="back" onClick={handleCancel}>
+                        취소
+                    </Button>,
+                    ...(editingUser ? [
+                        <Button
+                            key="reset"
+                            icon={<KeyOutlined />}
+                            onClick={handleResetPassword}
+                            style={{ marginRight: '8px' }}
+                        >
+                            비밀번호 초기화
+                        </Button>,
+                        <Button
+                            key="delete"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={handleDeleteUser}
+                            style={{ marginRight: '8px' }}
+                        >
+                            회원 삭제
+                        </Button>,
+                    ] : []),
+                    <Button
+                        key="submit"
+                        type="primary"
+                        onClick={handleOk}
+                        loading={loading}
+                    >
+                        {editingUser ? "수정" : "추가"}
+                    </Button>,
+                ]}
+            >
+                <Form
+                    form={form}
+                    layout="vertical"
+                    initialValues={{ status: "ACTIVE", role: "SKKU_MEMBER" }}
+                    requiredMark={false}
+                >
+                    <div style={{ marginBottom: '16px' }}>
+                        <Form.Item
+                            name="username"
+                            label="사용자명(ID)"
+                            rules={[
+                                { required: true, message: "아이디를 입력해주세요!" },
+                                { min: 3, message: "아이디는 최소 3자 이상이어야 합니다!" }
+                            ]}
+                        >
+                            <Input
+                                placeholder="영문, 숫자 조합 3자 이상"
+                                disabled={!!editingUser}
+                                readOnly={!!editingUser}
+                            />
+                        </Form.Item>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                        <Form.Item
+                            name="name"
+                            label="이름"
+                            style={{ flex: 1 }}
+                            rules={[{ required: true, message: "이름을 입력해주세요!" }]}
+                        >
+                            <Input placeholder="홍길동" />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="role"
+                            label="역할"
+                            style={{ flex: 1 }}
+                            rules={[{ required: true, message: "역할을 선택해주세요!" }]}
+                        >
+                            <Select placeholder="역할 선택">
+                                <Option value="SKKU_MEMBER">성균관대 구성원</Option>
+                                <Option value="EXTERNAL_MEMBER">외부인</Option>
+                                <Option value="ADMIN">관리자</Option>
+                            </Select>
+                        </Form.Item>
+                    </div>
+
+                    <Form.Item
+                        name="email"
+                        label="이메일"
+                        rules={[
+                            { required: true, message: "이메일을 입력해주세요!" },
+                            { type: "email", message: "유효한 이메일 형식이 아닙니다!" },
+                        ]}
+                    >
+                        <Input placeholder="example@skku.edu" />
+                    </Form.Item>
+
+                    {!editingUser && (
+                        <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                            <Form.Item
+                                name="password"
+                                label="비밀번호"
+                                style={{ flex: 1 }}
+                                rules={[
+                                    { required: true, message: "비밀번호를 입력해주세요!" },
+                                    { min: 8, message: "비밀번호는 최소 8자 이상이어야 합니다!" }
+                                ]}
+                            >
+                                <Input.Password placeholder="비밀번호" />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="confirmPassword"
+                                label="비밀번호 확인"
+                                style={{ flex: 1 }}
+                                dependencies={['password']}
+                                rules={[
+                                    { required: true, message: "비밀번호 확인을 입력해주세요!" },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || getFieldValue('password') === value) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('비밀번호가 일치하지 않습니다'));
+                                        },
+                                    }),
+                                ]}
+                            >
+                                <Input.Password placeholder="비밀번호 확인" />
+                            </Form.Item>
+                        </div>
+                    )}
+
+                    {/* 기본 정보와 상세 정보 구분선 */}
+                    {editingUser && (
+                        <div style={{
+                            borderTop: '1px solid #f0f0f0',
+                            marginTop: '24px',
+                            paddingTop: '16px',
+                            marginBottom: '16px'
+                        }}>
+                            <Text strong style={{ fontSize: '16px', color: '#1890ff' }}>
+                                상세 정보
+                            </Text>
+                        </div>
+                    )}
+
+                    {/* 역할별 조건부 필드 */}
+                    <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues.role !== currentValues.role}>
+                        {({ getFieldValue }) => {
+                            const role = getFieldValue('role');
+
+                            if (role === 'SKKU_MEMBER' || role === 'ADMIN') {
+                                return (
+                                    <>
+                                        <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                                            <Form.Item
+                                                name="department"
+                                                label="학과/소속"
+                                                style={{ flex: 1 }}
+                                                rules={[{ required: true, message: "학과를 입력해주세요!" }]}
+                                            >
+                                                <Input placeholder="컴퓨터공학과" />
+                                            </Form.Item>
+
+                                            <Form.Item
+                                                name="studentYear"
+                                                label="학번 (연도)"
+                                                style={{ flex: 1 }}
+                                                rules={[
+                                                    { required: true, message: "학번을 입력해주세요!" },
+                                                    { pattern: /^[0-9]{2}$/, message: "2자리 숫자를 입력해주세요 (예: 23)" }
+                                                ]}
+                                            >
+                                                <Input placeholder="23" maxLength={2} />
+                                            </Form.Item>
+                                        </div>
+
+                                        <Form.Item
+                                            name="isClubMember"
+                                            label="동아리 회원 여부"
+                                            valuePropName="checked"
+                                        >
+                                            <Checkbox>SKKU 미술학회 회원입니다</Checkbox>
+                                        </Form.Item>
+                                    </>
+                                );
+                            } else if (role === 'EXTERNAL_MEMBER') {
+                                return (
+                                    <Form.Item
+                                        name="affiliation"
+                                        label="소속/기관"
+                                        rules={[{ required: true, message: "소속을 입력해주세요!" }]}
+                                    >
+                                        <Input placeholder="소속 기관명" />
+                                    </Form.Item>
+                                );
+                            }
+
+                            return null;
+                        }}
+                    </Form.Item>
+
+                    {editingUser && (
+                        <Form.Item
+                            name="emailVerified"
+                            label="이메일 인증"
+                            valuePropName="checked"
+                        >
+                            <Checkbox>이메일 인증 완료</Checkbox>
+                        </Form.Item>
+                    )}
+
+                    {/* 시스템 정보 섹션 */}
+                    {editingUser && (
+                        <>
+                            <div style={{
+                                borderTop: '1px solid #f0f0f0',
+                                marginTop: '24px',
+                                paddingTop: '16px',
+                                marginBottom: '16px'
+                            }}>
+                                <Text strong style={{ fontSize: '16px', color: '#1890ff' }}>
+                                    시스템 정보
+                                </Text>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                                <Form.Item label="가입일" style={{ flex: 1 }}>
+                                    <Input value={new Date(editingUser.createdAt).toLocaleDateString('ko-KR')} readOnly disabled />
+                                </Form.Item>
+
+                                <Form.Item label="수정일" style={{ flex: 1 }}>
+                                    <Input value={new Date(editingUser.updatedAt).toLocaleDateString('ko-KR')} readOnly disabled />
+                                </Form.Item>
+                            </div>
+
+                            <Form.Item label="계정 ID">
+                                <Input value={`USER_${editingUser.id}`} readOnly disabled />
+                            </Form.Item>
+                        </>
+                    )}
+                </Form>
+            </Modal>
+        </Card>
+    );
+};

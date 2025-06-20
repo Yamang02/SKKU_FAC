@@ -6,9 +6,11 @@
 // 기본 API 응답 타입
 export interface ApiResponse<T = unknown> {
     success: boolean;
-    data: T;
+    data?: T;
     error?: string;
     message?: string;
+    code?: string;
+    validationErrors?: Record<string, string[]>;
 }
 
 // 페이지네이션 응답 타입

@@ -40,7 +40,7 @@ export interface RequestOptions extends RequestInit {
 /**
  * API 응답 처리 함수
  */
-const handleResponse = async <T = any>(response: Response): Promise<ApiResponse<T>> => {
+const handleResponse = async <T = unknown>(response: Response): Promise<ApiResponse<T>> => {
     const contentType = response.headers.get('content-type');
 
     // HTML 응답 확인 (서버 오류 페이지인 경우)
@@ -143,7 +143,7 @@ export const api = {
                 // 헤더에 CSRF 토큰 추가
                 const headersWithCSRF = await csrfManager.addToHeaders({
                     'Content-Type': 'application/json',
-                    ...options.headers
+                    ...(options.headers as Record<string, string> || {})
                 });
 
                 requestOptions.headers = headersWithCSRF;
