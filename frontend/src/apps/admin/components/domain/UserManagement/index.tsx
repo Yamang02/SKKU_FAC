@@ -13,12 +13,16 @@ import {
     Space,
     Typography,
     Tag,
+    Checkbox,
 } from "antd";
 import {
     SearchOutlined,
     EditOutlined,
     PlusOutlined,
     FilterOutlined,
+    DeleteOutlined,
+    KeyOutlined,
+    ExclamationCircleOutlined,
 } from "@ant-design/icons";
 
 const { Option } = Select;
@@ -26,13 +30,18 @@ const { Title, Text } = Typography;
 
 interface UserData {
     key: string;
-    id: string;
+    id: string;              // username
     name: string;
     email: string;
-    role: string;
-    department: string;
-    status: string;
-    created: string;
+    role: string;            // ADMIN, SKKU_MEMBER, EXTERNAL_MEMBER
+    department: string;      // SKKU 사용자용
+    affiliation?: string;    // 외부 사용자용
+    studentYear?: string;    // SKKU 사용자용 (2자리 숫자)
+    isClubMember?: boolean;  // SKKU 사용자용
+    status: string;          // ACTIVE, INACTIVE, BLOCKED, UNVERIFIED
+    emailVerified?: boolean; // 이메일 인증 상태
+    created: string;         // createdAt
+    lastLogin?: string;      // lastLoginAt
 }
 
 export const UserManagement: React.FC = () => {
@@ -256,18 +265,77 @@ export const UserManagement: React.FC = () => {
         });
     };
 
+    // 회원 삭제 함수
+    const handleDeleteUser = () => {
+        if (!editingUser) return;
+
+        Modal.confirm({
+            title: '회원 삭제',
+            icon: <ExclamationCircleOutlined />,
+            content: `"${editingUser.name}" 회원을 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`,
+            okText: '삭제',
+            okType: 'danger',
+            cancelText: '취소',
+            onOk() {
+                // TODO: API 호출로 실제 삭제 처리
+                // await deleteUserApi(editingUser.key);
+
+                // 임시로 로컬 데이터에서 삭제
+                const updatedUsers = userData.filter(user => user.key !== editingUser.key);
+                setUserData(updatedUsers);
+                setIsModalVisible(false);
+                form.resetFields();
+
+                // 성공 메시지 표시
+                Modal.success({
+                    title: '삭제 완료',
+                    content: `"${editingUser.name}" 회원이 삭제되었습니다.`,
+                });
+            },
+        });
+    };
+
+    // 비밀번호 리셋 함수
+    const handleResetPassword = () => {
+        if (!editingUser) return;
+
+        Modal.confirm({
+            title: '비밀번호 초기화',
+            icon: <KeyOutlined />,
+            content: `"${editingUser.name}" 회원의 비밀번호를 초기화하시겠습니까? 임시 비밀번호가 생성됩니다.`,
+            okText: '초기화',
+            cancelText: '취소',
+            onOk() {
+                // TODO: API 호출로 실제 비밀번호 리셋 처리
+                // const result = await resetPasswordApi(editingUser.key);
+
+                // 임시 비밀번호 생성 (실제로는 서버에서 받아올 값)
+                const tempPassword = Math.random().toString(36).slice(-8);
+
+                // 성공 메시지와 임시 비밀번호 표시
+                Modal.success({
+                    title: '비밀번호 초기화 완료',
+                    content: (
+                        <div>
+                            <p>"{editingUser.name}" 회원의 비밀번호가 초기화되었습니다.</p>
+                            <p><strong>임시 비밀번호: {tempPassword}</strong></p>
+                            <p style={{ color: '#666', fontSize: '12px' }}>
+                                회원에게 임시 비밀번호를 전달하고 로그인 후 변경하도록 안내해주세요.
+                            </p>
+                        </div>
+                    ),
+                    width: 400,
+                });
+            },
+        });
+    };
+
     const columns = [
         {
-            title: "아이디",
+            title: "사용자명",
             dataIndex: "id",
             key: "id",
             width: 120,
-        },
-        {
-            title: "역할",
-            dataIndex: "role",
-            key: "role",
-            width: 150,
         },
         {
             title: "이름",
@@ -282,10 +350,42 @@ export const UserManagement: React.FC = () => {
             width: 200,
         },
         {
+            title: "역할",
+            dataIndex: "role",
+            key: "role",
+            width: 120,
+            render: (role: string) => {
+                const roleMap: { [key: string]: { text: string; color: string } } = {
+                    'SKKU_MEMBER': { text: 'SKKU 회원', color: 'green' },
+                    'EXTERNAL_MEMBER': { text: '외부 회원', color: 'blue' },
+                    'ADMIN': { text: '관리자', color: 'red' }
+                };
+                const roleInfo = roleMap[role] || { text: role, color: 'default' };
+                return <Tag color={roleInfo.color}>{roleInfo.text}</Tag>;
+            },
+        },
+        {
             title: "소속정보",
             dataIndex: "department",
             key: "department",
             width: 150,
+            render: (department: string, record: UserData) => {
+                if (record.role === 'EXTERNAL_MEMBER') {
+                    return record.affiliation || '-';
+                }
+                return department || '-';
+            },
+        },
+        {
+            title: "학번",
+            dataIndex: "studentYear",
+            key: "studentYear",
+            width: 80,
+            render: (studentYear: string, record: UserData) => {
+                return (record.role === 'SKKU_MEMBER' || record.role === 'ADMIN')
+                    ? (studentYear || '-')
+                    : '-';
+            },
         },
         {
             title: "가입일",
@@ -297,10 +397,26 @@ export const UserManagement: React.FC = () => {
             title: "상태",
             dataIndex: "status",
             key: "status",
+            width: 100,
+            render: (status: string) => {
+                const statusMap: { [key: string]: { text: string; color: string } } = {
+                    'ACTIVE': { text: '활성', color: 'green' },
+                    'INACTIVE': { text: '비활성', color: 'orange' },
+                    'BLOCKED': { text: '차단', color: 'red' },
+                    'UNVERIFIED': { text: '미인증', color: 'volcano' }
+                };
+                const statusInfo = statusMap[status] || { text: status, color: 'default' };
+                return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;
+            },
+        },
+        {
+            title: "인증",
+            dataIndex: "emailVerified",
+            key: "emailVerified",
             width: 80,
-            render: (status: string) => (
-                <Tag color={status === "활동" ? "green" : "red"}>
-                    {status}
+            render: (emailVerified: boolean) => (
+                <Tag color={emailVerified ? "green" : "red"}>
+                    {emailVerified ? "인증" : "미인증"}
                 </Tag>
             ),
         },
@@ -358,8 +474,10 @@ export const UserManagement: React.FC = () => {
                         onChange={setStatusFilter}
                     >
                         <Option value="전체">전체 상태</Option>
-                        <Option value="활동">활동</Option>
-                        <Option value="비활성">비활성</Option>
+                        <Option value="ACTIVE">활성</Option>
+                        <Option value="INACTIVE">비활성</Option>
+                        <Option value="BLOCKED">차단</Option>
+                        <Option value="UNVERIFIED">미인증</Option>
                     </Select>
 
                     <Select
@@ -369,9 +487,9 @@ export const UserManagement: React.FC = () => {
                         onChange={setRoleFilter}
                     >
                         <Option value="전체">전체 역할</Option>
-                        <Option value="일반회원">일반회원</Option>
-                        <Option value="일반회원 구독자">일반회원 구독자</Option>
-                        <Option value="시스템관리자">시스템관리자</Option>
+                        <Option value="SKKU_MEMBER">SKKU 회원</Option>
+                        <Option value="EXTERNAL_MEMBER">외부 회원</Option>
+                        <Option value="ADMIN">관리자</Option>
                     </Select>
 
                     <Input
@@ -423,11 +541,38 @@ export const UserManagement: React.FC = () => {
                 title={editingUser ? "회원 정보 수정" : "새 회원 추가"}
                 open={isModalVisible}
                 onCancel={handleCancel}
+                width={600}
+                maskClosable={false}
+                destroyOnClose={true}
                 footer={[
                     <Button key="back" onClick={handleCancel}>
                         취소
                     </Button>,
-                    <Button key="submit" type="primary" onClick={handleOk}>
+                    ...(editingUser ? [
+                        <Button
+                            key="reset"
+                            icon={<KeyOutlined />}
+                            onClick={handleResetPassword}
+                            style={{ marginRight: '8px' }}
+                        >
+                            비밀번호 초기화
+                        </Button>,
+                        <Button
+                            key="delete"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={handleDeleteUser}
+                            style={{ marginRight: '8px' }}
+                        >
+                            회원 삭제
+                        </Button>,
+                    ] : []),
+                    <Button
+                        key="submit"
+                        type="primary"
+                        onClick={handleOk}
+                        loading={false}
+                    >
                         {editingUser ? "수정" : "추가"}
                     </Button>,
                 ]}
@@ -436,21 +581,53 @@ export const UserManagement: React.FC = () => {
                     form={form}
                     layout="vertical"
                     initialValues={{ status: "활동", role: "일반회원" }}
+                    requiredMark={false}
                 >
-                    <Form.Item
-                        name="id"
-                        label="아이디"
-                        rules={[{ required: true, message: "아이디를 입력해주세요!" }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="name"
-                        label="이름"
-                        rules={[{ required: true, message: "이름을 입력해주세요!" }]}
-                    >
-                        <Input />
-                    </Form.Item>
+                    <div style={{ marginBottom: '16px' }}>
+                        <Form.Item
+                            name="id"
+                            label="사용자명(ID)"
+                            rules={[
+                                { required: true, message: "아이디를 입력해주세요!" },
+                                { min: 3, message: "아이디는 최소 3자 이상이어야 합니다!" }
+                            ]}
+                        >
+                            <Input
+                                placeholder="영문, 숫자 조합 3자 이상"
+                                disabled={!!editingUser}
+                                readOnly={!!editingUser}
+                            />
+                        </Form.Item>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                        <Form.Item
+                            name="name"
+                            label="이름"
+                            style={{ flex: 1 }}
+                            rules={[{ required: true, message: "이름을 입력해주세요!" }]}
+                        >
+                            <Input
+                                placeholder="홍길동"
+                                readOnly={!!editingUser}
+                                disabled={!!editingUser}
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="role"
+                            label="역할"
+                            style={{ flex: 1 }}
+                            rules={[{ required: true, message: "역할을 선택해주세요!" }]}
+                        >
+                            <Select placeholder="역할 선택">
+                                <Option value="SKKU_MEMBER">성균관대 구성원</Option>
+                                <Option value="EXTERNAL_MEMBER">외부인</Option>
+                                <Option value="ADMIN">관리자</Option>
+                            </Select>
+                        </Form.Item>
+                    </div>
+
                     <Form.Item
                         name="email"
                         label="이메일"
@@ -459,32 +636,153 @@ export const UserManagement: React.FC = () => {
                             { type: "email", message: "유효한 이메일 형식이 아닙니다!" },
                         ]}
                     >
-                        <Input />
+                        <Input
+                            placeholder="example@skku.edu"
+                            readOnly={!!editingUser}
+                            disabled={!!editingUser}
+                        />
                     </Form.Item>
-                    <Form.Item
-                        name="role"
-                        label="역할"
-                        rules={[{ required: true, message: "역할을 선택해주세요!" }]}
-                    >
-                        <Select>
-                            <Option value="일반회원">일반회원</Option>
-                            <Option value="일반회원 구독자">일반회원 구독자</Option>
-                            <Option value="시스템관리자">시스템관리자</Option>
-                        </Select>
+
+                    {/* 기본 정보와 상세 정보 구분선 */}
+                    {editingUser && (
+                        <div style={{
+                            borderTop: '1px solid #f0f0f0',
+                            marginTop: '24px',
+                            paddingTop: '16px',
+                            marginBottom: '16px'
+                        }}>
+                            <Text strong style={{ fontSize: '16px', color: '#1890ff' }}>
+                                상세 정보
+                            </Text>
+                        </div>
+                    )}
+
+                    {/* 역할별 조건부 필드 */}
+                    <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues.role !== currentValues.role}>
+                        {({ getFieldValue }) => {
+                            const role = getFieldValue('role');
+
+                            if (role === 'SKKU_MEMBER' || role === 'ADMIN') {
+                                return (
+                                    <>
+                                        <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                                            <Form.Item
+                                                name="department"
+                                                label="학과/소속"
+                                                style={{ flex: 1 }}
+                                                rules={[{ required: true, message: "학과를 입력해주세요!" }]}
+                                            >
+                                                <Input placeholder="컴퓨터공학과" />
+                                            </Form.Item>
+
+                                            <Form.Item
+                                                name="studentYear"
+                                                label="학번 (연도)"
+                                                style={{ flex: 1 }}
+                                                rules={[
+                                                    { required: true, message: "학번을 입력해주세요!" },
+                                                    { pattern: /^[0-9]{2}$/, message: "2자리 숫자를 입력해주세요 (예: 23)" }
+                                                ]}
+                                            >
+                                                <Input placeholder="23" maxLength={2} />
+                                            </Form.Item>
+                                        </div>
+
+                                        <Form.Item
+                                            name="isClubMember"
+                                            label="동아리 회원 여부"
+                                            valuePropName="checked"
+                                        >
+                                            <Checkbox>SKKU 미술학회 회원입니다</Checkbox>
+                                        </Form.Item>
+                                    </>
+                                );
+                            } else if (role === 'EXTERNAL_MEMBER') {
+                                return (
+                                    <Form.Item
+                                        name="affiliation"
+                                        label="소속/기관"
+                                        rules={[{ required: true, message: "소속을 입력해주세요!" }]}
+                                    >
+                                        <Input placeholder="소속 기관명" />
+                                    </Form.Item>
+                                );
+                            }
+
+                            return null;
+                        }}
                     </Form.Item>
-                    <Form.Item name="department" label="소속정보">
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        name="status"
-                        label="상태"
-                        rules={[{ required: true, message: "상태를 선택해주세요!" }]}
-                    >
-                        <Select>
-                            <Option value="활동">활동</Option>
-                            <Option value="비활성">비활성</Option>
-                        </Select>
-                    </Form.Item>
+
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                        <Form.Item
+                            name="status"
+                            label="계정 상태"
+                            style={{ flex: 1 }}
+                            rules={[{ required: true, message: "상태를 선택해주세요!" }]}
+                        >
+                            <Select>
+                                <Option value="ACTIVE">활성</Option>
+                                <Option value="INACTIVE">비활성</Option>
+                                <Option value="BLOCKED">차단</Option>
+                                <Option value="UNVERIFIED">미인증</Option>
+                            </Select>
+                        </Form.Item>
+
+                        <Form.Item
+                            name="emailVerified"
+                            label="이메일 인증"
+                            style={{ flex: 1 }}
+                            valuePropName="checked"
+                        >
+                            <Checkbox>이메일 인증 완료</Checkbox>
+                        </Form.Item>
+                    </div>
+
+
+
+                    {/* 시스템 정보 섹션 */}
+                    {editingUser && (
+                        <>
+                            <div style={{
+                                borderTop: '1px solid #f0f0f0',
+                                marginTop: '24px',
+                                paddingTop: '16px',
+                                marginBottom: '16px'
+                            }}>
+                                <Text strong style={{ fontSize: '16px', color: '#1890ff' }}>
+                                    시스템 정보
+                                </Text>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                                <Form.Item label="가입일" style={{ flex: 1 }}>
+                                    <Input value={editingUser.created} readOnly disabled />
+                                </Form.Item>
+
+                                <Form.Item label="수정일" style={{ flex: 1 }}>
+                                    <Input value={editingUser.created} readOnly disabled />
+                                </Form.Item>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                                <Form.Item label="마지막 로그인" style={{ flex: 1 }}>
+                                    <Input value={editingUser.lastLogin || '정보 없음'} readOnly disabled />
+                                </Form.Item>
+
+                                <Form.Item label="계정 ID" style={{ flex: 1 }}>
+                                    <Input value={`USER_${editingUser.key}`} readOnly disabled />
+                                </Form.Item>
+                            </div>
+
+                            <Form.Item label="이메일 인증 여부">
+                                <Input
+                                    value={editingUser.emailVerified ? '인증 완료' : '미인증'}
+                                    readOnly
+                                    disabled
+                                />
+                            </Form.Item>
+                        </>
+                    )}
                 </Form>
             </Modal>
         </Card>

@@ -38,3 +38,4 @@ export const useAdminNavigation = () => {
         getPageTitle,
     };
 };
+
