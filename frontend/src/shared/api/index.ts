@@ -1,29 +1,18 @@
 /**
- * API 모듈 통합 Export - TypeScript 버전
- * 도메인별로 분리된 API 구조
+ * API 모듈 통합 Export
+ * 모든 API 관련 모듈들을 여기서 통합하여 export
  */
 
-// 공통 모듈
+// API 클라이언트 (기존 구조 유지)
+export { api } from '../utils/api';
+export type { ApiResponse, ApiError } from '../utils/api';
+
+// Base API 클래스
 export { default as BaseApi } from './BaseApi';
-export type { PaginationParams, FilterParams, ListResponse } from './BaseApi';
 
-// 인증 API
-export { default as AuthApi } from './AuthApi';
+// 추가 타입들 (BaseApi에서 사용)
 export type {
-    LoginCredentials,
-    RegisterData,
-    User,
-    AuthResponse,
-    SessionResponse
-} from './AuthApi';
-
-// API 유틸리티
-export { api, ApiError } from '../utils/api';
-export type { ApiResponse, RequestOptions } from '../utils/api';
-
-// 설정
-export * from '../config/api.config';
-
-// 유틸리티
-export * from '../utils/notification';
-export { csrfManager } from '../utils/csrfManager';
+    PaginationParams,
+    FilterParams,
+    ListResponse
+} from './types';

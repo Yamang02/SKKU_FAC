@@ -23,6 +23,19 @@
             "@/*": [
                 "src/*"
             ],
+            "@/apps/*": [
+                "src/apps/*"
+            ],
+            "@/shared/*": [
+                "src/shared/*"
+            ],
+            "@/features/*": [
+                "src/features/*"
+            ],
+            "@/assets/*": [
+                "src/assets/*"
+            ],
+            // 레거시 호환성
             "@/components/*": [
                 "src/components/*"
             ],
@@ -49,9 +62,6 @@
             ],
             "@/config/*": [
                 "src/config/*"
-            ],
-            "@/assets/*": [
-                "src/assets/*"
             ]
         },
         /* Linting */

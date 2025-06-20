@@ -6,7 +6,7 @@
 import BaseApi from './BaseApi';
 import type { ApiResponse } from '../utils/api';
 import { api } from '../utils/api';
-import { showErrorMessage, showSuccessMessage } from '../utils/notification';
+import { showSuccessMessage } from '../utils/notification';
 
 // 인증 관련 타입 정의
 export interface LoginCredentials {
@@ -83,27 +83,11 @@ export default class AuthApi extends BaseApi {
      * 회원가입
      */
     static async register(userData: RegisterData): Promise<ApiResponse<AuthResponse>> {
-        try {
-            const response = await api.post<AuthResponse>('/auth/register', userData);
-            if (response.success) {
-                showSuccessMessage('회원가입이 완료되었습니다.');
-            }
-            return response;
-        } catch (error: any) {
-            console.error('회원가입 중 오류 발생:', error);
-
-            // 유효성 검사 오류인 경우 상세 메시지 표시
-            if (error.isApiError && error.apiResponse && error.apiResponse.validationErrors) {
-                const validationErrors = error.apiResponse.validationErrors;
-                const errorMessages = Object.values(validationErrors).flat();
-                showErrorMessage(`회원가입 오류:\n${errorMessages.join('\n')}`);
-            } else if (error.isApiError && error.apiResponse) {
-                showErrorMessage(error.apiResponse.error || '회원가입에 실패했습니다.');
-            } else {
-                showErrorMessage('회원가입 요청 처리 중 오류가 발생했습니다.');
-            }
-            throw error;
-        }
+        return this.handleApiCallWithSuccess(
+            () => api.post<AuthResponse>('/auth/register', userData),
+            '회원가입이 완료되었습니다.',
+            '회원가입'
+        );
     }
 
     /**
@@ -156,18 +140,12 @@ export default class AuthApi extends BaseApi {
     static async getCurrentUser(): Promise<ApiResponse<User>> {
         try {
             return await api.get<User>('/auth/me');
-        } catch (error: any) {
+        } catch (error) {
             console.error('현재 사용자 정보 조회 중 오류 발생:', error);
-
-            // 401 오류인 경우 인증되지 않은 상태로 처리
-            if (error.statusCode === 401) {
-                return {
-                    success: false,
-                    error: '인증이 필요합니다.'
-                };
-            }
-
-            throw error;
+            return {
+                success: false,
+                error: '사용자 정보를 가져올 수 없습니다.'
+            };
         }
     }
 
@@ -208,7 +186,7 @@ export default class AuthApi extends BaseApi {
     /**
      * 계정 삭제
      */
-    static async deleteAccount(password: string): Promise<ApiResponse<{ message: string }>> {
+    static async deleteAccount(): Promise<ApiResponse<{ message: string }>> {
         return this.handleApiCallWithSuccess(
             () => api.delete<{ message: string }>('/auth/account'),
             '계정이 성공적으로 삭제되었습니다.',

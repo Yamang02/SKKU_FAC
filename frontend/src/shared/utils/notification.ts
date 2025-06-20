@@ -5,28 +5,12 @@
 // 알림 타입 정의
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
-// 알림 옵션 타입
-export interface NotificationOptions {
-    duration?: number;
-    position?: 'top' | 'bottom' | 'center';
-    showClose?: boolean;
-}
-
-// 기본 알림 옵션
-const DEFAULT_OPTIONS: NotificationOptions = {
-    duration: 3000,
-    position: 'top',
-    showClose: true
-};
-
 /**
- * 브라우저 알림 표시 (임시 구현)
- * 추후 Toast 라이브러리나 커스텀 컴포넌트로 대체 예정
+ * 브라우저 알림 표시
  */
 const showNotification = (
     message: string,
-    type: NotificationType,
-    options: NotificationOptions = {}
+    type: NotificationType
 ): void => {
     // 개발 환경에서는 콘솔에 출력
     if (process.env.NODE_ENV === 'development') {
@@ -40,12 +24,10 @@ const showNotification = (
         console.log(`${emoji[type]} ${type.toUpperCase()}: ${message}`);
     }
 
-    // 브라우저 alert (임시)
-    // TODO: 실제 Toast 컴포넌트로 교체
+    // 간단한 브라우저 알림
     if (type === 'error') {
         alert(`오류: ${message}`);
     } else if (type === 'success') {
-        // 성공 메시지는 조용히 처리 (콘솔에만 출력)
         console.log(`성공: ${message}`);
     } else {
         alert(`${type}: ${message}`);
@@ -55,41 +37,29 @@ const showNotification = (
 /**
  * 성공 메시지 표시
  */
-export const showSuccessMessage = (
-    message: string,
-    options?: NotificationOptions
-): void => {
-    showNotification(message, 'success', options);
+export const showSuccessMessage = (message: string): void => {
+    showNotification(message, 'success');
 };
 
 /**
  * 에러 메시지 표시
  */
-export const showErrorMessage = (
-    message: string,
-    options?: NotificationOptions
-): void => {
-    showNotification(message, 'error', options);
+export const showErrorMessage = (message: string): void => {
+    showNotification(message, 'error');
 };
 
 /**
  * 경고 메시지 표시
  */
-export const showWarningMessage = (
-    message: string,
-    options?: NotificationOptions
-): void => {
-    showNotification(message, 'warning', options);
+export const showWarningMessage = (message: string): void => {
+    showNotification(message, 'warning');
 };
 
 /**
  * 정보 메시지 표시
  */
-export const showInfoMessage = (
-    message: string,
-    options?: NotificationOptions
-): void => {
-    showNotification(message, 'info', options);
+export const showInfoMessage = (message: string): void => {
+    showNotification(message, 'info');
 };
 
 /**
