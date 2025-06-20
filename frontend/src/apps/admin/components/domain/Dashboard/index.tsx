@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, Button, Avatar } from 'antd';
 import {
     UserOutlined,
@@ -6,6 +6,7 @@ import {
     AppstoreOutlined,
     EyeOutlined,
 } from '@ant-design/icons';
+import * as echarts from 'echarts';
 
 interface RecentActivity {
     id: number;
@@ -15,6 +16,54 @@ interface RecentActivity {
 }
 
 export const AdminDashboard: React.FC = () => {
+    // ECharts 초기화
+    useEffect(() => {
+        // 월별 통계 차트
+        const monthlyChart = echarts.init(document.getElementById('monthlyStats'));
+        if (monthlyChart) {
+            const monthlyOption = {
+                title: { text: '월별 통계' },
+                tooltip: {},
+                xAxis: {
+                    type: 'category',
+                    data: ['1월', '2월', '3월', '4월', '5월', '6월']
+                },
+                yAxis: { type: 'value' },
+                series: [{
+                    data: [120, 200, 150, 80, 70, 110],
+                    type: 'bar',
+                    itemStyle: { color: '#1890ff' }
+                }]
+            };
+            monthlyChart.setOption(monthlyOption);
+        }
+
+        // 카테고리 분포 차트
+        const categoryChart = echarts.init(document.getElementById('categoryDistribution'));
+        if (categoryChart) {
+            const categoryOption = {
+                title: { text: '카테고리 분포' },
+                tooltip: {},
+                series: [{
+                    type: 'pie',
+                    data: [
+                        { value: 35, name: '회화' },
+                        { value: 25, name: '조각' },
+                        { value: 20, name: '사진' },
+                        { value: 20, name: '기타' }
+                    ]
+                }]
+            };
+            categoryChart.setOption(categoryOption);
+        }
+
+        // 클린업 함수
+        return () => {
+            monthlyChart?.dispose();
+            categoryChart?.dispose();
+        };
+    }, []);
+
     // 최근 활동 데이터
     const recentActivities: RecentActivity[] = [
         {
@@ -113,15 +162,11 @@ export const AdminDashboard: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginBottom: '32px' }}>
                 <div style={{ background: '#fff', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '16px', border: '1px solid #f0f0f0' }}>
                     <h3 style={{ fontSize: '18px', fontWeight: '500', marginBottom: '16px' }}>월별 통계</h3>
-                    <div style={{ height: '300px', background: '#fafafa', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
-                        차트 영역
-                    </div>
+                    <div id="monthlyStats" style={{ height: '300px' }}></div>
                 </div>
                 <div style={{ background: '#fff', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '16px', border: '1px solid #f0f0f0' }}>
                     <h3 style={{ fontSize: '18px', fontWeight: '500', marginBottom: '16px' }}>카테고리 분포</h3>
-                    <div style={{ height: '300px', background: '#fafafa', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
-                        차트 영역
-                    </div>
+                    <div id="categoryDistribution" style={{ height: '300px' }}></div>
                 </div>
             </div>
 

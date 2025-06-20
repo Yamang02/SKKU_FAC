@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Badge, Breadcrumb, Dropdown, Avatar } from 'antd';
+import { Layout, Menu, Badge, Dropdown, Avatar, Button } from 'antd';
 import type { MenuProps } from 'antd';
 import {
     UserOutlined,
@@ -13,17 +13,20 @@ import {
 } from '@ant-design/icons';
 import { useAuth } from '../../../../../shared/contexts/AuthContext';
 import { showSuccessMessage } from '../../../../../shared/utils/notification';
+import type { AdminPage } from '../../../hooks/useAdminNavigation';
 
 const { Header, Sider, Content } = Layout;
 
 interface AdminLayoutProps {
     children: React.ReactNode;
-    breadcrumbItems?: Array<{ title: string }>;
+    selectedMenuKey?: string;
+    onMenuClick?: (key: AdminPage) => void;
 }
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({
     children,
-    breadcrumbItems = [{ title: '홈' }, { title: '관리자 대시보드' }]
+    selectedMenuKey = '1',
+    onMenuClick
 }) => {
     const [collapsed] = useState(false);
     const { user, logout } = useAuth();
@@ -62,7 +65,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 collapsible
                 collapsed={collapsed}
                 style={{
-                    background: '#1a2942',
+                    background: '#001529',
                     position: 'fixed',
                     left: 0,
                     top: 0,
@@ -79,15 +82,24 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                     color: 'white',
                     fontSize: '18px',
                     fontWeight: 'bold',
-                    borderBottom: '1px solid #2c3e50'
+                    borderBottom: '1px solid #1f1f1f'
                 }}>
                     SKKU Gallery
                 </div>
                 <Menu
                     theme="dark"
                     mode="inline"
-                    defaultSelectedKeys={['1']}
-                    style={{ background: '#1a2942', paddingTop: '16px' }}
+                    selectedKeys={[selectedMenuKey]}
+                    style={{ background: '#001529', paddingTop: '16px' }}
+                    onClick={({ key }) => {
+                        const pageMap: Record<string, AdminPage> = {
+                            '1': 'dashboard',
+                            '2': 'users',
+                            '3': 'artworks',
+                            '4': 'exhibitions',
+                        };
+                        onMenuClick?.(pageMap[key]);
+                    }}
                     items={[
                         {
                             key: '1',
@@ -119,17 +131,28 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                     height: '64px',
                     zIndex: 5
                 }}>
-                    <Breadcrumb items={breadcrumbItems} />
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>
+                            관리자 패널
+                        </h1>
+                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <Badge count={5} style={{ cursor: 'pointer' }}>
-                            <BellOutlined style={{ fontSize: '18px' }} />
+                            <BellOutlined style={{ fontSize: '18px', color: '#666' }} />
                         </Badge>
 
-                        {/* 사용자 드롭다운 메뉴 */}
+                        <Button
+                            type="primary"
+                            icon={<SettingOutlined />}
+                            style={{ borderRadius: '6px' }}
+                        >
+                            설정
+                        </Button>
+
                         <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
                             <div style={{
                                 display: 'flex',
@@ -160,7 +183,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                         </Dropdown>
                     </div>
                 </Header>
-                <Content style={{ padding: '24px', background: '#f5f5f5' }}>
+                <Content style={{
+                    padding: '24px',
+                    background: '#f0f2f5',
+                    minHeight: 'calc(100vh - 64px)'
+                }}>
                     {children}
                 </Content>
             </Layout>
