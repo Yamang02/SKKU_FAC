@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ConfigProvider, Spin } from 'antd';
 import koKR from 'antd/locale/ko_KR';
 
@@ -9,14 +9,23 @@ import { AdminLayout, type AdminPage } from './components/layout/AdminLayout';
 import { Dashboard } from './components/domain/Dashboard';
 import { UserManagement } from './components/domain/UserManagement';
 import { useAdminNavigation } from './hooks/useAdminNavigation';
+import BaseApi from './shared/api/BaseApi';
 
 // 추후 구현할 컴포넌트들의 placeholder
 const ArtworkManagement = () => <div>작품 관리 - 구현 예정</div>;
 const ExhibitionManagement = () => <div>전시 관리 - 구현 예정</div>;
 
 const AdminContent: React.FC = () => {
-    const { isAuthenticated, isAdmin, loading } = useAuth();
+    const authContext = useAuth();
+    const { isAuthenticated, isAdmin, loading } = authContext;
     const { currentPage, navigateTo } = useAdminNavigation();
+
+    // BaseApi에 AuthContext 설정 - 인증된 상태에서만
+    useEffect(() => {
+        if (authContext.isAuthenticated() && authContext.accessToken) {
+            BaseApi.setAuthContext(authContext);
+        }
+    }, [authContext]);
 
     // 로딩 중일 때 스피너 표시
     if (loading) {

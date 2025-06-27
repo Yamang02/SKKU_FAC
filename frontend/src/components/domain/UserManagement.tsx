@@ -26,17 +26,20 @@ import {
     ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { UserAdminApi } from '../../api/UserAdminApi';
+import { useAuth } from '../../shared/contexts/AuthContext';
 import type {
     AdminUserDetail,
     AdminCreateUserRequest,
     AdminUpdateUserRequest,
-    AdminUserSearchParams
+    AdminUserSearchParams,
+    BackendUserResponse
 } from '../../types/user.types';
 
 const { Option } = Select;
 const { Title, Text } = Typography;
 
 export const UserManagement: React.FC = () => {
+    const { isAuthenticated, accessToken } = useAuth();
     const [users, setUsers] = useState<AdminUserDetail[]>([]);
     const [loading, setLoading] = useState(false);
     const [total, setTotal] = useState(0);
@@ -45,8 +48,18 @@ export const UserManagement: React.FC = () => {
 
     // 필터 상태 - 이전 버전과 동일한 방식
     const [searchText, setSearchText] = useState("");
+    const [debouncedSearchText, setDebouncedSearchText] = useState("");
     const [statusFilter, setStatusFilter] = useState("전체");
     const [roleFilter, setRoleFilter] = useState("전체");
+
+    // 검색어 디바운스 처리
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchText(searchText);
+        }, 500); // 500ms 후에 검색어 적용
+
+        return () => clearTimeout(timer);
+    }, [searchText]);
 
     // 모달 상태
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -57,6 +70,10 @@ export const UserManagement: React.FC = () => {
 
     // 사용자 목록 조회
     const fetchUsers = useCallback(async () => {
+        if (!isAuthenticated() || !accessToken) {
+            return; // 인증되지 않은 경우 요청하지 않음
+        }
+
         setLoading(true);
         try {
             const params: AdminUserSearchParams = {
@@ -64,7 +81,7 @@ export const UserManagement: React.FC = () => {
                 limit: pageSize,
                 sortBy: 'id',
                 sortOrder: 'desc',
-                ...(searchText && { search: searchText }),
+                ...(debouncedSearchText && { search: debouncedSearchText }),
                 ...(roleFilter !== '전체' && { role: roleFilter as 'ADMIN' | 'SKKU_MEMBER' | 'EXTERNAL_MEMBER' }),
                 ...(statusFilter !== '전체' && { status: statusFilter })
             };
@@ -72,7 +89,27 @@ export const UserManagement: React.FC = () => {
             const response = await UserAdminApi.getUsers(params);
 
             if (response.success && response.data) {
-                setUsers(response.data.items);
+                // 백엔드 데이터를 프론트엔드 형식으로 변환
+                const transformedUsers = response.data.items.map((user: BackendUserResponse) => {
+                    const transformedUser: AdminUserDetail = {
+                        id: user.id,
+                        username: user.username,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        emailVerified: user.emailVerified,
+                        createdAt: user.createdAt,
+                        updatedAt: user.updatedAt,
+                        // 프로필 정보 추출
+                        department: user.SkkuUserProfile?.department || null,
+                        affiliation: user.ExternalUserProfile?.affiliation || null,
+                        studentYear: user.SkkuUserProfile?.studentYear || null,
+                        isClubMember: user.SkkuUserProfile?.isClubMember || false,
+                    };
+                    return transformedUser;
+                });
+
+                setUsers(transformedUsers);
                 setTotal(response.data.total);
             } else {
                 message.error('사용자 목록을 불러올 수 없습니다.');
@@ -83,9 +120,9 @@ export const UserManagement: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [currentPage, pageSize, searchText, statusFilter, roleFilter]);
+    }, [currentPage, pageSize, debouncedSearchText, statusFilter, roleFilter, isAuthenticated, accessToken]);
 
-    // 초기 데이터 로드
+    // 데이터 로드 - 의존성이 변경될 때마다 실행
     useEffect(() => {
         fetchUsers();
     }, [fetchUsers]);
@@ -352,11 +389,7 @@ export const UserManagement: React.FC = () => {
         },
     ];
 
-    // 페이지네이션 처리된 데이터
-    const paginatedData = users.slice(
-        (currentPage - 1) * pageSize,
-        currentPage * pageSize,
-    );
+    // 백엔드에서 이미 페이지네이션된 데이터를 받으므로 추가 처리 불필요
 
     return (
         <Card style={{ marginBottom: '24px' }}>
@@ -412,6 +445,7 @@ export const UserManagement: React.FC = () => {
                         prefix={<SearchOutlined />}
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
+                        onPressEnter={() => {/* 엔터키로 검색 트리거 가능 */ }}
                         style={{ width: 300 }}
                     />
 
@@ -436,7 +470,7 @@ export const UserManagement: React.FC = () => {
 
             <Table
                 columns={columns}
-                dataSource={paginatedData}
+                dataSource={users}
                 rowKey="id"
                 loading={loading}
                 pagination={false}

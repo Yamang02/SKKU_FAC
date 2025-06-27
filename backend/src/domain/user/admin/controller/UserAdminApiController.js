@@ -33,9 +33,11 @@ export default class UserAdminApiController {
                 limit: Math.min(100, Math.max(1, parseInt(limit))),
                 sortBy,
                 sortOrder: sortOrder.toLowerCase() === 'desc' ? 'DESC' : 'ASC',
-                role,
-                status,
-                search
+                filters: {
+                    role: role && role !== '전체' ? role : undefined,
+                    status: status && status !== '전체' ? status : undefined,
+                    keyword: search || undefined
+                }
             };
 
             const result = await this.userAdminService.getUserList(options);

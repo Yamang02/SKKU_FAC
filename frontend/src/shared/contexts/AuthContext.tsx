@@ -8,7 +8,7 @@ interface User {
     id: number;
     email: string;
     name: string;
-    role: 'ADMIN' | 'USER';
+    role: 'ADMIN' | 'SKKU_MEMBER' | 'EXTERNAL_MEMBER';
     profileImageUrl?: string;
 }
 

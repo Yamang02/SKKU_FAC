@@ -4,9 +4,40 @@
  * Admin 기능에만 집중
  */
 
+// 백엔드에서 실제로 보내는 원시 데이터 구조
+export interface BackendUserResponse {
+    id: string;
+    username: string;
+    email: string;
+    password: string;
+    name: string;
+    role: 'ADMIN' | 'SKKU_MEMBER' | 'EXTERNAL_MEMBER';
+    status: string;
+    lastLoginAt: string | null;
+    emailVerified: boolean;
+    createdAt: string;
+    updatedAt: string;
+    SkkuUserProfile: {
+        id: string;
+        userId: string;
+        department: string;
+        studentYear: string;
+        isClubMember: boolean;
+        createdAt: string;
+        updatedAt: string;
+    } | null;
+    ExternalUserProfile: {
+        id: string;
+        userId: string;
+        affiliation: string;
+        createdAt: string;
+        updatedAt: string;
+    } | null;
+}
+
 // 관리자가 보는 사용자 상세 정보 - 백엔드 UserResponseDto 기준
 export interface AdminUserDetail {
-    id: number;
+    id: string; // UUID 형식
     username: string;
     name: string;
     email: string;
@@ -55,6 +86,20 @@ export interface AdminUserSearchParams {
     status?: string;          // 백엔드에서 status 파라미터 사용
     sortBy?: 'id' | 'name' | 'email' | 'username' | 'createdAt' | 'updatedAt';
     sortOrder?: 'asc' | 'desc';
+}
+
+// 백엔드에서 실제로 보내는 사용자 목록 응답
+export interface BackendUserListResponse {
+    items: BackendUserResponse[];
+    total: number;
+    page: {
+        currentPage: number;
+        itemsPerPage: number;
+        totalItems: number;
+        totalPages: number;
+        hasPrev: boolean;
+        hasNext: boolean;
+    };
 }
 
 // 사용자 목록 응답 - 백엔드 userAdminService.getUserList() 응답 기준

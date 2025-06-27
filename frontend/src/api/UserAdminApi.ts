@@ -6,6 +6,7 @@ import type {
     AdminUpdateUserRequest,
     AdminUserSearchParams,
     AdminUserListResponse,
+    BackendUserListResponse,
     AdminPasswordResetResponse,
     AdminUserStats
 } from '../types/user.types';
@@ -20,14 +21,14 @@ export class UserAdminApi {
     /**
      * 사용자 목록 조회 - GET /api/admin/users
      */
-    static async getUsers(params: AdminUserSearchParams = {}): Promise<ApiResponse<AdminUserListResponse>> {
-        return BaseApi.get<AdminUserListResponse>(this.basePath, params as Record<string, unknown>);
+    static async getUsers(params: AdminUserSearchParams = {}): Promise<ApiResponse<BackendUserListResponse>> {
+        return BaseApi.get<BackendUserListResponse>(this.basePath, params as Record<string, unknown>);
     }
 
     /**
      * 특정 사용자 조회 - GET /api/admin/users/:id
      */
-    static async getUser(id: number): Promise<ApiResponse<AdminUserDetail>> {
+    static async getUser(id: string): Promise<ApiResponse<AdminUserDetail>> {
         return BaseApi.get<AdminUserDetail>(`${this.basePath}/${id}`);
     }
 
@@ -41,28 +42,28 @@ export class UserAdminApi {
     /**
      * 사용자 정보 수정 - PUT /api/admin/users/:id
      */
-    static async updateUser(id: number, userData: AdminUpdateUserRequest): Promise<ApiResponse<AdminUserDetail>> {
+    static async updateUser(id: string, userData: AdminUpdateUserRequest): Promise<ApiResponse<AdminUserDetail>> {
         return BaseApi.put<AdminUserDetail>(`${this.basePath}/${id}`, userData);
     }
 
     /**
      * 사용자 삭제 - DELETE /api/admin/users/:id
      */
-    static async deleteUser(id: number): Promise<ApiResponse<{ message: string }>> {
+    static async deleteUser(id: string): Promise<ApiResponse<{ message: string }>> {
         return BaseApi.delete<{ message: string }>(`${this.basePath}/${id}`);
     }
 
     /**
      * 사용자 역할 변경 - PUT /api/admin/users/:id/role
      */
-    static async updateUserRole(id: number, role: 'ADMIN' | 'SKKU_MEMBER' | 'EXTERNAL_MEMBER'): Promise<ApiResponse<AdminUserDetail>> {
+    static async updateUserRole(id: string, role: 'ADMIN' | 'SKKU_MEMBER' | 'EXTERNAL_MEMBER'): Promise<ApiResponse<AdminUserDetail>> {
         return BaseApi.put<AdminUserDetail>(`${this.basePath}/${id}/role`, { role });
     }
 
     /**
      * 비밀번호 초기화 - POST /api/admin/users/:id/reset-password
      */
-    static async resetPassword(id: number): Promise<ApiResponse<AdminPasswordResetResponse>> {
+    static async resetPassword(id: string): Promise<ApiResponse<AdminPasswordResetResponse>> {
         return BaseApi.post<AdminPasswordResetResponse>(`${this.basePath}/${id}/reset-password`, {});
     }
 
