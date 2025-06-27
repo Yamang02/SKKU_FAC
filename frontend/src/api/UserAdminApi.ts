@@ -2,7 +2,6 @@ import BaseApi from '../shared/api/BaseApi';
 import type { ApiResponse } from '../shared/api/types';
 import type {
     AdminUserDetail,
-    AdminCreateUserRequest,
     AdminUpdateUserRequest,
     AdminUserSearchParams,
     AdminUserListResponse,
@@ -30,13 +29,6 @@ export class UserAdminApi {
      */
     static async getUser(id: string): Promise<ApiResponse<AdminUserDetail>> {
         return BaseApi.get<AdminUserDetail>(`${this.basePath}/${id}`);
-    }
-
-    /**
-     * 사용자 생성 - POST /api/admin/users
-     */
-    static async createUser(userData: AdminCreateUserRequest): Promise<ApiResponse<AdminUserDetail>> {
-        return BaseApi.post<AdminUserDetail>(this.basePath, userData);
     }
 
     /**

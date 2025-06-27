@@ -20,30 +20,16 @@ export interface AdminUserDetail {
     updatedAt: string;
 }
 
-// 관리자용 사용자 생성 요청 - 백엔드 RegisterSchema 기준
-export interface AdminCreateUserRequest {
-    username: string;
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-    role: 'ADMIN' | 'SKKU_MEMBER' | 'EXTERNAL_MEMBER';
-    department?: string;      // SKKU_MEMBER, ADMIN일 때 필수
-    affiliation?: string;     // EXTERNAL_MEMBER일 때 필수
-    studentYear?: string;     // SKKU_MEMBER, ADMIN일 때 필수
-    isClubMember?: boolean;   // SKKU_MEMBER, ADMIN일 때만 설정 가능
-}
-
-// 관리자용 사용자 업데이트 요청 - 백엔드 UpdateProfileSchema 기준
+// 관리자용 사용자 수정 요청 - 백엔드 UpdateProfileSchema 기준
 export interface AdminUpdateUserRequest {
     name?: string;
     email?: string;
     role?: 'ADMIN' | 'SKKU_MEMBER' | 'EXTERNAL_MEMBER';
-    department?: string;
-    affiliation?: string;
-    studentYear?: string;
-    isClubMember?: boolean;
-    emailVerified?: boolean;
+    department?: string;      // SKKU_MEMBER, ADMIN일 때 필수
+    affiliation?: string;     // EXTERNAL_MEMBER일 때 필수
+    studentYear?: string;     // SKKU_MEMBER, ADMIN일 때 필수
+    isClubMember?: boolean;   // SKKU_MEMBER, ADMIN일 때만 설정 가능
+    emailVerified?: boolean;  // 관리자만 수정 가능
 }
 
 // 사용자 검색 및 필터링 파라미터 - 백엔드 query params 기준

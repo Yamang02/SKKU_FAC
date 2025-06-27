@@ -151,6 +151,53 @@ export default class UserRequestDto extends BaseDto {
     }
 
     /**
+     * 관리자용 사용자 업데이트 검증 스키마
+     * @returns {Object} Joi 검증 스키마
+     */
+    static getAdminUpdateUserSchema() {
+        return Joi.object({
+            name: Joi.string().min(2).max(50).optional().messages({
+                'string.min': '이름은 최소 2자 이상이어야 합니다',
+                'string.max': '이름은 최대 50자까지 가능합니다'
+            }),
+
+            email: Joi.string().email().optional().messages({
+                'string.email': '올바른 이메일 형식을 입력해주세요'
+            }),
+
+            role: Joi.string().valid('ADMIN', 'SKKU_MEMBER', 'EXTERNAL_MEMBER').optional().messages({
+                'any.only': '역할은 ADMIN, SKKU_MEMBER, EXTERNAL_MEMBER 중 하나여야 합니다'
+            }),
+
+            department: Joi.string().max(100).allow('', null).optional().messages({
+                'string.max': '학과명은 최대 100자까지 가능합니다'
+            }),
+
+            affiliation: Joi.string().max(100).allow('', null).optional().messages({
+                'string.max': '소속은 최대 100자까지 가능합니다'
+            }),
+
+            studentYear: Joi.alternatives().try(
+                Joi.string().pattern(/^[0-9]{2}$/),
+                Joi.number().integer().min(0).max(99),
+                Joi.allow('', null)
+            ).optional().messages({
+                'string.pattern.base': '학번은 2자리 숫자여야 합니다 (예: 00, 23)',
+                'number.min': '학번은 0 이상이어야 합니다',
+                'number.max': '학번은 99 이하여야 합니다'
+            }),
+
+            isClubMember: Joi.boolean().optional(),
+
+            emailVerified: Joi.boolean().optional(),
+
+            status: Joi.string().valid('ACTIVE', 'INACTIVE', 'BLOCKED', 'UNVERIFIED').optional().messages({
+                'any.only': '상태는 ACTIVE, INACTIVE, BLOCKED, UNVERIFIED 중 하나여야 합니다'
+            })
+        });
+    }
+
+    /**
      * 프로필 수정용 검증 스키마
      * @returns {Object} Joi 검증 스키마
      */
@@ -237,23 +284,26 @@ export default class UserRequestDto extends BaseDto {
         } else if (typeof schemaOrType === 'string') {
             // 문자열인 경우 기존 로직 사용
             switch (schemaOrType) {
-            case 'register':
-                schema = UserRequestDto.getRegisterSchema();
-                break;
-            case 'login':
-                schema = UserRequestDto.getLoginSchema();
-                break;
-            case 'updateProfile':
-                schema = UserRequestDto.getUpdateProfileSchema();
-                break;
-            case 'email':
-                schema = UserRequestDto.getEmailSchema();
-                break;
-            case 'resetPassword':
-                schema = UserRequestDto.getResetPasswordSchema();
-                break;
-            default:
-                schema = this.getValidationSchema();
+                case 'register':
+                    schema = UserRequestDto.getRegisterSchema();
+                    break;
+                case 'login':
+                    schema = UserRequestDto.getLoginSchema();
+                    break;
+                case 'updateProfile':
+                    schema = UserRequestDto.getUpdateProfileSchema();
+                    break;
+                case 'adminUpdateUser':
+                    schema = UserRequestDto.getAdminUpdateUserSchema();
+                    break;
+                case 'email':
+                    schema = UserRequestDto.getEmailSchema();
+                    break;
+                case 'resetPassword':
+                    schema = UserRequestDto.getResetPasswordSchema();
+                    break;
+                default:
+                    schema = this.getValidationSchema();
             }
         } else {
             // 기본값

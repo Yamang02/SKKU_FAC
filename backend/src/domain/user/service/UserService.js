@@ -296,8 +296,31 @@ export default class UserService {
     async updateUserByAdmin(userId, userData) {
         await this._findUserOrThrow(userId);
 
+        // DTO 객체에서 실제 데이터 추출 (toPlainObject 메소드가 있다면 사용)
+        const updateData = userData.toPlainObject ? userData.toPlainObject() : userData;
+
+        // 업데이트하면 안 되는 필드들 제외
+        const {
+            id,
+            skkuUserId,
+            externalUserId,
+            emailVerificationToken,
+            emailVerificationTokenExpiry,
+            password, // 비밀번호는 별도 메소드로만 변경
+            createdAt,
+            updatedAt,
+            ...safeUpdateData
+        } = updateData;
+
+        console.log('🔧 안전한 업데이트 데이터:', safeUpdateData);
+
+        // 빈 객체가 아닌 경우에만 업데이트
+        if (Object.keys(safeUpdateData).length === 0) {
+            throw new UserValidationError('업데이트할 데이터가 없습니다.');
+        }
+
         // 사용자 정보 업데이트
-        const updatedUser = await this.userRepository.updateUser(userId, userData);
+        const updatedUser = await this.userRepository.updateUser(userId, safeUpdateData);
         return updatedUser;
     }
 

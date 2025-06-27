@@ -13,24 +13,28 @@ import {
 } from '@ant-design/icons';
 import { useAuth } from '../../shared/contexts/AuthContext';
 import { showSuccessMessage } from '../../shared/utils/notification';
+import { AdminErrorProvider, useAdminError } from '../../shared/contexts/AdminErrorContext';
+import { ErrorBanner } from '../../shared/components';
 
 const { Header, Sider, Content } = Layout;
 
 export type AdminPage = 'dashboard' | 'users' | 'artworks' | 'exhibitions';
 
 interface AdminLayoutProps {
-    children: React.ReactNode;
+    children: any;
     selectedMenuKey?: string;
     onMenuClick?: (key: AdminPage) => void;
 }
 
-export const AdminLayout: React.FC<AdminLayoutProps> = ({
+// 내부 레이아웃 컴포넌트 (ErrorProvider 내부에서 useAdminError 사용)
+const AdminLayoutInner: React.FC<AdminLayoutProps> = ({
     children,
     selectedMenuKey = '1',
     onMenuClick
 }) => {
     const [collapsed] = useState(false);
     const { user, logout } = useAuth();
+    const { error, hideError } = useAdminError();
 
     const handleLogout = async () => {
         await logout();
@@ -184,15 +188,41 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                         </Dropdown>
                     </div>
                 </Header>
+
+                {/* 전역 오류 표시 공간 - Header와 Content 사이 */}
+                {error.show && (
+                    <div style={{
+                        padding: '0 24px',
+                        background: '#f0f2f5',
+                        paddingTop: '16px'
+                    }}>
+                        <ErrorBanner
+                            error={error}
+                            onClose={hideError}
+                            style={{ marginBottom: '0' }}
+                        />
+                    </div>
+                )}
+
                 <Content style={{
                     padding: '24px',
                     background: '#f0f2f5',
-                    minHeight: 'calc(100vh - 64px)'
+                    minHeight: 'calc(100vh - 64px)',
+                    paddingTop: error.show ? '16px' : '24px'
                 }}>
                     {children}
                 </Content>
             </Layout>
         </Layout>
+    );
+};
+
+// 메인 컴포넌트 (ErrorProvider로 감쌈)
+export const AdminLayout: React.FC<AdminLayoutProps> = (props) => {
+    return (
+        <AdminErrorProvider>
+            <AdminLayoutInner {...props} />
+        </AdminErrorProvider>
     );
 };
 

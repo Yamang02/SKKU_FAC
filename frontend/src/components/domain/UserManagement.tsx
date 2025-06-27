@@ -19,7 +19,6 @@ import {
 import {
     SearchOutlined,
     EditOutlined,
-    PlusOutlined,
     FilterOutlined,
     DeleteOutlined,
     KeyOutlined,
@@ -29,11 +28,11 @@ import { UserAdminApi } from '../../api/UserAdminApi';
 import { useAuth } from '../../shared/contexts/AuthContext';
 import type {
     AdminUserDetail,
-    AdminCreateUserRequest,
-    AdminUpdateUserRequest,
     AdminUserSearchParams,
-    BackendUserResponse
+    BackendUserResponse,
+    AdminUpdateUserRequest
 } from '../../types/user.types';
+import { useAdminError } from '../../shared/contexts/AdminErrorContext';
 
 const { Option } = Select;
 const { Title, Text } = Typography;
@@ -46,11 +45,19 @@ export const UserManagement: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
 
+    // 전역 오류 처리 훅 사용
+    const { showError, hideError } = useAdminError();
+
     // 필터 상태 - 이전 버전과 동일한 방식
     const [searchText, setSearchText] = useState("");
     const [debouncedSearchText, setDebouncedSearchText] = useState("");
     const [statusFilter, setStatusFilter] = useState("전체");
     const [roleFilter, setRoleFilter] = useState("전체");
+
+    // 모달 상태
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [editingUser, setEditingUser] = useState<AdminUserDetail | null>(null);
+    const [form] = Form.useForm();
 
     // 검색어 디바운스 처리
     useEffect(() => {
@@ -61,13 +68,6 @@ export const UserManagement: React.FC = () => {
         return () => clearTimeout(timer);
     }, [searchText]);
 
-    // 모달 상태
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [editingUser, setEditingUser] = useState<AdminUserDetail | null>(null);
-    const [form] = Form.useForm();
-
-
-
     // 사용자 목록 조회
     const fetchUsers = useCallback(async () => {
         if (!isAuthenticated() || !accessToken) {
@@ -75,6 +75,7 @@ export const UserManagement: React.FC = () => {
         }
 
         setLoading(true);
+        hideError(); // 새로운 요청 시 이전 오류 숨김
         try {
             const params: AdminUserSearchParams = {
                 page: currentPage,
@@ -112,11 +113,19 @@ export const UserManagement: React.FC = () => {
                 setUsers(transformedUsers);
                 setTotal(response.data.total);
             } else {
-                message.error('사용자 목록을 불러올 수 없습니다.');
+                showError(
+                    '데이터 로드 실패',
+                    '사용자 목록을 불러올 수 없습니다.',
+                    response.error || '서버에서 오류가 발생했습니다.'
+                );
             }
         } catch (error) {
             console.error('사용자 목록 조회 실패:', error);
-            message.error('사용자 목록을 불러오는 중 오류가 발생했습니다.');
+            showError(
+                '서버 연결 오류',
+                '사용자 목록을 불러오는 중 오류가 발생했습니다.',
+                error instanceof Error ? error.message : '네트워크 오류가 발생했습니다.'
+            );
         } finally {
             setLoading(false);
         }
@@ -127,25 +136,28 @@ export const UserManagement: React.FC = () => {
         fetchUsers();
     }, [fetchUsers]);
 
-    const showModal = (user?: AdminUserDetail) => {
-        if (user) {
-            setEditingUser(user);
-            form.setFieldsValue({
-                username: user.username,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                department: user.department,
-                affiliation: user.affiliation,
-                studentYear: user.studentYear,
-                isClubMember: user.isClubMember,
-                emailVerified: user.emailVerified
-            });
-        } else {
-            setEditingUser(null);
-            form.resetFields();
+    // 모달 표시 함수 - 회원 추가 기능 제거, 수정 모드만 지원
+    const showModal = (user: AdminUserDetail) => {
+        if (!user) {
+            message.warning('회원 정보 수정만 가능합니다.');
+            return;
         }
+
+        setEditingUser(user);
         setIsModalVisible(true);
+
+        // 폼에 기존 사용자 데이터 설정
+        form.setFieldsValue({
+            username: user.username,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            department: user.department,
+            affiliation: user.affiliation,
+            studentYear: user.studentYear,
+            isClubMember: user.isClubMember,
+            emailVerified: user.emailVerified
+        });
     };
 
     const handleCancel = () => {
@@ -153,65 +165,73 @@ export const UserManagement: React.FC = () => {
         form.resetFields();
     };
 
+    // 폼 제출 핸들러 - 수정 모드만 지원
     const handleOk = () => {
+        console.log('🔄 handleOk 시작');
+        console.log('📋 editingUser:', editingUser);
+
+        if (!editingUser) {
+            showError('오류', '수정할 회원 정보가 없습니다.', '', 'warning');
+            return;
+        }
+
+        console.log('📝 폼 유효성 검사 시작');
+
         form.validateFields().then(async (values) => {
+            console.log('✅ 폼 유효성 검사 성공');
+            console.log('📊 폼 데이터:', values);
+
             setLoading(true);
             try {
-                if (editingUser) {
-                    // 수정 모드
-                    const updateData: AdminUpdateUserRequest = {
-                        name: values.name,
-                        email: values.email,
-                        role: values.role,
-                        department: values.department,
-                        affiliation: values.affiliation,
-                        studentYear: values.studentYear,
-                        isClubMember: values.isClubMember,
-                        emailVerified: values.emailVerified
-                    };
+                // 수정 모드
+                const updateData: AdminUpdateUserRequest = {
+                    name: values.name,
+                    email: values.email,
+                    role: values.role,
+                    department: values.department,
+                    affiliation: values.affiliation,
+                    studentYear: values.studentYear,
+                    isClubMember: values.isClubMember,
+                    emailVerified: values.emailVerified
+                };
 
-                    const response = await UserAdminApi.updateUser(editingUser.id, updateData);
+                console.log('🔍 업데이트 데이터:', updateData);
+                console.log('🚀 API 호출 시작 - editingUser.id:', editingUser.id);
 
-                    if (response.success) {
-                        message.success('사용자 정보가 성공적으로 수정되었습니다.');
-                        setIsModalVisible(false);
-                        form.resetFields();
-                        fetchUsers();
-                    } else {
-                        message.error(response.error || '사용자 정보 수정에 실패했습니다.');
-                    }
+                const response = await UserAdminApi.updateUser(editingUser.id, updateData);
+
+                console.log('📡 API 응답:', response);
+
+                if (response.success) {
+                    message.success('사용자 정보가 성공적으로 수정되었습니다.');
+                    setIsModalVisible(false);
+                    form.resetFields();
+                    fetchUsers();
                 } else {
-                    // 생성 모드
-                    const createData: AdminCreateUserRequest = {
-                        username: values.username,
-                        name: values.name,
-                        email: values.email,
-                        password: values.password,
-                        confirmPassword: values.confirmPassword,
-                        role: values.role,
-                        department: values.department,
-                        affiliation: values.affiliation,
-                        studentYear: values.studentYear,
-                        isClubMember: values.isClubMember || false
-                    };
-
-                    const response = await UserAdminApi.createUser(createData);
-
-                    if (response.success) {
-                        message.success('사용자가 성공적으로 생성되었습니다.');
-                        setIsModalVisible(false);
-                        form.resetFields();
-                        fetchUsers();
-                    } else {
-                        message.error(response.error || '사용자 생성에 실패했습니다.');
-                    }
+                    showError(
+                        '수정 실패',
+                        '사용자 정보 수정에 실패했습니다.',
+                        response.error || '서버에서 오류가 발생했습니다.'
+                    );
                 }
             } catch (error) {
-                console.error('사용자 처리 실패:', error);
-                message.error('작업 중 오류가 발생했습니다.');
+                console.error('❌ 사용자 처리 실패:', error);
+                showError(
+                    '서버 오류',
+                    '작업 중 오류가 발생했습니다.',
+                    error instanceof Error ? error.message : '네트워크 연결을 확인해주세요.'
+                );
             } finally {
                 setLoading(false);
             }
+        }).catch((errorInfo) => {
+            console.error('❌ 폼 유효성 검사 실패:', errorInfo);
+            showError(
+                '입력 오류',
+                '입력한 정보를 다시 확인해주세요.',
+                '필수 항목이 누락되었거나 형식이 올바르지 않습니다.',
+                'warning'
+            );
         });
     };
 
@@ -236,11 +256,19 @@ export const UserManagement: React.FC = () => {
                         form.resetFields();
                         fetchUsers();
                     } else {
-                        message.error(response.error || '사용자 삭제에 실패했습니다.');
+                        showError(
+                            '삭제 실패',
+                            '사용자 삭제에 실패했습니다.',
+                            response.error || '서버에서 오류가 발생했습니다.'
+                        );
                     }
                 } catch (error) {
                     console.error('사용자 삭제 실패:', error);
-                    message.error('사용자 삭제 중 오류가 발생했습니다.');
+                    showError(
+                        '서버 오류',
+                        '사용자 삭제 중 오류가 발생했습니다.',
+                        error instanceof Error ? error.message : '네트워크 연결을 확인해주세요.'
+                    );
                 }
             },
         });
@@ -277,11 +305,19 @@ export const UserManagement: React.FC = () => {
                             width: 400,
                         });
                     } else {
-                        message.error(response.error || '비밀번호 초기화에 실패했습니다.');
+                        showError(
+                            '초기화 실패',
+                            '비밀번호 초기화에 실패했습니다.',
+                            response.error || '서버에서 오류가 발생했습니다.'
+                        );
                     }
                 } catch (error) {
                     console.error('비밀번호 초기화 실패:', error);
-                    message.error('비밀번호 초기화 중 오류가 발생했습니다.');
+                    showError(
+                        '서버 오류',
+                        '비밀번호 초기화 중 오류가 발생했습니다.',
+                        error instanceof Error ? error.message : '네트워크 연결을 확인해주세요.'
+                    );
                 }
             },
         });
@@ -347,7 +383,7 @@ export const UserManagement: React.FC = () => {
             dataIndex: "studentYear",
             key: "studentYear",
             width: 80,
-            render: (studentYear: number, record: AdminUserDetail) => {
+            render: (studentYear: string | null, record: AdminUserDetail) => {
                 return (record.role === 'SKKU_MEMBER' || record.role === 'ADMIN')
                     ? (studentYear ? `${studentYear}` : '-')
                     : '-';
@@ -456,15 +492,6 @@ export const UserManagement: React.FC = () => {
                     >
                         필터 적용
                     </Button>
-
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => showModal()}
-                        style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
-                    >
-                        회원 추가
-                    </Button>
                 </Space>
             </div>
 
@@ -490,42 +517,40 @@ export const UserManagement: React.FC = () => {
             </div>
 
             <Modal
-                title={editingUser ? "회원 정보 수정" : "새 회원 추가"}
+                title="회원 정보 수정"
                 open={isModalVisible}
                 onCancel={handleCancel}
                 width={600}
                 maskClosable={false}
-                destroyOnClose={true}
+                destroyOnHidden={true}
                 footer={[
                     <Button key="back" onClick={handleCancel}>
                         취소
                     </Button>,
-                    ...(editingUser ? [
-                        <Button
-                            key="reset"
-                            icon={<KeyOutlined />}
-                            onClick={handleResetPassword}
-                            style={{ marginRight: '8px' }}
-                        >
-                            비밀번호 초기화
-                        </Button>,
-                        <Button
-                            key="delete"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={handleDeleteUser}
-                            style={{ marginRight: '8px' }}
-                        >
-                            회원 삭제
-                        </Button>,
-                    ] : []),
+                    <Button
+                        key="reset"
+                        icon={<KeyOutlined />}
+                        onClick={handleResetPassword}
+                        style={{ marginRight: '8px' }}
+                    >
+                        비밀번호 초기화
+                    </Button>,
+                    <Button
+                        key="delete"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={handleDeleteUser}
+                        style={{ marginRight: '8px' }}
+                    >
+                        회원 삭제
+                    </Button>,
                     <Button
                         key="submit"
                         type="primary"
                         onClick={handleOk}
                         loading={loading}
                     >
-                        {editingUser ? "수정" : "추가"}
+                        수정
                     </Button>,
                 ]}
             >
@@ -539,15 +564,12 @@ export const UserManagement: React.FC = () => {
                         <Form.Item
                             name="username"
                             label="사용자명(ID)"
-                            rules={[
-                                { required: true, message: "아이디를 입력해주세요!" },
-                                { min: 3, message: "아이디는 최소 3자 이상이어야 합니다!" }
-                            ]}
                         >
                             <Input
-                                placeholder="영문, 숫자 조합 3자 이상"
-                                disabled={!!editingUser}
-                                readOnly={!!editingUser}
+                                placeholder="사용자명"
+                                disabled={true}
+                                readOnly={true}
+                                style={{ backgroundColor: '#f5f5f5' }}
                             />
                         </Form.Item>
                     </div>
@@ -587,55 +609,17 @@ export const UserManagement: React.FC = () => {
                         <Input placeholder="example@skku.edu" />
                     </Form.Item>
 
-                    {!editingUser && (
-                        <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
-                            <Form.Item
-                                name="password"
-                                label="비밀번호"
-                                style={{ flex: 1 }}
-                                rules={[
-                                    { required: true, message: "비밀번호를 입력해주세요!" },
-                                    { min: 8, message: "비밀번호는 최소 8자 이상이어야 합니다!" }
-                                ]}
-                            >
-                                <Input.Password placeholder="비밀번호" />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="confirmPassword"
-                                label="비밀번호 확인"
-                                style={{ flex: 1 }}
-                                dependencies={['password']}
-                                rules={[
-                                    { required: true, message: "비밀번호 확인을 입력해주세요!" },
-                                    ({ getFieldValue }) => ({
-                                        validator(_, value) {
-                                            if (!value || getFieldValue('password') === value) {
-                                                return Promise.resolve();
-                                            }
-                                            return Promise.reject(new Error('비밀번호가 일치하지 않습니다'));
-                                        },
-                                    }),
-                                ]}
-                            >
-                                <Input.Password placeholder="비밀번호 확인" />
-                            </Form.Item>
-                        </div>
-                    )}
-
                     {/* 기본 정보와 상세 정보 구분선 */}
-                    {editingUser && (
-                        <div style={{
-                            borderTop: '1px solid #f0f0f0',
-                            marginTop: '24px',
-                            paddingTop: '16px',
-                            marginBottom: '16px'
-                        }}>
-                            <Text strong style={{ fontSize: '16px', color: '#1890ff' }}>
-                                상세 정보
-                            </Text>
-                        </div>
-                    )}
+                    <div style={{
+                        borderTop: '1px solid #f0f0f0',
+                        marginTop: '24px',
+                        paddingTop: '16px',
+                        marginBottom: '16px'
+                    }}>
+                        <Text strong style={{ fontSize: '16px', color: '#1890ff' }}>
+                            상세 정보
+                        </Text>
+                    </div>
 
                     {/* 역할별 조건부 필드 */}
                     <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues.role !== currentValues.role}>

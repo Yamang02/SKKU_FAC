@@ -118,20 +118,29 @@ export default class UserAdminApiController {
     async updateUser(req, res) {
         try {
             const { id } = req.params;
+            console.log('🔍 updateUser - 받은 ID:', id);
+            console.log('📋 updateUser - 받은 데이터:', req.body);
 
-            if (!id || isNaN(parseInt(id)) || parseInt(id) <= 0) {
+            // UUID 형식 검증 (기존 parseInt 대신)
+            if (!id || typeof id !== 'string' || id.trim() === '') {
+                console.log('❌ Invalid user ID:', id);
                 return res.status(400).json(ApiResponse.error('Invalid user ID'));
             }
 
             const userDto = new UserRequestDto(req.body);
+            console.log('📝 생성된 UserDto:', userDto.toPlainObject());
 
             // DTO 유효성 검사
-            const validationResult = userDto.validateWithSchema(UserRequestDto.getUpdateProfileSchema());
+            const validationResult = userDto.validateWithSchema(UserRequestDto.getAdminUpdateUserSchema());
+            console.log('✅ 유효성 검사 결과:', validationResult);
+
             if (validationResult.error) {
+                console.log('❌ 유효성 검사 실패:', validationResult.error.details);
                 return res.status(400).json(ApiResponse.error(validationResult.error.details[0].message));
             }
 
-            const updatedUser = await this.userAdminService.updateUser(parseInt(id), userDto);
+            console.log('🚀 UserAdminService.updateUser 호출');
+            const updatedUser = await this.userAdminService.updateUser(id, userDto);
 
             if (!updatedUser) {
                 return res.status(404).json(ApiResponse.error('User not found'));

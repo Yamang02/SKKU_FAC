@@ -14,11 +14,11 @@ import {
     Typography,
     Tag,
     Checkbox,
+    message,
 } from "antd";
 import {
     SearchOutlined,
     EditOutlined,
-    PlusOutlined,
     FilterOutlined,
     DeleteOutlined,
     KeyOutlined,
@@ -53,6 +53,7 @@ export const UserManagement: React.FC = () => {
     const [form] = Form.useForm();
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
+    const [loading, setLoading] = useState(false);
 
     // 사용자 데이터
     const initialUserData: UserData[] = [
@@ -211,22 +212,26 @@ export const UserManagement: React.FC = () => {
         setFilteredData(filtered);
     };
 
-    const showModal = (user?: UserData) => {
-        if (user) {
-            setEditingUser(user);
-            form.setFieldsValue({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                department: user.department,
-                status: user.status,
-            });
-        } else {
-            setEditingUser(null);
-            form.resetFields();
+    const showModal = (user: UserData) => {
+        if (!user) {
+            message.warning('회원 정보 수정만 가능합니다.');
+            return;
         }
+
+        setEditingUser(user);
         setIsModalVisible(true);
+
+        // 폼에 기존 사용자 데이터 설정
+        form.setFieldsValue({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            department: user.department,
+            affiliation: user.affiliation,
+            studentYear: user.studentYear,
+            isClubMember: user.isClubMember
+        });
     };
 
     const handleCancel = () => {
@@ -235,33 +240,32 @@ export const UserManagement: React.FC = () => {
     };
 
     const handleOk = () => {
+        if (!editingUser) {
+            message.error('수정할 회원 정보가 없습니다.');
+            return;
+        }
+
         form.validateFields().then((values) => {
-            if (editingUser) {
-                // 사용자 수정
-                const updatedUsers = userData.map((user) => {
-                    if (user.key === editingUser.key) {
-                        return { ...user, ...values };
-                    }
-                    return user;
-                });
+            setLoading(true);
+
+            // 실제 구현에서는 API 호출
+            setTimeout(() => {
+                // 기존 사용자 데이터 업데이트
+                const updatedUsers = userData.map(user =>
+                    user.key === editingUser.key
+                        ? { ...user, ...values, updatedAt: new Date().toISOString() }
+                        : user
+                );
                 setUserData(updatedUsers);
-            } else {
-                // 새 사용자 추가
-                const newUser: UserData = {
-                    key: (userData.length + 1).toString(),
-                    ...values,
-                    created: new Date()
-                        .toLocaleDateString("en-US", {
-                            month: "numeric",
-                            day: "numeric",
-                            year: "numeric",
-                        })
-                        .replace(/\//g, "/"),
-                };
-                setUserData([...userData, newUser]);
-            }
-            setIsModalVisible(false);
-            form.resetFields();
+                setIsModalVisible(false);
+                form.resetFields();
+                setLoading(false);
+
+                Modal.success({
+                    title: '수정 완료',
+                    content: `"${values.name}" 회원 정보가 수정되었습니다.`,
+                });
+            }, 1000);
         });
     };
 
@@ -503,17 +507,9 @@ export const UserManagement: React.FC = () => {
                     <Button
                         type="primary"
                         icon={<FilterOutlined />}
+                        onClick={() => message.info('필터 기능을 적용합니다.')}
                     >
                         필터 적용
-                    </Button>
-
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => showModal()}
-                        style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
-                    >
-                        회원 추가
                     </Button>
                 </Space>
             </div>
@@ -538,7 +534,7 @@ export const UserManagement: React.FC = () => {
             </div>
 
             <Modal
-                title={editingUser ? "회원 정보 수정" : "새 회원 추가"}
+                title="회원 정보 수정"
                 open={isModalVisible}
                 onCancel={handleCancel}
                 width={600}
@@ -548,32 +544,30 @@ export const UserManagement: React.FC = () => {
                     <Button key="back" onClick={handleCancel}>
                         취소
                     </Button>,
-                    ...(editingUser ? [
-                        <Button
-                            key="reset"
-                            icon={<KeyOutlined />}
-                            onClick={handleResetPassword}
-                            style={{ marginRight: '8px' }}
-                        >
-                            비밀번호 초기화
-                        </Button>,
-                        <Button
-                            key="delete"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={handleDeleteUser}
-                            style={{ marginRight: '8px' }}
-                        >
-                            회원 삭제
-                        </Button>,
-                    ] : []),
+                    <Button
+                        key="reset"
+                        icon={<KeyOutlined />}
+                        onClick={handleResetPassword}
+                        style={{ marginRight: '8px' }}
+                    >
+                        비밀번호 초기화
+                    </Button>,
+                    <Button
+                        key="delete"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={handleDeleteUser}
+                        style={{ marginRight: '8px' }}
+                    >
+                        회원 삭제
+                    </Button>,
                     <Button
                         key="submit"
                         type="primary"
                         onClick={handleOk}
-                        loading={false}
+                        loading={loading}
                     >
-                        {editingUser ? "수정" : "추가"}
+                        수정
                     </Button>,
                 ]}
             >
@@ -587,15 +581,12 @@ export const UserManagement: React.FC = () => {
                         <Form.Item
                             name="id"
                             label="사용자명(ID)"
-                            rules={[
-                                { required: true, message: "아이디를 입력해주세요!" },
-                                { min: 3, message: "아이디는 최소 3자 이상이어야 합니다!" }
-                            ]}
                         >
                             <Input
-                                placeholder="영문, 숫자 조합 3자 이상"
-                                disabled={!!editingUser}
-                                readOnly={!!editingUser}
+                                placeholder="사용자명"
+                                disabled={true}
+                                readOnly={true}
+                                style={{ backgroundColor: '#f5f5f5' }}
                             />
                         </Form.Item>
                     </div>
@@ -737,8 +728,6 @@ export const UserManagement: React.FC = () => {
                             <Checkbox>이메일 인증 완료</Checkbox>
                         </Form.Item>
                     </div>
-
-
 
                     {/* 시스템 정보 섹션 */}
                     {editingUser && (
