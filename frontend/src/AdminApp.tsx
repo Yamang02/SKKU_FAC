@@ -9,6 +9,7 @@ import { AdminLayout, type AdminPage } from './components/layout/AdminLayout';
 import { Dashboard } from './components/domain/Dashboard';
 import { UserManagement } from './components/domain/UserManagement';
 import { useAdminNavigation } from './hooks/useAdminNavigation';
+import { USER_ROLES } from './shared/constants/userRoles';
 import BaseApi from './shared/api/BaseApi';
 
 // 추후 구현할 컴포넌트들의 placeholder
@@ -17,7 +18,7 @@ const ExhibitionManagement = () => <div>전시 관리 - 구현 예정</div>;
 
 const AdminContent: React.FC = () => {
     const authContext = useAuth();
-    const { isAuthenticated, isAdmin, loading } = authContext;
+    const { isAuthenticated, isAdmin, loading, user } = authContext;
     const { currentPage, navigateTo } = useAdminNavigation();
 
     // BaseApi에 AuthContext 설정 - 인증된 상태에서만
@@ -42,7 +43,8 @@ const AdminContent: React.FC = () => {
     }
 
     // 로그인되지 않았거나 관리자가 아닌 경우 로그인 화면 표시
-    if (!isAuthenticated() || !isAdmin()) {
+    // user가 존재하고 role이 명시적으로 확인된 후에만 관리자 여부 판단
+    if (!isAuthenticated() || !user || user.role !== USER_ROLES.ADMIN) {
         return <AdminLoginForm />;
     }
 

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import storage from '../utils/storage';
 import { API_CONFIG, API_ENDPOINTS, STORAGE_KEYS, AUTH_HEADER_TYPE } from '../config/api.config';
+import { USER_ROLES } from '../constants/userRoles';
 
 // 타입 정의
 interface User {
@@ -25,7 +26,6 @@ interface AuthContextType {
     login: (loginData: LoginData) => Promise<boolean>;
     logout: () => Promise<void>;
     refreshToken: () => Promise<boolean>;
-    verifyAdminToken: () => Promise<boolean>;
     getAuthHeaders: () => Record<string, string>;
     authenticatedFetch: (url: string, options?: RequestInit) => Promise<Response>;
     isAdmin: () => boolean;
@@ -64,11 +64,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             ]);
 
             if (storedToken && storedUser) {
+                const parsedUser = JSON.parse(storedUser);
                 setAccessToken(storedToken);
-                setUser(JSON.parse(storedUser));
+                setUser(parsedUser);
             }
         } catch (error) {
             console.error('저장된 인증 정보 확인 오류:', error);
+            // 오류 발생 시 저장된 정보 삭제
+            try {
+                await storage.multiRemove([
+                    STORAGE_KEYS.ACCESS_TOKEN,
+                    STORAGE_KEYS.REFRESH_TOKEN,
+                    STORAGE_KEYS.USER
+                ]);
+            } catch (storageError) {
+                console.error('저장소 정리 오류:', storageError);
+            }
         } finally {
             setLoading(false);
         }
@@ -140,34 +151,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    // 관리자 토큰 검증
-    const verifyAdminToken = async (): Promise<boolean> => {
-        try {
-            if (!accessToken) {
-                return false;
-            }
-
-            const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.AUTH.JWT_VERIFY_ADMIN}`, {
-                method: 'GET',
-                headers: getAuthHeaders()
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success && data.data.valid && data.data.isAdmin) {
-                return true;
-            } else {
-                // 관리자 권한이 없거나 토큰이 무효한 경우
-                await logout();
-                return false;
-            }
-        } catch (error) {
-            console.error('관리자 토큰 검증 오류:', error);
-            await logout();
-            return false;
-        }
-    };
-
     // API 호출용 헤더 생성
     const getAuthHeaders = (): Record<string, string> => {
         if (!accessToken) return {};
@@ -209,7 +192,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     const isAdmin = (): boolean => {
-        return user?.role === 'ADMIN';
+        return user?.role === USER_ROLES.ADMIN;
     };
 
     const isAuthenticated = (): boolean => {
@@ -223,7 +206,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login,
         logout,
         refreshToken,
-        verifyAdminToken,
         getAuthHeaders,
         authenticatedFetch,
         isAdmin,

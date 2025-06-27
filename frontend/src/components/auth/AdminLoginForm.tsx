@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../shared/contexts/AuthContext';
 import { showErrorMessage, showSuccessMessage } from '../../shared/utils/notification';
 import { API_CONFIG, API_ENDPOINTS } from '../../shared/config/api.config';
+import { USER_ROLES } from '../../shared/constants/userRoles';
 
 interface LoginCredentials {
     email: string;
@@ -50,10 +51,16 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onLoginSuccess }
             const data = await response.json();
 
             if (response.ok && data.success) {
+                // 먼저 사용자 role이 ADMIN인지 확인
+                if (data.data.user.role !== USER_ROLES.ADMIN) {
+                    showErrorMessage('관리자 권한이 필요합니다.');
+                    return;
+                }
+
                 // AuthContext를 통한 로그인 처리
                 const loginSuccess = await login(data.data);
                 if (loginSuccess) {
-                    showSuccessMessage('로그인되었습니다.');
+                    showSuccessMessage('관리자 로그인이 완료되었습니다.');
                     onLoginSuccess?.(data.data);
                 } else {
                     showErrorMessage('로그인 처리 중 오류가 발생했습니다.');

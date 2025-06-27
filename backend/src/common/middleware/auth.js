@@ -207,8 +207,7 @@ export const hasRole = role => {
     };
 };
 
-// 읽기 전용 관리자 체크 (특수 목적으로 유지)
-export const isReadOnlyAdmin = () => hasPermission(rbacService.permissions.ADMIN_READ_ONLY);
+// 읽기 전용 관리자 체크 제거됨 - 사용하지 않는 기능
 
 // ========== 권한 그룹 기반 미들웨어 ==========
 

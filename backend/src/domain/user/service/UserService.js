@@ -261,8 +261,7 @@ export default class UserService {
         }
 
         // 관리자 권한이 있는 경우 - 모든 필드 수정 가능
-        if (currentUser.role === 'ADMIN' ||
-            currentUser.role === 'ADMIN_USER_MANAGER') {
+        if (currentUser.role === 'ADMIN') {
             baseFields.push('role', 'status', 'isActive', 'email', 'department', 'studentYear', 'affiliation');
         }
 
@@ -325,7 +324,7 @@ export default class UserService {
         const user = await this._findUserOrThrow(userId);
 
         // 관리자 계정 삭제 방지
-        if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        if (user.role === 'ADMIN') {
             throw new UserValidationError('관리자 계정은 삭제할 수 없습니다.');
         }
 

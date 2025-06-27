@@ -35,9 +35,8 @@ export const API_ENDPOINTS = {
         // JWT 관련
         JWT_LOGIN: '/auth/jwt/login',
         JWT_REFRESH: '/auth/jwt/refresh',
-        JWT_VERIFY: '/auth/jwt/verify',
-        JWT_VERIFY_ADMIN: '/auth/jwt/verify-admin',
         JWT_LOGOUT: '/auth/jwt/logout',
+        // 백엔드의 requireJwtAuthApi, requireJwtAdminApi 미들웨어가 자동으로 토큰 검증을 처리
     },
 
     // 사용자 관리
