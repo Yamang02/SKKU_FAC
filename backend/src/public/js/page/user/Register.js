@@ -365,12 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 페이지 이탈 방지 활성화
         preventPageUnload();
 
-        // 디버깅: 전송할 데이터 확인
-        console.log('🔍 회원가입 데이터 전송:', {
-            selectedRole,
-            userDto: JSON.stringify(userDto, null, 2),
-            originalUserData: JSON.stringify(userData, null, 2)
-        });
+        // 회원가입 데이터 전송 준비 완료
 
         try {
             // API 호출

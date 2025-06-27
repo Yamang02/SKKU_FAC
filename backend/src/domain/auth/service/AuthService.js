@@ -20,7 +20,7 @@ export default class AuthService {
         const jwtConfig = config.getJwtAccessTokenConfig();
 
         // 디버깅을 위한 로그 추가
-        console.log('🔍 JWT Access Token Config:', jwtConfig);
+
 
         const payload = {
             id: user.id,

@@ -291,15 +291,15 @@ export default class UserService {
     }
 
     /**
-     * 사용자 정보를 수정합니다.
-     */
+ * 사용자 정보를 수정합니다.
+ */
     async updateUserByAdmin(userId, userData) {
-        await this._findUserOrThrow(userId);
+        const user = await this._findUserOrThrow(userId);
 
         // DTO 객체에서 실제 데이터 추출 (toPlainObject 메소드가 있다면 사용)
         const updateData = userData.toPlainObject ? userData.toPlainObject() : userData;
 
-        // 업데이트하면 안 되는 필드들 제외
+        // 프로필 관련 필드들 분리
         const {
             id,
             skkuUserId,
@@ -309,19 +309,62 @@ export default class UserService {
             password, // 비밀번호는 별도 메소드로만 변경
             createdAt,
             updatedAt,
-            ...safeUpdateData
+            // 프로필 관련 필드들
+            department,
+            studentYear,
+            isClubMember,
+            affiliation,
+            ...userAccountData
         } = updateData;
 
-        console.log('🔧 안전한 업데이트 데이터:', safeUpdateData);
-
-        // 빈 객체가 아닌 경우에만 업데이트
-        if (Object.keys(safeUpdateData).length === 0) {
-            throw new UserValidationError('업데이트할 데이터가 없습니다.');
+        // UserAccount 정보 업데이트 (기본 필드들)
+        if (Object.keys(userAccountData).length > 0) {
+            await this.userRepository.updateUser(userId, userAccountData);
         }
 
-        // 사용자 정보 업데이트
-        const updatedUser = await this.userRepository.updateUser(userId, safeUpdateData);
+        // 프로필 정보 업데이트
+        await this._updateUserProfile(user, { department, studentYear, isClubMember, affiliation });
+
+        // 업데이트된 사용자 정보 다시 조회
+        const updatedUser = await this.userRepository.findUserById(userId);
+
         return updatedUser;
+    }
+
+    /**
+ * 사용자 프로필 정보를 업데이트합니다.
+ * @private
+ */
+    async _updateUserProfile(user, profileData) {
+        const { department, studentYear, isClubMember, affiliation } = profileData;
+
+        if (user.role === 'SKKU_MEMBER' || user.role === 'ADMIN') {
+            // SKKU 사용자 프로필 업데이트
+            if (user.SkkuUserProfile) {
+                const updateFields = {};
+
+                if (department !== undefined) updateFields.department = department;
+                if (studentYear !== undefined) updateFields.studentYear = studentYear;
+                if (isClubMember !== undefined) updateFields.isClubMember = isClubMember;
+
+                if (Object.keys(updateFields).length > 0) {
+                    updateFields.updatedAt = new Date();
+                    await user.SkkuUserProfile.update(updateFields);
+                }
+            }
+        } else if (user.role === 'EXTERNAL_MEMBER') {
+            // 외부 사용자 프로필 업데이트
+            if (user.ExternalUserProfile) {
+                const updateFields = {};
+
+                if (affiliation !== undefined) updateFields.affiliation = affiliation;
+
+                if (Object.keys(updateFields).length > 0) {
+                    updateFields.updatedAt = new Date();
+                    await user.ExternalUserProfile.update(updateFields);
+                }
+            }
+        }
     }
 
     /**
