@@ -15,6 +15,7 @@ import { useAuth } from '../../shared/contexts/AuthContext';
 import { showSuccessMessage } from '../../shared/utils/notification';
 import { AdminErrorProvider, useAdminError } from '../../shared/contexts/AdminErrorContext';
 import { ErrorBanner } from '../../shared/components';
+import { AdminLoginForm } from '../auth/AdminLoginForm';
 
 const { Header, Sider, Content } = Layout;
 
@@ -219,6 +220,13 @@ const AdminLayoutInner: React.FC<AdminLayoutProps> = ({
 
 // 메인 컴포넌트 (ErrorProvider로 감쌈)
 export const AdminLayout: React.FC<AdminLayoutProps> = (props) => {
+    const { isAuthenticated, isAdmin, loading } = useAuth();
+    if (loading) {
+        return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>로딩 중...</div>;
+    }
+    if (!isAuthenticated() || !isAdmin()) {
+        return <AdminLoginForm />;
+    }
     return (
         <AdminErrorProvider>
             <AdminLayoutInner {...props} />

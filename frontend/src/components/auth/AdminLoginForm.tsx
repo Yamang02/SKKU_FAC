@@ -21,7 +21,7 @@ interface LoginData {
 }
 
 interface AdminLoginFormProps {
-    onLoginSuccess?: (data: LoginData) => void;
+    onLoginSuccess?: () => void;
 }
 
 export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onLoginSuccess }) => {
@@ -61,7 +61,7 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onLoginSuccess }
                 const loginSuccess = await login(data.data);
                 if (loginSuccess) {
                     showSuccessMessage('관리자 로그인이 완료되었습니다.');
-                    onLoginSuccess?.(data.data);
+                    onLoginSuccess?.();
                 } else {
                     showErrorMessage('로그인 처리 중 오류가 발생했습니다.');
                 }
