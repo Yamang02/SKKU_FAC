@@ -134,11 +134,9 @@ export default class UserAdminApiController {
             }
 
             const updatedUser = await this.userAdminService.updateUser(id, userDto);
-
             if (!updatedUser) {
                 return res.status(404).json(ApiResponse.error('User not found'));
             }
-
             const userResponseDto = new UserResponseDto(updatedUser);
             return res.json(ApiResponse.success(userResponseDto, 'User updated successfully'));
 

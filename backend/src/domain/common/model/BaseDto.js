@@ -188,12 +188,12 @@ export default class BaseDto {
     }
 
     /**
-     * DTO를 JSON 문자열로 변환합니다.
+     * DTO를 JSON 형태로 변환
      * @param {boolean} includePrivate - private 속성 포함 여부
-     * @returns {string} JSON 문자열
+     * @returns {Object} JSON 형태의 DTO 데이터
      */
     toJSON(includePrivate = false) {
-        return JSON.stringify(this.toPlainObject(includePrivate), null, 2);
+        return this.toPlainObject(includePrivate);
     }
 
     /**

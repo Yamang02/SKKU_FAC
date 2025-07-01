@@ -26,7 +26,7 @@ const AdminContent: React.FC = () => {
         if (authContext.isAuthenticated() && authContext.accessToken) {
             BaseApi.setAuthContext(authContext);
         }
-    }, [authContext]);
+    }, [authContext.isAuthenticated(), authContext.accessToken]);
 
     // 로딩 중일 때 스피너 표시
     if (loading) {

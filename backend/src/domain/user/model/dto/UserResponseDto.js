@@ -7,10 +7,21 @@ import BaseDto from '#src/domain/common/model/BaseDto.js';
  */
 export default class UserResponseDto extends BaseDto {
     constructor(data = {}) {
-        super(data);
+        super();
+        this.id = data.id;
+        this.username = data.username;
+        this.name = data.name;
+        this.email = data.email;
+        this.role = data.role;
+        this.emailVerified = data.emailVerified;
+        this.createdAt = data.createdAt;
+        this.updatedAt = data.updatedAt;
 
-        // BaseDto가 자동으로 데이터를 할당하므로 추가 설정은 불필요
-        // 필요한 경우에만 기본값이나 변환 로직 추가
+        // 평탄화: 관계형 객체에서 필요한 값만 추출
+        this.department = data.SkkuUserProfile?.department || null;
+        this.studentYear = data.SkkuUserProfile?.studentYear || null;
+        this.isClubMember = data.SkkuUserProfile?.isClubMember || false;
+        this.affiliation = data.ExternalUserProfile?.affiliation || null;
     }
 
     /**
@@ -115,17 +126,17 @@ export default class UserResponseDto extends BaseDto {
         let schema;
 
         switch (schemaType) {
-        case 'response':
-            schema = UserResponseDto.getResponseSchema();
-            break;
-        case 'publicProfile':
-            schema = UserResponseDto.getPublicProfileSchema();
-            break;
-        case 'adminDetail':
-            schema = UserResponseDto.getAdminDetailSchema();
-            break;
-        default:
-            schema = this.getValidationSchema();
+            case 'response':
+                schema = UserResponseDto.getResponseSchema();
+                break;
+            case 'publicProfile':
+                schema = UserResponseDto.getPublicProfileSchema();
+                break;
+            case 'adminDetail':
+                schema = UserResponseDto.getAdminDetailSchema();
+                break;
+            default:
+                schema = this.getValidationSchema();
         }
 
         const { error, value } = schema.validate(this.toPlainObject(), {
@@ -142,6 +153,23 @@ export default class UserResponseDto extends BaseDto {
             isValid: this._isValid,
             errors: this._validationErrors,
             value: value
+        };
+    }
+
+    toJSON() {
+        return {
+            id: this.id,
+            username: this.username,
+            name: this.name,
+            email: this.email,
+            role: this.role,
+            emailVerified: this.emailVerified,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
+            department: this.department,
+            studentYear: this.studentYear,
+            isClubMember: this.isClubMember,
+            affiliation: this.affiliation
         };
     }
 }

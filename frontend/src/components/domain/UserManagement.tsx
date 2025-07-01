@@ -129,12 +129,12 @@ export const UserManagement: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [isAuthenticated, accessToken, currentPage, pageSize, debouncedSearchText, statusFilter, roleFilter, hideError]);
+    }, [isAuthenticated, accessToken, currentPage, pageSize, debouncedSearchText, statusFilter, roleFilter]);
 
     // 데이터 로드 - 의존성이 변경될 때마다 실행
     useEffect(() => {
         fetchUsers();
-    }, [fetchUsers, isAuthenticated, accessToken]);
+    }, [fetchUsers]);
 
     // 모달 표시 함수 - 회원 추가 기능 제거, 수정 모드만 지원
     const showModal = (user: AdminUserDetail) => {

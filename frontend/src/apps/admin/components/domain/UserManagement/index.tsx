@@ -184,7 +184,7 @@ export const UserManagement: React.FC = () => {
 
     useEffect(() => {
         filterData();
-    }, [searchText, statusFilter, roleFilter, userData]);
+    }, [searchText, statusFilter, roleFilter]);
 
     const filterData = () => {
         let filtered = [...userData];
