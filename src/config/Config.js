@@ -1317,7 +1317,10 @@ class Config {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
             from: process.env.EMAIL_FROM,
-            adminEmail: process.env.ADMIN_EMAIL
+            adminEmail: process.env.ADMIN_EMAIL,
+            // Resend 설정
+            resendApiKey: process.env.RESEND_API_KEY,
+            emailProvider: process.env.EMAIL_PROVIDER || 'resend' // 'smtp' 또는 'resend'
         };
     }
 
