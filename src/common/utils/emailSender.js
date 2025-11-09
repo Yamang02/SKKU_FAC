@@ -77,7 +77,43 @@ export const sendPasswordResetEmail = async (to, token) => {
            <a href="${baseUrl}/user/password/reset?token=${token}">${baseUrl}/user/password/reset?token=${token}</a>`
     };
 
-    await transporter.sendMail(mailOptions);
+    try {
+        logger.debug('📤 비밀번호 재설정 이메일 전송 시도:', { to });
+        const result = await transporter.sendMail(mailOptions);
+        logger.info('✅ 비밀번호 재설정 이메일 전송 성공:', { to, messageId: result.messageId });
+        return result;
+    } catch (error) {
+        const errorDetails = {
+            to,
+            timestamp: new Date().toISOString(),
+            error: {
+                name: error.name,
+                code: error.code,
+                message: error.message,
+                stack: error.stack,
+                response: error.response,
+                responseCode: error.responseCode,
+                command: error.command,
+                errno: error.errno,
+                syscall: error.syscall,
+                hostname: error.hostname,
+                port: error.port
+            },
+            emailConfig: {
+                user: emailConfig.user ? `${emailConfig.user.substring(0, 3)}***@${emailConfig.user.split('@')[1]}` : 'undefined',
+                hasPassword: !!emailConfig.pass,
+                passwordLength: emailConfig.pass ? emailConfig.pass.length : 0,
+                from: emailConfig.from
+            },
+            transporter: {
+                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 587
+            }
+        };
+        logger.error('❌ 비밀번호 재설정 이메일 전송 실패:', errorDetails);
+        throw error;
+    }
 };
 
 export const sendVerificationEmail = async (to, token) => {
@@ -160,7 +196,44 @@ export const sendLogNotificationEmail = async (to, subject, htmlContent) => {
         html: htmlContent
     };
 
-    await transporter.sendMail(mailOptions);
+    try {
+        logger.debug('📤 로그 알림 이메일 전송 시도:', { to, subject });
+        const result = await transporter.sendMail(mailOptions);
+        logger.info('✅ 로그 알림 이메일 전송 성공:', { to, messageId: result.messageId });
+        return result;
+    } catch (error) {
+        const errorDetails = {
+            to,
+            subject,
+            timestamp: new Date().toISOString(),
+            error: {
+                name: error.name,
+                code: error.code,
+                message: error.message,
+                stack: error.stack,
+                response: error.response,
+                responseCode: error.responseCode,
+                command: error.command,
+                errno: error.errno,
+                syscall: error.syscall,
+                hostname: error.hostname,
+                port: error.port
+            },
+            emailConfig: {
+                user: emailConfig.user ? `${emailConfig.user.substring(0, 3)}***@${emailConfig.user.split('@')[1]}` : 'undefined',
+                hasPassword: !!emailConfig.pass,
+                passwordLength: emailConfig.pass ? emailConfig.pass.length : 0,
+                from: emailConfig.from
+            },
+            transporter: {
+                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 587
+            }
+        };
+        logger.error('❌ 로그 알림 이메일 전송 실패:', errorDetails);
+        throw error;
+    }
 };
 
 export const sendDailyLogFileEmail = async (to, subject, logContent, filename) => {
@@ -178,5 +251,43 @@ export const sendDailyLogFileEmail = async (to, subject, logContent, filename) =
         ]
     };
 
-    await transporter.sendMail(mailOptions);
+    try {
+        logger.debug('📤 일별 로그 파일 이메일 전송 시도:', { to, subject, filename });
+        const result = await transporter.sendMail(mailOptions);
+        logger.info('✅ 일별 로그 파일 이메일 전송 성공:', { to, messageId: result.messageId });
+        return result;
+    } catch (error) {
+        const errorDetails = {
+            to,
+            subject,
+            filename,
+            timestamp: new Date().toISOString(),
+            error: {
+                name: error.name,
+                code: error.code,
+                message: error.message,
+                stack: error.stack,
+                response: error.response,
+                responseCode: error.responseCode,
+                command: error.command,
+                errno: error.errno,
+                syscall: error.syscall,
+                hostname: error.hostname,
+                port: error.port
+            },
+            emailConfig: {
+                user: emailConfig.user ? `${emailConfig.user.substring(0, 3)}***@${emailConfig.user.split('@')[1]}` : 'undefined',
+                hasPassword: !!emailConfig.pass,
+                passwordLength: emailConfig.pass ? emailConfig.pass.length : 0,
+                from: emailConfig.from
+            },
+            transporter: {
+                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 587
+            }
+        };
+        logger.error('❌ 일별 로그 파일 이메일 전송 실패:', errorDetails);
+        throw error;
+    }
 };
