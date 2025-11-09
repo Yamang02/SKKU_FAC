@@ -9,5 +9,6 @@ export default class UserSimpleDTO {
         this.name = data.name;
         this.role = data.role;
         this.affiliation = data.affiliation;
+        this.emailSent = data.emailSent !== undefined ? data.emailSent : true; // 기본값은 true
     }
 }

@@ -241,8 +241,15 @@ export class ErrorHandler {
         }
 
         // User-Agent 기반 필터링 (봇, 크롤러 등)
-        if (ignoreUserAgents && ignoreUserAgents.some(agent =>
-            req.get('User-Agent')?.includes(agent))) {
+        if (ignoreUserAgents && ignoreUserAgents.some(agent => {
+            const userAgent = req.get('User-Agent') || '';
+            // 정규식인 경우 test() 사용, 문자열인 경우 includes() 사용
+            if (agent instanceof RegExp) {
+                return agent.test(userAgent);
+            } else {
+                return userAgent.includes(agent);
+            }
+        })) {
             return true;
         }
 

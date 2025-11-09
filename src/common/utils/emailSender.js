@@ -115,22 +115,39 @@ export const sendVerificationEmail = async (to, token) => {
 
         return result;
     } catch (error) {
-        logger.error('❌ 이메일 전송 실패:', {
+        // 상세한 오류 추적 정보 수집
+        const errorDetails = {
             to: to,
+            timestamp: new Date().toISOString(),
             error: {
+                name: error.name,
                 code: error.code,
+                message: error.message,
+                stack: error.stack,
                 response: error.response,
                 responseCode: error.responseCode,
                 command: error.command,
-                message: error.message
+                errno: error.errno,
+                syscall: error.syscall,
+                hostname: error.hostname,
+                port: error.port
             },
             emailConfig: {
                 user: emailConfig.user ? `${emailConfig.user.substring(0, 3)}***@${emailConfig.user.split('@')[1]}` : 'undefined',
                 hasPassword: !!emailConfig.pass,
                 passwordLength: emailConfig.pass ? emailConfig.pass.length : 0,
-                from: emailConfig.from
+                from: emailConfig.from,
+                hasUser: !!emailConfig.user,
+                hasPass: !!emailConfig.pass
+            },
+            transporter: {
+                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 587
             }
-        });
+        };
+
+        logger.error('❌ 이메일 전송 실패:', errorDetails);
         throw error;
     }
 };

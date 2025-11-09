@@ -61,16 +61,21 @@ export default class UserService {
             const createdUser = await this.userRepository.createUser(userDto);
 
             // AuthService를 통한 이메일 인증 토큰 생성 및 전송
+            let emailSent = true;
             try {
                 await this.authService.createEmailVerificationToken(createdUser.id, createdUser.email);
                 logger.info(`인증 이메일 전송 성공: ${createdUser.email}`);
             } catch (emailError) {
+                emailSent = false;
                 logger.warn(`이메일 전송 실패 (회원가입은 성공): ${createdUser.email}`, emailError);
                 // 이메일 전송 실패 시에도 회원가입은 성공으로 처리
                 // 사용자에게는 이메일 설정 문제로 인한 안내 메시지 표시
             }
 
-            const userSimpleDto = new UserSimpleDto(createdUser);
+            const userSimpleDto = new UserSimpleDto({
+                ...createdUser,
+                emailSent
+            });
             return userSimpleDto;
         } catch (error) {
             logger.error('사용자 생성 중 오류 발생:', error);

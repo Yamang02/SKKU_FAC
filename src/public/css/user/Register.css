@@ -30,6 +30,42 @@
     }
 }
 
+/* 이메일 전송 상태 메시지 */
+.email-status-message {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.email-status-message i {
+    font-size: 1rem;
+}
+
+.email-status-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.email-status-success i {
+    color: #28a745;
+}
+
+.email-status-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.email-status-warning i {
+    color: #ffc107;
+}
+
 /* 학과와 학번 입력 필드 레이아웃 */
 .input-row {
     display: grid;

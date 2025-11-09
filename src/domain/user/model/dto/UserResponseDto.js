@@ -13,5 +13,6 @@ export default class UserResponseDTO {
         this.isClubMember = data.isClubMember;
         this.studentYear = data.studentYear;
         this.affiliation = data.affiliation;
+        this.emailSent = data.emailSent !== undefined ? data.emailSent : true; // 기본값은 true
     }
 }

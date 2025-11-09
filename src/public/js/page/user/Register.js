@@ -358,11 +358,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // API 호출
-            await UserApi.register(userDto);
+            const response = await UserApi.register(userDto);
 
             showLoading(false);
+
+            // 이메일 전송 상태 표시
+            const emailStatusDiv = document.getElementById('email-status');
+            const emailStatusText = document.getElementById('email-status-text');
+
+            if (response && response.data) {
+                // 이메일 전송 성공 여부 확인
+                const emailSent = response.data.emailSent !== false; // 기본값은 true
+
+                if (emailStatusDiv && emailStatusText) {
+                    emailStatusDiv.style.display = 'block';
+
+                    if (emailSent) {
+                        emailStatusDiv.className = 'email-status-message email-status-success';
+                        emailStatusText.textContent = '✅ 인증 이메일이 발송되었습니다.';
+                    } else {
+                        emailStatusDiv.className = 'email-status-message email-status-warning';
+                        emailStatusText.textContent = '⚠️ 이메일 전송에 실패했습니다. 관리자에게 문의하세요.';
+                    }
+                }
+            }
+
             // 성공 후 완전한 페이지 차단
             blockAllInteractions();
+
+            // API 응답 메시지 확인하여 오버레이 메시지 업데이트
+            if (response && response.message) {
+                const overlay = document.getElementById('success-overlay');
+                if (overlay) {
+                    const titleElement = overlay.querySelector('.success-title');
+                    const subtitleElement = overlay.querySelector('.success-subtitle');
+
+                    // 이메일 전송 실패 메시지인 경우
+                    if (response.message.includes('이메일 설정 문제') || response.message.includes('전송에 실패')) {
+                        if (titleElement) {
+                            titleElement.textContent = '회원가입이 완료되었습니다.';
+                        }
+                        if (subtitleElement) {
+                            subtitleElement.textContent = '이메일 설정 문제로 인증 메일 전송에 실패했습니다. 관리자에게 문의하세요.';
+                        }
+                    } else {
+                        // 정상적인 성공 메시지
+                        if (titleElement) {
+                            titleElement.textContent = '회원가입 이메일이 발송되었습니다!';
+                        }
+                        if (subtitleElement) {
+                            subtitleElement.textContent = '잠시 후 로그인 페이지로 이동합니다...';
+                        }
+                    }
+                }
+            }
 
             // 3초 후 로그인 페이지로 리다이렉트
             setTimeout(() => {
